@@ -11,14 +11,13 @@ namespace ige::creator
     class Menu: public Widget, public Container
     {
     public:
-        Menu(const std::string& name);
+        Menu(const std::string& name, bool enable = true);
         virtual ~Menu();
 
     protected:
         virtual void _drawImpl() override;
 
         std::string m_name;
-        Event<> m_clickedEvent;
         bool m_bIsOpened = false;
     };
 }

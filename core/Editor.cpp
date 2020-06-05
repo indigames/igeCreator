@@ -7,7 +7,6 @@
 
 #include "core/Editor.h"
 #include "core/Canvas.h"
-#include "core/panels/MenuBar.h"
 
 using namespace pyxie;
 
@@ -29,10 +28,9 @@ namespace ige::creator
     
     void Editor::initialize()
     {
-        initImGUI();
+        initImGUI();        
 
-        m_canvas = std::make_shared<Canvas>();
-        m_canvas->createPanel<MenuBar>("Menu");
+        m_canvas = std::make_shared<Canvas>();        
         m_canvas->setDockable(true);
     }
 
@@ -48,9 +46,13 @@ namespace ige::creator
             
     void Editor::render()
     {
+        // Render main canvas
         m_canvas->draw();
+
+        // Render ImGUI
         renderImGUI();
 
+        // Render ImGUI with with IGE Back-end
         pyxieRenderContext::InstancePtr()->BeginScene(nullptr, Vec4(0.2f, 0.6f, 0.8f, 0.0f), true, false);
         m_showcase->Update(0.0f);
         m_camera->Render();
@@ -117,6 +119,7 @@ namespace ige::creator
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         io.IniFilename = nullptr;
         io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
+        io.ConfigWindowsMoveFromTitleBarOnly = true;
 
         // Keyboard mapping
         io.KeyMap[ImGuiKey_Tab] = SDL_SCANCODE_TAB;

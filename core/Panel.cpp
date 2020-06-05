@@ -48,7 +48,7 @@ namespace ige::creator
 
     void Panel::setFocus()
     {
-        ImGui::SetWindowFocus((m_name + m_id).c_str());
+        ImGui::SetWindowFocus((m_name).c_str());
     }
 
     void Panel::_drawImpl()
@@ -57,7 +57,7 @@ namespace ige::creator
         {
             int windowFlags = ImGuiWindowFlags_None;
 
-            if (!m_settings.resizable)		windowFlags |= ImGuiWindowFlags_NoResize;
+            if (!m_settings.resizable)                  windowFlags |= ImGuiWindowFlags_NoResize;
             if (!m_settings.movable)					windowFlags |= ImGuiWindowFlags_NoMove;
             if (!m_settings.dockable)					windowFlags |= ImGuiWindowFlags_NoDocking;
             if (m_settings.hideBackground)				windowFlags |= ImGuiWindowFlags_NoBackground;
@@ -70,7 +70,7 @@ namespace ige::creator
 
             ImGui::SetNextWindowSizeConstraints({ 1280.0f, 720.0f }, { 10000.f, 10000.f });
 
-            if (ImGui::Begin((m_name + m_id).c_str(), m_settings.closable ? &m_bIsOpened : nullptr, windowFlags))
+            if (ImGui::Begin((m_name).c_str(), m_settings.closable ? &m_bIsOpened : nullptr, windowFlags))
             {
                 m_bIsHovered = ImGui::IsWindowHovered();
                 m_bIsFocused = ImGui::IsWindowFocused();
@@ -81,9 +81,8 @@ namespace ige::creator
                     updateSize();
                 updatePosition();
 
-                drawWidgets();
+                drawWidgets();                
             }
-            
             ImGui::End();
         }
     }

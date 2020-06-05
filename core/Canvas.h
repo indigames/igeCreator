@@ -8,6 +8,7 @@
 namespace ige::creator
 {
     class Panel;
+    class MenuBar;
     class Canvas: public IDrawable
     {
     public:
@@ -21,7 +22,7 @@ namespace ige::creator
         {
             if constexpr (std::is_base_of<Panel, T>::value)
             {
-                m_panels.emplace(id, std::make_shared<T>(id, std::forward(args)...));
+                m_panels.emplace(id, std::make_shared<T>(id, std::forward<Args>(args)...));
             }
         }
 
@@ -39,6 +40,7 @@ namespace ige::creator
 
     protected:
         bool m_bDockable = false;
+        std::shared_ptr<MenuBar> m_menuBar = nullptr;
         std::unordered_map<std::string, std::shared_ptr<Panel>> m_panels;
     };    
 }

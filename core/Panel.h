@@ -59,8 +59,8 @@ namespace ige::creator
         std::string getName() const { return m_name; }
         std::string getId() const { return m_id; }
         
-        void setEnable(bool enable) { m_bIsEnable = enable; }
-        bool isEnable() const { return m_bIsEnable; }
+        void setEnable(bool enable) { m_bEnabled = enable; }
+        bool isEnable() const { return m_bEnabled; }
 
         void setSize(const ImVec2& size);
         const ImVec2& getSize() const;
@@ -69,8 +69,8 @@ namespace ige::creator
         const ImVec2& getPosition() const;
 
         void setAlign(E_HAlign hAlign, E_VAlign vAlign);
-        E_HAlign getHAlign() const;
-        E_VAlign getVAlign() const;
+        E_HAlign getHAlign() const { return m_hAlign;  }
+        E_VAlign getVAlign() const { return m_vAlign; } 
 
     protected:
         virtual void initialize() {};
@@ -80,9 +80,8 @@ namespace ige::creator
         void updateSize();
 
         bool m_bInitialized = false;
-        bool m_bIsEnable = true;
-        bool m_bIsDockable = false;
-        bool m_bIsOpened = false;
+        bool m_bEnabled = true;
+        bool m_bIsOpened = true;
         bool m_bIsFocused = false;
         bool m_bIsHovered = false;
         std::string m_id;

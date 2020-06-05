@@ -4,7 +4,8 @@ namespace ige::creator
 {
     uint64_t Widget::s_idCounter = 0;
 
-    Widget::Widget()
+    Widget::Widget(bool enable)
+        : m_bEnabled(enable)
     {
         m_id = "#" + std::to_string(s_idCounter++);
     }
