@@ -4,7 +4,7 @@
 
 namespace ige::creator
 {
-    MenuItem::MenuItem(const std::string& name, const std::string& shortcut = "")
+    MenuItem::MenuItem(const std::string& name, const std::string& shortcut)
         : m_name(name), m_shortcut(shortcut)
     {}
 
@@ -13,7 +13,7 @@ namespace ige::creator
 
     void MenuItem::_drawImpl()
     {
-        if (ImGui::MenuItem((m_name + m_id).c_str(), m_shortcut.c_str(), nullptr, m_bIsEnable))
+        if (ImGui::MenuItem((m_name).c_str(), m_shortcut.c_str(), nullptr, m_bIsEnable))
         {
             m_clickEvent.invoke();
         }		

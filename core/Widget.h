@@ -31,7 +31,7 @@ namespace ige::creator
     protected:
         std::string m_id = "";
         std::weak_ptr<Container> m_container;
-        bool m_bIsEnable = false;     
+        bool m_bIsEnable = true;
 
     private:
         static uint64_t s_idCounter;

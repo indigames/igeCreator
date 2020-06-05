@@ -6,9 +6,9 @@
 
 namespace ige::creator
 {
-    MenuBar::MenuBar()
+    MenuBar::MenuBar(const std::string& name, const Panel::Settings& settings)
+        : Panel(name, settings)
     {
-
     }
     
     MenuBar::~MenuBar()
@@ -38,5 +38,9 @@ namespace ige::creator
         fileMenu->createWidget<MenuItem>("New Scene", "CTRL + N")->getClickedEvent().addListener([](){
             ImGui::LogText("New Scene clicked");
         });
+
+        fileMenu->createWidget<MenuItem>("Exit", "CTRL + N")->getClickedEvent().addListener([]() {
+            exit(0);
+        });        
     }
 }

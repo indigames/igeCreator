@@ -7,10 +7,11 @@
 namespace ige::creator
 {
     class MenuItem;
+
     class MenuBar: public Panel
     {
     public:
-        MenuBar();
+        MenuBar(const std::string& name = "", const Panel::Settings& settings = {});
         virtual ~MenuBar();
 
         virtual void initialize();

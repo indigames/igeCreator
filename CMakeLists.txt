@@ -19,11 +19,9 @@ add_subdirectory(${IGE_ROOT}/igeScene  ${CMAKE_BINARY_DIR}/igeScene)
 add_subdirectory(${IGE_ROOT}/imgui  ${CMAKE_BINARY_DIR}/imgui)
 add_subdirectory(${IGE_ROOT}/SDL  ${CMAKE_BINARY_DIR}/SDL)
 
-file(GLOB SRC_FILES
+file(GLOB_RECURSE SRC_FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/**/*.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/**/*.cpp"
 )
 
 add_executable(${TARGET_NAME} WIN32 ${SRC_FILES})

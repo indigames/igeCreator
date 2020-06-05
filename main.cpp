@@ -21,30 +21,40 @@ void CreateConsole(void) {
 	freopen_s(&fp, "CONOUT$", "w", stderr);
 }
 
+using namespace pyxie;
+using namespace ige::creator;
+
 int main(void* data) {
 	CreateConsole();
 
-	pyxie::pyxieFios::Instance().SetRoot(".");
+	pyxieFios::Instance().SetRoot(".");
 
 	// Create window
-	auto app = std::make_shared<pyxie::pyxieApplication>();
-	app->createAppWindow();
-   
-	auto editor = std::make_shared<ige::creator::Editor>();
+	auto app = std::make_shared<pyxieApplication>();
+	app->createAppWindow();	
 
 	// Initialize
 	if (app->isInitialized())
 	{
-		pyxie::pyxieSystemInfo::Instance().SetGemeScreenSize(SCREEN_WIDTH);
+		// Create editor instance
+		auto editor = Editor::getInstance();
+		editor->registerApp(app);
+		editor->initialize();
+
+		pyxieSystemInfo::Instance().SetGemeScreenSize(SCREEN_WIDTH);
 		app->showAppWindow(true, SCREEN_WIDTH, SCREEN_HEIGHT);
 		
-		app->getInputHandler()->setRawInputHandlerFunc(&ige::creator::Editor::handleEvent);
-
+		// Register input handler
+		app->getInputHandler()->setRawInputHandlerFunc(&Editor::handleEvent);
+		
+		// Main loop
 		while (app->isRunning())
 		{
+			// Update
 			app->update();			
-			editor->update((float)pyxie::pyxieTime::Instance().GetElapsedTime());
+			editor->update((float)pyxieTime::Instance().GetElapsedTime());
 
+			// Render
 			editor->render();
 			app->swap();
 		}

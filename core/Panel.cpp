@@ -16,6 +16,12 @@ namespace ige::creator
 
     void Panel::draw()
     {
+        if (!m_bInitialized)
+        {
+            initialize();
+            m_bInitialized = true;
+        }
+
         if(isEnable())
         {
             _drawImpl();

@@ -47,18 +47,6 @@ namespace ige::creator
         }
     }
 
-    template<typename T, typename... Args>
-    void Canvas::createPanel(const std::string& id, Args&&... args)
-    {
-        m_panels.emplace(id, std::make_shared<T>(std::forward<Args>(args)...));
-    }
-
-    template<typename T>
-    std::shared_ptr<T> Canvas::getPanelAs(const std::string& id)
-    {
-        return m_panels[id];
-    }
-
     void Canvas::removePanel(std::shared_ptr<Panel> panel)
     {
         auto found = std::find_if(m_panels.begin(), m_panels.end(), [&](auto itr)

@@ -11,6 +11,7 @@ namespace ige::creator
 {
     class Panel: public IDrawable, public Container
     {
+    public:
         struct Settings
         {
             bool closable					= false;
@@ -72,12 +73,14 @@ namespace ige::creator
         E_VAlign getVAlign() const;
 
     protected:
+        virtual void initialize() {};
         virtual void _drawImpl();
 
         void updatePosition();
         void updateSize();
 
-        bool m_bIsEnable = false;
+        bool m_bInitialized = false;
+        bool m_bIsEnable = true;
         bool m_bIsDockable = false;
         bool m_bIsOpened = false;
         bool m_bIsFocused = false;
