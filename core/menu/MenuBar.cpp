@@ -52,12 +52,6 @@ namespace ige::creator
 
         fileMenu->createWidget<MenuItem>("Exit", "CTRL + N")->getOnClickEvent().addListener([]() {
             exit(0);
-        });
-
-        auto btnClose = std::make_shared<Button>("Close", ImVec2(20.0f, 20.0f));
-        btnClose->getOnClickEvent().addListener([](){
-            exit(0);
-        });
-        addWidget(btnClose);
+        });        
     }
 }

@@ -32,6 +32,7 @@ namespace ige::creator
         std::shared_ptr<Container> getContainer() const { return m_container.lock(); }
 
         Event<>& getOnClickEvent() { return m_onClickEvent; }
+
     protected:
         virtual void _drawImpl() = 0;
 
@@ -44,5 +45,34 @@ namespace ige::creator
 
     private:
         static uint64_t s_idCounter;        
-    };    
+    };
+
+    //! Data widget: widget with data
+    template <typename T>
+    class DataWidget : public Widget
+    {
+    public:
+        DataWidget(T& data, bool enable = true) : Widget(enable), m_data(data) {};		
+
+        Event<T&>& getOnDataChangedEvent() { return m_onDataChangedEvent; }
+
+    protected:
+        virtual void _drawImpl() override;
+        void notifyChange(T& data);
+
+        T m_data;
+        Event<T&> m_onDataChangedEvent;
+    };
+
+    template<typename T>
+    inline void DataWidget<T>::_drawImpl()
+    {
+        // Widget::_drawImpl();
+    }
+
+    template<typename T>
+    inline void DataWidget<T>::notifyChange(T& data)
+    {
+        m_onDataChangedEvent.invoke(data);
+    }
 }
