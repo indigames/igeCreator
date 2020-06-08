@@ -9,6 +9,8 @@ namespace ige::creator
 {
     class Panel;
     class MenuBar;
+    class ToolBar;
+
     class Canvas: public IDrawable
     {
     public:
@@ -18,12 +20,15 @@ namespace ige::creator
         virtual void draw() override;
 
         template<typename T, typename... Args>
-        void createPanel(const std::string& id, Args&&... args)
+        std::shared_ptr<T> createPanel(const std::string& id, Args&&... args)
         {
             if constexpr (std::is_base_of<Panel, T>::value)
             {
-                m_panels.emplace(id, std::make_shared<T>(id, std::forward<Args>(args)...));
+                auto panel = std::make_shared<T>(id, std::forward<Args>(args)...);
+                m_panels.emplace(id, panel);
+                return panel;
             }
+            return nullptr;
         }
 
         template<typename T>
@@ -41,6 +46,7 @@ namespace ige::creator
     protected:
         bool m_bDockable = false;
         std::shared_ptr<MenuBar> m_menuBar = nullptr;
+        std::shared_ptr<ToolBar> m_toolBar = nullptr;
         std::unordered_map<std::string, std::shared_ptr<Panel>> m_panels;
     };    
 }

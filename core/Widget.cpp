@@ -1,3 +1,4 @@
+#include <imgui.h>
 #include "core/Widget.h"
 
 namespace ige::creator
@@ -20,6 +21,11 @@ namespace ige::creator
         if(isEnable())
         {
             _drawImpl();
+
+            if (!isEndOfLine())
+            {
+                ImGui::SameLine();
+            }
         }
     }
 }

@@ -19,8 +19,13 @@ namespace ige::creator
         
         std::string getId() const { return m_id; }
 
+        //! Enable/disable widget
         void setEnable(bool enable) { m_bEnabled = enable; }
         bool isEnable() const { return m_bEnabled; }
+
+        //! Should break line after render this widget
+        void setEndOfLine(bool eol) { m_bEOL = eol; }
+        bool isEndOfLine() const { return m_bEOL; }
 
         void setContainer(std::shared_ptr<Container> container) { m_container = container; }
         bool hasContainer() const { return m_container.lock() != nullptr; };
@@ -34,6 +39,7 @@ namespace ige::creator
         std::string m_id = "";
         std::weak_ptr<Container> m_container;
         bool m_bEnabled;
+        bool m_bEOL = true;
         Event<> m_onClickEvent;
 
     private:

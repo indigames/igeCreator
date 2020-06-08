@@ -21,7 +21,7 @@ namespace ige::creator
 
     void Hierarchy::_drawImpl()
     {
-        Panel::_drawImpl();       
+        Panel::_drawImpl();
     }
 
     void Hierarchy::clear()

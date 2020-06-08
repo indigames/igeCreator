@@ -4,11 +4,11 @@
 
 namespace ige::creator
 {
-    class Hierarchy: public Panel
+    class EditorScene: public Panel
     {
     public:
-        Hierarchy(const std::string& name = "", const Panel::Settings& settings = {});
-        virtual ~Hierarchy();
+        EditorScene(const std::string& name = "", const Panel::Settings& settings = {});
+        virtual ~EditorScene();
 
         virtual void clear();
 

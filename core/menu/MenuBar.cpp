@@ -59,6 +59,5 @@ namespace ige::creator
             exit(0);
         });
         addWidget(btnClose);
-
     }
 }

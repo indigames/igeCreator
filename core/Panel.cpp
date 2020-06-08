@@ -7,8 +7,9 @@ namespace ige::creator
     uint64_t Panel::s_idCounter = 0;
 
     Panel::Panel(const std::string& name, const Panel::Settings& settings)
-        : m_name(name), m_settings(settings)
     {
+        m_name = name;
+        m_settings = settings;
         m_id = "#" + std::to_string(s_idCounter++);
     }
 
@@ -57,7 +58,8 @@ namespace ige::creator
         {
             int windowFlags = ImGuiWindowFlags_None;
 
-            if (!m_settings.resizable)                  windowFlags |= ImGuiWindowFlags_NoResize;
+            if (m_settings.hideTitle)					windowFlags |= ImGuiWindowFlags_NoTitleBar;
+            if (!m_settings.resizable)					windowFlags |= ImGuiWindowFlags_NoResize;
             if (!m_settings.movable)					windowFlags |= ImGuiWindowFlags_NoMove;
             if (!m_settings.dockable)					windowFlags |= ImGuiWindowFlags_NoDocking;
             if (m_settings.hideBackground)				windowFlags |= ImGuiWindowFlags_NoBackground;
@@ -68,7 +70,7 @@ namespace ige::creator
             if (!m_settings.collapsable)				windowFlags |= ImGuiWindowFlags_NoCollapse;
             if (!m_settings.allowInputs)				windowFlags |= ImGuiWindowFlags_NoInputs;
 
-            ImGui::SetNextWindowSizeConstraints({ 1280.0f, 720.0f }, { 10000.f, 10000.f });
+            ImGui::SetNextWindowSizeConstraints({ 0.0f, 0.0f }, { 10000.f, 10000.f });
 
             if (ImGui::Begin((m_name).c_str(), m_settings.closable ? &m_bIsOpened : nullptr, windowFlags))
             {
@@ -79,9 +81,10 @@ namespace ige::creator
 
                 if(!m_settings.autoSize)
                     updateSize();
+                
                 updatePosition();
 
-                drawWidgets();                
+                drawWidgets();
             }
             ImGui::End();
         }

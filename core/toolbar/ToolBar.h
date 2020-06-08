@@ -1,23 +1,19 @@
 #pragma once
 
 #include "core/Widget.h"
-#include "core/Container.h"
+#include "core/Panel.h"
 #include "core/button/Button.h"
 
 namespace ige::creator
 {
-    class ToolBar: public Widget, public Container
+    class ToolBar: public Panel
     {
     public:
-        ToolBar(const std::string& name = "", bool enable = true);
+        ToolBar(const std::string& name = "", const Settings& setting = {});
         virtual ~ToolBar();        
 
     protected:
         virtual void initialize();
         virtual void _drawImpl();
-
-    private:
-        std::string m_name;
-        std::shared_ptr<Button> m_button;
     };
 }

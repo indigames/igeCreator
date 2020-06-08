@@ -26,6 +26,7 @@ namespace ige::creator
             bool collapsable				= false;
             bool allowInputs				= true;
             bool autoSize					= false;
+            bool hideTitle					= false;
         };
 
         enum class E_HAlign
@@ -43,7 +44,7 @@ namespace ige::creator
         };
         
     public:
-        Panel(const std::string& name = "", const Settings& setting = {});
+        Panel(const std::string& name = "", const Panel::Settings& setting = {});
         virtual ~Panel();
 
         void draw() override;
