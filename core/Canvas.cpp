@@ -16,12 +16,7 @@ namespace ige::creator
     Canvas::Canvas()
     {
         m_menuBar = std::make_shared<MenuBar>("Menu");
-
-        Panel::Settings toolbarSettings;
-        toolbarSettings.movable = false;
-        toolbarSettings.dockable = true;
-        auto toolBar = createPanel<ToolBar>("ToolBar", toolbarSettings);        
-        toolBar->setSize({1280.f, 32.f});
+        m_toolBar = std::make_shared<ToolBar>("ToolBar");
         
         Panel::Settings settings;
         settings.closable = true;
@@ -38,7 +33,8 @@ namespace ige::creator
 
     Canvas::~Canvas()
     {
-        m_menuBar = nullptr;       
+        m_menuBar = nullptr;
+        m_toolBar = nullptr;
         m_panels.clear();
     }
 
@@ -52,7 +48,8 @@ namespace ige::creator
 
         ImGui::Begin("Workspace", nullptr, flags);
         m_menuBar->draw();
-        
+        m_toolBar->draw();
+
         if (!m_panels.empty())
         {
             if (isDockable())
@@ -65,14 +62,12 @@ namespace ige::creator
                     ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace); // Add empty node
                     ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
 
-                    ImGuiID dock_main_id = dockspace_id; // This variable will track the document node, however we are not using it here as we aren't docking anything into it.
-                    ImGuiID dock_id_top = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Up, 0.10f, NULL, &dock_main_id);
+                    ImGuiID dock_main_id = dockspace_id; // This variable will track the document node, however we are not using it here as we aren't docking anything into it.                    
                     ImGuiID dock_id_left = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.20f, NULL, &dock_main_id);
                     ImGuiID dock_id_right = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.20f, NULL, &dock_main_id);
                     ImGuiID dock_id_bottom = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down, 0.20f, NULL, &dock_main_id);
                     ImGuiID dock_id_right_bottom = ImGui::DockBuilderSplitNode(dock_id_right, ImGuiDir_Down, 0.22f, NULL, &dock_id_right);
-
-                    ImGui::DockBuilderDockWindow("ToolBar", dock_id_top);
+                    
                     ImGui::DockBuilderDockWindow("Hierarchy", dock_id_left);
                     ImGui::DockBuilderDockWindow("Scene", dock_main_id);
                     ImGui::DockBuilderDockWindow("Inspector", dock_id_right);

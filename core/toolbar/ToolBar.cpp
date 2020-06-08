@@ -1,18 +1,17 @@
 #include <imgui.h>
 
 #include "core/toolbar/ToolBar.h"
-#include "core/Panel.h"
+#include "core/Widget.h"
 
 namespace ige::creator
 {
-    ToolBar::ToolBar(const std::string& name, const Settings& setting)
-        : Panel(name, setting)
+    ToolBar::ToolBar(const std::string& name, bool enable)
+        : Widget(enable), m_name(name)
     {
     }
     
     ToolBar::~ToolBar()
     {
-
     }
 
     void ToolBar::initialize()
@@ -37,6 +36,13 @@ namespace ige::creator
 
     void ToolBar::_drawImpl()
     {
-        Panel::_drawImpl();
+        static bool initialized = false;
+        if(!initialized)
+        {
+            initialize();
+            initialized = true;
+        }
+
+        drawWidgets();
     }    
 }
