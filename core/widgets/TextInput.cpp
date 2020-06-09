@@ -1,7 +1,6 @@
 #include <imgui.h>
 
-#include "core/input/TextInput.h"
-#include "core/Widget.h"
+#include "core/widgets/TextInput.h"
 
 namespace ige::creator
 {

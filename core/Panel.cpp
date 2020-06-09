@@ -84,6 +84,7 @@ namespace ige::creator
                 
                 updatePosition();
 
+                m_size = ImGui::GetWindowSize();
                 drawWidgets();
             }
             ImGui::End();

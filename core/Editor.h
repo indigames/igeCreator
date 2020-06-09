@@ -30,6 +30,8 @@ namespace ige::creator
 
         void registerApp(std::shared_ptr<pyxieApplication> app) { m_app = app; }
 
+        std::map<uint32_t, Sampler>& getAssetSamplers() { return m_assetSamplers; }
+
     protected:        
         virtual void createDeviceObjects();
 	    virtual void refreshFontTexture();

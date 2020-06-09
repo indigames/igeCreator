@@ -26,4 +26,4 @@ namespace ige::creator
     };
 }
 
-#include "core/input/Slider.hpp"
+#include "core/widgets/Slider.hpp"

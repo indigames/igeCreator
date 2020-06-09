@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/Widget.h"
-#include "core/input/Slider.h"
+#include "core/widgets/Slider.h"
 
 namespace ige::creator
 {

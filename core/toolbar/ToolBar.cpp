@@ -2,8 +2,9 @@
 
 #include "core/toolbar/ToolBar.h"
 #include "core/Widget.h"
-#include "core/input/TextInput.h"
-#include "core/input/Slider.h"
+#include "core/widgets/Button.h"
+#include "core/widgets/TextInput.h"
+#include "core/widgets/Slider.h"
 
 namespace ige::creator
 {
@@ -42,7 +43,6 @@ namespace ige::creator
         {            
             ImGui::LogText(text.c_str());
         });
-        // inputTxt->setEndOfLine(false);
 
         int val = 50;
         auto valSlider = createWidget<Slider<int>>("Val", ImGuiDataType_S32, 0, 100, val);

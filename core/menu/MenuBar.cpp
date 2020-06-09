@@ -1,9 +1,9 @@
 #include <imgui.h>
 
-#include "core/menu/Menu.h"
 #include "core/menu/MenuBar.h"
+#include "core/menu/Menu.h"
 #include "core/menu/MenuItem.h"
-#include "core/button/Button.h"
+#include "core/widgets/Button.h"
 
 namespace ige::creator
 {

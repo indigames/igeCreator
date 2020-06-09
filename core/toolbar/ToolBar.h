@@ -2,7 +2,6 @@
 
 #include "core/Widget.h"
 #include "core/Container.h"
-#include "core/button/Button.h"
 
 namespace ige::creator
 {
