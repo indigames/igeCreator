@@ -28,6 +28,15 @@ namespace ige::creator
             });
             return m_instance.get();
         }
+
+        static void setInstance(T* instance) {
+            if (instance != nullptr) {
+                m_instance.reset(new T());
+            }
+            else {
+                m_instance = nullptr;
+            }
+        }
     };
 
     template<typename T> std::unique_ptr<T> Singleton<T>::m_instance;

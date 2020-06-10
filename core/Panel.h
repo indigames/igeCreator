@@ -48,6 +48,7 @@ namespace ige::creator
         virtual ~Panel();
 
         void draw() override;
+        virtual void update(float dt);
         
         void open();
         void close();

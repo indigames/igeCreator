@@ -38,6 +38,12 @@ namespace ige::creator
         m_panels.clear();
     }
 
+    void Canvas::update(float dt)
+    {
+        for (auto panel : m_panels)
+            panel.second->update(dt);
+    }
+
     void Canvas::draw()
     {
         ImGui::NewFrame();

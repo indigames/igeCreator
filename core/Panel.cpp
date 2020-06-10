@@ -15,14 +15,17 @@ namespace ige::creator
 
     Panel::~Panel() {}
 
-    void Panel::draw()
+    void Panel::update(float dt)
     {
         if (!m_bInitialized)
         {
             initialize();
             m_bInitialized = true;
         }
+    }
 
+    void Panel::draw()
+    {
         if(isEnable())
         {
             _drawImpl();
@@ -85,6 +88,7 @@ namespace ige::creator
                 updatePosition();
 
                 m_size = ImGui::GetWindowSize();
+
                 drawWidgets();
             }
             ImGui::End();

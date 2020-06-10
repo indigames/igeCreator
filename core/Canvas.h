@@ -17,6 +17,7 @@ namespace ige::creator
         Canvas();
         virtual ~Canvas();
 
+        virtual void update(float dt);
         virtual void draw() override;
 
         template<typename T, typename... Args>

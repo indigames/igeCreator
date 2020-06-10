@@ -3,12 +3,7 @@
 #include <SDL.h>
 #include <SDL_thread.h>
 
-#include <pyxieApplication.h>
-#include <pyxieSystemInfo.h>
-#include <pyxieFios.h>
-#include <pyxieTime.h>
-#include <input/pyxieInputHandler.h>
-
+#include "utils/PyxieHeaders.h"
 #include "core/Editor.h"
 
 #define SCREEN_WIDTH	1920
@@ -21,16 +16,15 @@ void CreateConsole(void) {
 	freopen_s(&fp, "CONOUT$", "w", stderr);
 }
 
-using namespace pyxie;
 using namespace ige::creator;
 
 int main(void* data) {
 	CreateConsole();
 
-	pyxieFios::Instance().SetRoot(".");
+	FileIO::Instance().SetRoot(".");
 
 	// Create window
-	auto app = std::make_shared<pyxieApplication>();
+	auto app = std::make_shared<Application>();
 	app->createAppWindow();	
 
 	// Initialize
@@ -41,7 +35,7 @@ int main(void* data) {
 		editor->registerApp(app);
 		editor->initialize();
 
-		pyxieSystemInfo::Instance().SetGemeScreenSize(SCREEN_WIDTH);
+		SystemInfo::Instance().SetGemeScreenSize(SCREEN_WIDTH);
 		app->showAppWindow(true, SCREEN_WIDTH, SCREEN_HEIGHT);
 		
 		// Register input handler
@@ -52,12 +46,16 @@ int main(void* data) {
 		{
 			// Update
 			app->update();			
-			editor->update((float)pyxieTime::Instance().GetElapsedTime());
+			editor->update((float)Time::Instance().GetElapsedTime());
 
 			// Render
 			editor->render();
 			app->swap();
 		}
+
+		// Destroy
+		Editor::setInstance(nullptr);
+		editor = nullptr;
 	}
 
 	// Destroy

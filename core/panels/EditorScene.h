@@ -1,28 +1,7 @@
 #pragma once
 
 #include "core/Panel.h"
-
-#include <pyxie.h>
-#include <pyxieCamera.h>
-#include <pyxieShowcase.h>
-#include <pyxieEnvironmentSet.h>
-#include <pyxieRenderContext.h>
-#include <pyxieRenderTarget.h>
-#include <pyxieFigure.h>
-#include <pyxieEditableFigure.h>
-#include <pyxieResourceCreator.h>
-#include <pyxieResourceManager.h>
-
-using Camera = pyxie::pyxieCamera;
-using Showcase = pyxie::pyxieShowcase;
-using Environment = pyxie::pyxieEnvironmentSet;
-using RenderContext = pyxie::pyxieRenderContext;
-using Figure = pyxie::pyxieFigure;
-using EditableFigure = pyxie::pyxieEditableFigure;
-using RenderTarget = pyxie::pyxieRenderTarget;
-using ResourceCreator = pyxie::pyxieResourceCreator;
-using ResourceManager = pyxie::pyxieResourceManager;
-
+#include "utils/PyxieHeaders.h"
 
 namespace ige::creator
 {
@@ -35,6 +14,7 @@ namespace ige::creator
         virtual ~EditorScene();
 
         virtual void clear();
+        virtual void update(float dt);
 
         void set2DMode(bool _2d) { m_bIs2DMode = _2d; }
 
@@ -45,12 +25,11 @@ namespace ige::creator
     protected:
         virtual void initialize() override;
         virtual void _drawImpl() override;
-        EditableFigure* createGrid(const pyxie::Vec2& size, uint32_t textureId = 0xffffffff);
-        
 
         Camera* m_editorCamera;
         Showcase* m_editorShowcase;
         Environment* m_editorEnvironment;
+        Texture* m_rtTexture;
         RenderTarget* m_fbo;
 
         bool m_bIs2DMode = false;
