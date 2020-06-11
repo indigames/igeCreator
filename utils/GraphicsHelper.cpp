@@ -76,7 +76,7 @@ namespace ige::creator
         {
             // efig->SetMaterialParamTexture("mate", "ColorSampler", texture, SAMPLERSTATE_BORDER, SAMPLERSTATE_BORDER, SAMPLERSTATE_LINEAR, SAMPLERSTATE_LINEAR);
             Sampler sampler;
-            sampler.samplerSlot = 0;
+            sampler.samplerSlotNo = 0;
             sampler.samplerState.wrap_s = SamplerState::BORDER;
             sampler.samplerState.wrap_t = SamplerState::BORDER;
             sampler.samplerState.minfilter = SamplerState::LINEAR;
