@@ -31,6 +31,7 @@ target_link_libraries(${TARGET_NAME}
     igeCore-static
     igeVMath-static
     igePAL-static
+    igeScene-static
     imgui
     SDL2-static
 )
@@ -54,4 +55,5 @@ target_include_directories(${TARGET_NAME} PUBLIC
 
 set_target_properties(
     ${TARGET_NAME} PROPERTIES
-    VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/app")
+    VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/app"
+)

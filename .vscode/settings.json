@@ -67,6 +67,10 @@
         "xlocnum": "cpp",
         "xloctime": "cpp",
         "xtree": "cpp",
-        "*.rh": "cpp"
+        "*.rh": "cpp",
+        "clocale": "cpp",
+        "forward_list": "cpp",
+        "numeric": "cpp",
+        "valarray": "cpp"
     }
 }

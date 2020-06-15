@@ -4,10 +4,11 @@
 
 #include <SDL.h>
 
-#include "utils/PyxieHeaders.h"
-#include "utils/Singleton.h"
+#include <utils/PyxieHeaders.h>
+#include <utils/Singleton.h>
 
 using namespace pyxie;
+using namespace ige::scene;
 
 namespace ige::creator
 {

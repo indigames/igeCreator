@@ -1,7 +1,11 @@
 #pragma once
 
+#include <scene/SceneManager.h>
+#include <utils/PyxieHeaders.h>
+
 #include "core/Panel.h"
-#include "utils/PyxieHeaders.h"
+
+using namespace ige::scene;
 
 namespace ige::creator
 {
@@ -18,21 +22,16 @@ namespace ige::creator
 
         void set2DMode(bool _2d) { m_bIs2DMode = _2d; }
 
-        Camera* getCamera() const { return m_editorCamera; }
-        Showcase* getShowcase() const { return m_editorShowcase; }
-        Environment* getEnvironment() const { return m_editorEnvironment; }
-
     protected:
         virtual void initialize() override;
         virtual void _drawImpl() override;
 
-        Camera* m_editorCamera;
-        Showcase* m_editorShowcase;
-        Environment* m_editorEnvironment;
         Texture* m_rtTexture;
         RenderTarget* m_fbo;
 
         bool m_bIs2DMode = false;
         std::shared_ptr<Image> m_image = nullptr;
+
+        std::shared_ptr<SceneManager> m_sceneManager = nullptr;
     };
 }

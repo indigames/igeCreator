@@ -3,7 +3,7 @@
 #include <SDL.h>
 #include <SDL_thread.h>
 
-#include "utils/PyxieHeaders.h"
+#include <utils/PyxieHeaders.h>
 #include "core/Editor.h"
 
 #define SCREEN_WIDTH	1920

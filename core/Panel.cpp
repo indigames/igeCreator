@@ -73,7 +73,16 @@ namespace ige::creator
             if (!m_settings.collapsable)				windowFlags |= ImGuiWindowFlags_NoCollapse;
             if (!m_settings.allowInputs)				windowFlags |= ImGuiWindowFlags_NoInputs;
 
-            ImGui::SetNextWindowSizeConstraints({ 0.0f, 0.0f }, { 10000.f, 10000.f });
+            ImVec2 vMin = ImGui::GetWindowContentRegionMin();
+            ImVec2 vMax = ImGui::GetWindowContentRegionMax();
+
+            vMin.x += ImGui::GetWindowPos().x;
+            vMin.y += ImGui::GetWindowPos().y;
+
+            vMax.x += ImGui::GetWindowPos().x;
+            vMax.y += ImGui::GetWindowPos().y;
+
+            ImGui::SetNextWindowSizeConstraints(vMin, vMax);
 
             if (ImGui::Begin((m_name).c_str(), m_settings.closable ? &m_bIsOpened : nullptr, windowFlags))
             {

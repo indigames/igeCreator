@@ -5,8 +5,6 @@
 
 #include "core/Editor.h"
 #include "core/Canvas.h"
-#include "utils/PyxieHeaders.h"
-#include "utils/GraphicsHelper.h"
 
 namespace ige::creator
 {
