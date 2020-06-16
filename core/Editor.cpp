@@ -5,6 +5,11 @@
 
 #include "core/Editor.h"
 #include "core/Canvas.h"
+#include "core/panels/Inspector.h"
+
+#include <scene/SceneManager.h>
+#include <scene/Scene.h>
+using namespace ige::scene;
 
 namespace ige::creator
 {
@@ -78,4 +83,16 @@ namespace ige::creator
     {
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
+
+    //! Set current selected object by its name
+    void Editor::setSelectedObject(const std::string& objName)
+    {
+        m_selectedObject = getSceneManager()->getCurrentScene()->findObjectByName(objName);
+        auto inspector = getCanvas()->getPanelAs<Inspector>("Inspector");
+        if (inspector)
+        {
+            inspector->setTargetObject(m_selectedObject);
+        }
+    }
+
 }

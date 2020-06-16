@@ -1,9 +1,10 @@
 #include <imgui.h>
 
 #include "core/toolbar/ToolBar.h"
+
 #include "core/Widget.h"
 #include "core/widgets/Button.h"
-#include "core/widgets/TextInput.h"
+#include "core/widgets/TextField.h"
 #include "core/widgets/Slider.h"
 
 namespace ige::creator
@@ -35,20 +36,7 @@ namespace ige::creator
         reloadBtn->getOnClickEvent().addListener([](){
 
         });
-        reloadBtn->setEndOfLine(false);
-
-        std::string inputText = "";
-        auto inputTxt = createWidget<TextInput>("Input", inputText);
-        inputTxt->getOnDataChangedEvent().addListener([](auto text) 
-        {            
-            ImGui::LogText(text.c_str());
-        });
-
-        int val = 50;
-        auto valSlider = createWidget<Slider<int>>("Val", ImGuiDataType_S32, 0, 100, val);
-        valSlider->getOnDataChangedEvent().addListener([](auto val) {
-            ImGui::LogText("Val: %d", val);
-        });
+        reloadBtn->setEndOfLine(true);        
     }
 
     void ToolBar::_drawImpl()

@@ -6,7 +6,6 @@
 #include "core/Container.h"
 
 #include <event/Event.h>
-using namespace ige::scene;
 
 namespace ige::creator
 {
@@ -75,6 +74,9 @@ namespace ige::creator
         E_HAlign getHAlign() const { return m_hAlign;  }
         E_VAlign getVAlign() const { return m_vAlign; } 
 
+        ige::scene::Event<>& getOnOpenedEvent() { return m_openEvent; }
+        ige::scene::Event<>& getOnClosedEvent() { return m_closeEvent; }
+
     protected:
         virtual void initialize() {};
         virtual void _drawImpl();
@@ -89,8 +91,8 @@ namespace ige::creator
         bool m_bIsHovered = false;
         std::string m_id;
 
-        Event<> m_openEvent;
-        Event<> m_closeEvent;
+        ige::scene::Event<> m_openEvent;
+        ige::scene::Event<> m_closeEvent;
 
     private:
         std::string m_name;

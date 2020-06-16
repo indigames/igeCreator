@@ -31,14 +31,29 @@ namespace ige::creator
     {
         auto node = createWidget<TreeNode>(sceneObject.getName(), false, sceneObject.getChildrenCount() == 0);
         m_objectNodeMap[sceneObject.getName()] = node;
-        node->getOnClickEvent().addListener([node, this]() {
+        node->getOnClickEvent().addListener([node, &sceneObject, this]() {
             if (m_selectedNode != nullptr && m_selectedNode != node) 
             {
                 m_selectedNode->setIsSelected(false);
             }
             m_selectedNode = node;
             m_selectedNode->setIsSelected(true);
+            Editor::getInstance()->setSelectedObject(sceneObject.getName());
         });
+
+        static std::shared_ptr<ContextMenu> ctxMenu = nullptr;
+        if (ctxMenu == nullptr)
+        {
+            ctxMenu = createWidget<ContextMenu>("Hierarchy Context");
+            auto createMenu = ctxMenu->createWidget<Menu>("Create");
+            createMenu->createWidget<MenuItem>("Cone");
+            createMenu->createWidget<MenuItem>("Cube");
+            createMenu->createWidget<MenuItem>("Cylinder");
+            createMenu->createWidget<MenuItem>("Plane");
+            createMenu->createWidget<MenuItem>("Sphere");
+            ctxMenu->createWidget<MenuItem>("Delete");
+        }
+        node->addWidget(ctxMenu);
     }
 
     void Hierarchy::onSceneObjectDeleted(SceneObject& sceneObject)

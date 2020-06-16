@@ -1,21 +1,21 @@
 #include <imgui.h>
 
-#include "core/widgets/TextInput.h"
+#include "core/widgets/TextField.h"
 
 namespace ige::creator
 {
-    TextInput::TextInput(const std::string& label, std::string& content)
-        : DataWidget<std::string>(content), m_label(label)
+    TextField::TextField(const std::string& label, std::string& content)
+        : DataWidget<std::string>(content), m_label(label), m_content(content)
     {
 
     }
 
-    TextInput::~TextInput()
+    TextField::~TextField()
     {
 
     }
 
-    void TextInput::_drawImpl()
+    void TextField::_drawImpl()
     {
         std::string previousContent = m_content;
         m_content.resize(512, '\0');

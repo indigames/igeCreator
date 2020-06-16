@@ -4,9 +4,7 @@
 #include <string>
 
 #include "core/IDrawable.h"
-
 #include <event/Event.h>
-using namespace ige::scene;
 
 namespace ige::creator
 {
@@ -33,7 +31,7 @@ namespace ige::creator
         bool hasContainer() const { return m_container != nullptr; };
         Container* getContainer() const { return m_container; }
 
-        Event<>& getOnClickEvent() { return m_onClickEvent; }
+        ige::scene::Event<>& getOnClickEvent() { return m_onClickEvent; }
 
     protected:
         virtual void _drawImpl() = 0;
@@ -43,7 +41,7 @@ namespace ige::creator
         Container* m_container;
         bool m_bEnabled;
         bool m_bEOL = true;
-        Event<> m_onClickEvent;
+        ige::scene::Event<> m_onClickEvent;
 
     private:
         static uint64_t s_idCounter;        
@@ -56,14 +54,14 @@ namespace ige::creator
     public:
         DataWidget(T& data, bool enable = true) : Widget(enable), m_data(data) {};		
 
-        Event<T&>& getOnDataChangedEvent() { return m_onDataChangedEvent; }
+        ige::scene::Event<T&>& getOnDataChangedEvent() { return m_onDataChangedEvent; }
 
     protected:
         virtual void _drawImpl() override;
         void notifyChange(T& data);
 
         T m_data;
-        Event<T&> m_onDataChangedEvent;
+        ige::scene::Event<T&> m_onDataChangedEvent;
     };
 
     template<typename T>

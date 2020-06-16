@@ -4,6 +4,7 @@
 #include "core/menu/Menu.h"
 #include "core/menu/MenuItem.h"
 #include "core/widgets/Button.h"
+#include "core/Editor.h"
 
 namespace ige::creator
 {
@@ -51,7 +52,7 @@ namespace ige::creator
         });
 
         fileMenu->createWidget<MenuItem>("Exit", "CTRL + N")->getOnClickEvent().addListener([]() {
-            exit(0);
+            Editor::getInstance()->getApp()->quit();
         });        
     }
 }

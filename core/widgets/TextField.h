@@ -4,12 +4,11 @@
 
 namespace ige::creator
 {
-    class TextInput: public DataWidget<std::string>
+    class TextField: public DataWidget<std::string>
     {
     public:
-        TextInput(const std::string& label, std::string& content);
-        virtual ~TextInput();
-
+        TextField(const std::string& label, std::string& content);
+        virtual ~TextField();
 
     protected:
         virtual void _drawImpl() override;
