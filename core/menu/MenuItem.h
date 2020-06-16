@@ -1,7 +1,6 @@
 #pragma once
 
 #include "core/Widget.h"
-#include "event/Event.h"
 
 namespace ige::creator
 {    

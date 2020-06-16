@@ -5,7 +5,8 @@
 #include "core/IDrawable.h"
 #include "core/Container.h"
 
-#include "event/Event.h"
+#include <event/Event.h>
+using namespace ige::scene;
 
 namespace ige::creator
 {

@@ -4,7 +4,9 @@
 #include <string>
 
 #include "core/IDrawable.h"
-#include "event/Event.h"
+
+#include <event/Event.h>
+using namespace ige::scene;
 
 namespace ige::creator
 {
@@ -27,9 +29,9 @@ namespace ige::creator
         void setEndOfLine(bool eol) { m_bEOL = eol; }
         bool isEndOfLine() const { return m_bEOL; }
 
-        void setContainer(std::shared_ptr<Container> container) { m_container = container; }
-        bool hasContainer() const { return m_container.lock() != nullptr; };
-        std::shared_ptr<Container> getContainer() const { return m_container.lock(); }
+        void setContainer(Container* container) { m_container = container; }
+        bool hasContainer() const { return m_container != nullptr; };
+        Container* getContainer() const { return m_container; }
 
         Event<>& getOnClickEvent() { return m_onClickEvent; }
 
@@ -38,7 +40,7 @@ namespace ige::creator
 
     protected:
         std::string m_id = "";
-        std::weak_ptr<Container> m_container;
+        Container* m_container;
         bool m_bEnabled;
         bool m_bEOL = true;
         Event<> m_onClickEvent;

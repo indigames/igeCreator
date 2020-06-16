@@ -14,7 +14,7 @@ namespace ige::creator
 
     void Container::addWidget(std::shared_ptr<Widget> widget)
     {
-        widget->setContainer(shared_from_this());
+        widget->setContainer(this);
         m_widgets.push_back(widget);
     }
 

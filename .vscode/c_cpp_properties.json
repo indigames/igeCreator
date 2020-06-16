@@ -6,6 +6,7 @@
                 "${workspaceFolder}",
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/../igeCore",
+                "${workspaceFolder}/../igeScene",
                 "${workspaceFolder}/../pyxCore/pyxcore",
                 "${workspaceFolder}/../igeVMath",
                 "${IGE_LIBS}/json/include",

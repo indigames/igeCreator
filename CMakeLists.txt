@@ -44,6 +44,7 @@ target_include_directories(${TARGET_NAME} PUBLIC
     ${IGE_ROOT}/pyxCore/ThirdParty/spdlog/include
     ${IGE_ROOT}/tracy
     ${IGE_ROOT}/igeLibs/cpp-taskflow/include
+    ${IGE_ROOT}/igeLibs/json/include
     ${IGE_ROOT}/igeVmath
     ${IGE_ROOT}/igeCore
     ${IGE_ROOT}/igePAL

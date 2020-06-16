@@ -6,6 +6,7 @@
 
 #include <utils/PyxieHeaders.h>
 #include <utils/Singleton.h>
+#include <scene/SceneManager.h>
 
 using namespace pyxie;
 using namespace ige::scene;
@@ -26,6 +27,8 @@ namespace ige::creator
 
         void registerApp(std::shared_ptr<Application> app) { m_app = app; }
 
+        std::shared_ptr<SceneManager>& getSceneManager() { return m_sceneManager; }
+
     protected:
         virtual void initImGUI();
         virtual bool handleEventImGUI(const SDL_Event* event);
@@ -34,5 +37,6 @@ namespace ige::creator
     protected:
         std::shared_ptr<Canvas> m_canvas = nullptr;
         std::shared_ptr<Application> m_app = nullptr;
+        std::shared_ptr<SceneManager> m_sceneManager = nullptr;
     };
 }

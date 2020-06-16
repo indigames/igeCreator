@@ -1,11 +1,8 @@
 #pragma once
 
-#include <scene/SceneManager.h>
 #include <utils/PyxieHeaders.h>
 
 #include "core/Panel.h"
-
-using namespace ige::scene;
 
 namespace ige::creator
 {
@@ -30,8 +27,5 @@ namespace ige::creator
         RenderTarget* m_fbo;
 
         bool m_bIs2DMode = false;
-        std::shared_ptr<Image> m_image = nullptr;
-
-        std::shared_ptr<SceneManager> m_sceneManager = nullptr;
     };
 }

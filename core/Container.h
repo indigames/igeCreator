@@ -8,7 +8,7 @@
 
 namespace ige::creator
 {
-    class Container: public std::enable_shared_from_this<Container>
+    class Container
     {
     public:
         Container();
@@ -18,7 +18,7 @@ namespace ige::creator
 		std::shared_ptr<T> createWidget(Args&&... args)
 		{
             auto widget = std::make_shared<T>(args...);
-            widget->setContainer(shared_from_this());
+            widget->setContainer(this);
 			addWidget(widget);
 			return widget;
 		}
