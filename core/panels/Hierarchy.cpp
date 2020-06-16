@@ -24,7 +24,15 @@ namespace ige::creator
 
     Hierarchy::~Hierarchy()
     {
+        SceneObject::getCreatedEvent().removeAllListeners();
+        SceneObject::getDestroyedEvent().removeAllListeners();
+        SceneObject::getAttachedEvent().removeAllListeners();
+        SceneObject::getDetachedEvent().removeAllListeners();
 
+        for (auto& widget : m_widgets)
+            widget->getOnClickEvent().removeAllListeners();
+
+        m_objectNodeMap.clear();
     }
 
     void Hierarchy::onSceneObjectCreated(SceneObject& sceneObject)
@@ -41,19 +49,17 @@ namespace ige::creator
             Editor::getInstance()->setSelectedObject(sceneObject.getName());
         });
 
-        static std::shared_ptr<ContextMenu> ctxMenu = nullptr;
-        if (ctxMenu == nullptr)
-        {
-            ctxMenu = createWidget<ContextMenu>("Hierarchy Context");
-            auto createMenu = ctxMenu->createWidget<Menu>("Create");
-            createMenu->createWidget<MenuItem>("Cone");
-            createMenu->createWidget<MenuItem>("Cube");
-            createMenu->createWidget<MenuItem>("Cylinder");
-            createMenu->createWidget<MenuItem>("Plane");
-            createMenu->createWidget<MenuItem>("Sphere");
-            ctxMenu->createWidget<MenuItem>("Delete");
-        }
-        node->addWidget(ctxMenu);
+        auto ctxMenu = node->createWidget<ContextMenu>("Hierarchy Context");
+        auto createMenu = ctxMenu->createWidget<Menu>("Create");
+        createMenu->createWidget<MenuItem>("Cone");
+        createMenu->createWidget<MenuItem>("Cube");
+        createMenu->createWidget<MenuItem>("Cylinder");
+        createMenu->createWidget<MenuItem>("Plane");
+        createMenu->createWidget<MenuItem>("Sphere");
+
+        ctxMenu->createWidget<MenuItem>("Delete")->getOnClickEvent().addListener([node, &sceneObject, this]() {
+            Editor::getInstance()->getSceneManager()->getCurrentScene()->removeObjectById(sceneObject.getId());
+        }); 
     }
 
     void Hierarchy::onSceneObjectDeleted(SceneObject& sceneObject)

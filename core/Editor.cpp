@@ -18,8 +18,8 @@ namespace ige::creator
     
     Editor::~Editor()
     {
-        m_sceneManager = nullptr;
         m_canvas = nullptr;
+        m_sceneManager = nullptr;
         m_app.reset();
 
         ImGui_ImplOpenGL3_Shutdown();
