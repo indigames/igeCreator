@@ -89,29 +89,36 @@ namespace ige::creator
                     posDrag->getOnDataChangedEvent().addListener([&component](auto val) {
                         auto tranform = (TransformComponent*)(component.get());
                         tranform->setPosition({ val[0], val[1], val[2] });
-                        });
-                    std::array rot = { tranform->getRotation().X(), tranform->getRotation().Y(), tranform->getRotation().Z(), tranform->getRotation().W() };
-                    auto rotDrag = localGroup->createWidget<Drag<float, 4>>("Rotation", ImGuiDataType_Float, rot);
+                    });
+
+                    Vec3 euler;
+                    vmath_quatToEuler(tranform->getRotation().P(), euler.P());
+                    std::array rot = { euler.X(), euler.Y(), euler.Z()};
+                    auto rotDrag = localGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot);
                     rotDrag->getOnDataChangedEvent().addListener([&component](auto val) {
                         auto tranform = (TransformComponent*)(component.get());
-                        tranform->setRotation({ val[0], val[1], val[2], val[3] });
-                        });
+                        Quat quat;
+                        vmath_eulerToQuat(val.data(), quat.P());
+                        tranform->setRotation(quat);
+                    });
+
                     std::array scale = { tranform->getScale().X(), tranform->getScale().Y(), tranform->getScale().Z() };
                     auto scaleDrag = localGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scale);
                     scaleDrag->getOnDataChangedEvent().addListener([&component](auto val) {
                         auto tranform = (TransformComponent*)(component.get());
                         tranform->setScale({ val[0], val[1], val[2] });
-                        });
+                    });
 
                     auto worldGroup = header->createWidget<Group>("World", false);
                     localGroup->createWidget<Label>("World");
-                    pos = { tranform->getPosition().X(), tranform->getPosition().Y(), tranform->getPosition().Z() };
+                    pos = { tranform->getWorldPosition().X(), tranform->getWorldPosition().Y(), tranform->getWorldPosition().Z() };
                     worldGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos, 0.f);
                     
-                    rot = { tranform->getRotation().X(), tranform->getRotation().Y(), tranform->getRotation().Z(), tranform->getRotation().W() };
-                    worldGroup->createWidget<Drag<float, 4>>("Rotation", ImGuiDataType_Float, rot, 0.f);
+                    vmath_quatToEuler(tranform->getWorldRotation().P(), euler.P());
+                    rot = { euler.X(), euler.Y(), euler.Z() };
+                    worldGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot, 0.f);
                     
-                    scale = { tranform->getScale().X(), tranform->getScale().Y(), tranform->getScale().Z() };
+                    scale = { tranform->getWorldScale().X(), tranform->getWorldScale().Y(), tranform->getWorldScale().Z() };
                     worldGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scale, 0.f);
                 }
                 else if (component->getName() == "CameraComponent")
