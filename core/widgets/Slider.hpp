@@ -5,19 +5,19 @@
 
 namespace ige::creator
 {
-    template <typename T>
-    Slider<T>::Slider(const std::string& label, ImGuiDataType type, const T& min, const T& max, const T& val)
-        : DataWidget(val), m_label(label),m_dataType(type), m_min(min), m_max(max)
+    template <typename T, size_t N>
+    Slider<T, N>::Slider(const std::string& label, ImGuiDataType type, const std::array<T, N>& val, const T& min, const T& max)
+        : DataWidget(val), m_label(label), m_dataType(type), m_min(min), m_max(max)
     {
     }
 
-    template <typename T>
-    Slider<T>::~Slider()
+    template <typename T, size_t N>
+    Slider<T, N>::~Slider()
     {        
     }
 
-    template <typename T>
-    void Slider<T>::_drawImpl()
+    template <typename T, size_t N>
+    void Slider<T, N>::_drawImpl()
     {
         if (m_max < m_min)
             m_max = m_min;

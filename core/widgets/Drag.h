@@ -13,7 +13,7 @@ namespace ige::creator
         static_assert(std::is_scalar<T>::value, "Invalid Drag<T>, scalar type expected!");
 
     public:
-        Drag(const std::string& label, ImGuiDataType type, const std::array<T, N>& val, float speed = 0.05f, const T& minVal = std::numeric_limits<T>::min(), const T& maxVal = std::numeric_limits<T>::max());
+        Drag(const std::string& label, ImGuiDataType type, const std::array<T, N>& val, float speed = 0.05f, const T& minVal = std::numeric_limits<T>::lowest(), const T& maxVal = std::numeric_limits<T>::max());
         virtual ~Drag();
 
     protected:
