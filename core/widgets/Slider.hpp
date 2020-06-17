@@ -6,7 +6,7 @@
 namespace ige::creator
 {
     template <typename T>
-    Slider<T>::Slider(const std::string& label, ImGuiDataType type, const T& min, const T& max, T& val)
+    Slider<T>::Slider(const std::string& label, ImGuiDataType type, const T& min, const T& max, const T& val)
         : DataWidget(val), m_label(label),m_dataType(type), m_min(min), m_max(max)
     {
     }

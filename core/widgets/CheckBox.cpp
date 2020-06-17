@@ -4,8 +4,8 @@
 
 namespace ige::creator
 {
-    CheckBox::CheckBox(const std::string& label, bool selected)
-        : DataWidget<bool>(selected), m_label(label)
+    CheckBox::CheckBox(const std::string& label, const bool& selected)
+        : DataWidget<bool>(selected), m_label(label), m_bIsSelected(selected)
     {
     }
 
@@ -20,7 +20,6 @@ namespace ige::creator
 
         if(prevValue != m_bIsSelected)
         {
-            getOnValueChangedEvent().invoke(m_bIsSelected);
             this->notifyChange(m_bIsSelected);
         }       
     }

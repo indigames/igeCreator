@@ -12,7 +12,7 @@ namespace ige::creator
         static_assert(std::is_scalar<T>::value, "Invalid Slider<T>, scalar type expected!");
 
     public:
-        Slider(const std::string& label, ImGuiDataType type, const T& min, const T& max, T& val);
+        Slider(const std::string& label, ImGuiDataType type, const T& min, const T& max, const T& val);
         virtual ~Slider();
 
 

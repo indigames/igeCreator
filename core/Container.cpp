@@ -36,7 +36,11 @@ namespace ige::creator
     void Container::removeAllWidgets()
     {
         for (auto& widget : m_widgets)
+        {
             widget->setContainer(nullptr);
+            widget = nullptr;
+        }
+            
         m_widgets.clear();
     }
 

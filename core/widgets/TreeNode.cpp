@@ -10,6 +10,8 @@ namespace ige::creator
 
     TreeNode::~TreeNode()
     {
+        getOnOpenedEvent().removeAllListeners();
+        getOnClosedEvent().removeAllListeners();
     }
 
     void TreeNode::_drawImpl()

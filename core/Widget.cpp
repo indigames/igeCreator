@@ -13,7 +13,7 @@ namespace ige::creator
 
     Widget::~Widget()
     {
-
+        getOnClickEvent().removeAllListeners();
     }
 
     void Widget::draw()

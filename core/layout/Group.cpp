@@ -11,6 +11,8 @@ namespace ige::creator
 
     Group::~Group()
     {
+        getOnOpenedEvent().removeAllListeners();
+        getOnClosedEvent().removeAllListeners();        
     }
 
     void Group::_drawImpl()

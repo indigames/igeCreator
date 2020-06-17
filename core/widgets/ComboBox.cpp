@@ -3,7 +3,7 @@
 
 namespace ige::creator
 {
-    ComboBox::ComboBox(const std::string& label, int selectedIdx)
+    ComboBox::ComboBox(const std::string& label, const int& selectedIdx)
         : DataWidget<int>(selectedIdx), m_label(label), m_selectedIdx(selectedIdx)
     {
     }
@@ -29,7 +29,6 @@ namespace ige::creator
                     {
                         ImGui::SetItemDefaultFocus();
                         m_selectedIdx = key;
-                        getOnValueChangedEvent().invoke(m_selectedIdx);
                         this->notifyChange(m_selectedIdx);
                     }
                 }

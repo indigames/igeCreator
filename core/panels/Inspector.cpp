@@ -3,6 +3,7 @@
 #include "core/layout/Columns.h"
 #include "core/widgets/Label.h"
 #include "core/widgets/TextField.h"
+#include "core/widgets/CheckBox.h"
 
 #include "core/panels/Inspector.h"
 #include "core/Editor.h"
@@ -12,12 +13,10 @@ namespace ige::creator
     Inspector::Inspector(const std::string& name, const Panel::Settings& settings)
         : Panel(name, settings)
     {
-
     }
     
     Inspector::~Inspector()
     {
-
     }
 
     void Inspector::initialize()
@@ -25,12 +24,21 @@ namespace ige::creator
         clear();
 
         m_headerGroup = createWidget<Group>("Inspector_Header", false);
-        auto columns = m_headerGroup->createWidget<Columns<2>>();
+        if (m_targetObject)
+        {
+            m_headerGroup->createWidget<TextField>("ID", std::to_string(m_targetObject->getId()), true);
 
-        std::string input = m_targetObject ? m_targetObject->getName() : "sasdasdsad";
-        columns->createWidget<TextField>("txtName", input);
+            m_headerGroup->createWidget<TextField>("Name", m_targetObject->getName())->getOnDataChangedEvent().addListener([this](auto txt) {
+                m_targetObject->setName(txt);
+            });
 
+            m_headerGroup->createWidget<CheckBox>("Active", m_targetObject->isActive())->getOnDataChangedEvent().addListener([this](bool active) {
+                m_targetObject->setActive(active);
+            });
+        }
+        
         m_componentGroup = createWidget<Group>("Inspector_Components", false);
+
 
     }
 

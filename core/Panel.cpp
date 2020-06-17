@@ -13,7 +13,11 @@ namespace ige::creator
         m_id = "#" + std::to_string(s_idCounter++);
     }
 
-    Panel::~Panel() {}
+    Panel::~Panel()
+    {
+        getOnOpenedEvent().removeAllListeners();
+        getOnClosedEvent().removeAllListeners();
+    }
 
     void Panel::update(float dt)
     {

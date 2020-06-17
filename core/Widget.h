@@ -52,26 +52,20 @@ namespace ige::creator
     class DataWidget : public Widget
     {
     public:
-        DataWidget(T& data, bool enable = true) : Widget(enable), m_data(data) {};		
+        DataWidget(const T& data, bool enable = true) : Widget(enable), m_data(data) {};		
+        virtual ~DataWidget() { getOnDataChangedEvent().removeAllListeners(); }
 
-        ige::scene::Event<T&>& getOnDataChangedEvent() { return m_onDataChangedEvent; }
+        ige::scene::Event<const T&>& getOnDataChangedEvent() { return m_onDataChangedEvent; }
 
     protected:
-        virtual void _drawImpl() override;
-        void notifyChange(T& data);
+        void notifyChange(const T& data);
 
         T m_data;
-        ige::scene::Event<T&> m_onDataChangedEvent;
+        ige::scene::Event<const T&> m_onDataChangedEvent;
     };
 
     template<typename T>
-    inline void DataWidget<T>::_drawImpl()
-    {
-        // Widget::_drawImpl();
-    }
-
-    template<typename T>
-    inline void DataWidget<T>::notifyChange(T& data)
+    inline void DataWidget<T>::notifyChange(const T& data)
     {
         m_onDataChangedEvent.invoke(data);
     }
