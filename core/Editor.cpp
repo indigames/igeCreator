@@ -70,6 +70,8 @@ namespace ige::creator
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         io.ConfigWindowsMoveFromTitleBarOnly = true;
 
+        ImGui::StyleColorsDark();
+
         ImGui_ImplSDL2_InitForOpenGL((SDL_Window*)m_app->getAppWindow(), m_app->getAppContext());
         ImGui_ImplOpenGL3_Init("#version 130");
     }
@@ -84,10 +86,10 @@ namespace ige::creator
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
 
-    //! Set current selected object by its name
-    void Editor::setSelectedObject(const std::string& objName)
+    //! Set current selected object by its Id
+    void Editor::setSelectedObject(uint64_t objId)
     {
-        m_selectedObject = getSceneManager()->getCurrentScene()->findObjectByName(objName);
+        m_selectedObject = getSceneManager()->getCurrentScene()->findObjectById(objId);
         auto inspector = getCanvas()->getPanelAs<Inspector>("Inspector");
         if (inspector)
         {

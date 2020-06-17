@@ -3,8 +3,8 @@
 
 namespace ige::creator
 {
-    ComboBox::ComboBox(const std::string& label, const int& selectedIdx)
-        : DataWidget<int>(selectedIdx), m_label(label), m_selectedIdx(selectedIdx)
+    ComboBox::ComboBox(const int& selectedIdx)
+        : DataWidget<int>(selectedIdx), m_selectedIdx(selectedIdx)
     {
     }
 
@@ -12,12 +12,17 @@ namespace ige::creator
     {
     }
 
+    void ComboBox::addChoice(int idx, const std::string& item)
+    {
+        m_choices.emplace(idx, item);
+    }
+
     void ComboBox::_drawImpl()
     {
         if (m_choices.find(m_selectedIdx) == m_choices.end())
             m_selectedIdx = m_choices.begin()->first;
 
-        if (ImGui::BeginCombo((m_label + m_id).c_str(), m_choices[m_selectedIdx].c_str()))
+        if (ImGui::BeginCombo(m_id.c_str(), m_choices[m_selectedIdx].c_str()))
         {
             for (const auto&[key, value] : m_choices)
             {

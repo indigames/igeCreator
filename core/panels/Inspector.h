@@ -8,6 +8,7 @@ using namespace ige::scene;
 
 namespace ige::creator
 {
+    class ComboBox;
     class Inspector: public Panel
     {
     public:
@@ -26,5 +27,6 @@ namespace ige::creator
         std::shared_ptr<SceneObject> m_targetObject = nullptr;
         std::shared_ptr<Group> m_headerGroup = nullptr;
         std::shared_ptr<Group> m_componentGroup = nullptr;
+        std::shared_ptr<ComboBox> m_createCompCombo = nullptr;
     };
 }

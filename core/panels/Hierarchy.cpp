@@ -15,7 +15,6 @@ namespace ige::creator
     Hierarchy::Hierarchy(const std::string& name, const Panel::Settings& settings)
         : Panel(name, settings)
     {
-        m_selectedNode = nullptr;
         SceneObject::getCreatedEvent().addListener(std::bind(&Hierarchy::onSceneObjectCreated, this, std::placeholders::_1));
         SceneObject::getDestroyedEvent().addListener(std::bind(&Hierarchy::onSceneObjectDeleted, this, std::placeholders::_1));
         SceneObject::getAttachedEvent().addListener(std::bind(&Hierarchy::onSceneObjectAttached, this, std::placeholders::_1));
@@ -37,16 +36,26 @@ namespace ige::creator
 
     void Hierarchy::onSceneObjectCreated(SceneObject& sceneObject)
     {
+        auto objId = sceneObject.getId();
+
         auto node = createWidget<TreeNode>(sceneObject.getName(), false, sceneObject.getChildrenCount() == 0);
-        m_objectNodeMap[sceneObject.getName()] = node;
-        node->getOnClickEvent().addListener([node, &sceneObject, this]() {
-            if (m_selectedNode != nullptr && m_selectedNode != node) 
+        m_objectNodeMap[objId] = node;
+        node->getOnClickEvent().addListener([objId, this]() {
+            // Set previous selected to false
+            auto nodePair = m_objectNodeMap.find(m_selectedNodeId);
+            if (nodePair != m_objectNodeMap.end())
             {
-                m_selectedNode->setIsSelected(false);
+                nodePair->second->setIsSelected(false);
             }
-            m_selectedNode = node;
-            m_selectedNode->setIsSelected(true);
-            Editor::getInstance()->setSelectedObject(sceneObject.getName());
+
+            // Update current selected id
+            nodePair = m_objectNodeMap.find(objId);
+            if (nodePair != m_objectNodeMap.end())
+            {
+                m_selectedNodeId = objId;
+                nodePair->second->setIsSelected(true);
+                Editor::getInstance()->setSelectedObject(objId);
+            }            
         });
 
         auto ctxMenu = node->createWidget<ContextMenu>("Hierarchy Context");
@@ -57,24 +66,30 @@ namespace ige::creator
         createMenu->createWidget<MenuItem>("Plane");
         createMenu->createWidget<MenuItem>("Sphere");
 
-        ctxMenu->createWidget<MenuItem>("Delete")->getOnClickEvent().addListener([node, &sceneObject, this]() {
-            Editor::getInstance()->getSceneManager()->getCurrentScene()->removeObjectById(sceneObject.getId());
+        
+        ctxMenu->createWidget<MenuItem>("Delete")->getOnClickEvent().addListener([objId]() {
+            if (objId != 0) // Avoid delete root node
+            {
+                Editor::getInstance()->setSelectedObject(0);
+                Editor::getInstance()->getSceneManager()->getCurrentScene()->removeObjectById(objId);
+            }            
         }); 
     }
 
     void Hierarchy::onSceneObjectDeleted(SceneObject& sceneObject)
-    {
-        auto nodePair = m_objectNodeMap.find(sceneObject.getName());
+    { 
+        auto nodePair = m_objectNodeMap.find(sceneObject.getId());
         if (nodePair != m_objectNodeMap.end())
         {
-            removeWidget(nodePair->second);
+            if(nodePair->second->hasContainer())
+                nodePair->second->getContainer()->removeWidget(nodePair->second);
             m_objectNodeMap.erase(nodePair);
-        }
+        }        
     }
 
     void Hierarchy::onSceneObjectAttached(SceneObject& sceneObject)
     {
-        auto nodePair = m_objectNodeMap.find(sceneObject.getName());
+        auto nodePair = m_objectNodeMap.find(sceneObject.getId());
 
         if (nodePair != m_objectNodeMap.end())
         {
@@ -85,7 +100,7 @@ namespace ige::creator
 
             if (sceneObject.hasParent())
             {
-                auto parentWidget = m_objectNodeMap.at(sceneObject.getParent()->getName());
+                auto parentWidget = m_objectNodeMap.at(sceneObject.getParent()->getId());
                 parentWidget->setIsLeaf(false);
                 parentWidget->addWidget(widget);
             }
@@ -94,21 +109,19 @@ namespace ige::creator
 
     void Hierarchy::onSceneObjectDetached(SceneObject& sceneObject)
     {
-        auto nodePair = m_objectNodeMap.find(sceneObject.getName());
+        auto nodePair = m_objectNodeMap.find(sceneObject.getId());
 
         if (nodePair != m_objectNodeMap.end())
         {            
             if (sceneObject.hasParent() && sceneObject.getParent()->getChildrenCount() == 1)
             {
-                auto parentWidget = m_objectNodeMap.at(sceneObject.getParent()->getName());
+                auto parentWidget = m_objectNodeMap.at(sceneObject.getParent()->getId());
                 parentWidget->setIsLeaf(true);
             }
 
             auto widget = nodePair->second;
             if (widget->hasContainer())
                 widget->getContainer()->removeWidget(widget);
-
-            m_objectNodeMap.erase(nodePair);
         }
     }
 

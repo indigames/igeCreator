@@ -8,7 +8,7 @@ namespace ige::creator
     Widget::Widget(bool enable)
         : m_bEnabled(enable)
     {
-        m_id = "#" + std::to_string(s_idCounter++);
+        m_id = "##" + std::to_string(s_idCounter++);
     }
 
     Widget::~Widget()

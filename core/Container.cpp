@@ -12,13 +12,13 @@ namespace ige::creator
         removeAllWidgets();
     }
 
-    void Container::addWidget(std::shared_ptr<Widget> widget)
+    void Container::addWidget(const std::shared_ptr<Widget>& widget)
     {
         widget->setContainer(this);
         m_widgets.push_back(widget);
     }
 
-    void Container::removeWidget(std::shared_ptr<Widget> widget)
+    void Container::removeWidget(const std::shared_ptr<Widget>& widget)
     {
         widget->setContainer(nullptr);
 
@@ -46,8 +46,8 @@ namespace ige::creator
 
     void Container::drawWidgets()
     {
-        std::for_each(m_widgets.begin(), m_widgets.end(), [](auto widget) {
+        for(auto widget: m_widgets) {
             if(widget != nullptr) widget->draw();
-        });
+        }
     }
 }
