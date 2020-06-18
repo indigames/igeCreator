@@ -24,9 +24,14 @@ namespace ige::creator
         virtual void initialize() override;
         virtual void _drawImpl() override;
 
+        void drawLocalTransformComponent(const std::shared_ptr<Component>& component);
+        void drawWorldTransformComponent(const std::shared_ptr<Component>& component);
+
         std::shared_ptr<SceneObject> m_targetObject = nullptr;
         std::shared_ptr<Group> m_headerGroup = nullptr;
         std::shared_ptr<Group> m_componentGroup = nullptr;
+        std::shared_ptr<Group> m_localTransformGroup = nullptr;
+        std::shared_ptr<Group> m_worldTransformGroup = nullptr;
         std::shared_ptr<ComboBox> m_createCompCombo = nullptr;
     };
 }

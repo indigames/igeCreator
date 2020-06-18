@@ -27,7 +27,10 @@ namespace ige::creator
     }
     
     Inspector::~Inspector()
-    {
+    {   
+        m_targetObject = nullptr;
+
+        clear();
     }
 
     void Inspector::initialize()
@@ -40,8 +43,8 @@ namespace ige::creator
 
         // Object info
         m_headerGroup->createWidget<TextField>("ID", std::to_string(m_targetObject->getId()), true);
-        m_headerGroup->createWidget<TextField>("Name", m_targetObject->getName())->getOnDataChangedEvent().addListener([this](auto txt) {
-            m_targetObject->setName(txt);
+        m_headerGroup->createWidget<TextField>("Name", m_targetObject->getName())->getOnDataChangedEvent().addListener([this](auto name) {
+            m_targetObject->setName(name);
         });
         m_headerGroup->createWidget<CheckBox>("Active", m_targetObject->isActive())->getOnDataChangedEvent().addListener([this](bool active) {
             m_targetObject->setActive(active);
@@ -73,7 +76,7 @@ namespace ige::creator
         m_componentGroup = createWidget<Group>("Inspector_Components", false);
         std::for_each(getTargetObject()->getComponents().begin(), getTargetObject()->getComponents().end(), [this](auto& component)
             {
-                auto closable = (component->getName() == "TransformComponent");
+                auto closable = (component->getName() != "TransformComponent");
                 auto header = m_componentGroup->createWidget<Group>(component->getName(), true, closable);
                 header->getOnClosedEvent().addListener([this, component]() {
                     getTargetObject()->removeComponent(component);
@@ -81,45 +84,11 @@ namespace ige::creator
                 
                 if (component->getName() == "TransformComponent")
                 {
-                    auto localGroup = header->createWidget<Group>("Local", false);
-                    localGroup->createWidget<Label>("Local");
-                    auto tranform = std::static_pointer_cast<TransformComponent>(component);
-                    std::array pos = { tranform->getPosition().X(), tranform->getPosition().Y(), tranform->getPosition().Z() };
-                    auto posDrag = localGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos);
-                    posDrag->getOnDataChangedEvent().addListener([&component](auto val) {
-                        auto tranform = (TransformComponent*)(component.get());
-                        tranform->setPosition({ val[0], val[1], val[2] });
-                    });
+                    m_localTransformGroup = header->createWidget<Group>("LocalTransformGroup", false);
+                    drawLocalTransformComponent(component);
 
-                    Vec3 euler;
-                    vmath_quatToEuler(tranform->getRotation().P(), euler.P());
-                    std::array rot = { euler.X(), euler.Y(), euler.Z()};
-                    auto rotDrag = localGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot);
-                    rotDrag->getOnDataChangedEvent().addListener([&component](auto val) {
-                        auto tranform = (TransformComponent*)(component.get());
-                        Quat quat;
-                        vmath_eulerToQuat(val.data(), quat.P());
-                        tranform->setRotation(quat);
-                    });
-
-                    std::array scale = { tranform->getScale().X(), tranform->getScale().Y(), tranform->getScale().Z() };
-                    auto scaleDrag = localGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scale);
-                    scaleDrag->getOnDataChangedEvent().addListener([&component](auto val) {
-                        auto tranform = (TransformComponent*)(component.get());
-                        tranform->setScale({ val[0], val[1], val[2] });
-                    });
-
-                    auto worldGroup = header->createWidget<Group>("World", false);
-                    localGroup->createWidget<Label>("World");
-                    pos = { tranform->getWorldPosition().X(), tranform->getWorldPosition().Y(), tranform->getWorldPosition().Z() };
-                    worldGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos, 0.f);
-                    
-                    vmath_quatToEuler(tranform->getWorldRotation().P(), euler.P());
-                    rot = { euler.X(), euler.Y(), euler.Z() };
-                    worldGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot, 0.f);
-                    
-                    scale = { tranform->getWorldScale().X(), tranform->getWorldScale().Y(), tranform->getWorldScale().Z() };
-                    worldGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scale, 0.f);
+                    m_worldTransformGroup = header->createWidget<Group>("WorldTransformGroup", false);
+                    drawWorldTransformComponent(component);
                 }
                 else if (component->getName() == "CameraComponent")
                 {
@@ -140,6 +109,63 @@ namespace ige::creator
             });
     }
 
+    void Inspector::drawLocalTransformComponent(const std::shared_ptr<Component>& component)
+    {
+        m_localTransformGroup->removeAllWidgets();
+        m_localTransformGroup->createWidget<Label>("Local");
+
+        auto tranform = std::static_pointer_cast<TransformComponent>(component);
+        std::array pos = { tranform->getPosition().X(), tranform->getPosition().Y(), tranform->getPosition().Z() };
+        auto posDrag = m_localTransformGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos);
+        posDrag->getOnDataChangedEvent().addListener([&component, this](auto val) {
+            auto tranform = (TransformComponent*)(component.get());
+            tranform->setPosition({ val[0], val[1], val[2] });
+            tranform->onUpdate(0.f); // update without waiting next frame
+            drawWorldTransformComponent(component); // redraw world transform widgets
+        });
+
+        Vec3 euler;
+        vmath_quatToEuler(tranform->getRotation().P(), euler.P());
+        std::array rot = { euler.X(), euler.Y(), euler.Z() };
+        auto rotDrag = m_localTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot);
+        rotDrag->getOnDataChangedEvent().addListener([&component, this](auto val) {
+            auto tranform = (TransformComponent*)(component.get());
+            Quat quat;
+            vmath_eulerToQuat(val.data(), quat.P());
+            tranform->setRotation(quat);
+            tranform->onUpdate(0.f); // update without waiting next frame
+            drawWorldTransformComponent(component); // redraw world transform widgets
+        });
+
+        std::array scale = { tranform->getScale().X(), tranform->getScale().Y(), tranform->getScale().Z() };
+        auto scaleDrag = m_localTransformGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scale);
+        scaleDrag->getOnDataChangedEvent().addListener([&component, this](auto val) {
+            auto tranform = (TransformComponent*)(component.get());
+            tranform->setScale({ val[0], val[1], val[2] });
+            tranform->onUpdate(0.f); // update without waiting next frame
+            drawWorldTransformComponent(component); // redraw world transform widgets
+        });
+
+    }
+
+    void Inspector::drawWorldTransformComponent(const std::shared_ptr<Component>& component)
+    {
+        m_worldTransformGroup->removeAllWidgets();
+        m_worldTransformGroup->createWidget<Label>("World");
+
+        auto tranform = std::static_pointer_cast<TransformComponent>(component);
+        std::array pos = { tranform->getWorldPosition().X(), tranform->getWorldPosition().Y(), tranform->getWorldPosition().Z() };
+        m_worldTransformGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos, 0.f);
+
+        Vec3 euler;
+        vmath_quatToEuler(tranform->getWorldRotation().P(), euler.P());
+        std::array rot = { euler.X(), euler.Y(), euler.Z() };
+        m_worldTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot, 0.f);
+
+        std::array scale = { tranform->getWorldScale().X(), tranform->getWorldScale().Y(), tranform->getWorldScale().Z() };
+        m_worldTransformGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scale, 0.f);        
+    }
+
     void Inspector::_drawImpl()
     {
         Panel::_drawImpl();
@@ -147,6 +173,12 @@ namespace ige::creator
 
     void Inspector::clear()
     {
+        m_headerGroup = nullptr;
+        m_componentGroup = nullptr;
+        m_localTransformGroup = nullptr;
+        m_worldTransformGroup = nullptr;
+        m_createCompCombo = nullptr;
+
         removeAllWidgets();
     }
 
