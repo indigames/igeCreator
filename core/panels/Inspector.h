@@ -26,12 +26,23 @@ namespace ige::creator
 
         void drawLocalTransformComponent(std::shared_ptr<Component>& component);
         void drawWorldTransformComponent(std::shared_ptr<Component>& component);
+        void drawCameraComponent(std::shared_ptr<Component>& component);
+        void drawEnvironmentComponent(std::shared_ptr<Component>& component);
+        void drawFigureComponent(std::shared_ptr<Component>& component);
+        void drawEditableFigureComponent(std::shared_ptr<Component>& component);
 
+        //! Inspected scene object
         std::shared_ptr<SceneObject> m_targetObject = nullptr;
+
+        //! Groups of default components
         std::shared_ptr<Group> m_headerGroup = nullptr;
+        std::shared_ptr<ComboBox> m_createCompCombo = nullptr;
         std::shared_ptr<Group> m_componentGroup = nullptr;
         std::shared_ptr<Group> m_localTransformGroup = nullptr;
         std::shared_ptr<Group> m_worldTransformGroup = nullptr;
-        std::shared_ptr<ComboBox> m_createCompCombo = nullptr;
+        std::shared_ptr<Group> m_cameraCompGroup = nullptr;
+        std::shared_ptr<Group> m_environmentCompGroup = nullptr;
+        std::shared_ptr<Group> m_figureCompGroup = nullptr;
+        std::shared_ptr<Group> m_editableFigureCompGroup = nullptr;
     };
 }

@@ -45,11 +45,12 @@ namespace ige::creator
         m_headerGroup = createWidget<Group>("Inspector_Header", false);
 
         // Object info
-        m_headerGroup->createWidget<TextField>("ID", std::to_string(m_targetObject->getId()), true);
-        m_headerGroup->createWidget<TextField>("Name", m_targetObject->getName())->getOnDataChangedEvent().addListener([this](auto name) {
+        auto colums = m_headerGroup->createWidget<Columns<3>>(120);
+        colums->createWidget<TextField>("ID", std::to_string(m_targetObject->getId()), true);
+        colums->createWidget<TextField>("Name", m_targetObject->getName())->getOnDataChangedEvent().addListener([this](auto name) {
             m_targetObject->setName(name);
         });
-        m_headerGroup->createWidget<CheckBox>("Active", m_targetObject->isActive())->getOnDataChangedEvent().addListener([this](bool active) {
+        colums->createWidget<CheckBox>("Active", m_targetObject->isActive())->getOnDataChangedEvent().addListener([this](bool active) {
             m_targetObject->setActive(active);
         });
 
@@ -66,10 +67,10 @@ namespace ige::creator
         createCompButton->getOnClickEvent().addListener([this](){
             switch(m_createCompCombo->getSelectedIndex())
             {
-                case 0: getTargetObject()->addComponent<CameraComponent>("Camera"); break;
-                case 1: getTargetObject()->addComponent<EditableFigureComponent>("EFifure"); break;
-                case 2: getTargetObject()->addComponent<EnvironmentComponent>("Envieromnent"); break;
-                case 3: getTargetObject()->addComponent<FigureComponent>("Figure"); break;
+                case 0: getTargetObject()->addComponent<CameraComponent>("camera"); break;
+                case 1: getTargetObject()->addComponent<EditableFigureComponent>("editableFigure"); break;
+                case 2: getTargetObject()->addComponent<EnvironmentComponent>("environment"); break;
+                case 3: getTargetObject()->addComponent<FigureComponent>("figure"); break;
                 case 4: getTargetObject()->addComponent<TransformComponent>(); break;
             }
         });
@@ -78,38 +79,42 @@ namespace ige::creator
         m_headerGroup->createWidget<Separator>();
         m_componentGroup = createWidget<Group>("Inspector_Components", false);
         std::for_each(getTargetObject()->getComponents().begin(), getTargetObject()->getComponents().end(), [this](auto& component)
-            {
-                auto closable = (component->getName() != "TransformComponent");
-                auto header = m_componentGroup->createWidget<Group>(component->getName(), true, closable);
-                header->getOnClosedEvent().addListener([this, component]() {
-                    getTargetObject()->removeComponent(component);
-                    });
-                
-                if (component->getName() == "TransformComponent")
-                {
-                    m_localTransformGroup = header->createWidget<Group>("LocalTransformGroup", false);
-                    drawLocalTransformComponent(component);
-
-                    m_worldTransformGroup = header->createWidget<Group>("WorldTransformGroup", false);
-                    drawWorldTransformComponent(component);
-                }
-                else if (component->getName() == "CameraComponent")
-                {
-
-                }
-                else if (component->getName() == "EnvironmentComponent")
-                {
-
-                }
-                else if (component->getName() == "FigureComponent")
-                {
-
-                }
-                else if (component->getName() == "EditableFigureComponent")
-                {
-
-                }
+        {
+            auto closable = (component->getName() != "TransformComponent");
+            auto header = m_componentGroup->createWidget<Group>(component->getName(), true, closable);
+            header->getOnClosedEvent().addListener([this, &component]() {
+                getTargetObject()->removeComponent(component);
             });
+                
+            if (component->getName() == "TransformComponent")
+            {
+                m_localTransformGroup = header->createWidget<Group>("LocalTransformGroup", false);
+                drawLocalTransformComponent(component);
+
+                m_worldTransformGroup = header->createWidget<Group>("WorldTransformGroup", false);
+                drawWorldTransformComponent(component);
+            }
+            else if (component->getName() == "CameraComponent")
+            {
+                m_cameraCompGroup = header->createWidget<Group>("CameraGroup", false);
+                drawCameraComponent(component);
+            }
+            else if (component->getName() == "EnvironmentComponent")
+            {
+                m_environmentCompGroup = header->createWidget<Group>("EnvironmentGroup", false);
+                drawEnvironmentComponent(component);
+            }
+            else if (component->getName() == "FigureComponent")
+            {
+                m_figureCompGroup = header->createWidget<Group>("FigureGroup", false);
+                drawFigureComponent(component);
+            }
+            else if (component->getName() == "EditableFigureComponent")
+            {
+                m_editableFigureCompGroup = header->createWidget<Group>("EditableFigureGroup", false);
+                drawEditableFigureComponent(component);
+            }
+        });
     }
 
     void Inspector::drawLocalTransformComponent(std::shared_ptr<Component>& component)
@@ -188,6 +193,89 @@ namespace ige::creator
         });
     }
 
+    void Inspector::drawCameraComponent(std::shared_ptr<Component>& component)
+    {
+        if (m_cameraCompGroup == nullptr) return;
+        m_cameraCompGroup->removeAllWidgets();
+
+        auto camera = std::static_pointer_cast<CameraComponent>(component);
+        auto colums = m_cameraCompGroup->createWidget<Columns<3>>(120);
+
+        // Orthographic
+        colums->createWidget<CheckBox>("IsOrtho", camera->isOrthoProjection())->getOnDataChangedEvent().addListener([&component](auto val) {
+            auto camera = std::static_pointer_cast<CameraComponent>(component);
+            camera->setOrthoProjection(val);
+        });
+        std::array orthorW = { camera->getOrthoWidth() };
+        colums->createWidget<Drag<float>>("OrtW", ImGuiDataType_Float, orthorW)->getOnDataChangedEvent().addListener([&component](auto val) {
+            auto camera = std::static_pointer_cast<CameraComponent>(component);
+            camera->setOrthoWidth(val[0]);
+        });
+        std::array orthorH = { camera->getOrthoWidth() };
+        colums->createWidget<Drag<float>>("OrtH", ImGuiDataType_Float, orthorH)->getOnDataChangedEvent().addListener([&component](auto val) {
+            auto camera = std::static_pointer_cast<CameraComponent>(component);
+            camera->setOrthoWidth(val[0]);
+        });
+
+        // FOV - Near - Far
+        std::array fov = { camera->getFieldOfView() };
+        colums->createWidget<Drag<float>>("FOV", ImGuiDataType_Float, fov)->getOnDataChangedEvent().addListener([&component](auto val) {
+            auto camera = std::static_pointer_cast<CameraComponent>(component);
+            camera->setFieldOfView(val[0]);
+        });
+        std::array camNear = { camera->getNearPlane() };
+        colums->createWidget<Drag<float>>("Near", ImGuiDataType_Float, camNear)->getOnDataChangedEvent().addListener([&component](auto val) {
+            auto camera = std::static_pointer_cast<CameraComponent>(component);
+            camera->setNearPlane(val[0]);
+        });
+        std::array camFar = { camera->getFarPlane() };
+        colums->createWidget<Drag<float>>("Far", ImGuiDataType_Float, camFar)->getOnDataChangedEvent().addListener([&component](auto val) {
+            auto camera = std::static_pointer_cast<CameraComponent>(component);
+            camera->setFarPlane(val[0]);
+        });
+
+        // Pan - Titl - Roll
+        std::array pan = { camera->getPan() };
+        colums->createWidget<Drag<float>>("Pan", ImGuiDataType_Float, pan)->getOnDataChangedEvent().addListener([&component](auto val) {
+            auto camera = std::static_pointer_cast<CameraComponent>(component);
+            camera->setPan(val[0]);
+        });
+        std::array tilt = { camera->getTilt() };
+        colums->createWidget<Drag<float>>("Tilt", ImGuiDataType_Float, tilt)->getOnDataChangedEvent().addListener([&component](auto val) {
+            auto camera = std::static_pointer_cast<CameraComponent>(component);
+            camera->setTilt(val[0]);
+        });
+        std::array roll = { camera->getRoll() };
+        colums->createWidget<Drag<float>>("Roll", ImGuiDataType_Float, roll)->getOnDataChangedEvent().addListener([&component](auto val) {
+            auto camera = std::static_pointer_cast<CameraComponent>(component);
+            camera->setRoll(val[0]);
+        });
+
+        // Width based?
+        colums->createWidget<CheckBox>("WidthBased", camera->isWidthBase())->getOnDataChangedEvent().addListener([&component](auto val) {
+            auto camera = std::static_pointer_cast<CameraComponent>(component);
+            camera->setWidthBase(val);
+        });
+    }
+
+    void Inspector::drawEnvironmentComponent(std::shared_ptr<Component>& component)
+    {
+        if (m_environmentCompGroup == nullptr) return;
+        m_environmentCompGroup->removeAllWidgets();
+    }
+
+    void Inspector::drawFigureComponent(std::shared_ptr<Component>& component)
+    {
+        if (m_figureCompGroup == nullptr) return;
+        m_figureCompGroup->removeAllWidgets();
+    }
+
+    void Inspector::drawEditableFigureComponent(std::shared_ptr<Component>& component)
+    {
+        if (m_editableFigureCompGroup == nullptr) return;
+        m_editableFigureCompGroup->removeAllWidgets();
+    }
+    
     void Inspector::_drawImpl()
     {
         Panel::_drawImpl();
@@ -196,10 +284,14 @@ namespace ige::creator
     void Inspector::clear()
     {
         m_headerGroup = nullptr;
+        m_createCompCombo = nullptr;
         m_componentGroup = nullptr;
         m_localTransformGroup = nullptr;
         m_worldTransformGroup = nullptr;
-        m_createCompCombo = nullptr;
+        m_cameraCompGroup = nullptr;
+        m_environmentCompGroup = nullptr;
+        m_figureCompGroup = nullptr;
+        m_editableFigureCompGroup = nullptr;
 
         removeAllWidgets();
     }
