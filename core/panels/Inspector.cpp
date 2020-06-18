@@ -19,6 +19,9 @@
 #include <components/EditableFigureComponent.h>
 using namespace ige::scene;
 
+#include <pyxieUtilities.h>
+using namespace pyxie;
+
 namespace ige::creator
 {
     Inspector::Inspector(const std::string& name, const Panel::Settings& settings)
@@ -67,7 +70,7 @@ namespace ige::creator
                 case 1: getTargetObject()->addComponent<EditableFigureComponent>("EFifure"); break;
                 case 2: getTargetObject()->addComponent<EnvironmentComponent>("Envieromnent"); break;
                 case 3: getTargetObject()->addComponent<FigureComponent>("Figure"); break;
-                case 4: getTargetObject()->addComponent<TransformComponent>(); break;                
+                case 4: getTargetObject()->addComponent<TransformComponent>(); break;
             }
         });
 
@@ -109,7 +112,7 @@ namespace ige::creator
             });
     }
 
-    void Inspector::drawLocalTransformComponent(const std::shared_ptr<Component>& component)
+    void Inspector::drawLocalTransformComponent(std::shared_ptr<Component>& component)
     {
         m_localTransformGroup->removeAllWidgets();
         m_localTransformGroup->createWidget<Label>("Local");
@@ -120,21 +123,22 @@ namespace ige::creator
         posDrag->getOnDataChangedEvent().addListener([&component, this](auto val) {
             auto tranform = (TransformComponent*)(component.get());
             tranform->setPosition({ val[0], val[1], val[2] });
-            tranform->onUpdate(0.f); // update without waiting next frame
-            drawWorldTransformComponent(component); // redraw world transform widgets
+            tranform->onUpdate(0.f);
+            drawWorldTransformComponent(component);
         });
 
         Vec3 euler;
         vmath_quatToEuler(tranform->getRotation().P(), euler.P());
-        std::array rot = { euler.X(), euler.Y(), euler.Z() };
+        std::array rot = { RADIANS_TO_DEGREES(euler.X()), RADIANS_TO_DEGREES(euler.Y()), RADIANS_TO_DEGREES(euler.Z()) };
         auto rotDrag = m_localTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot);
         rotDrag->getOnDataChangedEvent().addListener([&component, this](auto val) {
             auto tranform = (TransformComponent*)(component.get());
             Quat quat;
-            vmath_eulerToQuat(val.data(), quat.P());
+            float rad[3] = { DEGREES_TO_RADIANS (val[0]), DEGREES_TO_RADIANS (val[1]), DEGREES_TO_RADIANS (val[2])};
+            vmath_eulerToQuat(rad, quat.P());
             tranform->setRotation(quat);
-            tranform->onUpdate(0.f); // update without waiting next frame
-            drawWorldTransformComponent(component); // redraw world transform widgets
+            tranform->onUpdate(0.f);
+            drawWorldTransformComponent(component);
         });
 
         std::array scale = { tranform->getScale().X(), tranform->getScale().Y(), tranform->getScale().Z() };
@@ -142,28 +146,46 @@ namespace ige::creator
         scaleDrag->getOnDataChangedEvent().addListener([&component, this](auto val) {
             auto tranform = (TransformComponent*)(component.get());
             tranform->setScale({ val[0], val[1], val[2] });
-            tranform->onUpdate(0.f); // update without waiting next frame
-            drawWorldTransformComponent(component); // redraw world transform widgets
+            tranform->onUpdate(0.f);
+            drawWorldTransformComponent(component);
         });
 
     }
 
-    void Inspector::drawWorldTransformComponent(const std::shared_ptr<Component>& component)
+    void Inspector::drawWorldTransformComponent(std::shared_ptr<Component>& component)
     {
         m_worldTransformGroup->removeAllWidgets();
         m_worldTransformGroup->createWidget<Label>("World");
 
         auto tranform = std::static_pointer_cast<TransformComponent>(component);
         std::array pos = { tranform->getWorldPosition().X(), tranform->getWorldPosition().Y(), tranform->getWorldPosition().Z() };
-        m_worldTransformGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos, 0.f);
+        auto worldPosDrag = m_worldTransformGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos);
+        worldPosDrag->getOnDataChangedEvent().addListener([&component, this](auto val) {
+            auto tranform = (TransformComponent*)(component.get());
+            tranform->setWorldPosition({ val[0], val[1], val[2] });
+            drawLocalTransformComponent(component);
+        });
 
         Vec3 euler;
         vmath_quatToEuler(tranform->getWorldRotation().P(), euler.P());
-        std::array rot = { euler.X(), euler.Y(), euler.Z() };
-        m_worldTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot, 0.f);
+        std::array rot = { RADIANS_TO_DEGREES(euler.X()), RADIANS_TO_DEGREES(euler.Y()), RADIANS_TO_DEGREES(euler.Z()) };
+        auto worldRotDrag = m_worldTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot);
+        worldRotDrag->getOnDataChangedEvent().addListener([&component, this](auto val) {
+            auto tranform = (TransformComponent*)(component.get());
+            Quat quat;
+            float rad[3] = { DEGREES_TO_RADIANS(val[0]), DEGREES_TO_RADIANS(val[1]), DEGREES_TO_RADIANS(val[2]) };
+            vmath_eulerToQuat(rad, quat.P());
+            tranform->setWorldRotation(quat);
+            drawLocalTransformComponent(component);
+        });
 
         std::array scale = { tranform->getWorldScale().X(), tranform->getWorldScale().Y(), tranform->getWorldScale().Z() };
-        m_worldTransformGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scale, 0.f);        
+        auto worldScaleDrag = m_worldTransformGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scale);
+        worldScaleDrag->getOnDataChangedEvent().addListener([&component, this](auto val) {
+            auto tranform = (TransformComponent*)(component.get());
+            tranform->setWorldScale({ val[0], val[1], val[2] });
+            drawLocalTransformComponent(component);
+        });
     }
 
     void Inspector::_drawImpl()
