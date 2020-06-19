@@ -24,12 +24,12 @@ namespace ige::creator
         virtual void initialize() override;
         virtual void _drawImpl() override;
 
-        void drawLocalTransformComponent(std::shared_ptr<Component>& component);
-        void drawWorldTransformComponent(std::shared_ptr<Component>& component);
-        void drawCameraComponent(std::shared_ptr<Component>& component);
-        void drawEnvironmentComponent(std::shared_ptr<Component>& component);
-        void drawFigureComponent(std::shared_ptr<Component>& component);
-        void drawEditableFigureComponent(std::shared_ptr<Component>& component);
+        void drawLocalTransformComponent();
+        void drawWorldTransformComponent();
+        void drawCameraComponent();
+        void drawEnvironmentComponent();
+        void drawFigureComponent();
+        void drawEditableFigureComponent();
 
         //! Inspected scene object
         std::shared_ptr<SceneObject> m_targetObject = nullptr;
@@ -41,6 +41,7 @@ namespace ige::creator
         std::shared_ptr<Group> m_localTransformGroup = nullptr;
         std::shared_ptr<Group> m_worldTransformGroup = nullptr;
         std::shared_ptr<Group> m_cameraCompGroup = nullptr;
+        std::shared_ptr<Group> m_cameraLockTargetGroup = nullptr;
         std::shared_ptr<Group> m_environmentCompGroup = nullptr;
         std::shared_ptr<Group> m_figureCompGroup = nullptr;
         std::shared_ptr<Group> m_editableFigureCompGroup = nullptr;

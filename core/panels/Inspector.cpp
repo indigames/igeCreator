@@ -89,188 +89,240 @@ namespace ige::creator
             if (component->getName() == "TransformComponent")
             {
                 m_localTransformGroup = header->createWidget<Group>("LocalTransformGroup", false);
-                drawLocalTransformComponent(component);
+                drawLocalTransformComponent();
 
                 m_worldTransformGroup = header->createWidget<Group>("WorldTransformGroup", false);
-                drawWorldTransformComponent(component);
+                drawWorldTransformComponent();
             }
             else if (component->getName() == "CameraComponent")
             {
                 m_cameraCompGroup = header->createWidget<Group>("CameraGroup", false);
-                drawCameraComponent(component);
+                drawCameraComponent();
             }
             else if (component->getName() == "EnvironmentComponent")
             {
                 m_environmentCompGroup = header->createWidget<Group>("EnvironmentGroup", false);
-                drawEnvironmentComponent(component);
+                drawEnvironmentComponent();
             }
             else if (component->getName() == "FigureComponent")
             {
                 m_figureCompGroup = header->createWidget<Group>("FigureGroup", false);
-                drawFigureComponent(component);
+                drawFigureComponent();
             }
             else if (component->getName() == "EditableFigureComponent")
             {
                 m_editableFigureCompGroup = header->createWidget<Group>("EditableFigureGroup", false);
-                drawEditableFigureComponent(component);
+                drawEditableFigureComponent();
             }
         });
     }
 
-    void Inspector::drawLocalTransformComponent(std::shared_ptr<Component>& component)
+    void Inspector::drawLocalTransformComponent()
     {
         m_localTransformGroup->removeAllWidgets();
+        auto tranform = getTargetObject()->getComponent<TransformComponent>();
+        if (tranform == nullptr) return;
+
         m_localTransformGroup->createWidget<Label>("Local");
 
-        auto tranform = std::static_pointer_cast<TransformComponent>(component);
         std::array pos = { tranform->getPosition().X(), tranform->getPosition().Y(), tranform->getPosition().Z() };
-        auto posDrag = m_localTransformGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos);
-        posDrag->getOnDataChangedEvent().addListener([&component, this](auto val) {
-            auto tranform = (TransformComponent*)(component.get());
+        m_localTransformGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto tranform = getTargetObject()->getComponent<TransformComponent>();
             tranform->setPosition({ val[0], val[1], val[2] });
             tranform->onUpdate(0.f);
-            drawWorldTransformComponent(component);
+            drawWorldTransformComponent();
         });
 
         Vec3 euler;
         vmath_quatToEuler(tranform->getRotation().P(), euler.P());
         std::array rot = { RADIANS_TO_DEGREES(euler.X()), RADIANS_TO_DEGREES(euler.Y()), RADIANS_TO_DEGREES(euler.Z()) };
-        auto rotDrag = m_localTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot);
-        rotDrag->getOnDataChangedEvent().addListener([&component, this](auto val) {
-            auto tranform = (TransformComponent*)(component.get());
+        m_localTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto tranform = getTargetObject()->getComponent<TransformComponent>();
             Quat quat;
             float rad[3] = { DEGREES_TO_RADIANS (val[0]), DEGREES_TO_RADIANS (val[1]), DEGREES_TO_RADIANS (val[2])};
             vmath_eulerToQuat(rad, quat.P());
             tranform->setRotation(quat);
             tranform->onUpdate(0.f);
-            drawWorldTransformComponent(component);
+            drawWorldTransformComponent();
         });
 
         std::array scale = { tranform->getScale().X(), tranform->getScale().Y(), tranform->getScale().Z() };
-        auto scaleDrag = m_localTransformGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scale);
-        scaleDrag->getOnDataChangedEvent().addListener([&component, this](auto val) {
-            auto tranform = (TransformComponent*)(component.get());
+        m_localTransformGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scale)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto tranform = getTargetObject()->getComponent<TransformComponent>();
             tranform->setScale({ val[0], val[1], val[2] });
             tranform->onUpdate(0.f);
-            drawWorldTransformComponent(component);
+            drawWorldTransformComponent();
         });
 
     }
 
-    void Inspector::drawWorldTransformComponent(std::shared_ptr<Component>& component)
+    void Inspector::drawWorldTransformComponent()
     {
         m_worldTransformGroup->removeAllWidgets();
-        m_worldTransformGroup->createWidget<Label>("World");
+        auto tranform = getTargetObject()->getComponent<TransformComponent>();
+        if (tranform == nullptr) return;
 
-        auto tranform = std::static_pointer_cast<TransformComponent>(component);
+        m_worldTransformGroup->createWidget<Label>("World");
         std::array pos = { tranform->getWorldPosition().X(), tranform->getWorldPosition().Y(), tranform->getWorldPosition().Z() };
-        auto worldPosDrag = m_worldTransformGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos);
-        worldPosDrag->getOnDataChangedEvent().addListener([&component, this](auto val) {
-            auto tranform = (TransformComponent*)(component.get());
+        m_worldTransformGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto tranform = getTargetObject()->getComponent<TransformComponent>();
             tranform->setWorldPosition({ val[0], val[1], val[2] });
-            drawLocalTransformComponent(component);
+            drawLocalTransformComponent();
         });
 
         Vec3 euler;
         vmath_quatToEuler(tranform->getWorldRotation().P(), euler.P());
         std::array rot = { RADIANS_TO_DEGREES(euler.X()), RADIANS_TO_DEGREES(euler.Y()), RADIANS_TO_DEGREES(euler.Z()) };
-        auto worldRotDrag = m_worldTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot);
-        worldRotDrag->getOnDataChangedEvent().addListener([&component, this](auto val) {
-            auto tranform = (TransformComponent*)(component.get());
+        m_worldTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto tranform = getTargetObject()->getComponent<TransformComponent>();
             Quat quat;
             float rad[3] = { DEGREES_TO_RADIANS(val[0]), DEGREES_TO_RADIANS(val[1]), DEGREES_TO_RADIANS(val[2]) };
             vmath_eulerToQuat(rad, quat.P());
             tranform->setWorldRotation(quat);
-            drawLocalTransformComponent(component);
+            drawLocalTransformComponent();
         });
 
         std::array scale = { tranform->getWorldScale().X(), tranform->getWorldScale().Y(), tranform->getWorldScale().Z() };
-        auto worldScaleDrag = m_worldTransformGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scale);
-        worldScaleDrag->getOnDataChangedEvent().addListener([&component, this](auto val) {
-            auto tranform = (TransformComponent*)(component.get());
+        m_worldTransformGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scale)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto tranform = getTargetObject()->getComponent<TransformComponent>();
             tranform->setWorldScale({ val[0], val[1], val[2] });
-            drawLocalTransformComponent(component);
+            drawLocalTransformComponent();
         });
     }
 
-    void Inspector::drawCameraComponent(std::shared_ptr<Component>& component)
+    void Inspector::drawCameraComponent()
     {
         if (m_cameraCompGroup == nullptr) return;
+        auto camera = getTargetObject()->getComponent<CameraComponent>();
+        if (camera == nullptr) return;
         m_cameraCompGroup->removeAllWidgets();
 
-        auto camera = std::static_pointer_cast<CameraComponent>(component);
         auto colums = m_cameraCompGroup->createWidget<Columns<3>>(120);
-
         // Orthographic
-        colums->createWidget<CheckBox>("IsOrtho", camera->isOrthoProjection())->getOnDataChangedEvent().addListener([&component](auto val) {
-            auto camera = std::static_pointer_cast<CameraComponent>(component);
-            camera->setOrthoProjection(val);
-        });
         std::array orthorW = { camera->getOrthoWidth() };
-        colums->createWidget<Drag<float>>("OrtW", ImGuiDataType_Float, orthorW)->getOnDataChangedEvent().addListener([&component](auto val) {
-            auto camera = std::static_pointer_cast<CameraComponent>(component);
+        colums->createWidget<Drag<float>>("OrtW", ImGuiDataType_Float, orthorW)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto camera = getTargetObject()->getComponent<CameraComponent>();
             camera->setOrthoWidth(val[0]);
         });
-        std::array orthorH = { camera->getOrthoWidth() };
-        colums->createWidget<Drag<float>>("OrtH", ImGuiDataType_Float, orthorH)->getOnDataChangedEvent().addListener([&component](auto val) {
-            auto camera = std::static_pointer_cast<CameraComponent>(component);
-            camera->setOrthoWidth(val[0]);
+        std::array orthorH = { camera->getOrthoHeight() };
+        colums->createWidget<Drag<float>>("OrtH", ImGuiDataType_Float, orthorH)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto camera = getTargetObject()->getComponent<CameraComponent>();
+            camera->setOrthoHeight(val[0]);
+        });
+        colums->createWidget<CheckBox>("IsOrtho", camera->isOrthoProjection())->getOnDataChangedEvent().addListener([this](auto val) {
+            auto camera = getTargetObject()->getComponent<CameraComponent>();
+            camera->setOrthoProjection(val);
         });
 
         // FOV - Near - Far
         std::array fov = { camera->getFieldOfView() };
-        colums->createWidget<Drag<float>>("FOV", ImGuiDataType_Float, fov)->getOnDataChangedEvent().addListener([&component](auto val) {
-            auto camera = std::static_pointer_cast<CameraComponent>(component);
+        colums->createWidget<Drag<float>>("FOV", ImGuiDataType_Float, fov)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto camera = getTargetObject()->getComponent<CameraComponent>();
             camera->setFieldOfView(val[0]);
         });
         std::array camNear = { camera->getNearPlane() };
-        colums->createWidget<Drag<float>>("Near", ImGuiDataType_Float, camNear)->getOnDataChangedEvent().addListener([&component](auto val) {
-            auto camera = std::static_pointer_cast<CameraComponent>(component);
+        colums->createWidget<Drag<float>>("Near", ImGuiDataType_Float, camNear)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto camera = getTargetObject()->getComponent<CameraComponent>();
             camera->setNearPlane(val[0]);
         });
         std::array camFar = { camera->getFarPlane() };
-        colums->createWidget<Drag<float>>("Far", ImGuiDataType_Float, camFar)->getOnDataChangedEvent().addListener([&component](auto val) {
-            auto camera = std::static_pointer_cast<CameraComponent>(component);
+        colums->createWidget<Drag<float>>("Far", ImGuiDataType_Float, camFar)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto camera = getTargetObject()->getComponent<CameraComponent>();
             camera->setFarPlane(val[0]);
         });
+        
+        // Target
+        auto drawCameraLockTarget = [this]() {
+            m_cameraLockTargetGroup->removeAllWidgets();
 
-        // Pan - Titl - Roll
-        std::array pan = { camera->getPan() };
-        colums->createWidget<Drag<float>>("Pan", ImGuiDataType_Float, pan)->getOnDataChangedEvent().addListener([&component](auto val) {
-            auto camera = std::static_pointer_cast<CameraComponent>(component);
-            camera->setPan(val[0]);
-        });
-        std::array tilt = { camera->getTilt() };
-        colums->createWidget<Drag<float>>("Tilt", ImGuiDataType_Float, tilt)->getOnDataChangedEvent().addListener([&component](auto val) {
-            auto camera = std::static_pointer_cast<CameraComponent>(component);
-            camera->setTilt(val[0]);
-        });
-        std::array roll = { camera->getRoll() };
-        colums->createWidget<Drag<float>>("Roll", ImGuiDataType_Float, roll)->getOnDataChangedEvent().addListener([&component](auto val) {
-            auto camera = std::static_pointer_cast<CameraComponent>(component);
-            camera->setRoll(val[0]);
-        });
+            auto camera = getTargetObject()->getComponent<CameraComponent>();
+            if (camera->getLockon()) {
+                std::array target = { camera->getTarget().X(), camera->getTarget().Y(), camera->getTarget().Z() };
+                auto targetGroup = m_cameraLockTargetGroup->createWidget<Drag<float, 3>>("Target", ImGuiDataType_Float, target);
+                targetGroup->getOnDataChangedEvent().addListener([this](auto val) {
+                    auto camera = getTargetObject()->getComponent<CameraComponent>();
+                    camera->setTarget({ val[0], val[1], val[2] });
+                    drawLocalTransformComponent();
+                    drawWorldTransformComponent();
+                });
+            }
+            else {
+                // Pan - Tilt - Roll
+                auto colums = m_cameraLockTargetGroup->createWidget<Columns<3>>(120);
+                std::array pan = { camera->getPan() };
+                colums->createWidget<Drag<float>>("Pan", ImGuiDataType_Float, pan)->getOnDataChangedEvent().addListener([this](auto val) {
+                    auto camera = getTargetObject()->getComponent<CameraComponent>();
+                    camera->setPan(val[0]);
+                    drawLocalTransformComponent();
+                    drawWorldTransformComponent();
+                    });
+                std::array tilt = { camera->getTilt() };
+                colums->createWidget<Drag<float>>("Tilt", ImGuiDataType_Float, tilt)->getOnDataChangedEvent().addListener([this](auto val) {
+                    auto camera = getTargetObject()->getComponent<CameraComponent>();
+                    camera->setTilt(val[0]);
+                    drawLocalTransformComponent();
+                    drawWorldTransformComponent();
+                    });
+                std::array roll = { camera->getRoll() };
+                colums->createWidget<Drag<float>>("Roll", ImGuiDataType_Float, roll)->getOnDataChangedEvent().addListener([this](auto val) {
+                    auto camera = getTargetObject()->getComponent<CameraComponent>();
+                    camera->setRoll(val[0]);
+                    drawLocalTransformComponent();
+                    drawWorldTransformComponent();
+                });
+            }
+        };
+               
+        m_cameraCompGroup->createWidget<CheckBox>("LockTarget", camera->getLockon())->getOnDataChangedEvent().addListener([drawCameraLockTarget, this](auto locked) {
+            auto camera = getTargetObject()->getComponent<CameraComponent>();
+            if (!locked)
+            {
+                auto tranform = getTargetObject()->getComponent<TransformComponent>();
+                camera->setTarget(tranform->getPosition() + Vec3(0.f, 0.f, -1.f));
+            }
+            else
+            {
+                camera->setPan(0.f);
+                camera->setTilt(0.f);
+                camera->setRoll(0.f);
+            }
+            camera->lockonTarget(locked);
+            drawLocalTransformComponent();
+            drawWorldTransformComponent();
+            drawCameraLockTarget();
+          });
 
-        // Width based?
-        colums->createWidget<CheckBox>("WidthBased", camera->isWidthBase())->getOnDataChangedEvent().addListener([&component](auto val) {
-            auto camera = std::static_pointer_cast<CameraComponent>(component);
+        m_cameraLockTargetGroup = m_cameraCompGroup->createWidget<Group>("LockTargetGroup", false);
+        drawCameraLockTarget();
+
+        // Width Based
+        auto widthBasedColums = m_cameraCompGroup->createWidget<Columns<2>>(180);
+        widthBasedColums->createWidget<CheckBox>("WidthBased", camera->isWidthBase())->getOnDataChangedEvent().addListener([this](auto val) {
+            auto camera = getTargetObject()->getComponent<CameraComponent>();
             camera->setWidthBase(val);
+        });
+
+        // Aspect Ratio
+        std::array ratio = { camera->getAspectRatio() };
+        widthBasedColums->createWidget<Drag<float>>("Ratio", ImGuiDataType_Float, ratio)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto camera = getTargetObject()->getComponent<CameraComponent>();
+            camera->setAspectRatio(val[0]);
         });
     }
 
-    void Inspector::drawEnvironmentComponent(std::shared_ptr<Component>& component)
+    void Inspector::drawEnvironmentComponent()
     {
         if (m_environmentCompGroup == nullptr) return;
         m_environmentCompGroup->removeAllWidgets();
     }
 
-    void Inspector::drawFigureComponent(std::shared_ptr<Component>& component)
+    void Inspector::drawFigureComponent()
     {
         if (m_figureCompGroup == nullptr) return;
         m_figureCompGroup->removeAllWidgets();
     }
 
-    void Inspector::drawEditableFigureComponent(std::shared_ptr<Component>& component)
+    void Inspector::drawEditableFigureComponent()
     {
         if (m_editableFigureCompGroup == nullptr) return;
         m_editableFigureCompGroup->removeAllWidgets();
@@ -289,6 +341,7 @@ namespace ige::creator
         m_localTransformGroup = nullptr;
         m_worldTransformGroup = nullptr;
         m_cameraCompGroup = nullptr;
+        m_cameraLockTargetGroup = nullptr;
         m_environmentCompGroup = nullptr;
         m_figureCompGroup = nullptr;
         m_editableFigureCompGroup = nullptr;

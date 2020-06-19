@@ -3,8 +3,8 @@
 
 namespace ige::creator
 {
-    TreeNode::TreeNode(const std::string& name, bool isSelected, bool isLeaf)
-        : m_name(name), m_bIsSelected(isSelected), m_bIsLeaf(isLeaf)
+    TreeNode::TreeNode(const std::string& name, bool isSelected, bool isLeaf, bool opened)
+        : m_name(name), m_bIsSelected(isSelected), m_bIsLeaf(isLeaf), m_bIsDefaultOpened(opened)
     {
     }
 
@@ -17,8 +17,9 @@ namespace ige::creator
     void TreeNode::_drawImpl()
     {
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
-        if (m_bIsSelected)			flags |= ImGuiTreeNodeFlags_Selected;
-        if (m_bIsLeaf)				flags |= ImGuiTreeNodeFlags_Leaf;
+        if (m_bIsDefaultOpened) flags |= ImGuiTreeNodeFlags_DefaultOpen;
+        if (m_bIsSelected)      flags |= ImGuiTreeNodeFlags_Selected;
+        if (m_bIsLeaf)          flags |= ImGuiTreeNodeFlags_Leaf;
 
         bool opened = ImGui::TreeNodeEx(m_name.c_str(), flags);
 

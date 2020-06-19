@@ -38,7 +38,7 @@ namespace ige::creator
     {
         auto objId = sceneObject.getId();
 
-        auto node = createWidget<TreeNode>(sceneObject.getName(), false, sceneObject.getChildrenCount() == 0);
+        auto node = createWidget<TreeNode>(sceneObject.getName(), false, sceneObject.getChildrenCount() == 0, sceneObject.getName() == "root");
         m_objectNodeMap[objId] = node;
         node->getOnClickEvent().addListener([objId, this]() {
             // Set previous selected to false
@@ -65,8 +65,7 @@ namespace ige::creator
         createMenu->createWidget<MenuItem>("Cylinder");
         createMenu->createWidget<MenuItem>("Plane");
         createMenu->createWidget<MenuItem>("Sphere");
-
-        
+ 
         ctxMenu->createWidget<MenuItem>("Delete")->getOnClickEvent().addListener([objId]() {
             if (objId != 0) // Avoid delete root node
             {

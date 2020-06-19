@@ -9,7 +9,7 @@ namespace ige::creator
     class Group: public Widget, public Container
     {
     public:
-        Group(const std::string& name, bool collapsable = true, bool closable = false, bool enable = true);
+        Group(const std::string& name, bool collapsable = true, bool closable = false, bool open = true, bool enable = true);
         virtual ~Group();
 
         ige::scene::Event<>& getOnClosedEvent() { return m_onClosedEvent; }

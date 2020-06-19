@@ -27,6 +27,8 @@ namespace ige::creator
 
         virtual void removeWidget(const std::shared_ptr<Widget>& widget);
 
+        virtual void removeWidgetById(const std::string& widgetId);
+
         virtual void removeAllWidgets();
 
         virtual void drawWidgets();

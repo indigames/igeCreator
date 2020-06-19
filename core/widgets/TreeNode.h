@@ -8,7 +8,7 @@ namespace ige::creator
     class TreeNode: public Widget, public Container
     {
     public:
-        TreeNode(const std::string& name, bool isSelected = false, bool isLeaf = false);
+        TreeNode(const std::string& name, bool isSelected = false, bool isLeaf = false, bool opened = false);
         virtual ~TreeNode();
         
         ige::scene::Event<>& getOnOpenedEvent() { return m_onOpenedEvent; }
@@ -25,6 +25,7 @@ namespace ige::creator
 
         std::string m_name;
         bool m_opened = false;
+        bool m_bIsDefaultOpened = false;
         bool m_bIsSelected = false;
         bool m_bIsLeaf = false;
     };
