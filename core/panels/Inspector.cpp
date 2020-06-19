@@ -249,24 +249,24 @@ namespace ige::creator
             else {
                 // Pan - Tilt - Roll
                 auto colums = m_cameraLockTargetGroup->createWidget<Columns<3>>(120);
-                std::array pan = { camera->getPan() };
+                std::array pan = { RADIANS_TO_DEGREES(camera->getPan()) };
                 colums->createWidget<Drag<float>>("Pan", ImGuiDataType_Float, pan)->getOnDataChangedEvent().addListener([this](auto val) {
                     auto camera = getTargetObject()->getComponent<CameraComponent>();
-                    camera->setPan(val[0]);
+                    camera->setPan(DEGREES_TO_RADIANS(val[0]));
                     drawLocalTransformComponent();
                     drawWorldTransformComponent();
                     });
-                std::array tilt = { camera->getTilt() };
+                std::array tilt = { RADIANS_TO_DEGREES(camera->getTilt()) };
                 colums->createWidget<Drag<float>>("Tilt", ImGuiDataType_Float, tilt)->getOnDataChangedEvent().addListener([this](auto val) {
                     auto camera = getTargetObject()->getComponent<CameraComponent>();
-                    camera->setTilt(val[0]);
+                    camera->setTilt(DEGREES_TO_RADIANS(val[0]));
                     drawLocalTransformComponent();
                     drawWorldTransformComponent();
                     });
-                std::array roll = { camera->getRoll() };
+                std::array roll = { RADIANS_TO_DEGREES(camera->getRoll()) };
                 colums->createWidget<Drag<float>>("Roll", ImGuiDataType_Float, roll)->getOnDataChangedEvent().addListener([this](auto val) {
                     auto camera = getTargetObject()->getComponent<CameraComponent>();
-                    camera->setRoll(val[0]);
+                    camera->setRoll(DEGREES_TO_RADIANS(val[0]));
                     drawLocalTransformComponent();
                     drawWorldTransformComponent();
                 });
