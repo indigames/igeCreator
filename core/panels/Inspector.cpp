@@ -57,13 +57,13 @@ namespace ige::creator
         // Create component selection
         m_createCompCombo = m_headerGroup->createWidget<ComboBox>();
         m_createCompCombo->setEndOfLine(false);
-        m_createCompCombo->addChoice(0, "Camera");
-        m_createCompCombo->addChoice(1, "EditableFigure");
-        m_createCompCombo->addChoice(2, "Environment");
-        m_createCompCombo->addChoice(3, "Figure");
-        m_createCompCombo->addChoice(4, "Transform");
+        m_createCompCombo->addChoice(0, "Camera Component");
+        m_createCompCombo->addChoice(1, "Editable Figure Component");
+        m_createCompCombo->addChoice(2, "Environment Component");
+        m_createCompCombo->addChoice(3, "Figure Component");
+        m_createCompCombo->addChoice(4, "Transform Component");
 
-        auto createCompButton = m_headerGroup->createWidget<Button>("Add Component", ImVec2(100.f, 0.f));
+        auto createCompButton = m_headerGroup->createWidget<Button>("Add", ImVec2(100.f, 0.f));
         createCompButton->getOnClickEvent().addListener([this](){
             switch(m_createCompCombo->getSelectedIndex())
             {
@@ -314,6 +314,120 @@ namespace ige::creator
     {
         if (m_environmentCompGroup == nullptr) return;
         m_environmentCompGroup->removeAllWidgets();
+        auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+        if (environment == nullptr) return;
+
+        // Ambient
+        auto ambientGroup = m_environmentCompGroup->createWidget<Group>("AmbientLight");
+        std::array ambientSkyColor = { environment->getAmbientSkyColor().X(), environment->getAmbientSkyColor().Y(), environment->getAmbientSkyColor().Z()};
+        ambientGroup->createWidget<Drag<float, 3>>("SkyColor", ImGuiDataType_Float, ambientSkyColor, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+            environment->setAmbientSkyColor({val[0], val[1], val[2]});
+        });
+        std::array ambientGroundColor = { environment->getAmbientGroundColor().X(), environment->getAmbientGroundColor().Y(), environment->getAmbientGroundColor().Z() };
+        ambientGroup->createWidget<Drag<float, 3>>("GroundColor", ImGuiDataType_Float, ambientGroundColor, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+            environment->setAmbientGroundColor({ val[0], val[1], val[2] });
+        });
+        std::array ambientDir = { environment->getAmbientDirection().X(), environment->getAmbientDirection().Y(), environment->getAmbientDirection().Z() };
+        ambientGroup->createWidget<Drag<float, 3>>("Direction", ImGuiDataType_Float, ambientDir)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+            environment->setAmbientDirection({ val[0], val[1], val[2] });
+        });
+
+        // Directional
+        auto directionalGroup = m_environmentCompGroup->createWidget<Group>("DirectionalLight");
+        for (int i = 0; i < 3; i++)
+        {            
+            directionalGroup->createWidget<Label>("Light "+ std::to_string(i));
+            std::array directCol = { environment->getDirectionalLightColor(i).X(), environment->getDirectionalLightColor(i).Y(), environment->getDirectionalLightColor(i).Z() };
+            directionalGroup->createWidget<Drag<float, 3>>("Color", ImGuiDataType_Float, directCol, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([i, this](auto val) {
+                auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+                environment->setDirectionalLightColor(i, { val[0], val[1], val[2] });
+            });
+            std::array dir = { environment->getDirectionalLightDirection(i).X(), environment->getDirectionalLightDirection(i).Y(), environment->getDirectionalLightDirection(i).Z() };
+            directionalGroup->createWidget<Drag<float, 3>>("Direction", ImGuiDataType_Float, dir)->getOnDataChangedEvent().addListener([i, this](auto val) {
+                auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+                environment->setDirectionalLightDirection(i, { val[0], val[1], val[2] });
+            });
+            std::array intensity = { environment->getDirectionalLightIntensity(i) };
+            directionalGroup->createWidget<Drag<float>>("Intensity", ImGuiDataType_Float, intensity)->getOnDataChangedEvent().addListener([i, this](auto val) {
+                auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+                environment->setDirectionalLightIntensity(i, val[0]);
+            });
+        }
+
+        // Point
+        auto pointGroup = m_environmentCompGroup->createWidget<Group>("PointLight");
+        for (int i = 0; i < 7; i++)
+        {
+            pointGroup->createWidget<Label>("Light " + std::to_string(i));           
+            std::array color = { environment->getPointLightColor(i).X(), environment->getPointLightColor(i).Y(), environment->getPointLightColor(i).Z() };
+            pointGroup->createWidget<Drag<float, 3>>("Color", ImGuiDataType_Float, color, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([i, this](auto val) {
+                auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+                environment->setPointLightColor(i, { val[0], val[1], val[2] });
+            });
+            std::array pos = { environment->getPointLightPosition(i).X(), environment->getPointLightPosition(i).Y(), environment->getPointLightPosition(i).Z() };
+            pointGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos)->getOnDataChangedEvent().addListener([i, this](auto val) {
+                auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+                environment->setPointLightPosition(i, { val[0], val[1], val[2] });
+            });
+
+            auto col2 = pointGroup->createWidget <Columns<2>>(140);
+            std::array intensity = { environment->getPointLightIntensity(i) };
+            col2->createWidget<Drag<float>>("Int.", ImGuiDataType_Float, intensity)->getOnDataChangedEvent().addListener([i, this](auto val) {
+                auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+                environment->setPointLightIntensity(i, val[0]);
+            });
+            std::array range = { environment->getPointLightRange(i) };
+            col2->createWidget<Drag<float>>("Range", ImGuiDataType_Float, range)->getOnDataChangedEvent().addListener([i, this](auto val) {
+                auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+                environment->setPointLightRange(i, val[0]);
+            });
+        }
+
+        // Shadow
+        auto shadowGroup = m_environmentCompGroup->createWidget<Group>("Shadow");
+        std::array shadowColor = { environment->getShadowColor().X(), environment->getShadowColor().Y(), environment->getShadowColor().Z() };
+        shadowGroup->createWidget<Drag<float, 3>>("Color", ImGuiDataType_Float, shadowColor, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+            environment->setShadowColor({ val[0], val[1], val[2] });
+        });
+        auto shadowColumn = shadowGroup->createWidget <Columns<2>>(140);
+        std::array density = { environment->getShadowDensity() };
+        shadowColumn->createWidget<Drag<float>>("Density", ImGuiDataType_Float, density, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+            environment->setShadowDensity(val[0]);
+        });
+        std::array wideness = { environment->getShadowWideness() };
+        shadowColumn->createWidget<Drag<float>>("Wideness", ImGuiDataType_Float, wideness, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+            environment->setShadowWideness(val[0]);
+        });
+
+        // Fog
+        auto fogGroup = m_environmentCompGroup->createWidget<Group>("Fog");
+        std::array fogColor = { environment->getDistanceFogColor().X(), environment->getDistanceFogColor().Y(), environment->getDistanceFogColor().Z() };
+        fogGroup->createWidget<Drag<float, 3>>("Color", ImGuiDataType_Float, fogColor, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+            environment->setDistanceFogColor({ val[0], val[1], val[2] });
+        });
+        auto fogColumn = fogGroup->createWidget <Columns<3>>(120);
+        std::array fogNear = { environment->getDistanceFogNear() };
+        fogColumn->createWidget<Drag<float>>("Near", ImGuiDataType_Float, fogNear, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+            environment->setDistanceFogNear(val[0]);
+        });
+        std::array fogFar = { environment->getDistanceFogFar() };
+        fogColumn->createWidget<Drag<float>>("Far", ImGuiDataType_Float, fogNear, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+            environment->setDistanceFogFar(val[0]);
+        });
+        std::array fogAlpha = { environment->getDistanceFogAlpha() };
+        fogColumn->createWidget<Drag<float>>("Alpha", ImGuiDataType_Float, fogAlpha, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+            environment->setDistanceFogAlpha(val[0]);
+        });
     }
 
     void Inspector::drawFigureComponent()

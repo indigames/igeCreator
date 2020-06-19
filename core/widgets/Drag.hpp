@@ -30,9 +30,9 @@ namespace ige::creator
                 m_data[i] = m_min;
             else if (m_data[i] > m_max)
                 m_data[i] = m_max;
-        }        
+        }
 
-        if (ImGui::DragScalarN((m_label + m_id).c_str(), m_dataType, m_data.data(), (int)N, m_speed, &m_min, &m_max))
+        if (ImGui::DragScalarN((m_label + m_id).c_str(), m_dataType, m_data.data(), (int)N, m_speed, &m_min, &m_max, "%.3f"))
         {
             notifyChange(m_data);
         }
