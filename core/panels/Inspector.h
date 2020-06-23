@@ -24,12 +24,16 @@ namespace ige::creator
         virtual void initialize() override;
         virtual void _drawImpl() override;
 
+        //! Draw components
         void drawLocalTransformComponent();
         void drawWorldTransformComponent();
         void drawCameraComponent();
         void drawEnvironmentComponent();
         void drawFigureComponent();
         void drawEditableFigureComponent();
+
+        //! Redraw
+        void redraw() { m_bNeedRedraw = true;  }
 
         //! Inspected scene object
         std::shared_ptr<SceneObject> m_targetObject = nullptr;
@@ -45,5 +49,8 @@ namespace ige::creator
         std::shared_ptr<Group> m_environmentCompGroup = nullptr;
         std::shared_ptr<Group> m_figureCompGroup = nullptr;
         std::shared_ptr<Group> m_editableFigureCompGroup = nullptr;
+
+        //! Flags for redrawing component in main thread
+        bool m_bNeedRedraw = false;
     };
 }

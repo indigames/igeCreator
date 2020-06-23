@@ -14,7 +14,7 @@ namespace ige::creator
     class Widget: public IDrawable, public Pluggable
     {
     public:
-        Widget(bool enable = true);
+        Widget(bool enable = true, bool eol = true);
         virtual ~Widget();
 
         void draw() override;
@@ -54,7 +54,7 @@ namespace ige::creator
     class DataWidget : public Widget
     {
     public:
-        DataWidget(const T& data, bool enable = true) : Widget(enable), m_data(data) {};
+        DataWidget(const T& data, bool enable = true, bool eol = true) : Widget(enable, eol), m_data(data) {};
         virtual ~DataWidget() { getOnDataChangedEvent().removeAllListeners(); }
 
         ige::scene::Event<const T&>& getOnDataChangedEvent() { return m_onDataChangedEvent; }

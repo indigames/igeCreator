@@ -9,7 +9,7 @@ namespace ige::creator
     {
     public:
         //! Constructor: Button with label
-        Button(const std::string& label = "Btn", const ImVec2& size = {32.f, 32.f}, bool enable = true);
+        Button(const std::string& label = "Btn", const ImVec2& size = {32.f, 32.f}, bool enable = true, bool eol = true);
 
         //! Constructor: Color button
         Button(const ImVec4& color);

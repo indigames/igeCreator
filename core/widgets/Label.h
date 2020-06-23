@@ -9,7 +9,7 @@ namespace ige::creator
     class Label: public Widget
     {
     public:
-        Label(const std::string& label, const ImVec4& color = {1.0f, 1.0f, 1.0f, 1.0f});
+        Label(const std::string& label, const ImVec4& color = {1.0f, 1.0f, 1.0f, 1.0f}, bool enable = true, bool eol = true);
         virtual ~Label();
 
         void setLabel(const std::string& label) { m_label = label; }

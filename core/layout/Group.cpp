@@ -17,19 +17,23 @@ namespace ige::creator
 
     void Group::_drawImpl()
     {
-        bool prevOpened = m_bIsOpened;
-
-        if (!m_bIsCollapsable || (m_bIsCollapsable && ImGui::CollapsingHeader(m_name.c_str(), m_bIsClosable ? &m_bIsOpened : nullptr, m_bIsOpened ? ImGuiTreeNodeFlags_DefaultOpen : 0)))
+        ImGui::BeginGroup();
         {
-            drawWidgets();
-        }
+            bool prevOpened = m_bIsOpened;
 
-        if (m_bIsOpened != prevOpened)
-        {
-            if (m_bIsOpened)
-                getOnOpenedEvent().invoke();
-            else
-                getOnClosedEvent().invoke();
-        }
+            if (!m_bIsCollapsable || (m_bIsCollapsable && ImGui::CollapsingHeader(m_name.c_str(), m_bIsClosable ? &m_bIsOpened : nullptr, m_bIsOpened ? ImGuiTreeNodeFlags_DefaultOpen : 0)))
+            {
+                drawWidgets();
+            }
+
+            if (m_bIsOpened != prevOpened)
+            {
+                if (m_bIsOpened)
+                    getOnOpenedEvent().invoke();
+                else
+                    getOnClosedEvent().invoke();
+            }
+        }        
+        ImGui::EndGroup();
     }
 }

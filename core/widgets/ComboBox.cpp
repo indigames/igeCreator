@@ -3,8 +3,8 @@
 
 namespace ige::creator
 {
-    ComboBox::ComboBox(const int& selectedIdx)
-        : DataWidget<int>(selectedIdx), m_selectedIdx(selectedIdx)
+    ComboBox::ComboBox(const int& selectedIdx, bool enable, bool eol)
+        : DataWidget<int>(selectedIdx, enable, eol), m_selectedIdx(selectedIdx)
     {
     }
 

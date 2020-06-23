@@ -7,7 +7,7 @@ namespace ige::creator
     class ComboBox: public DataWidget<int>
     {
     public:
-        ComboBox(const int& selectedIdx = 0);
+        ComboBox(const int& selectedIdx = 0, bool enable = true, bool eol = true);
         virtual ~ComboBox();
 
         void addChoice(int idx, const std::string& item);

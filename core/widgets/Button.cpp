@@ -5,8 +5,8 @@
 
 namespace ige::creator
 {
-    Button::Button(const std::string& label, const ImVec2& size, bool enable)
-        : Widget(enable), m_label(label), m_size(size)
+    Button::Button(const std::string& label, const ImVec2& size, bool enable, bool eol)
+        : Widget(enable, eol), m_label(label), m_size(size)
     {
     }
     

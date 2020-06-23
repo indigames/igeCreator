@@ -2,8 +2,8 @@
 
 namespace ige::creator
 {
-    Image::Image(uint32_t textureId, const ImVec2& size, bool enable)
-        : Widget(enable), m_textureId(textureId), m_size(size)
+    Image::Image(uint32_t textureId, const ImVec2& size, bool enable, bool eol)
+        : Widget(enable, eol), m_textureId(textureId), m_size(size)
     {}
 
     Image::~Image()

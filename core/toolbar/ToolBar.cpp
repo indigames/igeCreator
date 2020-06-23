@@ -20,23 +20,17 @@ namespace ige::creator
 
     void ToolBar::initialize()
     {
-        auto playBtn = createWidget<Button>("Play");
-        playBtn->getOnClickEvent().addListener([](){
+        createWidget<Button>("Play", ImVec2(32.f, 32.f), true, false)->getOnClickEvent().addListener([](){
+            // TODO
+        });        
+
+        createWidget<Button>("Stop", ImVec2(32.f, 32.f), true, false)->getOnClickEvent().addListener([](){
+            // TODO
+        });        
+
+        createWidget<Button>("Reload", ImVec2(32.f, 32.f), true, true)->getOnClickEvent().addListener([](){
 
         });
-        playBtn->setEndOfLine(false);
-
-        auto stopBtn = createWidget<Button>("Stop");        
-        stopBtn->getOnClickEvent().addListener([](){
-
-        });
-        stopBtn->setEndOfLine(false);
-
-        auto reloadBtn = createWidget<Button>("Reload");        
-        reloadBtn->getOnClickEvent().addListener([](){
-
-        });
-        reloadBtn->setEndOfLine(true);        
     }
 
     void ToolBar::_drawImpl()

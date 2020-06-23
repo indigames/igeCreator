@@ -8,7 +8,7 @@ namespace ige::creator
     class Icon: public Widget
     {
     public:
-        Icon(const std::string& label, uint32_t textureId, const ImVec2& size = {32.f, 32.f}, bool enable = true);
+        Icon(const std::string& label, uint32_t textureId, const ImVec2& size = {32.f, 32.f}, bool enable = true, bool eol = true);
         virtual ~Icon();
 
         const std::string& getLabel() { return m_label; }

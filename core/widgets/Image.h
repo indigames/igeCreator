@@ -8,7 +8,7 @@ namespace ige::creator
     class Image: public Widget
     {
     public:
-        Image(uint32_t textureId, const ImVec2& size = {32.f, 32.f}, bool enable = true);
+        Image(uint32_t textureId, const ImVec2& size = {32.f, 32.f}, bool enable = true, bool eol = true);
         virtual ~Image();
 
         uint32_t getTextureId() const { return m_textureId; }

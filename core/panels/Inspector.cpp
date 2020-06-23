@@ -12,6 +12,8 @@
 #include "core/panels/Inspector.h"
 #include "core/Editor.h"
 
+#include "core/plugin/DragDropPlugin.h"
+
 #include <components/CameraComponent.h>
 #include <components/TransformComponent.h>
 #include <components/EnvironmentComponent.h>
@@ -70,7 +72,7 @@ namespace ige::creator
                 case 0: getTargetObject()->addComponent<CameraComponent>("camera"); break;
                 case 1: getTargetObject()->addComponent<EditableFigureComponent>("editableFigure"); break;
                 case 2: getTargetObject()->addComponent<EnvironmentComponent>("environment"); break;
-                case 3: getTargetObject()->addComponent<FigureComponent>("figure"); break;
+                case 3: getTargetObject()->addComponent<FigureComponent>(); break;
                 case 4: getTargetObject()->addComponent<TransformComponent>(); break;
             }
         });
@@ -438,6 +440,16 @@ namespace ige::creator
         auto figure = getTargetObject()->getComponent<FigureComponent>();
         if (figure == nullptr) return;
 
+        auto txtPath = m_figureCompGroup->createWidget<TextField>("Path", figure->getFigure() ? figure->getFigure()->ResourceName() : "");
+        txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
+            auto figure = getTargetObject()->getComponent<FigureComponent>();
+            figure->setPath(txt);
+        });
+        txtPath->addPlugin<DDTargetPlugin<std::string>>(EDragDropID::FILE)->getOnDataReceivedEvent().addListener([this](auto txt) {
+            auto figure = getTargetObject()->getComponent<FigureComponent>();
+            figure->setPath(txt);
+            redraw();
+        });
 
     }
 
@@ -449,6 +461,13 @@ namespace ige::creator
     
     void Inspector::_drawImpl()
     {
+        if (m_bNeedRedraw)
+        {
+            initialize();
+            m_bNeedRedraw = false;
+            return;
+        }
+
         Panel::_drawImpl();
     }
 
