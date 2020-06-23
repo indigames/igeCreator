@@ -4,12 +4,14 @@
 #include <string>
 
 #include "core/IDrawable.h"
+#include "core/plugin/IPlugin.h"
+
 #include <event/Event.h>
 
 namespace ige::creator
 {
     class Container;
-    class Widget: public IDrawable
+    class Widget: public IDrawable, public Pluggable
     {
     public:
         Widget(bool enable = true);
@@ -44,7 +46,7 @@ namespace ige::creator
         ige::scene::Event<> m_onClickEvent;
 
     private:
-        static uint64_t s_idCounter;        
+        static uint64_t s_idCounter;
     };
 
     //! Data widget: widget with data
@@ -52,7 +54,7 @@ namespace ige::creator
     class DataWidget : public Widget
     {
     public:
-        DataWidget(const T& data, bool enable = true) : Widget(enable), m_data(data) {};		
+        DataWidget(const T& data, bool enable = true) : Widget(enable), m_data(data) {};
         virtual ~DataWidget() { getOnDataChangedEvent().removeAllListeners(); }
 
         ige::scene::Event<const T&>& getOnDataChangedEvent() { return m_onDataChangedEvent; }

@@ -71,6 +71,11 @@
         "clocale": "cpp",
         "forward_list": "cpp",
         "numeric": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "filesystem": "cpp",
+        "iomanip": "cpp",
+        "condition_variable": "cpp",
+        "future": "cpp",
+        "resumable": "cpp"
     }
 }

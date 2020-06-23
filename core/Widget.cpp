@@ -22,6 +22,9 @@ namespace ige::creator
         {
             _drawImpl();
 
+            // execute plugins
+            executePlugins();
+
             if (!isEndOfLine())
             {
                 ImGui::SameLine();

@@ -17,6 +17,8 @@ namespace ige::creator
         void setIsLeaf(bool isLeaf) { m_bIsLeaf = isLeaf; }
         void setIsSelected(bool isSelected) { m_bIsSelected = isSelected; }
 
+        const std::string& getName() { return m_name; }
+
     protected:
         virtual void _drawImpl() override;
 

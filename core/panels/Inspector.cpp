@@ -434,6 +434,11 @@ namespace ige::creator
     {
         if (m_figureCompGroup == nullptr) return;
         m_figureCompGroup->removeAllWidgets();
+
+        auto figure = getTargetObject()->getComponent<FigureComponent>();
+        if (figure == nullptr) return;
+
+
     }
 
     void Inspector::drawEditableFigureComponent()

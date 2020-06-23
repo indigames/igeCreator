@@ -10,6 +10,7 @@
 #include "core/panels/Inspector.h"
 #include "core/panels/Console.h"
 #include "core/panels/AssetViewer.h"
+#include "core/panels/AssetBrowser.h"
 
 namespace ige::creator
 {
@@ -28,6 +29,7 @@ namespace ige::creator
         createPanel<Inspector>("Inspector", settings);
         createPanel<Hierarchy>("Hierarchy", settings);
         createPanel<Console>("Console", settings);
+        createPanel<AssetBrowser>("AssetBrowser", settings);
         createPanel<AssetViewer>("AssetViewer", settings);
     }
 
@@ -79,8 +81,8 @@ namespace ige::creator
                     ImGui::DockBuilderDockWindow("Hierarchy", dock_id_left);
                     ImGui::DockBuilderDockWindow("Scene", dock_main_id);
                     ImGui::DockBuilderDockWindow("Inspector", dock_id_right);
-                    ImGui::DockBuilderDockWindow("Assets##ChooseFileDlgKey", dock_id_bottom);
                     ImGui::DockBuilderDockWindow("Console", dock_id_bottom);
+                    ImGui::DockBuilderDockWindow("AssetBrowser", dock_id_bottom);
                     ImGui::DockBuilderDockWindow("AssetViewer", dock_id_right_bottom);
                     ImGui::DockBuilderFinish(dockspace_id);
                 }
@@ -89,7 +91,7 @@ namespace ige::creator
                 ImVec2 displaySize = ImGui::GetIO().DisplaySize;
                 ImGui::DockSpace(dockspace_id, displaySize, ImGuiDockNodeFlags_NoCloseButton | ImGuiDockNodeFlags_NoWindowMenuButton);
                 ImGui::SetWindowPos({ 0.f, 0.f });                
-                ImGui::SetWindowSize({ (float)displaySize.x, (float)displaySize.y });          
+                ImGui::SetWindowSize({ (float)displaySize.x, (float)displaySize.y });
             }
 
             for (auto panel : m_panels)
