@@ -103,7 +103,7 @@ namespace ige::creator
 
     void AssetBrowser::import(const std::string& path)
     {
-        auto files = OpenFileDialog("Import Assets", m_currentFolder).result();
+        auto files = OpenFileDialog("Import Assets", m_currentFolder, { "All Files", "*" }, OpenFileDialog::Option::multiselect).result();
         for (auto file : files)
         {
             auto fname = fs::path(file).filename().string();

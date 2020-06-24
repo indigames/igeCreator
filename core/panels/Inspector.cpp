@@ -13,6 +13,7 @@
 #include "core/Editor.h"
 
 #include "core/plugin/DragDropPlugin.h"
+#include "core/dialog/OpenFileDialog.h"
 
 #include <components/CameraComponent.h>
 #include <components/TransformComponent.h>
@@ -65,7 +66,7 @@ namespace ige::creator
         m_createCompCombo->addChoice(3, "Figure Component");
         m_createCompCombo->addChoice(4, "Transform Component");
 
-        auto createCompButton = m_headerGroup->createWidget<Button>("Add", ImVec2(100.f, 0.f));
+        auto createCompButton = m_headerGroup->createWidget<Button>("Add", ImVec2(64.f, 0.f));
         createCompButton->getOnClickEvent().addListener([this](){
             switch(m_createCompCombo->getSelectedIndex())
             {
@@ -442,6 +443,7 @@ namespace ige::creator
         if (figure == nullptr) return;
 
         auto txtPath = m_figureCompGroup->createWidget<TextField>("Path", figure->getFigure() ? figure->getFigure()->ResourceName() : "");
+        txtPath->setEndOfLine(false);
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
             auto figure = getTargetObject()->getComponent<FigureComponent>();
             figure->setPath(txt);
@@ -451,7 +453,15 @@ namespace ige::creator
             figure->setPath(txt);
             redraw();
         });
-
+        m_figureCompGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this]() {
+            auto files = OpenFileDialog("Import Assets", "", { "Figure (*.pyxf)", "*.pyxf" }).result();
+            if (files.size() > 0)
+            {
+                auto figure = getTargetObject()->getComponent<FigureComponent>();
+                figure->setPath(files[0]);
+                redraw();
+            }
+        });
     }
 
     void Inspector::drawEditableFigureComponent()
