@@ -12,6 +12,7 @@ namespace ige::creator
 
     void Icon::_drawImpl()
     {
+        ImGui::PushID((m_label + m_id).c_str());
         ImGui::BeginGroup();
         {
             if (ImGui::ImageButton((ImTextureID)m_textureId, m_size, { 0.f, 1.f }, { 1.f, 0.f }))
@@ -28,5 +29,6 @@ namespace ige::creator
             }
         }
         ImGui::EndGroup();
+        ImGui::PopID();
     }
 }
