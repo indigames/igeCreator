@@ -107,7 +107,7 @@ namespace ige::creator
         for (auto file : files)
         {
             auto fname = fs::path(file).filename().string();
-            if (fs::exists(m_currentFolder + "\\" + fname))
+            if (fs::exists(fs::path(m_currentFolder).append(fname)))
             {  
                 auto content = "File " + fname + " exists. Do you want to replace?";
                 auto overwrite = MsgBox("File exists", content, MsgBox::EBtnLayout::yes_no, MsgBox::EMsgType::question).result();
