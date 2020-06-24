@@ -11,6 +11,7 @@
 #include "core/plugin/DragDropPlugin.h"
 
 #include "core/dialog/MsgBox.h"
+#include "core/dialog/OpenFileDialog.h"
 
 namespace ige::creator
 {
@@ -81,6 +82,7 @@ namespace ige::creator
 
         auto treeNode = m_folderGroup->createWidget<TreeNode>(itemName, false, false, true);
         treeNode->getOnClickEvent().addListener([&, treeNode, this, path]() {
+            m_currentFolder = path;
             parseFile(std::filesystem::directory_entry(path), true);
             if (m_selectedNode != treeNode)
             {
@@ -101,6 +103,24 @@ namespace ige::creator
 
     void AssetBrowser::import(const std::string& path)
     {
+        auto files = OpenFileDialog("Import Assets", m_currentFolder).result();
+        for (auto file : files)
+        {
+            auto fname = fs::path(file).filename().string();
+            if (fs::exists(m_currentFolder + "\\" + fname))
+            {  
+                auto content = "File " + fname + " exists. Do you want to replace?";
+                auto overwrite = MsgBox("File exists", content, MsgBox::EBtnLayout::yes_no, MsgBox::EMsgType::question).result();
+                if (overwrite == MsgBox::EButton::yes)
+                {
+                    fs::copy(file, m_currentFolder, fs::copy_options::overwrite_existing);
+                }
+            }
+            else
+            {
+                fs::copy(file, m_currentFolder, fs::copy_options::none);
+            }            
+        }
     }
 
     void AssetBrowser::parseFolder(const std::shared_ptr<TreeNode>& root, const fs::directory_entry& directory, bool isEngine)
@@ -116,6 +136,7 @@ namespace ige::creator
 
                 auto treeNode = root ? root->createWidget<TreeNode>(itemName) : m_folderGroup->createWidget<TreeNode>(itemName);
                 treeNode->getOnClickEvent().addListener([&, treeNode, this, path]() {
+                    m_currentFolder = path;
                     parseFile(std::filesystem::directory_entry(path), isEngine);
                     if (m_selectedNode != treeNode)
                     {
