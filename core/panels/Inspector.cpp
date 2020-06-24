@@ -75,6 +75,7 @@ namespace ige::creator
                 case 3: getTargetObject()->addComponent<FigureComponent>(); break;
                 case 4: getTargetObject()->addComponent<TransformComponent>(); break;
             }
+            redraw();
         });
 
         // Component
