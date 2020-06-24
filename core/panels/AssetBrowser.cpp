@@ -37,7 +37,9 @@ namespace ige::creator
             std::filesystem::create_directories(m_projectAssetFolder);
         }
 
-        createWidget<Button>("Refresh", ImVec2(0,0), true, false)->getOnClickEvent().addListener(std::bind(&AssetBrowser::refresh, this));
+        createWidget<Button>("Refresh", ImVec2(0, 0), true, false)->getOnClickEvent().addListener([this]() {
+            m_bNeedRefresh = true;
+        });
         createWidget<Button>("Import", ImVec2(0, 0))->getOnClickEvent().addListener(std::bind(&AssetBrowser::import, this, m_projectAssetFolder));
 
         auto columns = createWidget<Columns<2>>();
@@ -53,6 +55,12 @@ namespace ige::creator
     void AssetBrowser::_drawImpl()
     {
         Panel::_drawImpl();
+
+        if (m_bNeedRefresh)
+        {
+            refresh();
+            m_bNeedRefresh = false;
+        }
     }
 
     void AssetBrowser::clear()
@@ -80,9 +88,6 @@ namespace ige::creator
                 m_selectedNode = treeNode;
                 m_selectedNode->setIsSelected(true);
             }
-        });
-        treeNode->getOnOpenedEvent().addListener([&, this, path]() {
-            parseFile(std::filesystem::directory_entry(path), true);
         });
         m_selectedNode = treeNode;
         m_selectedNode->setIsSelected(true);
@@ -119,10 +124,6 @@ namespace ige::creator
                         m_selectedNode->setIsSelected(true);
                     }
                 });
-                treeNode->getOnOpenedEvent().addListener([&, this, path]() {
-                    parseFile(std::filesystem::directory_entry(path), isEngine);
-                });
-
                 parseFolder(treeNode, item, isEngine);
             }
         }

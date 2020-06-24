@@ -31,10 +31,13 @@ namespace ige::creator
         void import(const std::string& path);
 
         std::string m_engineAssetFolder;
-        std::string m_projectAssetFolder;        
+        std::string m_projectAssetFolder;
         std::string m_currentFolder;
         std::shared_ptr<Group> m_folderGroup;
-        std::shared_ptr<Columns<4>> m_fileGroup;        
+        std::shared_ptr<Columns<4>> m_fileGroup;
         std::shared_ptr<TreeNode> m_selectedNode;
+
+        // Flag to call refresh() in main thread
+        bool m_bNeedRefresh = false;
     };
 }
