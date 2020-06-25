@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <contributor>
+      <author>Assimp</author>
+      <authoring_tool>Assimp Exporter</authoring_tool>
+    </contributor>
+    <created>2020-06-24T06:55:11</created>
+    <modified>2020-06-24T06:55:11</modified>
+    <unit name="meter" meter="1" />
+    <up_axis>Y_UP</up_axis>
+  </asset>
+  <library_effects>
+    <effect id="lambert1-fx" name="lambert1">
+      <profile_COMMON>
+        <technique sid="standard">
+          <lambert>
+            <emission>
+              <color sid="emission">0   0   0   1</color>
+            </emission>
+            <ambient>
+              <color sid="ambient">0   0   0   1</color>
+            </ambient>
+            <diffuse>
+              <color sid="diffuse">1   1   1   1</color>
+            </diffuse>
+            <transparent>
+              <color sid="transparent">0   0   0   1</color>
+            </transparent>
+            <transparency>
+              <float sid="transparency">1</float>
+            </transparency>
+          </lambert>
+        </technique>
+      </profile_COMMON>
+    </effect>
+  </library_effects>
+  <library_materials>
+    <material id="lambert1" name="lambert1">
+      <instance_effect url="#lambert1-fx"/>
+    </material>
+  </library_materials>
+  <library_geometries>
+    <geometry id="pPlane1" name="pPlane1" >
+      <mesh>
+        <source id="pPlane1-positions" name="pPlane1-positions">
+          <float_array id="pPlane1-positions-array" count="12"> -0.5 -1.110223e-16 0.5 0.5 -1.110223e-16 0.5 0.5 1.110223e-16 -0.5 -0.5 1.110223e-16 -0.5 </float_array>
+          <technique_common>
+            <accessor count="4" offset="0" source="#pPlane1-positions-array" stride="3">
+              <param name="X" type="float" />
+              <param name="Y" type="float" />
+              <param name="Z" type="float" />
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="pPlane1-normals" name="pPlane1-normals">
+          <float_array id="pPlane1-normals-array" count="12"> 0 1 2.220446e-16 0 1 2.220446e-16 0 1 2.220446e-16 0 1 2.220446e-16 </float_array>
+          <technique_common>
+            <accessor count="4" offset="0" source="#pPlane1-normals-array" stride="3">
+              <param name="X" type="float" />
+              <param name="Y" type="float" />
+              <param name="Z" type="float" />
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="pPlane1-tex0" name="pPlane1-tex0">
+          <float_array id="pPlane1-tex0-array" count="8"> 0 0 1 0 1 1 0 1 </float_array>
+          <technique_common>
+            <accessor count="4" offset="0" source="#pPlane1-tex0-array" stride="2">
+              <param name="S" type="float" />
+              <param name="T" type="float" />
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="pPlane1-vertices">
+          <input semantic="POSITION" source="#pPlane1-positions" />
+        </vertices>
+        <polylist count="1" material="defaultMaterial">
+          <input offset="0" semantic="VERTEX" source="#pPlane1-vertices" />
+          <input offset="0" semantic="NORMAL" source="#pPlane1-normals" />
+          <input offset="0" semantic="TEXCOORD" source="#pPlane1-tex0" set="0" />
+          <vcount>4 </vcount>
+          <p>0 1 2 3 </p>
+        </polylist>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_controllers>
+  </library_controllers>
+  <library_visual_scenes>
+    <visual_scene id="RootNode" name="RootNode">
+      <node id="pPlane1"  name="pPlane1" type="NODE">
+        <matrix sid="matrix">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+        <instance_geometry url="#pPlane1">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="defaultMaterial" target="#lambert1">
+                <bind_vertex_input semantic="CHANNEL0" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#RootNode" />
+  </scene>
+</COLLADA>

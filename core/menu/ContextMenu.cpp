@@ -14,6 +14,11 @@ namespace ige::creator
 
     void ContextMenu::_drawImpl() 
     {
+        // DO NOTHING
+    }
+
+    void ContextMenu::execute()
+    {
         if (ImGui::BeginPopupContextItem())
         {
             drawWidgets();

@@ -18,6 +18,9 @@ namespace ige::creator
         void setIsSelected(bool isSelected) { m_bIsSelected = isSelected; }
 
         const std::string& getName() { return m_name; }
+        void setName(const std::string& name) { m_name = name; }
+
+        virtual void draw() override;
 
     protected:
         virtual void _drawImpl() override;

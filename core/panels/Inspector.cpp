@@ -439,26 +439,28 @@ namespace ige::creator
         if (m_figureCompGroup == nullptr) return;
         m_figureCompGroup->removeAllWidgets();
 
-        auto figure = getTargetObject()->getComponent<FigureComponent>();
-        if (figure == nullptr) return;
+        auto figureComp = getTargetObject()->getComponent<FigureComponent>();
+        if (figureComp == nullptr) return;
 
-        auto txtPath = m_figureCompGroup->createWidget<TextField>("Path", figure->getFigure() ? figure->getFigure()->ResourceName() : "");
+        auto figure = figureComp->getFigure();
+
+        auto txtPath = m_figureCompGroup->createWidget<TextField>("Path", figure ? figure->ResourceName() : "");
         txtPath->setEndOfLine(false);
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
-            auto figure = getTargetObject()->getComponent<FigureComponent>();
-            figure->setPath(txt);
+            auto figureComp = getTargetObject()->getComponent<FigureComponent>();
+            figureComp->setPath(txt);
         });
         txtPath->addPlugin<DDTargetPlugin<std::string>>(EDragDropID::FILE)->getOnDataReceivedEvent().addListener([this](auto txt) {
-            auto figure = getTargetObject()->getComponent<FigureComponent>();
-            figure->setPath(txt);
+            auto figureComp = getTargetObject()->getComponent<FigureComponent>();
+            figureComp->setPath(txt);
             redraw();
         });
         m_figureCompGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this]() {
             auto files = OpenFileDialog("Import Assets", "", { "Figure (*.pyxf)", "*.pyxf" }).result();
             if (files.size() > 0)
             {
-                auto figure = getTargetObject()->getComponent<FigureComponent>();
-                figure->setPath(files[0]);
+                auto figureComp = getTargetObject()->getComponent<FigureComponent>();
+                figureComp->setPath(files[0]);
                 redraw();
             }
         });
@@ -468,6 +470,32 @@ namespace ige::creator
     {
         if (m_editableFigureCompGroup == nullptr) return;
         m_editableFigureCompGroup->removeAllWidgets();
+
+        /*auto eFigComp = getTargetObject()->getComponent<EditableFigureComponent>();
+        if (eFigComp == nullptr) return;
+
+        auto figure = eFigComp->getEditableFigure();
+
+        auto txtPath = m_editableFigureCompGroup->createWidget<TextField>("Path", figure ? figure->ResourceName() : "");
+        txtPath->setEndOfLine(false);
+        txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
+            auto eFigComp = getTargetObject()->getComponent<EditableFigureComponent>();
+            eFigComp->setPath(txt);
+        });
+        txtPath->addPlugin<DDTargetPlugin<std::string>>(EDragDropID::FILE)->getOnDataReceivedEvent().addListener([this](auto txt) {
+            auto eFigComp = getTargetObject()->getComponent<EditableFigureComponent>();
+            eFigComp->setPath(txt);
+            redraw();
+        });
+        m_editableFigureCompGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this]() {
+            auto files = OpenFileDialog("Import Assets", "", { "Figure (*.pyxf)", "*.pyxf" }).result();
+            if (files.size() > 0)
+            {
+                auto eFigComp = getTargetObject()->getComponent<EditableFigureComponent>();
+                eFigComp->setPath(files[0]);
+                redraw();
+            }
+        });*/
     }
     
     void Inspector::_drawImpl()

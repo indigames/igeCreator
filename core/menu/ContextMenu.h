@@ -4,12 +4,13 @@
 
 namespace ige::creator
 {
-    class ContextMenu: public Menu
+    class ContextMenu: public Menu, public IPlugin
     {
     public:
         ContextMenu(const std::string& name, bool enable = true);
         virtual ~ContextMenu();
 
+        void execute();
         void close();
 
     protected:

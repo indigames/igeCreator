@@ -9,6 +9,7 @@ namespace ige::creator
     class IPlugin
     {
     public:
+        virtual ~IPlugin() {}
         virtual void execute() = 0;
 
     protected:
@@ -20,7 +21,7 @@ namespace ige::creator
     public:
         Pluggable() {}
 
-        ~Pluggable()
+        virtual ~Pluggable()
         {
             removeAllPlugins();
         }

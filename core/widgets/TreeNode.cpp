@@ -1,4 +1,6 @@
 #include <imgui.h>
+#include <algorithm>
+
 #include "core/widgets/TreeNode.h"
 
 namespace ige::creator
@@ -14,14 +16,29 @@ namespace ige::creator
         getOnClosedEvent().removeAllListeners();
     }
 
+    void TreeNode::draw()
+    {
+        if (isEnable())
+        {
+            _drawImpl();
+
+            if (!isEndOfLine())
+            {
+                ImGui::SameLine();
+            }
+        }
+    }
+
     void TreeNode::_drawImpl()
     {
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
         if (m_bIsDefaultOpened) flags |= ImGuiTreeNodeFlags_DefaultOpen;
         if (m_bIsSelected)      flags |= ImGuiTreeNodeFlags_Selected;
         if (m_bIsLeaf)          flags |= ImGuiTreeNodeFlags_Leaf;
 
-        bool opened = ImGui::TreeNodeEx(m_name.c_str(), flags);
+        bool opened = ImGui::TreeNodeEx((m_name + m_id).c_str(), flags);
+
+        executePlugins();
 
         if (ImGui::IsItemClicked() && (ImGui::GetMousePos().x - ImGui::GetItemRectMin().x) > ImGui::GetTreeNodeToLabelSpacing())
             getOnClickEvent().invoke();
@@ -30,18 +47,14 @@ namespace ige::creator
         {
             if (!m_opened)
                 getOnOpenedEvent().invoke();
-
             m_opened = true;
-
             drawWidgets();
-
             ImGui::TreePop();
         }
         else
         {
             if (m_opened)
                 getOnClosedEvent().invoke();
-
             m_opened = false;
         }
     }

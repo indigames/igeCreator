@@ -6,7 +6,7 @@ namespace ige::creator
     uint64_t Widget::s_idCounter = 0;
 
     Widget::Widget(bool enable, bool eol)
-        : m_bEnabled(enable), m_bEOL(eol)
+        : m_bEnabled(enable), m_bEOL(eol), m_container(nullptr)
     {
         m_id = "##" + std::to_string(s_idCounter++);
     }

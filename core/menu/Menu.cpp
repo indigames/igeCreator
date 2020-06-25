@@ -12,7 +12,7 @@ namespace ige::creator
 
     void Menu::_drawImpl()
     {
-        if (ImGui::BeginMenu(m_name.c_str(), m_bEnabled))
+        if (ImGui::BeginMenu((m_name + m_id).c_str(), m_bEnabled))
         {
             if (!m_bIsOpened)
             {

@@ -26,6 +26,8 @@ namespace ige::creator
         void onSceneObjectAttached(SceneObject& sceneObject);
         void onSceneObjectDetached(SceneObject& sceneObject);
 
+        void onSceneObjectChangedName(SceneObject& sceneObject);
+
         std::shared_ptr<TreeNode> m_sceneRoot;
         std::unordered_map<uint64_t, std::shared_ptr<TreeNode>> m_objectNodeMap;
         uint64_t m_selectedNodeId = 0xffffffff;

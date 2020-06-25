@@ -6,6 +6,7 @@
 #include "core/Editor.h"
 #include "core/Canvas.h"
 #include "core/panels/Inspector.h"
+#include "core/task/TaskManager.h"
 
 #include <scene/SceneManager.h>
 #include <scene/Scene.h>
@@ -47,6 +48,7 @@ namespace ige::creator
 
     void Editor::update(float dt)
     {
+        // Update layouts
         m_canvas->update(dt);
     }
 
@@ -55,8 +57,18 @@ namespace ige::creator
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL2_NewFrame((SDL_Window*)m_app->getAppWindow());
 
+        // Update inspector object
+        auto inspector = getCanvas()->getPanelAs<Inspector>("Inspector");
+        if (inspector && inspector->getTargetObject() != m_selectedObject)
+        {
+            inspector->setTargetObject(m_selectedObject);
+        }
+
         // Render main canvas
         m_canvas->draw();
+
+        // Update tasks
+        TaskManager::getInstance()->update();
 
         // Render ImGUI
         renderImGUI();
@@ -90,11 +102,6 @@ namespace ige::creator
     void Editor::setSelectedObject(uint64_t objId)
     {
         m_selectedObject = getSceneManager()->getCurrentScene()->findObjectById(objId);
-        auto inspector = getCanvas()->getPanelAs<Inspector>("Inspector");
-        if (inspector)
-        {
-            inspector->setTargetObject(m_selectedObject);
-        }
     }
 
 }

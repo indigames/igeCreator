@@ -23,6 +23,9 @@ namespace ige::creator
         virtual void initialize() override;
         virtual void _drawImpl() override;
 
+        Camera* m_camera;
+        Showcase* m_showcase;
+
         Texture* m_rtTexture;
         RenderTarget* m_fbo;
 

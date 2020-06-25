@@ -47,8 +47,6 @@ namespace ige::creator
         }
     }
 
-    
-
     void Container::removeAllWidgets()
     {
         for (auto& widget : m_widgets)

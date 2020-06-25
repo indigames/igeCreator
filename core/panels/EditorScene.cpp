@@ -4,13 +4,20 @@
 #include "core/widgets/Image.h"
 #include "core/Editor.h"
 
+#include "utils/GraphicsHelper.h"
+#include "scene/Scene.h"
+#include "scene/SceneManager.h"
+
 using namespace pyxie;
+using namespace ige::scene;
 
 namespace ige::creator
 {
     EditorScene::EditorScene(const std::string& name, const Panel::Settings& settings)
         : Panel(name, settings)
     {
+        m_camera = nullptr;
+        m_showcase = nullptr;
         m_rtTexture = nullptr;
         m_fbo = nullptr;
     }
@@ -37,6 +44,16 @@ namespace ige::creator
 
     void EditorScene::initialize()
     {
+        m_camera = ResourceCreator::Instance().NewCamera("editor_camera", nullptr);
+        m_camera->SetPosition(Vec3(0.f, 5.f, 10.f));
+        m_camera->LockonTarget(false);
+
+        m_showcase = Editor::getInstance()->getSceneManager()->getCurrentScene()->getShowcase();
+
+        auto grid = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, "grid");
+        grid->SetPosition(Vec3(0.f, 0.f, 0.f));
+        grid->SetRotation(Quat::RotationX(PI / 2.f));
+        m_showcase->Add(grid);
     }
 
     void EditorScene::update(float dt)
@@ -54,6 +71,8 @@ namespace ige::creator
         }
 
         // Update
+        m_camera->Step(dt);
+        m_showcase->Update(dt);
         if (Editor::getInstance()->getSceneManager())
             Editor::getInstance()->getSceneManager()->update(dt);
 
@@ -62,6 +81,8 @@ namespace ige::creator
         if (renderContext && m_fbo)
         {
             renderContext->BeginScene(m_fbo, Vec4(0.f, 0.0f, 0.0f, 1.f), true, true);
+
+            m_camera->Render();
 
             if (Editor::getInstance()->getSceneManager())
                 Editor::getInstance()->getSceneManager()->render();

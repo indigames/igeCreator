@@ -11,6 +11,7 @@
                 "${workspaceFolder}/../igeVMath",
                 "${IGE_LIBS}/json/include",
                 "${IGE_LIBS}/SDL/include",
+                "${IGE_LIBS}/cpp-taskflow/include",
                 "${workspaceFolder}/../imgui/**"
             ],
             "defines": [
