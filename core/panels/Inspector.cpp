@@ -19,7 +19,7 @@
 #include <components/TransformComponent.h>
 #include <components/EnvironmentComponent.h>
 #include <components/FigureComponent.h>
-#include <components/EditableFigureComponent.h>
+#include <components/SpriteComponent.h>
 using namespace ige::scene;
 
 #include <pyxieUtilities.h>
@@ -48,33 +48,31 @@ namespace ige::creator
         m_headerGroup = createWidget<Group>("Inspector_Header", false);
 
         // Object info
-        auto colums = m_headerGroup->createWidget<Columns<3>>(120);
-        colums->createWidget<TextField>("ID", std::to_string(m_targetObject->getId()), true);
-        colums->createWidget<TextField>("Name", m_targetObject->getName())->getOnDataChangedEvent().addListener([this](auto name) {
-            m_targetObject->setName(name);
-        });
-        colums->createWidget<CheckBox>("Active", m_targetObject->isActive())->getOnDataChangedEvent().addListener([this](bool active) {
+        auto columns = m_headerGroup->createWidget<Columns<2>>();
+        columns->createWidget<TextField>("ID", std::to_string(m_targetObject->getId()), true);
+        columns->createWidget<CheckBox>("Active", m_targetObject->isActive())->getOnDataChangedEvent().addListener([this](bool active) {
             m_targetObject->setActive(active);
+        });
+        m_headerGroup->createWidget<TextField>("Name", m_targetObject->getName())->getOnDataChangedEvent().addListener([this](auto name) {
+            m_targetObject->setName(name);
         });
 
         // Create component selection
         m_createCompCombo = m_headerGroup->createWidget<ComboBox>();
         m_createCompCombo->setEndOfLine(false);
         m_createCompCombo->addChoice(0, "Camera Component");
-        m_createCompCombo->addChoice(1, "Editable Figure Component");
-        m_createCompCombo->addChoice(2, "Environment Component");
-        m_createCompCombo->addChoice(3, "Figure Component");
-        m_createCompCombo->addChoice(4, "Transform Component");
+        m_createCompCombo->addChoice(1, "Environment Component");
+        m_createCompCombo->addChoice(2, "Figure Component");
+        m_createCompCombo->addChoice(3, "Sprite Component");
 
         auto createCompButton = m_headerGroup->createWidget<Button>("Add", ImVec2(64.f, 0.f));
         createCompButton->getOnClickEvent().addListener([this](){
             switch(m_createCompCombo->getSelectedIndex())
             {
                 case 0: getTargetObject()->addComponent<CameraComponent>("camera"); break;
-                case 1: getTargetObject()->addComponent<EditableFigureComponent>("editableFigure"); break;
-                case 2: getTargetObject()->addComponent<EnvironmentComponent>("environment"); break;
-                case 3: getTargetObject()->addComponent<FigureComponent>(); break;
-                case 4: getTargetObject()->addComponent<TransformComponent>(); break;
+                case 1: getTargetObject()->addComponent<EnvironmentComponent>("environment"); break;
+                case 2: getTargetObject()->addComponent<FigureComponent>(); break;
+                case 3: getTargetObject()->addComponent<SpriteComponent>(); break;
             }
             redraw();
         });
@@ -113,10 +111,10 @@ namespace ige::creator
                 m_figureCompGroup = header->createWidget<Group>("FigureGroup", false);
                 drawFigureComponent();
             }
-            else if (component->getName() == "EditableFigureComponent")
+            else if (component->getName() == "SpriteComponent")
             {
-                m_editableFigureCompGroup = header->createWidget<Group>("EditableFigureGroup", false);
-                drawEditableFigureComponent();
+                m_spriteCompGroup = header->createWidget<Group>("SpriteGroup", false);
+                drawSpriteComponent();
             }
         });
     }
@@ -201,36 +199,36 @@ namespace ige::creator
         if (camera == nullptr) return;
         m_cameraCompGroup->removeAllWidgets();
 
-        auto colums = m_cameraCompGroup->createWidget<Columns<3>>(120);
+        auto columns = m_cameraCompGroup->createWidget<Columns<3>>(120);
         // Orthographic
         std::array orthorW = { camera->getOrthoWidth() };
-        colums->createWidget<Drag<float>>("OrtW", ImGuiDataType_Float, orthorW)->getOnDataChangedEvent().addListener([this](auto val) {
+        columns->createWidget<Drag<float>>("OrtW", ImGuiDataType_Float, orthorW)->getOnDataChangedEvent().addListener([this](auto val) {
             auto camera = getTargetObject()->getComponent<CameraComponent>();
             camera->setOrthoWidth(val[0]);
         });
         std::array orthorH = { camera->getOrthoHeight() };
-        colums->createWidget<Drag<float>>("OrtH", ImGuiDataType_Float, orthorH)->getOnDataChangedEvent().addListener([this](auto val) {
+        columns->createWidget<Drag<float>>("OrtH", ImGuiDataType_Float, orthorH)->getOnDataChangedEvent().addListener([this](auto val) {
             auto camera = getTargetObject()->getComponent<CameraComponent>();
             camera->setOrthoHeight(val[0]);
         });
-        colums->createWidget<CheckBox>("IsOrtho", camera->isOrthoProjection())->getOnDataChangedEvent().addListener([this](auto val) {
+        columns->createWidget<CheckBox>("IsOrtho", camera->isOrthoProjection())->getOnDataChangedEvent().addListener([this](auto val) {
             auto camera = getTargetObject()->getComponent<CameraComponent>();
             camera->setOrthoProjection(val);
         });
 
         // FOV - Near - Far
         std::array fov = { camera->getFieldOfView() };
-        colums->createWidget<Drag<float>>("FOV", ImGuiDataType_Float, fov)->getOnDataChangedEvent().addListener([this](auto val) {
+        columns->createWidget<Drag<float>>("FOV", ImGuiDataType_Float, fov)->getOnDataChangedEvent().addListener([this](auto val) {
             auto camera = getTargetObject()->getComponent<CameraComponent>();
             camera->setFieldOfView(val[0]);
         });
         std::array camNear = { camera->getNearPlane() };
-        colums->createWidget<Drag<float>>("Near", ImGuiDataType_Float, camNear)->getOnDataChangedEvent().addListener([this](auto val) {
+        columns->createWidget<Drag<float>>("Near", ImGuiDataType_Float, camNear)->getOnDataChangedEvent().addListener([this](auto val) {
             auto camera = getTargetObject()->getComponent<CameraComponent>();
             camera->setNearPlane(val[0]);
         });
         std::array camFar = { camera->getFarPlane() };
-        colums->createWidget<Drag<float>>("Far", ImGuiDataType_Float, camFar)->getOnDataChangedEvent().addListener([this](auto val) {
+        columns->createWidget<Drag<float>>("Far", ImGuiDataType_Float, camFar)->getOnDataChangedEvent().addListener([this](auto val) {
             auto camera = getTargetObject()->getComponent<CameraComponent>();
             camera->setFarPlane(val[0]);
         });
@@ -240,7 +238,7 @@ namespace ige::creator
             m_cameraLockTargetGroup->removeAllWidgets();
 
             auto camera = getTargetObject()->getComponent<CameraComponent>();
-            if (camera->getLockon()) {
+            if (camera->getLockOn()) {
                 std::array target = { camera->getTarget().X(), camera->getTarget().Y(), camera->getTarget().Z() };
                 auto targetGroup = m_cameraLockTargetGroup->createWidget<Drag<float, 3>>("Target", ImGuiDataType_Float, target);
                 targetGroup->getOnDataChangedEvent().addListener([this](auto val) {
@@ -252,23 +250,23 @@ namespace ige::creator
             }
             else {
                 // Pan - Tilt - Roll
-                auto colums = m_cameraLockTargetGroup->createWidget<Columns<3>>(120);
+                auto columns = m_cameraLockTargetGroup->createWidget<Columns<3>>(120);
                 std::array pan = { RADIANS_TO_DEGREES(camera->getPan()) };
-                colums->createWidget<Drag<float>>("Pan", ImGuiDataType_Float, pan)->getOnDataChangedEvent().addListener([this](auto val) {
+                columns->createWidget<Drag<float>>("Pan", ImGuiDataType_Float, pan)->getOnDataChangedEvent().addListener([this](auto val) {
                     auto camera = getTargetObject()->getComponent<CameraComponent>();
                     camera->setPan(DEGREES_TO_RADIANS(val[0]));
                     drawLocalTransformComponent();
                     drawWorldTransformComponent();
                     });
                 std::array tilt = { RADIANS_TO_DEGREES(camera->getTilt()) };
-                colums->createWidget<Drag<float>>("Tilt", ImGuiDataType_Float, tilt)->getOnDataChangedEvent().addListener([this](auto val) {
+                columns->createWidget<Drag<float>>("Tilt", ImGuiDataType_Float, tilt)->getOnDataChangedEvent().addListener([this](auto val) {
                     auto camera = getTargetObject()->getComponent<CameraComponent>();
                     camera->setTilt(DEGREES_TO_RADIANS(val[0]));
                     drawLocalTransformComponent();
                     drawWorldTransformComponent();
                     });
                 std::array roll = { RADIANS_TO_DEGREES(camera->getRoll()) };
-                colums->createWidget<Drag<float>>("Roll", ImGuiDataType_Float, roll)->getOnDataChangedEvent().addListener([this](auto val) {
+                columns->createWidget<Drag<float>>("Roll", ImGuiDataType_Float, roll)->getOnDataChangedEvent().addListener([this](auto val) {
                     auto camera = getTargetObject()->getComponent<CameraComponent>();
                     camera->setRoll(DEGREES_TO_RADIANS(val[0]));
                     drawLocalTransformComponent();
@@ -277,7 +275,7 @@ namespace ige::creator
             }
         };
                
-        m_cameraCompGroup->createWidget<CheckBox>("LockTarget", camera->getLockon())->getOnDataChangedEvent().addListener([drawCameraLockTarget, this](auto locked) {
+        m_cameraCompGroup->createWidget<CheckBox>("LockTarget", camera->getLockOn())->getOnDataChangedEvent().addListener([drawCameraLockTarget, this](auto locked) {
             auto camera = getTargetObject()->getComponent<CameraComponent>();
             if (!locked)
             {
@@ -290,7 +288,7 @@ namespace ige::creator
                 camera->setTilt(0.f);
                 camera->setRoll(0.f);
             }
-            camera->lockonTarget(locked);
+            camera->lockOnTarget(locked);
             drawLocalTransformComponent();
             drawWorldTransformComponent();
             drawCameraLockTarget();
@@ -300,15 +298,15 @@ namespace ige::creator
         drawCameraLockTarget();
 
         // Width Based
-        auto widthBasedColums = m_cameraCompGroup->createWidget<Columns<2>>(180);
-        widthBasedColums->createWidget<CheckBox>("WidthBased", camera->isWidthBase())->getOnDataChangedEvent().addListener([this](auto val) {
+        auto widthBasedColumns = m_cameraCompGroup->createWidget<Columns<2>>(180);
+        widthBasedColumns->createWidget<CheckBox>("WidthBased", camera->isWidthBase())->getOnDataChangedEvent().addListener([this](auto val) {
             auto camera = getTargetObject()->getComponent<CameraComponent>();
             camera->setWidthBase(val);
         });
 
         // Aspect Ratio
         std::array ratio = { camera->getAspectRatio() };
-        widthBasedColums->createWidget<Drag<float>>("Ratio", ImGuiDataType_Float, ratio)->getOnDataChangedEvent().addListener([this](auto val) {
+        widthBasedColumns->createWidget<Drag<float>>("Ratio", ImGuiDataType_Float, ratio)->getOnDataChangedEvent().addListener([this](auto val) {
             auto camera = getTargetObject()->getComponent<CameraComponent>();
             camera->setAspectRatio(val[0]);
         });
@@ -466,36 +464,40 @@ namespace ige::creator
         });
     }
 
-    void Inspector::drawEditableFigureComponent()
+    void Inspector::drawSpriteComponent()
     {
-        if (m_editableFigureCompGroup == nullptr) return;
-        m_editableFigureCompGroup->removeAllWidgets();
+        if (m_spriteCompGroup == nullptr) return;
+        m_spriteCompGroup->removeAllWidgets();
 
-        /*auto eFigComp = getTargetObject()->getComponent<EditableFigureComponent>();
-        if (eFigComp == nullptr) return;
+        auto spriteComp = getTargetObject()->getComponent<SpriteComponent>();
+        if (spriteComp == nullptr) return;
 
-        auto figure = eFigComp->getEditableFigure();
-
-        auto txtPath = m_editableFigureCompGroup->createWidget<TextField>("Path", figure ? figure->ResourceName() : "");
+        auto txtPath = m_spriteCompGroup->createWidget<TextField>("Path", spriteComp->getPath());
         txtPath->setEndOfLine(false);
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
-            auto eFigComp = getTargetObject()->getComponent<EditableFigureComponent>();
-            eFigComp->setPath(txt);
+            auto spriteComp = getTargetObject()->getComponent<SpriteComponent>();
+            spriteComp->setPath(txt);
         });
         txtPath->addPlugin<DDTargetPlugin<std::string>>(EDragDropID::FILE)->getOnDataReceivedEvent().addListener([this](auto txt) {
-            auto eFigComp = getTargetObject()->getComponent<EditableFigureComponent>();
-            eFigComp->setPath(txt);
+            auto spriteComp = getTargetObject()->getComponent<SpriteComponent>();
+            spriteComp->setPath(txt);
             redraw();
         });
-        m_editableFigureCompGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this]() {
-            auto files = OpenFileDialog("Import Assets", "", { "Figure (*.pyxf)", "*.pyxf" }).result();
+        m_spriteCompGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this]() {
+            auto files = OpenFileDialog("Import Assets", "", { "Texture (*.pyxi)", "*.pyxi" }).result();
             if (files.size() > 0)
             {
-                auto eFigComp = getTargetObject()->getComponent<EditableFigureComponent>();
-                eFigComp->setPath(files[0]);
+                auto spriteComp = getTargetObject()->getComponent<SpriteComponent>();
+                spriteComp->setPath(files[0]);
                 redraw();
             }
-        });*/
+        });
+
+        std::array size = { spriteComp->getSize().X(),  spriteComp->getSize().Y() };
+        m_spriteCompGroup->createWidget<Drag<float, 2>>("Size", ImGuiDataType_Float, size, 1.f, 0.f, 4096.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto spriteComp = getTargetObject()->getComponent<SpriteComponent>();
+            spriteComp->setSize({ val[0], val[1] });
+        });
     }
     
     void Inspector::_drawImpl()
@@ -521,7 +523,7 @@ namespace ige::creator
         m_cameraLockTargetGroup = nullptr;
         m_environmentCompGroup = nullptr;
         m_figureCompGroup = nullptr;
-        m_editableFigureCompGroup = nullptr;
+        m_spriteCompGroup = nullptr;
 
         removeAllWidgets();
     }

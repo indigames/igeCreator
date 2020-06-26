@@ -30,7 +30,7 @@ namespace ige::creator
         void drawCameraComponent();
         void drawEnvironmentComponent();
         void drawFigureComponent();
-        void drawEditableFigureComponent();
+        void drawSpriteComponent();
 
         //! Redraw
         void redraw() { m_bNeedRedraw = true;  }
@@ -48,7 +48,7 @@ namespace ige::creator
         std::shared_ptr<Group> m_cameraLockTargetGroup = nullptr;
         std::shared_ptr<Group> m_environmentCompGroup = nullptr;
         std::shared_ptr<Group> m_figureCompGroup = nullptr;
-        std::shared_ptr<Group> m_editableFigureCompGroup = nullptr;
+        std::shared_ptr<Group> m_spriteCompGroup = nullptr;
 
         //! Flags for redrawing component in main thread
         bool m_bNeedRedraw = false;

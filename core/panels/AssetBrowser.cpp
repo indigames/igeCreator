@@ -159,7 +159,7 @@ namespace ige::creator
             if (!item.is_directory())
             {
                 std::string itemName = item.path().filename().string();
-                std::string path = item.path().string();
+                std::string path = fs::relative(item.path(), fs::current_path()).string();
 
                 auto fileIcon = m_fileGroup->createWidget<Icon>(itemName, 0, ImVec2(32.f, 32.f));
                 fileIcon->addPlugin<DDSourcePlugin<std::string>>(EDragDropID::FILE, fileIcon->getLabel(), path);
