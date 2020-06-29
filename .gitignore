@@ -1,3 +1,4 @@
 build
 *.log
 .tmp
+/app/scripts/__pycache__

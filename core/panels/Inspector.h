@@ -31,6 +31,7 @@ namespace ige::creator
         void drawEnvironmentComponent();
         void drawFigureComponent();
         void drawSpriteComponent();
+        void drawScriptComponent();
 
         //! Redraw
         void redraw() { m_bNeedRedraw = true;  }
@@ -49,6 +50,7 @@ namespace ige::creator
         std::shared_ptr<Group> m_environmentCompGroup = nullptr;
         std::shared_ptr<Group> m_figureCompGroup = nullptr;
         std::shared_ptr<Group> m_spriteCompGroup = nullptr;
+        std::shared_ptr<Group> m_scriptCompGroup = nullptr;
 
         //! Flags for redrawing component in main thread
         bool m_bNeedRedraw = false;

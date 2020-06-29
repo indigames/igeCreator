@@ -20,6 +20,7 @@
 #include <components/EnvironmentComponent.h>
 #include <components/FigureComponent.h>
 #include <components/SpriteComponent.h>
+#include <components/ScriptComponent.h>
 using namespace ige::scene;
 
 #include <pyxieUtilities.h>
@@ -64,6 +65,7 @@ namespace ige::creator
         m_createCompCombo->addChoice(1, "Environment Component");
         m_createCompCombo->addChoice(2, "Figure Component");
         m_createCompCombo->addChoice(3, "Sprite Component");
+        m_createCompCombo->addChoice(4, "Script Component");
 
         auto createCompButton = m_headerGroup->createWidget<Button>("Add", ImVec2(64.f, 0.f));
         createCompButton->getOnClickEvent().addListener([this](){
@@ -73,6 +75,7 @@ namespace ige::creator
                 case 1: getTargetObject()->addComponent<EnvironmentComponent>("environment"); break;
                 case 2: getTargetObject()->addComponent<FigureComponent>(); break;
                 case 3: getTargetObject()->addComponent<SpriteComponent>(); break;
+                case 4: getTargetObject()->addComponent<ScriptComponent>(); break;
             }
             redraw();
         });
@@ -115,6 +118,11 @@ namespace ige::creator
             {
                 m_spriteCompGroup = header->createWidget<Group>("SpriteGroup", false);
                 drawSpriteComponent();
+            }
+            else if (component->getName() == "ScriptComponent")
+            {
+                m_scriptCompGroup = header->createWidget<Group>("ScriptGroup", false);
+                drawScriptComponent();
             }
         });
     }
@@ -440,9 +448,7 @@ namespace ige::creator
         auto figureComp = getTargetObject()->getComponent<FigureComponent>();
         if (figureComp == nullptr) return;
 
-        auto figure = figureComp->getFigure();
-
-        auto txtPath = m_figureCompGroup->createWidget<TextField>("Path", figure ? figure->ResourceName() : "");
+        auto txtPath = m_figureCompGroup->createWidget<TextField>("Path", figureComp->getPath());
         txtPath->setEndOfLine(false);
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
             auto figureComp = getTargetObject()->getComponent<FigureComponent>();
@@ -499,7 +505,37 @@ namespace ige::creator
             spriteComp->setSize({ val[0], val[1] });
         });
     }
-    
+
+    void Inspector::drawScriptComponent()
+    {
+        if (m_scriptCompGroup == nullptr) return;
+        m_scriptCompGroup->removeAllWidgets();
+
+        auto scriptComp = getTargetObject()->getComponent<ScriptComponent>();
+        if (scriptComp == nullptr) return;
+
+        auto txtPath = m_scriptCompGroup->createWidget<TextField>("Path", scriptComp->getPath());
+        txtPath->setEndOfLine(false);
+        txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
+            auto scriptComp = getTargetObject()->getComponent<ScriptComponent>();
+            scriptComp->setPath(txt);
+        });
+        txtPath->addPlugin<DDTargetPlugin<std::string>>(EDragDropID::FILE)->getOnDataReceivedEvent().addListener([this](auto txt) {
+            auto scriptComp = getTargetObject()->getComponent<ScriptComponent>();
+            scriptComp->setPath(txt);
+            redraw();
+        });
+        m_scriptCompGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this]() {
+            auto files = OpenFileDialog("Import Assets", "", { "Script (*.py)", "*.py" }).result();
+            if (files.size() > 0)
+            {
+                auto scriptComp = getTargetObject()->getComponent<ScriptComponent>();
+                scriptComp->setPath(files[0]);
+                redraw();
+            }
+        });
+    }   
+
     void Inspector::_drawImpl()
     {
         if (m_bNeedRedraw)
