@@ -207,7 +207,7 @@ namespace ige::creator
         if (camera == nullptr) return;
         m_cameraCompGroup->removeAllWidgets();
 
-        auto columns = m_cameraCompGroup->createWidget<Columns<3>>(120);
+        auto columns = m_cameraCompGroup->createWidget<Columns<3>>(120.f);
         // Orthographic
         std::array orthorW = { camera->getOrthoWidth() };
         columns->createWidget<Drag<float>>("OrtW", ImGuiDataType_Float, orthorW)->getOnDataChangedEvent().addListener([this](auto val) {

@@ -54,7 +54,7 @@ int main(void* data) {
 		}
 
 		// Destroy
-		Editor::setInstance(nullptr);
+		Editor::destroy();
 		editor = nullptr;
 	}
 

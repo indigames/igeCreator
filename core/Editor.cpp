@@ -21,6 +21,7 @@ namespace ige::creator
     {
         m_canvas = nullptr;
         m_sceneManager = nullptr;
+        SceneManager::destroy();
         m_app.reset();
 
         ImGui_ImplOpenGL3_Shutdown();
@@ -35,7 +36,7 @@ namespace ige::creator
         m_canvas = std::make_shared<Canvas>();
         m_canvas->setDockable(true);
 
-        m_sceneManager = std::make_shared<SceneManager>();
+        m_sceneManager = SceneManager::getInstance();
         auto scene = m_sceneManager->createEmptyScene();
         m_sceneManager->setCurrentScene("EmptyScene");
         assert(scene == m_sceneManager->getCurrentScene());
