@@ -7,6 +7,8 @@
 #include "core/widgets/TextField.h"
 #include "core/widgets/Slider.h"
 
+#include "utils/PyxieHeaders.h"
+
 namespace ige::creator
 {
     ToolBar::ToolBar(const std::string& name, bool enable)
@@ -20,15 +22,15 @@ namespace ige::creator
 
     void ToolBar::initialize()
     {
-        createWidget<Button>("Play", ImVec2(32.f, 32.f), true, false)->getOnClickEvent().addListener([](){
+        createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/play")->GetTextureHandle(), ImVec2(16.f, 16.f), true, false)->getOnClickEvent().addListener([](){
             // TODO
         });        
 
-        createWidget<Button>("Stop", ImVec2(32.f, 32.f), true, false)->getOnClickEvent().addListener([](){
+        createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/pause")->GetTextureHandle(), ImVec2(16.f, 16.f), true, false)->getOnClickEvent().addListener([](){
             // TODO
         });        
 
-        createWidget<Button>("Reload", ImVec2(32.f, 32.f), true, true)->getOnClickEvent().addListener([](){
+        createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/stop")->GetTextureHandle(), ImVec2(16.f, 16.f), true, true)->getOnClickEvent().addListener([](){
 
         });
     }

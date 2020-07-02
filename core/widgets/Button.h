@@ -12,10 +12,10 @@ namespace ige::creator
         Button(const std::string& label = "Btn", const ImVec2& size = {32.f, 32.f}, bool enable = true, bool eol = true);
 
         //! Constructor: Color button
-        Button(const ImVec4& color);
+        Button(const ImVec4& color, const ImVec2& size = { 32.f, 32.f }, bool enable = true, bool eol = true);
 
         //! Constructor: Button with texture
-        Button(uint32_t textureId, const ImVec2& size);
+        Button(uint32_t textureId, const ImVec2& size = { 32.f, 32.f }, bool enable = true, bool eol = true);
 
         virtual ~Button();
               
