@@ -13,12 +13,14 @@
 #include "core/dialog/MsgBox.h"
 #include "core/dialog/OpenFileDialog.h"
 
+#include "utils/GraphicsHelper.h"
+
 namespace ige::creator
 {
     AssetBrowser::AssetBrowser(const std::string& name, const Panel::Settings& settings, const std::string& engineAssetPath, const std::string& projectAssetPath)
         : Panel(name, settings), m_engineAssetFolder(engineAssetPath), m_projectAssetFolder(projectAssetPath)
     {
-        m_selectedNode = nullptr;
+        m_selectedNode = nullptr;        
     }
     
     AssetBrowser::~AssetBrowser()
@@ -97,6 +99,7 @@ namespace ige::creator
         if (rootDir.exists() && rootDir.is_directory())
         {
             parseFolder(treeNode, rootDir, true);
+            parseFile(std::filesystem::directory_entry(rootDir), true);
         }
     }
 
@@ -159,9 +162,31 @@ namespace ige::creator
             if (!item.is_directory())
             {
                 std::string itemName = item.path().filename().string();
+                std::string ext = item.path().extension().string();
                 std::string path = fs::relative(item.path(), fs::current_path()).string();
-
-                auto fileIcon = m_fileGroup->createWidget<Icon>(itemName, 0, ImVec2(32.f, 32.f));
+                std::string iconPath = "";
+                if (ext == ".png" || ext == ".jpg" || ext == ".pyxi")
+                {
+                    iconPath = "icon/image";
+                }
+                else if (ext == ".dae" || ext == ".pyxf")
+                {
+                    iconPath = "icon/model";
+                }
+                else if (ext == ".ogg" || ext == ".mp3" || ext == ".wav")
+                {
+                    iconPath = "icon/audio";
+                }
+                else if (ext == ".py" || ext == ".pyc" || ext == ".pyxd")
+                {
+                    iconPath = "icon/python";
+                }
+                else
+                {
+                    iconPath = "icon/undefined";
+                }
+                auto iconTextureId = ResourceCreator::Instance().NewTexture(iconPath.c_str())->GetTextureHandle();
+                auto fileIcon = m_fileGroup->createWidget<Icon>(itemName, iconTextureId, ImVec2(32.f, 32.f));
                 fileIcon->addPlugin<DDSourcePlugin<std::string>>(EDragDropID::FILE, fileIcon->getLabel(), path);
             }
         }
