@@ -44,30 +44,46 @@ namespace ige::creator
 
     void EditorScene::initialize()
     {
-        m_camera = ResourceCreator::Instance().NewCamera("editor_camera", nullptr);
-        m_camera->SetPosition(Vec3(0.f, 5.f, 10.f));
-        m_camera->LockonTarget(false);
-
-        m_showcase = Editor::getInstance()->getSceneManager()->getCurrentScene()->getShowcase();
-
-        auto grid = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, "grid");
-        grid->SetPosition(Vec3(0.f, 0.f, 0.f));
-        grid->SetRotation(Quat::RotationX(PI / 2.f));
-        m_showcase->Add(grid);
-    }
-
-    void EditorScene::update(float dt)
-    {
-        Panel::update(dt);
-        
-        if (!m_fbo) {
+        if (!m_bIsInitialized)
+        {
             auto size = getSize();
             if (size.x > 0 && size.y > 0)
             {
                 m_rtTexture = ResourceCreator::Instance().NewTexture("Editor_RTTexture", nullptr, size.x, size.y, GL_RGBA);
                 m_fbo = ResourceCreator::Instance().NewRenderTarget(m_rtTexture, true, true);
-                createWidget<Image>(m_fbo->GetColorTexture()->GetTextureHandle(), size);
-            }            
+                m_imageWidget = createWidget<Image>(m_fbo->GetColorTexture()->GetTextureHandle(), size);
+
+                m_camera = ResourceCreator::Instance().NewCamera("editor_camera", nullptr);
+                m_camera->SetPosition(Vec3(0.f, 5.f, 10.f));
+                m_camera->LockonTarget(false);
+
+                m_showcase = Editor::getInstance()->getSceneManager()->getCurrentScene()->getShowcase();
+
+                auto grid = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, "grid");
+                grid->SetPosition(Vec3(0.f, 0.f, 0.f));
+                grid->SetRotation(Quat::RotationX(PI / 2.f));
+                m_showcase->Add(grid);
+
+                getOnSizeChangedEvent().addListener([this](auto size) {
+                    m_imageWidget->setSize(size);
+                    m_camera->SetAspectRate(size.x / size.y);
+                });
+
+                setAlign(Panel::E_HAlign::CENTER, Panel::E_VAlign::MIDDLE);
+
+                m_bIsInitialized = true;
+            }
+        }
+    }
+
+    void EditorScene::update(float dt)
+    {
+        Panel::update(dt);
+
+        if (!m_bIsInitialized)
+        {
+            initialize();
+            return;
         }
 
         // Update

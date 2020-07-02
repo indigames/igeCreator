@@ -76,6 +76,7 @@ namespace ige::creator
 
         ige::scene::Event<>& getOnOpenedEvent() { return m_openEvent; }
         ige::scene::Event<>& getOnClosedEvent() { return m_closeEvent; }
+        ige::scene::Event<ImVec2&>& getOnSizeChangedEvent() { return m_sizeChangedEvent; }
 
     protected:
         virtual void initialize() {};
@@ -93,6 +94,7 @@ namespace ige::creator
 
         ige::scene::Event<> m_openEvent;
         ige::scene::Event<> m_closeEvent;
+        ige::scene::Event<ImVec2&> m_sizeChangedEvent;
 
     private:
         std::string m_name;

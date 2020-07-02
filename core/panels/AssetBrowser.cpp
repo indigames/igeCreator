@@ -72,7 +72,6 @@ namespace ige::creator
         m_fileGroup->removeAllWidgets();
     }
 
-
     void AssetBrowser::refresh()
     {
         clear();

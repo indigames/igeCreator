@@ -29,6 +29,9 @@ namespace ige::creator
         Texture* m_rtTexture;
         RenderTarget* m_fbo;
 
+        std::shared_ptr<Image> m_imageWidget = nullptr;
+
         bool m_bIs2DMode = false;
+        bool m_bIsInitialized = false;
     };
 }

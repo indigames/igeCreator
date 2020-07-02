@@ -100,7 +100,12 @@ namespace ige::creator
                 
                 updatePosition();
 
-                m_size = ImGui::GetWindowSize();
+                auto newSize = ImGui::GetContentRegionAvail();
+                if (m_size.x != newSize.x || m_size.y != newSize.y)
+                {
+                    getOnSizeChangedEvent().invoke(m_size);
+                    m_size = newSize;
+                }
 
                 drawWidgets();
             }

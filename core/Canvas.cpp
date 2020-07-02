@@ -25,12 +25,12 @@ namespace ige::creator
         settings.dockable = true;
         settings.movable = false;
 
-        createPanel<EditorScene>("Scene", settings);
         createPanel<Inspector>("Inspector", settings);
         createPanel<Hierarchy>("Hierarchy", settings);
         createPanel<Console>("Console", settings);
         createPanel<AssetBrowser>("AssetBrowser", settings);
         createPanel<AssetViewer>("AssetViewer", settings);
+        createPanel<EditorScene>("Scene", settings);
     }
 
     Canvas::~Canvas()
@@ -56,7 +56,7 @@ namespace ige::creator
             ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse |
             ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
 
-        ImGui::Begin("Workspace", nullptr, flags);
+        ImGui::Begin("##Workspace", nullptr, flags);
         m_menuBar->draw();
         m_toolBar->draw();
 
@@ -95,7 +95,9 @@ namespace ige::creator
             }
 
             for (auto panel : m_panels)
+            {
                 panel.second->draw();
+            }
         }
 
         ImGui::End();
