@@ -1,0 +1,3 @@
+[submodule "3rd-party/pfd"]
+	path = 3rd-party/pfd
+	url = https://github.com/samhocevar/portable-file-dialogs
