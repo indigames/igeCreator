@@ -9,7 +9,13 @@ namespace ige::creator
     class Group: public Widget, public Container
     {
     public:
-        Group(const std::string& name, bool collapsable = true, bool closable = false, bool open = true, bool enable = true);
+        enum class E_Align {
+            LEFT = 0,
+            CENTER = 1,
+            RIGHT = 2
+        };
+
+        Group(const std::string& name, bool collapsable = true, bool closable = false, E_Align align = E_Align::LEFT, bool open = true, bool enable = true);
         virtual ~Group();
 
         ige::scene::Event<>& getOnClosedEvent() { return m_onClosedEvent; }
@@ -25,5 +31,6 @@ namespace ige::creator
         bool m_bIsOpened = true;
         bool m_bIsCollapsable = false;
         bool m_bIsClosable = false;
+        E_Align m_align = E_Align::LEFT;
     };
 }

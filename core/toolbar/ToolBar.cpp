@@ -5,9 +5,16 @@
 #include "core/Widget.h"
 #include "core/widgets/Button.h"
 #include "core/widgets/TextField.h"
+#include "core/widgets/Label.h"
 #include "core/widgets/Slider.h"
+#include "core/widgets/Separator.h"
+
+#include "core/layout/Columns.h"
+#include "core/layout/Group.h"
 
 #include "utils/PyxieHeaders.h"
+#include "core/Editor.h"
+#include "core/panels/EditorScene.h"
 
 namespace ige::creator
 {
@@ -22,17 +29,48 @@ namespace ige::creator
 
     void ToolBar::initialize()
     {
-        createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/play")->GetTextureHandle(), ImVec2(16.f, 16.f), true, false)->getOnClickEvent().addListener([](){
+        auto width = ImGui::GetMainViewport()->Size.x / 3.f;
+        auto columns = createWidget<Columns<3>>(width);
+        auto gizmoGroup = columns->createWidget<Group>("GizmoGroup", false);
+        gizmoGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/btn_translate")->GetTextureHandle(), ImVec2(16.f, 16.f), true, false)->getOnClickEvent().addListener([]() {
+            auto gizmo = Editor::getInstance()->getCanvas()->getEditorScene()->getGizmo();
+            if (gizmo)
+            {
+                gizmo->setOperation(gizmo::OPERATION::TRANSLATE);
+            }
+        });
+
+        gizmoGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/btn_rotate")->GetTextureHandle(), ImVec2(16.f, 16.f), true, false)->getOnClickEvent().addListener([]() {
+            auto gizmo = Editor::getInstance()->getCanvas()->getEditorScene()->getGizmo();
+            if (gizmo)
+            {
+                gizmo->setOperation(gizmo::OPERATION::ROTATE);
+            }
+        });
+
+        gizmoGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/btn_scale")->GetTextureHandle(), ImVec2(16.f, 16.f), true, false)->getOnClickEvent().addListener([]() {
+            auto gizmo = Editor::getInstance()->getCanvas()->getEditorScene()->getGizmo();
+            if (gizmo)
+            {
+                gizmo->setOperation(gizmo::OPERATION::SCALE);
+            }
+        });
+        
+        auto playGroup = columns->createWidget<Group>("PlayGroup", false, false, Group::E_Align::CENTER);
+        playGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/btn_play")->GetTextureHandle(), ImVec2(16.f, 16.f), true, false)->getOnClickEvent().addListener([](){
             // TODO
         });        
 
-        createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/pause")->GetTextureHandle(), ImVec2(16.f, 16.f), true, false)->getOnClickEvent().addListener([](){
+        playGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/btn_pause")->GetTextureHandle(), ImVec2(16.f, 16.f), true, false)->getOnClickEvent().addListener([](){
             // TODO
         });        
 
-        createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/stop")->GetTextureHandle(), ImVec2(16.f, 16.f), true, true)->getOnClickEvent().addListener([](){
+        playGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/btn_stop")->GetTextureHandle(), ImVec2(16.f, 16.f), true, true)->getOnClickEvent().addListener([](){
 
         });
+
+        auto serviceGroup = columns->createWidget<Group>("ServiceGroup", false, false, Group::E_Align::RIGHT);
+        serviceGroup->createWidget<Label>("Service (coming soon...)");
     }
 
     void ToolBar::_drawImpl()

@@ -20,6 +20,7 @@ namespace ige::creator
         m_showcase = nullptr;
         m_rtTexture = nullptr;
         m_fbo = nullptr;
+        m_gizmo = nullptr;
     }
     
     EditorScene::~EditorScene()
@@ -40,6 +41,11 @@ namespace ige::creator
             m_fbo->DecReference();
             m_fbo = nullptr;
         }
+
+        m_gizmo = nullptr;
+        m_camera = nullptr;
+        m_showcase = nullptr;
+        m_gizmo = nullptr;
     }
 
     void EditorScene::initialize()
@@ -70,6 +76,9 @@ namespace ige::creator
                 });
 
                 setAlign(Panel::E_HAlign::CENTER, Panel::E_VAlign::MIDDLE);
+
+                m_gizmo = createWidget<Gizmo>();
+                m_gizmo->setCamera(m_camera);
 
                 m_bIsInitialized = true;
             }

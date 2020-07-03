@@ -25,21 +25,32 @@ namespace ige::creator
         settings.dockable = true;
         settings.movable = false;
 
-        createPanel<Inspector>("Inspector", settings);
+        m_inspector = createPanel<Inspector>("Inspector", settings);
         createPanel<Hierarchy>("Hierarchy", settings);
         createPanel<Console>("Console", settings);
         createPanel<AssetBrowser>("AssetBrowser", settings);
         createPanel<AssetViewer>("AssetViewer", settings);
-        createPanel<EditorScene>("Scene", settings);
+        m_editorScene = createPanel<EditorScene>("Scene", settings);
     }
 
     Canvas::~Canvas()
     {
         m_menuBar = nullptr;
         m_toolBar = nullptr;
+        m_inspector = nullptr;
+        m_editorScene = nullptr;
         for (auto panel : m_panels)
             panel.second = nullptr;
         m_panels.clear();
+    }
+
+    void Canvas::setTargetObject(const std::shared_ptr<SceneObject>& obj)
+    {
+        m_inspector->setTargetObject(obj);
+        if (m_editorScene->getGizmo())
+        {
+            m_editorScene->getGizmo()->setTarget(obj);
+        }
     }
 
     void Canvas::update(float dt)

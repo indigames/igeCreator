@@ -4,8 +4,8 @@
 
 namespace ige::creator
 {
-    Group::Group(const std::string& name, bool collapsable, bool closable, bool open, bool enable)
-        : Widget(enable), m_name(name), m_bIsCollapsable(collapsable), m_bIsOpened(open), m_bIsClosable(closable)
+    Group::Group(const std::string& name, bool collapsable, bool closable, E_Align align, bool open, bool enable)
+        : Widget(enable), m_name(name), m_bIsCollapsable(collapsable), m_bIsClosable(closable), m_align(align), m_bIsOpened(open)
     {
     }
 
@@ -17,6 +17,21 @@ namespace ige::creator
 
     void Group::_drawImpl()
     {
+        auto width = ImGui::CalcItemWidth();
+        switch (m_align)
+        {
+        case ige::creator::Group::E_Align::LEFT:
+            break;
+        case ige::creator::Group::E_Align::CENTER:
+            ImGui::SameLine(width / 2.f);
+            break;
+        case ige::creator::Group::E_Align::RIGHT:
+            ImGui::SameLine(width);
+            break;
+        default:
+            break;
+        }
+
         ImGui::BeginGroup();
         {
             bool prevOpened = m_bIsOpened;

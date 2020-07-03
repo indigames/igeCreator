@@ -5,11 +5,16 @@
 
 #include "core/IDrawable.h"
 
+#include <scene/SceneObject.h>
+using namespace ige::scene;
+
 namespace ige::creator
 {
     class Panel;
     class MenuBar;
     class ToolBar;
+    class Inspector;
+    class EditorScene;
 
     class Canvas: public IDrawable
     {
@@ -19,6 +24,8 @@ namespace ige::creator
 
         virtual void update(float dt);
         virtual void draw() override;
+
+        void setTargetObject(const std::shared_ptr<SceneObject>& obj);
 
         template<typename T, typename... Args>
         std::shared_ptr<T> createPanel(const std::string& id, Args&&... args)
@@ -44,10 +51,17 @@ namespace ige::creator
         bool isDockable() const { return m_bDockable; }
         void setDockable(bool dockable) { m_bDockable = dockable; }
 
+        std::shared_ptr<MenuBar>& getMenuBar() { return m_menuBar; }
+        std::shared_ptr<ToolBar>& getToolBar() { return m_toolBar; }
+        std::shared_ptr<Inspector>& getInspector() { return m_inspector; }
+        std::shared_ptr<EditorScene>& getEditorScene() { return m_editorScene; }
+
     protected:
         bool m_bDockable = false;
         std::shared_ptr<MenuBar> m_menuBar = nullptr;
         std::shared_ptr<ToolBar> m_toolBar = nullptr;
+        std::shared_ptr<Inspector> m_inspector = nullptr;
+        std::shared_ptr<EditorScene> m_editorScene = nullptr;
         std::unordered_map<std::string, std::shared_ptr<Panel>> m_panels;
-    };    
+    };
 }

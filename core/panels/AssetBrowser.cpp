@@ -166,23 +166,23 @@ namespace ige::creator
                 std::string iconPath = "";
                 if (ext == ".png" || ext == ".jpg" || ext == ".pyxi")
                 {
-                    iconPath = "icon/image";
+                    iconPath = "icon/file_image";
                 }
                 else if (ext == ".dae" || ext == ".pyxf")
                 {
-                    iconPath = "icon/model";
+                    iconPath = "icon/file_model";
                 }
                 else if (ext == ".ogg" || ext == ".mp3" || ext == ".wav")
                 {
-                    iconPath = "icon/audio";
+                    iconPath = "icon/file_audio";
                 }
                 else if (ext == ".py" || ext == ".pyc" || ext == ".pyxd")
                 {
-                    iconPath = "icon/python";
+                    iconPath = "icon/file_python";
                 }
                 else
                 {
-                    iconPath = "icon/undefined";
+                    iconPath = "icon/file_undefined";
                 }
                 auto iconTextureId = ResourceCreator::Instance().NewTexture(iconPath.c_str())->GetTextureHandle();
                 auto fileIcon = m_fileGroup->createWidget<Icon>(itemName, iconTextureId, ImVec2(32.f, 32.f));
