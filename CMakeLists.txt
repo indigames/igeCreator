@@ -42,6 +42,20 @@ file(GLOB_RECURSE SRC_FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
 )
 
+set (EXCLUDE_DIR 
+    "examples"
+    "example"
+    "bin"
+)
+foreach (TMP_PATH ${SRC_FILES})
+    foreach (TMP_DIR ${EXCLUDE_DIR})
+        string (FIND ${TMP_PATH} ${TMP_DIR} EXCLUDE_DIR_FOUND)
+        if (NOT ${EXCLUDE_DIR_FOUND} EQUAL -1)
+            list (REMOVE_ITEM SRC_FILES ${TMP_PATH})
+        endif ()
+    endforeach(TMP_DIR)
+endforeach(TMP_PATH)
+
 add_executable(${TARGET_NAME} WIN32 ${SRC_FILES})
 
 target_link_libraries(${TARGET_NAME}
@@ -63,6 +77,8 @@ target_link_libraries(${TARGET_NAME}
 
 target_include_directories(${TARGET_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/pfd
+    ${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/ImGuizmo
     ${IGE_ROOT}/pyxCore/pyxcore
     ${IGE_ROOT}/pyxCore/ThirdParty/GLEW
     ${IGE_ROOT}/pyxCore/ThirdParty/edge/include
