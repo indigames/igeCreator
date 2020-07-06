@@ -18,7 +18,7 @@ namespace ige::creator
 
     protected:
         virtual void initialize() override;
-        virtual void _drawImpl() override;
+        virtual void drawWidgets() override;
 
         void onSceneObjectCreated(SceneObject& sceneObject);
         void onSceneObjectDeleted(SceneObject& sceneObject);

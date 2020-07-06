@@ -11,6 +11,8 @@
 
 using namespace ige::scene;
 
+#include <utils/PyxieHeaders.h>
+
 namespace ige::creator
 {
     Hierarchy::Hierarchy(const std::string& name, const Panel::Settings& settings)
@@ -119,7 +121,7 @@ namespace ige::creator
         auto nodePair = m_objectNodeMap.find(sceneObject.getId());
 
         if (nodePair != m_objectNodeMap.end())
-        {            
+        {
             if (sceneObject.hasParent() && sceneObject.getParent()->getChildrenCount() == 1)
             {
                 auto parentWidget = m_objectNodeMap.at(sceneObject.getParent()->getId());
@@ -144,9 +146,13 @@ namespace ige::creator
         clear();
     }
 
-    void Hierarchy::_drawImpl()
+    void Hierarchy::drawWidgets()
     {
-        Panel::_drawImpl();
+        // Show FPS
+        ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
+        // Draw widgets
+        Panel::drawWidgets();
     }
 
     void Hierarchy::clear()

@@ -468,6 +468,72 @@ namespace ige::creator
                 redraw();
             }
         });
+
+        auto figure = figureComp->getFigure();
+        if (figure)
+        {
+            for (int i = 0; i < figure->NumMaterials(); i++)
+            {
+                const char* matName = figure->GetMaterialName(i);
+                if (matName)
+                {
+                    m_figureCompGroup->createWidget<Label>(matName);
+                    int index = figure->GetMaterialIndex(GenerateNameHash(matName));
+                    auto currMat = figure->GetMaterial(i);
+
+                    for (auto j = 0; j < currMat->numParams; j++)
+                    {
+                        auto info = RenderContext::Instance().GetShaderParameterInfoByHash(currMat->params[j].hash);
+                        auto infoName = std::string(info->name);
+
+                        if ((currMat->params[j].type == ParamTypeFloat4))
+                        {
+                            std::array<float, 4> arr;
+                            std::copy(currMat->params[j].fValue, currMat->params[j].fValue + 4, begin(arr));
+                            m_figureCompGroup->createWidget<Drag<float, 4>>(info->name, ImGuiDataType_Float, arr, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this, index, infoName](auto val) {
+                                auto figureComp = getTargetObject()->getComponent<FigureComponent>();
+                                auto figure = figureComp->getFigure();
+                                if (figure)
+                                {
+                                    figure->SetMaterialParam(index, infoName.c_str(), &val);
+                                }
+                            });
+                        }
+                        else if ((currMat->params[j].type == ParamTypeSampler))
+                        {
+                            auto textPath = currMat->params[j].sampler.tex->ResourceName();
+                            m_figureCompGroup->createWidget<TextField>(info->name, textPath)->getOnDataChangedEvent().addListener([this, index, infoName](auto txt) {
+                                auto figureComp = getTargetObject()->getComponent<FigureComponent>();
+                                auto figure = figureComp->getFigure();
+                                if (figure)
+                                {
+                                    Sampler sampler;
+                                    auto tex = ResourceCreator::Instance().NewTexture(txt.c_str());
+                                    sampler.tex = tex;
+                                    sampler.samplerSlotNo = 0;
+                                    if (tex)
+                                    {
+                                        figure->SetMaterialParam(index, infoName.c_str(), &sampler);
+                                    }
+                                }
+                            });
+                        }
+                        else if ((currMat->params[j].type == ParamTypeFloat))
+                        {
+                            std::array val = { currMat->params[j].fValue[0] };
+                            m_figureCompGroup->createWidget<Drag<float>>(info->name, ImGuiDataType_Float, val)->getOnDataChangedEvent().addListener([this, index, infoName](auto val) {
+                                auto figureComp = getTargetObject()->getComponent<FigureComponent>();
+                                auto figure = figureComp->getFigure();
+                                if (figure)
+                                {
+                                    figure->SetMaterialParam(index, infoName.c_str(), &val);
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        }
     }
 
     void Inspector::drawSpriteComponent()

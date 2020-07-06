@@ -50,6 +50,9 @@ namespace ige::creator
 
     void Editor::update(float dt)
     {
+        // Set ImGui IO DeltaTime
+        ImGui::GetIO().DeltaTime = dt;
+
         // Update layouts
         m_canvas->update(dt);
     }
