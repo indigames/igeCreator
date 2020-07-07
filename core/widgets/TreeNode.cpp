@@ -29,8 +29,31 @@ namespace ige::creator
         }
     }
 
+    void TreeNode::open()
+    {
+        m_shouldOpen = true;
+        m_shouldClose = false;
+    }
+
+    void TreeNode::close()
+    {
+        m_shouldClose = true;
+        m_shouldOpen = false;
+    }
+
     void TreeNode::_drawImpl()
     {
+        if (m_shouldOpen)
+        {
+            ImGui::SetNextTreeNodeOpen(true);
+            m_shouldOpen = false;
+        }
+        else if (m_shouldClose)
+        {
+            ImGui::SetNextTreeNodeOpen(false);
+            m_shouldClose = false;
+        }
+
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
         if (m_bIsDefaultOpened) flags |= ImGuiTreeNodeFlags_DefaultOpen;
         if (m_bIsSelected)      flags |= ImGuiTreeNodeFlags_Selected;

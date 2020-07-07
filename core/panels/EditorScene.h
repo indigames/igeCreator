@@ -18,6 +18,7 @@ namespace ige::creator
         virtual void clear();
         virtual void update(float dt);
 
+        bool isResizing();
         void set2DMode(bool _2d) { m_bIs2DMode = _2d; }
 
         std::shared_ptr<Gizmo>& getGizmo() { return m_gizmo; }
@@ -37,5 +38,6 @@ namespace ige::creator
 
         bool m_bIs2DMode = false;
         bool m_bIsInitialized = false;
+        bool m_bNeedResize = false;
     };
 }

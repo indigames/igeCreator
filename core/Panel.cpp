@@ -95,15 +95,16 @@ namespace ige::creator
 
                 if (!m_bIsOpened) m_closeEvent.invoke();
 
-                if(!m_settings.autoSize)
-                    updateSize();
+                auto windowPos = ImGui::GetWindowPos();
+                if (m_position.x != windowPos.x || m_position.y != windowPos.y)
+                {
+                    m_position = windowPos;
+                }
                 
-                updatePosition();
-
                 auto newSize = ImGui::GetContentRegionAvail();
                 if (m_size.x != newSize.x || m_size.y != newSize.y)
                 {
-                    getOnSizeChangedEvent().invoke(m_size);
+                    getOnSizeChangedEvent().invoke(newSize);
                     m_size = newSize;
                 }
 
@@ -113,77 +114,13 @@ namespace ige::creator
         }
     }
 
-    void Panel::setPosition(const ImVec2& pos) {
-        m_position = pos;
-        m_bPositionChanged = true;
-    }
-
     const ImVec2& Panel::getPosition() const
     {
         return m_position;
     }
 
-    void Panel::setSize(const ImVec2& size)
-    {
-        m_size = size;
-        m_bSizeChanged = true;
-    }
-
     const ImVec2& Panel::getSize() const
     {
         return m_size;
-    }
-
-    void Panel::setAlign(Panel::E_HAlign hAlign, Panel::E_VAlign vAlign)
-    {
-        m_hAlign = hAlign;
-        m_vAlign = vAlign;
-        m_bAlignChanged = true;
-    }
-
-    void Panel::updatePosition()
-    {
-        if(m_bPositionChanged || m_bAlignChanged)
-        {
-            ImVec2 offset = {0.f, 0.f};
-
-            switch (m_hAlign)
-            {
-            case Panel::E_HAlign::CENTER:
-                offset.x -= m_size.x / 2.0f;
-                break;
-            case Panel::E_HAlign::RIGHT:
-                offset.x -= m_size.x;
-                break;
-            default:
-                break;
-            }
-
-            switch (m_vAlign)
-            {
-            case Panel::E_VAlign::MIDDLE:
-                offset.y -= m_size.y / 2.0f;
-                break;
-            case Panel::E_VAlign::BOTTOM:
-                offset.y -= m_size.y;
-                break;
-            default:
-                break;
-            }
-            
-            ImGui::SetWindowPos(ImVec2(m_position.x + offset.x, m_position.y + offset.y), ImGuiCond_Always);
-
-            m_bPositionChanged = false;
-            m_bAlignChanged = false;
-        }
-    }
-
-    void Panel::updateSize()
-    {
-        if (m_bSizeChanged)
-        {
-            ImGui::SetWindowSize(m_size, ImGuiCond_Always);
-            m_bSizeChanged = false;
-        }
     }
 }

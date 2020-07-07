@@ -23,6 +23,7 @@ namespace ige::creator
         SceneObject::getAttachedEvent().addListener(std::bind(&Hierarchy::onSceneObjectAttached, this, std::placeholders::_1));
         SceneObject::getDetachedEvent().addListener(std::bind(&Hierarchy::onSceneObjectDetached, this, std::placeholders::_1));
         SceneObject::getNameChangedEvent().addListener(std::bind(&Hierarchy::onSceneObjectChangedName, this, std::placeholders::_1));
+        SceneObject::getSelectedEvent().addListener(std::bind(&Hierarchy::onSceneObjectSelected, this, std::placeholders::_1));
     }
 
     Hierarchy::~Hierarchy()
@@ -140,6 +141,44 @@ namespace ige::creator
         if (nodePair != m_objectNodeMap.end())
             nodePair->second->setName(sceneObject.getName());
     }
+
+    void Hierarchy::onSceneObjectSelected(SceneObject& sceneObject)
+    {
+        auto obj = Editor::getInstance()->getSelectedObject();
+        if (obj)
+        {
+            obj->setSelected(false);
+        }
+       
+        // Set previous selected to false
+        auto nodePair = m_objectNodeMap.find(m_selectedNodeId);
+        if (nodePair != m_objectNodeMap.end())
+        {
+            nodePair->second->setIsSelected(false);
+        }
+
+        // Update current selected id
+        nodePair = m_objectNodeMap.find(sceneObject.getId());
+        if (nodePair != m_objectNodeMap.end())
+        {
+            m_selectedNodeId = sceneObject.getId();
+            nodePair->second->setIsSelected(true);
+                
+            // Recursive open parent nodes
+            auto parent = sceneObject.getParent();
+            while (parent != nullptr)
+            {
+                auto parentWidget = m_objectNodeMap.at(parent->getId());
+                parentWidget->open();
+                parent = parent->getParent();
+            }
+
+            // Set this node open as well
+            nodePair->second->open();
+            Editor::getInstance()->setSelectedObject(sceneObject.getId());
+        }
+    }
+    
 
     void Hierarchy::initialize()
     {

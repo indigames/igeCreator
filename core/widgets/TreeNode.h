@@ -22,6 +22,10 @@ namespace ige::creator
 
         virtual void draw() override;
 
+        void open();
+
+        void close();
+
     protected:
         virtual void _drawImpl() override;
 
@@ -33,5 +37,7 @@ namespace ige::creator
         bool m_bIsDefaultOpened = false;
         bool m_bIsSelected = false;
         bool m_bIsLeaf = false;
+        bool m_shouldOpen = false;
+        bool m_shouldClose = false;
     };
 }

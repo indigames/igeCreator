@@ -7,9 +7,11 @@
 #include "utils/GraphicsHelper.h"
 #include "scene/Scene.h"
 #include "scene/SceneManager.h"
-
-using namespace pyxie;
+#include "utils/RayOBBChecker.h"
 using namespace ige::scene;
+
+#include <utils/PyxieHeaders.h>
+using namespace pyxie;
 
 namespace ige::creator
 {
@@ -60,8 +62,9 @@ namespace ige::creator
                 m_imageWidget = createWidget<Image>(m_fbo->GetColorTexture()->GetTextureHandle(), size);
 
                 m_camera = ResourceCreator::Instance().NewCamera("editor_camera", nullptr);
-                m_camera->SetPosition(Vec3(0.f, 5.f, 10.f));
+                m_camera->SetPosition(Vec3(0.f, 5.f, 20.f));
                 m_camera->LockonTarget(false);
+                m_camera->SetAspectRate(size.x / size.y);
 
                 m_showcase = Editor::getInstance()->getSceneManager()->getCurrentScene()->getShowcase();
 
@@ -71,11 +74,9 @@ namespace ige::creator
                 m_showcase->Add(grid);
 
                 getOnSizeChangedEvent().addListener([this](auto size) {
-                    m_imageWidget->setSize(size);
-                    m_camera->SetAspectRate(size.x / size.y);
+                    auto currSize = getSize();
+                    m_bNeedResize = (currSize.x != size.x || currSize.y != size.y);
                 });
-
-                setAlign(Panel::E_HAlign::CENTER, Panel::E_VAlign::MIDDLE);
 
                 m_gizmo = createWidget<Gizmo>();
                 m_gizmo->setCamera(m_camera);
@@ -85,8 +86,29 @@ namespace ige::creator
         }
     }
 
+    bool EditorScene::isResizing()
+    {       
+        auto cursor = ImGui::GetMouseCursor();
+
+        return
+            cursor == ImGuiMouseCursor_ResizeEW ||
+            cursor == ImGuiMouseCursor_ResizeNS ||
+            cursor == ImGuiMouseCursor_ResizeNWSE ||
+            cursor == ImGuiMouseCursor_ResizeNESW ||
+            cursor == ImGuiMouseCursor_ResizeAll;
+    }
+
     void EditorScene::update(float dt)
     {
+        if (m_bNeedResize)
+        {
+            auto size = getSize();
+            m_fbo->Resize(size.x, size.y);
+            m_imageWidget->setSize(size);
+            m_camera->SetAspectRate(size.x / size.y);
+            m_bNeedResize = false;
+        }
+
         Panel::update(dt);
 
         if (!m_bIsInitialized)
@@ -98,8 +120,51 @@ namespace ige::creator
         // Update
         m_camera->Step(dt);
         m_showcase->Update(dt);
+
+        // If left button release, check selected object
+        auto touch = Editor::getInstance()->getApp()->getInputHandler()->getTouchDevice();
+        if (touch->isFingerReleased(0))
+        {
+            float touchX, touchY;
+            touch->getFingerPosition(0, touchX, touchY);
+
+            float screenW = SystemInfo::Instance().GetGameW();
+            float screenH = SystemInfo::Instance().GetGameH();
+
+            auto size = getSize();
+            float w = size.x;
+            float h = size.y;
+
+            auto pos = getPosition();
+            float dx = pos.x;
+            float dy = pos.y;
+
+            float x = touchX - dx / 2.f;
+            float y = touchY + dy / 2.f;
+
+            x = x + (screenW - (w + dx)) / 2.f;
+            y = y - (screenH - (h + dy)) / 2.f;
+
+            RayOBBChecker::setChecking(true);
+
+            Mat4 proj;
+            m_camera->GetProjectionMatrix(proj);
+
+            Mat4 viewInv;
+            m_camera->GetViewInverseMatrix(viewInv);
+
+            RayOBBChecker::screenPosToWorldRay(x, y, w, h, viewInv, proj);
+        }
+
+        // Update scene
         if (Editor::getInstance()->getSceneManager())
             Editor::getInstance()->getSceneManager()->update(dt);
+
+        // All object updated, no more checking
+        if (RayOBBChecker::isChecking())
+        {
+            RayOBBChecker::setChecking(false);
+        }
 
         // Render
         auto renderContext = RenderContext::InstancePtr();
