@@ -169,6 +169,8 @@ namespace ige::creator
             while (parent != nullptr)
             {
                 auto parentWidget = m_objectNodeMap.at(parent->getId());
+                if (parentWidget->isOpened()) 
+                    break;
                 parentWidget->open();
                 parent = parent->getParent();
             }

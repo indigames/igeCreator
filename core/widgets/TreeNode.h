@@ -23,8 +23,8 @@ namespace ige::creator
         virtual void draw() override;
 
         void open();
-
         void close();
+        bool isOpened() { return m_opened; }
 
     protected:
         virtual void _drawImpl() override;
