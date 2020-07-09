@@ -33,10 +33,7 @@ namespace ige::creator
         SceneObject::getAttachedEvent().removeAllListeners();
         SceneObject::getDetachedEvent().removeAllListeners();
 
-        for (auto& widget : m_widgets)
-            widget->getOnClickEvent().removeAllListeners();
-
-        m_objectNodeMap.clear();
+        clear();
     }
 
     void Hierarchy::onSceneObjectCreated(SceneObject& sceneObject)
@@ -66,8 +63,8 @@ namespace ige::creator
         auto createMenu = ctxMenu->createWidget<Menu>("Create");
         createMenu->createWidget<MenuItem>("New Object")->getOnClickEvent().addListener([objId]() {
             TaskManager::getInstance()->getTaskflow().emplace([objId]() {
-                auto currentObject = Editor::getInstance()->getSceneManager()->getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getInstance()->getSceneManager()->getCurrentScene()->createObject("New Object", currentObject);
+                auto currentObject = Editor::getSceneManager()->getCurrentScene()->findObjectById(objId);
+                auto newObject = Editor::getSceneManager()->getCurrentScene()->createObject("New Object", currentObject);
                 });
             });
 
@@ -81,7 +78,7 @@ namespace ige::creator
         ctxMenu->createWidget<MenuItem>("Delete")->getOnClickEvent().addListener([objId]() {
             TaskManager::getInstance()->getTaskflow().emplace([objId]() {
                 Editor::getInstance()->setSelectedObject(0);
-                if (objId != 0) Editor::getInstance()->getSceneManager()->getCurrentScene()->removeObjectById(objId);
+                if (objId != 0) Editor::getSceneManager()->getCurrentScene()->removeObjectById(objId);
                 });
             });
         m_objectNodeMap[objId] = node;
@@ -144,7 +141,7 @@ namespace ige::creator
 
     void Hierarchy::onSceneObjectSelected(SceneObject& sceneObject)
     {
-        auto obj = Editor::getInstance()->getSelectedObject();
+        auto obj = Editor::getSelectedObject();
         if (obj)
         {
             obj->setSelected(false);
@@ -198,5 +195,11 @@ namespace ige::creator
 
     void Hierarchy::clear()
     {
+        for (auto& widget : m_widgets)
+            widget->getOnClickEvent().removeAllListeners();
+
+        m_objectNodeMap.clear();
+
+        removeAllWidgets();
     }
 }

@@ -33,7 +33,7 @@ namespace ige::creator
         auto columns = createWidget<Columns<3>>(width);
         auto gizmoGroup = columns->createWidget<Group>("GizmoGroup", false);
         gizmoGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/btn_translate")->GetTextureHandle(), ImVec2(16.f, 16.f), true, false)->getOnClickEvent().addListener([]() {
-            auto gizmo = Editor::getInstance()->getCanvas()->getEditorScene()->getGizmo();
+            auto gizmo = Editor::getCanvas()->getEditorScene()->getGizmo();
             if (gizmo)
             {
                 gizmo->setOperation(gizmo::OPERATION::TRANSLATE);
@@ -41,7 +41,7 @@ namespace ige::creator
         });
 
         gizmoGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/btn_rotate")->GetTextureHandle(), ImVec2(16.f, 16.f), true, false)->getOnClickEvent().addListener([]() {
-            auto gizmo = Editor::getInstance()->getCanvas()->getEditorScene()->getGizmo();
+            auto gizmo = Editor::getCanvas()->getEditorScene()->getGizmo();
             if (gizmo)
             {
                 gizmo->setOperation(gizmo::OPERATION::ROTATE);
@@ -49,7 +49,7 @@ namespace ige::creator
         });
 
         gizmoGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/btn_scale")->GetTextureHandle(), ImVec2(16.f, 16.f), true, false)->getOnClickEvent().addListener([]() {
-            auto gizmo = Editor::getInstance()->getCanvas()->getEditorScene()->getGizmo();
+            auto gizmo = Editor::getCanvas()->getEditorScene()->getGizmo();
             if (gizmo)
             {
                 gizmo->setOperation(gizmo::OPERATION::SCALE);

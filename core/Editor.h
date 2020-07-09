@@ -27,16 +27,16 @@ namespace ige::creator
         static void handleEvent(const void* event);
 
         void registerApp(std::shared_ptr<Application> app) { m_app = app; }
-        std::shared_ptr<Application>& getApp() { return m_app; }
-        std::shared_ptr<Canvas>& getCanvas() { return m_canvas; }
 
-        SceneManager* getSceneManager() { return m_sceneManager; }
+        static std::shared_ptr<Application>& getApp() { return getInstance()->m_app; }
+        static std::shared_ptr<Canvas>& getCanvas() { return getInstance()->m_canvas; }
+        static SceneManager* getSceneManager() { return getInstance()->m_sceneManager; }
 
         //! Get current selected object
-        std::shared_ptr<SceneObject>& getSelectedObject() { return m_selectedObject; }
+        static std::shared_ptr<SceneObject>& getSelectedObject() { return m_selectedObject; }
 
         //! Set current selected object by its id
-        void setSelectedObject(uint64_t objId);
+        static void setSelectedObject(uint64_t objId);
 
     protected:
         virtual void initImGUI();
@@ -49,6 +49,6 @@ namespace ige::creator
         SceneManager* m_sceneManager = nullptr;
 
         //! Selected object (in hierarchy & inspector)
-        std::shared_ptr<SceneObject> m_selectedObject = nullptr;
+        static std::shared_ptr<SceneObject> m_selectedObject;
     };
 }

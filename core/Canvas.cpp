@@ -26,7 +26,7 @@ namespace ige::creator
         settings.movable = false;
 
         m_inspector = createPanel<Inspector>("Inspector", settings);
-        createPanel<Hierarchy>("Hierarchy", settings);
+        m_hierarchy = createPanel<Hierarchy>("Hierarchy", settings);
         createPanel<Console>("Console", settings);
         createPanel<AssetBrowser>("AssetBrowser", settings);
         createPanel<AssetViewer>("AssetViewer", settings);

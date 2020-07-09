@@ -15,6 +15,7 @@ namespace ige::creator
     class ToolBar;
     class Inspector;
     class EditorScene;
+    class Hierarchy;
 
     class Canvas: public IDrawable
     {
@@ -55,6 +56,7 @@ namespace ige::creator
         std::shared_ptr<ToolBar>& getToolBar() { return m_toolBar; }
         std::shared_ptr<Inspector>& getInspector() { return m_inspector; }
         std::shared_ptr<EditorScene>& getEditorScene() { return m_editorScene; }
+        std::shared_ptr<Hierarchy>& getHierarchy() { return m_hierarchy; }
 
     protected:
         bool m_bDockable = false;
@@ -62,6 +64,7 @@ namespace ige::creator
         std::shared_ptr<ToolBar> m_toolBar = nullptr;
         std::shared_ptr<Inspector> m_inspector = nullptr;
         std::shared_ptr<EditorScene> m_editorScene = nullptr;
+        std::shared_ptr<Hierarchy> m_hierarchy = nullptr;
         std::unordered_map<std::string, std::shared_ptr<Panel>> m_panels;
     };
 }

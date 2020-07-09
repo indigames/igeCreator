@@ -15,11 +15,14 @@ using namespace ige::scene;
 
 namespace ige::creator
 {
+    std::shared_ptr<SceneObject> Editor::m_selectedObject = nullptr;
+
     Editor::Editor()
     {}
     
     Editor::~Editor()
     {
+        m_selectedObject = nullptr;
         m_canvas = nullptr;
         m_sceneManager = nullptr;
         SceneManager::destroy();
@@ -38,9 +41,7 @@ namespace ige::creator
         m_canvas->setDockable(true);
 
         m_sceneManager = SceneManager::getInstance();
-        auto scene = m_sceneManager->createEmptyScene();
-        m_sceneManager->setCurrentScene("EmptyScene");
-        assert(scene == m_sceneManager->getCurrentScene());
+        m_sceneManager->createEmptyScene();
     }
 
     void Editor::handleEvent(const void* event)

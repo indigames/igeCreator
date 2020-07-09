@@ -66,7 +66,7 @@ namespace ige::creator
                 m_camera->LockonTarget(false);
                 m_camera->SetAspectRate(size.x / size.y);
 
-                m_showcase = Editor::getInstance()->getSceneManager()->getCurrentScene()->getShowcase();
+                m_showcase = Editor::getSceneManager()->getCurrentScene()->getShowcase();
 
                 auto grid = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, "grid");
                 grid->SetPosition(Vec3(0.f, 0.f, 0.f));
@@ -122,7 +122,7 @@ namespace ige::creator
         m_showcase->Update(dt);
 
         // If left button release, check selected object
-        auto touch = Editor::getInstance()->getApp()->getInputHandler()->getTouchDevice();
+        auto touch = Editor::getApp()->getInputHandler()->getTouchDevice();
         if (touch->isFingerReleased(0))
         {
             float touchX, touchY;
@@ -157,8 +157,8 @@ namespace ige::creator
         }
 
         // Update scene
-        if (Editor::getInstance()->getSceneManager())
-            Editor::getInstance()->getSceneManager()->update(dt);
+        if (Editor::getSceneManager())
+            Editor::getSceneManager()->update(dt);
 
         // All object updated, no more checking
         if (RayOBBChecker::isChecking())
@@ -174,8 +174,8 @@ namespace ige::creator
 
             m_camera->Render();
 
-            if (Editor::getInstance()->getSceneManager())
-                Editor::getInstance()->getSceneManager()->render();
+            if (Editor::getSceneManager())
+                Editor::getSceneManager()->render();
 
             renderContext->EndScene();
         }
