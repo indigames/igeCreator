@@ -9,6 +9,7 @@
 #include "core/widgets/Separator.h"
 #include "core/widgets/Drag.h"
 #include "core/widgets/Slider.h"
+#include "core/widgets/Color.h"
 #include "core/panels/Inspector.h"
 #include "core/Editor.h"
 
@@ -488,16 +489,7 @@ namespace ige::creator
 
                         if ((currMat->params[j].type == ParamTypeFloat4))
                         {
-                            std::array<float, 4> arr;
-                            std::copy(currMat->params[j].fValue, currMat->params[j].fValue + 4, begin(arr));
-                            m_figureCompGroup->createWidget<Drag<float, 4>>(info->name, ImGuiDataType_Float, arr, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this, index, infoName](auto val) {
-                                auto figureComp = getTargetObject()->getComponent<FigureComponent>();
-                                auto figure = figureComp->getFigure();
-                                if (figure)
-                                {
-                                    figure->SetMaterialParam(index, infoName.c_str(), &val);
-                                }
-                            });
+                            m_figureCompGroup->createWidget<Color>(info->name, currMat->params[j].fValue);
                         }
                         else if ((currMat->params[j].type == ParamTypeSampler))
                         {
