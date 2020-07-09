@@ -4,9 +4,11 @@
 
 namespace ige::creator
 {
-    TextField::TextField(const std::string& label, const std::string& content, bool readOnly)
-        : DataWidget<std::string>(content), m_label(label), m_content(content), m_bIsReadOnly(readOnly)
+    TextField::TextField(const std::string& label, const char* content, bool needEnter, bool readOnly)
+        : DataWidget<std::string>(content), m_label(label), m_bIsReadOnly(readOnly), m_bIsNeedEnter(needEnter)
     {
+        m_content.fill(0);
+        std::memcpy(m_content.data(), content, strlen(content) < MAX_TEXT_LENGHT ? strlen(content) : MAX_TEXT_LENGHT);
     }
 
     TextField::~TextField()
@@ -16,22 +18,22 @@ namespace ige::creator
 
     void TextField::_drawImpl()
     {
-        std::string previousContent = m_content;
-        m_content.resize(512, '\0');
-
-
-        int flag = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll;
+        int flag = ImGuiInputTextFlags_AutoSelectAll;
+        if (m_bIsNeedEnter)
+        {
+            flag |= ImGuiInputTextFlags_EnterReturnsTrue;
+        }
 
         if (m_bIsReadOnly)
         {
             flag |= ImGuiInputTextFlags_ReadOnly;
         }
 
-        bool enterPressed = ImGui::InputText((m_label + m_id).c_str(), &m_content[0], 512, flag);
+        bool enterPressed = ImGui::InputText((m_label + m_id).c_str(), m_content.data(), MAX_TEXT_LENGHT, flag);
 
-        if (m_content != previousContent)
+       if (enterPressed)
         {           
-            this->notifyChange(m_content);
+            this->notifyChange(m_content.data());
         }
     }
 }
