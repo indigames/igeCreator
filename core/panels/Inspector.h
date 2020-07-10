@@ -19,6 +19,7 @@ namespace ige::creator
 
         void setTargetObject(std::shared_ptr<SceneObject> obj);
         std::shared_ptr<SceneObject>& getTargetObject() { return m_targetObject; }
+        void updateMaterial(int index, const char* infoName, std::string txt);
 
     protected:
         virtual void initialize() override;
