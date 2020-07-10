@@ -18,7 +18,6 @@ namespace ige::creator
 		std::shared_ptr<T> createWidget(Args&&... args)
 		{
             auto widget = std::make_shared<T>(args...);
-            widget->setContainer(this);
 			addWidget(widget);
 			return widget;
 		}

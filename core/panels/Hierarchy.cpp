@@ -16,7 +16,7 @@ using namespace ige::scene;
 namespace ige::creator
 {
     Hierarchy::Hierarchy(const std::string& name, const Panel::Settings& settings)
-        : Panel(name, settings)
+        : Panel(name, settings), m_targetObject(nullptr)
     {
         SceneObject::getCreatedEvent().addListener(std::bind(&Hierarchy::onSceneObjectCreated, this, std::placeholders::_1));
         SceneObject::getDestroyedEvent().addListener(std::bind(&Hierarchy::onSceneObjectDeleted, this, std::placeholders::_1));
@@ -34,6 +34,11 @@ namespace ige::creator
         SceneObject::getDetachedEvent().removeAllListeners();
 
         clear();
+    }
+
+    void Hierarchy::setTargetObject(const std::shared_ptr<SceneObject>& obj)
+    {
+        m_targetObject = obj;
     }
 
     void Hierarchy::onSceneObjectCreated(SceneObject& sceneObject)
@@ -141,10 +146,9 @@ namespace ige::creator
 
     void Hierarchy::onSceneObjectSelected(SceneObject& sceneObject)
     {
-        auto obj = Editor::getSelectedObject();
-        if (obj)
+        if (m_targetObject)
         {
-            obj->setSelected(false);
+            m_targetObject->setSelected(false);
         }
        
         // Set previous selected to false
@@ -178,12 +182,6 @@ namespace ige::creator
         }
     }
     
-
-    void Hierarchy::initialize()
-    {
-        clear();
-    }
-
     void Hierarchy::drawWidgets()
     {
         // Show FPS
@@ -195,11 +193,6 @@ namespace ige::creator
 
     void Hierarchy::clear()
     {
-        for (auto& widget : m_widgets)
-            widget->getOnClickEvent().removeAllListeners();
-
-        m_objectNodeMap.clear();
-
-        removeAllWidgets();
+        m_targetObject = nullptr;
     }
 }

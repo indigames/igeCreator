@@ -7,7 +7,10 @@
 #include "core/Editor.h"
 #include "core/Canvas.h"
 #include "core/dialog/OpenFileDialog.h"
+#include "core/dialog/SaveFileDialog.h"
 #include "core/panels/Hierarchy.h"
+#include "core/panels/EditorScene.h"
+#include "core/task/TaskManager.h"
 
 namespace ige::creator
 {
@@ -50,14 +53,27 @@ namespace ige::creator
     void MenuBar::createFileMenu()
     {
         auto fileMenu = createWidget<Menu>("File");
-        fileMenu->createWidget<MenuItem>("Open Scene", "CTRL + O")->getOnClickEvent().addListener([](){
-            auto selectedFiles = OpenFileDialog("Open", ".", {"json", "*.json"}).result();
+        fileMenu->createWidget<MenuItem>("Open Scene", "CTRL + O")->getOnClickEvent().addListener([this](){
+            auto selectedFiles = OpenFileDialog("Open", ".", { "json", "*.json" }).result();
             if (!selectedFiles.empty() && !selectedFiles[0].empty())
             {
-                Editor::getCanvas()->getHierarchy()->clear();
-                Editor::getSceneManager()->loadScene(selectedFiles[0]);
+                TaskManager::getInstance()->getTaskflow().emplace([selectedFiles, this]() {
+                    Editor::setSelectedObject(-1);
+                    Editor::getCanvas()->getEditorScene()->clear();
+                    Editor::getSceneManager()->loadScene(selectedFiles[0]);
+                });
             }
         });
+
+        fileMenu->createWidget<MenuItem>("Save Scene", "CTRL + S")->getOnClickEvent().addListener([this]() {
+            auto selectedFile = SaveFileDialog("Save", ".", { "json", "*.json" }).result();
+                if (!selectedFile.empty())
+                {
+                    TaskManager::getInstance()->getTaskflow().emplace([selectedFile, this]() {
+                        Editor::getSceneManager()->saveScene(selectedFile);
+                    });
+                }
+            });
 
         fileMenu->createWidget<MenuItem>("Exit", "CTRL + N")->getOnClickEvent().addListener([]() {
             Editor::getApp()->quit();

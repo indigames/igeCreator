@@ -32,6 +32,14 @@ namespace ige::creator
 
     void EditorScene::clear()
     {
+        m_bIsInitialized = false;
+
+        m_imageWidget = nullptr;
+        m_gizmo = nullptr;
+
+        getOnSizeChangedEvent().removeAllListeners();
+        removeAllWidgets();
+
         if (m_rtTexture)
         {
             m_rtTexture->DecReference();
@@ -44,10 +52,20 @@ namespace ige::creator
             m_fbo = nullptr;
         }
 
-        m_gizmo = nullptr;
-        m_camera = nullptr;
-        m_showcase = nullptr;
-        m_gizmo = nullptr;
+        if (m_camera)
+        {
+            m_camera->DecReference();
+            m_camera = nullptr;
+        }
+
+        if (m_showcase)
+        {
+            m_showcase->Clear();
+            m_showcase->DecReference();
+            m_showcase = nullptr;
+        }
+
+        ResourceManager::Instance().DeleteDaemon();
     }
 
     void EditorScene::initialize()
@@ -67,6 +85,7 @@ namespace ige::creator
                 m_camera->SetAspectRate(size.x / size.y);
 
                 m_showcase = Editor::getSceneManager()->getCurrentScene()->getShowcase();
+                m_showcase->IncReference();
 
                 auto grid = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, "grid");
                 grid->SetPosition(Vec3(0.f, 0.f, 0.f));

@@ -16,10 +16,6 @@ namespace ige::creator
 
     void TextField::_drawImpl()
     {
-        std::string previousContent = m_content;
-        m_content.resize(512, '\0');
-
-
         int flag = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll;
 
         if (m_bIsReadOnly)
@@ -27,10 +23,13 @@ namespace ige::creator
             flag |= ImGuiInputTextFlags_ReadOnly;
         }
 
-        bool enterPressed = ImGui::InputText((m_label + m_id).c_str(), &m_content[0], 512, flag);
+        char txt[256] = { 0 };
+        sprintf(txt, m_content.c_str());
+        bool enterPressed = ImGui::InputText((m_label + m_id).c_str(), txt, 256, flag);
+        m_content = std::string(txt);
 
-        if (m_content != previousContent)
-        {           
+        if (enterPressed)
+        {
             this->notifyChange(m_content);
         }
     }
