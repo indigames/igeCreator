@@ -20,7 +20,6 @@ namespace ige::creator
         m_toolBar = std::make_shared<ToolBar>("ToolBar");
         
         Panel::Settings settings;
-        settings.closable = true;
         settings.collapsable = true;
         settings.dockable = true;
         settings.movable = false;

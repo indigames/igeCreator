@@ -87,7 +87,7 @@ namespace ige::creator
                 m_showcase = Editor::getSceneManager()->getCurrentScene()->getShowcase();
                 m_showcase->IncReference();
 
-                auto grid = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, "grid");
+                auto grid = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, "sprite/grid");
                 grid->SetPosition(Vec3(0.f, 0.f, 0.f));
                 grid->SetRotation(Quat::RotationX(PI / 2.f));
                 m_showcase->Add(grid);
