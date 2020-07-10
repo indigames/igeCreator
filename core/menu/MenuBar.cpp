@@ -75,7 +75,7 @@ namespace ige::creator
                 }
             });
 
-        fileMenu->createWidget<MenuItem>("Exit", "CTRL + N")->getOnClickEvent().addListener([]() {
+        fileMenu->createWidget<MenuItem>("Exit", "ALT + F4")->getOnClickEvent().addListener([]() {
             Editor::getApp()->quit();
         });
     }

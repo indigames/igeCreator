@@ -8,7 +8,7 @@
 #include "core/menu/ContextMenu.h"
 #include "core/menu/MenuItem.h"
 #include "core/task/TaskManager.h"
-
+#include "components/FigureComponent.h"
 using namespace ige::scene;
 
 #include <utils/PyxieHeaders.h>
@@ -70,22 +70,40 @@ namespace ige::creator
             TaskManager::getInstance()->getTaskflow().emplace([objId]() {
                 auto currentObject = Editor::getSceneManager()->getCurrentScene()->findObjectById(objId);
                 auto newObject = Editor::getSceneManager()->getCurrentScene()->createObject("New Object", currentObject);
-                });
             });
+        });
 
         auto shapeMenu = createMenu->createWidget<Menu>("Primitives");
-        shapeMenu->createWidget<MenuItem>("Cone");
-        shapeMenu->createWidget<MenuItem>("Cube");
-        shapeMenu->createWidget<MenuItem>("Cylinder");
-        shapeMenu->createWidget<MenuItem>("Plane");
-        shapeMenu->createWidget<MenuItem>("Sphere");
+        shapeMenu->createWidget<MenuItem>("Cube")->getOnClickEvent().addListener([objId]() {
+            TaskManager::getInstance()->getTaskflow().emplace([objId]() {
+                auto currentObject = Editor::getSceneManager()->getCurrentScene()->findObjectById(objId);
+                auto newObject = Editor::getSceneManager()->getCurrentScene()->createObject("Cube", currentObject);
+                newObject->addComponent<FigureComponent>("figure/cube.pyxf");
+            });
+        });
+
+        shapeMenu->createWidget<MenuItem>("Plane")->getOnClickEvent().addListener([objId]() {
+            TaskManager::getInstance()->getTaskflow().emplace([objId]() {
+                auto currentObject = Editor::getSceneManager()->getCurrentScene()->findObjectById(objId);
+                auto newObject = Editor::getSceneManager()->getCurrentScene()->createObject("Plane", currentObject);
+                newObject->addComponent<FigureComponent>("figure/plane.pyxf");
+            });
+        });
+
+        shapeMenu->createWidget<MenuItem>("Sphere")->getOnClickEvent().addListener([objId]() {
+            TaskManager::getInstance()->getTaskflow().emplace([objId]() {
+                auto currentObject = Editor::getSceneManager()->getCurrentScene()->findObjectById(objId);
+                auto newObject = Editor::getSceneManager()->getCurrentScene()->createObject("Sphere", currentObject);
+                newObject->addComponent<FigureComponent>("figure/sphere.pyxf");
+            });
+        });
 
         ctxMenu->createWidget<MenuItem>("Delete")->getOnClickEvent().addListener([objId]() {
             TaskManager::getInstance()->getTaskflow().emplace([objId]() {
                 Editor::getInstance()->setSelectedObject(0);
                 if (objId != 0) Editor::getSceneManager()->getCurrentScene()->removeObjectById(objId);
-                });
             });
+        });
         m_objectNodeMap[objId] = node;
     }
 
@@ -115,6 +133,7 @@ namespace ige::creator
                 auto parentWidget = m_objectNodeMap.at(sceneObject.getParent()->getId());
                 parentWidget->setIsLeaf(false);
                 parentWidget->addWidget(widget);
+                parentWidget->open();
             }
         }
     }
