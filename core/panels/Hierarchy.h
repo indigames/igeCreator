@@ -15,9 +15,9 @@ namespace ige::creator
         virtual ~Hierarchy();
 
         virtual void clear();
+        void setTargetObject(const std::shared_ptr<SceneObject>& obj);
 
     protected:
-        virtual void initialize() override;
         virtual void drawWidgets() override;
 
         void onSceneObjectCreated(SceneObject& sceneObject);
@@ -32,5 +32,8 @@ namespace ige::creator
         std::shared_ptr<TreeNode> m_sceneRoot;
         std::unordered_map<uint64_t, std::shared_ptr<TreeNode>> m_objectNodeMap;
         uint64_t m_selectedNodeId = 0xffffffff;
+
+        //! Selected object
+        std::shared_ptr<SceneObject> m_targetObject = nullptr;
     };
 }

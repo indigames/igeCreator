@@ -6,7 +6,7 @@
 namespace ige::creator
 {
     Gizmo::Gizmo()
-        : Widget(true, false), m_camera(nullptr)
+        : Widget(true, false), m_camera(nullptr), m_target(nullptr)
     {
         m_operation = gizmo::OPERATION::TRANSLATE;
         m_mode = gizmo::MODE::LOCAL;
@@ -14,6 +14,8 @@ namespace ige::creator
 
     Gizmo::~Gizmo()
     {
+        m_camera = nullptr;
+        m_target = nullptr;
     }
 
     void Gizmo::setTarget(const std::shared_ptr<SceneObject>& target)

@@ -15,14 +15,11 @@ using namespace ige::scene;
 
 namespace ige::creator
 {
-    std::shared_ptr<SceneObject> Editor::m_selectedObject = nullptr;
-
     Editor::Editor()
     {}
     
     Editor::~Editor()
     {
-        m_selectedObject = nullptr;
         m_canvas = nullptr;
         m_sceneManager = nullptr;
         SceneManager::destroy();
@@ -54,6 +51,9 @@ namespace ige::creator
         // Set ImGui IO DeltaTime
         ImGui::GetIO().DeltaTime = dt;
 
+        // Update tasks
+        TaskManager::getInstance()->update();
+
         // Update layouts
         m_canvas->update(dt);
     }
@@ -63,14 +63,8 @@ namespace ige::creator
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL2_NewFrame((SDL_Window*)m_app->getAppWindow());
 
-        // Update target object
-        m_canvas->setTargetObject(m_selectedObject);
-
         // Render main canvas
         m_canvas->draw();
-
-        // Update tasks
-        TaskManager::getInstance()->update();
 
         // Render ImGUI
         renderImGUI();
@@ -103,7 +97,8 @@ namespace ige::creator
     //! Set current selected object by its Id
     void Editor::setSelectedObject(uint64_t objId)
     {
-        m_selectedObject = getSceneManager()->getCurrentScene()->findObjectById(objId);
+        auto obj = getSceneManager()->getCurrentScene()->findObjectById(objId);
+        getCanvas()->setTargetObject(obj);
     }
 
 }

@@ -54,7 +54,7 @@ namespace ige::creator
             m_shouldClose = false;
         }
 
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
         if (m_bIsDefaultOpened) flags |= ImGuiTreeNodeFlags_DefaultOpen;
         if (m_bIsSelected)      flags |= ImGuiTreeNodeFlags_Selected;
         if (m_bIsLeaf)          flags |= ImGuiTreeNodeFlags_Leaf;

@@ -16,8 +16,7 @@ namespace ige::creator
         virtual void _drawImpl() override;
 
         std::string m_label;
-        //std::string m_content;
-        std::array<char, 64> m_content;
+        std::array<char, MAX_TEXT_LENGHT> m_content;
         bool m_bIsReadOnly;
         bool m_bIsNeedEnter;
     };

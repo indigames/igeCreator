@@ -32,9 +32,6 @@ namespace ige::creator
         static std::shared_ptr<Canvas>& getCanvas() { return getInstance()->m_canvas; }
         static SceneManager* getSceneManager() { return getInstance()->m_sceneManager; }
 
-        //! Get current selected object
-        static std::shared_ptr<SceneObject>& getSelectedObject() { return m_selectedObject; }
-
         //! Set current selected object by its id
         static void setSelectedObject(uint64_t objId);
 
@@ -47,8 +44,5 @@ namespace ige::creator
         std::shared_ptr<Canvas> m_canvas = nullptr;
         std::shared_ptr<Application> m_app = nullptr;
         SceneManager* m_sceneManager = nullptr;
-
-        //! Selected object (in hierarchy & inspector)
-        static std::shared_ptr<SceneObject> m_selectedObject;
     };
 }
