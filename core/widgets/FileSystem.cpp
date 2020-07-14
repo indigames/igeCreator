@@ -1,4 +1,5 @@
 #include <imgui.h>
+#include "core/plugin/DragDropPlugin.h"
 
 #include "core/widgets/FileSystem.h"
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
@@ -7,63 +8,16 @@
 #include <imgui_internal.h>
 #include <SDL.h>
 #include <array>
+#include <string>
 
 namespace ImGui
 {
-    void ImageWithAspect(ImTextureID texture, ImVec2 texture_size, ImVec2 size,
-        const ImVec2& uv0 = ImVec2(0, 0), const ImVec2& uv1 = ImVec2(1, 1),
-        const ImVec4& tint_col = ImVec4(1, 1, 1, 1),
-        const ImVec4& border_col = ImVec4(0, 0, 0, 0))
-    {
-        float w = texture_size.x;
-        float h = texture_size.y;
-        float max_size = ImMax(size.x, size.y);
-        float aspect = w / h;
-        if (w > h)
-        {
-            float m = ImMin(max_size, w);
-
-            size.x = m;
-            size.y = m / aspect;
-        }
-        else if (h > w)
-        {
-            float m = ImMin(max_size, h);
-
-            size.x = m * aspect;
-            size.y = m;
-        }
-
-        auto pos = GetCursorScreenPos();
-        ImGuiWindow* window = GetCurrentWindow();
-
-        ImRect bb(window->DC.CursorPos,
-            ImVec2(window->DC.CursorPos.x + max_size, window->DC.CursorPos.y + max_size));
-        ItemSize(bb);
-        ItemAdd(bb, 0);
-
-        auto pos2 = GetCursorScreenPos();
-
-        if (size.x > size.y)
-            pos.y += (max_size - size.y) * 0.5f;
-        if (size.x < size.y)
-            pos.x += (max_size - size.x) * 0.5f;
-
-        SetCursorScreenPos(pos);
-
-        Image(texture, size, uv0, uv1, tint_col, border_col);
-
-        SetCursorScreenPos(pos2);
-    }
-
     void RenderFrameEx(ImVec2 p_min, ImVec2 p_max, bool border, float rounding, float thickness)
     {
         ImGuiWindow* window = GetCurrentWindow();
-
         if (border)
         {
-            window->DrawList->AddRect(p_min + ImVec2(1, 1), p_max + ImVec2(1, 1),
-                GetColorU32(ImGuiCol_BorderShadow), rounding, 15, thickness);
+            window->DrawList->AddRect(p_min + ImVec2(1, 1), p_max + ImVec2(1, 1), GetColorU32(ImGuiCol_BorderShadow), rounding, 15, thickness);
             window->DrawList->AddRect(p_min, p_max, GetColorU32(ImGuiCol_Border), rounding, 15, thickness);
         }
     }
@@ -595,26 +549,10 @@ namespace ige::creator
             const std::string extension = filename.has_extension() ? filename.extension().string() : "folder";
             const std::string id = absolute_path.string();
             const std::string strfilename = filename.string();
-            const auto& tex = preview;
-            ImVec2 item_size = { 32, 32 };
-            ImVec2 texture_size = item_size;
-            if (tex)
-            {
-                texture_size = { float(tex->GetTextureWidth()), float(tex->GetTextureHeight()) };
-            }
-            ImVec2 uv0 = { 0.0f, 1.0f };
-            ImVec2 uv1 = { 1.0f, 0.0f };
-            ImGui::BeginGroup();
-
-            auto w = ImGui::CalcTextSize(strfilename.c_str()).x;
-
-            ImGui::SameLine(0.0f, (w - item_size.x) / 2.0f);
-            ImGui::ImageWithAspect((ImTextureID)(tex->GetTextureHandle()), texture_size, item_size, uv0, uv1);
 
             ImGui::TextUnformatted(strfilename.c_str());
-
-            ImGui::EndGroup();
-            ImGui::SetDragDropPayload(extension.c_str(), id.data(), id.size());
+            const std::string relative = fs::relative(absolute_path).replace_extension().string();
+            ImGui::SetDragDropPayload(extension.c_str(), &relative, sizeof(relative));
             ImGui::EndDragDropSource();
             return true;
         }
