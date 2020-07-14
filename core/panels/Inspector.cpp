@@ -12,6 +12,7 @@
 #include "core/widgets/Color.h"
 #include "core/panels/Inspector.h"
 #include "core/Editor.h"
+#include "core/FileHandle.h"
 
 #include "core/plugin/DragDropPlugin.h"
 #include "core/dialog/OpenFileDialog.h"
@@ -455,11 +456,14 @@ namespace ige::creator
             auto figureComp = getTargetObject()->getComponent<FigureComponent>();
             figureComp->setPath(txt);
         });
-        txtPath->addPlugin<DDTargetPlugin<std::string>>(EDragDropID::FILE)->getOnDataReceivedEvent().addListener([this](auto txt) {
-            auto figureComp = getTargetObject()->getComponent<FigureComponent>();
-            figureComp->setPath(txt);
-            redraw();
-        });
+        for (const auto& type : GetFileExtensionSuported<FigureComponent>())
+        {
+            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
+                auto figureComp = getTargetObject()->getComponent<FigureComponent>();
+                figureComp->setPath(txt);
+                redraw();
+                });
+        }       
         m_figureCompGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this]() {
             auto files = OpenFileDialog("Import Assets", "", { "Figure (*.pyxf)", "*.pyxf" }).result();
             if (files.size() > 0)
@@ -499,9 +503,13 @@ namespace ige::creator
                                 updateMaterial(index, infoName, txt);
                             });
 
-                            txtPath->addPlugin<DDTargetPlugin<std::string>>(EDragDropID::FILE)->getOnDataReceivedEvent().addListener([this, index, infoName](auto txt) {
-                                updateMaterial(index, infoName, txt);
-                            });
+                            for (const auto& type : GetFileExtensionSuported<SpriteComponent>())
+                            {
+                                txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this, index, infoName](auto txt) {
+                                    updateMaterial(index, infoName, txt);
+                                    redraw();
+                                });
+                            }                            
                         }
                         else if ((currMat->params[j].type == ParamTypeFloat))
                         {
@@ -535,11 +543,14 @@ namespace ige::creator
             auto spriteComp = getTargetObject()->getComponent<SpriteComponent>();
             spriteComp->setPath(txt);
         });
-        txtPath->addPlugin<DDTargetPlugin<std::string>>(EDragDropID::FILE)->getOnDataReceivedEvent().addListener([this](auto txt) {
-            auto spriteComp = getTargetObject()->getComponent<SpriteComponent>();
-            spriteComp->setPath(txt);
-            redraw();
-        });
+        for (const auto& type : GetFileExtensionSuported<SpriteComponent>())
+        {
+            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
+                auto spriteComp = getTargetObject()->getComponent<SpriteComponent>();
+                spriteComp->setPath(txt);
+                redraw();
+            });
+        }
         m_spriteCompGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this]() {
             auto files = OpenFileDialog("Import Assets", "", { "Texture (*.pyxi)", "*.pyxi" }).result();
             if (files.size() > 0)
@@ -571,11 +582,15 @@ namespace ige::creator
             auto scriptComp = getTargetObject()->getComponent<ScriptComponent>();
             scriptComp->setPath(txt);
         });
-        txtPath->addPlugin<DDTargetPlugin<std::string>>(EDragDropID::FILE)->getOnDataReceivedEvent().addListener([this](auto txt) {
-            auto scriptComp = getTargetObject()->getComponent<ScriptComponent>();
-            scriptComp->setPath(txt);
-            redraw();
-        });
+        for (const auto& type : GetFileExtensionSuported<ScriptComponent>())
+        {
+            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
+                auto scriptComp = getTargetObject()->getComponent<ScriptComponent>();
+                scriptComp->setPath(txt);
+                redraw();
+            });
+        }
+        
         m_scriptCompGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this]() {
             auto files = OpenFileDialog("Import Assets", "", { "Script (*.py)", "*.py" }).result();
             if (files.size() > 0)

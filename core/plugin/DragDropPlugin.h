@@ -5,6 +5,8 @@
 #include <string>
 #include "core/plugin/IPlugin.h"
 
+#include <event/Event.h>
+
 namespace ige::creator
 {
     enum class EDragDropID
@@ -18,6 +20,7 @@ namespace ige::creator
     {
     public:
         DDSourcePlugin(EDragDropID id, const std::string& tooltip, const T& data);
+        DDSourcePlugin(std::string id, const std::string& tooltip, const T& data);
         virtual ~DDSourcePlugin() {}
 
         virtual void execute();
@@ -49,6 +52,7 @@ namespace ige::creator
     {
     public:
         DDTargetPlugin(EDragDropID id);
+        DDTargetPlugin(std::string id);
         virtual ~DDTargetPlugin() {}
 
         virtual void execute();
@@ -80,6 +84,13 @@ namespace ige::creator
         : m_tooltip(tooltip), m_data(data)
     {
         m_id = std::to_string((int)id);
+    }
+
+    template<typename T>
+    DDSourcePlugin<T>::DDSourcePlugin(std::string id, const std::string& tooltip, const T& data)
+        : m_tooltip(tooltip), m_data(data)
+    {
+        m_id = id;
     }
 
     template<typename T>
@@ -120,6 +131,12 @@ namespace ige::creator
     DDTargetPlugin<T>::DDTargetPlugin(EDragDropID id)
     {
         m_id = std::to_string((int)id);
+    }
+
+    template<typename T>
+    DDTargetPlugin<T>::DDTargetPlugin(std::string id)
+    {
+        m_id = id;
     }
 
     template<typename T>
