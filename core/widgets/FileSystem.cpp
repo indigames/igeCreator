@@ -1,5 +1,6 @@
 #include <imgui.h>
 #include "core/plugin/DragDropPlugin.h"
+#include "core/FileHandle.h"
 
 #include "core/widgets/FileSystem.h"
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
@@ -170,7 +171,8 @@ namespace ige::creator
         m_iconTextures["folder"] = ResourceCreator::Instance().NewTexture("icon/folder");
         m_iconTextures["file"] = ResourceCreator::Instance().NewTexture("icon/file_image");
         m_iconTextures["prefab"] = ResourceCreator::Instance().NewTexture("icon/file_prefab");
-        m_iconTextures["python"] = ResourceCreator::Instance().NewTexture("icons/file_python");
+        m_iconTextures["python"] = ResourceCreator::Instance().NewTexture("icon/file_python");
+        m_iconTextures["model"] = ResourceCreator::Instance().NewTexture("icon/file_model");
 
         const auto root_path = fs::current_path();// fs::absolute("");
 
@@ -296,14 +298,39 @@ namespace ige::creator
             }
             else //file
             {
-                DrawEntry(m_iconTextures["file"], false, filename, absolute_path, is_selected(absolute_path), size,
-                    [&]() // on_click
-                    {
-                        m_selection = absolute_path;
-                    },
-                    nullptr, // on_double_click
-                    on_rename, on_delete);
-                return;
+                if (IsFormat<ScriptComponent>(file_ext))
+                {
+                    DrawEntry(m_iconTextures["python"], false, filename, absolute_path, is_selected(absolute_path), size,
+                        [&]() // on_click
+                        {
+                            m_selection = absolute_path;
+                        },
+                        nullptr, // on_double_click
+                            on_rename, on_delete);
+                    return;
+                }
+                else if (IsFormat<FigureComponent>(file_ext))
+                {
+                    DrawEntry(m_iconTextures["model"], false, filename, absolute_path, is_selected(absolute_path), size,
+                        [&]() // on_click
+                        {
+                            m_selection = absolute_path;
+                        },
+                        nullptr, // on_double_click
+                            on_rename, on_delete);
+                    return;
+                }
+                else
+                {
+                    DrawEntry(m_iconTextures["file"], false, filename, absolute_path, is_selected(absolute_path), size,
+                        [&]() // on_click
+                        {
+                            m_selection = absolute_path;
+                        },
+                        nullptr, // on_double_click
+                            on_rename, on_delete);
+                    return;
+                }
             }
         };        
 
