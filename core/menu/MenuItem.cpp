@@ -15,7 +15,7 @@ namespace ige::creator
     {
         if (ImGui::MenuItem((m_name + m_id).c_str(), m_shortcut.c_str(), nullptr, m_bEnabled))
         {
-            m_onClickEvent.invoke();
+            getOnClickEvent().invoke(this);
         }
     }
 }

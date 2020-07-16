@@ -10,6 +10,7 @@
 #include "core/widgets/Drag.h"
 #include "core/widgets/Slider.h"
 #include "core/widgets/Color.h"
+#include "core/widgets/AnchorWidget.h"
 #include "core/panels/Inspector.h"
 #include "core/Editor.h"
 
@@ -22,6 +23,7 @@
 #include <components/FigureComponent.h>
 #include <components/SpriteComponent.h>
 #include <components/ScriptComponent.h>
+#include <components/RectTransform.h>
 using namespace ige::scene;
 
 #include <pyxieUtilities.h>
@@ -67,9 +69,10 @@ namespace ige::creator
         m_createCompCombo->addChoice(2, "Figure Component");
         m_createCompCombo->addChoice(3, "Sprite Component");
         m_createCompCombo->addChoice(4, "Script Component");
+        m_createCompCombo->addChoice(5, "RectTransform");
 
         auto createCompButton = m_headerGroup->createWidget<Button>("Add", ImVec2(64.f, 0.f));
-        createCompButton->getOnClickEvent().addListener([this](){
+        createCompButton->getOnClickEvent().addListener([this](auto widget){
             switch(m_createCompCombo->getSelectedIndex())
             {
                 case 0: getTargetObject()->addComponent<CameraComponent>("camera"); break;
@@ -77,6 +80,7 @@ namespace ige::creator
                 case 2: getTargetObject()->addComponent<FigureComponent>(); break;
                 case 3: getTargetObject()->addComponent<SpriteComponent>(); break;
                 case 4: getTargetObject()->addComponent<ScriptComponent>(); break;
+                case 5: getTargetObject()->addComponent<RectTransform>(); break;
             }
             redraw();
         });
@@ -124,6 +128,11 @@ namespace ige::creator
             {
                 m_scriptCompGroup = header->createWidget<Group>("ScriptGroup", false);
                 drawScriptComponent();
+            }
+            else if (component->getName() == "RectTransform")
+            {
+                m_rectTransformGroup = header->createWidget<Group>("RectTransformGroup", false);
+                drawRectTransform();
             }
         });
     }
@@ -460,7 +469,7 @@ namespace ige::creator
             figureComp->setPath(txt);
             redraw();
         });
-        m_figureCompGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this]() {
+        m_figureCompGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
             auto files = OpenFileDialog("Import Assets", "", { "Figure (*.pyxf)", "*.pyxf" }).result();
             if (files.size() > 0)
             {
@@ -540,7 +549,7 @@ namespace ige::creator
             spriteComp->setPath(txt);
             redraw();
         });
-        m_spriteCompGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this]() {
+        m_spriteCompGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
             auto files = OpenFileDialog("Import Assets", "", { "Texture (*.pyxi)", "*.pyxi" }).result();
             if (files.size() > 0)
             {
@@ -576,7 +585,7 @@ namespace ige::creator
             scriptComp->setPath(txt);
             redraw();
         });
-        m_scriptCompGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this]() {
+        m_scriptCompGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
             auto files = OpenFileDialog("Import Assets", "", { "Script (*.py)", "*.py" }).result();
             if (files.size() > 0)
             {
@@ -585,8 +594,118 @@ namespace ige::creator
                 redraw();
             }
         });
-    }   
+    }
 
+    void Inspector::drawRectTransform()
+    {
+        if (m_rectTransformGroup == nullptr) return;
+        m_rectTransformGroup->removeAllWidgets();
+        
+        auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+        if (rectTransform == nullptr) return;
+
+        std::array pos = { rectTransform->getPosition().X(), rectTransform->getPosition().Y(), rectTransform->getPosition().Z() };
+        m_rectTransformGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+            rectTransform->setPosition({ val[0], val[1], val[2] });
+            rectTransform->onUpdate(0.f);
+        });
+
+        std::array size = { rectTransform->getSize().X(), rectTransform->getSize().Y() };
+        m_rectTransformGroup->createWidget<Drag<float, 2>>("Size", ImGuiDataType_Float, size)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+            rectTransform->setSize({ val[0], val[1] });
+            rectTransform->onUpdate(0.f);
+        });
+
+        m_rectTransformGroup->createWidget<Label>("Anchor");
+        m_rectTransformGroup->createWidget<AnchorPresets>("AnchorPresets")->getOnClickEvent().addListener([this](auto widget) {
+            auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+            auto anchor = rectTransform->getAnchor();
+            auto anchorWidget = (AnchorWidget*)widget;
+            anchor.m_left = anchorWidget->getAnchorMin().x;
+            anchor.m_top = anchorWidget->getAnchorMin().y;
+            anchor.m_right = anchorWidget->getAnchorMax().x;
+            anchor.m_bottom = anchorWidget->getAnchorMax().y;
+            rectTransform->setAnchor(anchor);
+            redraw();
+        });
+
+        auto anchorColumn = m_rectTransformGroup->createWidget<Columns<2>>();
+        anchorColumn->setColumnWidth(0, 52.f);       
+        
+        auto anchor = rectTransform->getAnchor();
+        anchorColumn->createWidget<AnchorWidget>(ImVec2(anchor.m_left, anchor.m_top), ImVec2(anchor.m_right, anchor.m_bottom), false)->getOnClickEvent().addListener([](auto widget) {
+            ImGui::OpenPopup("AnchorPresets");
+        });
+
+        auto anchorGroup = anchorColumn->createWidget<Group>("AnchorGroup", false, false);
+        std::array anchorMin = { rectTransform->getAnchor().m_left, rectTransform->getAnchor().m_top };
+        anchorGroup->createWidget<Drag<float, 2>>("Min", ImGuiDataType_Float, anchorMin, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+            auto anchor = rectTransform->getAnchor();
+            anchor.m_left = val[0];
+            anchor.m_top = val[1];
+            rectTransform->setAnchor(anchor);
+        });
+        std::array anchorMax = { rectTransform->getAnchor().m_right, rectTransform->getAnchor().m_bottom };
+        anchorGroup->createWidget<Drag<float, 2>>("Max", ImGuiDataType_Float, anchorMax, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+            auto anchor = rectTransform->getAnchor();
+            anchor.m_right = val[0];
+            anchor.m_bottom = val[1];
+            rectTransform->setAnchor(anchor);
+            rectTransform->onUpdate(0.f);
+        });
+
+        std::array pivot = { rectTransform->getPivot().X(), rectTransform->getPivot().Y() };
+        m_rectTransformGroup->createWidget<Drag<float, 2>>("Pivot", ImGuiDataType_Float, pivot)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+            rectTransform->setPivot({ val[0], val[1] });
+            rectTransform->onUpdate(0.f);
+        });
+
+        m_rectTransformGroup->createWidget<Label>("Offset");
+        std::array offsetMin = { rectTransform->getOffset().m_left, rectTransform->getOffset().m_top };
+        m_rectTransformGroup->createWidget<Drag<float, 2>>("Left-Top", ImGuiDataType_Float, offsetMin)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+            auto offset = rectTransform->getOffset();
+            offset.m_left = val[0];
+            offset.m_top = val[1];
+            rectTransform->setOffset(offset);
+            rectTransform->onUpdate(0.f);
+        });
+
+        std::array offsetMax = { rectTransform->getOffset().m_right, rectTransform->getOffset().m_bottom };
+        m_rectTransformGroup->createWidget<Drag<float, 2>>("Right-Bottom", ImGuiDataType_Float, offsetMax)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+            auto offset = rectTransform->getOffset();
+            offset.m_right = val[0];
+            offset.m_bottom = val[1];
+            rectTransform->setOffset(offset);
+            rectTransform->onUpdate(0.f);
+        });
+
+        Vec3 euler;
+        vmath_quatToEuler(rectTransform->getRotation().P(), euler.P());
+        std::array rot = { RADIANS_TO_DEGREES(euler.X()), RADIANS_TO_DEGREES(euler.Y()), RADIANS_TO_DEGREES(euler.Z()) };
+        m_rectTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+            Quat quat;
+            float rad[3] = { DEGREES_TO_RADIANS(val[0]), DEGREES_TO_RADIANS(val[1]), DEGREES_TO_RADIANS(val[2]) };
+            vmath_eulerToQuat(rad, quat.P());
+            rectTransform->setRotation(quat);
+            rectTransform->onUpdate(0.f);
+        });
+
+        std::array scale = { rectTransform->getScale().X(), rectTransform->getScale().Y(), rectTransform->getScale().Z() };
+        m_rectTransformGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scale)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+            rectTransform->setScale({ val[0], val[1], val[2] });
+            rectTransform->onUpdate(0.f);
+        });
+    }
+    
     void Inspector::_drawImpl()
     {
         if (m_bNeedRedraw)
@@ -611,6 +730,7 @@ namespace ige::creator
         m_environmentCompGroup = nullptr;
         m_figureCompGroup = nullptr;
         m_spriteCompGroup = nullptr;
+        m_rectTransformGroup = nullptr;
 
         removeAllWidgets();
     }

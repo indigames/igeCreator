@@ -53,7 +53,7 @@ namespace ige::creator
     void MenuBar::createFileMenu()
     {
         auto fileMenu = createWidget<Menu>("File");
-        fileMenu->createWidget<MenuItem>("Open Scene", "CTRL + O")->getOnClickEvent().addListener([this](){
+        fileMenu->createWidget<MenuItem>("Open Scene", "CTRL + O")->getOnClickEvent().addListener([this](auto widget){
             auto selectedFiles = OpenFileDialog("Open", ".", { "json", "*.json" }).result();
             if (!selectedFiles.empty() && !selectedFiles[0].empty())
             {
@@ -65,7 +65,7 @@ namespace ige::creator
             }
         });
 
-        fileMenu->createWidget<MenuItem>("Save Scene", "CTRL + S")->getOnClickEvent().addListener([this]() {
+        fileMenu->createWidget<MenuItem>("Save Scene", "CTRL + S")->getOnClickEvent().addListener([this](auto widget) {
             auto selectedFile = SaveFileDialog("Save", ".", { "json", "*.json" }).result();
                 if (!selectedFile.empty())
                 {
@@ -75,7 +75,7 @@ namespace ige::creator
                 }
             });
 
-        fileMenu->createWidget<MenuItem>("Exit", "ALT + F4")->getOnClickEvent().addListener([]() {
+        fileMenu->createWidget<MenuItem>("Exit", "ALT + F4")->getOnClickEvent().addListener([](auto widget) {
             Editor::getApp()->quit();
         });
     }

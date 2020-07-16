@@ -17,11 +17,11 @@ namespace ige::creator
         {
             if (ImGui::ImageButton((ImTextureID)m_textureId, m_size, { 0.f, 1.f }, { 1.f, 0.f }))
             {
-                getOnClickEvent().invoke();
+                getOnClickEvent().invoke(this);
             }
             if (ImGui::Selectable((m_label + m_id).c_str(), false, 0, ImVec2(128.f, 0.f)))
             {
-                getOnClickEvent().invoke();
+                getOnClickEvent().invoke(this);
             }
             if (ImGui::IsItemHovered())
             {

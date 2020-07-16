@@ -33,7 +33,7 @@ namespace ige::creator
         bool hasContainer() const { return m_container != nullptr; };
         Container* getContainer() const { return m_container; }
 
-        ige::scene::Event<>& getOnClickEvent() { return m_onClickEvent; }
+        ige::scene::Event<Widget*>& getOnClickEvent() { return m_onClickEvent; }
 
     protected:
         virtual void _drawImpl() = 0;
@@ -43,7 +43,7 @@ namespace ige::creator
         Container* m_container;
         bool m_bEnabled;
         bool m_bEOL = true;
-        ige::scene::Event<> m_onClickEvent;
+        ige::scene::Event<Widget*> m_onClickEvent;
 
     private:
         static uint64_t s_idCounter;

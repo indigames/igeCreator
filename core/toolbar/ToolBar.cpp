@@ -32,7 +32,7 @@ namespace ige::creator
         auto width = ImGui::GetMainViewport()->Size.x / 3.f;
         auto columns = createWidget<Columns<3>>(width);
         auto gizmoGroup = columns->createWidget<Group>("GizmoGroup", false);
-        gizmoGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/btn_translate")->GetTextureHandle(), ImVec2(16.f, 16.f), true, false)->getOnClickEvent().addListener([]() {
+        gizmoGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/btn_translate")->GetTextureHandle(), ImVec2(16.f, 16.f), true, false)->getOnClickEvent().addListener([](auto widget) {
             auto gizmo = Editor::getCanvas()->getEditorScene()->getGizmo();
             if (gizmo)
             {
@@ -40,7 +40,7 @@ namespace ige::creator
             }
         });
 
-        gizmoGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/btn_rotate")->GetTextureHandle(), ImVec2(16.f, 16.f), true, false)->getOnClickEvent().addListener([]() {
+        gizmoGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/btn_rotate")->GetTextureHandle(), ImVec2(16.f, 16.f), true, false)->getOnClickEvent().addListener([](auto widget) {
             auto gizmo = Editor::getCanvas()->getEditorScene()->getGizmo();
             if (gizmo)
             {
@@ -48,7 +48,7 @@ namespace ige::creator
             }
         });
 
-        gizmoGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/btn_scale")->GetTextureHandle(), ImVec2(16.f, 16.f), true, false)->getOnClickEvent().addListener([]() {
+        gizmoGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/btn_scale")->GetTextureHandle(), ImVec2(16.f, 16.f), true, false)->getOnClickEvent().addListener([](auto widget) {
             auto gizmo = Editor::getCanvas()->getEditorScene()->getGizmo();
             if (gizmo)
             {
@@ -57,15 +57,15 @@ namespace ige::creator
         });
         
         auto playGroup = columns->createWidget<Group>("PlayGroup", false, false, Group::E_Align::CENTER);
-        playGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/btn_play")->GetTextureHandle(), ImVec2(16.f, 16.f), true, false)->getOnClickEvent().addListener([](){
+        playGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/btn_play")->GetTextureHandle(), ImVec2(16.f, 16.f), true, false)->getOnClickEvent().addListener([](auto widget){
             // TODO
         });        
 
-        playGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/btn_pause")->GetTextureHandle(), ImVec2(16.f, 16.f), true, false)->getOnClickEvent().addListener([](){
+        playGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/btn_pause")->GetTextureHandle(), ImVec2(16.f, 16.f), true, false)->getOnClickEvent().addListener([](auto widget){
             // TODO
         });        
 
-        playGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/btn_stop")->GetTextureHandle(), ImVec2(16.f, 16.f), true, true)->getOnClickEvent().addListener([](){
+        playGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/btn_stop")->GetTextureHandle(), ImVec2(16.f, 16.f), true, true)->getOnClickEvent().addListener([](auto widget){
 
         });
 

@@ -12,7 +12,7 @@ namespace ige::creator
     class Columns: public Widget, public Container
     {
     public:
-        Columns(float defautWidth = 180.f, bool isChild = false, bool enable = true);
+        Columns(float defautWidth = -1.f, bool isChild = false, bool enable = true);
         virtual ~Columns() {}
 
         void setColumnWidth(int idx, float width);   
@@ -51,10 +51,20 @@ namespace ige::creator
             ImGui::Columns(static_cast<int>(N), ("##" + m_id).c_str(), false);
 
             int counter = 0;
+            int offset = 0;
             for (auto widget : m_widgets)
             {
                 if (m_columnWidths[counter] > 0.f)
+                {
                     ImGui::SetColumnWidth(counter, m_columnWidths[counter]);
+                    offset += m_columnWidths[counter];
+                }
+                else
+                {
+                    ImGui::SetColumnOffset(counter, offset);
+                    ImGui::SetColumnWidth(counter, ImGui::GetWindowContentRegionWidth() - offset - 10.f);
+                    offset = ImGui::GetWindowContentRegionWidth();
+                }
 
                 widget->draw();
 
@@ -62,7 +72,10 @@ namespace ige::creator
 
                 ++counter;
                 if (counter == N)
+                {
                     counter = 0;
+                    offset = 0;
+                }                 
             }
             ImGui::Columns(1);
         }

@@ -16,7 +16,7 @@ namespace ige::creator
         {
             if (!m_bIsOpened)
             {
-                m_onClickEvent.invoke();
+                getOnClickEvent().invoke(this);
                 m_bIsOpened = true;
             }
 

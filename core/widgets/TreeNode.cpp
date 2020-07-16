@@ -64,7 +64,7 @@ namespace ige::creator
         executePlugins();
 
         if (ImGui::IsItemClicked() && (ImGui::GetMousePos().x - ImGui::GetItemRectMin().x) > ImGui::GetTreeNodeToLabelSpacing())
-            getOnClickEvent().invoke();
+            getOnClickEvent().invoke(this);
 
         if (opened)
         {

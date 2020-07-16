@@ -40,7 +40,7 @@ namespace ige::creator
             std::filesystem::create_directories(m_projectAssetFolder);
         }
 
-        createWidget<Button>("Refresh", ImVec2(0, 0), true, false)->getOnClickEvent().addListener([this]() {
+        createWidget<Button>("Refresh", ImVec2(0, 0), true, false)->getOnClickEvent().addListener([this](auto widget) {
             m_bNeedRefresh = true;
         });
         createWidget<Button>("Import", ImVec2(0, 0))->getOnClickEvent().addListener(std::bind(&AssetBrowser::import, this, m_projectAssetFolder));
@@ -82,7 +82,7 @@ namespace ige::creator
         std::string path = rootDir.path().string();
 
         auto treeNode = m_folderGroup->createWidget<TreeNode>(itemName, false, false, true);
-        treeNode->getOnClickEvent().addListener([&, treeNode, this, path]() {
+        treeNode->getOnClickEvent().addListener([&, treeNode, this, path](auto widget) {
             m_currentFolder = path;
             parseFile(std::filesystem::directory_entry(path), true);
             if (m_selectedNode != treeNode)
@@ -137,7 +137,7 @@ namespace ige::creator
                 std::string path = item.path().string();
 
                 auto treeNode = root ? root->createWidget<TreeNode>(itemName) : m_folderGroup->createWidget<TreeNode>(itemName);
-                treeNode->getOnClickEvent().addListener([&, treeNode, this, path]() {
+                treeNode->getOnClickEvent().addListener([&, treeNode, this, path](auto widget) {
                     m_currentFolder = path;
                     parseFile(std::filesystem::directory_entry(path), isEngine);
                     if (m_selectedNode != treeNode)
