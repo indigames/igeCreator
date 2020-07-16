@@ -98,6 +98,14 @@ namespace ige::creator
             });
         });
 
+        auto guiMenu = createMenu->createWidget<Menu>("GUI");
+        guiMenu->createWidget<MenuItem>("Buttom")->getOnClickEvent().addListener([objId](auto widget) {
+            TaskManager::getInstance()->getTaskflow().emplace([objId]() {
+                auto currentObject = Editor::getSceneManager()->getCurrentScene()->findObjectById(objId);
+                auto newObject = Editor::getSceneManager()->getCurrentScene()->createGUIObject("Button", currentObject);                
+            });
+        });
+
         ctxMenu->createWidget<MenuItem>("Delete")->getOnClickEvent().addListener([objId](auto widget) {
             TaskManager::getInstance()->getTaskflow().emplace([objId](auto widget) {
                 Editor::getInstance()->setSelectedObject(0);

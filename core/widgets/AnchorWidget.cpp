@@ -30,8 +30,9 @@ namespace ige::creator
         auto isStretchW = (m_anchorMin.x == 0.f && m_anchorMax.x == 1.f);
         auto isStretchH = (m_anchorMin.y == 0.f && m_anchorMax.y == 1.f);
         
-        auto anchorX = (m_anchorMin.x + m_anchorMax.x) / 2.f; // rectTransform->getAnchor().m_left;
-        auto anchorY = (m_anchorMin.y + m_anchorMax.y) / 2.f; //rectTransform->getAnchor().m_top;
+        // Now, just consider 09 fixed anchor points
+        auto anchorX = (m_anchorMin.x + m_anchorMax.x) / 2.f;
+        auto anchorY = (m_anchorMin.y + m_anchorMax.y) / 2.f;
 
         auto curX = minPos.x + (maxPos.x - minPos.x) * anchorX;
         auto curY = maxPos.y - (maxPos.y - minPos.y) * anchorY;
