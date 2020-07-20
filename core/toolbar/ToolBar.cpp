@@ -15,6 +15,7 @@
 #include "utils/PyxieHeaders.h"
 #include "core/Editor.h"
 #include "core/panels/EditorScene.h"
+#include "core/Canvas.h"
 
 namespace ige::creator
 {

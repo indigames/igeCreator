@@ -46,10 +46,7 @@ namespace ige::creator
     void Canvas::setTargetObject(const std::shared_ptr<SceneObject>& obj)
     {
         m_inspector->setTargetObject(obj);
-        if (m_editorScene->getGizmo())
-        {
-            m_editorScene->getGizmo()->setTarget(obj);
-        }
+        m_editorScene->setTargetObject(obj);
     }
 
     void Canvas::update(float dt)

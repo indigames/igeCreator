@@ -25,6 +25,7 @@
 #include <components/SpriteComponent.h>
 #include <components/ScriptComponent.h>
 #include <components/RectTransform.h>
+#include <components/Canvas.h>
 using namespace ige::scene;
 
 #include <pyxieUtilities.h>
@@ -133,6 +134,11 @@ namespace ige::creator
                 m_rectTransformGroup = header->createWidget<Group>("RectTransformGroup", false);
                 drawRectTransform();
             }
+            else if (component->getName() == "Canvas")
+            {
+                m_canvasGroup = header->createWidget<Group>("CanvasGroup", false);
+                drawCanvas();
+            }            
         });
     }
 
@@ -470,7 +476,7 @@ namespace ige::creator
                 auto figureComp = getTargetObject()->getComponent<FigureComponent>();
                 figureComp->setPath(txt);
                 redraw();
-                });
+            });
         }
 
         m_figureCompGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
@@ -654,6 +660,7 @@ namespace ige::creator
                 auto offset = rectTransform->getOffset();
                 offset.m_left = val[0];
                 rectTransform->setOffset(offset);
+                rectTransform->onUpdate(0.f);
             });
 
             std::array top = { offset.m_top };
@@ -662,6 +669,7 @@ namespace ige::creator
                 auto offset = rectTransform->getOffset();
                 offset.m_top = val[0];
                 rectTransform->setOffset(offset);
+                rectTransform->onUpdate(0.f);
             });
 
             std::array posZ = { rectTransform->getPosition().Z() };
@@ -679,6 +687,7 @@ namespace ige::creator
                 auto offset = rectTransform->getOffset();
                 offset.m_right = val[0];
                 rectTransform->setOffset(offset);
+                rectTransform->onUpdate(0.f);
             });
 
             std::array bottom = { offset.m_bottom };
@@ -687,6 +696,7 @@ namespace ige::creator
                 auto offset = rectTransform->getOffset();
                 offset.m_bottom = val[0];
                 rectTransform->setOffset(offset);
+                rectTransform->onUpdate(0.f);
             });
         }
         else if (anchor.m_left == 0.f && anchor.m_right == 1.f)
@@ -697,6 +707,7 @@ namespace ige::creator
                 auto offset = rectTransform->getOffset();
                 offset.m_left = val[0];
                 rectTransform->setOffset(offset);
+                rectTransform->onUpdate(0.f);
             });
             std::array posY = { rectTransform->getPosition().Y() };
             anchorGroupColums->createWidget<Drag<float>>("Y", ImGuiDataType_Float, posY)->getOnDataChangedEvent().addListener([this](auto val) {
@@ -721,6 +732,7 @@ namespace ige::creator
                 auto offset = rectTransform->getOffset();
                 offset.m_right = val[0];
                 rectTransform->setOffset(offset);
+                rectTransform->onUpdate(0.f);
             });
 
             std::array height = { rectTransform->getSize().Y() };
@@ -729,6 +741,7 @@ namespace ige::creator
                 auto size = rectTransform->getSize();
                 size.Y(val[0]);
                 rectTransform->setSize(size);
+                rectTransform->onUpdate(0.f);
             });
         }
         else if (anchor.m_top == 0.f && anchor.m_bottom == 1.f)
@@ -748,6 +761,7 @@ namespace ige::creator
                 auto offset = rectTransform->getOffset();
                 offset.m_top = val[0];
                 rectTransform->setOffset(offset);
+                rectTransform->onUpdate(0.f);
             });
 
             std::array posZ = { rectTransform->getPosition().Z() };
@@ -765,6 +779,7 @@ namespace ige::creator
                 auto size = rectTransform->getSize();
                 size.X(val[0]);
                 rectTransform->setSize(size);
+                rectTransform->onUpdate(0.f);
             });
 
             std::array bottom = { offset.m_bottom };
@@ -773,6 +788,7 @@ namespace ige::creator
                 auto offset = rectTransform->getOffset();
                 offset.m_bottom = val[0];
                 rectTransform->setOffset(offset);
+                rectTransform->onUpdate(0.f);
             });
         }
         else
@@ -810,6 +826,7 @@ namespace ige::creator
                 auto size = rectTransform->getSize();
                 size.X(val[0]);
                 rectTransform->setSize(size);
+                rectTransform->onUpdate(0.f);
             });
 
             std::array height = { rectTransform->getSize().Y() };
@@ -818,6 +835,7 @@ namespace ige::creator
                 auto size = rectTransform->getSize();
                 size.Y(val[0]);
                 rectTransform->setSize(size);
+                rectTransform->onUpdate(0.f);
             });
         }
         
@@ -848,6 +866,27 @@ namespace ige::creator
         });
     }
     
+    void Inspector::drawCanvas()
+    {
+        if (m_canvasGroup == nullptr) return;
+        m_canvasGroup->removeAllWidgets();
+
+        auto canvas = getTargetObject()->getComponent<ige::scene::Canvas>();
+        if (canvas == nullptr) return;
+
+        std::array size = { canvas->getDesignCanvasSize().X(), canvas->getDesignCanvasSize().Y() };
+        m_canvasGroup->createWidget<Drag<float, 2>>("Design Size", ImGuiDataType_Float, size)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto canvas = getTargetObject()->getComponent<ige::scene::Canvas>();
+            canvas->setDesignCanvasSize({ val[0], val[1] });
+        });
+
+        std::array targetSize = { canvas->getTargetCanvasSize().X(), canvas->getTargetCanvasSize().Y() };
+        m_canvasGroup->createWidget<Drag<float, 2>>("Target Size", ImGuiDataType_Float, targetSize)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto canvas = getTargetObject()->getComponent<ige::scene::Canvas>();
+            canvas->setTargetCanvasSize({ val[0], val[1] });
+        });        
+    }
+    
     void Inspector::_drawImpl()
     {
         if (m_bNeedRedraw)
@@ -873,6 +912,7 @@ namespace ige::creator
         m_figureCompGroup = nullptr;
         m_spriteCompGroup = nullptr;
         m_rectTransformGroup = nullptr;
+        m_canvasGroup = nullptr;
 
         removeAllWidgets();
     }

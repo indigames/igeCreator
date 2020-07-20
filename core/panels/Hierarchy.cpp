@@ -9,6 +9,7 @@
 #include "core/menu/MenuItem.h"
 #include "core/task/TaskManager.h"
 #include "components/FigureComponent.h"
+#include "components/Canvas.h"
 using namespace ige::scene;
 
 #include <utils/PyxieHeaders.h>
@@ -99,11 +100,32 @@ namespace ige::creator
         });
 
         auto guiMenu = createMenu->createWidget<Menu>("GUI");
+        guiMenu->createWidget<MenuItem>("Canvas")->getOnClickEvent().addListener([objId](auto widget) {
+            TaskManager::getInstance()->getTaskflow().emplace([objId]() {
+                auto currentObject = Editor::getSceneManager()->getCurrentScene()->findObjectById(objId);
+                auto newObject = Editor::getSceneManager()->getCurrentScene()->createGUIObject("Canvas", currentObject);                
+                auto canvas = newObject->addComponent<ige::scene::Canvas>();
+                canvas->setDesignCanvasSize({960.f, 540.f});
+                auto canvasSize = canvas->getDesignCanvasSize();
+                auto viewportSize = Vec2(SystemInfo::Instance().GetGameW(), SystemInfo::Instance().GetGameH());
+                                
+                //Vec3 translation((viewportSize.X() - (canvasSize.X() * 1.f)) * 0.5f, (viewportSize.Y() - (canvasSize.Y() * 1.f)) * 0.5f, 0.0f);
+                //Quat rot(0.f, 0.f, 0.f, 0.f);
+                //Vec3 scale3(1.f, 1.f, 1.f);
+
+                Mat4 matrix;
+                matrix.Identity();
+                //vmath_mat4_from_rottrans(rot.P(), translation.P(), matrix.P());
+                //vmath_mat_appendScale(matrix.P(), scale3.P(), 4, 4, matrix.P());
+                canvas->setCanvasToViewportMatrix(matrix);
+            });
+        });
+
         guiMenu->createWidget<MenuItem>("Buttom")->getOnClickEvent().addListener([objId](auto widget) {
             TaskManager::getInstance()->getTaskflow().emplace([objId]() {
                 auto currentObject = Editor::getSceneManager()->getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getSceneManager()->getCurrentScene()->createGUIObject("Button", currentObject);                
-            });
+                auto newObject = Editor::getSceneManager()->getCurrentScene()->createGUIObject("Button", currentObject);
+                });
         });
 
         ctxMenu->createWidget<MenuItem>("Delete")->getOnClickEvent().addListener([objId](auto widget) {

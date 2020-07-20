@@ -22,6 +22,7 @@ namespace ige::creator
     {
         m_canvas = nullptr;
         m_sceneManager = nullptr;
+        m_selectedObject = nullptr;
         SceneManager::destroy();
         m_app.reset();
 
@@ -98,7 +99,16 @@ namespace ige::creator
     void Editor::setSelectedObject(uint64_t objId)
     {
         auto obj = getSceneManager()->getCurrentScene()->findObjectById(objId);
-        getCanvas()->setTargetObject(obj);
+        if (getInstance()->m_selectedObject != obj)
+        {
+            getInstance()->m_selectedObject = obj;
+            getCanvas()->setTargetObject(obj);
+        }        
+    }
+    
+    std::shared_ptr<SceneObject>& Editor::getSelectedObject()
+    {
+        return getInstance()->m_selectedObject;
     }
 
 }
