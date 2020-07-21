@@ -20,6 +20,8 @@ namespace ige::creator
     Hierarchy::Hierarchy(const std::string& name, const Panel::Settings& settings)
         : Panel(name, settings), m_targetObject(nullptr)
     {
+        Editor::getSceneManager()->getOnSceneAddedEvent().addListener(std::bind(&Hierarchy::onSceneAdded, this, std::placeholders::_1));
+        Editor::getSceneManager()->getOnSceneRemovedEvent().addListener(std::bind(&Hierarchy::onSceneRemoved, this, std::placeholders::_1));
         SceneObject::getCreatedEvent().addListener(std::bind(&Hierarchy::onSceneObjectCreated, this, std::placeholders::_1));
         SceneObject::getDestroyedEvent().addListener(std::bind(&Hierarchy::onSceneObjectDeleted, this, std::placeholders::_1));
         SceneObject::getAttachedEvent().addListener(std::bind(&Hierarchy::onSceneObjectAttached, this, std::placeholders::_1));
@@ -43,12 +45,23 @@ namespace ige::creator
         m_targetObject = obj;
     }
 
+    void Hierarchy::onSceneAdded(Scene& scene)
+    {
+
+    }
+
+    void Hierarchy::onSceneRemoved(Scene& scene)
+    {
+
+    }
+
     void Hierarchy::onSceneObjectCreated(SceneObject& sceneObject)
     {
         auto objId = sceneObject.getId();
-        auto node = createWidget<TreeNode>(sceneObject.getName(), false, sceneObject.getChildrenCount() == 0, sceneObject.getName() == "root");
-        node->getOnClickEvent().addListener([objId, this](auto widget) {
-            TaskManager::getInstance()->getTaskflow().emplace([objId, this]() {
+        auto name = sceneObject.getName();
+        auto node = createWidget<TreeNode>(sceneObject.getName(), false, sceneObject.getChildrenCount() == 0);
+        node->getOnClickEvent().addListener([objId, name, this](auto widget) {
+            TaskManager::getInstance()->getTaskflow().emplace([objId, name, this]() {
                 // Set previous selected to false
                 auto nodePair = m_objectNodeMap.find(m_selectedNodeId);
                 if (nodePair != m_objectNodeMap.end())
@@ -62,6 +75,7 @@ namespace ige::creator
                 {
                     m_selectedNodeId = objId;
                     nodePair->second->setIsSelected(true);
+                    Editor::getSceneManager()->setCurrentScene(name);
                     Editor::getInstance()->setSelectedObject(objId);
                 }
             });
@@ -78,7 +92,7 @@ namespace ige::creator
 
         node->addPlugin<DDSourcePlugin<uint64_t>>(EDragDropID::OBJECT, sceneObject.getName(), objId);
 
-        auto ctxMenu = node->addPlugin<ContextMenu>("Hierarchy_Context");
+        auto ctxMenu = node->addPlugin<ContextMenu>(sceneObject.getName() + "_Context");
         auto createMenu = ctxMenu->createWidget<Menu>("Create");
         createMenu->createWidget<MenuItem>("New Object")->getOnClickEvent().addListener([objId](auto widget) {
             TaskManager::getInstance()->getTaskflow().emplace([objId]() {
@@ -243,6 +257,28 @@ namespace ige::creator
             Editor::getInstance()->setSelectedObject(sceneObject.getId());
         }
     }
+
+    void Hierarchy::initialize()
+    {
+        if (!m_bInitialized)
+        {
+            m_groupLayout = createWidget<Group>("Hierarchy_Group", false, false);
+            auto ctxMenu = m_groupLayout->addPlugin<WindowContextMenu>("Hierarchy_Context");
+            auto createMenu = ctxMenu->createWidget<Menu>("New");
+            createMenu->createWidget<MenuItem>("Scene")->getOnClickEvent().addListener([](auto widget) {
+                TaskManager::getInstance()->getTaskflow().emplace([]() {
+                    Editor::getSceneManager()->createEmptyScene("Scene");
+                });
+            });
+
+            createMenu->createWidget<MenuItem>("GUI")->getOnClickEvent().addListener([](auto widget) {
+            });
+
+            m_bInitialized = true;
+        }
+    }
+
+
     
     void Hierarchy::drawWidgets()
     {
@@ -255,6 +291,7 @@ namespace ige::creator
 
     void Hierarchy::clear()
     {
+        m_groupLayout = nullptr;
         m_targetObject = nullptr;
     }
 }

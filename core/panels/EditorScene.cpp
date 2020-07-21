@@ -104,7 +104,7 @@ namespace ige::creator
                 {
                     if (m_guiRect)
                     {
-                        m_guiShowcase->Remove(m_guiRect);
+                        if(m_guiShowcase) m_guiShowcase->Remove(m_guiRect);
                         m_guiRect->ClearAll();
                         m_guiRect->DecReference();
                         m_guiRect = nullptr;
@@ -112,7 +112,7 @@ namespace ige::creator
                     }
                     m_guiRectSize = m_targetTransform->getSize();
                     m_guiRect = GraphicsHelper::getInstance()->createSprite(m_guiRectSize, "sprite/grid");
-                    m_guiShowcase->Add(m_guiRect);
+                    if(m_guiShowcase) m_guiShowcase->Add(m_guiRect);
 
                     m_currentCamera = m_guiCamera;
                     m_currentShowcase = m_guiShowcase;
@@ -147,9 +147,6 @@ namespace ige::creator
                 m_camera->LockonTarget(false);
                 m_camera->SetAspectRate(size.x / size.y);
 
-                m_showcase = Editor::getSceneManager()->getCurrentScene()->getShowcase();
-                m_showcase->IncReference();
-
                 m_guiCamera = ResourceCreator::Instance().NewCamera("editor_gui_camera", nullptr);
                 m_guiCamera->SetPosition(Vec3(0.f, 0.f, 20.f));
                 m_guiCamera->LockonTarget(false);
@@ -158,21 +155,27 @@ namespace ige::creator
                 m_guiCamera->SetWidthBase(false);
                 m_guiCamera->SetOrthoHeight(6.f);
 
-                m_guiShowcase = Editor::getSceneManager()->getCurrentScene()->getGuiShowcase();
-                m_guiShowcase->IncReference();
+                if (Editor::getSceneManager()->getCurrentScene())
+                {
+                    m_showcase = Editor::getSceneManager()->getCurrentScene()->getShowcase();
+                    m_showcase->IncReference();
+
+                    auto grid = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, "sprite/grid");
+                    grid->SetPosition(Vec3(0.f, 0.f, 0.f));
+                    grid->SetRotation(Quat::RotationX(PI / 2.f));
+                    m_showcase->Add(grid);
+
+                    m_guiShowcase = Editor::getSceneManager()->getCurrentScene()->getGuiShowcase();
+                    m_guiShowcase->IncReference();
+
+                    auto grid2 = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, "sprite/grid");
+                    grid->SetPosition(Vec3(0.f, 0.f, 0.f));
+                    m_guiShowcase->Add(grid2);
+                }
 
                 m_currentCamera = m_camera;
                 m_currentShowcase = m_showcase;
-
-                auto grid = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, "sprite/grid");
-                grid->SetPosition(Vec3(0.f, 0.f, 0.f));
-                grid->SetRotation(Quat::RotationX(PI / 2.f));
-                m_showcase->Add(grid);
-
-                auto grid2 = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, "sprite/grid");
-                grid->SetPosition(Vec3(0.f, 0.f, 0.f));
-                m_guiShowcase->Add(grid2);
-
+          
                 getOnSizeChangedEvent().addListener([this](auto size) {
                     auto currSize = getSize();
                     m_bNeedResize = (currSize.x != size.x || currSize.y != size.y);
@@ -216,7 +219,7 @@ namespace ige::creator
             {
                 if (m_guiRect)
                 {
-                    m_guiShowcase->Remove(m_guiRect);
+                    if(m_guiShowcase) m_guiShowcase->Remove(m_guiRect);
                     m_guiRect->ClearAll();
                     m_guiRect->DecReference();
                     m_guiRect = nullptr;
@@ -224,7 +227,8 @@ namespace ige::creator
                 }
                 m_guiRectSize = m_targetTransform->getSize();
                 m_guiRect = GraphicsHelper::getInstance()->createSprite(m_guiRectSize, "sprite/grid");
-                m_guiShowcase->Add(m_guiRect);
+
+                if(m_guiShowcase) m_guiShowcase->Add(m_guiRect);
             }
 
             m_guiRect->SetPosition(m_targetTransform->getPosition());
@@ -241,8 +245,8 @@ namespace ige::creator
         }
 
         // Update
-        m_currentCamera->Step(dt);
-        m_currentShowcase->Update(dt);
+        if(m_currentCamera) m_currentCamera->Step(dt);
+        if(m_currentShowcase) m_currentShowcase->Update(dt);
 
         // If left button release, check selected object
         auto touch = Editor::getApp()->getInputHandler()->getTouchDevice();
@@ -295,8 +299,8 @@ namespace ige::creator
         {
             renderContext->BeginScene(m_fbo, Vec4(0.f, 0.0f, 0.0f, 1.f), true, true);
 
-            m_currentCamera->Render();
-            m_currentShowcase->Render();
+            if(m_currentCamera) m_currentCamera->Render();
+            if(m_currentShowcase) m_currentShowcase->Render();
 
             //if (Editor::getSceneManager())
             //    Editor::getSceneManager()->render();

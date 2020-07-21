@@ -34,12 +34,10 @@ namespace ige::creator
     void Editor::initialize()
     {
         initImGUI();
+        m_sceneManager = SceneManager::getInstance();
 
         m_canvas = std::make_shared<Canvas>();
         m_canvas->setDockable(true);
-
-        m_sceneManager = SceneManager::getInstance();
-        m_sceneManager->createEmptyScene();
     }
 
     void Editor::handleEvent(const void* event)
@@ -98,12 +96,19 @@ namespace ige::creator
     //! Set current selected object by its Id
     void Editor::setSelectedObject(uint64_t objId)
     {
+        if (objId == (uint64_t)-1 || !getSceneManager()->getCurrentScene())
+        {
+            getInstance()->m_selectedObject = nullptr;
+            getCanvas()->setTargetObject(nullptr);
+            return;
+        }
+
         auto obj = getSceneManager()->getCurrentScene()->findObjectById(objId);
         if (getInstance()->m_selectedObject != obj)
         {
             getInstance()->m_selectedObject = obj;
             getCanvas()->setTargetObject(obj);
-        }        
+        }
     }
     
     std::shared_ptr<SceneObject>& Editor::getSelectedObject()
