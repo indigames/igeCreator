@@ -8,6 +8,7 @@
 #include "core/menu/ContextMenu.h"
 #include "core/menu/MenuItem.h"
 #include "core/task/TaskManager.h"
+#include "core/plugin/DragDropPlugin.h"
 #include "components/FigureComponent.h"
 #include "components/Canvas.h"
 using namespace ige::scene;
@@ -65,6 +66,18 @@ namespace ige::creator
                 }
             });
         });
+        node->addPlugin<DDTargetPlugin<uint64_t>>(EDragDropID::OBJECT)->getOnDataReceivedEvent().addListener([this, objId](auto txt) {
+            auto currentObject = Editor::getSceneManager()->getCurrentScene()->findObjectById(txt);
+            auto _object = Editor::getSceneManager()->getCurrentScene()->findObjectById(objId);
+            
+            if (currentObject->getParent())
+                currentObject->getParent()->removeChild(currentObject);
+
+            _object->addChild(currentObject);            
+        });
+
+        node->addPlugin<DDSourcePlugin<uint64_t>>(EDragDropID::OBJECT, sceneObject.getName(), objId);
+
         auto ctxMenu = node->addPlugin<ContextMenu>("Hierarchy_Context");
         auto createMenu = ctxMenu->createWidget<Menu>("Create");
         createMenu->createWidget<MenuItem>("New Object")->getOnClickEvent().addListener([objId](auto widget) {
