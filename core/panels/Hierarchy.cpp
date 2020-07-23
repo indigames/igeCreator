@@ -114,27 +114,6 @@ namespace ige::creator
         });
 
         auto guiMenu = createMenu->createWidget<Menu>("GUI");
-        guiMenu->createWidget<MenuItem>("Canvas")->getOnClickEvent().addListener([objId](auto widget) {
-            TaskManager::getInstance()->getTaskflow().emplace([objId]() {
-                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getCurrentScene()->createGUIObject("Canvas", currentObject);
-                auto canvas = newObject->addComponent<ige::scene::Canvas>();
-                canvas->setDesignCanvasSize({960.f, 540.f});
-                auto canvasSize = canvas->getDesignCanvasSize();
-                auto viewportSize = Vec2(SystemInfo::Instance().GetGameW(), SystemInfo::Instance().GetGameH());
-                                
-                //Vec3 translation((viewportSize.X() - (canvasSize.X() * 1.f)) * 0.5f, (viewportSize.Y() - (canvasSize.Y() * 1.f)) * 0.5f, 0.0f);
-                //Quat rot(0.f, 0.f, 0.f, 0.f);
-                //Vec3 scale3(1.f, 1.f, 1.f);
-
-                Mat4 matrix;
-                matrix.Identity();
-                //vmath_mat4_from_rottrans(rot.P(), translation.P(), matrix.P());
-                //vmath_mat_appendScale(matrix.P(), scale3.P(), 4, 4, matrix.P());
-                canvas->setCanvasToViewportMatrix(matrix);
-            });
-        });
-
         guiMenu->createWidget<MenuItem>("Buttom")->getOnClickEvent().addListener([objId](auto widget) {
             TaskManager::getInstance()->getTaskflow().emplace([objId]() {
                 auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
@@ -144,8 +123,8 @@ namespace ige::creator
 
         ctxMenu->createWidget<MenuItem>("Delete")->getOnClickEvent().addListener([objId](auto widget) {
             TaskManager::getInstance()->getTaskflow().emplace([objId](auto widget) {
-                Editor::getInstance()->setSelectedObject(0);
-                if (objId != 0) Editor::getCurrentScene()->removeObjectById(objId);
+                Editor::getInstance()->setSelectedObject(-1);
+                Editor::getCurrentScene()->removeObjectById(objId);
             });
         });
         m_objectNodeMap[objId] = node;
@@ -253,13 +232,29 @@ namespace ige::creator
             auto ctxMenu = m_groupLayout->addPlugin<WindowContextMenu>("Hierarchy_Context");
             ctxMenu->createWidget<MenuItem>("New Scene")->getOnClickEvent().addListener([](auto widget) {
                 TaskManager::getInstance()->getTaskflow().emplace([]() {
-
+                    if (Editor::getCurrentScene() == nullptr)
+                    {
+                        auto scene = Editor::getSceneManager()->createScene("New scene");
+                        Editor::getSceneManager()->setCurrentScene(scene);
+                        Editor::getCurrentScene()->findObjectById(0)->setSelected(true);
+                    }
+                    else
+                    {
+                        auto newObj = Editor::getCurrentScene()->createObject("New scene");
+                        newObj->setSelected(true);
+                    }                    
                 });
             });
 
-            ctxMenu->createWidget<MenuItem>("Load Scene")->getOnClickEvent().addListener([](auto widget) {
+            ctxMenu->createWidget<MenuItem>("New Canvas")->getOnClickEvent().addListener([](auto widget) {
                 TaskManager::getInstance()->getTaskflow().emplace([]() {
-
+                    if (Editor::getCurrentScene() == nullptr)
+                    {
+                        auto scene = Editor::getSceneManager()->createScene("New scene");
+                        Editor::getSceneManager()->setCurrentScene(scene);
+                    }                    
+                    auto newObj = Editor::getCurrentScene()->createGUIObject("Canvas");
+                    newObj->setSelected(true);
                 });
             });
 

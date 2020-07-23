@@ -102,25 +102,13 @@ namespace ige::creator
                 m_rtTexture = ResourceCreator::Instance().NewTexture("Editor_RTTexture", nullptr, size.x, size.y, GL_RGBA);
                 m_fbo = ResourceCreator::Instance().NewRenderTarget(m_rtTexture, true, true);
                 m_imageWidget = createWidget<Image>(m_fbo->GetColorTexture()->GetTextureHandle(), size);
-                /*
-                m_guiCamera = ResourceCreator::Instance().NewCamera("editor_gui_camera", nullptr);
-                m_guiCamera->SetPosition(Vec3(0.f, 0.f, 20.f));
-                m_guiCamera->LockonTarget(false);
-                m_guiCamera->SetAspectRate(size.x / size.y);
-                m_guiCamera->SetOrthographicProjection(true);
-                m_guiCamera->SetWidthBase(false);
-                m_guiCamera->SetOrthoHeight(6.f);*/
-
-                Editor::getCurrentScene()->setActiveCamera("default_camera");
-          
+                          
                 getOnSizeChangedEvent().addListener([this](auto size) {
                     auto currSize = getSize();
                     m_bNeedResize = (currSize.x != size.x || currSize.y != size.y);
                 });
 
-                m_gizmo = createWidget<Gizmo>();
-                m_gizmo->setCamera(Editor::getCurrentScene()->getActiveCamera()->getCamera());
-                
+                m_gizmo = createWidget<Gizmo>();                
                 m_grid2D = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, "sprite/grid");
                 m_grid2D->SetPosition(Vec3(0.f, 0.f, 0.f));
 
@@ -134,14 +122,28 @@ namespace ige::creator
 
         if (Editor::getCurrentScene() != m_currentScene)
         {
-            if (m_currentScene)
-            {
-                //m_currentScene->getGuiShowcase()->Remove(m_grid2D);
+            if (m_currentScene && m_currentScene->getActiveCamera() && m_currentScene->getActiveCamera()->getShootTarget())
+            {            
                 m_currentScene->getActiveCamera()->getShootTarget()->getShowcase()->Remove(m_grid3D);
             }
-            m_currentScene = Editor::getCurrentScene();
-            //m_currentScene->getGuiShowcase()->Add(m_grid2D);
-            m_currentScene->getActiveCamera()->getShootTarget()->getShowcase()->Add(m_grid3D);
+
+            m_currentScene = Editor::getCurrentScene();            
+            if (m_currentScene->getActiveCamera())
+            {
+                m_gizmo->setCamera(m_currentScene->getActiveCamera()->getCamera());
+                if(m_currentScene->getActiveCamera()->getShootTarget())
+                    m_currentScene->getActiveCamera()->getShootTarget()->getShowcase()->Add(m_grid3D);
+            }                
+
+            m_currentScene->getOnActiveCameraChangedEvent().addListener([this](auto camera) {
+                if (m_currentScene->getActiveCamera()->getShootTarget())
+                    m_currentScene->getActiveCamera()->getShootTarget()->getShowcase()->Remove(m_grid3D);
+                if (camera)
+                {
+                    m_gizmo->setCamera(camera->getCamera());
+                    camera->getShootTarget()->getShowcase()->Add(m_grid3D);
+                }                
+            });
         }
     }
 
@@ -163,8 +165,9 @@ namespace ige::creator
         initialize();
 
         //! If there is no scene, just do nothing
-        if (!Editor::getCurrentScene()) return;
-
+        if (!Editor::getCurrentScene() || !Editor::getCurrentScene()->getActiveCamera())
+            return;
+        
         // Update render target size
         if (m_bNeedResize)
         {
