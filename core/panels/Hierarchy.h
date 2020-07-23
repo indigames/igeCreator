@@ -23,22 +23,26 @@ namespace ige::creator
         virtual void drawWidgets() override;
         virtual void initialize() override;
 
-        void onSceneAdded(Scene& scene);
-        void onSceneRemoved(Scene& scene);
-
+        //! Object created/deleted
         void onSceneObjectCreated(SceneObject& sceneObject);
         void onSceneObjectDeleted(SceneObject& sceneObject);
 
+        //! Object attached/detached to its parent
         void onSceneObjectAttached(SceneObject& sceneObject);
         void onSceneObjectDetached(SceneObject& sceneObject);
 
+        //! Object changed name
         void onSceneObjectChangedName(SceneObject& sceneObject);
+
+        //! Object selected
         void onSceneObjectSelected(SceneObject& sceneObject);
 
+        //! Tree node objects
         std::shared_ptr<TreeNode> m_sceneRoot;
         std::unordered_map<uint64_t, std::shared_ptr<TreeNode>> m_objectNodeMap;
         uint64_t m_selectedNodeId = 0xffffffff;
 
+        //! Group layout to add WindowContextMenu
         std::shared_ptr<Group> m_groupLayout;
 
         //! Selected object

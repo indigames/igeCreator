@@ -145,14 +145,14 @@ namespace ige::creator
     void Inspector::drawLocalTransformComponent()
     {
         m_localTransformGroup->removeAllWidgets();
-        auto transform = getTargetObject()->getComponent<TransformComponent>();
+        auto transform = getTargetObject()->getTransform();
         if (transform == nullptr) return;
 
         m_localTransformGroup->createWidget<Label>("Local");
 
         std::array pos = { transform->getPosition().X(), transform->getPosition().Y(), transform->getPosition().Z() };
         m_localTransformGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto transform = getTargetObject()->getComponent<TransformComponent>();
+            auto transform = getTargetObject()->getTransform();
             transform->setPosition({ val[0], val[1], val[2] });
             transform->onUpdate(0.f);
             drawWorldTransformComponent();
@@ -162,7 +162,7 @@ namespace ige::creator
         vmath_quatToEuler(transform->getRotation().P(), euler.P());
         std::array rot = { RADIANS_TO_DEGREES(euler.X()), RADIANS_TO_DEGREES(euler.Y()), RADIANS_TO_DEGREES(euler.Z()) };
         m_localTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto transform = getTargetObject()->getComponent<TransformComponent>();
+            auto transform = getTargetObject()->getTransform();
             Quat quat;
             float rad[3] = { DEGREES_TO_RADIANS (val[0]), DEGREES_TO_RADIANS (val[1]), DEGREES_TO_RADIANS (val[2])};
             vmath_eulerToQuat(rad, quat.P());
@@ -173,7 +173,7 @@ namespace ige::creator
 
         std::array scale = { transform->getScale().X(), transform->getScale().Y(), transform->getScale().Z() };
         m_localTransformGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scale)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto transform = getTargetObject()->getComponent<TransformComponent>();
+            auto transform = getTargetObject()->getTransform();
             transform->setScale({ val[0], val[1], val[2] });
             transform->onUpdate(0.f);
             drawWorldTransformComponent();
@@ -184,13 +184,13 @@ namespace ige::creator
     void Inspector::drawWorldTransformComponent()
     {
         m_worldTransformGroup->removeAllWidgets();
-        auto transform = getTargetObject()->getComponent<TransformComponent>();
+        auto transform = getTargetObject()->getTransform();
         if (transform == nullptr) return;
 
         m_worldTransformGroup->createWidget<Label>("World");
         std::array pos = { transform->getWorldPosition().X(), transform->getWorldPosition().Y(), transform->getWorldPosition().Z() };
         m_worldTransformGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto transform = getTargetObject()->getComponent<TransformComponent>();
+            auto transform = getTargetObject()->getTransform();
             transform->setWorldPosition({ val[0], val[1], val[2] });
             drawLocalTransformComponent();
         });
@@ -199,7 +199,7 @@ namespace ige::creator
         vmath_quatToEuler(transform->getWorldRotation().P(), euler.P());
         std::array rot = { RADIANS_TO_DEGREES(euler.X()), RADIANS_TO_DEGREES(euler.Y()), RADIANS_TO_DEGREES(euler.Z()) };
         m_worldTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto transform = getTargetObject()->getComponent<TransformComponent>();
+            auto transform = getTargetObject()->getTransform();
             Quat quat;
             float rad[3] = { DEGREES_TO_RADIANS(val[0]), DEGREES_TO_RADIANS(val[1]), DEGREES_TO_RADIANS(val[2]) };
             vmath_eulerToQuat(rad, quat.P());
@@ -209,7 +209,7 @@ namespace ige::creator
 
         std::array scale = { transform->getWorldScale().X(), transform->getWorldScale().Y(), transform->getWorldScale().Z() };
         m_worldTransformGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scale)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto transform = getTargetObject()->getComponent<TransformComponent>();
+            auto transform = getTargetObject()->getTransform();
             transform->setWorldScale({ val[0], val[1], val[2] });
             drawLocalTransformComponent();
         });
@@ -273,7 +273,7 @@ namespace ige::creator
             }
             else {
                 // Pan - Tilt - Roll
-                auto columns = m_cameraLockTargetGroup->createWidget<Columns<3>>(120);
+                auto columns = m_cameraLockTargetGroup->createWidget<Columns<3>>(120.f);
                 std::array pan = { RADIANS_TO_DEGREES(camera->getPan()) };
                 columns->createWidget<Drag<float>>("Pan", ImGuiDataType_Float, pan)->getOnDataChangedEvent().addListener([this](auto val) {
                     auto camera = getTargetObject()->getComponent<CameraComponent>();
@@ -302,7 +302,7 @@ namespace ige::creator
             auto camera = getTargetObject()->getComponent<CameraComponent>();
             if (!locked)
             {
-                auto transform = getTargetObject()->getComponent<TransformComponent>();
+                auto transform = getTargetObject()->getTransform();
                 camera->setTarget(transform->getPosition() + Vec3(0.f, 0.f, -1.f));
             }
             else
@@ -321,7 +321,7 @@ namespace ige::creator
         drawCameraLockTarget();
 
         // Width Based
-        auto widthBasedColumns = m_cameraCompGroup->createWidget<Columns<2>>(180);
+        auto widthBasedColumns = m_cameraCompGroup->createWidget<Columns<2>>(180.f);
         widthBasedColumns->createWidget<CheckBox>("WidthBased", camera->isWidthBase())->getOnDataChangedEvent().addListener([this](auto val) {
             auto camera = getTargetObject()->getComponent<CameraComponent>();
             camera->setWidthBase(val);
@@ -398,7 +398,7 @@ namespace ige::creator
                 environment->setPointLightPosition(i, { val[0], val[1], val[2] });
             });
 
-            auto col2 = pointGroup->createWidget <Columns<2>>(140);
+            auto col2 = pointGroup->createWidget <Columns<2>>(140.f);
             std::array intensity = { environment->getPointLightIntensity(i) };
             col2->createWidget<Drag<float>>("Int.", ImGuiDataType_Float, intensity)->getOnDataChangedEvent().addListener([i, this](auto val) {
                 auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
@@ -418,7 +418,7 @@ namespace ige::creator
             auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
             environment->setShadowColor({ val[0], val[1], val[2] });
         });
-        auto shadowColumn = shadowGroup->createWidget <Columns<2>>(140);
+        auto shadowColumn = shadowGroup->createWidget <Columns<2>>(140.f);
         std::array density = { environment->getShadowDensity() };
         shadowColumn->createWidget<Drag<float>>("Density", ImGuiDataType_Float, density, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
             auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
@@ -437,7 +437,7 @@ namespace ige::creator
             auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
             environment->setDistanceFogColor({ val[0], val[1], val[2] });
         });
-        auto fogColumn = fogGroup->createWidget <Columns<3>>(120);
+        auto fogColumn = fogGroup->createWidget <Columns<3>>(120.f);
         std::array fogNear = { environment->getDistanceFogNear() };
         fogColumn->createWidget<Drag<float>>("Near", ImGuiDataType_Float, fogNear, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
             auto environment = getTargetObject()->getComponent<EnvironmentComponent>();

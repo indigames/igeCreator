@@ -20,11 +20,11 @@ namespace ige::creator
     
     Editor::~Editor()
     {
-        m_canvas = nullptr;
-        m_sceneManager = nullptr;
-        m_selectedObject = nullptr;
         SceneManager::destroy();
-        m_app.reset();
+
+        m_canvas = nullptr;
+        m_selectedObject = nullptr;
+        m_app = nullptr;
 
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplSDL2_Shutdown();
@@ -34,7 +34,6 @@ namespace ige::creator
     void Editor::initialize()
     {
         initImGUI();
-        m_sceneManager = SceneManager::getInstance();
 
         m_canvas = std::make_shared<Canvas>();
         m_canvas->setDockable(true);

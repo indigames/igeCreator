@@ -578,7 +578,8 @@ namespace ige::creator
             const std::string strfilename = filename.string();
 
             ImGui::TextUnformatted(strfilename.c_str());
-            const std::string relative = fs::relative(absolute_path).replace_extension().string();
+            static std::string relative; // Keep content in memory
+            relative = fs::relative(absolute_path).replace_extension().string();
             ImGui::SetDragDropPayload(extension.c_str(), &relative, sizeof(relative));
             ImGui::EndDragDropSource();
             return true;

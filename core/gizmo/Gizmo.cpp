@@ -70,7 +70,7 @@ namespace ige::creator
         }
 
         std::shared_ptr<TransformComponent> transform = nullptr;
-        transform = m_target->getComponent<TransformComponent>();
+        transform = m_target->getTransform();
         if (!transform)
         {
             transform = std::dynamic_pointer_cast<TransformComponent>(m_target->getComponent<RectTransform>());

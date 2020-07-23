@@ -6,6 +6,7 @@
 #include "core/gizmo/Gizmo.h"
 
 #include "components/RectTransform.h"
+#include "scene/Scene.h"
 using namespace ige::scene;
 
 namespace ige::creator
@@ -32,25 +33,21 @@ namespace ige::creator
         virtual void initialize() override;
         virtual void _drawImpl() override;
 
-        Camera* m_camera = nullptr;
-        Showcase* m_showcase = nullptr;
-
         Texture* m_rtTexture = nullptr;
         RenderTarget* m_fbo = nullptr;
 
-        Camera* m_guiCamera = nullptr;
-        Showcase* m_guiShowcase = nullptr;
-
-        Camera* m_currentCamera = nullptr;
-        Showcase* m_currentShowcase = nullptr;
-
+        //! GUI Rectangle of selected object
         EditableFigure* m_guiRect = nullptr;
         Vec2 m_guiRectSize;
 
+        //! Grids
+        EditableFigure* m_grid2D = nullptr;
+        EditableFigure* m_grid3D = nullptr;
+
         std::shared_ptr<Image> m_imageWidget = nullptr;
         std::shared_ptr<Gizmo> m_gizmo = nullptr;
-        std::shared_ptr<SceneObject> m_targetObject = nullptr;
-        std::shared_ptr<RectTransform> m_targetTransform = nullptr;
+        std::shared_ptr<SceneObject> m_targetObject = nullptr;        
+        std::shared_ptr<Scene> m_currentScene = nullptr;
 
         bool m_bIs2DMode = false;
         bool m_bIsInitialized = false;

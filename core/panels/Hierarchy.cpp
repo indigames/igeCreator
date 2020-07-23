@@ -20,8 +20,6 @@ namespace ige::creator
     Hierarchy::Hierarchy(const std::string& name, const Panel::Settings& settings)
         : Panel(name, settings), m_targetObject(nullptr)
     {
-        Editor::getSceneManager()->getOnSceneAddedEvent().addListener(std::bind(&Hierarchy::onSceneAdded, this, std::placeholders::_1));
-        Editor::getSceneManager()->getOnSceneRemovedEvent().addListener(std::bind(&Hierarchy::onSceneRemoved, this, std::placeholders::_1));
         SceneObject::getCreatedEvent().addListener(std::bind(&Hierarchy::onSceneObjectCreated, this, std::placeholders::_1));
         SceneObject::getDestroyedEvent().addListener(std::bind(&Hierarchy::onSceneObjectDeleted, this, std::placeholders::_1));
         SceneObject::getAttachedEvent().addListener(std::bind(&Hierarchy::onSceneObjectAttached, this, std::placeholders::_1));
@@ -45,16 +43,6 @@ namespace ige::creator
         m_targetObject = obj;
     }
 
-    void Hierarchy::onSceneAdded(Scene& scene)
-    {
-
-    }
-
-    void Hierarchy::onSceneRemoved(Scene& scene)
-    {
-
-    }
-
     void Hierarchy::onSceneObjectCreated(SceneObject& sceneObject)
     {
         auto objId = sceneObject.getId();
@@ -75,19 +63,18 @@ namespace ige::creator
                 {
                     m_selectedNodeId = objId;
                     nodePair->second->setIsSelected(true);
-                    Editor::getSceneManager()->setCurrentScene(name);
                     Editor::getInstance()->setSelectedObject(objId);
                 }
             });
         });
         node->addPlugin<DDTargetPlugin<uint64_t>>(EDragDropID::OBJECT)->getOnDataReceivedEvent().addListener([this, objId](auto txt) {
-            auto currentObject = Editor::getSceneManager()->getCurrentScene()->findObjectById(txt);
-            auto _object = Editor::getSceneManager()->getCurrentScene()->findObjectById(objId);
+            auto currentObject = Editor::getCurrentScene()->findObjectById(txt);
+            auto _object = Editor::getCurrentScene()->findObjectById(objId);
             
             if (currentObject->getParent())
                 currentObject->getParent()->removeChild(currentObject);
 
-            _object->addChild(currentObject);            
+            _object->addChild(currentObject);
         });
 
         node->addPlugin<DDSourcePlugin<uint64_t>>(EDragDropID::OBJECT, sceneObject.getName(), objId);
@@ -96,32 +83,32 @@ namespace ige::creator
         auto createMenu = ctxMenu->createWidget<Menu>("Create");
         createMenu->createWidget<MenuItem>("New Object")->getOnClickEvent().addListener([objId](auto widget) {
             TaskManager::getInstance()->getTaskflow().emplace([objId]() {
-                auto currentObject = Editor::getSceneManager()->getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getSceneManager()->getCurrentScene()->createObject("New Object", currentObject);
+                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
+                auto newObject = Editor::getCurrentScene()->createObject("New Object", currentObject);
             });
         });
 
         auto shapeMenu = createMenu->createWidget<Menu>("Primitives");
         shapeMenu->createWidget<MenuItem>("Cube")->getOnClickEvent().addListener([objId](auto widget) {
             TaskManager::getInstance()->getTaskflow().emplace([objId]() {
-                auto currentObject = Editor::getSceneManager()->getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getSceneManager()->getCurrentScene()->createObject("Cube", currentObject);
+                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
+                auto newObject = Editor::getCurrentScene()->createObject("Cube", currentObject);
                 newObject->addComponent<FigureComponent>("figure/cube.pyxf");
             });
         });
 
         shapeMenu->createWidget<MenuItem>("Plane")->getOnClickEvent().addListener([objId](auto widget) {
             TaskManager::getInstance()->getTaskflow().emplace([objId]() {
-                auto currentObject = Editor::getSceneManager()->getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getSceneManager()->getCurrentScene()->createObject("Plane", currentObject);
+                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
+                auto newObject = Editor::getCurrentScene()->createObject("Plane", currentObject);
                 newObject->addComponent<FigureComponent>("figure/plane.pyxf");
             });
         });
 
         shapeMenu->createWidget<MenuItem>("Sphere")->getOnClickEvent().addListener([objId](auto widget) {
             TaskManager::getInstance()->getTaskflow().emplace([objId]() {
-                auto currentObject = Editor::getSceneManager()->getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getSceneManager()->getCurrentScene()->createObject("Sphere", currentObject);
+                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
+                auto newObject = Editor::getCurrentScene()->createObject("Sphere", currentObject);
                 newObject->addComponent<FigureComponent>("figure/sphere.pyxf");
             });
         });
@@ -129,8 +116,8 @@ namespace ige::creator
         auto guiMenu = createMenu->createWidget<Menu>("GUI");
         guiMenu->createWidget<MenuItem>("Canvas")->getOnClickEvent().addListener([objId](auto widget) {
             TaskManager::getInstance()->getTaskflow().emplace([objId]() {
-                auto currentObject = Editor::getSceneManager()->getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getSceneManager()->getCurrentScene()->createGUIObject("Canvas", currentObject);                
+                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
+                auto newObject = Editor::getCurrentScene()->createGUIObject("Canvas", currentObject);
                 auto canvas = newObject->addComponent<ige::scene::Canvas>();
                 canvas->setDesignCanvasSize({960.f, 540.f});
                 auto canvasSize = canvas->getDesignCanvasSize();
@@ -150,15 +137,15 @@ namespace ige::creator
 
         guiMenu->createWidget<MenuItem>("Buttom")->getOnClickEvent().addListener([objId](auto widget) {
             TaskManager::getInstance()->getTaskflow().emplace([objId]() {
-                auto currentObject = Editor::getSceneManager()->getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getSceneManager()->getCurrentScene()->createGUIObject("Button", currentObject);
+                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
+                auto newObject = Editor::getCurrentScene()->createGUIObject("Button", currentObject);
                 });
         });
 
         ctxMenu->createWidget<MenuItem>("Delete")->getOnClickEvent().addListener([objId](auto widget) {
             TaskManager::getInstance()->getTaskflow().emplace([objId](auto widget) {
                 Editor::getInstance()->setSelectedObject(0);
-                if (objId != 0) Editor::getSceneManager()->getCurrentScene()->removeObjectById(objId);
+                if (objId != 0) Editor::getCurrentScene()->removeObjectById(objId);
             });
         });
         m_objectNodeMap[objId] = node;
@@ -264,14 +251,16 @@ namespace ige::creator
         {
             m_groupLayout = createWidget<Group>("Hierarchy_Group", false, false);
             auto ctxMenu = m_groupLayout->addPlugin<WindowContextMenu>("Hierarchy_Context");
-            auto createMenu = ctxMenu->createWidget<Menu>("New");
-            createMenu->createWidget<MenuItem>("Scene")->getOnClickEvent().addListener([](auto widget) {
+            ctxMenu->createWidget<MenuItem>("New Scene")->getOnClickEvent().addListener([](auto widget) {
                 TaskManager::getInstance()->getTaskflow().emplace([]() {
-                    Editor::getSceneManager()->createEmptyScene("Scene");
+
                 });
             });
 
-            createMenu->createWidget<MenuItem>("GUI")->getOnClickEvent().addListener([](auto widget) {
+            ctxMenu->createWidget<MenuItem>("Load Scene")->getOnClickEvent().addListener([](auto widget) {
+                TaskManager::getInstance()->getTaskflow().emplace([]() {
+
+                });
             });
 
             m_bInitialized = true;
@@ -291,7 +280,6 @@ namespace ige::creator
 
     void Hierarchy::clear()
     {
-        m_groupLayout = nullptr;
         m_targetObject = nullptr;
     }
 }
