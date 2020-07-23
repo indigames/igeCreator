@@ -103,10 +103,10 @@ namespace ige::creator
         }
 
         auto obj = getSceneManager()->getCurrentScene()->findObjectById(objId);
-        if (getInstance()->m_selectedObject != obj)
+        if (getSelectedObject() != obj)
         {
             getInstance()->m_selectedObject = obj;
-            getCanvas()->setTargetObject(obj);
+            getCanvas()->setTargetObject(getSelectedObject());
         }
     }
     

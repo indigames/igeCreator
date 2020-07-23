@@ -47,6 +47,7 @@ namespace ige::creator
     {
         m_inspector->setTargetObject(obj);
         m_editorScene->setTargetObject(obj);
+        m_hierarchy->setTargetObject(obj);
     }
 
     void Canvas::update(float dt)

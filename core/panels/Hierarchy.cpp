@@ -40,7 +40,12 @@ namespace ige::creator
 
     void Hierarchy::setTargetObject(const std::shared_ptr<SceneObject>& obj)
     {
-        m_targetObject = obj;
+        if (m_targetObject != obj)
+        {
+            if (m_targetObject) m_targetObject->setActive(false);
+            if (obj) obj->setActive(true);
+            m_targetObject = obj;
+        }
     }
 
     void Hierarchy::onSceneObjectCreated(SceneObject& sceneObject)
@@ -48,8 +53,8 @@ namespace ige::creator
         auto objId = sceneObject.getId();
         auto name = sceneObject.getName();
         auto node = createWidget<TreeNode>(sceneObject.getName(), false, sceneObject.getChildrenCount() == 0);
-        node->getOnClickEvent().addListener([objId, name, this](auto widget) {
-            TaskManager::getInstance()->getTaskflow().emplace([objId, name, this]() {
+        node->getOnClickEvent().addListener([objId, this](auto widget) {
+            TaskManager::getInstance()->getTaskflow().emplace([objId, this]() {
                 // Set previous selected to false
                 auto nodePair = m_objectNodeMap.find(m_selectedNodeId);
                 if (nodePair != m_objectNodeMap.end())
@@ -63,18 +68,19 @@ namespace ige::creator
                 {
                     m_selectedNodeId = objId;
                     nodePair->second->setIsSelected(true);
-                    Editor::getInstance()->setSelectedObject(objId);
                 }
+
+                // Update selected object
+                auto object = Editor::getCurrentScene()->findObjectById(objId);
+                object->setSelected(true);
             });
         });
         node->addPlugin<DDTargetPlugin<uint64_t>>(EDragDropID::OBJECT)->getOnDataReceivedEvent().addListener([this, objId](auto txt) {
             auto currentObject = Editor::getCurrentScene()->findObjectById(txt);
-            auto _object = Editor::getCurrentScene()->findObjectById(objId);
-            
+            auto obj = Editor::getCurrentScene()->findObjectById(objId);
             if (currentObject->getParent())
                 currentObject->getParent()->removeChild(currentObject);
-
-            _object->addChild(currentObject);
+            obj->addChild(currentObject);
         });
 
         node->addPlugin<DDSourcePlugin<uint64_t>>(EDragDropID::OBJECT, sceneObject.getName(), objId);
@@ -85,6 +91,7 @@ namespace ige::creator
             TaskManager::getInstance()->getTaskflow().emplace([objId]() {
                 auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
                 auto newObject = Editor::getCurrentScene()->createObject("New Object", currentObject);
+                newObject->setSelected(true);
             });
         });
 
@@ -94,6 +101,7 @@ namespace ige::creator
                 auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
                 auto newObject = Editor::getCurrentScene()->createObject("Cube", currentObject);
                 newObject->addComponent<FigureComponent>("figure/cube.pyxf");
+                newObject->setSelected(true);
             });
         });
 
@@ -102,6 +110,7 @@ namespace ige::creator
                 auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
                 auto newObject = Editor::getCurrentScene()->createObject("Plane", currentObject);
                 newObject->addComponent<FigureComponent>("figure/plane.pyxf");
+                newObject->setSelected(true);
             });
         });
 
@@ -110,19 +119,23 @@ namespace ige::creator
                 auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
                 auto newObject = Editor::getCurrentScene()->createObject("Sphere", currentObject);
                 newObject->addComponent<FigureComponent>("figure/sphere.pyxf");
+                newObject->setSelected(true);
             });
         });
 
         auto guiMenu = createMenu->createWidget<Menu>("GUI");
-        guiMenu->createWidget<MenuItem>("Buttom")->getOnClickEvent().addListener([objId](auto widget) {
+        guiMenu->createWidget<MenuItem>("Button")->getOnClickEvent().addListener([objId](auto widget) {
             TaskManager::getInstance()->getTaskflow().emplace([objId]() {
                 auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
                 auto newObject = Editor::getCurrentScene()->createGUIObject("Button", currentObject);
-                });
+                newObject->setSelected(true);
+            });
         });
 
         ctxMenu->createWidget<MenuItem>("Delete")->getOnClickEvent().addListener([objId](auto widget) {
             TaskManager::getInstance()->getTaskflow().emplace([objId](auto widget) {
+                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
+                if (currentObject->getParent()) currentObject->getParent()->setSelected(true);
                 Editor::getInstance()->setSelectedObject(-1);
                 Editor::getCurrentScene()->removeObjectById(objId);
             });
@@ -188,7 +201,7 @@ namespace ige::creator
 
     void Hierarchy::onSceneObjectSelected(SceneObject& sceneObject)
     {
-        if (m_targetObject)
+        if (m_targetObject && m_targetObject->getId() != sceneObject.getId())
         {
             m_targetObject->setSelected(false);
         }

@@ -108,7 +108,7 @@ namespace ige::creator
                     m_bNeedResize = (currSize.x != size.x || currSize.y != size.y);
                 });
 
-                m_gizmo = createWidget<Gizmo>();                
+                m_gizmo = createWidget<Gizmo>();
                 m_grid2D = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, "sprite/grid");
                 m_grid2D->SetPosition(Vec3(0.f, 0.f, 0.f));
 
@@ -122,27 +122,48 @@ namespace ige::creator
 
         if (Editor::getCurrentScene() != m_currentScene)
         {
-            if (m_currentScene && m_currentScene->getActiveCamera() && m_currentScene->getActiveCamera()->getShootTarget())
-            {            
-                m_currentScene->getActiveCamera()->getShootTarget()->getShowcase()->Remove(m_grid3D);
+            if (m_currentScene && m_currentScene->getActiveCamera())
+            {
+                auto targetObj = m_currentScene->getActiveCamera()->getShootTarget();
+                if (targetObj)
+                {
+                    auto grid = targetObj->isGUIObject() ? m_grid2D : m_grid3D;
+                    targetObj->getShowcase()->Remove(grid);
+                }
             }
 
-            m_currentScene = Editor::getCurrentScene();            
+            m_currentScene = Editor::getCurrentScene();
             if (m_currentScene->getActiveCamera())
             {
                 m_gizmo->setCamera(m_currentScene->getActiveCamera()->getCamera());
-                if(m_currentScene->getActiveCamera()->getShootTarget())
-                    m_currentScene->getActiveCamera()->getShootTarget()->getShowcase()->Add(m_grid3D);
-            }                
+                auto targetObj = m_currentScene->getActiveCamera()->getShootTarget();
+                if (targetObj)
+                {
+                    auto grid = targetObj->isGUIObject() ? m_grid2D : m_grid3D;
+                    targetObj->getShowcase()->Add(grid);
+                }
+            }
 
             m_currentScene->getOnActiveCameraChangedEvent().addListener([this](auto camera) {
                 if (m_currentScene->getActiveCamera()->getShootTarget())
-                    m_currentScene->getActiveCamera()->getShootTarget()->getShowcase()->Remove(m_grid3D);
+                {
+                    auto targetObj = m_currentScene->getActiveCamera()->getShootTarget();
+                    if (targetObj)
+                    {
+                        auto grid = targetObj->isGUIObject() ? m_grid2D : m_grid3D;
+                        targetObj->getShowcase()->Remove(grid);
+                    }
+                }
                 if (camera)
                 {
                     m_gizmo->setCamera(camera->getCamera());
-                    camera->getShootTarget()->getShowcase()->Add(m_grid3D);
-                }                
+                    auto targetObj = camera->getShootTarget();
+                    if (targetObj)
+                    {
+                        auto grid = targetObj->isGUIObject() ? m_grid2D : m_grid3D;
+                        targetObj->getShowcase()->Add(grid);
+                    }
+                }
             });
         }
     }
