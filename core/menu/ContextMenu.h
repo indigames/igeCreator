@@ -10,10 +10,20 @@ namespace ige::creator
         ContextMenu(const std::string& name, bool enable = true);
         virtual ~ContextMenu();
 
-        void execute();
+        virtual void execute();
         void close();
 
     protected:
         virtual void _drawImpl() override;
+    };
+
+    class WindowContextMenu : public ContextMenu
+    {
+    public:
+        WindowContextMenu(const std::string& name, bool enable = true);
+        virtual ~WindowContextMenu() {}
+      
+    protected:
+        virtual void execute() override;
     };
 }

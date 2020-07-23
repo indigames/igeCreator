@@ -28,15 +28,15 @@ namespace ige::creator
     {
         if (m_textureId != 0xffffff && ImGui::ImageButton((ImTextureID)m_textureId, m_size))
         {
-            m_onClickEvent.invoke();
+            getOnClickEvent().invoke(this);
         }
         else if (m_color.x >= 0.f && ImGui::ColorButton((m_label + m_id).c_str(), m_color, 0, m_size))
         {
-            m_onClickEvent.invoke();
+            getOnClickEvent().invoke(this);
         }
         else if (m_label != "" && ImGui::ButtonEx((m_label + m_id).c_str(), m_size, !m_bEnabled ? ImGuiButtonFlags_Disabled : 0))
         {
-            m_onClickEvent.invoke();
+            getOnClickEvent().invoke(this);
         }
     }
 }

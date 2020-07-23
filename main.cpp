@@ -31,7 +31,7 @@ int main(void* data) {
 	if (app->isInitialized())
 	{
 		// Create editor instance
-		auto editor = Editor::getInstance();
+		auto& editor = Editor::getInstance();
 		editor->registerApp(app);
 		editor->initialize();
 

@@ -2,6 +2,7 @@
 #include "core/gizmo/Gizmo.h"
 
 #include <components/TransformComponent.h>
+#include <components/RectTransform.h>
 
 namespace ige::creator
 {
@@ -68,7 +69,13 @@ namespace ige::creator
             return;
         }
 
-        auto transform = m_target->getComponent<TransformComponent>();
+        auto transform = m_target->getTransform();
+        if (!transform)
+        {
+            transform = std::dynamic_pointer_cast<TransformComponent>(m_target->getComponent<RectTransform>());
+            if(!transform)
+                return;
+        }
 
         Mat4 temp;
         auto view = m_camera->GetViewInverseMatrix(temp).Inverse().P();

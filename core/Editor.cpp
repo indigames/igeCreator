@@ -20,10 +20,11 @@ namespace ige::creator
     
     Editor::~Editor()
     {
-        m_canvas = nullptr;
-        m_sceneManager = nullptr;
         SceneManager::destroy();
-        m_app.reset();
+
+        m_canvas = nullptr;
+        m_selectedObject = nullptr;
+        m_app = nullptr;
 
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplSDL2_Shutdown();
@@ -36,9 +37,6 @@ namespace ige::creator
 
         m_canvas = std::make_shared<Canvas>();
         m_canvas->setDockable(true);
-
-        m_sceneManager = SceneManager::getInstance();
-        m_sceneManager->createEmptyScene();
     }
 
     void Editor::handleEvent(const void* event)
@@ -97,8 +95,24 @@ namespace ige::creator
     //! Set current selected object by its Id
     void Editor::setSelectedObject(uint64_t objId)
     {
+        if (objId == (uint64_t)-1 || !getSceneManager()->getCurrentScene())
+        {
+            getInstance()->m_selectedObject = nullptr;
+            getCanvas()->setTargetObject(nullptr);
+            return;
+        }
+
         auto obj = getSceneManager()->getCurrentScene()->findObjectById(objId);
-        getCanvas()->setTargetObject(obj);
+        if (getSelectedObject() != obj)
+        {
+            getInstance()->m_selectedObject = obj;
+            getCanvas()->setTargetObject(getSelectedObject());
+        }
+    }
+    
+    std::shared_ptr<SceneObject>& Editor::getSelectedObject()
+    {
+        return getInstance()->m_selectedObject;
     }
 
 }

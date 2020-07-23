@@ -1,1 +1,290 @@
-{"name":"EmptyScene","root":{"active":true,"children":[{"active":true,"children":[{"active":true,"children":[{"active":true,"children":[],"comps":[{"TransformComponent":{"pos":[8.0,0.0,-10.0],"rot":[0.0,0.0,0.0,1.0],"scale":[1.0,1.0,1.0]}},{"FigureComponent":{"path":"figure/Trees_Object.pyxf"}}],"id":3,"name":"tree3","select":false}],"comps":[{"TransformComponent":{"pos":[-2.0,0.0,-10.0],"rot":[0.0,0.0,0.0,1.0],"scale":[1.0,1.0,1.0]}},{"FigureComponent":{"path":"figure/Trees_Object.pyxf"}}],"id":2,"name":"tree2","select":false}],"comps":[{"TransformComponent":{"pos":[-5.0,0.0,-10.0],"rot":[0.0,0.0,0.0,1.0],"scale":[1.0,1.0,1.0]}},{"FigureComponent":{"path":"figure/Trees_Object.pyxf"}}],"id":1,"name":"tree","select":false}],"comps":[{"TransformComponent":{"pos":[0.0,0.0,0.0],"rot":[0.0,0.0,0.0,1.0],"scale":[1.0,1.0,1.0]}},{"EnvironmentComponent":{"ambDir":[0.0,-1.0,0.0],"ambGndCol":[0.5,0.5,0.5],"ambSkyCol":[0.10000000149011612,0.30000001192092896,0.699999988079071],"dirCol_0":[0.5,0.5,0.5],"dirCol_1":[0.5,0.5,0.5],"dirCol_2":[0.5,0.5,0.5],"dirDir_0":[0.5773501992225647,0.5773501992225647,0.5773501992225647],"dirDir_1":[0.40824827551841736,0.8164965510368347,0.40824827551841736],"dirDir_2":[0.40824827551841736,0.8164965510368347,0.40824827551841736],"dirInt_0":1.0,"dirInt_1":1.0,"dirInt_2":1.0,"fogAlpha":1.0,"fogCol":[1.0,1.0,1.0],"fogFar":50.0,"fogNear":0.10000000149011612,"name":"environment","pointCol_0":[1.0,1.0,1.0],"pointCol_1":[1.0,1.0,1.0],"pointCol_2":[1.0,1.0,1.0],"pointCol_3":[1.0,1.0,1.0],"pointCol_4":[1.0,1.0,1.0],"pointCol_5":[1.0,1.0,1.0],"pointCol_6":[1.0,1.0,1.0],"pointInt_0":0.30000001192092896,"pointInt_1":0.30000001192092896,"pointInt_2":0.30000001192092896,"pointInt_3":0.30000001192092896,"pointInt_4":0.30000001192092896,"pointInt_5":0.30000001192092896,"pointInt_6":0.30000001192092896,"pointPos_0":[0.0,100.0,0.0],"pointPos_1":[0.0,100.0,0.0],"pointPos_2":[0.0,100.0,0.0],"pointPos_3":[0.0,100.0,0.0],"pointPos_4":[0.0,100.0,0.0],"pointPos_5":[0.0,100.0,0.0],"pointPos_6":[0.0,100.0,0.0],"pointRng_0":100.0,"pointRng_1":100.0,"pointRng_2":100.0,"pointRng_3":100.0,"pointRng_4":100.0,"pointRng_5":100.0,"pointRng_6":100.0,"shadowCol":[0.0,0.0,0.0],"shadowDensity":0.5,"shadowWideness":1000.0}}],"id":0,"name":"root","select":false}}
+{
+  "name": "EmptyScene",
+  "objId": 4,
+  "root": {
+    "active": true,
+    "children": [
+      {
+        "active": true,
+        "children": [
+          {
+            "active": true,
+            "children": [
+              {
+                "active": true,
+                "children": [],
+                "comps": [
+                  {
+                    "TransformComponent": {
+                      "pos": [
+                        8,
+                        0,
+                        -10
+                      ],
+                      "rot": [
+                        0,
+                        0,
+                        0,
+                        1
+                      ],
+                      "scale": [
+                        1,
+                        1,
+                        1
+                      ]
+                    }
+                  },
+                  {
+                    "FigureComponent": {
+                      "path": "figure/Trees_Object.pyxf"
+                    }
+                  }
+                ],
+                "id": 3,
+                "name": "tree3",
+                "select": false
+              }
+            ],
+            "comps": [
+              {
+                "TransformComponent": {
+                  "pos": [
+                    -2,
+                    0,
+                    -10
+                  ],
+                  "rot": [
+                    0,
+                    0,
+                    0,
+                    1
+                  ],
+                  "scale": [
+                    1,
+                    1,
+                    1
+                  ]
+                }
+              },
+              {
+                "FigureComponent": {
+                  "path": "figure/Trees_Object.pyxf"
+                }
+              }
+            ],
+            "id": 2,
+            "name": "tree2",
+            "select": false
+          }
+        ],
+        "comps": [
+          {
+            "TransformComponent": {
+              "pos": [
+                -5,
+                0,
+                -10
+              ],
+              "rot": [
+                0,
+                0,
+                0,
+                1
+              ],
+              "scale": [
+                1,
+                1,
+                1
+              ]
+            }
+          },
+          {
+            "FigureComponent": {
+              "path": "figure/Trees_Object.pyxf"
+            }
+          }
+        ],
+        "id": 1,
+        "name": "tree",
+        "select": false
+      }
+    ],
+    "comps": [
+      {
+        "TransformComponent": {
+          "pos": [
+            0,
+            0,
+            0
+          ],
+          "rot": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        }
+      },
+      {
+        "EnvironmentComponent": {
+          "ambDir": [
+            0,
+            -1,
+            0
+          ],
+          "ambGndCol": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "ambSkyCol": [
+            0.10000000149011612,
+            0.30000001192092896,
+            0.699999988079071
+          ],
+          "dirCol_0": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "dirCol_1": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "dirCol_2": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "dirDir_0": [
+            0.5773501992225647,
+            0.5773501992225647,
+            0.5773501992225647
+          ],
+          "dirDir_1": [
+            0.40824827551841736,
+            0.8164965510368347,
+            0.40824827551841736
+          ],
+          "dirDir_2": [
+            0.40824827551841736,
+            0.8164965510368347,
+            0.40824827551841736
+          ],
+          "dirInt_0": 1,
+          "dirInt_1": 1,
+          "dirInt_2": 1,
+          "fogAlpha": 1,
+          "fogCol": [
+            1,
+            1,
+            1
+          ],
+          "fogFar": 50,
+          "fogNear": 0.10000000149011612,
+          "name": "environment",
+          "pointCol_0": [
+            1,
+            1,
+            1
+          ],
+          "pointCol_1": [
+            1,
+            1,
+            1
+          ],
+          "pointCol_2": [
+            1,
+            1,
+            1
+          ],
+          "pointCol_3": [
+            1,
+            1,
+            1
+          ],
+          "pointCol_4": [
+            1,
+            1,
+            1
+          ],
+          "pointCol_5": [
+            1,
+            1,
+            1
+          ],
+          "pointCol_6": [
+            1,
+            1,
+            1
+          ],
+          "pointInt_0": 0.30000001192092896,
+          "pointInt_1": 0.30000001192092896,
+          "pointInt_2": 0.30000001192092896,
+          "pointInt_3": 0.30000001192092896,
+          "pointInt_4": 0.30000001192092896,
+          "pointInt_5": 0.30000001192092896,
+          "pointInt_6": 0.30000001192092896,
+          "pointPos_0": [
+            0,
+            100,
+            0
+          ],
+          "pointPos_1": [
+            0,
+            100,
+            0
+          ],
+          "pointPos_2": [
+            0,
+            100,
+            0
+          ],
+          "pointPos_3": [
+            0,
+            100,
+            0
+          ],
+          "pointPos_4": [
+            0,
+            100,
+            0
+          ],
+          "pointPos_5": [
+            0,
+            100,
+            0
+          ],
+          "pointPos_6": [
+            0,
+            100,
+            0
+          ],
+          "pointRng_0": 100,
+          "pointRng_1": 100,
+          "pointRng_2": 100,
+          "pointRng_3": 100,
+          "pointRng_4": 100,
+          "pointRng_5": 100,
+          "pointRng_6": 100,
+          "shadowCol": [
+            0,
+            0,
+            0
+          ],
+          "shadowDensity": 0.5,
+          "shadowWideness": 1000
+        }
+      }
+    ],
+    "id": 0,
+    "name": "EmptyScene",
+    "select": false
+  }
+}

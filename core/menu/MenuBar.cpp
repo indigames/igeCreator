@@ -53,19 +53,37 @@ namespace ige::creator
     void MenuBar::createFileMenu()
     {
         auto fileMenu = createWidget<Menu>("File");
-        fileMenu->createWidget<MenuItem>("Open Scene", "CTRL + O")->getOnClickEvent().addListener([this](){
+        fileMenu->createWidget<MenuItem>("New Scene", "CTRL + N")->getOnClickEvent().addListener([this](auto widget) {            
+            TaskManager::getInstance()->getTaskflow().emplace([this]() {
+                auto scene = Editor::getCurrentScene();
+                if (scene) Editor::getSceneManager()->unloadScene(scene);
+                scene = nullptr;
+
+                Editor::setSelectedObject(-1);
+                Editor::getCanvas()->getEditorScene()->clear();
+                scene = Editor::getSceneManager()->createScene("New scene");
+                Editor::setCurrentScene(scene);
+            });
+        });
+
+        fileMenu->createWidget<MenuItem>("Open Scene", "CTRL + O")->getOnClickEvent().addListener([this](auto widget){
             auto selectedFiles = OpenFileDialog("Open", ".", { "json", "*.json" }).result();
             if (!selectedFiles.empty() && !selectedFiles[0].empty())
             {
                 TaskManager::getInstance()->getTaskflow().emplace([selectedFiles, this]() {
+                    auto scene = Editor::getCurrentScene();
+                    if (scene) Editor::getSceneManager()->unloadScene(scene);
+                    scene = nullptr;
+
                     Editor::setSelectedObject(-1);
                     Editor::getCanvas()->getEditorScene()->clear();
-                    Editor::getSceneManager()->loadScene(selectedFiles[0]);
+                    scene = Editor::getSceneManager()->loadScene(selectedFiles[0]);
+                    Editor::setCurrentScene(scene);
                 });
             }
         });
 
-        fileMenu->createWidget<MenuItem>("Save Scene", "CTRL + S")->getOnClickEvent().addListener([this]() {
+        fileMenu->createWidget<MenuItem>("Save Scene", "CTRL + S")->getOnClickEvent().addListener([this](auto widget) {
             auto selectedFile = SaveFileDialog("Save", ".", { "json", "*.json" }).result();
                 if (!selectedFile.empty())
                 {
@@ -75,7 +93,7 @@ namespace ige::creator
                 }
             });
 
-        fileMenu->createWidget<MenuItem>("Exit", "ALT + F4")->getOnClickEvent().addListener([]() {
+        fileMenu->createWidget<MenuItem>("Exit", "ALT + F4")->getOnClickEvent().addListener([](auto widget) {
             Editor::getApp()->quit();
         });
     }

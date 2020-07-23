@@ -30,4 +30,19 @@ namespace ige::creator
     {
         ImGui::CloseCurrentPopup();
     }
+
+
+    WindowContextMenu::WindowContextMenu(const std::string& name, bool enable)
+        : ContextMenu(name, enable)
+    {}
+
+
+    void WindowContextMenu::execute()
+    {
+        if (ImGui::BeginPopupContextWindow())
+        {
+            drawWidgets();
+            ImGui::EndPopup();
+        }
+    }
 }
