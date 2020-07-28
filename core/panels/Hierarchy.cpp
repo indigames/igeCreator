@@ -52,6 +52,7 @@ namespace ige::creator
     {
         auto objId = sceneObject.getId();
         auto name = sceneObject.getName();
+        auto isGuiObj = sceneObject.isGUIObject();
         auto node = createWidget<TreeNode>(sceneObject.getName(), false, sceneObject.getChildrenCount() == 0);
         node->getOnClickEvent().addListener([objId, this](auto widget) {
             TaskManager::getInstance()->getTaskflow().emplace([objId, this]() {
@@ -82,55 +83,59 @@ namespace ige::creator
                 currentObject->getParent()->removeChild(currentObject);
             obj->addChild(currentObject);
         });
-
         node->addPlugin<DDSourcePlugin<uint64_t>>(EDragDropID::OBJECT, sceneObject.getName(), objId);
 
         auto ctxMenu = node->addPlugin<ContextMenu>(sceneObject.getName() + "_Context");
         auto createMenu = ctxMenu->createWidget<Menu>("Create");
-        createMenu->createWidget<MenuItem>("New Object")->getOnClickEvent().addListener([objId](auto widget) {
-            TaskManager::getInstance()->getTaskflow().emplace([objId]() {
-                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getCurrentScene()->createObject("New Object", currentObject);
-                newObject->setSelected(true);
+        if (isGuiObj)
+        {
+            auto guiMenu = createMenu->createWidget<Menu>("GUI");
+            guiMenu->createWidget<MenuItem>("Button")->getOnClickEvent().addListener([objId](auto widget) {
+                TaskManager::getInstance()->getTaskflow().emplace([objId]() {
+                    auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
+                    auto newObject = Editor::getCurrentScene()->createGUIObject("Button", currentObject);
+                    newObject->setSelected(true);
+                });
             });
-        });
+        }
+        else
+        {
+            createMenu->createWidget<MenuItem>("New Object")->getOnClickEvent().addListener([objId](auto widget) {
+                TaskManager::getInstance()->getTaskflow().emplace([objId]() {
+                    auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
+                    auto newObject = Editor::getCurrentScene()->createObject("New Object", currentObject);
+                    newObject->setSelected(true);
+                });
+            });
 
-        auto shapeMenu = createMenu->createWidget<Menu>("Primitives");
-        shapeMenu->createWidget<MenuItem>("Cube")->getOnClickEvent().addListener([objId](auto widget) {
-            TaskManager::getInstance()->getTaskflow().emplace([objId]() {
-                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getCurrentScene()->createObject("Cube", currentObject);
-                newObject->addComponent<FigureComponent>("figure/cube.pyxf");
-                newObject->setSelected(true);
+            auto shapeMenu = createMenu->createWidget<Menu>("Primitives");
+            shapeMenu->createWidget<MenuItem>("Cube")->getOnClickEvent().addListener([objId](auto widget) {
+                TaskManager::getInstance()->getTaskflow().emplace([objId]() {
+                    auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
+                    auto newObject = Editor::getCurrentScene()->createObject("Cube", currentObject);
+                    newObject->addComponent<FigureComponent>("figure/cube.pyxf");
+                    newObject->setSelected(true);
+                });
             });
-        });
 
-        shapeMenu->createWidget<MenuItem>("Plane")->getOnClickEvent().addListener([objId](auto widget) {
-            TaskManager::getInstance()->getTaskflow().emplace([objId]() {
-                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getCurrentScene()->createObject("Plane", currentObject);
-                newObject->addComponent<FigureComponent>("figure/plane.pyxf");
-                newObject->setSelected(true);
+            shapeMenu->createWidget<MenuItem>("Plane")->getOnClickEvent().addListener([objId](auto widget) {
+                TaskManager::getInstance()->getTaskflow().emplace([objId]() {
+                    auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
+                    auto newObject = Editor::getCurrentScene()->createObject("Plane", currentObject);
+                    newObject->addComponent<FigureComponent>("figure/plane.pyxf");
+                    newObject->setSelected(true);
+                });
             });
-        });
 
-        shapeMenu->createWidget<MenuItem>("Sphere")->getOnClickEvent().addListener([objId](auto widget) {
-            TaskManager::getInstance()->getTaskflow().emplace([objId]() {
-                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getCurrentScene()->createObject("Sphere", currentObject);
-                newObject->addComponent<FigureComponent>("figure/sphere.pyxf");
-                newObject->setSelected(true);
+            shapeMenu->createWidget<MenuItem>("Sphere")->getOnClickEvent().addListener([objId](auto widget) {
+                TaskManager::getInstance()->getTaskflow().emplace([objId]() {
+                    auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
+                    auto newObject = Editor::getCurrentScene()->createObject("Sphere", currentObject);
+                    newObject->addComponent<FigureComponent>("figure/sphere.pyxf");
+                    newObject->setSelected(true);
+                });
             });
-        });
-
-        auto guiMenu = createMenu->createWidget<Menu>("GUI");
-        guiMenu->createWidget<MenuItem>("Button")->getOnClickEvent().addListener([objId](auto widget) {
-            TaskManager::getInstance()->getTaskflow().emplace([objId]() {
-                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getCurrentScene()->createGUIObject("Button", currentObject);
-                newObject->setSelected(true);
-            });
-        });
+        }
 
         ctxMenu->createWidget<MenuItem>("Delete")->getOnClickEvent().addListener([objId](auto widget) {
             TaskManager::getInstance()->getTaskflow().emplace([objId](auto widget) {

@@ -145,7 +145,7 @@ namespace ige::creator
             }
 
             m_currentScene->getOnActiveCameraChangedEvent().addListener([this](auto camera) {
-                if (m_currentScene->getActiveCamera()->getShootTarget())
+                if (m_currentScene->getActiveCamera() && m_currentScene->getActiveCamera()->getShootTarget())
                 {
                     auto targetObj = m_currentScene->getActiveCamera()->getShootTarget();
                     if (targetObj)
