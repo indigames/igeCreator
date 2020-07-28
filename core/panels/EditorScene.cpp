@@ -64,31 +64,6 @@ namespace ige::creator
         {
             m_targetObject = obj;
             if (m_gizmo) m_gizmo->setTarget(m_targetObject);
-
-            //if (m_targetObject)
-            //{
-            //    auto rectTransform = m_targetObject->getComponent<RectTransform>();
-            //    if (rectTransform && m_guiRectSize != rectTransform->getSize())
-            //    {
-            //        if (m_guiRect)
-            //        {
-            //            Editor::getCurrentScene()->getGuiShowcase()->Remove(m_guiRect);
-            //            m_guiRect->ClearAll();
-            //            m_guiRect->DecReference();
-            //            m_guiRect = nullptr;
-            //            ResourceManager::Instance().DeleteDaemon();
-            //        }
-            //        m_guiRectSize = rectTransform->getSize();
-            //        m_guiRect = GraphicsHelper::getInstance()->createSprite(m_guiRectSize, "sprite/grid");
-            //        Editor::getCurrentScene()->getGuiShowcase()->Add(m_guiRect);
-
-            //        m_currentCamera = m_guiCamera;
-            //    }
-            //    else
-            //    {
-            //        m_currentCamera = m_camera;
-            //    }
-            //}
         }
     }
 
@@ -201,33 +176,6 @@ namespace ige::creator
         
         //! Update Panel
         Panel::update(dt);
-
-        //! Update GUI Rectangle
-/*        if (m_targetObject)
-        {
-            auto rectTransform = m_targetObject->getComponent<RectTransform>();
-            if (rectTransform)
-            {
-                auto rectSize = rectTransform->getSize();
-                if (!m_guiRect || m_guiRectSize != rectSize)
-                {
-                    if (m_guiRect)
-                    {
-                        m_currentScene->getGuiShowcase()->Remove(m_guiRect);
-                        m_guiRect->ClearAll();
-                        m_guiRect->DecReference();
-                        m_guiRect = nullptr;
-                        ResourceManager::Instance().DeleteDaemon();
-                    }
-                    m_guiRectSize = rectTransform->getSize();
-                    m_guiRect = GraphicsHelper::getInstance()->createSprite(m_guiRectSize, "sprite/grid");
-                    m_currentScene->getGuiShowcase()->Add(m_guiRect);
-                }
-                m_guiRect->SetPosition(rectTransform->getPosition());
-                m_guiRect->SetRotation(rectTransform->getRotation());
-                m_guiRect->SetScale(rectTransform->getScale());
-            }
-        } */
 
         // If left button release, check selected object
         auto touch = Editor::getApp()->getInputHandler()->getTouchDevice();
