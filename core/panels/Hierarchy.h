@@ -15,7 +15,6 @@ namespace ige::creator
     public:
         Hierarchy(const std::string& name = "", const Panel::Settings& settings = {});
         virtual ~Hierarchy();
-
         virtual void clear();
         void setTargetObject(const std::shared_ptr<SceneObject>& obj);
 
@@ -44,8 +43,5 @@ namespace ige::creator
 
         //! Group layout to add WindowContextMenu
         std::shared_ptr<Group> m_groupLayout;
-
-        //! Selected object
-        std::shared_ptr<SceneObject> m_targetObject = nullptr;
     };
 }

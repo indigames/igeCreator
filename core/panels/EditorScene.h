@@ -36,17 +36,15 @@ namespace ige::creator
         Texture* m_rtTexture = nullptr;
         RenderTarget* m_fbo = nullptr;
 
-        //! GUI Rectangle of selected object
-        EditableFigure* m_guiRect = nullptr;
-        Vec2 m_guiRectSize;
-
         //! Grids
         EditableFigure* m_grid2D = nullptr;
-        EditableFigure* m_grid3D = nullptr;
+        EditableFigure* m_grid3D = nullptr; 
 
         std::shared_ptr<Image> m_imageWidget = nullptr;
         std::shared_ptr<Gizmo> m_gizmo = nullptr;
-        std::shared_ptr<SceneObject> m_targetObject = nullptr;        
+        std::shared_ptr<SceneObject> m_targetObject = nullptr;
+
+        //! Cache current scene
         std::shared_ptr<Scene> m_currentScene = nullptr;
 
         bool m_bIs2DMode = false;

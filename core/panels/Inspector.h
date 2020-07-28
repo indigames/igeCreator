@@ -14,11 +14,9 @@ namespace ige::creator
     public:
         Inspector(const std::string& name = "", const Panel::Settings& settings = {});
         virtual ~Inspector();
-
         virtual void clear();
 
         void setTargetObject(std::shared_ptr<SceneObject> obj);
-        std::shared_ptr<SceneObject>& getTargetObject() { return m_targetObject; }
         void updateMaterial(int index, const char* infoName, std::string txt);
 
     protected:

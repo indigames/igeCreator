@@ -1,5 +1,5 @@
-
 #include "core/gizmo/Gizmo.h"
+#include "core/Editor.h"
 
 #include <components/TransformComponent.h>
 #include <components/RectTransform.h>
@@ -7,7 +7,7 @@
 namespace ige::creator
 {
     Gizmo::Gizmo()
-        : Widget(true, false), m_camera(nullptr), m_target(nullptr)
+        : Widget(true, false), m_camera(nullptr)
     {
         m_operation = gizmo::OPERATION::TRANSLATE;
         m_mode = gizmo::MODE::LOCAL;
@@ -16,20 +16,6 @@ namespace ige::creator
     Gizmo::~Gizmo()
     {
         m_camera = nullptr;
-        m_target = nullptr;
-    }
-
-    void Gizmo::setTarget(const std::shared_ptr<SceneObject>& target)
-    {
-        if (m_target != target)
-        {
-            m_target = target;
-        }        
-    }
-
-    std::shared_ptr<SceneObject>& Gizmo::getTarget()
-    {
-        return m_target;
     }
 
     void Gizmo::setCamera(Camera* cam)
@@ -64,18 +50,13 @@ namespace ige::creator
 
     void Gizmo::_drawImpl()
     {
-        if(!m_bEnabled || m_target == nullptr)
-        {
-            return;
-        }
+        if(!m_bEnabled || m_camera == nullptr) return;
 
-        auto transform = m_target->getTransform();
-        if (!transform)
-        {
-            transform = std::dynamic_pointer_cast<TransformComponent>(m_target->getComponent<RectTransform>());
-            if(!transform)
-                return;
-        }
+        auto target = Editor::getSelectedObject();
+        if(!target) return;
+
+        auto transform = target->getTransform();
+        if (!transform) return;
 
         Mat4 temp;
         auto view = m_camera->GetViewInverseMatrix(temp).Inverse().P();
@@ -88,7 +69,7 @@ namespace ige::creator
 
         ImGuizmo::SetDrawlist();
         ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
-        ImGuizmo::SetID(m_target->getId());
+        ImGuizmo::SetID(target->getId());
         
         float delta[16] = { 0.f };
         gizmo::Manipulate(&view[0], &proj[0], m_operation, m_mode, &model[0], &delta[0]);

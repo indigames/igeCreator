@@ -21,51 +21,27 @@ namespace ige::creator
         Gizmo();
         virtual ~Gizmo();
         
-        /**
-         * Set target
-         */
-        void setTarget(const std::shared_ptr<SceneObject>& target);
-
-        /**
-         * Get target
-         */
-        std::shared_ptr<SceneObject>& getTarget();
-
-        /**
-         * Set camera
-         */
+        //! Set camera
         void setCamera(Camera* cam);
 
-        /**
-         * Get camera
-         */
+        //! Get camera
         Camera* getCamera();
 
-        /**
-         * Set gizmo mode
-         */
+        //! Set gizmo mode
         void setMode(gizmo::MODE value);
 
-        /**
-         * Get gizmo mode
-         */
+        //! Get gizmo mode
         gizmo::MODE getMode() const;
 
-
-        /**
-         * Set gizmo operation
-         */
+        //! Set gizmo operation
         void setOperation(gizmo::OPERATION value);
 
-        /**
-         * Get gizmo operation
-         */
+        //! Get gizmo operation
         gizmo::OPERATION getOperation() const;
 
     protected:
         virtual void _drawImpl() override;
-
-        std::shared_ptr<SceneObject> m_target;
+        
         Camera* m_camera;
         
         gizmo::OPERATION m_operation;

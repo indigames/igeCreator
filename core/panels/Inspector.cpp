@@ -76,11 +76,11 @@ namespace ige::creator
         createCompButton->getOnClickEvent().addListener([this](auto widget){
             switch(m_createCompCombo->getSelectedIndex())
             {
-                case 0: getTargetObject()->addComponent<CameraComponent>("camera"); break;
-                case 1: getTargetObject()->addComponent<EnvironmentComponent>("environment"); break;
-                case 2: getTargetObject()->addComponent<FigureComponent>(); break;
-                case 3: getTargetObject()->addComponent<SpriteComponent>(); break;
-                case 4: getTargetObject()->addComponent<ScriptComponent>(); break;
+                case 0: m_targetObject->addComponent<CameraComponent>("camera"); break;
+                case 1: m_targetObject->addComponent<EnvironmentComponent>("environment"); break;
+                case 2: m_targetObject->addComponent<FigureComponent>(); break;
+                case 3: m_targetObject->addComponent<SpriteComponent>(); break;
+                case 4: m_targetObject->addComponent<ScriptComponent>(); break;
             }
             redraw();
         });
@@ -88,12 +88,12 @@ namespace ige::creator
         // Component
         m_headerGroup->createWidget<Separator>();
         m_componentGroup = createWidget<Group>("Inspector_Components", false);
-        std::for_each(getTargetObject()->getComponents().begin(), getTargetObject()->getComponents().end(), [this](auto& component)
+        std::for_each(m_targetObject->getComponents().begin(), m_targetObject->getComponents().end(), [this](auto& component)
         {
             auto closable = (component->getName() != "TransformComponent");
             auto header = m_componentGroup->createWidget<Group>(component->getName(), true, closable);
             header->getOnClosedEvent().addListener([this, &component]() {
-                getTargetObject()->removeComponent(component);
+                m_targetObject->removeComponent(component);
             });
                 
             if (component->getName() == "TransformComponent")
@@ -145,14 +145,14 @@ namespace ige::creator
     void Inspector::drawLocalTransformComponent()
     {
         m_localTransformGroup->removeAllWidgets();
-        auto transform = getTargetObject()->getTransform();
+        auto transform = m_targetObject->getTransform();
         if (transform == nullptr) return;
 
         m_localTransformGroup->createWidget<Label>("Local");
 
         std::array pos = { transform->getPosition().X(), transform->getPosition().Y(), transform->getPosition().Z() };
         m_localTransformGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto transform = getTargetObject()->getTransform();
+            auto transform = m_targetObject->getTransform();
             transform->setPosition({ val[0], val[1], val[2] });
             transform->onUpdate(0.f);
             drawWorldTransformComponent();
@@ -162,7 +162,7 @@ namespace ige::creator
         vmath_quatToEuler(transform->getRotation().P(), euler.P());
         std::array rot = { RADIANS_TO_DEGREES(euler.X()), RADIANS_TO_DEGREES(euler.Y()), RADIANS_TO_DEGREES(euler.Z()) };
         m_localTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto transform = getTargetObject()->getTransform();
+            auto transform = m_targetObject->getTransform();
             Quat quat;
             float rad[3] = { DEGREES_TO_RADIANS (val[0]), DEGREES_TO_RADIANS (val[1]), DEGREES_TO_RADIANS (val[2])};
             vmath_eulerToQuat(rad, quat.P());
@@ -173,7 +173,7 @@ namespace ige::creator
 
         std::array scale = { transform->getScale().X(), transform->getScale().Y(), transform->getScale().Z() };
         m_localTransformGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scale)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto transform = getTargetObject()->getTransform();
+            auto transform = m_targetObject->getTransform();
             transform->setScale({ val[0], val[1], val[2] });
             transform->onUpdate(0.f);
             drawWorldTransformComponent();
@@ -184,13 +184,13 @@ namespace ige::creator
     void Inspector::drawWorldTransformComponent()
     {
         m_worldTransformGroup->removeAllWidgets();
-        auto transform = getTargetObject()->getTransform();
+        auto transform = m_targetObject->getTransform();
         if (transform == nullptr) return;
 
         m_worldTransformGroup->createWidget<Label>("World");
         std::array pos = { transform->getWorldPosition().X(), transform->getWorldPosition().Y(), transform->getWorldPosition().Z() };
         m_worldTransformGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto transform = getTargetObject()->getTransform();
+            auto transform = m_targetObject->getTransform();
             transform->setWorldPosition({ val[0], val[1], val[2] });
             drawLocalTransformComponent();
         });
@@ -199,7 +199,7 @@ namespace ige::creator
         vmath_quatToEuler(transform->getWorldRotation().P(), euler.P());
         std::array rot = { RADIANS_TO_DEGREES(euler.X()), RADIANS_TO_DEGREES(euler.Y()), RADIANS_TO_DEGREES(euler.Z()) };
         m_worldTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto transform = getTargetObject()->getTransform();
+            auto transform = m_targetObject->getTransform();
             Quat quat;
             float rad[3] = { DEGREES_TO_RADIANS(val[0]), DEGREES_TO_RADIANS(val[1]), DEGREES_TO_RADIANS(val[2]) };
             vmath_eulerToQuat(rad, quat.P());
@@ -209,7 +209,7 @@ namespace ige::creator
 
         std::array scale = { transform->getWorldScale().X(), transform->getWorldScale().Y(), transform->getWorldScale().Z() };
         m_worldTransformGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scale)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto transform = getTargetObject()->getTransform();
+            auto transform = m_targetObject->getTransform();
             transform->setWorldScale({ val[0], val[1], val[2] });
             drawLocalTransformComponent();
         });
@@ -218,7 +218,7 @@ namespace ige::creator
     void Inspector::drawCameraComponent()
     {
         if (m_cameraCompGroup == nullptr) return;
-        auto camera = getTargetObject()->getComponent<CameraComponent>();
+        auto camera = m_targetObject->getComponent<CameraComponent>();
         if (camera == nullptr) return;
         m_cameraCompGroup->removeAllWidgets();
 
@@ -226,33 +226,33 @@ namespace ige::creator
         // Orthographic
         std::array orthorW = { camera->getOrthoWidth() };
         columns->createWidget<Drag<float>>("OrtW", ImGuiDataType_Float, orthorW)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto camera = getTargetObject()->getComponent<CameraComponent>();
+            auto camera = m_targetObject->getComponent<CameraComponent>();
             camera->setOrthoWidth(val[0]);
         });
         std::array orthorH = { camera->getOrthoHeight() };
         columns->createWidget<Drag<float>>("OrtH", ImGuiDataType_Float, orthorH)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto camera = getTargetObject()->getComponent<CameraComponent>();
+            auto camera = m_targetObject->getComponent<CameraComponent>();
             camera->setOrthoHeight(val[0]);
         });
         columns->createWidget<CheckBox>("IsOrtho", camera->isOrthoProjection())->getOnDataChangedEvent().addListener([this](auto val) {
-            auto camera = getTargetObject()->getComponent<CameraComponent>();
+            auto camera = m_targetObject->getComponent<CameraComponent>();
             camera->setOrthoProjection(val);
         });
 
         // FOV - Near - Far
         std::array fov = { camera->getFieldOfView() };
         columns->createWidget<Drag<float>>("FOV", ImGuiDataType_Float, fov)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto camera = getTargetObject()->getComponent<CameraComponent>();
+            auto camera = m_targetObject->getComponent<CameraComponent>();
             camera->setFieldOfView(val[0]);
         });
         std::array camNear = { camera->getNearPlane() };
         columns->createWidget<Drag<float>>("Near", ImGuiDataType_Float, camNear)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto camera = getTargetObject()->getComponent<CameraComponent>();
+            auto camera = m_targetObject->getComponent<CameraComponent>();
             camera->setNearPlane(val[0]);
         });
         std::array camFar = { camera->getFarPlane() };
         columns->createWidget<Drag<float>>("Far", ImGuiDataType_Float, camFar)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto camera = getTargetObject()->getComponent<CameraComponent>();
+            auto camera = m_targetObject->getComponent<CameraComponent>();
             camera->setFarPlane(val[0]);
         });
         
@@ -260,12 +260,12 @@ namespace ige::creator
         auto drawCameraLockTarget = [this]() {
             m_cameraLockTargetGroup->removeAllWidgets();
 
-            auto camera = getTargetObject()->getComponent<CameraComponent>();
+            auto camera = m_targetObject->getComponent<CameraComponent>();
             if (camera->getLockOn()) {
                 std::array target = { camera->getTarget().X(), camera->getTarget().Y(), camera->getTarget().Z() };
                 auto targetGroup = m_cameraLockTargetGroup->createWidget<Drag<float, 3>>("Target", ImGuiDataType_Float, target);
                 targetGroup->getOnDataChangedEvent().addListener([this](auto val) {
-                    auto camera = getTargetObject()->getComponent<CameraComponent>();
+                    auto camera = m_targetObject->getComponent<CameraComponent>();
                     camera->setTarget({ val[0], val[1], val[2] });
                     drawLocalTransformComponent();
                     drawWorldTransformComponent();
@@ -276,21 +276,21 @@ namespace ige::creator
                 auto columns = m_cameraLockTargetGroup->createWidget<Columns<3>>(120.f);
                 std::array pan = { RADIANS_TO_DEGREES(camera->getPan()) };
                 columns->createWidget<Drag<float>>("Pan", ImGuiDataType_Float, pan)->getOnDataChangedEvent().addListener([this](auto val) {
-                    auto camera = getTargetObject()->getComponent<CameraComponent>();
+                    auto camera = m_targetObject->getComponent<CameraComponent>();
                     camera->setPan(DEGREES_TO_RADIANS(val[0]));
                     drawLocalTransformComponent();
                     drawWorldTransformComponent();
                     });
                 std::array tilt = { RADIANS_TO_DEGREES(camera->getTilt()) };
                 columns->createWidget<Drag<float>>("Tilt", ImGuiDataType_Float, tilt)->getOnDataChangedEvent().addListener([this](auto val) {
-                    auto camera = getTargetObject()->getComponent<CameraComponent>();
+                    auto camera = m_targetObject->getComponent<CameraComponent>();
                     camera->setTilt(DEGREES_TO_RADIANS(val[0]));
                     drawLocalTransformComponent();
                     drawWorldTransformComponent();
                     });
                 std::array roll = { RADIANS_TO_DEGREES(camera->getRoll()) };
                 columns->createWidget<Drag<float>>("Roll", ImGuiDataType_Float, roll)->getOnDataChangedEvent().addListener([this](auto val) {
-                    auto camera = getTargetObject()->getComponent<CameraComponent>();
+                    auto camera = m_targetObject->getComponent<CameraComponent>();
                     camera->setRoll(DEGREES_TO_RADIANS(val[0]));
                     drawLocalTransformComponent();
                     drawWorldTransformComponent();
@@ -299,10 +299,10 @@ namespace ige::creator
         };
                
         m_cameraCompGroup->createWidget<CheckBox>("LockTarget", camera->getLockOn())->getOnDataChangedEvent().addListener([drawCameraLockTarget, this](auto locked) {
-            auto camera = getTargetObject()->getComponent<CameraComponent>();
+            auto camera = m_targetObject->getComponent<CameraComponent>();
             if (!locked)
             {
-                auto transform = getTargetObject()->getTransform();
+                auto transform = m_targetObject->getTransform();
                 camera->setTarget(transform->getPosition() + Vec3(0.f, 0.f, -1.f));
             }
             else
@@ -323,14 +323,14 @@ namespace ige::creator
         // Width Based
         auto widthBasedColumns = m_cameraCompGroup->createWidget<Columns<2>>(180.f);
         widthBasedColumns->createWidget<CheckBox>("WidthBased", camera->isWidthBase())->getOnDataChangedEvent().addListener([this](auto val) {
-            auto camera = getTargetObject()->getComponent<CameraComponent>();
+            auto camera = m_targetObject->getComponent<CameraComponent>();
             camera->setWidthBase(val);
         });
 
         // Aspect Ratio
         std::array ratio = { camera->getAspectRatio() };
         widthBasedColumns->createWidget<Drag<float>>("Ratio", ImGuiDataType_Float, ratio)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto camera = getTargetObject()->getComponent<CameraComponent>();
+            auto camera = m_targetObject->getComponent<CameraComponent>();
             camera->setAspectRatio(val[0]);
         });
     }
@@ -339,24 +339,24 @@ namespace ige::creator
     {
         if (m_environmentCompGroup == nullptr) return;
         m_environmentCompGroup->removeAllWidgets();
-        auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+        auto environment = m_targetObject->getComponent<EnvironmentComponent>();
         if (environment == nullptr) return;
 
         // Ambient
         auto ambientGroup = m_environmentCompGroup->createWidget<Group>("AmbientLight");
         std::array ambientSkyColor = { environment->getAmbientSkyColor().X(), environment->getAmbientSkyColor().Y(), environment->getAmbientSkyColor().Z()};
         ambientGroup->createWidget<Drag<float, 3>>("SkyColor", ImGuiDataType_Float, ambientSkyColor, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+            auto environment = m_targetObject->getComponent<EnvironmentComponent>();
             environment->setAmbientSkyColor({val[0], val[1], val[2]});
         });
         std::array ambientGroundColor = { environment->getAmbientGroundColor().X(), environment->getAmbientGroundColor().Y(), environment->getAmbientGroundColor().Z() };
         ambientGroup->createWidget<Drag<float, 3>>("GroundColor", ImGuiDataType_Float, ambientGroundColor, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+            auto environment = m_targetObject->getComponent<EnvironmentComponent>();
             environment->setAmbientGroundColor({ val[0], val[1], val[2] });
         });
         std::array ambientDir = { environment->getAmbientDirection().X(), environment->getAmbientDirection().Y(), environment->getAmbientDirection().Z() };
         ambientGroup->createWidget<Drag<float, 3>>("Direction", ImGuiDataType_Float, ambientDir)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+            auto environment = m_targetObject->getComponent<EnvironmentComponent>();
             environment->setAmbientDirection({ val[0], val[1], val[2] });
         });
 
@@ -367,17 +367,17 @@ namespace ige::creator
             directionalGroup->createWidget<Label>("Light "+ std::to_string(i));
             std::array directCol = { environment->getDirectionalLightColor(i).X(), environment->getDirectionalLightColor(i).Y(), environment->getDirectionalLightColor(i).Z() };
             directionalGroup->createWidget<Drag<float, 3>>("Color", ImGuiDataType_Float, directCol, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([i, this](auto val) {
-                auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+                auto environment = m_targetObject->getComponent<EnvironmentComponent>();
                 environment->setDirectionalLightColor(i, { val[0], val[1], val[2] });
             });
             std::array dir = { environment->getDirectionalLightDirection(i).X(), environment->getDirectionalLightDirection(i).Y(), environment->getDirectionalLightDirection(i).Z() };
             directionalGroup->createWidget<Drag<float, 3>>("Direction", ImGuiDataType_Float, dir)->getOnDataChangedEvent().addListener([i, this](auto val) {
-                auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+                auto environment = m_targetObject->getComponent<EnvironmentComponent>();
                 environment->setDirectionalLightDirection(i, { val[0], val[1], val[2] });
             });
             std::array intensity = { environment->getDirectionalLightIntensity(i) };
             directionalGroup->createWidget<Drag<float>>("Intensity", ImGuiDataType_Float, intensity)->getOnDataChangedEvent().addListener([i, this](auto val) {
-                auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+                auto environment = m_targetObject->getComponent<EnvironmentComponent>();
                 environment->setDirectionalLightIntensity(i, val[0]);
             });
         }
@@ -389,24 +389,24 @@ namespace ige::creator
             pointGroup->createWidget<Label>("Light " + std::to_string(i));           
             std::array color = { environment->getPointLightColor(i).X(), environment->getPointLightColor(i).Y(), environment->getPointLightColor(i).Z() };
             pointGroup->createWidget<Drag<float, 3>>("Color", ImGuiDataType_Float, color, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([i, this](auto val) {
-                auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+                auto environment = m_targetObject->getComponent<EnvironmentComponent>();
                 environment->setPointLightColor(i, { val[0], val[1], val[2] });
             });
             std::array pos = { environment->getPointLightPosition(i).X(), environment->getPointLightPosition(i).Y(), environment->getPointLightPosition(i).Z() };
             pointGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos)->getOnDataChangedEvent().addListener([i, this](auto val) {
-                auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+                auto environment = m_targetObject->getComponent<EnvironmentComponent>();
                 environment->setPointLightPosition(i, { val[0], val[1], val[2] });
             });
 
             auto col2 = pointGroup->createWidget <Columns<2>>(140.f);
             std::array intensity = { environment->getPointLightIntensity(i) };
             col2->createWidget<Drag<float>>("Int.", ImGuiDataType_Float, intensity)->getOnDataChangedEvent().addListener([i, this](auto val) {
-                auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+                auto environment = m_targetObject->getComponent<EnvironmentComponent>();
                 environment->setPointLightIntensity(i, val[0]);
             });
             std::array range = { environment->getPointLightRange(i) };
             col2->createWidget<Drag<float>>("Range", ImGuiDataType_Float, range)->getOnDataChangedEvent().addListener([i, this](auto val) {
-                auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+                auto environment = m_targetObject->getComponent<EnvironmentComponent>();
                 environment->setPointLightRange(i, val[0]);
             });
         }
@@ -415,18 +415,18 @@ namespace ige::creator
         auto shadowGroup = m_environmentCompGroup->createWidget<Group>("Shadow");
         std::array shadowColor = { environment->getShadowColor().X(), environment->getShadowColor().Y(), environment->getShadowColor().Z() };
         shadowGroup->createWidget<Drag<float, 3>>("Color", ImGuiDataType_Float, shadowColor, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+            auto environment = m_targetObject->getComponent<EnvironmentComponent>();
             environment->setShadowColor({ val[0], val[1], val[2] });
         });
         auto shadowColumn = shadowGroup->createWidget <Columns<2>>(140.f);
         std::array density = { environment->getShadowDensity() };
         shadowColumn->createWidget<Drag<float>>("Density", ImGuiDataType_Float, density, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+            auto environment = m_targetObject->getComponent<EnvironmentComponent>();
             environment->setShadowDensity(val[0]);
         });
         std::array wideness = { environment->getShadowWideness() };
         shadowColumn->createWidget<Drag<float>>("Wideness", ImGuiDataType_Float, wideness, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+            auto environment = m_targetObject->getComponent<EnvironmentComponent>();
             environment->setShadowWideness(val[0]);
         });
 
@@ -434,23 +434,23 @@ namespace ige::creator
         auto fogGroup = m_environmentCompGroup->createWidget<Group>("Fog");
         std::array fogColor = { environment->getDistanceFogColor().X(), environment->getDistanceFogColor().Y(), environment->getDistanceFogColor().Z() };
         fogGroup->createWidget<Drag<float, 3>>("Color", ImGuiDataType_Float, fogColor, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+            auto environment = m_targetObject->getComponent<EnvironmentComponent>();
             environment->setDistanceFogColor({ val[0], val[1], val[2] });
         });
         auto fogColumn = fogGroup->createWidget <Columns<3>>(120.f);
         std::array fogNear = { environment->getDistanceFogNear() };
         fogColumn->createWidget<Drag<float>>("Near", ImGuiDataType_Float, fogNear, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+            auto environment = m_targetObject->getComponent<EnvironmentComponent>();
             environment->setDistanceFogNear(val[0]);
         });
         std::array fogFar = { environment->getDistanceFogFar() };
         fogColumn->createWidget<Drag<float>>("Far", ImGuiDataType_Float, fogNear, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+            auto environment = m_targetObject->getComponent<EnvironmentComponent>();
             environment->setDistanceFogFar(val[0]);
         });
         std::array fogAlpha = { environment->getDistanceFogAlpha() };
         fogColumn->createWidget<Drag<float>>("Alpha", ImGuiDataType_Float, fogAlpha, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto environment = getTargetObject()->getComponent<EnvironmentComponent>();
+            auto environment = m_targetObject->getComponent<EnvironmentComponent>();
             environment->setDistanceFogAlpha(val[0]);
         });
     }
@@ -460,20 +460,20 @@ namespace ige::creator
         if (m_figureCompGroup == nullptr) return;
         m_figureCompGroup->removeAllWidgets();
 
-        auto figureComp = getTargetObject()->getComponent<FigureComponent>();
+        auto figureComp = m_targetObject->getComponent<FigureComponent>();
         if (figureComp == nullptr) return;
 
         auto txtPath = m_figureCompGroup->createWidget<TextField>("Path", figureComp->getPath().c_str(), true);
         txtPath->setEndOfLine(false);
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
-            auto figureComp = getTargetObject()->getComponent<FigureComponent>();
+            auto figureComp = m_targetObject->getComponent<FigureComponent>();
             figureComp->setPath(txt);
         });
 
         for (const auto& type : GetFileExtensionSuported<FigureComponent>())
         {
             txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-                auto figureComp = getTargetObject()->getComponent<FigureComponent>();
+                auto figureComp = m_targetObject->getComponent<FigureComponent>();
                 figureComp->setPath(txt);
                 redraw();
             });
@@ -483,7 +483,7 @@ namespace ige::creator
             auto files = OpenFileDialog("Import Assets", "", { "Figure (*.pyxf)", "*.pyxf" }).result();
             if (files.size() > 0)
             {
-                auto figureComp = getTargetObject()->getComponent<FigureComponent>();
+                auto figureComp = m_targetObject->getComponent<FigureComponent>();
                 figureComp->setPath(files[0]);
                 redraw();
             }
@@ -530,7 +530,7 @@ namespace ige::creator
                         {
                             std::array val = { currMat->params[j].fValue[0] };
                             m_figureCompGroup->createWidget<Drag<float>>(info->name, ImGuiDataType_Float, val)->getOnDataChangedEvent().addListener([this, index, infoName](auto val) {
-                                auto figureComp = getTargetObject()->getComponent<FigureComponent>();
+                                auto figureComp = m_targetObject->getComponent<FigureComponent>();
                                 auto figure = figureComp->getFigure();
                                 if (figure)
                                 {
@@ -549,20 +549,20 @@ namespace ige::creator
         if (m_spriteCompGroup == nullptr) return;
         m_spriteCompGroup->removeAllWidgets();
 
-        auto spriteComp = getTargetObject()->getComponent<SpriteComponent>();
+        auto spriteComp = m_targetObject->getComponent<SpriteComponent>();
         if (spriteComp == nullptr) return;
 
         auto txtPath = m_spriteCompGroup->createWidget<TextField>("Path", spriteComp->getPath().c_str(), true);
         txtPath->setEndOfLine(false);
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
-            auto spriteComp = getTargetObject()->getComponent<SpriteComponent>();
+            auto spriteComp = m_targetObject->getComponent<SpriteComponent>();
             spriteComp->setPath(txt);
         });
 
         for (const auto& type : GetFileExtensionSuported<SpriteComponent>())
         {
             txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-                auto spriteComp = getTargetObject()->getComponent<SpriteComponent>();
+                auto spriteComp = m_targetObject->getComponent<SpriteComponent>();
                 spriteComp->setPath(txt);
                 redraw();
             });
@@ -572,7 +572,7 @@ namespace ige::creator
             auto files = OpenFileDialog("Import Assets", "", { "Texture (*.pyxi)", "*.pyxi" }).result();
             if (files.size() > 0)
             {
-                auto spriteComp = getTargetObject()->getComponent<SpriteComponent>();
+                auto spriteComp = m_targetObject->getComponent<SpriteComponent>();
                 spriteComp->setPath(files[0]);
                 redraw();
             }
@@ -580,7 +580,7 @@ namespace ige::creator
 
         std::array size = { spriteComp->getSize().X(),  spriteComp->getSize().Y() };
         m_spriteCompGroup->createWidget<Drag<float, 2>>("Size", ImGuiDataType_Float, size, 1.f, 0.f, 4096.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto spriteComp = getTargetObject()->getComponent<SpriteComponent>();
+            auto spriteComp = m_targetObject->getComponent<SpriteComponent>();
             spriteComp->setSize({ val[0], val[1] });
         });
     }
@@ -590,20 +590,20 @@ namespace ige::creator
         if (m_scriptCompGroup == nullptr) return;
         m_scriptCompGroup->removeAllWidgets();
 
-        auto scriptComp = getTargetObject()->getComponent<ScriptComponent>();
+        auto scriptComp = m_targetObject->getComponent<ScriptComponent>();
         if (scriptComp == nullptr) return;
 
         auto txtPath = m_scriptCompGroup->createWidget<TextField>("Path", scriptComp->getPath().c_str(), true);
         txtPath->setEndOfLine(false);
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
-            auto scriptComp = getTargetObject()->getComponent<ScriptComponent>();
+            auto scriptComp = m_targetObject->getComponent<ScriptComponent>();
             scriptComp->setPath(txt);
         });
 
         for (const auto& type : GetFileExtensionSuported<ScriptComponent>())
         {
             txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-                auto scriptComp = getTargetObject()->getComponent<ScriptComponent>();
+                auto scriptComp = m_targetObject->getComponent<ScriptComponent>();
                 scriptComp->setPath(txt);
                 redraw();
             });
@@ -613,7 +613,7 @@ namespace ige::creator
             auto files = OpenFileDialog("Import Assets", "", { "Script (*.py)", "*.py" }).result();
             if (files.size() > 0)
             {
-                auto scriptComp = getTargetObject()->getComponent<ScriptComponent>();
+                auto scriptComp = m_targetObject->getComponent<ScriptComponent>();
                 scriptComp->setPath(files[0]);
                 redraw();
             }
@@ -625,11 +625,11 @@ namespace ige::creator
         if (m_rectTransformGroup == nullptr) return;
         m_rectTransformGroup->removeAllWidgets();
         
-        auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+        auto rectTransform = m_targetObject->getComponent<RectTransform>();
         if (rectTransform == nullptr) return;
 
         m_rectTransformGroup->createWidget<AnchorPresets>("AnchorPresets")->getOnClickEvent().addListener([this](auto widget) {
-            auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+            auto rectTransform = m_targetObject->getComponent<RectTransform>();
             auto anchor = rectTransform->getAnchor();
             auto anchorWidget = (AnchorWidget*)widget;
             anchor.m_left = anchorWidget->getAnchorMin().x;
@@ -656,7 +656,7 @@ namespace ige::creator
         {
             std::array left = { offset.m_left };
             anchorGroupColums->createWidget<Drag<float>>("L", ImGuiDataType_Float, left)->getOnDataChangedEvent().addListener([this](auto val) {
-                auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+                auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto offset = rectTransform->getOffset();
                 offset.m_left = val[0];
                 rectTransform->setOffset(offset);
@@ -665,7 +665,7 @@ namespace ige::creator
 
             std::array top = { offset.m_top };
             anchorGroupColums->createWidget<Drag<float>>("T", ImGuiDataType_Float, top)->getOnDataChangedEvent().addListener([this](auto val) {
-                auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+                auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto offset = rectTransform->getOffset();
                 offset.m_top = val[0];
                 rectTransform->setOffset(offset);
@@ -674,7 +674,7 @@ namespace ige::creator
 
             std::array posZ = { rectTransform->getPosition().Z() };
             anchorGroupColums->createWidget<Drag<float>>("Z", ImGuiDataType_Float, posZ)->getOnDataChangedEvent().addListener([this](auto val) {
-                auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+                auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto position = rectTransform->getPosition();
                 position.Z(val[0]);
                 rectTransform->setPosition(position);
@@ -683,7 +683,7 @@ namespace ige::creator
 
             std::array right = { offset.m_right };
             anchorGroupColums->createWidget<Drag<float>>("R", ImGuiDataType_Float, right)->getOnDataChangedEvent().addListener([this](auto val) {
-                auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+                auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto offset = rectTransform->getOffset();
                 offset.m_right = val[0];
                 rectTransform->setOffset(offset);
@@ -692,7 +692,7 @@ namespace ige::creator
 
             std::array bottom = { offset.m_bottom };
             anchorGroupColums->createWidget<Drag<float>>("B", ImGuiDataType_Float, bottom)->getOnDataChangedEvent().addListener([this](auto val) {
-                auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+                auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto offset = rectTransform->getOffset();
                 offset.m_bottom = val[0];
                 rectTransform->setOffset(offset);
@@ -703,7 +703,7 @@ namespace ige::creator
         {
             std::array left = { offset.m_left };
             anchorGroupColums->createWidget<Drag<float>>("L", ImGuiDataType_Float, left)->getOnDataChangedEvent().addListener([this](auto val) {
-                auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+                auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto offset = rectTransform->getOffset();
                 offset.m_left = val[0];
                 rectTransform->setOffset(offset);
@@ -711,7 +711,7 @@ namespace ige::creator
             });
             std::array posY = { rectTransform->getPosition().Y() };
             anchorGroupColums->createWidget<Drag<float>>("Y", ImGuiDataType_Float, posY)->getOnDataChangedEvent().addListener([this](auto val) {
-                auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+                auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto position = rectTransform->getPosition();
                 position.Y(val[0]);
                 rectTransform->setPosition(position);
@@ -719,7 +719,7 @@ namespace ige::creator
             });
             std::array posZ = { rectTransform->getPosition().Z() };
             anchorGroupColums->createWidget<Drag<float>>("Z", ImGuiDataType_Float, posZ)->getOnDataChangedEvent().addListener([this](auto val) {
-                auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+                auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto position = rectTransform->getPosition();
                 position.Z(val[0]);
                 rectTransform->setPosition(position);
@@ -728,7 +728,7 @@ namespace ige::creator
 
             std::array right = { offset.m_right };
             anchorGroupColums->createWidget<Drag<float>>("R", ImGuiDataType_Float, right)->getOnDataChangedEvent().addListener([this](auto val) {
-                auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+                auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto offset = rectTransform->getOffset();
                 offset.m_right = val[0];
                 rectTransform->setOffset(offset);
@@ -737,7 +737,7 @@ namespace ige::creator
 
             std::array height = { rectTransform->getSize().Y() };
             anchorGroupColums->createWidget<Drag<float>>("H", ImGuiDataType_Float, height)->getOnDataChangedEvent().addListener([this](auto val) {
-                auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+                auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto size = rectTransform->getSize();
                 size.Y(val[0]);
                 rectTransform->setSize(size);
@@ -748,7 +748,7 @@ namespace ige::creator
         {
             std::array posX = { rectTransform->getPosition().X() };
             anchorGroupColums->createWidget<Drag<float>>("X", ImGuiDataType_Float, posX)->getOnDataChangedEvent().addListener([this](auto val) {
-                auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+                auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto position = rectTransform->getPosition();
                 position.X(val[0]);
                 rectTransform->setPosition(position);
@@ -757,7 +757,7 @@ namespace ige::creator
 
             std::array top = { offset.m_top };
             anchorGroupColums->createWidget<Drag<float>>("T", ImGuiDataType_Float, top)->getOnDataChangedEvent().addListener([this](auto val) {
-                auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+                auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto offset = rectTransform->getOffset();
                 offset.m_top = val[0];
                 rectTransform->setOffset(offset);
@@ -766,7 +766,7 @@ namespace ige::creator
 
             std::array posZ = { rectTransform->getPosition().Z() };
             anchorGroupColums->createWidget<Drag<float>>("Z", ImGuiDataType_Float, posZ)->getOnDataChangedEvent().addListener([this](auto val) {
-                auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+                auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto position = rectTransform->getPosition();
                 position.Z(val[0]);
                 rectTransform->setPosition(position);
@@ -775,7 +775,7 @@ namespace ige::creator
 
             std::array width = { rectTransform->getSize().X() };
             anchorGroupColums->createWidget<Drag<float>>("W", ImGuiDataType_Float, width)->getOnDataChangedEvent().addListener([this](auto val) {
-                auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+                auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto size = rectTransform->getSize();
                 size.X(val[0]);
                 rectTransform->setSize(size);
@@ -784,7 +784,7 @@ namespace ige::creator
 
             std::array bottom = { offset.m_bottom };
             anchorGroupColums->createWidget<Drag<float>>("B", ImGuiDataType_Float, bottom)->getOnDataChangedEvent().addListener([this](auto val) {
-                auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+                auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto offset = rectTransform->getOffset();
                 offset.m_bottom = val[0];
                 rectTransform->setOffset(offset);
@@ -795,7 +795,7 @@ namespace ige::creator
         {
             std::array posX = { rectTransform->getPosition().X() };
             anchorGroupColums->createWidget<Drag<float>>("X", ImGuiDataType_Float, posX)->getOnDataChangedEvent().addListener([this](auto val) {
-                auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+                auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto position = rectTransform->getPosition();
                 position.X(val[0]);
                 rectTransform->setPosition(position);
@@ -804,7 +804,7 @@ namespace ige::creator
 
             std::array posY = { rectTransform->getPosition().Y() };
             anchorGroupColums->createWidget<Drag<float>>("Y", ImGuiDataType_Float, posY)->getOnDataChangedEvent().addListener([this](auto val) {
-                auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+                auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto position = rectTransform->getPosition();
                 position.Y(val[0]);
                 rectTransform->setPosition(position);
@@ -813,7 +813,7 @@ namespace ige::creator
 
             std::array posZ = { rectTransform->getPosition().Z() };
             anchorGroupColums->createWidget<Drag<float>>("Z", ImGuiDataType_Float, posZ)->getOnDataChangedEvent().addListener([this](auto val) {
-                auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+                auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto position = rectTransform->getPosition();
                 position.Z(val[0]);
                 rectTransform->setPosition(position);
@@ -822,7 +822,7 @@ namespace ige::creator
 
             std::array width = { rectTransform->getSize().X() };
             anchorGroupColums->createWidget<Drag<float>>("W", ImGuiDataType_Float, width)->getOnDataChangedEvent().addListener([this](auto val) {
-                auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+                auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto size = rectTransform->getSize();
                 size.X(val[0]);
                 rectTransform->setSize(size);
@@ -831,7 +831,7 @@ namespace ige::creator
 
             std::array height = { rectTransform->getSize().Y() };
             anchorGroupColums->createWidget<Drag<float>>("H", ImGuiDataType_Float, height)->getOnDataChangedEvent().addListener([this](auto val) {
-                auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+                auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto size = rectTransform->getSize();
                 size.Y(val[0]);
                 rectTransform->setSize(size);
@@ -841,7 +841,7 @@ namespace ige::creator
         
         std::array pivot = { rectTransform->getPivot().X(), rectTransform->getPivot().Y() };
         m_rectTransformGroup->createWidget<Drag<float, 2>>("Pivot", ImGuiDataType_Float, pivot)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+            auto rectTransform = m_targetObject->getComponent<RectTransform>();
             rectTransform->setPivot({ val[0], val[1] });
             rectTransform->onUpdate(0.f);
         });
@@ -850,7 +850,7 @@ namespace ige::creator
         vmath_quatToEuler(rectTransform->getRotation().P(), euler.P());
         std::array rot = { RADIANS_TO_DEGREES(euler.X()), RADIANS_TO_DEGREES(euler.Y()), RADIANS_TO_DEGREES(euler.Z()) };
         m_rectTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+            auto rectTransform = m_targetObject->getComponent<RectTransform>();
             Quat quat;
             float rad[3] = { DEGREES_TO_RADIANS(val[0]), DEGREES_TO_RADIANS(val[1]), DEGREES_TO_RADIANS(val[2]) };
             vmath_eulerToQuat(rad, quat.P());
@@ -860,7 +860,7 @@ namespace ige::creator
 
         std::array scale = { rectTransform->getScale().X(), rectTransform->getScale().Y(), rectTransform->getScale().Z() };
         m_rectTransformGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scale)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto rectTransform = getTargetObject()->getComponent<RectTransform>();
+            auto rectTransform = m_targetObject->getComponent<RectTransform>();
             rectTransform->setScale({ val[0], val[1], val[2] });
             rectTransform->onUpdate(0.f);
         });
@@ -871,18 +871,18 @@ namespace ige::creator
         if (m_canvasGroup == nullptr) return;
         m_canvasGroup->removeAllWidgets();
 
-        auto canvas = getTargetObject()->getComponent<ige::scene::Canvas>();
+        auto canvas = m_targetObject->getComponent<ige::scene::Canvas>();
         if (canvas == nullptr) return;
 
         std::array size = { canvas->getDesignCanvasSize().X(), canvas->getDesignCanvasSize().Y() };
         m_canvasGroup->createWidget<Drag<float, 2>>("Design Size", ImGuiDataType_Float, size)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto canvas = getTargetObject()->getComponent<ige::scene::Canvas>();
+            auto canvas = m_targetObject->getComponent<ige::scene::Canvas>();
             canvas->setDesignCanvasSize({ val[0], val[1] });
         });
 
         std::array targetSize = { canvas->getTargetCanvasSize().X(), canvas->getTargetCanvasSize().Y() };
         m_canvasGroup->createWidget<Drag<float, 2>>("Target Size", ImGuiDataType_Float, targetSize)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto canvas = getTargetObject()->getComponent<ige::scene::Canvas>();
+            auto canvas = m_targetObject->getComponent<ige::scene::Canvas>();
             canvas->setTargetCanvasSize({ val[0], val[1] });
         });        
     }
@@ -928,7 +928,7 @@ namespace ige::creator
 
     void Inspector::updateMaterial(int index, const char* infoName, std::string txt)
     {
-        auto figureComp = getTargetObject()->getComponent<FigureComponent>();
+        auto figureComp = m_targetObject->getComponent<FigureComponent>();
         auto figure = figureComp->getFigure();
         if (figure)
         {

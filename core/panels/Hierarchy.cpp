@@ -10,6 +10,8 @@
 #include "core/task/TaskManager.h"
 #include "core/plugin/DragDropPlugin.h"
 #include "components/FigureComponent.h"
+#include "components/SpriteComponent.h"
+#include "components/RectTransform.h"
 #include "components/Canvas.h"
 using namespace ige::scene;
 
@@ -18,7 +20,7 @@ using namespace ige::scene;
 namespace ige::creator
 {
     Hierarchy::Hierarchy(const std::string& name, const Panel::Settings& settings)
-        : Panel(name, settings), m_targetObject(nullptr)
+        : Panel(name, settings)
     {
         SceneObject::getCreatedEvent().addListener(std::bind(&Hierarchy::onSceneObjectCreated, this, std::placeholders::_1));
         SceneObject::getDestroyedEvent().addListener(std::bind(&Hierarchy::onSceneObjectDeleted, this, std::placeholders::_1));
@@ -34,18 +36,11 @@ namespace ige::creator
         SceneObject::getDestroyedEvent().removeAllListeners();
         SceneObject::getAttachedEvent().removeAllListeners();
         SceneObject::getDetachedEvent().removeAllListeners();
-
         clear();
     }
 
     void Hierarchy::setTargetObject(const std::shared_ptr<SceneObject>& obj)
     {
-        if (m_targetObject != obj)
-        {
-            if (m_targetObject) m_targetObject->setActive(false);
-            if (obj) obj->setActive(true);
-            m_targetObject = obj;
-        }
     }
 
     void Hierarchy::onSceneObjectCreated(SceneObject& sceneObject)
@@ -94,6 +89,8 @@ namespace ige::creator
                 TaskManager::getInstance()->getTaskflow().emplace([objId]() {
                     auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
                     auto newObject = Editor::getCurrentScene()->createGUIObject("Button", currentObject);
+                    auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
+                    newObject->addComponent<SpriteComponent>(rect->getSize(), "sprite/rect");
                     newObject->setSelected(true);
                 });
             });
@@ -206,11 +203,6 @@ namespace ige::creator
 
     void Hierarchy::onSceneObjectSelected(SceneObject& sceneObject)
     {
-        if (m_targetObject && m_targetObject->getId() != sceneObject.getId())
-        {
-            m_targetObject->setSelected(false);
-        }
-       
         // Set previous selected to false
         auto nodePair = m_objectNodeMap.find(m_selectedNodeId);
         if (nodePair != m_objectNodeMap.end())
@@ -279,8 +271,6 @@ namespace ige::creator
             m_bInitialized = true;
         }
     }
-
-
     
     void Hierarchy::drawWidgets()
     {
@@ -293,6 +283,5 @@ namespace ige::creator
 
     void Hierarchy::clear()
     {
-        m_targetObject = nullptr;
     }
 }
