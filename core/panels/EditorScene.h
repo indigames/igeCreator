@@ -5,7 +5,7 @@
 #include "core/Panel.h"
 #include "core/gizmo/Gizmo.h"
 
-#include "components/RectTransform.h"
+#include "components/gui/RectTransform.h"
 #include "scene/Scene.h"
 using namespace ige::scene;
 

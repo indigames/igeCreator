@@ -24,8 +24,8 @@
 #include <components/FigureComponent.h>
 #include <components/SpriteComponent.h>
 #include <components/ScriptComponent.h>
-#include <components/RectTransform.h>
-#include <components/Canvas.h>
+#include <components/gui/RectTransform.h>
+#include <components/gui/Canvas.h>
 using namespace ige::scene;
 
 #include <pyxieUtilities.h>

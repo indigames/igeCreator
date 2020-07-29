@@ -11,8 +11,9 @@
 #include "core/plugin/DragDropPlugin.h"
 #include "components/FigureComponent.h"
 #include "components/SpriteComponent.h"
-#include "components/RectTransform.h"
-#include "components/Canvas.h"
+#include "components/gui/RectTransform.h"
+#include "components/gui/Canvas.h"
+#include "components/gui/UIImage.h"
 using namespace ige::scene;
 
 #include <utils/PyxieHeaders.h>
@@ -90,7 +91,7 @@ namespace ige::creator
                     auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
                     auto newObject = Editor::getCurrentScene()->createGUIObject("Button", currentObject);
                     auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
-                    newObject->addComponent<SpriteComponent>(rect->getSize(), "sprite/rect");
+                    newObject->addComponent<UIImage>("icon/folder.pyxi", rect->getSize());
                     newObject->setSelected(true);
                 });
             });
@@ -264,6 +265,8 @@ namespace ige::creator
                         Editor::getSceneManager()->setCurrentScene(scene);
                     }                    
                     auto newObj = Editor::getCurrentScene()->createGUIObject("Canvas");
+                    auto canvas = newObj->getComponent<ige::scene::Canvas>();
+                    canvas->setDesignCanvasSize(Vec2(960.f, 540.f));
                     newObj->setSelected(true);
                 });
             });

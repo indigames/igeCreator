@@ -2,7 +2,7 @@
 #include "core/Editor.h"
 
 #include <components/TransformComponent.h>
-#include <components/RectTransform.h>
+#include <components/gui/RectTransform.h>
 
 namespace ige::creator
 {

@@ -9,7 +9,8 @@
 #include "scene/SceneObject.h"
 #include "scene/SceneManager.h"
 #include "utils/RayOBBChecker.h"
-#include "components/RectTransform.h"
+#include "components/gui/RectTransform.h"
+#include "components/gui/Canvas.h"
 using namespace ige::scene;
 
 #include <utils/PyxieHeaders.h>
@@ -132,6 +133,26 @@ namespace ige::creator
                 {
                     auto grid = targetObj->isGUIObject() ? m_grid2D : m_grid3D;
                     targetObj->getShowcase()->Add(grid);
+
+                    /*if (targetObj->isGUIObject())
+                    {
+                        auto canvas = targetObj->getRoot()->getComponent<ige::scene::Canvas>();
+                        if (canvas)
+                        {
+                            auto canvasSize = canvas->getDesignCanvasSize();
+                            auto scale = m_currentScene->getActiveCamera()->getScreenScale();
+
+                            Vec3 scale3(scale.X(), scale.Y(), 1.0f);
+                            Vec3 translate3((SystemInfo::Instance().GetDeviceW() - (canvasSize.X() * scale.X())) * 0.5f,
+                                (SystemInfo::Instance().GetDeviceH() - (canvasSize.Y() * scale.Y())) * 0.5f, 0.0f);
+
+                            Mat4 canvasToViewportMatrix;
+                            canvasToViewportMatrix.Identity();
+                            //vmath_mat4_from_rottrans(Quat().P(), translate3.P(), canvasToViewportMatrix.P());
+                            //vmath_mat_appendScale(canvasToViewportMatrix.P(), scale3.P(), 4, 4, canvasToViewportMatrix.P());
+                            canvas->setCanvasToViewportMatrix(canvasToViewportMatrix);
+                        }
+                    }*/
                 }
             }
 
@@ -153,6 +174,26 @@ namespace ige::creator
                     {
                         auto grid = targetObj->isGUIObject() ? m_grid2D : m_grid3D;
                         targetObj->getShowcase()->Add(grid);
+
+                        /*if (targetObj->isGUIObject())
+                        {
+                            auto canvas = targetObj->getRoot()->getComponent<ige::scene::Canvas>();
+                            if (canvas)
+                            {
+                                auto canvasSize = canvas->getDesignCanvasSize();
+                                auto scale = camera->getScreenScale();
+
+                                Vec3 scale3(scale.X(), scale.Y(), 1.0f);
+                                Vec3 translate3((SystemInfo::Instance().GetDeviceW() - (canvasSize.X() * scale.X())) * 0.5f,
+                                    (SystemInfo::Instance().GetDeviceH() - (canvasSize.Y() * scale.Y())) * 0.5f, 0.0f);
+
+                                Mat4 canvasToViewportMatrix;
+                                canvasToViewportMatrix.Identity();
+                                //vmath_mat4_from_rottrans(Quat().P(), translate3.P(), canvasToViewportMatrix.P());
+                                //vmath_mat_appendScale(canvasToViewportMatrix.P(), scale3.P(), 4, 4, canvasToViewportMatrix.P());
+                                canvas->setCanvasToViewportMatrix(canvasToViewportMatrix);
+                            }
+                        }*/
                     }
                 }
             });
