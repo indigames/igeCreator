@@ -26,6 +26,7 @@
 #include <components/ScriptComponent.h>
 #include <components/gui/RectTransform.h>
 #include <components/gui/Canvas.h>
+#include <components/gui/UIImage.h>
 using namespace ige::scene;
 
 #include <pyxieUtilities.h>
@@ -37,9 +38,9 @@ namespace ige::creator
         : Panel(name, settings)
     {
     }
-    
+
     Inspector::~Inspector()
-    {   
+    {
         m_targetObject = nullptr;
 
         clear();
@@ -71,6 +72,7 @@ namespace ige::creator
         m_createCompCombo->addChoice(2, "Figure Component");
         m_createCompCombo->addChoice(3, "Sprite Component");
         m_createCompCombo->addChoice(4, "Script Component");
+        m_createCompCombo->addChoice(5, "UIImage");
 
         auto createCompButton = m_headerGroup->createWidget<Button>("Add", ImVec2(64.f, 0.f));
         createCompButton->getOnClickEvent().addListener([this](auto widget){
@@ -81,6 +83,7 @@ namespace ige::creator
                 case 2: m_targetObject->addComponent<FigureComponent>(); break;
                 case 3: m_targetObject->addComponent<SpriteComponent>(); break;
                 case 4: m_targetObject->addComponent<ScriptComponent>(); break;
+                case 5: m_targetObject->addComponent<UIImage>(); break;
             }
             redraw();
         });
@@ -95,7 +98,7 @@ namespace ige::creator
             header->getOnClosedEvent().addListener([this, &component]() {
                 m_targetObject->removeComponent(component);
             });
-                
+
             if (component->getName() == "TransformComponent")
             {
                 m_localTransformGroup = header->createWidget<Group>("LocalTransformGroup", false);
@@ -138,7 +141,12 @@ namespace ige::creator
             {
                 m_canvasGroup = header->createWidget<Group>("CanvasGroup", false);
                 drawCanvas();
-            }            
+            }
+            else if (component->getName() == "UIImage")
+            {
+                m_uiImageGroup = header->createWidget<Group>("UIImageGroup", false);
+                drawUIImage();
+            }
         });
     }
 
@@ -255,7 +263,7 @@ namespace ige::creator
             auto camera = m_targetObject->getComponent<CameraComponent>();
             camera->setFarPlane(val[0]);
         });
-        
+
         // Target
         auto drawCameraLockTarget = [this]() {
             m_cameraLockTargetGroup->removeAllWidgets();
@@ -297,7 +305,7 @@ namespace ige::creator
                 });
             }
         };
-               
+
         m_cameraCompGroup->createWidget<CheckBox>("LockTarget", camera->getLockOn())->getOnDataChangedEvent().addListener([drawCameraLockTarget, this](auto locked) {
             auto camera = m_targetObject->getComponent<CameraComponent>();
             if (!locked)
@@ -363,7 +371,7 @@ namespace ige::creator
         // Directional
         auto directionalGroup = m_environmentCompGroup->createWidget<Group>("DirectionalLight");
         for (int i = 0; i < 3; i++)
-        {            
+        {
             directionalGroup->createWidget<Label>("Light "+ std::to_string(i));
             std::array directCol = { environment->getDirectionalLightColor(i).X(), environment->getDirectionalLightColor(i).Y(), environment->getDirectionalLightColor(i).Z() };
             directionalGroup->createWidget<Drag<float, 3>>("Color", ImGuiDataType_Float, directCol, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([i, this](auto val) {
@@ -386,7 +394,7 @@ namespace ige::creator
         auto pointGroup = m_environmentCompGroup->createWidget<Group>("PointLight");
         for (int i = 0; i < 7; i++)
         {
-            pointGroup->createWidget<Label>("Light " + std::to_string(i));           
+            pointGroup->createWidget<Label>("Light " + std::to_string(i));
             std::array color = { environment->getPointLightColor(i).X(), environment->getPointLightColor(i).Y(), environment->getPointLightColor(i).Z() };
             pointGroup->createWidget<Drag<float, 3>>("Color", ImGuiDataType_Float, color, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([i, this](auto val) {
                 auto environment = m_targetObject->getComponent<EnvironmentComponent>();
@@ -624,11 +632,11 @@ namespace ige::creator
     {
         if (m_rectTransformGroup == nullptr) return;
         m_rectTransformGroup->removeAllWidgets();
-        
+
         auto rectTransform = m_targetObject->getComponent<RectTransform>();
         if (rectTransform == nullptr) return;
 
-        m_rectTransformGroup->createWidget<AnchorPresets>("AnchorPresets")->getOnClickEvent().addListener([this](auto widget) {
+        m_rectTransformGroup->createWidget<AnchorPresets>("AnchorPresets")->getOnClickEvent().addListener([this](const auto& widget) {
             auto rectTransform = m_targetObject->getComponent<RectTransform>();
             auto anchor = rectTransform->getAnchor();
             auto anchorWidget = (AnchorWidget*)widget;
@@ -651,7 +659,7 @@ namespace ige::creator
         auto anchorGroup = anchorColumn->createWidget<Group>("AnchorGroup", false, false);
         auto anchorGroupColums = anchorGroup->createWidget<Columns<3>>(-1.f, true, 52.f);
 
-        if ((anchor.m_left == 0.f && anchor.m_right == 1.f) 
+        if ((anchor.m_left == 0.f && anchor.m_right == 1.f)
             && (anchor.m_top == 0.f && anchor.m_bottom == 1.f))
         {
             std::array left = { offset.m_left };
@@ -838,7 +846,7 @@ namespace ige::creator
                 rectTransform->onUpdate(0.f);
             });
         }
-        
+
         std::array pivot = { rectTransform->getPivot().X(), rectTransform->getPivot().Y() };
         m_rectTransformGroup->createWidget<Drag<float, 2>>("Pivot", ImGuiDataType_Float, pivot)->getOnDataChangedEvent().addListener([this](auto val) {
             auto rectTransform = m_targetObject->getComponent<RectTransform>();
@@ -865,7 +873,7 @@ namespace ige::creator
             rectTransform->onUpdate(0.f);
         });
     }
-    
+
     void Inspector::drawCanvas()
     {
         if (m_canvasGroup == nullptr) return;
@@ -884,9 +892,44 @@ namespace ige::creator
         m_canvasGroup->createWidget<Drag<float, 2>>("Target Size", ImGuiDataType_Float, targetSize)->getOnDataChangedEvent().addListener([this](auto val) {
             auto canvas = m_targetObject->getComponent<ige::scene::Canvas>();
             canvas->setTargetCanvasSize({ val[0], val[1] });
-        });        
+        });
     }
-    
+
+    void Inspector::drawUIImage()
+    {
+        if (m_uiImageGroup == nullptr) return;
+        m_uiImageGroup->removeAllWidgets();
+
+        auto uiImage = m_targetObject->getComponent<UIImage>();
+        if (uiImage == nullptr) return;
+
+        auto txtPath = m_uiImageGroup->createWidget<TextField>("Path", uiImage->getPath().c_str(), true);
+        txtPath->setEndOfLine(false);
+        txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
+            auto uiImage = m_targetObject->getComponent<UIImage>();
+            uiImage->setPath(txt);
+        });
+
+        for (const auto& type : GetFileExtensionSuported<SpriteComponent>())
+        {
+            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
+                auto uiImage = m_targetObject->getComponent<UIImage>();
+                uiImage->setPath(txt);
+                redraw();
+            });
+        }
+
+        m_uiImageGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
+            auto files = OpenFileDialog("Import Assets", "", { "Texture (*.pyxi)", "*.pyxi" }).result();
+            if (files.size() > 0)
+            {
+                auto uiImage = m_targetObject->getComponent<UIImage>();
+                uiImage->setPath(files[0]);
+                redraw();
+            }
+        });
+    }
+
     void Inspector::_drawImpl()
     {
         if (m_bNeedRedraw)
@@ -913,6 +956,7 @@ namespace ige::creator
         m_spriteCompGroup = nullptr;
         m_rectTransformGroup = nullptr;
         m_canvasGroup = nullptr;
+        m_uiImageGroup = nullptr;
 
         removeAllWidgets();
     }

@@ -20,8 +20,10 @@ namespace ige::creator
 {
     EditorScene::EditorScene(const std::string& name, const Panel::Settings& settings)
         : Panel(name, settings)
-    {}
-    
+    {
+        GraphicsHelper::getInstance()->createSprite({ 32, 32 }, "sprite/rect")->WaitBuild();
+    }
+
     EditorScene::~EditorScene()
     {
         clear();
@@ -43,7 +45,7 @@ namespace ige::creator
             m_rtTexture->DecReference();
             m_rtTexture = nullptr;
         }
-            
+
         if (m_fbo)
         {
             m_fbo->DecReference();
@@ -67,7 +69,7 @@ namespace ige::creator
                 m_rtTexture = ResourceCreator::Instance().NewTexture("Editor_RTTexture", nullptr, size.x, size.y, GL_RGBA);
                 m_fbo = ResourceCreator::Instance().NewRenderTarget(m_rtTexture, true, true);
                 m_imageWidget = createWidget<Image>(m_fbo->GetColorTexture()->GetTextureHandle(), size);
-                          
+
                 getOnSizeChangedEvent().addListener([this](auto size) {
                     auto currSize = getSize();
                     m_bNeedResize = (currSize.x != size.x || currSize.y != size.y);
@@ -87,7 +89,7 @@ namespace ige::creator
     }
 
     bool EditorScene::isResizing()
-    {       
+    {
         auto cursor = ImGui::GetMouseCursor();
 
         return
@@ -104,98 +106,17 @@ namespace ige::creator
         initialize();
 
         //! If there is no scene, just do nothing
-        if (!Editor::getCurrentScene() || !Editor::getCurrentScene()->getActiveCamera())
+        if (!m_bIsInitialized || !Editor::getCurrentScene() || !Editor::getCurrentScene()->getActiveCamera())
             return;
-        
+
         // Update active camera
         if (Editor::getCurrentScene() != m_currentScene)
         {
-            if ( m_currentScene)
-            {
-                if(m_currentScene->getActiveCamera())
-                {
-                    auto targetObj = m_currentScene->getActiveCamera()->getShootTarget();
-                    if (targetObj)
-                    {
-                        auto grid = targetObj->isGUIObject() ? m_grid2D : m_grid3D;
-                        targetObj->getShowcase()->Remove(grid);
-                    }
-                }
-                m_currentScene = nullptr;
-            }
-
             m_currentScene = Editor::getCurrentScene();
-            if (m_currentScene->getActiveCamera())
-            {
-                m_gizmo->setCamera(m_currentScene->getActiveCamera()->getCamera());
-                auto targetObj = m_currentScene->getActiveCamera()->getShootTarget();
-                if (targetObj)
-                {
-                    auto grid = targetObj->isGUIObject() ? m_grid2D : m_grid3D;
-                    targetObj->getShowcase()->Add(grid);
-
-                    /*if (targetObj->isGUIObject())
-                    {
-                        auto canvas = targetObj->getRoot()->getComponent<ige::scene::Canvas>();
-                        if (canvas)
-                        {
-                            auto canvasSize = canvas->getDesignCanvasSize();
-                            auto scale = m_currentScene->getActiveCamera()->getScreenScale();
-
-                            Vec3 scale3(scale.X(), scale.Y(), 1.0f);
-                            Vec3 translate3((SystemInfo::Instance().GetDeviceW() - (canvasSize.X() * scale.X())) * 0.5f,
-                                (SystemInfo::Instance().GetDeviceH() - (canvasSize.Y() * scale.Y())) * 0.5f, 0.0f);
-
-                            Mat4 canvasToViewportMatrix;
-                            canvasToViewportMatrix.Identity();
-                            //vmath_mat4_from_rottrans(Quat().P(), translate3.P(), canvasToViewportMatrix.P());
-                            //vmath_mat_appendScale(canvasToViewportMatrix.P(), scale3.P(), 4, 4, canvasToViewportMatrix.P());
-                            canvas->setCanvasToViewportMatrix(canvasToViewportMatrix);
-                        }
-                    }*/
-                }
-            }
+            onCameraChanged(m_currentScene->getActiveCamera());
 
             m_currentScene->getOnActiveCameraChangedEvent().addListener([this](auto camera) {
-                if (m_currentScene && m_currentScene->getActiveCamera() && m_currentScene->getActiveCamera()->getShootTarget())
-                {
-                    auto targetObj = m_currentScene->getActiveCamera()->getShootTarget();
-                    if (targetObj)
-                    {
-                        auto grid = targetObj->isGUIObject() ? m_grid2D : m_grid3D;
-                        targetObj->getShowcase()->Remove(grid);
-                    }
-                }
-                if (camera)
-                {
-                    m_gizmo->setCamera(camera->getCamera());
-                    auto targetObj = camera->getShootTarget();
-                    if (targetObj)
-                    {
-                        auto grid = targetObj->isGUIObject() ? m_grid2D : m_grid3D;
-                        targetObj->getShowcase()->Add(grid);
-
-                        /*if (targetObj->isGUIObject())
-                        {
-                            auto canvas = targetObj->getRoot()->getComponent<ige::scene::Canvas>();
-                            if (canvas)
-                            {
-                                auto canvasSize = canvas->getDesignCanvasSize();
-                                auto scale = camera->getScreenScale();
-
-                                Vec3 scale3(scale.X(), scale.Y(), 1.0f);
-                                Vec3 translate3((SystemInfo::Instance().GetDeviceW() - (canvasSize.X() * scale.X())) * 0.5f,
-                                    (SystemInfo::Instance().GetDeviceH() - (canvasSize.Y() * scale.Y())) * 0.5f, 0.0f);
-
-                                Mat4 canvasToViewportMatrix;
-                                canvasToViewportMatrix.Identity();
-                                //vmath_mat4_from_rottrans(Quat().P(), translate3.P(), canvasToViewportMatrix.P());
-                                //vmath_mat_appendScale(canvasToViewportMatrix.P(), scale3.P(), 4, 4, canvasToViewportMatrix.P());
-                                canvas->setCanvasToViewportMatrix(canvasToViewportMatrix);
-                            }
-                        }*/
-                    }
-                }
+                onCameraChanged(camera);
             });
         }
 
@@ -205,10 +126,10 @@ namespace ige::creator
             auto size = getSize();
             m_fbo->Resize(size.x, size.y);
             m_imageWidget->setSize(size);
-            Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(size.x / size.y);
+            Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(size.x / size.y);            
             m_bNeedResize = false;
         }
-        
+
         //! Update Panel
         Panel::update(dt);
 
@@ -251,7 +172,7 @@ namespace ige::creator
         Editor::getSceneManager()->update(dt);
 
         // All object updated, no more checking
-        RayOBBChecker::setChecking(false);        
+        RayOBBChecker::setChecking(false);
 
         // Render
         auto renderContext = RenderContext::InstancePtr();
@@ -266,5 +187,66 @@ namespace ige::creator
     void EditorScene::_drawImpl()
     {
         Panel::_drawImpl();
+    }
+
+    void EditorScene::onCameraChanged(CameraComponent* camera)
+    {
+        // If new camera is null, just return
+        if (!camera)
+        {
+            m_currentCamera = nullptr;
+            if(m_gizmo) m_gizmo->setCamera(nullptr);
+            return;
+        }
+
+        // Cleanup old config
+        if (m_currentCamera != camera)
+        {
+            if (m_currentCamera)
+            {
+                auto targetObj = m_currentCamera->getShootTarget();
+                if (targetObj)
+                {
+                    auto grid = targetObj->isGUIObject() ? m_grid2D : m_grid3D;
+                    targetObj->getShowcase()->Remove(grid);
+                }
+            }
+        }
+
+        // Setup new config
+        m_currentCamera = camera;
+        if(m_gizmo) m_gizmo->setCamera(camera->getCamera());
+        auto targetObj = camera->getShootTarget();
+        if (targetObj)
+        {
+            if (targetObj->isGUIObject())
+            {
+                targetObj->getShowcase()->Add(m_grid2D);
+
+                auto canvas = targetObj->getRoot()->getComponent<ige::scene::Canvas>();
+                if (canvas)
+                {
+                    auto canvasSize = canvas->getDesignCanvasSize();
+                    auto screenSize = Vec2(getSize().x, getSize().y);
+                    auto canvasScale = screenSize.Y() / canvasSize.Y();
+                    camera->setOrthoHeight(canvasSize.Y() * canvasScale * 0.5f);
+                    m_grid2D->SetScale({ canvasSize.Y() * canvasScale * 0.125f , canvasSize.Y() * canvasScale * 0.125f, 1.f });
+
+                    auto translate = Vec3(-canvasSize.X() * canvasScale * 0.5f, -canvasSize.Y() * canvasScale * 0.5f, 0.0f);
+                    auto rotate = Quat(0.f, 0.f, 0.f, 1.f);
+                    auto scale = Vec3(canvasScale, canvasScale, 1.0f);
+
+                    Mat4 canvasToViewportMatrix;
+                    canvasToViewportMatrix.Identity();
+                    vmath_mat4_from_rottrans(rotate.P(), translate.P(), canvasToViewportMatrix.P());
+                    vmath_mat_appendScale(canvasToViewportMatrix.P(), scale.P(), 4, 4, canvasToViewportMatrix.P());
+                    canvas->setCanvasToViewportMatrix(canvasToViewportMatrix);
+                }
+            }
+            else
+            {
+                targetObj->getShowcase()->Add(m_grid3D);
+            }
+        }
     }
 }

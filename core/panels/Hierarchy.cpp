@@ -91,7 +91,7 @@ namespace ige::creator
                     auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
                     auto newObject = Editor::getCurrentScene()->createGUIObject("Button", currentObject);
                     auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
-                    newObject->addComponent<UIImage>("icon/folder.pyxi", rect->getSize());
+                    newObject->addComponent<UIImage>("sprite/rect", rect->getSize());
                     newObject->setSelected(true);
                 });
             });
@@ -147,7 +147,7 @@ namespace ige::creator
     }
 
     void Hierarchy::onSceneObjectDeleted(SceneObject& sceneObject)
-    { 
+    {
         auto nodePair = m_objectNodeMap.find(sceneObject.getId());
         if (nodePair != m_objectNodeMap.end())
         {
@@ -217,13 +217,13 @@ namespace ige::creator
         {
             m_selectedNodeId = sceneObject.getId();
             nodePair->second->setIsSelected(true);
-                
+
             // Recursive open parent nodes
             auto parent = sceneObject.getParent();
             while (parent != nullptr)
             {
                 auto parentWidget = m_objectNodeMap.at(parent->getId());
-                if (parentWidget->isOpened()) 
+                if (parentWidget->isOpened())
                     break;
                 parentWidget->open();
                 parent = parent->getParent();
@@ -253,7 +253,7 @@ namespace ige::creator
                     {
                         auto newObj = Editor::getCurrentScene()->createObject("New scene");
                         newObj->setSelected(true);
-                    }                    
+                    }
                 });
             });
 
@@ -263,10 +263,12 @@ namespace ige::creator
                     {
                         auto scene = Editor::getSceneManager()->createScene("New scene");
                         Editor::getSceneManager()->setCurrentScene(scene);
-                    }                    
+                    }
                     auto newObj = Editor::getCurrentScene()->createGUIObject("Canvas");
                     auto canvas = newObj->getComponent<ige::scene::Canvas>();
-                    canvas->setDesignCanvasSize(Vec2(960.f, 540.f));
+                    canvas->setDesignCanvasSize(Vec2(540.f, 960.f));
+                    auto uiImage = newObj->addComponent<UIImage>();
+                    uiImage->setPath("sprite/rect");
                     newObj->setSelected(true);
                 });
             });
@@ -274,7 +276,7 @@ namespace ige::creator
             m_bInitialized = true;
         }
     }
-    
+
     void Hierarchy::drawWidgets()
     {
         // Show FPS

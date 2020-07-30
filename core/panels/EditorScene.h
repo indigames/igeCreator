@@ -33,6 +33,8 @@ namespace ige::creator
         virtual void initialize() override;
         virtual void _drawImpl() override;
 
+        void onCameraChanged(CameraComponent* camera);
+
         Texture* m_rtTexture = nullptr;
         RenderTarget* m_fbo = nullptr;
 
@@ -46,6 +48,7 @@ namespace ige::creator
 
         //! Cache current scene
         std::shared_ptr<Scene> m_currentScene = nullptr;
+        CameraComponent* m_currentCamera = nullptr;
 
         bool m_bIs2DMode = false;
         bool m_bIsInitialized = false;
