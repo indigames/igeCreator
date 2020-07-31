@@ -126,7 +126,7 @@ namespace ige::creator
             auto size = getSize();
             m_fbo->Resize(size.x, size.y);
             m_imageWidget->setSize(size);
-            Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(size.x / size.y);            
+            onCameraChanged(Editor::getCurrentScene()->getActiveCamera());
             m_bNeedResize = false;
         }
 
@@ -216,6 +216,7 @@ namespace ige::creator
         // Setup new config
         m_currentCamera = camera;
         if(m_gizmo) m_gizmo->setCamera(camera->getCamera());
+        auto size = getSize();
         auto targetObj = camera->getShootTarget();
         if (targetObj)
         {
@@ -227,20 +228,12 @@ namespace ige::creator
                 if (canvas)
                 {
                     auto canvasSize = canvas->getDesignCanvasSize();
-                    auto screenSize = Vec2(getSize().x, getSize().y);
-                    auto canvasScale = screenSize.Y() / canvasSize.Y();
-                    camera->setOrthoHeight(canvasSize.Y() * canvasScale * 0.5f);
-                    m_grid2D->SetScale({ canvasSize.Y() * canvasScale * 0.125f , canvasSize.Y() * canvasScale * 0.125f, 1.f });
+                    auto screenSize = Vec2(size.x, size.y);
+                    camera->setOrthoHeight(canvasSize.Y() * 0.5f);
+                    m_grid2D->SetScale({ canvasSize.Y() * 0.125f , canvasSize.Y() * 0.125f, 1.f });
 
-                    auto translate = Vec3(-canvasSize.X() * canvasScale * 0.5f, -canvasSize.Y() * canvasScale * 0.5f, 0.0f);
-                    auto rotate = Quat(0.f, 0.f, 0.f, 1.f);
-                    auto scale = Vec3(canvasScale, canvasScale, 1.0f);
-
-                    Mat4 canvasToViewportMatrix;
-                    canvasToViewportMatrix.Identity();
-                    vmath_mat4_from_rottrans(rotate.P(), translate.P(), canvasToViewportMatrix.P());
-                    vmath_mat_appendScale(canvasToViewportMatrix.P(), scale.P(), 4, 4, canvasToViewportMatrix.P());
-                    canvas->setCanvasToViewportMatrix(canvasToViewportMatrix);
+                    auto transformToViewport = Mat4::Translate(Vec3(-canvasSize.X() * 0.5f, -canvasSize.Y() * 0.5f, 0.f));
+                    canvas->setCanvasToViewportMatrix(transformToViewport);
                 }
             }
             else
@@ -248,5 +241,7 @@ namespace ige::creator
                 targetObj->getShowcase()->Add(m_grid3D);
             }
         }
+
+        m_currentCamera->setAspectRatio(size.x / size.y);
     }
 }
