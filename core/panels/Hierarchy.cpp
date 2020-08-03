@@ -85,11 +85,20 @@ namespace ige::creator
         auto createMenu = ctxMenu->createWidget<Menu>("Create");
         if (isGuiObj)
         {
-            auto guiMenu = createMenu->createWidget<Menu>("GUI");
-            guiMenu->createWidget<MenuItem>("Button")->getOnClickEvent().addListener([objId](auto widget) {
+            createMenu->createWidget<MenuItem>("Button")->getOnClickEvent().addListener([objId](auto widget) {
                 TaskManager::getInstance()->getTaskflow().emplace([objId]() {
                     auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
                     auto newObject = Editor::getCurrentScene()->createGUIObject("Button", currentObject);
+                    auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
+                    newObject->addComponent<UIImage>("sprite/rect", rect->getSize());
+                    newObject->setSelected(true);
+                });
+            });
+
+            createMenu->createWidget<MenuItem>("UIImage")->getOnClickEvent().addListener([objId](auto widget) {
+                TaskManager::getInstance()->getTaskflow().emplace([objId]() {
+                    auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
+                    auto newObject = Editor::getCurrentScene()->createGUIObject("UIImage", currentObject);
                     auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
                     newObject->addComponent<UIImage>("sprite/rect", rect->getSize());
                     newObject->setSelected(true);
@@ -264,7 +273,7 @@ namespace ige::creator
                         auto scene = Editor::getSceneManager()->createScene("New scene");
                         Editor::getSceneManager()->setCurrentScene(scene);
                     }
-                    auto newObj = Editor::getCurrentScene()->createGUIObject("Canvas");
+                    auto newObj = Editor::getCurrentScene()->createGUIObject("Canvas", nullptr, Vec3(), { 540.f, 960.f });
                     auto canvas = newObj->getComponent<ige::scene::Canvas>();
                     canvas->setDesignCanvasSize(Vec2(540.f, 960.f));
                     auto uiImage = newObj->addComponent<UIImage>();

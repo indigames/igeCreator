@@ -57,6 +57,9 @@ namespace ige::creator
 
         auto transform = target->getTransform();
         if (!transform) return;
+        
+        // Detect ortho projection
+        gizmo::SetOrthographic(m_camera->IsOrthographicProjection());
 
         Mat4 temp;
         auto view = m_camera->GetViewInverseMatrix(temp).Inverse().P();

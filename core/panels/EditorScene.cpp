@@ -211,10 +211,19 @@ namespace ige::creator
                     targetObj->getShowcase()->Remove(grid);
                 }
             }
-        }
+            
+            // Setup new config
+            m_currentCamera = camera;
 
-        // Setup new config
-        m_currentCamera = camera;
+            // Add grids
+            auto targetObj = camera->getShootTarget();
+            if (targetObj)
+            {
+                if (targetObj->isGUIObject()) targetObj->getShowcase()->Add(m_grid2D);
+                else targetObj->getShowcase()->Add(m_grid3D);
+            }
+        }
+        
         if(m_gizmo) m_gizmo->setCamera(camera->getCamera());
         auto size = getSize();
         auto targetObj = camera->getShootTarget();
@@ -222,8 +231,6 @@ namespace ige::creator
         {
             if (targetObj->isGUIObject())
             {
-                targetObj->getShowcase()->Add(m_grid2D);
-
                 auto canvas = targetObj->getRoot()->getComponent<ige::scene::Canvas>();
                 if (canvas)
                 {
@@ -235,10 +242,6 @@ namespace ige::creator
                     auto transformToViewport = Mat4::Translate(Vec3(-canvasSize.X() * 0.5f, -canvasSize.Y() * 0.5f, 0.f));
                     canvas->setCanvasToViewportMatrix(transformToViewport);
                 }
-            }
-            else
-            {
-                targetObj->getShowcase()->Add(m_grid3D);
             }
         }
 
