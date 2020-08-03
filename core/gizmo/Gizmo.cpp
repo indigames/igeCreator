@@ -64,7 +64,7 @@ namespace ige::creator
         Mat4 temp;
         auto view = m_camera->GetViewInverseMatrix(temp).Inverse().P();
         auto proj = m_camera->GetProjectionMatrix(temp).P();
-        auto model = (float*)(transform->getWorldMatrix().P());
+        auto model = (float*)(m_mode == gizmo::MODE::LOCAL ? transform->getLocalMatrix().P() : transform->getWorldMatrix().P());
 
         ImGui::PushStyleColor(ImGuiCol_Border, 0);
         gizmo::BeginFrame();
@@ -90,25 +90,43 @@ namespace ige::creator
         if(m_operation == gizmo::TRANSLATE)
         {            
             auto dPos = Vec3(deltaTranslation[0], deltaTranslation[1], deltaTranslation[2]);
-            transform->setWorldPosition(transform->getWorldPosition() + dPos);
+            if(m_mode == gizmo::MODE::LOCAL)
+                transform->setPosition(transform->getPosition() + dPos);
+            else
+                transform->setWorldPosition(transform->getWorldPosition() + dPos);
         }
         else if(m_operation == gizmo::SCALE)
         {
             auto dScale = Vec3(deltaScale[0], deltaScale[1], deltaScale[2]);
-            transform->setWorldScale(dScale);
+            if (m_mode == gizmo::MODE::LOCAL)
+                transform->setScale(dScale);
+            else
+                transform->setWorldScale(dScale);
         }
         else if(m_operation == gizmo::ROTATE)
         {            
             auto dRotation = Vec3(DEGREES_TO_RADIANS(deltaRotation[0]), DEGREES_TO_RADIANS(deltaRotation[1]), DEGREES_TO_RADIANS(deltaRotation[2]));
 
-            Vec3 eulerRotation;
-            vmath_quatToEuler(transform->getWorldRotation().P(), eulerRotation.P());
-            eulerRotation = eulerRotation + dRotation;
+            if (m_mode == gizmo::MODE::LOCAL)
+            {
+                Vec3 eulerRotation;
+                vmath_quatToEuler(transform->getRotation().P(), eulerRotation.P());
+                eulerRotation = eulerRotation + dRotation;
 
-            Quat quat;
-            vmath_eulerToQuat(eulerRotation.P(), quat.P());
+                Quat quat;
+                vmath_eulerToQuat(eulerRotation.P(), quat.P());
+                transform->setRotation(quat);
+            }
+            else
+            {
+                Vec3 eulerRotation;
+                vmath_quatToEuler(transform->getWorldRotation().P(), eulerRotation.P());
+                eulerRotation = eulerRotation + dRotation;
 
-            transform->setWorldRotation(quat);
+                Quat quat;
+                vmath_eulerToQuat(eulerRotation.P(), quat.P());
+                transform->setWorldRotation(quat);
+            }
         }
         ImGui::PopStyleColor();
     }

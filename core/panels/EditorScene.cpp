@@ -231,6 +231,8 @@ namespace ige::creator
         {
             if (targetObj->isGUIObject())
             {
+                if (m_gizmo) m_gizmo->setMode(gizmo::MODE::WORLD);
+
                 auto canvas = targetObj->getRoot()->getComponent<ige::scene::Canvas>();
                 if (canvas)
                 {
@@ -242,6 +244,10 @@ namespace ige::creator
                     auto transformToViewport = Mat4::Translate(Vec3(-canvasSize.X() * 0.5f, -canvasSize.Y() * 0.5f, 0.f));
                     canvas->setCanvasToViewportMatrix(transformToViewport);
                 }
+            }
+            else
+            {
+                if (m_gizmo) m_gizmo->setMode(gizmo::MODE::WORLD);
             }
         }
 
