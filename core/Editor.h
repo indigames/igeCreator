@@ -37,6 +37,7 @@ namespace ige::creator
 
         //! Set current selected object by its id
         static void setSelectedObject(uint64_t objId);
+        static void setSelectedObject(const std::shared_ptr<SceneObject>& obj);
         static std::shared_ptr<SceneObject>& getSelectedObject();
 
     protected:

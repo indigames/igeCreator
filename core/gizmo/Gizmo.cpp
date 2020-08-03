@@ -1,13 +1,13 @@
-
 #include "core/gizmo/Gizmo.h"
+#include "core/Editor.h"
 
 #include <components/TransformComponent.h>
-#include <components/RectTransform.h>
+#include <components/gui/RectTransform.h>
 
 namespace ige::creator
 {
     Gizmo::Gizmo()
-        : Widget(true, false), m_camera(nullptr), m_target(nullptr)
+        : Widget(true, false), m_camera(nullptr)
     {
         m_operation = gizmo::OPERATION::TRANSLATE;
         m_mode = gizmo::MODE::LOCAL;
@@ -16,20 +16,6 @@ namespace ige::creator
     Gizmo::~Gizmo()
     {
         m_camera = nullptr;
-        m_target = nullptr;
-    }
-
-    void Gizmo::setTarget(const std::shared_ptr<SceneObject>& target)
-    {
-        if (m_target != target)
-        {
-            m_target = target;
-        }        
-    }
-
-    std::shared_ptr<SceneObject>& Gizmo::getTarget()
-    {
-        return m_target;
     }
 
     void Gizmo::setCamera(Camera* cam)
@@ -64,23 +50,21 @@ namespace ige::creator
 
     void Gizmo::_drawImpl()
     {
-        if(!m_bEnabled || m_target == nullptr)
-        {
-            return;
-        }
+        if(!m_bEnabled || m_camera == nullptr) return;
 
-        auto transform = m_target->getTransform();
-        if (!transform)
-        {
-            transform = std::dynamic_pointer_cast<TransformComponent>(m_target->getComponent<RectTransform>());
-            if(!transform)
-                return;
-        }
+        auto target = Editor::getSelectedObject();
+        if(!target) return;
+
+        auto transform = target->getTransform();
+        if (!transform) return;
+        
+        // Detect ortho projection
+        gizmo::SetOrthographic(m_camera->IsOrthographicProjection());
 
         Mat4 temp;
         auto view = m_camera->GetViewInverseMatrix(temp).Inverse().P();
         auto proj = m_camera->GetProjectionMatrix(temp).P();
-        auto model = (float*)(transform->getWorldMatrix().P());
+        auto model = (float*)(m_mode == gizmo::MODE::LOCAL ? transform->getLocalMatrix().P() : transform->getWorldMatrix().P());
 
         ImGui::PushStyleColor(ImGuiCol_Border, 0);
         gizmo::BeginFrame();
@@ -88,7 +72,7 @@ namespace ige::creator
 
         ImGuizmo::SetDrawlist();
         ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
-        ImGuizmo::SetID(m_target->getId());
+        ImGuizmo::SetID(target->getId());
         
         float delta[16] = { 0.f };
         gizmo::Manipulate(&view[0], &proj[0], m_operation, m_mode, &model[0], &delta[0]);
@@ -106,25 +90,43 @@ namespace ige::creator
         if(m_operation == gizmo::TRANSLATE)
         {            
             auto dPos = Vec3(deltaTranslation[0], deltaTranslation[1], deltaTranslation[2]);
-            transform->setWorldPosition(transform->getWorldPosition() + dPos);
+            if(m_mode == gizmo::MODE::LOCAL)
+                transform->setPosition(transform->getPosition() + dPos);
+            else
+                transform->setWorldPosition(transform->getWorldPosition() + dPos);
         }
         else if(m_operation == gizmo::SCALE)
         {
             auto dScale = Vec3(deltaScale[0], deltaScale[1], deltaScale[2]);
-            transform->setWorldScale(dScale);
+            if (m_mode == gizmo::MODE::LOCAL)
+                transform->setScale(dScale);
+            else
+                transform->setWorldScale(dScale);
         }
         else if(m_operation == gizmo::ROTATE)
         {            
             auto dRotation = Vec3(DEGREES_TO_RADIANS(deltaRotation[0]), DEGREES_TO_RADIANS(deltaRotation[1]), DEGREES_TO_RADIANS(deltaRotation[2]));
 
-            Vec3 eulerRotation;
-            vmath_quatToEuler(transform->getWorldRotation().P(), eulerRotation.P());
-            eulerRotation = eulerRotation + dRotation;
+            if (m_mode == gizmo::MODE::LOCAL)
+            {
+                Vec3 eulerRotation;
+                vmath_quatToEuler(transform->getRotation().P(), eulerRotation.P());
+                eulerRotation = eulerRotation + dRotation;
 
-            Quat quat;
-            vmath_eulerToQuat(eulerRotation.P(), quat.P());
+                Quat quat;
+                vmath_eulerToQuat(eulerRotation.P(), quat.P());
+                transform->setRotation(quat);
+            }
+            else
+            {
+                Vec3 eulerRotation;
+                vmath_quatToEuler(transform->getWorldRotation().P(), eulerRotation.P());
+                eulerRotation = eulerRotation + dRotation;
 
-            transform->setWorldRotation(quat);
+                Quat quat;
+                vmath_eulerToQuat(eulerRotation.P(), quat.P());
+                transform->setWorldRotation(quat);
+            }
         }
         ImGui::PopStyleColor();
     }

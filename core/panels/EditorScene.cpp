@@ -9,7 +9,8 @@
 #include "scene/SceneObject.h"
 #include "scene/SceneManager.h"
 #include "utils/RayOBBChecker.h"
-#include "components/RectTransform.h"
+#include "components/gui/RectTransform.h"
+#include "components/gui/Canvas.h"
 using namespace ige::scene;
 
 #include <utils/PyxieHeaders.h>
@@ -19,8 +20,10 @@ namespace ige::creator
 {
     EditorScene::EditorScene(const std::string& name, const Panel::Settings& settings)
         : Panel(name, settings)
-    {}
-    
+    {
+        GraphicsHelper::getInstance()->createSprite({ 32, 32 }, "sprite/rect")->WaitBuild();
+    }
+
     EditorScene::~EditorScene()
     {
         clear();
@@ -32,23 +35,17 @@ namespace ige::creator
 
         m_imageWidget = nullptr;
         m_gizmo = nullptr;
-        
+        m_currentScene = nullptr;
+
         getOnSizeChangedEvent().removeAllListeners();
         removeAllWidgets();
-
-        if (m_guiRect)
-        {
-            m_guiRect->ClearAll();
-            m_guiRect->DecReference();
-            m_guiRect = nullptr;
-        }
 
         if (m_rtTexture)
         {
             m_rtTexture->DecReference();
             m_rtTexture = nullptr;
         }
-            
+
         if (m_fbo)
         {
             m_fbo->DecReference();
@@ -60,41 +57,11 @@ namespace ige::creator
 
     void EditorScene::setTargetObject(std::shared_ptr<SceneObject> obj)
     {
-        if (m_targetObject != obj)
-        {
-            m_targetObject = obj;
-            if (m_gizmo) m_gizmo->setTarget(m_targetObject);
-
-            //if (m_targetObject)
-            //{
-            //    auto rectTransform = m_targetObject->getComponent<RectTransform>();
-            //    if (rectTransform && m_guiRectSize != rectTransform->getSize())
-            //    {
-            //        if (m_guiRect)
-            //        {
-            //            Editor::getCurrentScene()->getGuiShowcase()->Remove(m_guiRect);
-            //            m_guiRect->ClearAll();
-            //            m_guiRect->DecReference();
-            //            m_guiRect = nullptr;
-            //            ResourceManager::Instance().DeleteDaemon();
-            //        }
-            //        m_guiRectSize = rectTransform->getSize();
-            //        m_guiRect = GraphicsHelper::getInstance()->createSprite(m_guiRectSize, "sprite/grid");
-            //        Editor::getCurrentScene()->getGuiShowcase()->Add(m_guiRect);
-
-            //        m_currentCamera = m_guiCamera;
-            //    }
-            //    else
-            //    {
-            //        m_currentCamera = m_camera;
-            //    }
-            //}
-        }
     }
 
     void EditorScene::initialize()
     {
-        if (Editor::getCurrentScene() && !m_bIsInitialized)
+        if (!m_bIsInitialized)
         {
             auto size = getSize();
             if (size.x > 0 && size.y > 0)
@@ -102,7 +69,7 @@ namespace ige::creator
                 m_rtTexture = ResourceCreator::Instance().NewTexture("Editor_RTTexture", nullptr, size.x, size.y, GL_RGBA);
                 m_fbo = ResourceCreator::Instance().NewRenderTarget(m_rtTexture, true, true);
                 m_imageWidget = createWidget<Image>(m_fbo->GetColorTexture()->GetTextureHandle(), size);
-                          
+
                 getOnSizeChangedEvent().addListener([this](auto size) {
                     auto currSize = getSize();
                     m_bNeedResize = (currSize.x != size.x || currSize.y != size.y);
@@ -119,57 +86,10 @@ namespace ige::creator
                 m_bIsInitialized = true;
             }
         }
-
-        if (Editor::getCurrentScene() != m_currentScene)
-        {
-            if (m_currentScene && m_currentScene->getActiveCamera())
-            {
-                auto targetObj = m_currentScene->getActiveCamera()->getShootTarget();
-                if (targetObj)
-                {
-                    auto grid = targetObj->isGUIObject() ? m_grid2D : m_grid3D;
-                    targetObj->getShowcase()->Remove(grid);
-                }
-            }
-
-            m_currentScene = Editor::getCurrentScene();
-            if (m_currentScene->getActiveCamera())
-            {
-                m_gizmo->setCamera(m_currentScene->getActiveCamera()->getCamera());
-                auto targetObj = m_currentScene->getActiveCamera()->getShootTarget();
-                if (targetObj)
-                {
-                    auto grid = targetObj->isGUIObject() ? m_grid2D : m_grid3D;
-                    targetObj->getShowcase()->Add(grid);
-                }
-            }
-
-            m_currentScene->getOnActiveCameraChangedEvent().addListener([this](auto camera) {
-                if (m_currentScene->getActiveCamera()->getShootTarget())
-                {
-                    auto targetObj = m_currentScene->getActiveCamera()->getShootTarget();
-                    if (targetObj)
-                    {
-                        auto grid = targetObj->isGUIObject() ? m_grid2D : m_grid3D;
-                        targetObj->getShowcase()->Remove(grid);
-                    }
-                }
-                if (camera)
-                {
-                    m_gizmo->setCamera(camera->getCamera());
-                    auto targetObj = camera->getShootTarget();
-                    if (targetObj)
-                    {
-                        auto grid = targetObj->isGUIObject() ? m_grid2D : m_grid3D;
-                        targetObj->getShowcase()->Add(grid);
-                    }
-                }
-            });
-        }
     }
 
     bool EditorScene::isResizing()
-    {       
+    {
         auto cursor = ImGui::GetMouseCursor();
 
         return
@@ -186,48 +106,32 @@ namespace ige::creator
         initialize();
 
         //! If there is no scene, just do nothing
-        if (!Editor::getCurrentScene() || !Editor::getCurrentScene()->getActiveCamera())
+        if (!m_bIsInitialized || !Editor::getCurrentScene() || !Editor::getCurrentScene()->getActiveCamera())
             return;
-        
+
+        // Update active camera
+        if (Editor::getCurrentScene() != m_currentScene)
+        {
+            m_currentScene = Editor::getCurrentScene();
+            onCameraChanged(m_currentScene->getActiveCamera());
+
+            m_currentScene->getOnActiveCameraChangedEvent().addListener([this](auto camera) {
+                onCameraChanged(camera);
+            });
+        }
+
         // Update render target size
         if (m_bNeedResize)
         {
             auto size = getSize();
             m_fbo->Resize(size.x, size.y);
             m_imageWidget->setSize(size);
-            Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(size.x / size.y);
+            onCameraChanged(Editor::getCurrentScene()->getActiveCamera());
             m_bNeedResize = false;
         }
-        
+
         //! Update Panel
         Panel::update(dt);
-
-        //! Update GUI Rectangle
-/*        if (m_targetObject)
-        {
-            auto rectTransform = m_targetObject->getComponent<RectTransform>();
-            if (rectTransform)
-            {
-                auto rectSize = rectTransform->getSize();
-                if (!m_guiRect || m_guiRectSize != rectSize)
-                {
-                    if (m_guiRect)
-                    {
-                        m_currentScene->getGuiShowcase()->Remove(m_guiRect);
-                        m_guiRect->ClearAll();
-                        m_guiRect->DecReference();
-                        m_guiRect = nullptr;
-                        ResourceManager::Instance().DeleteDaemon();
-                    }
-                    m_guiRectSize = rectTransform->getSize();
-                    m_guiRect = GraphicsHelper::getInstance()->createSprite(m_guiRectSize, "sprite/grid");
-                    m_currentScene->getGuiShowcase()->Add(m_guiRect);
-                }
-                m_guiRect->SetPosition(rectTransform->getPosition());
-                m_guiRect->SetRotation(rectTransform->getRotation());
-                m_guiRect->SetScale(rectTransform->getScale());
-            }
-        } */
 
         // If left button release, check selected object
         auto touch = Editor::getApp()->getInputHandler()->getTouchDevice();
@@ -268,7 +172,7 @@ namespace ige::creator
         Editor::getSceneManager()->update(dt);
 
         // All object updated, no more checking
-        RayOBBChecker::setChecking(false);        
+        RayOBBChecker::setChecking(false);
 
         // Render
         auto renderContext = RenderContext::InstancePtr();
@@ -283,5 +187,70 @@ namespace ige::creator
     void EditorScene::_drawImpl()
     {
         Panel::_drawImpl();
+    }
+
+    void EditorScene::onCameraChanged(CameraComponent* camera)
+    {
+        // If new camera is null, just return
+        if (!camera)
+        {
+            m_currentCamera = nullptr;
+            if(m_gizmo) m_gizmo->setCamera(nullptr);
+            return;
+        }
+
+        // Cleanup old config
+        if (m_currentCamera != camera)
+        {
+            if (m_currentCamera)
+            {
+                auto targetObj = m_currentCamera->getShootTarget();
+                if (targetObj)
+                {
+                    auto grid = targetObj->isGUIObject() ? m_grid2D : m_grid3D;
+                    targetObj->getShowcase()->Remove(grid);
+                }
+            }
+            
+            // Setup new config
+            m_currentCamera = camera;
+
+            // Add grids
+            auto targetObj = camera->getShootTarget();
+            if (targetObj)
+            {
+                if (targetObj->isGUIObject()) targetObj->getShowcase()->Add(m_grid2D);
+                else targetObj->getShowcase()->Add(m_grid3D);
+            }
+        }
+        
+        if(m_gizmo) m_gizmo->setCamera(camera->getCamera());
+        auto size = getSize();
+        auto targetObj = camera->getShootTarget();
+        if (targetObj)
+        {
+            if (targetObj->isGUIObject())
+            {
+                if (m_gizmo) m_gizmo->setMode(gizmo::MODE::WORLD);
+
+                auto canvas = targetObj->getRoot()->getComponent<ige::scene::Canvas>();
+                if (canvas)
+                {
+                    auto canvasSize = canvas->getDesignCanvasSize();
+                    auto screenSize = Vec2(size.x, size.y);
+                    camera->setOrthoHeight(canvasSize.Y() * 0.5f);
+                    m_grid2D->SetScale({ canvasSize.Y() * 0.125f , canvasSize.Y() * 0.125f, 1.f });
+
+                    auto transformToViewport = Mat4::Translate(Vec3(-canvasSize.X() * 0.5f, -canvasSize.Y() * 0.5f, 0.f));
+                    canvas->setCanvasToViewportMatrix(transformToViewport);
+                }
+            }
+            else
+            {
+                if (m_gizmo) m_gizmo->setMode(gizmo::MODE::WORLD);
+            }
+        }
+
+        m_currentCamera->setAspectRatio(size.x / size.y);
     }
 }

@@ -10,7 +10,10 @@
 #include "core/task/TaskManager.h"
 #include "core/plugin/DragDropPlugin.h"
 #include "components/FigureComponent.h"
-#include "components/Canvas.h"
+#include "components/SpriteComponent.h"
+#include "components/gui/RectTransform.h"
+#include "components/gui/Canvas.h"
+#include "components/gui/UIImage.h"
 using namespace ige::scene;
 
 #include <utils/PyxieHeaders.h>
@@ -18,7 +21,7 @@ using namespace ige::scene;
 namespace ige::creator
 {
     Hierarchy::Hierarchy(const std::string& name, const Panel::Settings& settings)
-        : Panel(name, settings), m_targetObject(nullptr)
+        : Panel(name, settings)
     {
         SceneObject::getCreatedEvent().addListener(std::bind(&Hierarchy::onSceneObjectCreated, this, std::placeholders::_1));
         SceneObject::getDestroyedEvent().addListener(std::bind(&Hierarchy::onSceneObjectDeleted, this, std::placeholders::_1));
@@ -34,24 +37,18 @@ namespace ige::creator
         SceneObject::getDestroyedEvent().removeAllListeners();
         SceneObject::getAttachedEvent().removeAllListeners();
         SceneObject::getDetachedEvent().removeAllListeners();
-
         clear();
     }
 
     void Hierarchy::setTargetObject(const std::shared_ptr<SceneObject>& obj)
     {
-        if (m_targetObject != obj)
-        {
-            if (m_targetObject) m_targetObject->setActive(false);
-            if (obj) obj->setActive(true);
-            m_targetObject = obj;
-        }
     }
 
     void Hierarchy::onSceneObjectCreated(SceneObject& sceneObject)
     {
         auto objId = sceneObject.getId();
         auto name = sceneObject.getName();
+        auto isGuiObj = sceneObject.isGUIObject();
         auto node = createWidget<TreeNode>(sceneObject.getName(), false, sceneObject.getChildrenCount() == 0);
         node->getOnClickEvent().addListener([objId, this](auto widget) {
             TaskManager::getInstance()->getTaskflow().emplace([objId, this]() {
@@ -82,55 +79,70 @@ namespace ige::creator
                 currentObject->getParent()->removeChild(currentObject);
             obj->addChild(currentObject);
         });
-
         node->addPlugin<DDSourcePlugin<uint64_t>>(EDragDropID::OBJECT, sceneObject.getName(), objId);
 
         auto ctxMenu = node->addPlugin<ContextMenu>(sceneObject.getName() + "_Context");
         auto createMenu = ctxMenu->createWidget<Menu>("Create");
-        createMenu->createWidget<MenuItem>("New Object")->getOnClickEvent().addListener([objId](auto widget) {
-            TaskManager::getInstance()->getTaskflow().emplace([objId]() {
-                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getCurrentScene()->createObject("New Object", currentObject);
-                newObject->setSelected(true);
+        if (isGuiObj)
+        {
+            createMenu->createWidget<MenuItem>("Button")->getOnClickEvent().addListener([objId](auto widget) {
+                TaskManager::getInstance()->getTaskflow().emplace([objId]() {
+                    auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
+                    auto newObject = Editor::getCurrentScene()->createGUIObject("Button", currentObject);
+                    auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
+                    newObject->addComponent<UIImage>("sprite/rect", rect->getSize());
+                    newObject->setSelected(true);
+                });
             });
-        });
 
-        auto shapeMenu = createMenu->createWidget<Menu>("Primitives");
-        shapeMenu->createWidget<MenuItem>("Cube")->getOnClickEvent().addListener([objId](auto widget) {
-            TaskManager::getInstance()->getTaskflow().emplace([objId]() {
-                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getCurrentScene()->createObject("Cube", currentObject);
-                newObject->addComponent<FigureComponent>("figure/cube.pyxf");
-                newObject->setSelected(true);
+            createMenu->createWidget<MenuItem>("UIImage")->getOnClickEvent().addListener([objId](auto widget) {
+                TaskManager::getInstance()->getTaskflow().emplace([objId]() {
+                    auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
+                    auto newObject = Editor::getCurrentScene()->createGUIObject("UIImage", currentObject);
+                    auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
+                    newObject->addComponent<UIImage>("sprite/rect", rect->getSize());
+                    newObject->setSelected(true);
+                });
             });
-        });
+        }
+        else
+        {
+            createMenu->createWidget<MenuItem>("New Object")->getOnClickEvent().addListener([objId](auto widget) {
+                TaskManager::getInstance()->getTaskflow().emplace([objId]() {
+                    auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
+                    auto newObject = Editor::getCurrentScene()->createObject("New Object", currentObject);
+                    newObject->setSelected(true);
+                });
+            });
 
-        shapeMenu->createWidget<MenuItem>("Plane")->getOnClickEvent().addListener([objId](auto widget) {
-            TaskManager::getInstance()->getTaskflow().emplace([objId]() {
-                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getCurrentScene()->createObject("Plane", currentObject);
-                newObject->addComponent<FigureComponent>("figure/plane.pyxf");
-                newObject->setSelected(true);
+            auto shapeMenu = createMenu->createWidget<Menu>("Primitives");
+            shapeMenu->createWidget<MenuItem>("Cube")->getOnClickEvent().addListener([objId](auto widget) {
+                TaskManager::getInstance()->getTaskflow().emplace([objId]() {
+                    auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
+                    auto newObject = Editor::getCurrentScene()->createObject("Cube", currentObject);
+                    newObject->addComponent<FigureComponent>("figure/cube.pyxf");
+                    newObject->setSelected(true);
+                });
             });
-        });
 
-        shapeMenu->createWidget<MenuItem>("Sphere")->getOnClickEvent().addListener([objId](auto widget) {
-            TaskManager::getInstance()->getTaskflow().emplace([objId]() {
-                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getCurrentScene()->createObject("Sphere", currentObject);
-                newObject->addComponent<FigureComponent>("figure/sphere.pyxf");
-                newObject->setSelected(true);
+            shapeMenu->createWidget<MenuItem>("Plane")->getOnClickEvent().addListener([objId](auto widget) {
+                TaskManager::getInstance()->getTaskflow().emplace([objId]() {
+                    auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
+                    auto newObject = Editor::getCurrentScene()->createObject("Plane", currentObject);
+                    newObject->addComponent<FigureComponent>("figure/plane.pyxf");
+                    newObject->setSelected(true);
+                });
             });
-        });
 
-        auto guiMenu = createMenu->createWidget<Menu>("GUI");
-        guiMenu->createWidget<MenuItem>("Button")->getOnClickEvent().addListener([objId](auto widget) {
-            TaskManager::getInstance()->getTaskflow().emplace([objId]() {
-                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getCurrentScene()->createGUIObject("Button", currentObject);
-                newObject->setSelected(true);
+            shapeMenu->createWidget<MenuItem>("Sphere")->getOnClickEvent().addListener([objId](auto widget) {
+                TaskManager::getInstance()->getTaskflow().emplace([objId]() {
+                    auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
+                    auto newObject = Editor::getCurrentScene()->createObject("Sphere", currentObject);
+                    newObject->addComponent<FigureComponent>("figure/sphere.pyxf");
+                    newObject->setSelected(true);
+                });
             });
-        });
+        }
 
         ctxMenu->createWidget<MenuItem>("Delete")->getOnClickEvent().addListener([objId](auto widget) {
             TaskManager::getInstance()->getTaskflow().emplace([objId](auto widget) {
@@ -144,7 +156,7 @@ namespace ige::creator
     }
 
     void Hierarchy::onSceneObjectDeleted(SceneObject& sceneObject)
-    { 
+    {
         auto nodePair = m_objectNodeMap.find(sceneObject.getId());
         if (nodePair != m_objectNodeMap.end())
         {
@@ -201,11 +213,6 @@ namespace ige::creator
 
     void Hierarchy::onSceneObjectSelected(SceneObject& sceneObject)
     {
-        if (m_targetObject && m_targetObject->getId() != sceneObject.getId())
-        {
-            m_targetObject->setSelected(false);
-        }
-       
         // Set previous selected to false
         auto nodePair = m_objectNodeMap.find(m_selectedNodeId);
         if (nodePair != m_objectNodeMap.end())
@@ -219,13 +226,13 @@ namespace ige::creator
         {
             m_selectedNodeId = sceneObject.getId();
             nodePair->second->setIsSelected(true);
-                
+
             // Recursive open parent nodes
             auto parent = sceneObject.getParent();
             while (parent != nullptr)
             {
                 auto parentWidget = m_objectNodeMap.at(parent->getId());
-                if (parentWidget->isOpened()) 
+                if (parentWidget->isOpened())
                     break;
                 parentWidget->open();
                 parent = parent->getParent();
@@ -255,7 +262,7 @@ namespace ige::creator
                     {
                         auto newObj = Editor::getCurrentScene()->createObject("New scene");
                         newObj->setSelected(true);
-                    }                    
+                    }
                 });
             });
 
@@ -265,8 +272,12 @@ namespace ige::creator
                     {
                         auto scene = Editor::getSceneManager()->createScene("New scene");
                         Editor::getSceneManager()->setCurrentScene(scene);
-                    }                    
-                    auto newObj = Editor::getCurrentScene()->createGUIObject("Canvas");
+                    }
+                    auto newObj = Editor::getCurrentScene()->createGUIObject("Canvas", nullptr, Vec3(), { 540.f, 960.f });
+                    auto canvas = newObj->getComponent<ige::scene::Canvas>();
+                    canvas->setDesignCanvasSize(Vec2(540.f, 960.f));
+                    auto uiImage = newObj->addComponent<UIImage>();
+                    uiImage->setPath("sprite/rect");
                     newObj->setSelected(true);
                 });
             });
@@ -275,8 +286,6 @@ namespace ige::creator
         }
     }
 
-
-    
     void Hierarchy::drawWidgets()
     {
         // Show FPS
@@ -288,6 +297,5 @@ namespace ige::creator
 
     void Hierarchy::clear()
     {
-        m_targetObject = nullptr;
     }
 }

@@ -29,15 +29,15 @@ namespace ige::creator
 
         auto isStretchW = (m_anchorMin.x == 0.f && m_anchorMax.x == 1.f);
         auto isStretchH = (m_anchorMin.y == 0.f && m_anchorMax.y == 1.f);
-        
+
         // Now, just consider 09 fixed anchor points
         auto anchorX = (m_anchorMin.x + m_anchorMax.x) / 2.f;
         auto anchorY = (m_anchorMin.y + m_anchorMax.y) / 2.f;
 
-        auto curX = minPos.x + (maxPos.x - minPos.x) * anchorX;
-        auto curY = maxPos.y - (maxPos.y - minPos.y) * anchorY;
+        auto curX = maxPos.x - (maxPos.x - minPos.x) * anchorX;
+        auto curY = minPos.y + (maxPos.y - minPos.y) * anchorY;
 
-        // Draw anchor indicator first    
+        // Draw anchor indicator first
         if(!isStretchW)
             drawList->AddRect(ImVec2(curX, minPos.y), ImVec2(curX, maxPos.y), color, false, ImDrawCornerFlags_None, 1.f);
         if (!isStretchH)
@@ -47,14 +47,12 @@ namespace ige::creator
         drawList->AddCircleFilled(ImVec2(curX, curY), 2.5f, color, 16);
 
         // Then draw stretch indicators
-        if (isStretchW)
-            drawList->AddLine(ImVec2(minRectPos.x, midPos.y), ImVec2(maxRectPos.x, midPos.y), stretchColor, 3.f);
-        if (isStretchH)
-            drawList->AddLine(ImVec2(midPos.x, minRectPos.y), ImVec2(midPos.x, maxRectPos.y), stretchColor, 3.f);
-                
+        if (isStretchW) drawList->AddLine(ImVec2(minRectPos.x, midPos.y), ImVec2(maxRectPos.x, midPos.y), stretchColor, 3.f);
+        if (isStretchH) drawList->AddLine(ImVec2(midPos.x, minRectPos.y), ImVec2(midPos.x, maxRectPos.y), stretchColor, 3.f);
+
         ImGui::EndChild();
 
-        if(ImGui::IsItemClicked()) 
+        if(ImGui::IsItemClicked())
             getOnClickEvent().invoke(this);
     }
 
@@ -62,38 +60,38 @@ namespace ige::creator
     AnchorPresets::AnchorPresets(const std::string& label)
         : Widget(), m_label(label)
     {
-        for(int y = 2; y >= 0; y--)
+        for(int y = 0; y < 3; y++)
         {
-            for(int x = 0; x < 3; x++)
+            for(int x = 2; x >= 0; x--)
             {
                 createWidget<AnchorWidget>(ImVec2(x / 2.f, y / 2.f), ImVec2(x / 2.f, y / 2.f), false);
-                if (x == 2)
+                if (x == 0)
                 {
                     createWidget<AnchorWidget>(ImVec2(0.f, y / 2.f), ImVec2(1.f, y / 2.f));
-                }                
+                }
             }
         }
-        for (int x = 0; x < 3; x++)
+        for (int x = 2; x >= 0; x--)
         {
             createWidget<AnchorWidget>(ImVec2(x / 2.f, 0.f), ImVec2(x / 2.f, 1.f), false);
-            if (x == 2)
+            if (x == 0)
             {
                 createWidget<AnchorWidget>(ImVec2(0.f, 0.f), ImVec2(1.f, 1.f));
             }
         }
 
-        for (auto& widget : m_widgets)
+        for (const auto& widget : m_widgets)
         {
-            widget->getOnClickEvent().addListener([this](auto widget) {
+            widget->getOnClickEvent().addListener([this](const auto& widget) {
                 getOnClickEvent().invoke(widget);
             });
         }
-    } 
+    }
 
     void AnchorPresets::_drawImpl()
     {
         if (ImGui::BeginPopup(m_label.c_str()))
-        { 
+        {
             for (auto widget : m_widgets)
             {
                 widget->draw();

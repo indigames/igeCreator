@@ -43,7 +43,7 @@ namespace ige::creator
         template<typename T>
         std::shared_ptr<T> getPanelAs(const std::string& id)
         {
-            return std::static_pointer_cast<T>(m_panels[id]);
+            return std::dynamic_pointer_cast<T>(m_panels[id]);
         }
 
         void removePanel(std::shared_ptr<Panel> panel);

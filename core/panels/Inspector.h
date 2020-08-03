@@ -14,11 +14,9 @@ namespace ige::creator
     public:
         Inspector(const std::string& name = "", const Panel::Settings& settings = {});
         virtual ~Inspector();
-
         virtual void clear();
 
         void setTargetObject(std::shared_ptr<SceneObject> obj);
-        std::shared_ptr<SceneObject>& getTargetObject() { return m_targetObject; }
         void updateMaterial(int index, const char* infoName, std::string txt);
 
     protected:
@@ -35,6 +33,7 @@ namespace ige::creator
         void drawScriptComponent();
         void drawRectTransform();
         void drawCanvas();
+        void drawUIImage();
 
         //! Redraw
         void redraw() { m_bNeedRedraw = true;  }
@@ -56,6 +55,7 @@ namespace ige::creator
         std::shared_ptr<Group> m_scriptCompGroup = nullptr;
         std::shared_ptr<Group> m_rectTransformGroup = nullptr;
         std::shared_ptr<Group> m_canvasGroup = nullptr;
+        std::shared_ptr<Group> m_uiImageGroup = nullptr;
 
         //! Flags for redrawing component in main thread
         bool m_bNeedRedraw = false;
