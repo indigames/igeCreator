@@ -61,10 +61,14 @@ namespace ige::creator
         // Detect ortho projection
         gizmo::SetOrthographic(m_camera->IsOrthographicProjection());
 
-        Mat4 temp;
-        auto view = m_camera->GetViewInverseMatrix(temp).Inverse().P();
-        auto proj = m_camera->GetProjectionMatrix(temp).P();
-        auto model = (float*)(m_mode == gizmo::MODE::LOCAL ? transform->getLocalMatrix().P() : transform->getWorldMatrix().P());
+        Mat4 viewInvMat;
+        auto view = m_camera->GetViewInverseMatrix(viewInvMat).Inverse().P();
+
+        Mat4 projMat;
+        auto proj = m_camera->GetProjectionMatrix(projMat).P();
+
+        Mat4 modelMat = (m_mode == gizmo::MODE::LOCAL ? transform->getLocalMatrix() : transform->getWorldMatrix());
+        auto model = modelMat.P();
 
         ImGui::PushStyleColor(ImGuiCol_Border, 0);
         gizmo::BeginFrame();
@@ -73,7 +77,7 @@ namespace ige::creator
         ImGuizmo::SetDrawlist();
         ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
         ImGuizmo::SetID(target->getId());
-        
+
         float delta[16] = { 0.f };
         gizmo::Manipulate(&view[0], &proj[0], m_operation, m_mode, &model[0], &delta[0]);
 
@@ -84,11 +88,11 @@ namespace ige::creator
             return;
         }
 
-        float deltaTranslation[3], deltaRotation[3], deltaScale[3];
-        gizmo::DecomposeMatrixToComponents(delta, deltaTranslation, deltaRotation, deltaScale);
-
         if(m_operation == gizmo::TRANSLATE)
-        {            
+        {
+            float deltaTranslation[3], deltaRotation[3], deltaScale[3];
+            gizmo::DecomposeMatrixToComponents(delta, deltaTranslation, deltaRotation, deltaScale);
+
             auto dPos = Vec3(deltaTranslation[0], deltaTranslation[1], deltaTranslation[2]);
             if(m_mode == gizmo::MODE::LOCAL)
                 transform->setPosition(transform->getPosition() + dPos);
@@ -97,36 +101,30 @@ namespace ige::creator
         }
         else if(m_operation == gizmo::SCALE)
         {
-            auto dScale = Vec3(deltaScale[0], deltaScale[1], deltaScale[2]);
+            Vec3 col0(model[0], model[4], model[8]);
+            Vec3 col1(model[1], model[5], model[9]);
+            Vec3 col2(model[2], model[6], model[10]);
+            Vec3 scale(col0.Length(), col1.Length(), col2.Length());
+
             if (m_mode == gizmo::MODE::LOCAL)
-                transform->setScale(dScale);
+                transform->setScale(scale); 
             else
-                transform->setWorldScale(dScale);
+                transform->setWorldScale(scale);
         }
         else if(m_operation == gizmo::ROTATE)
         {            
-            auto dRotation = Vec3(DEGREES_TO_RADIANS(deltaRotation[0]), DEGREES_TO_RADIANS(deltaRotation[1]), DEGREES_TO_RADIANS(deltaRotation[2]));
+            Vec3 col0(delta[0], delta[4], delta[8]);
+            Vec3 col1(delta[1], delta[5], delta[9]);
+            Vec3 col2(delta[2], delta[6], delta[10]);
+            Vec3 scale(col0.Length(), col1.Length(), col2.Length());
+
+            Mat3 rotmat(col0 / scale.X(), col1 / scale.Y(), col2 / scale.Z());
+            Quat dQuatRotation = Quat(rotmat);
 
             if (m_mode == gizmo::MODE::LOCAL)
-            {
-                Vec3 eulerRotation;
-                vmath_quatToEuler(transform->getRotation().P(), eulerRotation.P());
-                eulerRotation = eulerRotation + dRotation;
-
-                Quat quat;
-                vmath_eulerToQuat(eulerRotation.P(), quat.P());
-                transform->setRotation(quat);
-            }
+                transform->setRotation(transform->getRotation() * dQuatRotation);
             else
-            {
-                Vec3 eulerRotation;
-                vmath_quatToEuler(transform->getWorldRotation().P(), eulerRotation.P());
-                eulerRotation = eulerRotation + dRotation;
-
-                Quat quat;
-                vmath_eulerToQuat(eulerRotation.P(), quat.P());
-                transform->setWorldRotation(quat);
-            }
+                transform->setWorldRotation(transform->getWorldRotation() * dQuatRotation);
         }
         ImGui::PopStyleColor();
     }
