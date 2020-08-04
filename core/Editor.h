@@ -36,9 +36,9 @@ namespace ige::creator
         static void setCurrentScene(const std::shared_ptr<Scene>& scene) { if (getSceneManager()) getSceneManager()->setCurrentScene(scene); }
 
         //! Set current selected object by its id
-        static void setSelectedObject(uint64_t objId);
-        static void setSelectedObject(const std::shared_ptr<SceneObject>& obj);
-        static std::shared_ptr<SceneObject>& getSelectedObject();
+        void setSelectedObject(uint64_t objId);
+        void setSelectedObject(const std::shared_ptr<SceneObject>& obj);
+        std::shared_ptr<SceneObject>& getSelectedObject();
 
     protected:
         virtual void initImGUI();

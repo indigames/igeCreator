@@ -52,7 +52,7 @@ namespace ige::creator
     {
         if(!m_bEnabled || m_camera == nullptr) return;
 
-        auto target = Editor::getSelectedObject();
+        auto target = Editor::getInstance()->getSelectedObject();
         if(!target) return;
 
         auto transform = target->getTransform();

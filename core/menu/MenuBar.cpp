@@ -59,7 +59,7 @@ namespace ige::creator
                 if (scene) Editor::getSceneManager()->unloadScene(scene);
                 scene = nullptr;
 
-                Editor::setSelectedObject(-1);
+                Editor::getInstance()->setSelectedObject(-1);
                 Editor::getCanvas()->getEditorScene()->clear();
                 scene = Editor::getSceneManager()->createScene("New scene");
                 Editor::setCurrentScene(scene);
@@ -75,7 +75,7 @@ namespace ige::creator
                     if (scene) Editor::getSceneManager()->unloadScene(scene);
                     scene = nullptr;
 
-                    Editor::setSelectedObject(-1);
+                    Editor::getInstance()->setSelectedObject(-1);
                     Editor::getCanvas()->getEditorScene()->clear();
                     scene = Editor::getSceneManager()->loadScene(selectedFiles[0]);
                     Editor::setCurrentScene(scene);
