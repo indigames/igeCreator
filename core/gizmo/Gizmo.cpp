@@ -101,15 +101,13 @@ namespace ige::creator
         }
         else if(m_operation == gizmo::SCALE)
         {
-            Vec3 col0(model[0], model[4], model[8]);
-            Vec3 col1(model[1], model[5], model[9]);
-            Vec3 col2(model[2], model[6], model[10]);
-            Vec3 scale(col0.Length(), col1.Length(), col2.Length());
-
+            float deltaTranslation[3], deltaRotation[3], deltaScale[3];
+            gizmo::DecomposeMatrixToComponents(delta, deltaTranslation, deltaRotation, deltaScale);
+            auto scale = Vec3(deltaScale[0], deltaScale[1], deltaScale[2]);
             if (m_mode == gizmo::MODE::LOCAL)
-                transform->setScale(scale); 
+                transform->scale(scale);
             else
-                transform->setWorldScale(scale);
+                transform->scale(scale);
         }
         else if(m_operation == gizmo::ROTATE)
         {            
