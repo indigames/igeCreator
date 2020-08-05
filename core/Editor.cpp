@@ -20,10 +20,10 @@ namespace ige::creator
     
     Editor::~Editor()
     {
-        SceneManager::destroy();
-
+        setSelectedObject(-1);
         m_canvas = nullptr;
-        m_selectedObject = nullptr;
+
+        SceneManager::destroy();
         m_app = nullptr;
 
         ImGui_ImplOpenGL3_Shutdown();
@@ -106,24 +106,22 @@ namespace ige::creator
     
     void Editor::setSelectedObject(const std::shared_ptr<SceneObject>& obj)
     {
-        if (getSelectedObject() != obj)
+        if (m_selectedObject != obj)
         {
             // Set previous object as not selected
-            if(getInstance()->m_selectedObject)
-                getInstance()->m_selectedObject->setSelected(false);
+            if(m_selectedObject) m_selectedObject->setSelected(false);
 
-            getInstance()->m_selectedObject = obj;
+            m_selectedObject = obj;
 
             // Set current one as selected
-            if (getInstance()->m_selectedObject)
-                getInstance()->m_selectedObject->setSelected(true);
+            if (m_selectedObject) m_selectedObject->setSelected(true);
 
-            getCanvas()->setTargetObject(getSelectedObject());
+            if(m_canvas) m_canvas->setTargetObject(getSelectedObject());
         }
     }
 
     std::shared_ptr<SceneObject>& Editor::getSelectedObject()
     {
-        return getInstance()->m_selectedObject;
+        return m_selectedObject;
     }
 }

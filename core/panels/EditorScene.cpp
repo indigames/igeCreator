@@ -34,8 +34,8 @@ namespace ige::creator
         m_bIsInitialized = false;
 
         m_imageWidget = nullptr;
-        m_gizmo = nullptr;
         m_currentScene = nullptr;
+        m_gizmo = nullptr;
 
         getOnSizeChangedEvent().removeAllListeners();
         removeAllWidgets();

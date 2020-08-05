@@ -34,6 +34,15 @@ using namespace pyxie;
 
 namespace ige::creator
 {
+    enum class ComponentType {
+        Camera = 0,
+        Environment,
+        Figure,
+        Sprite,
+        Script,
+        UIImage,
+    };
+
     Inspector::Inspector(const std::string& name, const Panel::Settings& settings)
         : Panel(name, settings)
     {
@@ -67,23 +76,33 @@ namespace ige::creator
         // Create component selection
         m_createCompCombo = m_headerGroup->createWidget<ComboBox>();
         m_createCompCombo->setEndOfLine(false);
-        m_createCompCombo->addChoice(0, "Camera Component");
-        m_createCompCombo->addChoice(1, "Environment Component");
-        m_createCompCombo->addChoice(2, "Figure Component");
-        m_createCompCombo->addChoice(3, "Sprite Component");
-        m_createCompCombo->addChoice(4, "Script Component");
-        m_createCompCombo->addChoice(5, "UIImage");
+        m_createCompCombo->addChoice((int)ComponentType::Camera, "Camera Component");
+        m_createCompCombo->addChoice((int)ComponentType::Environment, "Environment Component");
+
+        // Scene Object
+        if (!m_targetObject->isGUIObject())
+        {
+            m_createCompCombo->addChoice((int)ComponentType::Figure, "Figure Component");
+            m_createCompCombo->addChoice((int)ComponentType::Sprite, "Sprite Component");
+        }
+        else // GUI Object
+        {
+            m_createCompCombo->addChoice((int)ComponentType::UIImage, "UIImage");
+        }
+
+        // Script component
+        m_createCompCombo->addChoice((int)ComponentType::Script, "Script Component");
 
         auto createCompButton = m_headerGroup->createWidget<Button>("Add", ImVec2(64.f, 0.f));
         createCompButton->getOnClickEvent().addListener([this](auto widget){
             switch(m_createCompCombo->getSelectedIndex())
             {
-                case 0: m_targetObject->addComponent<CameraComponent>("camera"); break;
-                case 1: m_targetObject->addComponent<EnvironmentComponent>("environment"); break;
-                case 2: m_targetObject->addComponent<FigureComponent>(); break;
-                case 3: m_targetObject->addComponent<SpriteComponent>(); break;
-                case 4: m_targetObject->addComponent<ScriptComponent>(); break;
-                case 5: m_targetObject->addComponent<UIImage>(); break;
+                case (int)ComponentType::Camera: m_targetObject->addComponent<CameraComponent>("camera"); break;
+                case (int)ComponentType::Environment: m_targetObject->addComponent<EnvironmentComponent>("environment"); break;
+                case (int)ComponentType::Script: m_targetObject->addComponent<ScriptComponent>(); break;
+                case (int)ComponentType::Figure: m_targetObject->addComponent<FigureComponent>(); break;
+                case (int)ComponentType::Sprite: m_targetObject->addComponent<SpriteComponent>(); break;
+                case (int)ComponentType::UIImage: m_targetObject->addComponent<UIImage>(); break;
             }
             redraw();
         });
