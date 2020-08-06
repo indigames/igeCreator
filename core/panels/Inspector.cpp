@@ -27,6 +27,7 @@
 #include <components/gui/RectTransform.h>
 #include <components/gui/Canvas.h>
 #include <components/gui/UIImage.h>
+#include <components/gui/UIText.h>
 using namespace ige::scene;
 
 #include <pyxieUtilities.h>
@@ -41,6 +42,7 @@ namespace ige::creator
         Sprite,
         Script,
         UIImage,
+        UIText,
     };
 
     Inspector::Inspector(const std::string& name, const Panel::Settings& settings)
@@ -88,6 +90,7 @@ namespace ige::creator
         else // GUI Object
         {
             m_createCompCombo->addChoice((int)ComponentType::UIImage, "UIImage");
+            m_createCompCombo->addChoice((int)ComponentType::UIText, "UIText");
         }
 
         // Script component
@@ -103,6 +106,7 @@ namespace ige::creator
                 case (int)ComponentType::Figure: m_targetObject->addComponent<FigureComponent>(); break;
                 case (int)ComponentType::Sprite: m_targetObject->addComponent<SpriteComponent>(); break;
                 case (int)ComponentType::UIImage: m_targetObject->addComponent<UIImage>(); break;
+                case (int)ComponentType::UIText: m_targetObject->addComponent<UIText>("Text", "fonts/Manjari-Regular.ttf"); break;
             }
             redraw();
         });
@@ -165,6 +169,11 @@ namespace ige::creator
             {
                 m_uiImageGroup = header->createWidget<Group>("UIImageGroup", false);
                 drawUIImage();
+            }
+            else if (component->getName() == "UIText")
+            {
+                m_uiTextGroup = header->createWidget<Group>("UITextGroup", false);
+                drawUIText();
             }
         });
     }
@@ -949,6 +958,42 @@ namespace ige::creator
         });
     }
 
+    void Inspector::drawUIText()
+    {
+        if (m_uiTextGroup == nullptr) return;
+        m_uiTextGroup->removeAllWidgets();
+
+        auto uiText = m_targetObject->getComponent<UIText>();
+        if (uiText == nullptr) return;
+
+        auto txtText = m_uiTextGroup->createWidget<TextField>("Text", uiText->getText().c_str(), true);
+        txtText->getOnDataChangedEvent().addListener([this](auto txt) {
+            auto uiText = m_targetObject->getComponent<UIText>();
+            uiText->setText(txt);
+        });
+
+        auto txtFontPath = m_uiTextGroup->createWidget<TextField>("Font", uiText->getFontPath().c_str(), true);
+        txtFontPath->getOnDataChangedEvent().addListener([this](auto txt) {
+            auto uiText = m_targetObject->getComponent<UIText>();
+            uiText->setFontPath(txt);
+        });
+        txtFontPath->setEndOfLine(false);
+
+        std::array size = { (float)uiText->getFontSize() };
+        m_uiTextGroup->createWidget<Drag<float>>("Size", ImGuiDataType_Float, size, 1.f, 4.f, 50.f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto uiText = m_targetObject->getComponent<UIText>();
+            uiText->setFontSize((int)val[0]);
+        });
+
+        static Vec4 color4;
+        color4 = uiText->getColor();
+        auto color = m_uiTextGroup->createWidget<Color>("Color", color4.P());
+        color->getOnDataChangedEvent().addListener([this](auto& color) {
+            auto uiText = m_targetObject->getComponent<UIText>();
+            uiText->setColor({ color[0], color[1], color[2], color[3] });
+        });
+    }
+
     void Inspector::_drawImpl()
     {
         if (m_bNeedRedraw)
@@ -976,6 +1021,7 @@ namespace ige::creator
         m_rectTransformGroup = nullptr;
         m_canvasGroup = nullptr;
         m_uiImageGroup = nullptr;
+        m_uiTextGroup = nullptr;
 
         removeAllWidgets();
     }

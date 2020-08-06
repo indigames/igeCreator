@@ -20,9 +20,7 @@ namespace ige::creator
 {
     EditorScene::EditorScene(const std::string& name, const Panel::Settings& settings)
         : Panel(name, settings)
-    {
-        GraphicsHelper::getInstance()->createSprite({ 32, 32 }, "sprite/rect")->WaitBuild();
-    }
+    {}
 
     EditorScene::~EditorScene()
     {
@@ -36,6 +34,12 @@ namespace ige::creator
         m_imageWidget = nullptr;
         m_currentScene = nullptr;
         m_gizmo = nullptr;
+
+        m_grid2D = nullptr;
+        m_grid3D = nullptr;
+
+        m_targetObject = nullptr;
+        m_currentCamera = nullptr;
 
         getOnSizeChangedEvent().removeAllListeners();
         removeAllWidgets();
@@ -107,7 +111,15 @@ namespace ige::creator
 
         //! If there is no scene, just do nothing
         if (!m_bIsInitialized || !Editor::getCurrentScene() || !Editor::getCurrentScene()->getActiveCamera())
+        {
+            auto renderContext = RenderContext::InstancePtr();
+            if (renderContext && m_fbo)
+            {
+                renderContext->BeginScene(m_fbo, Vec4(0.2f, 0.2f, 0.2f, 1.f), true, true);
+                renderContext->EndScene();
+            }
             return;
+        }
 
         // Update active camera
         if (Editor::getCurrentScene() != m_currentScene)

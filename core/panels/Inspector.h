@@ -34,6 +34,7 @@ namespace ige::creator
         void drawRectTransform();
         void drawCanvas();
         void drawUIImage();
+        void drawUIText();
 
         //! Redraw
         void redraw() { m_bNeedRedraw = true;  }
@@ -56,6 +57,7 @@ namespace ige::creator
         std::shared_ptr<Group> m_rectTransformGroup = nullptr;
         std::shared_ptr<Group> m_canvasGroup = nullptr;
         std::shared_ptr<Group> m_uiImageGroup = nullptr;
+        std::shared_ptr<Group> m_uiTextGroup = nullptr;
 
         //! Flags for redrawing component in main thread
         bool m_bNeedRedraw = false;

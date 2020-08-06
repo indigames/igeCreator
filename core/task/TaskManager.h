@@ -10,23 +10,20 @@ namespace ige::creator
 {
     class TaskManager: public ige::scene::Singleton<TaskManager>
     {
-    public:        
+    public:
         virtual ~TaskManager() {}
 
-        tf::Taskflow& getTaskflow() {
-            return m_taskflow;
+        void addTask(const std::function<void()>& task)
+        {
+            functors.push_back(task);
         }
         
         void update() {
-            if(!m_taskflow.empty())
-            {
-                m_executor.run(m_taskflow).wait();
-                m_taskflow.clear();
-            }
+            for (auto fun: functors) fun();
+            functors.clear();
         }
 
     protected:
-        tf::Executor m_executor;
-        tf::Taskflow m_taskflow;
+        std::vector<std::function<void()>> functors;
     };
 }

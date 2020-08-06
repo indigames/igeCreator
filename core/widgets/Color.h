@@ -6,7 +6,7 @@
 
 namespace ige::creator
 {
-    class Color: public Widget
+    class Color: public DataWidget<float*>
     {
     public:
         Color(const std::string& label, float* value);
