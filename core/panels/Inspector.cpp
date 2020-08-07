@@ -978,6 +978,10 @@ namespace ige::creator
             uiText->setFontPath(txt);
         });
         txtFontPath->setEndOfLine(false);
+        txtFontPath->addPlugin<DDTargetPlugin<std::string>>(".ttf")->getOnDataReceivedEvent().addListener([this](auto txt) {
+            auto uiText = m_targetObject->getComponent<UIText>();
+            uiText->setFontPath(txt);
+        });
 
         std::array size = { (float)uiText->getFontSize() };
         m_uiTextGroup->createWidget<Drag<float>>("Size", ImGuiDataType_Float, size, 1.f, 4.f, 50.f)->getOnDataChangedEvent().addListener([this](auto& val) {
