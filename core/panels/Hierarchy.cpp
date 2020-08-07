@@ -88,11 +88,12 @@ namespace ige::creator
         {
             createMenu->createWidget<MenuItem>("Button")->getOnClickEvent().addListener([objId](auto widget) {
                 auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getCurrentScene()->createGUIObject("Button", currentObject);
-                auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
-                newObject->addComponent<UIImage>("sprite/rect", rect->getSize());
-                newObject->addComponent<UIText>("Button");
-                newObject->setSelected(true);
+                auto newBtn = Editor::getCurrentScene()->createGUIObject("Button", currentObject);
+                auto rect = std::dynamic_pointer_cast<RectTransform>(newBtn->getTransform());
+                newBtn->addComponent<UIImage>("sprite/rect", rect->getSize());
+                auto newBtnLabel = Editor::getCurrentScene()->createGUIObject("Label", newBtn, Vec3(), Vec2());
+                newBtnLabel->addComponent<UIText>("Button");
+                newBtn->setSelected(true);
             });
 
             createMenu->createWidget<MenuItem>("UIImage")->getOnClickEvent().addListener([objId](auto widget) {
