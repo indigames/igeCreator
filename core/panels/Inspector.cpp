@@ -506,7 +506,7 @@ namespace ige::creator
             figureComp->setPath(txt);
         });
 
-        for (const auto& type : GetFileExtensionSuported<FigureComponent>())
+        for (const auto& type : GetFileExtensionSuported(E_FileExts::Figure))
         {
             txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
                 auto figureComp = m_targetObject->getComponent<FigureComponent>();
@@ -554,7 +554,7 @@ namespace ige::creator
                                 updateMaterial(index, infoName, txt);
                             });
 
-                            for (const auto& type : GetFileExtensionSuported<SpriteComponent>())
+                            for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
                             {
                                 txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this, index, infoName](auto txt) {
                                     updateMaterial(index, infoName, txt);
@@ -595,7 +595,7 @@ namespace ige::creator
             spriteComp->setPath(txt);
         });
 
-        for (const auto& type : GetFileExtensionSuported<SpriteComponent>())
+        for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
         {
             txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
                 auto spriteComp = m_targetObject->getComponent<SpriteComponent>();
@@ -636,7 +636,7 @@ namespace ige::creator
             scriptComp->setPath(txt);
         });
 
-        for (const auto& type : GetFileExtensionSuported<ScriptComponent>())
+        for (const auto& type : GetFileExtensionSuported(E_FileExts::Script))
         {
             txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
                 auto scriptComp = m_targetObject->getComponent<ScriptComponent>();
@@ -938,7 +938,7 @@ namespace ige::creator
             uiImage->setPath(txt);
         });
 
-        for (const auto& type : GetFileExtensionSuported<SpriteComponent>())
+        for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
         {
             txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
                 auto uiImage = m_targetObject->getComponent<UIImage>();
@@ -978,10 +978,13 @@ namespace ige::creator
             uiText->setFontPath(txt);
         });
         txtFontPath->setEndOfLine(false);
-        txtFontPath->addPlugin<DDTargetPlugin<std::string>>(".ttf")->getOnDataReceivedEvent().addListener([this](auto txt) {
-            auto uiText = m_targetObject->getComponent<UIText>();
-            uiText->setFontPath(txt);
-        });
+        for (const auto& type : GetFileExtensionSuported(E_FileExts::Font))
+        {
+            txtFontPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
+                auto uiText = m_targetObject->getComponent<UIText>();
+                uiText->setFontPath(txt);
+            });
+        }
 
         std::array size = { (float)uiText->getFontSize() };
         m_uiTextGroup->createWidget<Drag<float>>("Size", ImGuiDataType_Float, size, 1.f, 4.f, 50.f)->getOnDataChangedEvent().addListener([this](auto& val) {

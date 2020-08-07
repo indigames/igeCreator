@@ -169,10 +169,12 @@ namespace ige::creator
         : m_isDirty(true)
     {
         m_iconTextures["folder"] = ResourceCreator::Instance().NewTexture("icon/folder");
-        m_iconTextures["file"] = ResourceCreator::Instance().NewTexture("icon/file_image");
+        m_iconTextures["image"] = ResourceCreator::Instance().NewTexture("icon/file_image");
+        m_iconTextures["file"] = ResourceCreator::Instance().NewTexture("icon/file_undefined");
         m_iconTextures["prefab"] = ResourceCreator::Instance().NewTexture("icon/file_prefab");
         m_iconTextures["python"] = ResourceCreator::Instance().NewTexture("icon/file_python");
         m_iconTextures["model"] = ResourceCreator::Instance().NewTexture("icon/file_model");
+        m_iconTextures["font"] = ResourceCreator::Instance().NewTexture("icon/file_font");
 
         const auto root_path = fs::current_path();// fs::absolute("");
 
@@ -267,6 +269,9 @@ namespace ige::creator
                 m_selection = "";
             };
 
+            const auto on_click = [&]() {
+                m_selection = absolute_path;
+            };
            
             if (fs::is_directory(cache_entry.entry.status()))
             {
@@ -298,41 +303,27 @@ namespace ige::creator
             }
             else //file
             {
-                if (IsFormat<ScriptComponent>(file_ext))
+                auto icon = m_iconTextures["file"];
+                if (IsFormat(E_FileExts::Script, file_ext))
                 {
-                    DrawEntry(m_iconTextures["python"], false, filename, absolute_path, is_selected(absolute_path), size,
-                        [&]() // on_click
-                        {
-                            m_selection = absolute_path;
-                        },
-                        nullptr, // on_double_click
-                            on_rename, on_delete);
-                    return;
+                    icon = m_iconTextures["python"];
                 }
-                else if (IsFormat<FigureComponent>(file_ext))
+                else if (IsFormat(E_FileExts::Figure, file_ext))
                 {
-                    DrawEntry(m_iconTextures["model"], false, filename, absolute_path, is_selected(absolute_path), size,
-                        [&]() // on_click
-                        {
-                            m_selection = absolute_path;
-                        },
-                        nullptr, // on_double_click
-                            on_rename, on_delete);
-                    return;
+                    icon = m_iconTextures["model"];
                 }
-                else
+                else if (IsFormat(E_FileExts::Sprite, file_ext))
                 {
-                    DrawEntry(m_iconTextures["file"], false, filename, absolute_path, is_selected(absolute_path), size,
-                        [&]() // on_click
-                        {
-                            m_selection = absolute_path;
-                        },
-                        nullptr, // on_double_click
-                            on_rename, on_delete);
-                    return;
+                    icon = m_iconTextures["image"];
                 }
+                else if (IsFormat(E_FileExts::Font, file_ext))
+                {
+                    icon = m_iconTextures["font"];
+                }
+
+                DrawEntry(icon, false, filename, absolute_path, is_selected(absolute_path), size, on_click, nullptr, on_rename, on_delete);
             }
-        };        
+        };
 
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10, 10));
         const auto& style = ImGui::GetStyle();
