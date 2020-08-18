@@ -668,10 +668,10 @@ namespace ige::creator
             auto rectTransform = m_targetObject->getComponent<RectTransform>();
             auto anchor = rectTransform->getAnchor();
             auto anchorWidget = (AnchorWidget*)widget;
-            anchor.m_left = anchorWidget->getAnchorMin().x;
-            anchor.m_top = anchorWidget->getAnchorMin().y;
-            anchor.m_right = anchorWidget->getAnchorMax().x;
-            anchor.m_bottom = anchorWidget->getAnchorMax().y;
+            anchor[0] = anchorWidget->getAnchorMin().x;
+            anchor[1] = anchorWidget->getAnchorMin().y;
+            anchor[2] = anchorWidget->getAnchorMax().x;
+            anchor[3] = anchorWidget->getAnchorMax().y;
             rectTransform->setAnchor(anchor);
             redraw();
         });
@@ -680,30 +680,30 @@ namespace ige::creator
         anchorColumn->setColumnWidth(0, 52.f);
         auto anchor = rectTransform->getAnchor();
         auto offset = rectTransform->getOffset();
-        anchorColumn->createWidget<AnchorWidget>(ImVec2(anchor.m_left, anchor.m_top), ImVec2(anchor.m_right, anchor.m_bottom), false)->getOnClickEvent().addListener([](auto widget) {
+        anchorColumn->createWidget<AnchorWidget>(ImVec2(anchor[0], anchor[1]), ImVec2(anchor[2], anchor[3]), false)->getOnClickEvent().addListener([](auto widget) {
             ImGui::OpenPopup("AnchorPresets");
         });
 
         auto anchorGroup = anchorColumn->createWidget<Group>("AnchorGroup", false, false);
         auto anchorGroupColums = anchorGroup->createWidget<Columns<3>>(-1.f, true, 52.f);
 
-        if ((anchor.m_left == 0.f && anchor.m_right == 1.f)
-            && (anchor.m_top == 0.f && anchor.m_bottom == 1.f))
+        if ((anchor[0] == 0.f && anchor[2] == 1.f)
+            && (anchor[1] == 0.f && anchor[3] == 1.f))
         {
-            std::array left = { offset.m_left };
+            std::array left = { offset[0] };
             anchorGroupColums->createWidget<Drag<float>>("L", ImGuiDataType_Float, left, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
                 auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto offset = rectTransform->getOffset();
-                offset.m_left = val[0];
+                offset[0] = val[0];
                 rectTransform->setOffset(offset);
                 rectTransform->onUpdate(0.f);
             });
 
-            std::array top = { offset.m_top };
+            std::array top = { offset[1] };
             anchorGroupColums->createWidget<Drag<float>>("T", ImGuiDataType_Float, top, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
                 auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto offset = rectTransform->getOffset();
-                offset.m_top = val[0];
+                offset[1] = val[0];
                 rectTransform->setOffset(offset);
                 rectTransform->onUpdate(0.f);
             });
@@ -717,31 +717,31 @@ namespace ige::creator
                 rectTransform->onUpdate(0.f);
             });
 
-            std::array right = { offset.m_right };
+            std::array right = { offset[2] };
             anchorGroupColums->createWidget<Drag<float>>("R", ImGuiDataType_Float, right, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
                 auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto offset = rectTransform->getOffset();
-                offset.m_right = val[0];
+                offset[2] = val[0];
                 rectTransform->setOffset(offset);
                 rectTransform->onUpdate(0.f);
             });
 
-            std::array bottom = { offset.m_bottom };
+            std::array bottom = { offset[3] };
             anchorGroupColums->createWidget<Drag<float>>("B", ImGuiDataType_Float, bottom, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
                 auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto offset = rectTransform->getOffset();
-                offset.m_bottom = val[0];
+                offset[3] = val[0];
                 rectTransform->setOffset(offset);
                 rectTransform->onUpdate(0.f);
             });
         }
-        else if (anchor.m_left == 0.f && anchor.m_right == 1.f)
+        else if (anchor[0] == 0.f && anchor[2] == 1.f)
         {
-            std::array left = { offset.m_left };
+            std::array left = { offset[0] };
             anchorGroupColums->createWidget<Drag<float>>("L", ImGuiDataType_Float, left, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
                 auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto offset = rectTransform->getOffset();
-                offset.m_left = val[0];
+                offset[0] = val[0];
                 rectTransform->setOffset(offset);
                 rectTransform->onUpdate(0.f);
             });
@@ -762,11 +762,11 @@ namespace ige::creator
                 rectTransform->onUpdate(0.f);
             });
 
-            std::array right = { offset.m_right };
+            std::array right = { offset[2] };
             anchorGroupColums->createWidget<Drag<float>>("R", ImGuiDataType_Float, right, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
                 auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto offset = rectTransform->getOffset();
-                offset.m_right = val[0];
+                offset[2] = val[0];
                 rectTransform->setOffset(offset);
                 rectTransform->onUpdate(0.f);
             });
@@ -780,7 +780,7 @@ namespace ige::creator
                 rectTransform->onUpdate(0.f);
             });
         }
-        else if (anchor.m_top == 0.f && anchor.m_bottom == 1.f)
+        else if (anchor[1] == 0.f && anchor[3] == 1.f)
         {
             std::array posX = { rectTransform->getPosition().X() };
             anchorGroupColums->createWidget<Drag<float>>("X", ImGuiDataType_Float, posX, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
@@ -791,11 +791,11 @@ namespace ige::creator
                 rectTransform->onUpdate(0.f);
             });
 
-            std::array top = { offset.m_top };
+            std::array top = { offset[1] };
             anchorGroupColums->createWidget<Drag<float>>("T", ImGuiDataType_Float, top, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
                 auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto offset = rectTransform->getOffset();
-                offset.m_top = val[0];
+                offset[1] = val[0];
                 rectTransform->setOffset(offset);
                 rectTransform->onUpdate(0.f);
             });
@@ -818,11 +818,11 @@ namespace ige::creator
                 rectTransform->onUpdate(0.f);
             });
 
-            std::array bottom = { offset.m_bottom };
+            std::array bottom = { offset[3] };
             anchorGroupColums->createWidget<Drag<float>>("B", ImGuiDataType_Float, bottom, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
                 auto rectTransform = m_targetObject->getComponent<RectTransform>();
                 auto offset = rectTransform->getOffset();
-                offset.m_bottom = val[0];
+                offset[3] = val[0];
                 rectTransform->setOffset(offset);
                 rectTransform->onUpdate(0.f);
             });
