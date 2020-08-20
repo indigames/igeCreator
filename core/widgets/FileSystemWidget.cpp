@@ -2,7 +2,7 @@
 #include "core/plugin/DragDropPlugin.h"
 #include "core/FileHandle.h"
 
-#include "core/widgets/FileSystem.h"
+#include "core/widgets/FileSystemWidget.h"
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_MATH_OPERATORS
 #endif
@@ -165,7 +165,7 @@ namespace ImGui
 
 namespace ige::creator
 {
-    FileSystem::FileSystem()
+    FileSystemWidget::FileSystemWidget()
         : m_isDirty(true)
     {
         m_iconTextures["folder"] = ResourceCreator::Instance().NewTexture("icon/folder");
@@ -186,7 +186,7 @@ namespace ige::creator
         }
     }
     
-    FileSystem::FileSystem(const fs::directory_cache& cache)
+    FileSystemWidget::FileSystemWidget(const fs::directory_cache& cache)
         : m_cache(cache)
         , m_isDirty(true)
     {
@@ -200,7 +200,7 @@ namespace ige::creator
         }
     }   
 
-    FileSystem::~FileSystem()
+    FileSystemWidget::~FileSystemWidget()
     {
         for(auto icon : m_iconTextures)
         {
@@ -209,7 +209,7 @@ namespace ige::creator
         m_iconTextures.clear();
     }
 
-    void FileSystem::_drawImpl()
+    void FileSystemWidget::_drawImpl()
     {       
         if (m_isDirty)
         {
@@ -364,7 +364,7 @@ namespace ige::creator
         SetCachePath(current_path);
     }
 
-    void FileSystem::SetCachePath(const fs::path& path)
+    void FileSystemWidget::SetCachePath(const fs::path& path)
     {
         if (m_cache.get_path() == path)
         {
@@ -373,7 +373,7 @@ namespace ige::creator
         m_cache.set_path(path);
     }
 
-    bool FileSystem::DrawEntry(pyxieTexture* icon, bool is_loading, const std::string& name,
+    bool FileSystemWidget::DrawEntry(pyxieTexture* icon, bool is_loading, const std::string& name,
         const fs::path& absolute_path, bool is_selected, const float size,
         const std::function<void()>& on_click, const std::function<void()>& on_double_click,
         const std::function<void(const std::string&)>& on_rename,
@@ -559,7 +559,7 @@ namespace ige::creator
         return is_popup_opened;
     }
 
-    bool FileSystem::ProcessDragDropSource(pyxieTexture* preview, const fs::path& absolute_path)
+    bool FileSystemWidget::ProcessDragDropSource(pyxieTexture* preview, const fs::path& absolute_path)
     {
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
         {
@@ -579,7 +579,7 @@ namespace ige::creator
         return false;
     }
 
-    void FileSystem::ProcessDragDropTarget(const fs::path& absolute_path)
+    void FileSystemWidget::ProcessDragDropTarget(const fs::path& absolute_path)
     {
         // TODO : prefab
     }

@@ -9,12 +9,12 @@
 
 namespace ige::creator
 {
-    class FileSystem: public Widget
+    class FileSystemWidget: public Widget
     {
     public:
-        FileSystem();
-        FileSystem(const fs::directory_cache& cache);
-        virtual ~FileSystem();
+        FileSystemWidget();
+        FileSystemWidget(const fs::directory_cache& cache);
+        virtual ~FileSystemWidget();
 
     protected:
         virtual void _drawImpl() override;

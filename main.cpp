@@ -18,39 +18,41 @@ void CreateConsole(void) {
 
 using namespace ige::creator;
 
+extern std::shared_ptr<Application> gApp = nullptr;
+
 int main(void* data) {
 	CreateConsole();
 
 	FileIO::Instance().SetRoot(".");
 
 	// Create window
-	auto app = std::make_shared<Application>();
-	app->createAppWindow();	
+	gApp = std::make_shared<Application>();
+	gApp->createAppWindow();
 
 	// Initialize
-	if (app->isInitialized())
+	if (gApp->isInitialized())
 	{
 		// Create editor instance
 		auto& editor = Editor::getInstance();
-		editor->registerApp(app);
+		editor->registerApp(gApp);
 		editor->initialize();
 
 		SystemInfo::Instance().SetGemeScreenSize(SCREEN_WIDTH);
-		app->showAppWindow(true, SCREEN_WIDTH, SCREEN_HEIGHT);
+		gApp->showAppWindow(true, SCREEN_WIDTH, SCREEN_HEIGHT);
 		
 		// Register input handler
-		app->getInputHandler()->setRawInputHandlerFunc(&Editor::handleEvent);
+		gApp->getInputHandler()->setRawInputHandlerFunc(&Editor::handleEvent);
 		
 		// Main loop
-		while (app->isRunning())
+		while (gApp->isRunning())
 		{
 			// Update
-			app->update();			
+			gApp->update();
 			editor->update((float)Time::Instance().GetElapsedTime());
 
 			// Render
 			editor->render();
-			app->swap();
+			gApp->swap();
 		}
 
 		// Destroy
@@ -59,8 +61,8 @@ int main(void* data) {
 	}
 
 	// Destroy
-	app->destroy();
-	app = nullptr;
+	gApp->destroy();
+	gApp = nullptr;
 	return 0;
 }
 

@@ -7,7 +7,7 @@
 #include "core/widgets/Separator.h"
 #include "core/widgets/Icon.h"
 #include "core/widgets/Label.h"
-#include "core/widgets/FileSystem.h"
+#include "core/widgets/FileSystemWidget.h"
 #include "core/layout/Group.h"
 #include "core/layout/Columns.h"
 #include "core/plugin/DragDropPlugin.h"
@@ -34,7 +34,7 @@ namespace ige::creator
 
     void AssetBrowser::initialize()
     {
-        createWidget<FileSystem>();
+        createWidget<FileSystemWidget>();
     }
 
     void AssetBrowser::_drawImpl()

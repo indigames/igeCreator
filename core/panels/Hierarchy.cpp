@@ -1,6 +1,8 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
+#include "core/filesystem/FileSystem.h"
+
 #include <scene/Scene.h>
 #include <scene/SceneObject.h>
 #include "core/panels/Hierarchy.h"
@@ -11,6 +13,7 @@
 #include "core/plugin/DragDropPlugin.h"
 #include "components/FigureComponent.h"
 #include "components/SpriteComponent.h"
+#include "components/ScriptComponent.h"
 #include "components/gui/RectTransform.h"
 #include "components/gui/Canvas.h"
 #include "components/gui/UIImage.h"
@@ -93,6 +96,7 @@ namespace ige::creator
                 newBtn->addComponent<UIImage>("sprite/rect", rect->getSize());
                 auto newBtnLabel = Editor::getCurrentScene()->createGUIObject("Label", newBtn, Vec3(), Vec2());
                 newBtnLabel->addComponent<UIText>("Button");
+                newBtn->addComponent<ScriptComponent>(fs::createScript(newBtn->getName() + std::to_string(newBtn->getId())));
                 newBtn->setSelected(true);
             });
 
