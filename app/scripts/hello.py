@@ -21,5 +21,7 @@ class Hello(Script):
         if not self.updated:
             print(f'onUpdate, dt = {dt}')
             print(f'owner, name = {self.owner.name}')
+            self.owner.transform.position += vmath.vec3(10.0, 0.0, 0.0)
+            self.owner.transform.scale += vmath.vec3(2.0, 0.0, 0.0)
             self.updated = True
 
