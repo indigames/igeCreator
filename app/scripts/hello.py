@@ -4,50 +4,22 @@
 """
 
 import igeCore as core
-import igeScene
-from igeScene import Scene, SceneManager, SceneObject
-from igeScene import Component, TransformComponent, CameraComponent, EnvironmentComponent, FigureComponent, SpriteComponent
+import igeVmath as vmath
+from igeScene import Script
 
-counter = 0
+class Hello(Script):
+    def __init__(self, owner):
+        super().__init__(owner)
+        print("__init__!")
+        self.updated = False
 
-print(f"version: %s", igeScene.getVersion())
+    def onStart(self):
+        print("onStart")
+        print(f'Owner: {self.owner}')
 
-sceneManager = SceneManager.getInstance()
-print(sceneManager)
+    def onUpdate(self, dt):
+        if not self.updated:
+            print(f'onUpdate, dt = {dt}')
+            print(f'owner, name = {self.owner.name}')
+            self.updated = True
 
-if sceneManager is not None:
-    print(sceneManager.currentScene)
-    if sceneManager.currentScene is not None:
-        print(sceneManager.currentScene.name)
-
-def Awake():
-    global counter
-    name = SceneManager.getInstance().currentScene.name
-    print(f'Python function Awake(), scene = %s', name)
-
-def Start():
-    print('Python function Enable() called')
-
-def Enable():
-    print('Python function Start() called')
-
-def Disable():
-    print('Python function Disable() called')
-
-def Update(dt):
-    global name
-    global counter
-    counter += 1
-    print(f'Update(%f), counter = %d', dt, counter)
-
-def FixedUpdate(dt):
-    print(f'Python function FixedUpdate(%f) called', dt)
-
-def LateUpdate():
-    print(f'Python function LateUpdate(%f) called', dt)
-
-def Render():
-    print('Python function Render() called')
-
-def Destroy():
-    print('Python function Destroy() called')

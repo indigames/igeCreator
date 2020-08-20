@@ -104,7 +104,7 @@ namespace ige::creator
         setSelectedObject(obj);
     }
     
-    void Editor::setSelectedObject(const std::shared_ptr<SceneObject>& obj)
+    void Editor::setSelectedObject(std::shared_ptr<SceneObject> obj)
     {
         if (m_selectedObject != obj)
         {
