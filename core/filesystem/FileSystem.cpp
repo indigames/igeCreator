@@ -16,14 +16,20 @@ class %s(Script):\n\
         super().__init__(owner)\n\
         print(f'Hello {self.owner.name}')\n\
     \n\
+    def onAwake(self):\n\
+        print('onAwake() called!')\n\
+    \n\
     def onStart(self):\n\
-        pass\n\
+        print('onStart() called!')\n\
     \n\
     def onUpdate(self, dt):\n\
         pass\n\
     \n\
     def onClick(self):\n\
-        print(f'onClick: {self.owner.name}')\n\
+        print(f'onClick(): {self.owner.name}!')\n\
+    \n\
+    def onDestroy(self):\n\
+        print('onDestroy called!')\n\
     \n";
 
 	std::vector<path> split_until(const path& _path, const path& _predicate)
