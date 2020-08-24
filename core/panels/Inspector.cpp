@@ -28,6 +28,7 @@
 #include <components/gui/Canvas.h>
 #include <components/gui/UIImage.h>
 #include <components/gui/UIText.h>
+#include <components/gui/UITextField.h>
 using namespace ige::scene;
 
 #include <pyxieUtilities.h>
@@ -43,6 +44,7 @@ namespace ige::creator
         Script,
         UIImage,
         UIText,
+        UITextField,
     };
 
     Inspector::Inspector(const std::string& name, const Panel::Settings& settings)
@@ -91,6 +93,7 @@ namespace ige::creator
         {
             m_createCompCombo->addChoice((int)ComponentType::UIImage, "UIImage");
             m_createCompCombo->addChoice((int)ComponentType::UIText, "UIText");
+            m_createCompCombo->addChoice((int)ComponentType::UITextField, "UITextField");
         }
 
         // Script component
@@ -107,6 +110,7 @@ namespace ige::creator
                 case (int)ComponentType::Sprite: m_targetObject->addComponent<SpriteComponent>(); break;
                 case (int)ComponentType::UIImage: m_targetObject->addComponent<UIImage>(); break;
                 case (int)ComponentType::UIText: m_targetObject->addComponent<UIText>("Text", "fonts/Manjari-Regular.ttf"); break;
+                case (int)ComponentType::UITextField: m_targetObject->addComponent<UITextField>("TextField"); break;
             }
             redraw();
         });
@@ -170,7 +174,7 @@ namespace ige::creator
                 m_uiImageGroup = header->createWidget<Group>("UIImageGroup", false);
                 drawUIImage();
             }
-            else if (component->getName() == "UIText")
+            else if (component->getName() == "UIText" || component->getName() == "UITextField")
             {
                 m_uiTextGroup = header->createWidget<Group>("UITextGroup", false);
                 drawUIText();

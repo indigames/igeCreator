@@ -18,6 +18,7 @@
 #include "components/gui/Canvas.h"
 #include "components/gui/UIImage.h"
 #include "components/gui/UIText.h"
+#include "components/gui/UITextField.h"
 using namespace ige::scene;
 
 #include <utils/PyxieHeaders.h>
@@ -105,6 +106,34 @@ namespace ige::creator
                 auto newObject = Editor::getCurrentScene()->createGUIObject("UIImage", currentObject);
                 auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
                 newObject->addComponent<UIImage>("sprite/rect", rect->getSize());
+                newObject->setSelected(true);
+            });
+
+            createMenu->createWidget<MenuItem>("UIText")->getOnClickEvent().addListener([objId](auto widget) {
+                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
+                auto newObject = Editor::getCurrentScene()->createGUIObject("UIText", currentObject);
+                auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
+                newObject->addComponent<UIText>("Text");
+                newObject->setSelected(true);
+            });
+            
+            createMenu->createWidget<MenuItem>("UITextField")->getOnClickEvent().addListener([objId](auto widget) {
+                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
+                auto newObject = Editor::getCurrentScene()->createGUIObject("UITextField", currentObject);
+                auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
+                newObject->addComponent<UIImage>("sprite/rect", rect->getSize());
+                auto newLabel = Editor::getCurrentScene()->createGUIObject("Label", newObject, Vec3(), Vec2());
+                newLabel->addComponent<UITextField>("TextField");
+                auto id = newLabel->getId();
+                newObject->getSelectedEvent().addListener([id](SceneObject& obj) {
+                    auto label = obj.findObjectById(id);
+                    if (label) {
+                        auto txtField = label->getComponent<UITextField>();
+                        if(txtField) {
+                            txtField->onClick();
+                        }
+                    }
+                });
                 newObject->setSelected(true);
             });
         }
