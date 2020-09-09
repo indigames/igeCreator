@@ -11,6 +11,7 @@
 
 #include <scene/SceneManager.h>
 #include <scene/Scene.h>
+#include <physic/PhysicManager.h>
 using namespace ige::scene;
 
 namespace ige::creator
@@ -35,6 +36,9 @@ namespace ige::creator
     {
         initImGUI();
 
+        // Create physic instance
+        PhysicManager::getInstance();
+
         m_canvas = std::make_shared<Canvas>();
         m_canvas->setDockable(true);
     }
@@ -51,6 +55,9 @@ namespace ige::creator
 
         // Update tasks
         TaskManager::getInstance()->update();
+
+        // Update Physic
+        PhysicManager::getInstance()->onUpdate(dt);
 
         // Update layouts
         m_canvas->update(dt);

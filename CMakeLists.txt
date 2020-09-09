@@ -35,6 +35,7 @@ add_subdirectory(${IGE_ROOT}/igeScene  ${CMAKE_BINARY_DIR}/igeScene)
 add_subdirectory(${IGE_ROOT}/imgui  ${CMAKE_BINARY_DIR}/imgui)
 add_subdirectory(${IGE_ROOT}/SDL  ${CMAKE_BINARY_DIR}/SDL)
 add_subdirectory(${IGE_ROOT}/cpython  ${CMAKE_BINARY_DIR}/Python37)
+add_subdirectory(${IGE_ROOT}/igeBullet  ${CMAKE_BINARY_DIR}/igeBullet)
 
 # Source files
 file(GLOB_RECURSE SRC_FILES
@@ -64,6 +65,7 @@ target_link_libraries(${TARGET_NAME}
     igeVMath-static
     igePAL-static
     igeScene-static
+    igeBullet-static
     imgui
     SDL2-static
     Python37
@@ -93,6 +95,8 @@ target_include_directories(${TARGET_NAME} PUBLIC
     ${IGE_ROOT}/imgui
     ${IGE_ROOT}/SDL/include
     ${IGE_ROOT}/stb
+    ${IGE_ROOT}/igeBullet
+    ${IGE_ROOT}/igeBullet/bullet
 )
 
 # Python37

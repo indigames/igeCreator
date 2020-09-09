@@ -29,6 +29,9 @@
 #include <components/gui/UIImage.h>
 #include <components/gui/UIText.h>
 #include <components/gui/UITextField.h>
+#include <components/physic/PhysicBox.h>
+#include <components/physic/PhysicSphere.h>
+#include <components/physic/PhysicCapsule.h>
 using namespace ige::scene;
 
 #include <pyxieUtilities.h>
@@ -45,6 +48,9 @@ namespace ige::creator
         UIImage,
         UIText,
         UITextField,
+        PhysicBox,
+        PhysicSphere,
+        PhysicCapsule
     };
 
     Inspector::Inspector(const std::string& name, const Panel::Settings& settings)
@@ -88,6 +94,12 @@ namespace ige::creator
         {
             m_createCompCombo->addChoice((int)ComponentType::Figure, "Figure Component");
             m_createCompCombo->addChoice((int)ComponentType::Sprite, "Sprite Component");
+
+            if (m_targetObject->getComponent<PhysicBase>() == nullptr) {
+                m_createCompCombo->addChoice((int)ComponentType::PhysicBox, "PhysicBox");
+                m_createCompCombo->addChoice((int)ComponentType::PhysicSphere, "PhysicSphere");
+                m_createCompCombo->addChoice((int)ComponentType::PhysicCapsule, "PhysicCapsule");
+            }
         }
         else // GUI Object
         {
@@ -111,6 +123,9 @@ namespace ige::creator
                 case (int)ComponentType::UIImage: m_targetObject->addComponent<UIImage>(); break;
                 case (int)ComponentType::UIText: m_targetObject->addComponent<UIText>("Text", "fonts/Manjari-Regular.ttf"); break;
                 case (int)ComponentType::UITextField: m_targetObject->addComponent<UITextField>("TextField"); break;
+                case (int)ComponentType::PhysicBox: m_targetObject->addComponent<PhysicBox>(); break;
+                case (int)ComponentType::PhysicSphere: m_targetObject->addComponent<PhysicSphere>(); break;
+                case (int)ComponentType::PhysicCapsule: m_targetObject->addComponent<PhysicCapsule>(); break;
             }
             redraw();
         });
@@ -178,6 +193,21 @@ namespace ige::creator
             {
                 m_uiTextGroup = header->createWidget<Group>("UITextGroup", false);
                 drawUIText();
+            }
+            else if (component->getName() == "PhysicBox")
+            {
+                m_physicGroup = header->createWidget<Group>("PhysicGroup", false);
+                drawPhysicBox();
+            }
+            else if (component->getName() == "PhysicSphere")
+            {
+                m_physicGroup = header->createWidget<Group>("PhysicGroup", false);
+                drawPhysicSphere();
+            }
+            else if (component->getName() == "PhysicCapsule")
+            {
+                m_physicGroup = header->createWidget<Group>("PhysicGroup", false);
+                drawPhysicCapsule();
             }
         });
     }
@@ -1005,6 +1035,33 @@ namespace ige::creator
         });
     }
 
+    //! Draw PhysicBase component
+    void Inspector::drawPhysicBase(Component* comp)
+    {
+        if (m_uiTextGroup == nullptr) return;
+        m_physicGroup->removeAllWidgets();
+        
+
+    }
+
+    //! Draw PhysicBox component
+    void Inspector::drawPhysicBox()
+    {
+
+    }
+
+    //! Draw PhysicSphere component
+    void Inspector::drawPhysicSphere()
+    {
+
+    }
+
+    //! Draw PhysicCapsule component
+    void Inspector::drawPhysicCapsule()
+    {
+
+    }
+
     void Inspector::_drawImpl()
     {
         if (m_bNeedRedraw)
@@ -1033,6 +1090,7 @@ namespace ige::creator
         m_canvasGroup = nullptr;
         m_uiImageGroup = nullptr;
         m_uiTextGroup = nullptr;
+        m_physicGroup = nullptr;
 
         removeAllWidgets();
     }

@@ -23,18 +23,48 @@ namespace ige::creator
         virtual void initialize() override;
         virtual void _drawImpl() override;
 
-        //! Draw components
+        //! Draw transform components
         void drawLocalTransformComponent();
         void drawWorldTransformComponent();
+
+        //! Draw camera component
         void drawCameraComponent();
+
+        //! Draw environment component
         void drawEnvironmentComponent();
+
+        //! Draw figure component
         void drawFigureComponent();
+
+        //! Draw sprite component
         void drawSpriteComponent();
+
+        //! Draw script component
         void drawScriptComponent();
+
+        //! Draw RectTransform component
         void drawRectTransform();
+
+        //! Draw Canvas component
         void drawCanvas();
+
+        //! Draw UIImage component
         void drawUIImage();
+
+        //! Draw UIText component
         void drawUIText();
+
+        //! Draw PhysicBase component
+        void drawPhysicBase(Component* comp);
+
+        //! Draw PhysicBox component
+        void drawPhysicBox();
+
+        //! Draw PhysicSphere component
+        void drawPhysicSphere();
+
+        //! Draw PhysicCapsule component
+        void drawPhysicCapsule();
 
         //! Redraw
         void redraw() { m_bNeedRedraw = true;  }
@@ -58,6 +88,7 @@ namespace ige::creator
         std::shared_ptr<Group> m_canvasGroup = nullptr;
         std::shared_ptr<Group> m_uiImageGroup = nullptr;
         std::shared_ptr<Group> m_uiTextGroup = nullptr;
+        std::shared_ptr<Group> m_physicGroup = nullptr;
 
         //! Flags for redrawing component in main thread
         bool m_bNeedRedraw = false;
