@@ -29,6 +29,7 @@
 #include <components/gui/UIImage.h>
 #include <components/gui/UIText.h>
 #include <components/gui/UITextField.h>
+#include <components/physic/PhysicBase.h>
 #include <components/physic/PhysicBox.h>
 #include <components/physic/PhysicSphere.h>
 #include <components/physic/PhysicCapsule.h>
@@ -1036,30 +1037,128 @@ namespace ige::creator
     }
 
     //! Draw PhysicBase component
-    void Inspector::drawPhysicBase(Component* comp)
+    void Inspector::drawPhysicBase()
     {
-        if (m_uiTextGroup == nullptr) return;
+        if (m_physicGroup == nullptr) return;
         m_physicGroup->removeAllWidgets();
-        
 
+        auto physicComp = m_targetObject->getComponent<PhysicBase>();
+        if (physicComp == nullptr) return;
+
+        auto enableCheckBox = m_physicGroup->createWidget<CheckBox>("Enable", physicComp->isEnabled());
+        enableCheckBox->getOnDataChangedEvent().addListener([this](bool val) {
+            auto physicComp = m_targetObject->getComponent<PhysicBase>();
+            physicComp->setEnable(val);
+        });
+        enableCheckBox->setEndOfLine(false);
+
+        auto kineChk = m_physicGroup->createWidget<CheckBox>("Kinematic", physicComp->isKinematic());
+        kineChk->getOnDataChangedEvent().addListener([this](bool val) {
+            auto physicComp = m_targetObject->getComponent<PhysicBase>();
+            physicComp->setIsKinematic(val);
+        });
+        kineChk->setEndOfLine(false);
+
+        m_physicGroup->createWidget<CheckBox>(" Trigger", physicComp->isTrigger())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto physicComp = m_targetObject->getComponent<PhysicBase>();
+            physicComp->setIsTrigger(val);
+        });
+
+        m_physicGroup->createWidget<Separator>();
+        std::array mass = { physicComp->getMass() };
+        m_physicGroup->createWidget<Drag<float>>("Mass", ImGuiDataType_Float, mass, 0.1f, 0.1f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicBase>();
+            physicComp->setMass(val[0]);
+        });
+
+        std::array friction = { physicComp->getFriction() };
+        m_physicGroup->createWidget<Drag<float>>("Friction", ImGuiDataType_Float, friction, 0.1f, 0.1f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicBase>();
+            physicComp->setFriction(val[0]);
+        });
+
+        std::array restitution = { physicComp->getRestitution() };
+        m_physicGroup->createWidget<Drag<float>>("Restitution", ImGuiDataType_Float, restitution, 0.1f, 0.1f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicBase>();
+            physicComp->setRestitution(val[0]);
+        });
+
+        std::array linearVelocity = { physicComp->getLinearVelocity().x(), physicComp->getLinearVelocity().y(), physicComp->getLinearVelocity().z() };
+        m_physicGroup->createWidget<Drag<float, 3>>("Linear Velocity", ImGuiDataType_Float, linearVelocity)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicBase>();
+            physicComp->setLinearVelocity({ val[0], val[1], val[2] });
+        });
+
+        std::array angularVelocity = { physicComp->getAngularVelocity().x(), physicComp->getAngularVelocity().y(), physicComp->getAngularVelocity().z() };
+        m_physicGroup->createWidget<Drag<float, 3>>("Angular Velocity", ImGuiDataType_Float, angularVelocity)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicBase>();
+            physicComp->setAngularVelocity({ val[0], val[1], val[2] });
+        });
+
+        std::array linearFactor = { physicComp->getLinearFactor().x(), physicComp->getLinearFactor().y(), physicComp->getLinearFactor().z() };
+        m_physicGroup->createWidget<Drag<float, 3>>("Linear Factor", ImGuiDataType_Float, linearFactor)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicBase>();
+            physicComp->setLinearFactor({ val[0], val[1], val[2] });
+        });
+
+        std::array angularFactor = { physicComp->getAngularFactor().x(), physicComp->getAngularFactor().y(), physicComp->getAngularFactor().z() };
+        m_physicGroup->createWidget<Drag<float, 3>>("Angular Factor", ImGuiDataType_Float, angularFactor)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicBase>();
+            physicComp->setAngularFactor({ val[0], val[1], val[2] });
+        });
     }
 
     //! Draw PhysicBox component
     void Inspector::drawPhysicBox()
     {
+        auto physicComp= m_targetObject->getComponent<PhysicBox>();
+        if (physicComp == nullptr) return;
 
+        drawPhysicBase();
+
+        m_physicGroup->createWidget<Separator>();
+        std::array size = { physicComp->getSize().X(), physicComp->getSize().Y(), physicComp->getSize().Z() };
+        m_physicGroup->createWidget<Drag<float, 3>>("Size", ImGuiDataType_Float, size, 0.1f, 0.1f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicBox>();
+            physicComp->setSize({ val[0], val[1], val[2] });
+        });
     }
 
     //! Draw PhysicSphere component
     void Inspector::drawPhysicSphere()
     {
+        auto physicComp = m_targetObject->getComponent<PhysicSphere>();
+        if (physicComp == nullptr) return;
 
+        drawPhysicBase();
+
+        m_physicGroup->createWidget<Separator>();
+        std::array radius = { physicComp->getRadius() };
+        m_physicGroup->createWidget<Drag<float>>("Radius", ImGuiDataType_Float, radius, 0.1f, 0.1f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSphere>();
+            physicComp->setRadius(val[0]);
+        });
     }
 
     //! Draw PhysicCapsule component
     void Inspector::drawPhysicCapsule()
     {
+        auto physicComp = m_targetObject->getComponent<PhysicCapsule>();
+        if (physicComp == nullptr) return;
 
+        drawPhysicBase();
+
+        m_physicGroup->createWidget<Separator>();
+        std::array height = { physicComp->getHeight() };
+        m_physicGroup->createWidget<Drag<float>>("Height", ImGuiDataType_Float, height, 0.1f, 0.1f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicCapsule>();
+            physicComp->setHeight(val[0]);
+        });
+        std::array radius = { physicComp->getRadius() };
+        m_physicGroup->createWidget<Drag<float>>("Radius", ImGuiDataType_Float, radius, 0.1f, 0.1f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicCapsule>();
+            physicComp->setRadius(val[0]);
+        });
     }
 
     void Inspector::_drawImpl()

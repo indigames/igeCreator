@@ -55,7 +55,7 @@ namespace ige::creator
         void drawUIText();
 
         //! Draw PhysicBase component
-        void drawPhysicBase(Component* comp);
+        void drawPhysicBase();
 
         //! Draw PhysicBox component
         void drawPhysicBox();
