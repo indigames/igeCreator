@@ -37,7 +37,7 @@ namespace ige::creator
         initImGUI();
 
         // Create physic instance
-        PhysicManager::getInstance();
+        PhysicManager::getInstance()->initialize();
 
         m_canvas = std::make_shared<Canvas>();
         m_canvas->setDockable(true);
