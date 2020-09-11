@@ -33,6 +33,8 @@ namespace ige::creator
         virtual void initialize() override;
         virtual void _drawImpl() override;
 
+        void renderPhysicDebug();
+
         void onCameraChanged(CameraComponent* camera);
 
         Texture* m_rtTexture = nullptr;

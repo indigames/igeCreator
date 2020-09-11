@@ -9,20 +9,11 @@
 #define SCREEN_WIDTH	1920
 #define SCREEN_HEIGHT	1080
 
-void CreateConsole(void) {
-	FILE* fp;
-	AllocConsole();
-	freopen_s(&fp, "CONOUT$", "w", stdout);
-	freopen_s(&fp, "CONOUT$", "w", stderr);
-}
-
 using namespace ige::creator;
 
 extern std::shared_ptr<Application> gApp = nullptr;
 
 int main(void* data) {
-	CreateConsole();
-
 	FileIO::Instance().SetRoot(".");
 
 	// Create window
@@ -37,8 +28,11 @@ int main(void* data) {
 		editor->registerApp(gApp);
 		editor->initialize();
 
+		// Set game size width based
 		SystemInfo::Instance().SetGemeScreenSize(SCREEN_WIDTH);
-		gApp->showAppWindow(true, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+		// Show window
+		gApp->showAppWindow(true, SCREEN_WIDTH, SCREEN_HEIGHT, false, true);
 		
 		// Register input handler
 		gApp->getInputHandler()->setRawInputHandlerFunc(&Editor::handleEvent);

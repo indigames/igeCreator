@@ -83,10 +83,18 @@ namespace ige::creator
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         io.ConfigWindowsMoveFromTitleBarOnly = true;
 
-        ImGui::StyleColorsDark();
+        setImGUIStyle();
 
         ImGui_ImplSDL2_InitForOpenGL((SDL_Window*)m_app->getAppWindow(), m_app->getAppContext());
         ImGui_ImplOpenGL3_Init("#version 130");
+    }
+
+    void Editor::setImGUIStyle()
+    {
+        ImGuiIO& io = ImGui::GetIO();
+        ImFontConfig config;
+        io.Fonts->AddFontFromFileTTF("fonts/Manjari-Regular.ttf", 14.0f, &config);
+        ImGui::StyleColorsDark();
     }
 
     bool Editor::handleEventImGUI(const SDL_Event* event)

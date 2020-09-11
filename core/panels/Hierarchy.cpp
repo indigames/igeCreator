@@ -166,6 +166,27 @@ namespace ige::creator
                 newObject->addComponent<FigureComponent>("figure/sphere.pyxf");
                 newObject->setSelected(true);
             });
+
+            shapeMenu->createWidget<MenuItem>("Cone")->getOnClickEvent().addListener([objId](auto widget) {
+                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
+                auto newObject = Editor::getCurrentScene()->createObject("Cone", currentObject);
+                newObject->addComponent<FigureComponent>("figure/cone.pyxf");
+                newObject->setSelected(true);
+            });
+
+            shapeMenu->createWidget<MenuItem>("Cylinder")->getOnClickEvent().addListener([objId](auto widget) {
+                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
+                auto newObject = Editor::getCurrentScene()->createObject("Cylinder", currentObject);
+                newObject->addComponent<FigureComponent>("figure/cylinder.pyxf");
+                newObject->setSelected(true);
+            });
+
+            shapeMenu->createWidget<MenuItem>("Torus")->getOnClickEvent().addListener([objId](auto widget) {
+                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
+                auto newObject = Editor::getCurrentScene()->createObject("Torus", currentObject);
+                newObject->addComponent<FigureComponent>("figure/Torus.pyxf");
+                newObject->setSelected(true);
+            });
         }
 
         ctxMenu->createWidget<MenuItem>("Delete")->getOnClickEvent().addListener([objId](auto widget) {

@@ -28,7 +28,6 @@ namespace ige::creator
         m_hierarchy = createPanel<Hierarchy>("Hierarchy", settings);
         createPanel<Console>("Console", settings);
         createPanel<AssetBrowser>("AssetBrowser", settings);
-        createPanel<AssetViewer>("AssetViewer", settings);
         m_editorScene = createPanel<EditorScene>("Scene", settings);
     }
 
@@ -91,7 +90,6 @@ namespace ige::creator
                     ImGui::DockBuilderDockWindow("Inspector", dock_id_right);
                     ImGui::DockBuilderDockWindow("Console", dock_id_bottom);
                     ImGui::DockBuilderDockWindow("AssetBrowser", dock_id_bottom);
-                    ImGui::DockBuilderDockWindow("AssetViewer", dock_id_right_bottom);
                     ImGui::DockBuilderFinish(dockspace_id);
                 }
 

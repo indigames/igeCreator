@@ -44,6 +44,7 @@ namespace ige::creator
         virtual void initImGUI();
         virtual bool handleEventImGUI(const SDL_Event* event);
         virtual void renderImGUI();
+        virtual void setImGUIStyle();
 
     protected:
         std::shared_ptr<Canvas> m_canvas = nullptr;
