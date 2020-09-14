@@ -115,6 +115,17 @@ namespace ige::creator
         // Ensure initialization
         initialize();
 
+        // Update render target size
+        if (m_bNeedResize)
+        {
+            auto size = getSize();
+            m_fbo->Resize(size.x, size.y);
+            m_imageWidget->setSize(size);
+            if(Editor::getCurrentScene())
+                onCameraChanged(Editor::getCurrentScene()->getActiveCamera());
+            m_bNeedResize = false;
+        }
+
         //! If there is no scene, just do nothing
         if (!m_bIsInitialized || !Editor::getCurrentScene() || !Editor::getCurrentScene()->getActiveCamera())
         {
@@ -136,16 +147,6 @@ namespace ige::creator
             m_currentScene->getOnActiveCameraChangedEvent().addListener([this](auto camera) {
                 onCameraChanged(camera);
             });
-        }
-
-        // Update render target size
-        if (m_bNeedResize)
-        {
-            auto size = getSize();
-            m_fbo->Resize(size.x, size.y);
-            m_imageWidget->setSize(size);
-            onCameraChanged(Editor::getCurrentScene()->getActiveCamera());
-            m_bNeedResize = false;
         }
 
         //! Update Panel

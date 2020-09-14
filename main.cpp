@@ -23,20 +23,20 @@ int main(void* data) {
 	// Initialize
 	if (gApp->isInitialized())
 	{
-		// Create editor instance
-		auto& editor = Editor::getInstance();
-		editor->registerApp(gApp);
-		editor->initialize();
-
 		// Set game size width based
 		SystemInfo::Instance().SetGemeScreenSize(SCREEN_WIDTH);
 
 		// Show window
-		gApp->showAppWindow(true, SCREEN_WIDTH, SCREEN_HEIGHT, false, true);
+		gApp->showAppWindow(true, SCREEN_WIDTH, SCREEN_HEIGHT, true, true);
+
+		// Create editor instance
+		auto& editor = Editor::getInstance();
+		editor->registerApp(gApp);
+		editor->initialize();
 		
 		// Register input handler
 		gApp->getInputHandler()->setRawInputHandlerFunc(&Editor::handleEvent);
-		
+
 		// Main loop
 		while (gApp->isRunning())
 		{

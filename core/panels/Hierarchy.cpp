@@ -192,7 +192,7 @@ namespace ige::creator
         ctxMenu->createWidget<MenuItem>("Delete")->getOnClickEvent().addListener([objId](auto widget) {
             TaskManager::getInstance()->addTask([objId](){
                 auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                if (currentObject->getParent()) currentObject->getParent()->setSelected(true);
+                if (currentObject && currentObject->getParent()) currentObject->getParent()->setSelected(true);
                 Editor::getInstance()->setSelectedObject(-1);
                 Editor::getCurrentScene()->removeObjectById(objId);
             });
