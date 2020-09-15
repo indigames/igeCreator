@@ -42,7 +42,6 @@ namespace ige::creator
         m_grid2D = nullptr;
         m_grid3D = nullptr;
 
-        m_targetObject = nullptr;
         m_currentCamera = nullptr;
 
         getOnSizeChangedEvent().removeAllListeners();
@@ -61,10 +60,6 @@ namespace ige::creator
         }
 
         ResourceManager::Instance().DeleteDaemon();
-    }
-
-    void EditorScene::setTargetObject(std::shared_ptr<SceneObject> obj)
-    {
     }
 
     void EditorScene::initialize()
@@ -218,17 +213,17 @@ namespace ige::creator
 
     void EditorScene::renderPhysicDebug()
     {        
-        m_targetObject = Editor::getInstance()->getSelectedObject();
-        if (m_targetObject == nullptr)
+        auto target = Editor::getInstance()->getSelectedObject();
+        if (target == nullptr)
             return;
 
-        auto transform = m_targetObject->getTransform();
+        auto transform = target->getTransform();
         auto rotation = transform->getWorldRotation();
         auto position = transform->getWorldPosition();
         auto scale = transform->getWorldScale();
 
         /* Draw the box collider if any */
-        if (auto physicBox = m_targetObject->getComponent<PhysicBox>(); physicBox)
+        if (auto physicBox = target->getComponent<PhysicBox>(); physicBox)
         {
             auto colliderSize = physicBox->getSize();
             Vec3 halfSize = { colliderSize[0] * scale[0], colliderSize[1] * scale[1], colliderSize[2] * scale[2] };
@@ -249,7 +244,7 @@ namespace ige::creator
         }
 
         /* Draw the sphere collider if any */
-        if (auto physicSphere = m_targetObject->getComponent<PhysicSphere>(); physicSphere)
+        if (auto physicSphere = target->getComponent<PhysicSphere>(); physicSphere)
         {           
             float radius = physicSphere->getRadius() * std::max(std::max(std::max(scale[0], scale[1]), scale[2]), 0.0f);
 
@@ -262,7 +257,7 @@ namespace ige::creator
         }
 
         /* Draw the capsule collider if any */
-        if (auto physicCapsule = m_targetObject->getComponent<PhysicCapsule>(); physicCapsule)
+        if (auto physicCapsule = target->getComponent<PhysicCapsule>(); physicCapsule)
         {
             float radius = abs(physicCapsule->getRadius() * std::max(std::max(scale[01], scale[2]), 0.f));
             float height = abs(physicCapsule->getHeight() * scale[1]);
@@ -295,8 +290,8 @@ namespace ige::creator
 
     void EditorScene::updateCameraPosition()
     {
-        m_targetObject = Editor::getInstance()->getSelectedObject();
-        if (m_targetObject == nullptr || m_targetObject->isGUIObject())
+        auto target = Editor::getInstance()->getSelectedObject();
+        if (target == nullptr || target->isGUIObject())
             return;
 
         auto touch = Editor::getApp()->getInputHandler()->getTouchDevice();

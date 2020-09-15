@@ -47,8 +47,6 @@ namespace ige::creator
     void Canvas::setTargetObject(const std::shared_ptr<SceneObject>& obj)
     {
         m_inspector->setTargetObject(obj);
-        m_editorScene->setTargetObject(obj);
-        m_hierarchy->setTargetObject(obj);
     }
 
     void Canvas::update(float dt)

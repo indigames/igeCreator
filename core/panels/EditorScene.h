@@ -27,8 +27,6 @@ namespace ige::creator
 
         std::shared_ptr<Gizmo>& getGizmo() { return m_gizmo; }
 
-        void setTargetObject(std::shared_ptr<SceneObject> obj);
-
     protected:
         virtual void initialize() override;
         virtual void _drawImpl() override;
@@ -47,7 +45,6 @@ namespace ige::creator
 
         std::shared_ptr<Image> m_imageWidget = nullptr;
         std::shared_ptr<Gizmo> m_gizmo = nullptr;
-        std::shared_ptr<SceneObject> m_targetObject = nullptr;
 
         //! Cache current scene
         std::shared_ptr<Scene> m_currentScene = nullptr;

@@ -42,11 +42,10 @@ namespace ige::creator
         SceneObject::getDestroyedEvent().removeAllListeners();
         SceneObject::getAttachedEvent().removeAllListeners();
         SceneObject::getDetachedEvent().removeAllListeners();
+        SceneObject::getNameChangedEvent().removeAllListeners();
+        SceneObject::getSelectedEvent().removeAllListeners();
         clear();
-    }
-
-    void Hierarchy::setTargetObject(const std::shared_ptr<SceneObject>& obj)
-    {
+        m_groupLayout = nullptr;
     }
 
     void Hierarchy::onSceneObjectCreated(SceneObject& sceneObject)
@@ -74,7 +73,7 @@ namespace ige::creator
 
                 // Update selected object
                 auto object = Editor::getCurrentScene()->findObjectById(objId);
-                object->setSelected(true);
+                if(object) object->setSelected(true);
             });
         });
         node->addPlugin<DDTargetPlugin<uint64_t>>(EDragDropID::OBJECT)->getOnDataReceivedEvent().addListener([this, objId](auto txt) {
@@ -342,5 +341,14 @@ namespace ige::creator
 
     void Hierarchy::clear()
     {
+        if (m_groupLayout)
+        {
+            m_groupLayout->removeAllWidgets();
+            m_groupLayout->removeAllPlugins();
+        }
+        m_groupLayout = nullptr;
+        removeAllWidgets();
+        m_objectNodeMap.clear();
+        m_bInitialized = false;
     }
 }

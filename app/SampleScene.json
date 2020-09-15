@@ -1,290 +1,364 @@
 {
-  "name": "EmptyScene",
-  "objId": 4,
-  "root": {
-    "active": true,
-    "children": [
-      {
-        "active": true,
-        "children": [
-          {
-            "active": true,
-            "children": [
+  "name": "New scene",
+  "objId": 5,
+  "roots": [
+    {
+      "active": true,
+      "children": [
+        {
+          "active": true,
+          "children": [],
+          "comps": [
+            [
+              "TransformComponent",
               {
-                "active": true,
-                "children": [],
-                "comps": [
+                "pos": [
+                  -0.6932663321495056,
+                  5.2970428466796875,
+                  18.51387596130371
+                ],
+                "rot": [
+                  -0.02436724677681923,
+                  0.01249590702354908,
+                  0.0003046050842385739,
+                  0.9996249079704285
+                ],
+                "scale": [
+                  1,
+                  1,
+                  1
+                ]
+              }
+            ],
+            [
+              "CameraComponent",
+              {
+                "aspect": 2.051928758621216,
+                "far": 5000,
+                "fov": 45,
+                "lock": true,
+                "name": "default_camera",
+                "near": 1,
+                "ortho": false,
+                "orthoH": 0,
+                "orthoW": 0,
+                "pan": 0,
+                "roll": 0,
+                "scrOff": [
+                  0,
+                  0
+                ],
+                "scrRad": 0,
+                "scrScale": [
+                  1,
+                  1
+                ],
+                "target": [
+                  0,
+                  0,
+                  -1
+                ],
+                "targetId": 0,
+                "tilt": -0,
+                "up": 1,
+                "wBase": false
+              }
+            ]
+          ],
+          "id": 1,
+          "name": "Default Camera",
+          "select": false
+        },
+        {
+          "active": true,
+          "children": [
+            {
+              "active": true,
+              "children": [
+                {
+                  "active": true,
+                  "children": [],
+                  "comps": [
+                    [
+                      "TransformComponent",
+                      {
+                        "pos": [
+                          0,
+                          1.7978334426879883,
+                          0
+                        ],
+                        "rot": [
+                          0,
+                          0,
+                          0,
+                          1
+                        ],
+                        "scale": [
+                          1,
+                          1,
+                          1
+                        ]
+                      }
+                    ],
+                    [
+                      "FigureComponent",
+                      {
+                        "path": "figure/cone.pyxf"
+                      }
+                    ]
+                  ],
+                  "id": 4,
+                  "name": "Cone",
+                  "select": false
+                }
+              ],
+              "comps": [
+                [
+                  "TransformComponent",
                   {
-                    "TransformComponent": {
-                      "pos": [
-                        8,
-                        0,
-                        -10
-                      ],
-                      "rot": [
-                        0,
-                        0,
-                        0,
-                        1
-                      ],
-                      "scale": [
-                        1,
-                        1,
-                        1
-                      ]
-                    }
-                  },
-                  {
-                    "FigureComponent": {
-                      "path": "figure/Trees_Object.pyxf"
-                    }
+                    "pos": [
+                      -2.8788905143737793,
+                      2.684156894683838,
+                      0
+                    ],
+                    "rot": [
+                      0,
+                      0,
+                      0,
+                      1
+                    ],
+                    "scale": [
+                      1,
+                      1,
+                      1
+                    ]
                   }
                 ],
-                "id": 3,
-                "name": "tree3",
-                "select": false
+                [
+                  "FigureComponent",
+                  {
+                    "path": "figure/sphere.pyxf"
+                  }
+                ]
+              ],
+              "id": 3,
+              "name": "Sphere",
+              "select": false
+            }
+          ],
+          "comps": [
+            [
+              "TransformComponent",
+              {
+                "pos": [
+                  0,
+                  2.2986879348754883,
+                  0
+                ],
+                "rot": [
+                  0,
+                  0,
+                  0,
+                  1
+                ],
+                "scale": [
+                  1,
+                  1,
+                  1
+                ]
               }
             ],
-            "comps": [
+            [
+              "FigureComponent",
               {
-                "TransformComponent": {
-                  "pos": [
-                    -2,
-                    0,
-                    -10
-                  ],
-                  "rot": [
-                    0,
-                    0,
-                    0,
-                    1
-                  ],
-                  "scale": [
-                    1,
-                    1,
-                    1
-                  ]
-                }
-              },
-              {
-                "FigureComponent": {
-                  "path": "figure/Trees_Object.pyxf"
-                }
+                "path": "figure/cube.pyxf"
               }
+            ]
+          ],
+          "id": 2,
+          "name": "Cube",
+          "select": false
+        }
+      ],
+      "comps": [
+        [
+          "TransformComponent",
+          {
+            "pos": [
+              0,
+              0,
+              0
             ],
-            "id": 2,
-            "name": "tree2",
-            "select": false
+            "rot": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              1,
+              1
+            ]
           }
         ],
-        "comps": [
+        [
+          "EnvironmentComponent",
           {
-            "TransformComponent": {
-              "pos": [
-                -5,
-                0,
-                -10
-              ],
-              "rot": [
-                0,
-                0,
-                0,
-                1
-              ],
-              "scale": [
-                1,
-                1,
-                1
-              ]
-            }
-          },
-          {
-            "FigureComponent": {
-              "path": "figure/Trees_Object.pyxf"
-            }
+            "ambDir": [
+              0,
+              -1,
+              0
+            ],
+            "ambGndCol": [
+              0.5,
+              0.5,
+              0.5
+            ],
+            "ambSkyCol": [
+              0.10000000149011612,
+              0.30000001192092896,
+              0.699999988079071
+            ],
+            "dirCol_0": [
+              0.5,
+              0.5,
+              0.5
+            ],
+            "dirCol_1": [
+              0.5,
+              0.5,
+              0.5
+            ],
+            "dirCol_2": [
+              0.5,
+              0.5,
+              0.5
+            ],
+            "dirDir_0": [
+              0.5773502588272095,
+              0.5773502588272095,
+              0.5773502588272095
+            ],
+            "dirDir_1": [
+              0.40824833512306213,
+              0.8164966702461243,
+              0.40824833512306213
+            ],
+            "dirDir_2": [
+              0.40824833512306213,
+              0.8164966702461243,
+              0.40824833512306213
+            ],
+            "dirInt_0": 1,
+            "dirInt_1": 1,
+            "dirInt_2": 1,
+            "fogAlpha": 1,
+            "fogCol": [
+              1,
+              1,
+              1
+            ],
+            "fogFar": 50,
+            "fogNear": 0.10000000149011612,
+            "name": "environment",
+            "pointCol_0": [
+              1,
+              1,
+              1
+            ],
+            "pointCol_1": [
+              1,
+              1,
+              1
+            ],
+            "pointCol_2": [
+              1,
+              1,
+              1
+            ],
+            "pointCol_3": [
+              1,
+              1,
+              1
+            ],
+            "pointCol_4": [
+              1,
+              1,
+              1
+            ],
+            "pointCol_5": [
+              1,
+              1,
+              1
+            ],
+            "pointCol_6": [
+              1,
+              1,
+              1
+            ],
+            "pointInt_0": 0.30000001192092896,
+            "pointInt_1": 0.30000001192092896,
+            "pointInt_2": 0.30000001192092896,
+            "pointInt_3": 0.30000001192092896,
+            "pointInt_4": 0.30000001192092896,
+            "pointInt_5": 0.30000001192092896,
+            "pointInt_6": 0.30000001192092896,
+            "pointPos_0": [
+              0,
+              100,
+              0
+            ],
+            "pointPos_1": [
+              0,
+              100,
+              0
+            ],
+            "pointPos_2": [
+              0,
+              100,
+              0
+            ],
+            "pointPos_3": [
+              0,
+              100,
+              0
+            ],
+            "pointPos_4": [
+              0,
+              100,
+              0
+            ],
+            "pointPos_5": [
+              0,
+              100,
+              0
+            ],
+            "pointPos_6": [
+              0,
+              100,
+              0
+            ],
+            "pointRng_0": 100,
+            "pointRng_1": 100,
+            "pointRng_2": 100,
+            "pointRng_3": 100,
+            "pointRng_4": 100,
+            "pointRng_5": 100,
+            "pointRng_6": 100,
+            "shadowCol": [
+              0,
+              0,
+              0
+            ],
+            "shadowDensity": 0.5,
+            "shadowWideness": 1000
           }
-        ],
-        "id": 1,
-        "name": "tree",
-        "select": false
-      }
-    ],
-    "comps": [
-      {
-        "TransformComponent": {
-          "pos": [
-            0,
-            0,
-            0
-          ],
-          "rot": [
-            0,
-            0,
-            0,
-            1
-          ],
-          "scale": [
-            1,
-            1,
-            1
-          ]
-        }
-      },
-      {
-        "EnvironmentComponent": {
-          "ambDir": [
-            0,
-            -1,
-            0
-          ],
-          "ambGndCol": [
-            0.5,
-            0.5,
-            0.5
-          ],
-          "ambSkyCol": [
-            0.10000000149011612,
-            0.30000001192092896,
-            0.699999988079071
-          ],
-          "dirCol_0": [
-            0.5,
-            0.5,
-            0.5
-          ],
-          "dirCol_1": [
-            0.5,
-            0.5,
-            0.5
-          ],
-          "dirCol_2": [
-            0.5,
-            0.5,
-            0.5
-          ],
-          "dirDir_0": [
-            0.5773501992225647,
-            0.5773501992225647,
-            0.5773501992225647
-          ],
-          "dirDir_1": [
-            0.40824827551841736,
-            0.8164965510368347,
-            0.40824827551841736
-          ],
-          "dirDir_2": [
-            0.40824827551841736,
-            0.8164965510368347,
-            0.40824827551841736
-          ],
-          "dirInt_0": 1,
-          "dirInt_1": 1,
-          "dirInt_2": 1,
-          "fogAlpha": 1,
-          "fogCol": [
-            1,
-            1,
-            1
-          ],
-          "fogFar": 50,
-          "fogNear": 0.10000000149011612,
-          "name": "environment",
-          "pointCol_0": [
-            1,
-            1,
-            1
-          ],
-          "pointCol_1": [
-            1,
-            1,
-            1
-          ],
-          "pointCol_2": [
-            1,
-            1,
-            1
-          ],
-          "pointCol_3": [
-            1,
-            1,
-            1
-          ],
-          "pointCol_4": [
-            1,
-            1,
-            1
-          ],
-          "pointCol_5": [
-            1,
-            1,
-            1
-          ],
-          "pointCol_6": [
-            1,
-            1,
-            1
-          ],
-          "pointInt_0": 0.30000001192092896,
-          "pointInt_1": 0.30000001192092896,
-          "pointInt_2": 0.30000001192092896,
-          "pointInt_3": 0.30000001192092896,
-          "pointInt_4": 0.30000001192092896,
-          "pointInt_5": 0.30000001192092896,
-          "pointInt_6": 0.30000001192092896,
-          "pointPos_0": [
-            0,
-            100,
-            0
-          ],
-          "pointPos_1": [
-            0,
-            100,
-            0
-          ],
-          "pointPos_2": [
-            0,
-            100,
-            0
-          ],
-          "pointPos_3": [
-            0,
-            100,
-            0
-          ],
-          "pointPos_4": [
-            0,
-            100,
-            0
-          ],
-          "pointPos_5": [
-            0,
-            100,
-            0
-          ],
-          "pointPos_6": [
-            0,
-            100,
-            0
-          ],
-          "pointRng_0": 100,
-          "pointRng_1": 100,
-          "pointRng_2": 100,
-          "pointRng_3": 100,
-          "pointRng_4": 100,
-          "pointRng_5": 100,
-          "pointRng_6": 100,
-          "shadowCol": [
-            0,
-            0,
-            0
-          ],
-          "shadowDensity": 0.5,
-          "shadowWideness": 1000
-        }
-      }
-    ],
-    "id": 0,
-    "name": "EmptyScene",
-    "select": false
-  }
+        ]
+      ],
+      "id": 0,
+      "name": "New scene",
+      "select": false
+    }
+  ]
 }
