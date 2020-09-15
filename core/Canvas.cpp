@@ -6,6 +6,7 @@
 #include "core/menu/MenuBar.h"
 #include "core/toolbar/ToolBar.h"
 #include "core/panels/EditorScene.h"
+#include "core/panels/GameScene.h"
 #include "core/panels/Hierarchy.h"
 #include "core/panels/Inspector.h"
 #include "core/panels/Console.h"
@@ -28,6 +29,7 @@ namespace ige::creator
         m_hierarchy = createPanel<Hierarchy>("Hierarchy", settings);
         createPanel<Console>("Console", settings);
         createPanel<AssetBrowser>("AssetBrowser", settings);
+        m_gameScene = createPanel<GameScene>("GameScene", settings);
         m_editorScene = createPanel<EditorScene>("Scene", settings);
     }
 
@@ -71,13 +73,16 @@ namespace ige::creator
         {
             if (isDockable())
             {
+                ImVec2 displaySize = ImGui::GetIO().DisplaySize;
+                ImGui::SetWindowPos({ 0.f, 0.f });
+                ImGui::SetWindowSize({ (float)displaySize.x, (float)displaySize.y });
+
                 if (ImGui::DockBuilderGetNode(ImGui::GetID("EditorDockspace")) == NULL)
                 {
                     ImGuiID dockspace_id = ImGui::GetID("EditorDockspace");
-                    ImGuiViewport* viewport = ImGui::GetMainViewport();
                     ImGui::DockBuilderRemoveNode(dockspace_id); // Clear out existing layout
                     ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace); // Add empty node
-                    ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
+                    ImGui::DockBuilderSetNodeSize(dockspace_id, displaySize);
 
                     ImGuiID dock_main_id = dockspace_id; // This variable will track the document node, however we are not using it here as we aren't docking anything into it.                    
                     ImGuiID dock_id_left = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.20f, NULL, &dock_main_id);
@@ -86,18 +91,16 @@ namespace ige::creator
                     ImGuiID dock_id_right_bottom = ImGui::DockBuilderSplitNode(dock_id_right, ImGuiDir_Down, 0.22f, NULL, &dock_id_right);
                     
                     ImGui::DockBuilderDockWindow("Hierarchy", dock_id_left);
-                    ImGui::DockBuilderDockWindow("Scene", dock_main_id);
                     ImGui::DockBuilderDockWindow("Inspector", dock_id_right);
                     ImGui::DockBuilderDockWindow("Console", dock_id_bottom);
                     ImGui::DockBuilderDockWindow("AssetBrowser", dock_id_bottom);
+                    ImGui::DockBuilderDockWindow("Scene", dock_main_id);
+                    ImGui::DockBuilderDockWindow("GameScene", dock_main_id);
                     ImGui::DockBuilderFinish(dockspace_id);
                 }
 
                 ImGuiID dockspace_id = ImGui::GetID("EditorDockspace");
-                ImVec2 displaySize = ImGui::GetIO().DisplaySize;
                 ImGui::DockSpace(dockspace_id, displaySize, ImGuiDockNodeFlags_NoCloseButton | ImGuiDockNodeFlags_NoWindowMenuButton);
-                ImGui::SetWindowPos({ 0.f, 0.f });                
-                ImGui::SetWindowSize({ (float)displaySize.x, (float)displaySize.y });
             }
 
             for (auto panel : m_panels)

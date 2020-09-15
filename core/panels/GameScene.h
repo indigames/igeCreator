@@ -1,0 +1,42 @@
+#pragma once
+
+#include <utils/PyxieHeaders.h>
+
+#include "core/Panel.h"
+#include "core/gizmo/Gizmo.h"
+
+#include "components/gui/RectTransform.h"
+#include "scene/Scene.h"
+using namespace ige::scene;
+
+namespace ige::creator
+{
+    class Image;
+
+    class GameScene: public Panel
+    {
+    public:
+        GameScene(const std::string& name = "", const Panel::Settings& settings = {});
+        virtual ~GameScene();
+
+        virtual void update(float dt);
+
+        void play();
+        void pause();
+        void stop();
+
+    protected:
+        virtual void initialize() override;
+        virtual void clear();
+
+        virtual void _drawImpl() override;
+
+    protected:
+        Texture* m_rtTexture = nullptr;
+        RenderTarget* m_fbo = nullptr;
+        std::shared_ptr<Image> m_imageWidget = nullptr;
+
+        bool m_bInitialized = false;
+        bool m_bIsPlaying = false;
+    };
+}
