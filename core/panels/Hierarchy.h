@@ -15,11 +15,12 @@ namespace ige::creator
     public:
         Hierarchy(const std::string& name = "", const Panel::Settings& settings = {});
         virtual ~Hierarchy();
+
         virtual void clear();
+        virtual void initialize() override;
 
     protected:
-        virtual void drawWidgets() override;
-        virtual void initialize() override;
+        virtual void drawWidgets() override;       
 
         //! Object created/deleted
         void onSceneObjectCreated(SceneObject& sceneObject);

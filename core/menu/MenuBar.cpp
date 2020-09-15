@@ -77,6 +77,7 @@ namespace ige::creator
 
                     Editor::getInstance()->setSelectedObject(-1);
                     Editor::getCanvas()->getHierarchy()->clear();
+                    Editor::getCanvas()->getHierarchy()->initialize();
                     Editor::getCanvas()->getEditorScene()->clear();
                     scene = Editor::getSceneManager()->loadScene(selectedFiles[0]);
                     Editor::setCurrentScene(scene);
