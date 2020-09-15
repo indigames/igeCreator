@@ -1048,7 +1048,7 @@ namespace ige::creator
         auto enableCheckBox = m_physicGroup->createWidget<CheckBox>("Enable", physicComp->isEnabled());
         enableCheckBox->getOnDataChangedEvent().addListener([this](bool val) {
             auto physicComp = m_targetObject->getComponent<PhysicBase>();
-            physicComp->setEnable(val);
+            physicComp->setEnabled(val);
         });
         enableCheckBox->setEndOfLine(false);
 

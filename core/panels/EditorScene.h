@@ -34,6 +34,7 @@ namespace ige::creator
         virtual void _drawImpl() override;
 
         void renderPhysicDebug();
+        void updateCameraPosition();
 
         void onCameraChanged(CameraComponent* camera);
 
@@ -52,8 +53,17 @@ namespace ige::creator
         std::shared_ptr<Scene> m_currentScene = nullptr;
         CameraComponent* m_currentCamera = nullptr;
 
+        //! Initialize states
         bool m_bIs2DMode = false;
         bool m_bIsInitialized = false;
         bool m_bNeedResize = false;
+
+        //! Camera control
+        bool m_bIsFirstTouch = true;
+        float m_cameraDragSpeed = 0.5f;
+        float m_cameraRotationSpeed = 0.005f;
+        float m_lastMousePosX = 0.f;
+        float m_lastMousePosY = 0.f;
+        Vec3 m_cameraRotationEuler = {};
     };
 }

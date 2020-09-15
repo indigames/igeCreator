@@ -152,6 +152,9 @@ namespace ige::creator
         //! Update Panel
         Panel::update(dt);
 
+        //! Update camera
+        updateCameraPosition();
+
         // If left button release, check selected object
         auto touch = Editor::getApp()->getInputHandler()->getTouchDevice();
         if (touch->isFingerReleased(0))
@@ -287,6 +290,79 @@ namespace ige::creator
             ShapeDrawer::drawLine(position + rotation * (Vec3{ radius, -halfHeight, 0.f }), position + rotation * (Vec3{ radius, +halfHeight, 0.f }));
             ShapeDrawer::drawLine(position + rotation * (Vec3{ 0.f, -halfHeight, -radius }), position + rotation * (Vec3{ 0.f, +halfHeight, -radius }));
             ShapeDrawer::drawLine(position + rotation * (Vec3{ 0.f, -halfHeight, radius }), position + rotation * (Vec3{ 0.f, +halfHeight, radius }));
+        }
+    }
+
+    void EditorScene::updateCameraPosition()
+    {
+        m_targetObject = Editor::getInstance()->getSelectedObject();
+        if (m_targetObject == nullptr || m_targetObject->isGUIObject())
+            return;
+
+        auto touch = Editor::getApp()->getInputHandler()->getTouchDevice();
+        if (touch->isFingerScrolled(0))
+        {
+            float scrollX, scrollY;
+            bool isInverse;
+            touch->getFingerScrolledData(0, scrollX, scrollY, isInverse);
+
+            Vec2 offset = { scrollX, scrollY };
+            auto mouseOffset = offset * m_cameraDragSpeed;
+
+            auto cameraPosition = m_currentCamera->getPosition();
+            auto cameraRotation = m_currentCamera->getRotation();
+
+            const Vec3 rightVec = { 1.f, 0.f, 0.f };
+            const Vec3 upVec = { 0.f, 0.f, 1.f };
+            cameraPosition += cameraRotation * rightVec * mouseOffset.X();
+            cameraPosition -= cameraRotation * upVec * mouseOffset.Y();
+            m_currentCamera->setPosition(cameraPosition);
+
+        }
+        else if (touch->isFingerPressed(0)) 
+        {
+            touch->getFingerPosition(0, m_lastMousePosX, m_lastMousePosY);
+        }
+        else if (touch->isFingerMoved(0))
+        {
+            auto finger = touch->getFinger(0);
+            auto fid = finger->getFingerId();
+            if (finger->getFingerId() == 3) // right button
+            {
+                float touchX, touchY;
+                touch->getFingerPosition(0, touchX, touchY);
+
+                Vec2 offset = { touchX - m_lastMousePosX, touchY - m_lastMousePosY };
+                m_lastMousePosX = touchX;
+                m_lastMousePosY = touchY;
+
+                if (m_bIsFirstTouch)
+                {
+                    auto cameraRotation = m_currentCamera->getRotation();
+                    vmath_quatToEuler(cameraRotation.P(), m_cameraRotationEuler.P());
+
+                    //! remove roll
+                    if (m_cameraRotationEuler[2] >= 179.0f || m_cameraRotationEuler[2] <= -179.0f)
+                    {
+                        m_cameraRotationEuler[0] += m_cameraRotationEuler[2];
+                        m_cameraRotationEuler[1] = 180.0f - m_cameraRotationEuler[1];
+                        m_cameraRotationEuler[2] = 0.0f;
+                    }
+                    m_bIsFirstTouch = false;
+                }
+
+                auto mouseOffset = offset * m_cameraRotationSpeed;
+                m_cameraRotationEuler[1] -= mouseOffset.X();
+                m_cameraRotationEuler[0] -= mouseOffset.Y();
+
+                Quat rot;
+                vmath_eulerToQuat(m_cameraRotationEuler.P(), rot.P());
+                m_currentCamera->setRotation(rot);
+            }
+        }
+        else if(touch->isFingerReleased(0))
+        {
+            m_bIsFirstTouch = true;
         }
     }
 
