@@ -363,14 +363,6 @@ namespace ige::creator
 
     void EditorScene::onCameraChanged(CameraComponent* camera)
     {
-        // If new camera is null, just return
-        if (!camera)
-        {
-            m_currentCamera = nullptr;
-            if(m_gizmo) m_gizmo->setCamera(nullptr);
-            return;
-        }
-
         // Cleanup old config
         if (m_currentCamera != camera)
         {
@@ -388,15 +380,24 @@ namespace ige::creator
             m_currentCamera = camera;
 
             // Add grids
-            auto targetObj = camera->getShootTarget();
-            if (targetObj)
+            if (m_currentCamera)
             {
-                if (targetObj->isGUIObject()) targetObj->getShowcase()->Add(m_grid2D);
-                else targetObj->getShowcase()->Add(m_grid3D);
+                auto targetObj = camera->getShootTarget();
+                if (targetObj)
+                {
+                    targetObj->getShowcase()->Add(targetObj->isGUIObject() ? m_grid2D : m_grid3D);
+                }
             }
         }
         
-        if(m_gizmo) m_gizmo->setCamera(camera->getCamera());
+        if(m_gizmo) m_gizmo->setCamera(m_currentCamera ? m_currentCamera->getCamera() : nullptr);
+
+        // If new camera is null, just return
+        if (m_currentCamera == nullptr)
+        {
+            return;
+        }
+
         auto size = getSize();
         auto targetObj = camera->getShootTarget();
         if (targetObj)

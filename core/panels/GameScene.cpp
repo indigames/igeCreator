@@ -100,6 +100,9 @@ namespace ige::creator
     void GameScene::play()
     {
         m_bIsPlaying = true;
+        Editor::getCanvas()->getEditorScene()->close();
+        Editor::getCanvas()->getEditorScene()->onCameraChanged(nullptr);
+
         open();
         setFocus();
     }
@@ -113,6 +116,8 @@ namespace ige::creator
     {
         m_bIsPlaying = false;
         close();
+        Editor::getCanvas()->getEditorScene()->onCameraChanged(Editor::getSceneManager()->getCurrentScene()->getActiveCamera());
+        Editor::getCanvas()->getEditorScene()->open();
         Editor::getCanvas()->getEditorScene()->setFocus();
     }
 }

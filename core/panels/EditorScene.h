@@ -27,14 +27,14 @@ namespace ige::creator
 
         std::shared_ptr<Gizmo>& getGizmo() { return m_gizmo; }
 
+        void onCameraChanged(CameraComponent* camera);
+
     protected:
         virtual void initialize() override;
         virtual void _drawImpl() override;
 
         void renderPhysicDebug();
         void updateCameraPosition();
-
-        void onCameraChanged(CameraComponent* camera);
 
         Texture* m_rtTexture = nullptr;
         RenderTarget* m_fbo = nullptr;
