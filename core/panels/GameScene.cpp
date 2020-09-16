@@ -6,10 +6,11 @@
 #include "core/Editor.h"
 #include "core/Canvas.h"
 
-#include "utils/GraphicsHelper.h"
-#include "scene/Scene.h"
-#include "scene/SceneObject.h"
-#include "scene/SceneManager.h"
+#include <utils/GraphicsHelper.h>
+#include <scene/Scene.h>
+#include <scene/SceneObject.h>
+#include <scene/SceneManager.h>
+#include <physic/PhysicManager.h>
 using namespace ige::scene;
 
 #include <utils/PyxieHeaders.h>
@@ -75,6 +76,9 @@ namespace ige::creator
         //! Update Panel
         Panel::update(dt);
 
+        // Update Physic
+        PhysicManager::getInstance()->onUpdate(dt);
+
         // Update scene
         Editor::getSceneManager()->update(dt);
 
@@ -96,6 +100,7 @@ namespace ige::creator
     void GameScene::play()
     {
         m_bIsPlaying = true;
+        open();
         setFocus();
     }
 
@@ -107,6 +112,7 @@ namespace ige::creator
     void GameScene::stop()
     {
         m_bIsPlaying = false;
+        close();
         Editor::getCanvas()->getEditorScene()->setFocus();
     }
 }

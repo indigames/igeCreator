@@ -29,8 +29,9 @@ namespace ige::creator
         m_hierarchy = createPanel<Hierarchy>("Hierarchy", settings);
         createPanel<Console>("Console", settings);
         createPanel<AssetBrowser>("AssetBrowser", settings);
-        m_gameScene = createPanel<GameScene>("GameScene", settings);
         m_editorScene = createPanel<EditorScene>("Scene", settings);
+        m_gameScene = createPanel<GameScene>("Game", settings);
+        m_gameScene->close();
     }
 
     Canvas::~Canvas()
@@ -93,7 +94,7 @@ namespace ige::creator
                     ImGui::DockBuilderDockWindow("Console", dock_id_bottom);
                     ImGui::DockBuilderDockWindow("AssetBrowser", dock_id_bottom);
                     ImGui::DockBuilderDockWindow("Scene", dock_main_id);
-                    ImGui::DockBuilderDockWindow("GameScene", dock_main_id);
+                    ImGui::DockBuilderDockWindow("Game", dock_main_id);
                     ImGui::DockBuilderFinish(dockspace_id);
                 }
 

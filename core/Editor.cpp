@@ -56,9 +56,6 @@ namespace ige::creator
         // Update tasks
         TaskManager::getInstance()->update();
 
-        // Update Physic
-        PhysicManager::getInstance()->onUpdate(dt);
-
         // Update layouts
         m_canvas->update(dt);
     }
