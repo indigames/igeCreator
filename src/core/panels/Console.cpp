@@ -1,4 +1,5 @@
 #include <imgui.h>
+#include <ctime>
 
 #include "core/panels/Console.h"
 #include "core/Canvas.h"
@@ -63,7 +64,16 @@ namespace ige::creator
     void Console::onLogged(const char* message)
     {
         if(m_logGroup == nullptr)
-            m_logGroup = createWidget<Group>("Console Log");
-        m_logGroup->createWidget<Label>(message);
+            m_logGroup = createWidget<Group>("Console Log", false, false);
+        
+        time_t rawtime;
+        time(&rawtime);
+        auto timeinfo = localtime(&rawtime);
+
+        char buffer[80];
+        strftime(buffer, sizeof(buffer), "%d-%m-%Y %H:%M:%S", timeinfo);
+        auto msg = std::string(buffer) + "\t" + std::string(message);
+
+        m_logGroup->createWidget<Label>(msg);
     }
 }
