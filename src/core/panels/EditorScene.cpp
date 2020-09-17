@@ -293,7 +293,7 @@ namespace ige::creator
 
     void EditorScene::updateCameraPosition()
     {
-        if (!isOpened())
+        if (!isOpened() ||!isFocused())
             return;
 
         auto target = Editor::getInstance()->getSelectedObject();
