@@ -38,5 +38,6 @@ namespace ige::creator
 
         bool m_bInitialized = false;
         bool m_bIsPlaying = false;
+        bool m_bNeedResize = false;
     };
 }

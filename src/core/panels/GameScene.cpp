@@ -57,6 +57,12 @@ namespace ige::creator
                 m_rtTexture = ResourceCreator::Instance().NewTexture("GameScene_RTTexture", nullptr, size.x, size.y, GL_RGBA);
                 m_fbo = ResourceCreator::Instance().NewRenderTarget(m_rtTexture, true, true);
                 m_imageWidget = createWidget<Image>(m_fbo->GetColorTexture()->GetTextureHandle(), size);
+
+                getOnSizeChangedEvent().addListener([this](auto size) {
+                    auto currSize = getSize();
+                    m_bNeedResize = (currSize.x != size.x || currSize.y != size.y);
+                });
+
                 m_bInitialized = true;
             }
         }
@@ -72,6 +78,22 @@ namespace ige::creator
 
         if (!m_bInitialized)
             return;
+
+        // Update render target size
+        if (m_bNeedResize)
+        {
+            auto size = getSize();
+            m_fbo->Resize(size.x, size.y);
+            m_imageWidget->setSize(size);
+
+            if (Editor::getSceneManager()->getCurrentScene() \
+                && Editor::getSceneManager()->getCurrentScene()->getActiveCamera())
+            {
+                Editor::getSceneManager()->getCurrentScene()->getActiveCamera()->setAspectRatio(size.x / size.y);
+            }                
+            m_bNeedResize = false;
+        }
+
 
         //! Update Panel
         Panel::update(dt);
