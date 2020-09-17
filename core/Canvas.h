@@ -17,6 +17,7 @@ namespace ige::creator
     class EditorScene;
     class GameScene;
     class Hierarchy;
+    class Console;
 
     class Canvas: public IDrawable
     {
@@ -59,6 +60,7 @@ namespace ige::creator
         std::shared_ptr<EditorScene>& getEditorScene() { return m_editorScene; }
         std::shared_ptr<GameScene>& getGameScene() { return m_gameScene; }
         std::shared_ptr<Hierarchy>& getHierarchy() { return m_hierarchy; }
+        std::shared_ptr<Console>& getConsole() { return m_console; }
 
     protected:
         bool m_bDockable = false;
@@ -68,6 +70,7 @@ namespace ige::creator
         std::shared_ptr<EditorScene> m_editorScene = nullptr;
         std::shared_ptr<GameScene> m_gameScene = nullptr;
         std::shared_ptr<Hierarchy> m_hierarchy = nullptr;
+        std::shared_ptr<Console> m_console = nullptr;
         std::unordered_map<std::string, std::shared_ptr<Panel>> m_panels;
     };
 }

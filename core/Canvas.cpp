@@ -27,7 +27,7 @@ namespace ige::creator
 
         m_inspector = createPanel<Inspector>("Inspector", settings);
         m_hierarchy = createPanel<Hierarchy>("Hierarchy", settings);
-        createPanel<Console>("Console", settings);
+        m_console = createPanel<Console>("Console", settings);
         createPanel<AssetBrowser>("AssetBrowser", settings);
         m_editorScene = createPanel<EditorScene>("Scene", settings);
         m_gameScene = createPanel<GameScene>("Game", settings);

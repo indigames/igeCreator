@@ -152,7 +152,7 @@ namespace ige::creator
 
         // If left button release, check selected object
         auto touch = Editor::getApp()->getInputHandler()->getTouchDevice();
-        if (touch->isFingerReleased(0))
+        if (isFocused() && touch->isFingerReleased(0))
         {
             float touchX, touchY;
             touch->getFingerPosition(0, touchX, touchY);
@@ -212,7 +212,10 @@ namespace ige::creator
     }
 
     void EditorScene::renderPhysicDebug()
-    {        
+    {
+        if (!isOpened())
+            return;
+
         auto target = Editor::getInstance()->getSelectedObject();
         if (target == nullptr)
             return;
@@ -290,6 +293,9 @@ namespace ige::creator
 
     void EditorScene::updateCameraPosition()
     {
+        if (!isOpened())
+            return;
+
         auto target = Editor::getInstance()->getSelectedObject();
         if (target == nullptr || target->isGUIObject())
             return;
