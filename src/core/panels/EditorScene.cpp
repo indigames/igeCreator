@@ -396,13 +396,14 @@ namespace ige::creator
             }
         }
         
-        if(m_gizmo) m_gizmo->setCamera(m_currentCamera ? m_currentCamera->getCamera() : nullptr);
-
         // If new camera is null, just return
         if (m_currentCamera == nullptr)
         {
             return;
         }
+
+        if (m_gizmo)
+            m_gizmo->setCamera(m_currentCamera ? m_currentCamera->getCamera() : nullptr);
 
         auto size = getSize();
         auto targetObj = camera->getShootTarget();
