@@ -26,20 +26,25 @@ set(APP_STYLE STATIC)
 
 add_compile_definitions(EDITOR_MODE=1)
 add_subdirectory(${LIBS_DIR}/igeScene  ${CMAKE_BINARY_DIR}/igeScene)
-add_subdirectory(${LIBS_DIR}/imgui  ${CMAKE_BINARY_DIR}/imgui)
 
 # Source files
 file(GLOB_RECURSE SRC_FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/*.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/pfd/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/pfd/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/ImGuizmo/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/ImGuizmo/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui/*.cpp"
 )
 
 set (EXCLUDE_DIR 
     "examples"
     "example"
     "bin"
+    "misc"
+    "docs"
 )
 foreach (TMP_PATH ${SRC_FILES})
     foreach (TMP_DIR ${EXCLUDE_DIR})
@@ -49,6 +54,11 @@ foreach (TMP_PATH ${SRC_FILES})
         endif ()
     endforeach(TMP_DIR)
 endforeach(TMP_PATH)
+
+set(SRC_FILES ${SRC_FILES}
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui/examples/imgui_impl_opengl3.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui/examples/imgui_impl_sdl.cpp"
+)
 
 add_executable(${TARGET_NAME} WIN32 ${SRC_FILES})
 
@@ -143,7 +153,6 @@ endif ()
 
 target_link_libraries(${TARGET_NAME}
     igeScene-static
-    imgui
     Crypt32
     opengl32
     glu32
@@ -168,6 +177,7 @@ target_include_directories(${TARGET_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/pfd
     ${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/ImGuizmo
+    ${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui
     ${PYTHON_INCLUDE_DIRS}
     ${LIBS_DIR}/pyxCore/include/pyxcore
     ${LIBS_DIR}/pyxCore/include/ThirdParty/GLEW
@@ -178,7 +188,6 @@ target_include_directories(${TARGET_NAME} PUBLIC
     ${LIBS_DIR}/igeVmath/include
     ${LIBS_DIR}/igeCore/include
     ${LIBS_DIR}/igeScene
-    ${LIBS_DIR}/imgui
     ${LIBS_DIR}/SDL/include
     ${LIBS_DIR}/stb/include
     ${LIBS_DIR}/igeBullet/include
