@@ -1,6 +1,7 @@
 #pragma once
 
 #include <utils/PyxieHeaders.h>
+using namespace pyxie;
 
 #include "core/Panel.h"
 #include "core/gizmo/Gizmo.h"
@@ -19,6 +20,9 @@ namespace ige::creator
         EditorScene(const std::string& name = "", const Panel::Settings& settings = {});
         virtual ~EditorScene();
 
+        //! Set target object
+        void setTargetObject(const std::shared_ptr<SceneObject>& obj);
+
         virtual void clear();
         virtual void update(float dt);
 
@@ -27,8 +31,6 @@ namespace ige::creator
 
         std::shared_ptr<Gizmo>& getGizmo() { return m_gizmo; }
 
-        void onCameraChanged(CameraComponent* camera);
-
     protected:
         virtual void initialize() override;
         virtual void _drawImpl() override;
@@ -36,6 +38,8 @@ namespace ige::creator
         void renderPhysicDebug();
         void updateCameraPosition();
 
+        //! Scene FBO
+        std::shared_ptr<Image> m_imageWidget = nullptr;
         Texture* m_rtTexture = nullptr;
         RenderTarget* m_fbo = nullptr;
 
@@ -43,12 +47,19 @@ namespace ige::creator
         EditableFigure* m_grid2D = nullptr;
         EditableFigure* m_grid3D = nullptr; 
 
-        std::shared_ptr<Image> m_imageWidget = nullptr;
+        //! Camera
+        Camera* m_2dCamera = nullptr;
+        Camera* m_3dCamera = nullptr;
+        Camera* m_currCamera = nullptr;
+
+        //! Showcase
+        Showcase* m_currShowcase = nullptr;
+
+        //! Gizmo
         std::shared_ptr<Gizmo> m_gizmo = nullptr;
 
         //! Cache current scene
         std::shared_ptr<Scene> m_currentScene = nullptr;
-        CameraComponent* m_currentCamera = nullptr;
 
         //! Initialize states
         bool m_bIs2DMode = false;

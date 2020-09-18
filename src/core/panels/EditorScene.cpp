@@ -42,7 +42,16 @@ namespace ige::creator
         m_grid2D = nullptr;
         m_grid3D = nullptr;
 
-        m_currentCamera = nullptr;
+        m_currShowcase = nullptr;
+        m_currCamera = nullptr;
+
+        if (m_2dCamera)
+            m_2dCamera->DecReference();
+        m_2dCamera = nullptr;
+
+        if (m_3dCamera)
+            m_3dCamera->DecReference();
+        m_3dCamera = nullptr;
 
         getOnSizeChangedEvent().removeAllListeners();
         removeAllWidgets();
@@ -86,10 +95,75 @@ namespace ige::creator
                 m_grid3D->SetPosition(Vec3(0.f, 0.f, 0.f));
                 m_grid3D->SetRotation(Quat::RotationX(PI / 2.f));
 
+                m_2dCamera = ResourceCreator::Instance().NewCamera("editor_2d_camera", nullptr);
+                m_2dCamera->SetPosition({ 0.f, 0.f, 10.f });
+                m_2dCamera->LockonTarget(false);
+                m_2dCamera->SetAspectRate(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
+                m_2dCamera->SetOrthographicProjection(true);
+                m_2dCamera->SetWidthBase(false);
+
+                m_3dCamera = ResourceCreator::Instance().NewCamera("editor_3d_camera", nullptr);
+                m_3dCamera->SetPosition({ 0.f, 6.f, 20.f });
+                m_3dCamera->LockonTarget(false);
+                m_3dCamera->SetAspectRate(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
+
                 ShapeDrawer::initialize();
 
                 m_bIsInitialized = true;
             }
+        }
+    }
+
+    void EditorScene::setTargetObject(const std::shared_ptr<SceneObject>& obj)
+    {
+        if (obj == nullptr)
+        {
+            m_currShowcase = nullptr;
+            return;
+        }
+        
+        m_currShowcase = obj->getShowcase();
+
+        if (obj->isGUIObject())
+        {
+            if (m_currCamera != m_2dCamera)
+            {
+                m_currCamera = m_2dCamera;
+                obj->getShowcase()->Remove(m_grid3D);
+                obj->getShowcase()->Add(m_grid2D);
+
+                auto canvas = obj->getRoot()->getComponent<ige::scene::Canvas>();
+                if (canvas)
+                {
+                    auto canvasSize = canvas->getDesignCanvasSize();
+                    auto size = getSize();
+                    auto screenSize = Vec2(size.x, size.y);
+                    m_currCamera->SetOrthoHeight(canvasSize.Y() * 0.5f);
+                    m_currCamera->SetAspectRate(size.x / size.y);
+                    m_grid2D->SetScale({ canvasSize.Y() * 0.125f , canvasSize.Y() * 0.125f, 1.f });
+
+                    auto transformToViewport = Mat4::Translate(Vec3(-canvasSize.X() * 0.5f, -canvasSize.Y() * 0.5f, 0.f));
+                    canvas->setCanvasToViewportMatrix(transformToViewport);
+                }
+            }
+        }
+        else
+        {
+            if (m_currCamera != m_3dCamera)
+            {
+                m_currCamera = m_3dCamera;
+
+                obj->getShowcase()->Remove(m_grid2D);
+                obj->getShowcase()->Add(m_grid3D);
+
+                auto size = getSize();
+                m_currCamera->SetAspectRate(size.x / size.y);
+            }
+        }
+
+        if (m_gizmo) {
+            m_gizmo->setCamera(m_currCamera);
+            m_gizmo->setMode(gizmo::MODE::WORLD);
         }
     }
 
@@ -116,13 +190,13 @@ namespace ige::creator
             auto size = getSize();
             m_fbo->Resize(size.x, size.y);
             m_imageWidget->setSize(size);
-            if(Editor::getCurrentScene())
-                onCameraChanged(Editor::getCurrentScene()->getActiveCamera());
+            if(m_currCamera)
+                m_currCamera->SetAspectRate(size.x / size.y);
             m_bNeedResize = false;
         }
 
         //! If there is no scene, just do nothing
-        if (!m_bIsInitialized || !Editor::getCurrentScene() || !Editor::getCurrentScene()->getActiveCamera())
+        if (!m_bIsInitialized || !Editor::getCurrentScene() || m_currCamera == nullptr || m_currShowcase == nullptr)
         {
             auto renderContext = RenderContext::InstancePtr();
             if (renderContext && m_fbo)
@@ -131,17 +205,6 @@ namespace ige::creator
                 renderContext->EndScene();
             }
             return;
-        }
-
-        // Update active camera
-        if (Editor::getCurrentScene() != m_currentScene)
-        {
-            m_currentScene = Editor::getCurrentScene();
-            onCameraChanged(m_currentScene->getActiveCamera());
-
-            m_currentScene->getOnActiveCameraChangedEvent().addListener([this](auto camera) {
-                onCameraChanged(camera);
-            });
         }
 
         //! Update Panel
@@ -175,10 +238,10 @@ namespace ige::creator
             y = y - (screenH - (h + dy)) / 2.f;
 
             Mat4 proj;
-            Editor::getCurrentScene()->getActiveCamera()->getProjectionMatrix(proj);
+            m_currCamera->GetProjectionMatrix(proj);
 
             Mat4 viewInv;
-            Editor::getCurrentScene()->getActiveCamera()->getViewInverseMatrix(viewInv);
+            m_currCamera->GetViewInverseMatrix(viewInv);
 
             RayOBBChecker::screenPosToWorldRay(x, y, w, h, viewInv, proj);
 
@@ -196,7 +259,13 @@ namespace ige::creator
         if (renderContext && m_fbo)
         {
             renderContext->BeginScene(m_fbo, Vec4(0.2f, 0.2f, 0.2f, 1.f), true, true);
-            Editor::getSceneManager()->render();
+
+            // Render camera
+            m_currCamera->Step(dt);
+            m_currCamera->Render();
+
+            // Render scene
+            m_currShowcase->Render();
 
             // Render physic debug
             ShapeDrawer::setViewProjectionMatrix(renderContext->GetRenderViewProjectionMatrix());
@@ -293,7 +362,7 @@ namespace ige::creator
 
     void EditorScene::updateCameraPosition()
     {
-        if (!isOpened() ||!isFocused())
+        if (!isOpened() ||!isFocused() || m_currCamera == nullptr)
             return;
 
         auto target = Editor::getInstance()->getSelectedObject();
@@ -310,14 +379,14 @@ namespace ige::creator
             Vec2 offset = { scrollX, scrollY };
             auto mouseOffset = offset * m_cameraDragSpeed;
 
-            auto cameraPosition = m_currentCamera->getPosition();
-            auto cameraRotation = m_currentCamera->getRotation();
+            auto cameraPosition = m_currCamera->GetPosition();
+            auto cameraRotation = m_currCamera->GetRotation();
 
             const Vec3 rightVec = { 1.f, 0.f, 0.f };
             const Vec3 upVec = { 0.f, 0.f, 1.f };
             cameraPosition += cameraRotation * rightVec * mouseOffset.X();
             cameraPosition -= cameraRotation * upVec * mouseOffset.Y();
-            m_currentCamera->setPosition(cameraPosition);
+            m_currCamera->SetPosition(cameraPosition);
 
         }
         else if (touch->isFingerPressed(0)) 
@@ -339,7 +408,7 @@ namespace ige::creator
 
                 if (m_bIsFirstTouch)
                 {
-                    auto cameraRotation = m_currentCamera->getRotation();
+                    auto cameraRotation = m_currCamera->GetRotation();
                     vmath_quatToEuler(cameraRotation.P(), m_cameraRotationEuler.P());
 
                     //! remove roll
@@ -358,79 +427,12 @@ namespace ige::creator
 
                 Quat rot;
                 vmath_eulerToQuat(m_cameraRotationEuler.P(), rot.P());
-                m_currentCamera->setRotation(rot);
+                m_currCamera->SetRotation(rot);
             }
         }
         else if(touch->isFingerReleased(0))
         {
             m_bIsFirstTouch = true;
         }
-    }
-
-    void EditorScene::onCameraChanged(CameraComponent* camera)
-    {
-        // Cleanup old config
-        if (m_currentCamera != camera)
-        {
-            if (m_currentCamera)
-            {
-                auto targetObj = m_currentCamera->getShootTarget();
-                if (targetObj)
-                {
-                    auto grid = targetObj->isGUIObject() ? m_grid2D : m_grid3D;
-                    targetObj->getShowcase()->Remove(grid);
-                }
-            }
-            
-            // Setup new config
-            m_currentCamera = camera;
-
-            // Add grids
-            if (m_currentCamera)
-            {
-                auto targetObj = camera->getShootTarget();
-                if (targetObj)
-                {
-                    targetObj->getShowcase()->Add(targetObj->isGUIObject() ? m_grid2D : m_grid3D);
-                }
-            }
-        }
-        
-        // If new camera is null, just return
-        if (m_currentCamera == nullptr)
-        {
-            return;
-        }
-
-        if (m_gizmo)
-            m_gizmo->setCamera(m_currentCamera ? m_currentCamera->getCamera() : nullptr);
-
-        auto size = getSize();
-        auto targetObj = camera->getShootTarget();
-        if (targetObj)
-        {
-            if (targetObj->isGUIObject())
-            {
-                if (m_gizmo) m_gizmo->setMode(gizmo::MODE::WORLD);
-
-                auto canvas = targetObj->getRoot()->getComponent<ige::scene::Canvas>();
-                if (canvas)
-                {
-                    auto canvasSize = canvas->getDesignCanvasSize();
-                    auto screenSize = Vec2(size.x, size.y);
-                    camera->setOrthoHeight(canvasSize.Y() * 0.5f);
-                    m_grid2D->SetScale({ canvasSize.Y() * 0.125f , canvasSize.Y() * 0.125f, 1.f });
-
-                    auto transformToViewport = Mat4::Translate(Vec3(-canvasSize.X() * 0.5f, -canvasSize.Y() * 0.5f, 0.f));
-                    canvas->setCanvasToViewportMatrix(transformToViewport);
-                }
-            }
-            else
-            {
-                if (m_gizmo) m_gizmo->setMode(gizmo::MODE::WORLD);
-            }
-        }
-
-        m_currentCamera->setAspectRatio(size.x / size.y);
     }
 }

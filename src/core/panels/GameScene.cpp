@@ -123,7 +123,8 @@ namespace ige::creator
     {
         m_bIsPlaying = true;
         Editor::getCanvas()->getEditorScene()->close();
-        Editor::getCanvas()->getEditorScene()->onCameraChanged(nullptr);
+        if(PhysicManager::getInstance()->getWorld())
+            PhysicManager::getInstance()->getWorld()->clearForces();
 
         open();
         setFocus();
@@ -138,7 +139,7 @@ namespace ige::creator
     {
         m_bIsPlaying = false;
         close();
-        Editor::getCanvas()->getEditorScene()->onCameraChanged(Editor::getSceneManager()->getCurrentScene()->getActiveCamera());
+
         Editor::getCanvas()->getEditorScene()->open();
         Editor::getCanvas()->getEditorScene()->setFocus();
     }

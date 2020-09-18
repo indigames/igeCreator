@@ -32,10 +32,12 @@ namespace ige::creator
         virtual void _drawImpl() override;
 
     protected:
+        //! Rendering FBO
         Texture* m_rtTexture = nullptr;
         RenderTarget* m_fbo = nullptr;
         std::shared_ptr<Image> m_imageWidget = nullptr;
 
+        //! Cached states
         bool m_bInitialized = false;
         bool m_bIsPlaying = false;
         bool m_bNeedResize = false;

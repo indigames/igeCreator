@@ -1194,7 +1194,7 @@ namespace ige::creator
         removeAllWidgets();
     }
 
-    void Inspector::setTargetObject(std::shared_ptr<SceneObject> obj)
+    void Inspector::setTargetObject(const std::shared_ptr<SceneObject>& obj)
     {
         if (m_targetObject != obj)
         {
