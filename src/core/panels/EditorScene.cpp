@@ -109,6 +109,8 @@ namespace ige::creator
 
                 ShapeDrawer::initialize();
 
+                SceneManager::getInstance()->setIsEditor(true);
+
                 m_bIsInitialized = true;
             }
         }

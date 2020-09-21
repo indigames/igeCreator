@@ -55,12 +55,11 @@ namespace ige::creator
         auto fileMenu = createWidget<Menu>("File");
         fileMenu->createWidget<MenuItem>("New Scene", "CTRL + N")->getOnClickEvent().addListener([this](auto widget) {            
             TaskManager::getInstance()->addTask([](){
-                auto scene = Editor::getCurrentScene();
-                if (scene) Editor::getSceneManager()->unloadScene(scene);
-                scene = nullptr;
-
                 Editor::getInstance()->setSelectedObject(-1);
                 Editor::getCanvas()->getEditorScene()->clear();
+
+                auto scene = Editor::getCurrentScene();
+                if (scene) Editor::getSceneManager()->unloadScene(scene);
                 scene = Editor::getSceneManager()->createScene("New scene");
                 Editor::setCurrentScene(scene);
             });

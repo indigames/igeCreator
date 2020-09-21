@@ -30,6 +30,7 @@ namespace ige::creator
     void GameScene::clear()
     {   
         m_imageWidget = nullptr;
+        m_bInitialized = false;
        
         removeAllWidgets();
 
@@ -63,6 +64,8 @@ namespace ige::creator
                     m_bNeedResize = (currSize.x != size.x || currSize.y != size.y);
                 });
 
+                SceneManager::getInstance()->setIsEditor(false);
+
                 m_bInitialized = true;
             }
         }
@@ -86,7 +89,7 @@ namespace ige::creator
             m_fbo->Resize(size.x, size.y);
             m_imageWidget->setSize(size);
 
-            if (Editor::getSceneManager()->getCurrentScene() \
+            if (Editor::getSceneManager()->getCurrentScene()
                 && Editor::getSceneManager()->getCurrentScene()->getActiveCamera())
             {
                 Editor::getSceneManager()->getCurrentScene()->getActiveCamera()->setAspectRatio(size.x / size.y);
@@ -140,7 +143,9 @@ namespace ige::creator
         m_bIsPlaying = false;
         close();
 
+        SceneManager::getInstance()->setIsEditor(true);
         Editor::getCanvas()->getEditorScene()->open();
         Editor::getCanvas()->getEditorScene()->setFocus();
+        clear();
     }
 }
