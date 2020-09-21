@@ -269,8 +269,13 @@ namespace ige::creator
             // Render scene
             m_currShowcase->Render();
 
-            // Render physic debug
+            // Render debug context
             ShapeDrawer::setViewProjectionMatrix(renderContext->GetRenderViewProjectionMatrix());
+
+            // Render bounding box
+            renderBoundingBox();
+
+            // Render physic debug
             renderPhysicDebug();
 
             renderContext->EndScene();
@@ -282,6 +287,35 @@ namespace ige::creator
         Panel::_drawImpl();
     }
 
+    void EditorScene::renderBoundingBox()
+    {
+        auto target = Editor::getInstance()->getSelectedObject();
+        if (target == nullptr)
+            return;
+                
+        auto transform = target->getTransform(); 
+        auto position = transform->getWorldPosition() + transform->getCenter();
+
+        auto min = transform->getAabbMin();
+        auto max = transform->getAabbMax();
+
+        auto colliderSize = (min.Abs() + max.Abs()) * 0.5f;
+        Vec3 halfSize = { colliderSize[0], colliderSize[1], colliderSize[2] };
+
+        ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], -halfSize[2] }, position + Vec3{ -halfSize[0], -halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
+        ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], -halfSize[2] }, position + Vec3{ -halfSize[0], +halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
+        ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], -halfSize[2] }, position + Vec3{ -halfSize[0], +halfSize[1], -halfSize[2] }, { 1.f, 0.f, 0.f });
+        ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], +halfSize[2] }, position + Vec3{ -halfSize[0], +halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
+        ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], -halfSize[1], -halfSize[2] }, position + Vec3{ +halfSize[0], -halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
+        ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], +halfSize[1], -halfSize[2] }, position + Vec3{ +halfSize[0], +halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
+        ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], -halfSize[1], -halfSize[2] }, position + Vec3{ +halfSize[0], +halfSize[1], -halfSize[2] }, { 1.f, 0.f, 0.f });
+        ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], -halfSize[1], +halfSize[2] }, position + Vec3{ +halfSize[0], +halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
+        ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], -halfSize[2] }, position + Vec3{ +halfSize[0], -halfSize[1], -halfSize[2] }, { 1.f, 0.f, 0.f });
+        ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], -halfSize[2] }, position + Vec3{ +halfSize[0], +halfSize[1], -halfSize[2] }, { 1.f, 0.f, 0.f });
+        ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], +halfSize[2] }, position + Vec3{ +halfSize[0], -halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
+        ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], +halfSize[2] }, position + Vec3{ +halfSize[0], +halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
+    }
+
     void EditorScene::renderPhysicDebug()
     {
         if (!isOpened())
@@ -291,9 +325,13 @@ namespace ige::creator
         if (target == nullptr)
             return;
 
+        auto physicComp = target->getComponent<PhysicBase>();
+        if (physicComp == nullptr)
+            return;
+        
         auto transform = target->getTransform();
         auto rotation = transform->getWorldRotation();
-        auto position = transform->getWorldPosition();
+        auto position = transform->getWorldPosition() + physicComp->getPositionOffset();
         auto scale = transform->getWorldScale();
 
         /* Draw the box collider if any */

@@ -36,6 +36,7 @@ namespace ige::creator
         virtual void _drawImpl() override;
 
         void renderPhysicDebug();
+        void renderBoundingBox();
         void updateCameraPosition();
 
         //! Scene FBO

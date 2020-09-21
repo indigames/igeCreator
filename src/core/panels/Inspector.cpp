@@ -1106,6 +1106,12 @@ namespace ige::creator
             auto physicComp = m_targetObject->getComponent<PhysicBase>();
             physicComp->setAngularFactor({ val[0], val[1], val[2] });
         });
+
+        std::array posOffset = { physicComp->getPositionOffset()[0], physicComp->getPositionOffset()[1], physicComp->getPositionOffset()[2] };
+        m_physicGroup->createWidget<Drag<float, 3>>("Position Offset", ImGuiDataType_Float, posOffset)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicBase>();
+            physicComp->setPositionOffset({ val[0], val[1], val[2] });
+        });
     }
 
     //! Draw PhysicBox component
