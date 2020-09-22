@@ -120,7 +120,14 @@ namespace ige::creator
     {
         if (obj == nullptr)
         {
-            m_currShowcase = nullptr;
+            if (m_currShowcase)
+            {
+                if(m_grid2D)
+                    m_currShowcase->Remove(m_grid2D);
+                if(m_grid3D)
+                    m_currShowcase->Remove(m_grid3D);
+                m_currShowcase = nullptr;
+            }
             return;
         }
         
