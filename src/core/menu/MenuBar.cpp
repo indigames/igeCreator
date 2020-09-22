@@ -70,11 +70,11 @@ namespace ige::creator
             if (!selectedFiles.empty() && !selectedFiles[0].empty())
             {
                 TaskManager::getInstance()->addTask([selectedFiles](){
+                    Editor::getInstance()->setSelectedObject(-1);
+
                     auto scene = Editor::getCurrentScene();
                     if (scene) Editor::getSceneManager()->unloadScene(scene);
                     scene = nullptr;
-
-                    Editor::getInstance()->setSelectedObject(-1);
                     Editor::getCanvas()->getHierarchy()->clear();
                     Editor::getCanvas()->getHierarchy()->initialize();
                     Editor::getCanvas()->getEditorScene()->clear();

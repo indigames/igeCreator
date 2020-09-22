@@ -122,25 +122,25 @@ namespace ige::creator
         {
             if (m_currShowcase)
             {
-                if(m_grid2D)
+                if (m_currCamera == m_2dCamera)
                     m_currShowcase->Remove(m_grid2D);
-                if(m_grid3D)
+                if (m_currCamera == m_3dCamera)
                     m_currShowcase->Remove(m_grid3D);
-                m_currShowcase = nullptr;
             }
+            m_currShowcase = nullptr;
             return;
         }
-        
-        m_currShowcase = obj->getShowcase();
 
         if (obj->isGUIObject())
         {
-            if (m_currCamera != m_2dCamera)
+            if (m_currShowcase == nullptr || m_currCamera != m_2dCamera)
             {
-                m_currCamera = m_2dCamera;
-                obj->getShowcase()->Remove(m_grid3D);
-                obj->getShowcase()->Add(m_grid2D);
+                if(m_currShowcase)
+                    m_currShowcase->Remove(m_grid3D);
+                m_currShowcase = obj->getShowcase();
+                m_currShowcase->Add(m_grid2D);
 
+                m_currCamera = m_2dCamera;
                 auto canvas = obj->getRoot()->getComponent<ige::scene::Canvas>();
                 if (canvas)
                 {
@@ -158,14 +158,15 @@ namespace ige::creator
         }
         else
         {
-            if (m_currCamera != m_3dCamera)
+            if (m_currShowcase == nullptr || m_currCamera != m_3dCamera)
             {
-                m_currCamera = m_3dCamera;
-
-                obj->getShowcase()->Remove(m_grid2D);
-                obj->getShowcase()->Add(m_grid3D);
+                if (m_currShowcase)
+                    m_currShowcase->Remove(m_grid2D);
+                m_currShowcase = obj->getShowcase();
+                m_currShowcase->Add(m_grid3D);
 
                 auto size = getSize();
+                m_currCamera = m_3dCamera;
                 m_currCamera->SetAspectRate(size.x / size.y);
             }
         }

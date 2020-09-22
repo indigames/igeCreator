@@ -123,12 +123,12 @@ namespace ige::creator
             // Set previous object as not selected
             if(m_selectedObject) m_selectedObject->setSelected(false);
 
-            m_selectedObject = obj;
+            // Notify the views
+            if (obj) obj->setSelected(true);
+            if (m_canvas) m_canvas->setTargetObject(obj);
 
             // Set current one as selected
-            if (m_selectedObject) m_selectedObject->setSelected(true);
-
-            if(m_canvas) m_canvas->setTargetObject(getSelectedObject());
+            m_selectedObject = obj;
         }
     }
 
