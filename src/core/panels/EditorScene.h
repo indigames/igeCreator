@@ -35,8 +35,16 @@ namespace ige::creator
         virtual void initialize() override;
         virtual void _drawImpl() override;
 
-        void renderPhysicDebug();
+        //! Render bouding box
         void renderBoundingBox();
+
+        //! Render physic shape
+        void renderPhysicDebug();
+
+        //! Render camera frustum
+        void renderCameraFrustum();
+
+        //! Camera movement with mouse
         void updateCameraPosition();
 
         //! Scene FBO

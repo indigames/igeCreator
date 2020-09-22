@@ -278,6 +278,9 @@ namespace ige::creator
             // Render physic debug
             renderPhysicDebug();
 
+            // Render camera frustum
+            renderCameraFrustum();
+
             renderContext->EndScene();
         }
     }
@@ -398,6 +401,79 @@ namespace ige::creator
             ShapeDrawer::drawLine(position + rotation * (Vec3{ 0.f, -halfHeight, -radius }), position + rotation * (Vec3{ 0.f, +halfHeight, -radius }));
             ShapeDrawer::drawLine(position + rotation * (Vec3{ 0.f, -halfHeight, radius }), position + rotation * (Vec3{ 0.f, +halfHeight, radius }));
         }
+    }
+
+    //! Render camera frustum
+    void EditorScene::renderCameraFrustum()
+    {
+        if (!isOpened())
+            return;
+
+        auto target = Editor::getInstance()->getSelectedObject();
+        if (target == nullptr)
+            return;
+
+        auto camera = target->getComponent<CameraComponent>();
+        if (camera == nullptr)
+            return;
+
+        auto transform = target->getTransform();
+        auto cameraPos = transform->getWorldPosition();
+        auto cameraRotation = transform->getWorldRotation();
+        auto cameraForward = transform->getWorldForward().Negative();
+
+        Mat4 proj;
+        camera->getProjectionMatrix(proj);
+        proj = proj.Transpose();
+
+        auto f_near = camera->getNearPlane();
+        auto f_far = camera->getFarPlane();
+
+        const auto nLeft = f_near * (proj.P()[8] - 1.0f) / proj.P()[0];
+        const auto nRight = f_near * (1.0f + proj.P()[8]) / proj.P()[0];
+        const auto nTop = f_near * (1.0f + proj.P()[9]) / proj.P()[5];
+        const auto nBottom = f_near * (proj.P()[9] - 1.0f) / proj.P()[5];
+
+        const auto fLeft = f_far * (proj.P()[8] - 1.0f) / proj.P()[0];
+        const auto fRight = f_far * (1.0f + proj.P()[8]) / proj.P()[0];
+        const auto fTop = f_far * (1.0f + proj.P()[9]) / proj.P()[5];
+        const auto fBottom = f_far * (proj.P()[9] - 1.0f) / proj.P()[5];
+
+        auto a = cameraRotation * Vec3{ nLeft, nTop, 0 };
+        auto b = cameraRotation * Vec3{ nRight, nTop, 0 };
+        auto c = cameraRotation * Vec3{ nLeft, nBottom, 0 };
+        auto d = cameraRotation * Vec3{ nRight, nBottom, 0 };
+        auto e = cameraRotation * Vec3{ fLeft, fTop, 0 };
+        auto f = cameraRotation * Vec3{ fRight, fTop, 0 };
+        auto g = cameraRotation * Vec3{ fLeft, fBottom, 0 };
+        auto h = cameraRotation * Vec3{ fRight, fBottom, 0 };
+
+        // Convenient lambda to draw a frustum line
+        auto draw = [&](const Vec3& startPos, const Vec3& endPos, const float planeDistance)
+        {
+            auto offset = cameraPos + cameraForward * planeDistance;
+            auto start = offset + startPos;
+            auto end = offset + endPos;
+            ShapeDrawer::drawLine(start, end, {1.f, 1.f, 1.f});
+        };
+
+        // Draw near plane
+        draw(a, b, f_near);
+        draw(b, d, f_near);
+        draw(d, c, f_near);
+        draw(c, a, f_near);
+
+        // Draw far plane
+        draw(e, f, f_far);
+        draw(f, h, f_far);
+        draw(h, g, f_far);
+        draw(g, e, f_far);
+
+        // Draw lines between near and far planes
+        draw(a + cameraForward * f_near, e + cameraForward * f_far, 0);
+        draw(b + cameraForward * f_near, f + cameraForward * f_far, 0);
+        draw(c + cameraForward * f_near, g + cameraForward * f_far, 0);
+        draw(d + cameraForward * f_near, h + cameraForward * f_far, 0);
     }
 
     void EditorScene::updateCameraPosition()
