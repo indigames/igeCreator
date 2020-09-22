@@ -11,6 +11,10 @@
 #include <array>
 #include <string>
 
+#ifdef WIN32
+#  include <window.h>
+#endif
+
 namespace ImGui
 {
     void RenderFrameEx(ImVec2 p_min, ImVec2 p_max, bool border, float rounding, float thickness)
@@ -386,6 +390,7 @@ namespace ige::creator
             double_clicked,
             renamed,
             deleted,
+            opened,
         };
 
         bool is_popup_opened = false;
@@ -455,15 +460,21 @@ namespace ige::creator
         {
             is_popup_opened = true;
 
-            if (ImGui::MenuItem("RENAME", "F2"))
+            if (ImGui::MenuItem("Rename", "F2"))
             {
                 open_rename_menu = true;
                 ImGui::CloseCurrentPopup();
             }
 
-            if (ImGui::MenuItem("DELETE", "DEL"))
+            if (ImGui::MenuItem("Delete", "DEL"))
             {
                 action = entry_action::deleted;
+                ImGui::CloseCurrentPopup();
+            }
+
+            if (ImGui::MenuItem("Open", "Ctrl + O"))
+            {
+                action = entry_action::opened;
                 ImGui::CloseCurrentPopup();
             }
             ImGui::EndPopup();
@@ -543,6 +554,16 @@ namespace ige::creator
             {
                 on_delete();
             }
+        }
+        break;
+
+        case entry_action::opened:
+        {
+#ifdef WIN32
+            PVOID OldValue = nullptr;
+            Wow64DisableWow64FsRedirection(&OldValue);
+            ShellExecuteA(NULL, "open", absolute_path.string().c_str(), NULL, NULL, SW_RESTORE);
+#endif //  WIN32
         }
         break;
 
