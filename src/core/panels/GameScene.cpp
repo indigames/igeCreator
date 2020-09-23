@@ -129,17 +129,20 @@ namespace ige::creator
     {
         m_bIsPlaying = true;
 
-        auto path = SceneManager::getInstance()->getCurrentScene()->getPath();
-        if (path.empty())
+        if (SceneManager::getInstance()->getCurrentScene())
         {
-            path = SaveFileDialog("Save", ".", { "json", "*.json" }).result();
-            SceneManager::getInstance()->getCurrentScene()->setPath(path);
-        }
+            auto path = SceneManager::getInstance()->getCurrentScene()->getPath();
+            if (path.empty())
+            {
+                path = SaveFileDialog("Save", ".", { "json", "*.json" }).result();
+                SceneManager::getInstance()->getCurrentScene()->setPath(path);
+            }
 
-        SceneManager::getInstance()->saveScene(path);
-        Editor::getCanvas()->getEditorScene()->close();
-        if(PhysicManager::getInstance()->getWorld())
-            PhysicManager::getInstance()->getWorld()->clearForces();
+            SceneManager::getInstance()->saveScene(path);
+            Editor::getCanvas()->getEditorScene()->close();
+            if (PhysicManager::getInstance()->getWorld())
+                PhysicManager::getInstance()->getWorld()->clearForces();
+        }
 
         open();
         setFocus();
@@ -154,16 +157,22 @@ namespace ige::creator
     {
         m_bIsPlaying = false;
         close();
+        clear();
 
         SceneManager::getInstance()->setIsEditor(true);
         Editor::getCanvas()->getEditorScene()->open();
         Editor::getCanvas()->getEditorScene()->setFocus();
-        clear();
 
-        Editor::getInstance()->setSelectedObject(-1);
-        Editor::getCanvas()->getHierarchy()->clear();
-        Editor::getCanvas()->getHierarchy()->initialize();
-        SceneManager::getInstance()->reloadScene();
-        Editor::getInstance()->setSelectedObject(0);
+        if (SceneManager::getInstance()->getCurrentScene())
+        {
+            auto& selectedObj = Editor::getInstance()->getSelectedObject();
+            auto selectedId = selectedObj ? selectedObj->getId() : -1;
+
+            Editor::getInstance()->setSelectedObject(-1);
+            Editor::getCanvas()->getHierarchy()->clear();
+            Editor::getCanvas()->getHierarchy()->initialize();
+            SceneManager::getInstance()->reloadScene();
+            Editor::getInstance()->setSelectedObject(selectedId);
+        }        
     }
 }

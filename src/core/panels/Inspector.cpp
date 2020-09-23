@@ -575,6 +575,9 @@ namespace ige::creator
                     for (auto j = 0; j < currMat->numParams; j++)
                     {
                         auto info = RenderContext::Instance().GetShaderParameterInfoByHash(currMat->params[j].hash);
+                        if (!info)
+                            continue;
+
                         auto infoName = info->name;
 
                         if ((currMat->params[j].type == ParamTypeFloat4))
