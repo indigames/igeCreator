@@ -13,7 +13,19 @@ using namespace ige::creator;
 
 extern std::shared_ptr<Application> gApp = nullptr;
 
+#ifdef _DEBUG
+void CreateConsole(void) {
+	FILE* fp;
+	AllocConsole();
+	freopen_s(&fp, "CONOUT$", "w", stdout);
+	freopen_s(&fp, "CONOUT$", "w", stderr);
+}
+#endif
+
 int main(void* data) {
+#ifdef _DEBUG
+	CreateConsole();
+#endif
 	FileIO::Instance().SetRoot(".");
 
 	// Create window
