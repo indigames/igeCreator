@@ -5,6 +5,9 @@
 #include "core/widgets/Image.h"
 #include "core/Editor.h"
 #include "core/Canvas.h"
+#include "core/panels/Hierarchy.h"
+#include "core/panels/EditorScene.h"
+#include "core/dialog/SaveFileDialog.h"
 
 #include <utils/GraphicsHelper.h>
 #include <scene/Scene.h>
@@ -125,6 +128,15 @@ namespace ige::creator
     void GameScene::play()
     {
         m_bIsPlaying = true;
+
+        auto path = SceneManager::getInstance()->getCurrentScene()->getPath();
+        if (path.empty())
+        {
+            path = SaveFileDialog("Save", ".", { "json", "*.json" }).result();
+            SceneManager::getInstance()->getCurrentScene()->setPath(path);
+        }
+
+        SceneManager::getInstance()->saveScene(path);
         Editor::getCanvas()->getEditorScene()->close();
         if(PhysicManager::getInstance()->getWorld())
             PhysicManager::getInstance()->getWorld()->clearForces();
@@ -147,5 +159,11 @@ namespace ige::creator
         Editor::getCanvas()->getEditorScene()->open();
         Editor::getCanvas()->getEditorScene()->setFocus();
         clear();
+
+        Editor::getInstance()->setSelectedObject(-1);
+        Editor::getCanvas()->getHierarchy()->clear();
+        Editor::getCanvas()->getHierarchy()->initialize();
+        SceneManager::getInstance()->reloadScene();
+        Editor::getInstance()->setSelectedObject(0);
     }
 }
