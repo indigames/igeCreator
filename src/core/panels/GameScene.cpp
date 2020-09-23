@@ -138,6 +138,7 @@ namespace ige::creator
                 SceneManager::getInstance()->getCurrentScene()->setPath(path);
             }
 
+            Editor::getInstance()->setSelectedObject(-1);
             SceneManager::getInstance()->saveScene(path);
             Editor::getCanvas()->getEditorScene()->close();
             if (PhysicManager::getInstance()->getWorld())

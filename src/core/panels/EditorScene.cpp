@@ -118,6 +118,9 @@ namespace ige::creator
 
     void EditorScene::setTargetObject(const std::shared_ptr<SceneObject>& obj)
     {
+        if (!isOpened())
+            return;
+
         if (obj == nullptr)
         {
             if (m_currShowcase)
