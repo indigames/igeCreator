@@ -78,10 +78,10 @@ namespace ige::creator
         auto columns = m_headerGroup->createWidget<Columns<2>>();
         columns->createWidget<TextField>("ID", std::to_string(m_targetObject->getId()).c_str(), true);
         columns->createWidget<CheckBox>("Active", m_targetObject->isActive())->getOnDataChangedEvent().addListener([this](bool active) {
-            m_targetObject->setActive(active);
+            if(m_targetObject) m_targetObject->setActive(active);
         });
         m_headerGroup->createWidget<TextField>("Name", m_targetObject->getName().c_str())->getOnDataChangedEvent().addListener([this](auto name) {
-            m_targetObject->setName(name);
+            if (m_targetObject) m_targetObject->setName(name);
         });
 
         // Create component selection

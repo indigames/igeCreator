@@ -1,5 +1,8 @@
 #include <imgui.h>
 
+#include <filesystem>
+namespace fs = std::filesystem;
+
 #include "core/panels/GameScene.h"
 #include "core/panels/EditorScene.h"
 #include "core/widgets/Image.h"
@@ -131,13 +134,9 @@ namespace ige::creator
 
         if (SceneManager::getInstance()->getCurrentScene())
         {
-            auto path = SceneManager::getInstance()->getCurrentScene()->getPath();
-            if (path.empty())
-            {
-                path = SaveFileDialog("Save", ".", { "json", "*.json" }).result();
-                SceneManager::getInstance()->getCurrentScene()->setPath(path);
-            }
-
+            auto path = SceneManager::getInstance()->getCurrentScene()->getName() + "_tmp";
+            auto& selectedObj = Editor::getInstance()->getSelectedObject();
+            m_lastObjectId = selectedObj ? selectedObj->getId() : -1;
             Editor::getInstance()->setSelectedObject(-1);
             SceneManager::getInstance()->saveScene(path);
             Editor::getCanvas()->getEditorScene()->close();
@@ -166,14 +165,20 @@ namespace ige::creator
 
         if (SceneManager::getInstance()->getCurrentScene())
         {
-            auto& selectedObj = Editor::getInstance()->getSelectedObject();
-            auto selectedId = selectedObj ? selectedObj->getId() : -1;
-
+            auto name = SceneManager::getInstance()->getCurrentScene()->getName();
             Editor::getInstance()->setSelectedObject(-1);
             Editor::getCanvas()->getHierarchy()->clear();
             Editor::getCanvas()->getHierarchy()->initialize();
-            SceneManager::getInstance()->reloadScene();
-            Editor::getInstance()->setSelectedObject(selectedId);
-        }        
+            SceneManager::getInstance()->unloadScene(name);
+            SceneManager::getInstance()->loadScene(name + "_tmp");
+            Editor::getInstance()->setSelectedObject(m_lastObjectId);
+            m_lastObjectId = -1;
+
+            auto fsPath = fs::path(name + "_tmp");
+            auto ext = fsPath.extension();
+            if (ext.string() != ".json")
+                fsPath = fsPath.replace_extension(".json");
+            fs::remove(fsPath);
+        }
     }
 }
