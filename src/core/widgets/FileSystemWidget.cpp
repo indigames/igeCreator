@@ -12,14 +12,14 @@
 #include <string>
 
 #ifdef WIN32
-#  include <window.h>
+#include <window.h>
 #endif
 
 namespace ImGui
 {
     void RenderFrameEx(ImVec2 p_min, ImVec2 p_max, bool border, float rounding, float thickness)
     {
-        ImGuiWindow* window = GetCurrentWindow();
+        ImGuiWindow *window = GetCurrentWindow();
         if (border)
         {
             window->DrawList->AddRect(p_min + ImVec2(1, 1), p_max + ImVec2(1, 1), GetColorU32(ImGuiCol_BorderShadow), rounding, 15, thickness);
@@ -27,14 +27,14 @@ namespace ImGui
         }
     }
 
-    bool ImageButtonWithAspectAndTextDOWN(ImTextureID texId, const std::string& name,
-        const ImVec2& texture_size, const ImVec2& imageSize,
-        const ImVec2& uv0 = ImVec2(0, 0),
-        const ImVec2& uv1 = ImVec2(1, 1), int frame_padding = -1,
-        const ImVec4& bg_col = ImVec4(0, 0, 0, 0),
-        const ImVec4& tint_col = ImVec4(1, 1, 1, 1))
+    bool ImageButtonWithAspectAndTextDOWN(ImTextureID texId, const std::string &name,
+                                          const ImVec2 &texture_size, const ImVec2 &imageSize,
+                                          const ImVec2 &uv0 = ImVec2(0, 0),
+                                          const ImVec2 &uv1 = ImVec2(1, 1), int frame_padding = -1,
+                                          const ImVec4 &bg_col = ImVec4(0, 0, 0, 0),
+                                          const ImVec4 &tint_col = ImVec4(1, 1, 1, 1))
     {
-        ImGuiWindow* window = GetCurrentWindow();
+        ImGuiWindow *window = GetCurrentWindow();
         if (window->SkipItems)
             return false;
 
@@ -52,9 +52,8 @@ namespace ImGui
             size *= window->FontWindowScale * ImGui::GetIO().FontGlobalScale;
         }
 
-        ImGuiContext& g = *GImGui;
-        const ImGuiStyle& style = g.Style;
-
+        ImGuiContext &g = *GImGui;
+        const ImGuiStyle &style = g.Style;
 
         ImVec2 size_name = ImGui::CalcTextSize(name.c_str(), nullptr, true);
         auto name_sz = name.size();
@@ -77,7 +76,7 @@ namespace ImGui
             }
         }
 
-        const char* label = label_str.c_str();
+        const char *label = label_str.c_str();
 
         const ImGuiID id = window->GetID(label);
         const ImVec2 textSize = ImGui::CalcTextSize(label, NULL, true);
@@ -124,10 +123,10 @@ namespace ImGui
         bool hovered = false, held = false;
         bool pressed = ButtonBehavior(bb, id, &hovered, &held);
 
-        // Render        
+        // Render
         ImU32 col = GetColorU32((hovered && held) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
         RenderFrame(bb.Min, bb.Max, col, true,
-            ImClamp((float)ImMin(padding.x, padding.y), 0.0f, style.FrameRounding));
+                    ImClamp((float)ImMin(padding.x, padding.y), 0.0f, style.FrameRounding));
         if (bg_col.w > 0.0f)
             window->DrawList->AddRectFilled(image_bb.Min, image_bb.Max, GetColorU32(bg_col));
 
@@ -165,7 +164,7 @@ namespace ImGui
         }
         return pressed;
     }
-}
+} // namespace ImGui
 
 namespace ige::creator
 {
@@ -180,7 +179,7 @@ namespace ige::creator
         m_iconTextures["model"] = ResourceCreator::Instance().NewTexture("icon/file_model");
         m_iconTextures["font"] = ResourceCreator::Instance().NewTexture("icon/file_font");
 
-        const auto root_path = fs::current_path();// fs::absolute("");
+        const auto root_path = fs::current_path(); // fs::absolute("");
 
         std::error_code err;
         if (m_root != root_path || !fs::exists(m_cache.get_path(), err))
@@ -189,10 +188,9 @@ namespace ige::creator
             m_cache.set_path(m_root);
         }
     }
-    
-    FileSystemWidget::FileSystemWidget(const fs::directory_cache& cache)
-        : m_cache(cache)
-        , m_isDirty(true)
+
+    FileSystemWidget::FileSystemWidget(const fs::directory_cache &cache)
+        : m_cache(cache), m_isDirty(true)
     {
         const auto root_path = fs::absolute("");
 
@@ -202,11 +200,11 @@ namespace ige::creator
             m_root = root_path;
             m_cache.set_path(m_root);
         }
-    }   
+    }
 
     FileSystemWidget::~FileSystemWidget()
     {
-        for(auto icon : m_iconTextures)
+        for (auto icon : m_iconTextures)
         {
             icon.second->DecReference();
         }
@@ -214,7 +212,7 @@ namespace ige::creator
     }
 
     void FileSystemWidget::_drawImpl()
-    {       
+    {
         if (m_isDirty)
         {
             m_hierarchy.clear();
@@ -224,7 +222,7 @@ namespace ige::creator
         const float size = ImGui::GetFrameHeight() * 5.0f * 0.75;
 
         int id = 0;
-        for (const auto& dir : m_hierarchy)
+        for (const auto &dir : m_hierarchy)
         {
             ImGui::SameLine();
             ImGui::TextColored(ImVec4(1.0, 1.0, 1.0, 1.0), "/");
@@ -246,19 +244,18 @@ namespace ige::creator
 
         fs::path current_path = m_cache.get_path();
 
-        const auto is_selected = [&](const fs::path& _path) {
-
+        const auto is_selected = [&](const fs::path &_path) {
             bool is_selected = m_selection == _path;
             return is_selected;
         };
-        auto process_cache_entry = [&](const auto& cache_entry) {
-            const auto& absolute_path = cache_entry.entry.path();
-            const auto& name = cache_entry.stem;
-            const auto& relative = cache_entry.protocol_path;
-            const auto& file_ext = cache_entry.extension;
-            const std::string& filename = cache_entry.filename;
+        auto process_cache_entry = [&](const auto &cache_entry) {
+            const auto &absolute_path = cache_entry.entry.path();
+            const auto &name = cache_entry.stem;
+            const auto &relative = cache_entry.protocol_path;
+            const auto &file_ext = cache_entry.extension;
+            const std::string &filename = cache_entry.filename;
 
-            const auto on_rename = [&](const std::string& new_name) {
+            const auto on_rename = [&](const std::string &new_name) {
                 fs::path new_absolute_path = absolute_path;
                 new_absolute_path.remove_filename();
                 new_absolute_path /= new_name;
@@ -276,33 +273,16 @@ namespace ige::creator
             const auto on_click = [&]() {
                 m_selection = absolute_path;
             };
-           
+
             if (fs::is_directory(cache_entry.entry.status()))
             {
-                DrawEntry(m_iconTextures["folder"], false, name, absolute_path, is_selected(absolute_path), size,
-                    [&]() // on_click
-                    {
-                        m_selection = absolute_path;
-                    },
-                    [&]() // on_double_click
-                    {
-                        current_path = absolute_path;
-                        m_isDirty = true;
-                    },
-                        [&](const std::string& new_name) // on_rename
-                    {
-                        fs::path new_absolute_path = absolute_path;
-                        new_absolute_path.remove_filename();
-                        new_absolute_path /= new_name;
-                        std::error_code err;
-                        fs::rename(absolute_path, new_absolute_path, err);
-                    },
-                        [&]() // on_delete
-                    {
-                        std::error_code err;
-                        fs::remove_all(absolute_path, err);
-                    });
+                const auto on_double_click = [&]() {
+                    current_path = absolute_path;
+                    m_isDirty = true;
+                };
 
+                DrawEntry(m_iconTextures["folder"], false, name, absolute_path, is_selected(absolute_path),
+                          size, on_click, on_double_click, on_rename, on_delete);
                 return;
             }
             else //file
@@ -325,12 +305,21 @@ namespace ige::creator
                     icon = m_iconTextures["font"];
                 }
 
-                DrawEntry(icon, false, filename, absolute_path, is_selected(absolute_path), size, on_click, nullptr, on_rename, on_delete);
+                const auto on_double_click = [&]() {
+#ifdef WIN32
+                    PVOID OldValue = nullptr;
+                    Wow64DisableWow64FsRedirection(&OldValue);
+                    ShellExecuteA(NULL, "open", absolute_path.string().c_str(), NULL, NULL, SW_RESTORE);
+#endif
+                };
+
+                DrawEntry(icon, false, filename, absolute_path, is_selected(absolute_path),
+                          size, on_click, on_double_click, on_rename, on_delete);
             }
         };
 
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10, 10));
-        const auto& style = ImGui::GetStyle();
+        const auto &style = ImGui::GetStyle();
         auto avail = ImGui::GetContentRegionAvailWidth();
         auto item_size = size + style.ItemSpacing.x;
         auto items_per_line_exact = avail / item_size;
@@ -338,7 +327,7 @@ namespace ige::creator
         auto count = m_cache.size();
         auto items_per_line = std::min(size_t(items_per_line_floor), count);
         auto extra = ((items_per_line_exact - items_per_line_floor) * item_size) /
-            std::max(1.0f, items_per_line_floor - 1);
+                     std::max(1.0f, items_per_line_floor - 1);
         auto lines = std::max<int>(1, int(ImCeil(float(count) / float(items_per_line))));
         ImGuiListClipper clipper(lines);
 
@@ -350,7 +339,7 @@ namespace ige::creator
                 auto end = start + std::min(count - start, items_per_line);
                 for (size_t j = start; j < end; ++j)
                 {
-                    const auto& cache_entry = m_cache[j];
+                    const auto &cache_entry = m_cache[j];
 
                     ImGui::PushID(int(j));
                     process_cache_entry(cache_entry);
@@ -368,7 +357,7 @@ namespace ige::creator
         SetCachePath(current_path);
     }
 
-    void FileSystemWidget::SetCachePath(const fs::path& path)
+    void FileSystemWidget::SetCachePath(const fs::path &path)
     {
         if (m_cache.get_path() == path)
         {
@@ -377,11 +366,11 @@ namespace ige::creator
         m_cache.set_path(path);
     }
 
-    bool FileSystemWidget::DrawEntry(pyxieTexture* icon, bool is_loading, const std::string& name,
-        const fs::path& absolute_path, bool is_selected, const float size,
-        const std::function<void()>& on_click, const std::function<void()>& on_double_click,
-        const std::function<void(const std::string&)>& on_rename,
-        const std::function<void()>& on_delete)
+    bool FileSystemWidget::DrawEntry(pyxieTexture *icon, bool is_loading, const std::string &name,
+                                     const fs::path &absolute_path, bool is_selected, const float size,
+                                     const std::function<void()> &on_click, const std::function<void()> &on_double_click,
+                                     const std::function<void(const std::string &)> &on_rename,
+                                     const std::function<void()> &on_delete)
     {
         enum class entry_action
         {
@@ -389,8 +378,7 @@ namespace ige::creator
             clicked,
             double_clicked,
             renamed,
-            deleted,
-            opened,
+            deleted
         };
 
         bool is_popup_opened = false;
@@ -412,11 +400,11 @@ namespace ige::creator
             }
         }
 
-        ImVec2 item_size = { size, size };
+        ImVec2 item_size = {size, size};
         ImVec2 texture_size = item_size;
 
-        static const ImVec2 uv0 = { 0.0f, 1.0f };
-        static const ImVec2 uv1 = { 1.0f, 0.0f };
+        static const ImVec2 uv0 = {0.0f, 1.0f};
+        static const ImVec2 uv1 = {1.0f, 0.0f};
 
         auto col = ImGui::GetStyle().Colors[ImGuiCol_WindowBg];
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(col.x, col.y, col.z, 0.44f));
@@ -460,6 +448,12 @@ namespace ige::creator
         {
             is_popup_opened = true;
 
+            if (ImGui::MenuItem("Open", "Ctrl + O"))
+            {
+                action = entry_action::double_clicked;
+                ImGui::CloseCurrentPopup();
+            }
+
             if (ImGui::MenuItem("Rename", "F2"))
             {
                 open_rename_menu = true;
@@ -472,11 +466,6 @@ namespace ige::creator
                 ImGui::CloseCurrentPopup();
             }
 
-            if (ImGui::MenuItem("Open", "Ctrl + O"))
-            {
-                action = entry_action::opened;
-                ImGui::CloseCurrentPopup();
-            }
             ImGui::EndPopup();
         }
 
@@ -495,7 +484,7 @@ namespace ige::creator
             }
             ImGui::PushItemWidth(150.0f);
             if (ImGui::InputText("##NAME", input_buff.data(), input_buff.size(),
-                ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll))
+                                 ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll))
             {
                 action = entry_action::renamed;
                 ImGui::CloseCurrentPopup();
@@ -557,16 +546,6 @@ namespace ige::creator
         }
         break;
 
-        case entry_action::opened:
-        {
-#ifdef WIN32
-            PVOID OldValue = nullptr;
-            Wow64DisableWow64FsRedirection(&OldValue);
-            ShellExecuteA(NULL, "open", absolute_path.string().c_str(), NULL, NULL, SW_RESTORE);
-#endif //  WIN32
-        }
-        break;
-
         default:
             break;
         }
@@ -580,7 +559,7 @@ namespace ige::creator
         return is_popup_opened;
     }
 
-    bool FileSystemWidget::ProcessDragDropSource(pyxieTexture* preview, const fs::path& absolute_path)
+    bool FileSystemWidget::ProcessDragDropSource(pyxieTexture *preview, const fs::path &absolute_path)
     {
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
         {
@@ -600,8 +579,8 @@ namespace ige::creator
         return false;
     }
 
-    void FileSystemWidget::ProcessDragDropTarget(const fs::path& absolute_path)
+    void FileSystemWidget::ProcessDragDropTarget(const fs::path &absolute_path)
     {
         // TODO : prefab
     }
-}
+} // namespace ige::creator

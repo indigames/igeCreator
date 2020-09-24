@@ -86,16 +86,43 @@ namespace ige::creator
 
         fileMenu->createWidget<MenuItem>("Save Scene", "CTRL + S")->getOnClickEvent().addListener([this](auto widget) {
             auto selectedFile = SaveFileDialog("Save", ".", { "json", "*.json" }).result();
-                if (!selectedFile.empty())
-                {
-                    TaskManager::getInstance()->addTask([selectedFile, this]() {
-                        Editor::getSceneManager()->saveScene(selectedFile);
-                    });
-                }
-            });
+            if (!selectedFile.empty())
+            {
+                TaskManager::getInstance()->addTask([selectedFile, this]() {
+                    Editor::getSceneManager()->saveScene(selectedFile);
+                });
+            }
+        });
 
         fileMenu->createWidget<MenuItem>("Exit", "ALT + F4")->getOnClickEvent().addListener([](auto widget) {
             Editor::getApp()->quit();
+        });
+
+        auto viewMenu = createWidget<Menu>("View");
+        viewMenu->createWidget<MenuItem>("Fullscreen", "F11")->getOnClickEvent().addListener([](auto widget) {
+            // TODO
+        });
+        viewMenu->createWidget<MenuItem>("Reset")->getOnClickEvent().addListener([](auto widget) {
+            // TODO
+        });
+
+        auto buildMenu = createWidget<Menu>("Build");
+        buildMenu->createWidget<MenuItem>("Windows Desktop", "CTRL + SHIFT + B")->getOnClickEvent().addListener([](auto widget) {
+            // TODO
+        });
+        buildMenu->createWidget<MenuItem>("Android")->getOnClickEvent().addListener([](auto widget) {
+            // TODO
+        });
+        buildMenu->createWidget<MenuItem>("iOS")->getOnClickEvent().addListener([](auto widget) {
+            // TODO
+        });
+
+        auto helpMenu = createWidget<Menu>("Help");
+        helpMenu->createWidget<MenuItem>("Document", "CTRL + F1 ")->getOnClickEvent().addListener([](auto widget) {
+            // TODO
+        });
+        helpMenu->createWidget<MenuItem>("About")->getOnClickEvent().addListener([](auto widget) {
+            // TODO
         });
     }
 }
