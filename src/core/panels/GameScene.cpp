@@ -137,7 +137,7 @@ namespace ige::creator
             auto path = SceneManager::getInstance()->getCurrentScene()->getName() + "_tmp";
             auto& selectedObj = Editor::getInstance()->getSelectedObject();
             m_lastObjectId = selectedObj ? selectedObj->getId() : -1;
-            Editor::getInstance()->setSelectedObject(-1);
+            Editor::getCanvas()->getEditorScene()->setTargetObject(nullptr);
             SceneManager::getInstance()->saveScene(path);
             Editor::getCanvas()->getEditorScene()->close();
             if (PhysicManager::getInstance()->getWorld())
@@ -159,10 +159,6 @@ namespace ige::creator
         close();
         clear();
 
-        SceneManager::getInstance()->setIsEditor(true);
-        Editor::getCanvas()->getEditorScene()->open();
-        Editor::getCanvas()->getEditorScene()->setFocus();
-
         if (SceneManager::getInstance()->getCurrentScene())
         {
             auto name = SceneManager::getInstance()->getCurrentScene()->getName();
@@ -171,6 +167,11 @@ namespace ige::creator
             Editor::getCanvas()->getHierarchy()->initialize();
             SceneManager::getInstance()->unloadScene(name);
             SceneManager::getInstance()->loadScene(name + "_tmp");
+
+            SceneManager::getInstance()->setIsEditor(true);
+            Editor::getCanvas()->getEditorScene()->open();
+            Editor::getCanvas()->getEditorScene()->setFocus();
+
             Editor::getInstance()->setSelectedObject(m_lastObjectId);
             m_lastObjectId = -1;
 
@@ -179,6 +180,12 @@ namespace ige::creator
             if (ext.string() != ".json")
                 fsPath = fsPath.replace_extension(".json");
             fs::remove(fsPath);
+        }
+        else
+        {
+            SceneManager::getInstance()->setIsEditor(true);
+            Editor::getCanvas()->getEditorScene()->open();
+            Editor::getCanvas()->getEditorScene()->setFocus();
         }
     }
 }

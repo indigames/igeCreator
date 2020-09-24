@@ -1069,19 +1069,19 @@ namespace ige::creator
 
         m_physicGroup->createWidget<Separator>();
         std::array mass = { physicComp->getMass() };
-        m_physicGroup->createWidget<Drag<float>>("Mass", ImGuiDataType_Float, mass, 0.1f, 0.1f)->getOnDataChangedEvent().addListener([this](auto& val) {
+        m_physicGroup->createWidget<Drag<float>>("Mass", ImGuiDataType_Float, mass, 0.01f, 0.01f)->getOnDataChangedEvent().addListener([this](auto& val) {
             auto physicComp = m_targetObject->getComponent<PhysicBase>();
             physicComp->setMass(val[0]);
         });
 
         std::array friction = { physicComp->getFriction() };
-        m_physicGroup->createWidget<Drag<float>>("Friction", ImGuiDataType_Float, friction, 0.1f, 0.1f)->getOnDataChangedEvent().addListener([this](auto& val) {
+        m_physicGroup->createWidget<Drag<float>>("Friction", ImGuiDataType_Float, friction, 0.01f, 0.01f)->getOnDataChangedEvent().addListener([this](auto& val) {
             auto physicComp = m_targetObject->getComponent<PhysicBase>();
             physicComp->setFriction(val[0]);
         });
 
         std::array restitution = { physicComp->getRestitution() };
-        m_physicGroup->createWidget<Drag<float>>("Restitution", ImGuiDataType_Float, restitution, 0.1f, 0.1f)->getOnDataChangedEvent().addListener([this](auto& val) {
+        m_physicGroup->createWidget<Drag<float>>("Restitution", ImGuiDataType_Float, restitution, 0.01f, 0.01f)->getOnDataChangedEvent().addListener([this](auto& val) {
             auto physicComp = m_targetObject->getComponent<PhysicBase>();
             physicComp->setRestitution(val[0]);
         });
@@ -1127,7 +1127,7 @@ namespace ige::creator
 
         m_physicGroup->createWidget<Separator>();
         std::array size = { physicComp->getSize().X(), physicComp->getSize().Y(), physicComp->getSize().Z() };
-        m_physicGroup->createWidget<Drag<float, 3>>("Size", ImGuiDataType_Float, size, 0.1f, 0.1f)->getOnDataChangedEvent().addListener([this](auto& val) {
+        m_physicGroup->createWidget<Drag<float, 3>>("Size", ImGuiDataType_Float, size, 0.01f, 0.01f)->getOnDataChangedEvent().addListener([this](auto& val) {
             auto physicComp = m_targetObject->getComponent<PhysicBox>();
             physicComp->setSize({ val[0], val[1], val[2] });
         });
@@ -1143,7 +1143,7 @@ namespace ige::creator
 
         m_physicGroup->createWidget<Separator>();
         std::array radius = { physicComp->getRadius() };
-        m_physicGroup->createWidget<Drag<float>>("Radius", ImGuiDataType_Float, radius, 0.1f, 0.1f)->getOnDataChangedEvent().addListener([this](auto& val) {
+        m_physicGroup->createWidget<Drag<float>>("Radius", ImGuiDataType_Float, radius, 0.01f, 0.01f)->getOnDataChangedEvent().addListener([this](auto& val) {
             auto physicComp = m_targetObject->getComponent<PhysicSphere>();
             physicComp->setRadius(val[0]);
         });
@@ -1159,12 +1159,12 @@ namespace ige::creator
 
         m_physicGroup->createWidget<Separator>();
         std::array height = { physicComp->getHeight() };
-        m_physicGroup->createWidget<Drag<float>>("Height", ImGuiDataType_Float, height, 0.1f, 0.1f)->getOnDataChangedEvent().addListener([this](auto& val) {
+        m_physicGroup->createWidget<Drag<float>>("Height", ImGuiDataType_Float, height, 0.01f, 0.01f)->getOnDataChangedEvent().addListener([this](auto& val) {
             auto physicComp = m_targetObject->getComponent<PhysicCapsule>();
             physicComp->setHeight(val[0]);
         });
         std::array radius = { physicComp->getRadius() };
-        m_physicGroup->createWidget<Drag<float>>("Radius", ImGuiDataType_Float, radius, 0.1f, 0.1f)->getOnDataChangedEvent().addListener([this](auto& val) {
+        m_physicGroup->createWidget<Drag<float>>("Radius", ImGuiDataType_Float, radius, 0.01f, 0.01f)->getOnDataChangedEvent().addListener([this](auto& val) {
             auto physicComp = m_targetObject->getComponent<PhysicCapsule>();
             physicComp->setRadius(val[0]);
         });
