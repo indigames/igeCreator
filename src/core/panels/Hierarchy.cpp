@@ -302,11 +302,8 @@ namespace ige::creator
                         Editor::getSceneManager()->setCurrentScene(scene);
                         Editor::getCurrentScene()->findObjectById(0)->setSelected(true);
                     }
-                    else
-                    {
-                        auto newObj = Editor::getCurrentScene()->createObject("New scene");
-                        newObj->setSelected(true);
-                    }
+                    auto newObj = Editor::getCurrentScene()->createObject("New scene");
+                    newObj->setSelected(true);
                 });
             });
 
