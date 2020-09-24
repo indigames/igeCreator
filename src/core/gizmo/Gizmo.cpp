@@ -75,7 +75,7 @@ namespace ige::creator
         gizmo::Enable(m_bEnabled);
 
         ImGuizmo::SetDrawlist();
-        ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
+        ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y + 25.f, ImGui::GetWindowWidth(), ImGui::GetWindowHeight() - 25.f);
         ImGuizmo::SetID(target->getId());
 
         float delta[16] = { 0.f };
