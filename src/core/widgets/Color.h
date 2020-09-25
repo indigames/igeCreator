@@ -16,6 +16,6 @@ namespace ige::creator
         virtual void _drawImpl() override;
 
         std::string m_label;
-        float* m_value;
+        float* m_value = nullptr;
     };
 }

@@ -1347,6 +1347,7 @@ namespace ige::creator
         if (m_targetObject != obj)
         {
             m_targetObject = obj;
+            clear();
             if (m_targetObject != nullptr)
                 initialize();
         }
