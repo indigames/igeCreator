@@ -90,9 +90,7 @@ class Character(Script):
 
         scene = SceneManager.getInstance().currentScene
         if scene is not None:
-            # print(f"scene: {scene}")
-            camera = scene.activeCamera
-
+            camera = scene.cameras[0]
             if camera is not None:
                 moveVector = vmath.vec3(0.0, 0.0, 0.0)
 

@@ -51,8 +51,6 @@ namespace ige::creator
             m_fbo->DecReference();
             m_fbo = nullptr;
         }
-
-        ResourceManager::Instance().DeleteDaemon();
     }
 
     void GameScene::initialize()
