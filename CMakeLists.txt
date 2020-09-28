@@ -30,6 +30,8 @@ add_subdirectory(${LIBS_DIR}/igeScene  ${CMAKE_BINARY_DIR}/igeScene)
 # Source files
 file(GLOB_RECURSE SRC_FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/pfd/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/pfd/*.cpp"
