@@ -8,6 +8,7 @@
 #include "core/panels/Inspector.h"
 #include "core/panels/EditorScene.h"
 #include "core/task/TaskManager.h"
+#include "core/dialog/MsgBox.h"
 
 #include <scene/SceneManager.h>
 #include <scene/Scene.h>
@@ -147,5 +148,58 @@ namespace ige::creator
     std::shared_ptr<SceneObject>& Editor::getSelectedObject()
     {
         return m_selectedObject;
+    }
+
+    bool Editor::buildPC()
+    {
+        auto buildCmd = [](void*)
+        {
+            pyxie_printf("Building Windows Desktop...");
+            system("cmd.exe /c ..\\scripts\\build-game-pc.bat");
+            pyxie_printf("Building Windows Desktop: DONE!");
+            return 1;
+        };
+
+        auto buildThread = SDL_CreateThreadWithStackSize(buildCmd, "Build_Thread", 32 * 1024 * 1024, (void*)nullptr);
+        SDL_DetachThread(buildThread);
+        return true;
+    }
+
+    bool Editor::buildAndroid()
+    {
+        auto buildCmd = [](void*)
+        {
+            pyxie_printf("Building Android...");
+            system("cmd.exe /c ..\\scripts\\build-game-android.bat");
+            pyxie_printf("Building Android: DONE!");
+            return 1;
+        };
+
+        auto buildThread = SDL_CreateThreadWithStackSize(buildCmd, "Build_Thread", 32 * 1024 * 1024, (void*)nullptr);
+        SDL_DetachThread(buildThread);
+        return true;
+    }
+
+    bool Editor::buildIOS()
+    {
+        pyxie_printf("Build IOS: WIP...");
+        return false;
+    }
+
+    bool Editor::openDocument()
+    {
+#ifdef WIN32
+        ShellExecute(0, 0, "https://indigames.net", 0, 0, SW_SHOW);
+#else
+        system("open https://indigames.net");
+#endif
+        return true;
+    }
+
+    bool Editor::openAbout()
+    {
+        auto msgBox = MsgBox("About", "igeCreator \n Version: 0.0.1 \n ©2020 Indi Games", MsgBox::EBtnLayout::ok, MsgBox::EMsgType::info);
+        while (!msgBox.ready(1000));
+        return true;
     }
 }

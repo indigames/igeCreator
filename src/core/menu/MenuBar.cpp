@@ -95,7 +95,9 @@ namespace ige::creator
         });
 
         fileMenu->createWidget<MenuItem>("Exit", "ALT + F4")->getOnClickEvent().addListener([](auto widget) {
-            Editor::getApp()->quit();
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getApp()->quit();
+            });
         });
 
         auto viewMenu = createWidget<Menu>("View");
@@ -113,21 +115,31 @@ namespace ige::creator
 
         auto buildMenu = createWidget<Menu>("Build");
         buildMenu->createWidget<MenuItem>("Windows Desktop", "CTRL + SHIFT + B")->getOnClickEvent().addListener([](auto widget) {
-            // TODO
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->buildPC();
+            });
         });
         buildMenu->createWidget<MenuItem>("Android")->getOnClickEvent().addListener([](auto widget) {
-            // TODO
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->buildAndroid();
+            });
         });
         buildMenu->createWidget<MenuItem>("iOS")->getOnClickEvent().addListener([](auto widget) {
-            // TODO
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->buildIOS();
+            });
         });
 
         auto helpMenu = createWidget<Menu>("Help");
         helpMenu->createWidget<MenuItem>("Document", "CTRL + F1 ")->getOnClickEvent().addListener([](auto widget) {
-            // TODO
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->openDocument();
+            });
         });
         helpMenu->createWidget<MenuItem>("About")->getOnClickEvent().addListener([](auto widget) {
-            // TODO
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->openAbout();
+            });
         });
     }
 }

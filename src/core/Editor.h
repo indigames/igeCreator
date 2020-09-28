@@ -28,6 +28,13 @@ namespace ige::creator
         void resetLayout();
         void toggleFullScreen();
 
+        bool buildPC();
+        bool buildAndroid();
+        bool buildIOS();
+
+        bool openDocument();
+        bool openAbout();
+
         void registerApp(std::shared_ptr<Application> app) { m_app = app; }
 
         static std::shared_ptr<Application>& getApp() { return getInstance()->m_app; }

@@ -48,6 +48,7 @@ elseif (IOS)
     list(APPEND PYTHON_INCLUDE_DIRS ${LIBS_DIR}/Python/IOS)
 endif ()
 
+add_subdirectory(${LIBS_DIR}/igeScene  ${CMAKE_BINARY_DIR}/igeScene)
 file(GLOB_RECURSE SRC_FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/*.c"

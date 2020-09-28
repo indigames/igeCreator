@@ -26,7 +26,6 @@ set(APP_STYLE STATIC)
 
 add_compile_definitions(EDITOR_MODE=1)
 add_subdirectory(${LIBS_DIR}/igeScene  ${CMAKE_BINARY_DIR}/igeScene)
-add_subdirectory(${LIBS_DIR}/igeGame  ${CMAKE_BINARY_DIR}/igeGame)
 
 # Source files
 file(GLOB_RECURSE SRC_FILES
