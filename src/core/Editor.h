@@ -25,6 +25,9 @@ namespace ige::creator
         virtual void render();        
         static void handleEvent(const void* event);
 
+        void resetLayout();
+        void toggleFullScreen();
+
         void registerApp(std::shared_ptr<Application> app) { m_app = app; }
 
         static std::shared_ptr<Application>& getApp() { return getInstance()->m_app; }

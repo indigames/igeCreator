@@ -94,6 +94,18 @@ namespace ige::creator
         ImGui::StyleColorsDark();
     }
 
+    void Editor::resetLayout()
+    {
+        ImGui::LoadIniSettingsFromDisk("config/layout.ini");
+    }
+
+    void Editor::toggleFullScreen()
+    {
+        auto window = (SDL_Window*)m_app->getAppWindow();
+        bool isFullscreen = SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN;
+        SDL_SetWindowFullscreen(window, isFullscreen ? 0 : SDL_WINDOW_FULLSCREEN);
+    }
+
     bool Editor::handleEventImGUI(const SDL_Event* event)
     {
         return ImGui_ImplSDL2_ProcessEvent(event);

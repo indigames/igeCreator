@@ -100,10 +100,15 @@ namespace ige::creator
 
         auto viewMenu = createWidget<Menu>("View");
         viewMenu->createWidget<MenuItem>("Fullscreen", "F11")->getOnClickEvent().addListener([](auto widget) {
-            // TODO
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->toggleFullScreen();
+            });
         });
+
         viewMenu->createWidget<MenuItem>("Reset")->getOnClickEvent().addListener([](auto widget) {
-            // TODO
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->resetLayout();
+            });
         });
 
         auto buildMenu = createWidget<Menu>("Build");
