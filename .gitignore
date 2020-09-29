@@ -3,3 +3,5 @@ build
 .tmp
 /app/scripts/__pycache__
 app/imgui.ini
+/.env
+/release
