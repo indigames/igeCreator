@@ -97,7 +97,7 @@ namespace ige::creator
 
     void Editor::resetLayout()
     {
-        ImGui::LoadIniSettingsFromDisk("config/layout.ini");
+        ImGui::LoadIniSettingsFromDisk("layout.ini");
     }
 
     void Editor::toggleFullScreen()

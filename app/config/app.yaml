@@ -1,0 +1,74 @@
+App: # Application config
+    Name: igeLauncher # App Name: must not contains space
+    Label: IGE Launcher # App Label: Icon label, can contains space
+    VersionName: '0.0.1' # Version Name (major.minor.build + a-z)
+    VersionCode: 100 # Version Code ([1][0][0][00] <=> [Major][Minor][Build][0 - 24])
+    BundleId: net.indigames.igelauncher # BundleID (iOS/MacOS), Package Name (Android)
+
+Platforms: # Platforms config
+    android:
+        RomDir: rom/android
+        ConfigDir: config/android # Android 'res' folder
+        armeabi-v7a: true
+        arm64-v8a: true
+        x86: true
+        x86_64: true
+        MinSdkVersion: 21
+        TargetSdkVersion: 29
+        ScreenOrientation: portrait
+        Permissions:
+            - android.permission.INTERNET  # Access internet
+            - android.permission.ACCESS_NETWORK_STATE # Access network state
+            - android.permission.ACCESS_WIFI_STATE # Access WIFI state
+            - android.permission.WRITE_EXTERNAL_STORAGE # R/W access to external storage
+            # - android.permission.CAMERA # Camera permission
+            - android.permission.VIBRATE # Vibration permission
+            # - android.permission.BLUETOOTH # Bluetooth permission
+        Features:
+            android.hardware.touchscreen: true # Use touch screen, required
+            # android.hardware.camera: true # Use camera, required
+            # android.hardware.camera.autofocus: false # Use camera auto focus, not required
+    pc:
+        RomDir: rom/pc
+        ConfigDir: ''
+        x64: true
+    ios:
+        RomDir: rom/android
+        ConfigDir: config/ios # iOS's 'Assets' folder
+        arm64: true
+        DeploymentTarget: '11.0'
+        DeviveFamily: 1,2
+        DevelopmentTeamID: R2TWY42MN5
+        CodeSignIdentity: iPhone Distribution
+        ProvisioningProfile: Automatic # use 'Automatic' for development
+    macos:
+        RomDir: rom/pc
+        ConfigDir: ''
+        x64: true
+
+Modules: # Modules config
+    igeAds: false
+    igeAdjust: false
+    igeAppsFlyer: false
+    igeAutoTest: false
+    igeBullet: true
+    igeCamera: false
+    igeDlibExt: false
+    igeEffekseer: false
+    igeFirebase: false
+    igeFirebaseMLKit: false
+    igeGameAnalytics: false
+    igeGamesServices: false
+    igeInAppPurchase: false
+    igeNanoGUI: false
+    igeNotify: false
+    igePAL: false
+    igeScene: true
+    igeSocial: false
+    igeSound: false
+    igeWebview: false
+    Box2D: false
+    Dlib: false
+    IMGUI: true
+    OpenCV: false
+    

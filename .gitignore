@@ -5,3 +5,4 @@ build
 app/imgui.ini
 /.env
 /release
+/app/release
