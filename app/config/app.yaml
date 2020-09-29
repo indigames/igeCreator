@@ -11,8 +11,8 @@ Platforms: # Platforms config
         ConfigDir: config/android # Android 'res' folder
         armeabi-v7a: true
         arm64-v8a: true
-        x86: true
-        x86_64: true
+        x86: false
+        x86_64: false
         MinSdkVersion: 21
         TargetSdkVersion: 29
         ScreenOrientation: portrait
@@ -47,28 +47,27 @@ Platforms: # Platforms config
         x64: true
 
 Modules: # Modules config
-    igeAds: false
-    igeAdjust: false
+    igeAds: true
+    igeAdjust: true
     igeAppsFlyer: false
     igeAutoTest: false
     igeBullet: true
     igeCamera: false
     igeDlibExt: false
-    igeEffekseer: false
-    igeFirebase: false
+    igeEffekseer: true
+    igeFirebase: true
     igeFirebaseMLKit: false
-    igeGameAnalytics: false
-    igeGamesServices: false
+    igeGameAnalytics: true
+    igeGamesServices: true
     igeInAppPurchase: false
     igeNanoGUI: false
-    igeNotify: false
-    igePAL: false
-    igeScene: true
-    igeSocial: false
-    igeSound: false
-    igeWebview: false
+    igeNotify: true
+    igePAL: true
+    igeSocial: true
+    igeSound: true
+    igeWebview: true
     Box2D: false
     Dlib: false
     IMGUI: true
     OpenCV: false
-    
+
