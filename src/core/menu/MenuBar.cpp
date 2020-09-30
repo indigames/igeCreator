@@ -18,7 +18,7 @@ namespace ige::creator
         : Widget(enable), m_name(name)
     {
     }
-    
+
     MenuBar::~MenuBar()
     {
 
@@ -114,7 +114,12 @@ namespace ige::creator
         });
 
         auto buildMenu = createWidget<Menu>("Build");
-        buildMenu->createWidget<MenuItem>("Windows Desktop", "CTRL + SHIFT + B")->getOnClickEvent().addListener([](auto widget) {
+        buildMenu->createWidget<MenuItem>("ROM")->getOnClickEvent().addListener([](auto widget) {
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->buildRom();
+            });
+        });
+        buildMenu->createWidget<MenuItem>("Windows")->getOnClickEvent().addListener([](auto widget) {
             TaskManager::getInstance()->addTask([]() {
                 Editor::getInstance()->buildPC();
             });

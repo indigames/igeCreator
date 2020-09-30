@@ -19,7 +19,7 @@ namespace ige::creator
 {
     Editor::Editor()
     {}
-    
+
     Editor::~Editor()
     {
         setSelectedObject(-1);
@@ -31,7 +31,7 @@ namespace ige::creator
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplSDL2_Shutdown();
         ImGui::DestroyContext();
-    }    
+    }
 
     void Editor::initialize()
     {
@@ -128,7 +128,7 @@ namespace ige::creator
         auto obj = getSceneManager()->getCurrentScene()->findObjectById(objId);
         setSelectedObject(obj);
     }
-    
+
     void Editor::setSelectedObject(std::shared_ptr<SceneObject> obj)
     {
         if (m_selectedObject != obj)
@@ -150,12 +150,27 @@ namespace ige::creator
         return m_selectedObject;
     }
 
+    bool Editor::buildRom()
+    {
+        auto buildCmd = [](void*)
+        {
+            pyxie_printf("Building ROM...");
+            system("cmd.exe /c tools\\build-rom.bat");
+            pyxie_printf("Building ROM: DONE!");
+            return 1;
+        };
+
+        auto buildThread = SDL_CreateThreadWithStackSize(buildCmd, "Build_Thread", 32 * 1024 * 1024, (void*)nullptr);
+        SDL_DetachThread(buildThread);
+        return true;
+    }
+
     bool Editor::buildPC()
     {
         auto buildCmd = [](void*)
         {
             pyxie_printf("Building Windows Desktop...");
-            system("cmd.exe /c ..\\scripts\\build-game-pc.bat");
+            system("cmd.exe /c tools\\build-game-pc.bat");
             pyxie_printf("Building Windows Desktop: DONE!");
             return 1;
         };
@@ -170,7 +185,7 @@ namespace ige::creator
         auto buildCmd = [](void*)
         {
             pyxie_printf("Building Android...");
-            system("cmd.exe /c ..\\scripts\\build-game-android.bat");
+            system("cmd.exe /c tools\\build-game-android.bat");
             pyxie_printf("Building Android: DONE!");
             return 1;
         };

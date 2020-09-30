@@ -19,15 +19,16 @@ namespace ige::creator
     public:
         Editor();
         virtual ~Editor();
-        
+
         virtual void initialize();
         virtual void update(float dt);
-        virtual void render();        
+        virtual void render();
         static void handleEvent(const void* event);
 
         void resetLayout();
         void toggleFullScreen();
 
+        bool buildRom();
         bool buildPC();
         bool buildAndroid();
         bool buildIOS();
