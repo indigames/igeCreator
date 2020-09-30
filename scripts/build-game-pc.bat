@@ -1,56 +1,38 @@
 @echo off
 
-SET LIB_NAME=igeGame
+set CURR_DIR=%CD%
+set PROJECT_DIR=%~dp0..
+set ROM=%PROJECT_DIR%\release\ROM.zip
 
-SET BUILD_DEBUG=0
-
-echo COMPILING ...
-SET PROJECT_DIR=%~dp0..\libs\igeGame
-SET BUILD_DIR=%~dp0..\build\game-pc
-SET OUTPUT_DIR=%~dp0..\app
-
-SET CALL_DIR=%CD%
-
-echo Compiling %LIB_NAME% ...
-
-if not exist %OUTPUT_DIR% (
-    mkdir %OUTPUT_DIR%
+if not exist %ROM% (
+    call %~dp0\build-rom.bat
 )
 
-if not exist %BUILD_DIR% (
-    mkdir %BUILD_DIR%
+SET GAME_BUILDER=%APPDATA%\indigames\igeGameBuilder
+
+C:
+if not exist "%GAME_BUILDER%" (
+    if not exist "%APPDATA%\indigames" (
+        md "%APPDATA%\indigames"
+    )
+    cd "%APPDATA%\indigames"
+    git clone https://github.com/indigames/igeGameBuilder --recursive
 )
 
-cd %PROJECT_DIR%
+cd %GAME_BUILDER%
 
-cd %PROJECT_DIR%
-echo Compiling x64...
-    if not exist %BUILD_DIR%\x64 (
-        mkdir %BUILD_DIR%\x64
-    )
-    echo Generating x64 CMAKE project ...
-    cd %BUILD_DIR%\x64
-    cmake %PROJECT_DIR% -A x64 -DAPP_STYLE=STATIC
-    if %ERRORLEVEL% NEQ 0 goto ERROR
+git checkout master
+git pull
+git submodule update --init --remote
 
-    if [%BUILD_DEBUG%]==[1] (
-        echo Compiling x64 - Debug...
-        cmake --build . --config Debug -- -m
-        if %ERRORLEVEL% NEQ 0 goto ERROR
-        xcopy /q /s /y Debug\*.exe %OUTPUT_DIR%
-    ) else (
-        echo Compiling x64 - Release...
-        cmake --build . --config Release -- -m
-        if %ERRORLEVEL% NEQ 0 goto ERROR
-        xcopy /q /s /y Release\*.exe %OUTPUT_DIR%
-    )
-echo Compiling x64 DONE
+xcopy /q /y %ROM% %GAME_BUILDER%
 
-goto ALL_DONE
+call scripts\build-pc.bat
 
-:ERROR
-    echo ERROR OCCURED DURING COMPILING!
+if not exist %PROJECT_DIR%\release (
+    mkdir %PROJECT_DIR%\release
+)
+xcopy /q /y %GAME_BUILDER%\release\*.zip %PROJECT_DIR%\release
 
-:ALL_DONE
-    cd %CALL_DIR%
-    echo COMPILING DONE!
+%CURR_DIR:~0,2%
+cd %CURR_DIR%
