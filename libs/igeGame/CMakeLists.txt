@@ -23,11 +23,6 @@ if(DEFINED ANDROID_PLATFORM)
         add_compile_options(-Og)
     endif()
 elseif(MSVC)
-    if(${APP_STYLE} MATCHES "SHARED")
-        set(CMAKE_CXX_FLAGS "/MD ${CMAKE_CXX_FLAGS}")
-        set(CMAKE_CXX_FLAGS_RELEASE "/MD /O2 /Ob2 /Zc:inline")
-        set(CMAKE_CXX_FLAGS_DEBUG "/MD /JMC /ZI /Od")
-    endif()
     add_compile_options(/MP)
 elseif(APPLE)
     if(CMAKE_BUILD_TYPE STREQUAL "Release")
@@ -52,7 +47,6 @@ add_subdirectory(${LIBS_DIR}/igeScene  ${CMAKE_BINARY_DIR}/igeScene)
 file(GLOB_RECURSE SRC_FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/*.c"
-    "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
 )
 
@@ -152,17 +146,6 @@ if(MSVC)
         ${LIB_PATH}zlib.${LIB_EXT}
     )
 endif()
-
-set (PYTHON_INCLUDE_DIRS "${LIBS_DIR}/Python/Include")
-if (MSVC)
-    list(APPEND PYTHON_INCLUDE_DIRS "${LIBS_DIR}/Python/PC")
-elseif (OSX)
-    list(APPEND PYTHON_INCLUDE_DIRS "${LIBS_DIR}/Python/Mac")
-elseif (ANDROID)
-    list(APPEND PYTHON_INCLUDE_DIRS "${LIBS_DIR}/Python/Android")
-elseif (IOS)
-    list(APPEND PYTHON_INCLUDE_DIRS "${LIBS_DIR}/Python/IOS")
-endif ()
 
 target_link_libraries(${TARGET_NAME}
     igeScene-static
