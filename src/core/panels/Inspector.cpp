@@ -1163,6 +1163,18 @@ namespace ige::creator
             auto physicComp = m_targetObject->getComponent<PhysicBase>();
             physicComp->setPositionOffset({val[0], val[1], val[2]});
         });
+
+        std::array filterGroup = { physicComp->getCollisionFilterGroup() };
+        m_physicGroup->createWidget<Drag<int>>("Collision Group", ImGuiDataType_S32, filterGroup, 1, -1)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicBase>();
+            physicComp->setCollisionFilterGroup(val[0]);
+        });
+
+        std::array filterMask = { physicComp->getCollisionFilterMask() };
+        m_physicGroup->createWidget<Drag<int>>("Collision Mask", ImGuiDataType_S32, filterMask, 1, -1)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicBase>();
+            physicComp->setCollisionFilterMask(val[0]);
+        });
     }
 
     //! Draw PhysicBox component
