@@ -22,3 +22,8 @@ class Hello(Script):
             print(f'onUpdate, dt = {dt}')
             print(f'owner, name = {self.owner.name}')
             self.updated = True
+
+    def onCollisionStart(self, other):
+        print("onCollisionStart")
+        print(f'Owner: {self.owner}')
+        print(f'Other: {other}')
