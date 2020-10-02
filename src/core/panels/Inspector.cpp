@@ -1096,26 +1096,39 @@ namespace ige::creator
         if (physicComp == nullptr)
             return;
 
-        auto enableCheckBox = m_physicGroup->createWidget<CheckBox>("Enable", physicComp->isEnabled());
-        enableCheckBox->getOnDataChangedEvent().addListener([this](bool val) {
+        auto columns = m_physicGroup->createWidget<Columns<2>>();
+         columns->createWidget<CheckBox>("Enable", physicComp->isEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
             auto physicComp = m_targetObject->getComponent<PhysicBase>();
             physicComp->setEnabled(val);
         });
-        enableCheckBox->setEndOfLine(false);
 
-        auto kineChk = m_physicGroup->createWidget<CheckBox>("Kinematic", physicComp->isKinematic());
-        kineChk->getOnDataChangedEvent().addListener([this](bool val) {
+        columns->createWidget<CheckBox>("Continous", physicComp->isCCD())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto physicComp = m_targetObject->getComponent<PhysicBase>();
+            physicComp->setCCD(val);
+        });
+
+        columns->createWidget<CheckBox>("Kinematic", physicComp->isKinematic())->getOnDataChangedEvent().addListener([this](bool val) {
             auto physicComp = m_targetObject->getComponent<PhysicBase>();
             physicComp->setIsKinematic(val);
         });
-        kineChk->setEndOfLine(false);
 
-        m_physicGroup->createWidget<CheckBox>(" Trigger", physicComp->isTrigger())->getOnDataChangedEvent().addListener([this](bool val) {
+        columns->createWidget<CheckBox>("Trigger", physicComp->isTrigger())->getOnDataChangedEvent().addListener([this](bool val) {
             auto physicComp = m_targetObject->getComponent<PhysicBase>();
             physicComp->setIsTrigger(val);
         });
 
-        m_physicGroup->createWidget<Separator>();
+        std::array filterGroup = { physicComp->getCollisionFilterGroup() };
+        m_physicGroup->createWidget<Drag<int>>("Collision Group", ImGuiDataType_S32, filterGroup, 1, -1)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicBase>();
+            physicComp->setCollisionFilterGroup(val[0]);
+        });
+
+        std::array filterMask = { physicComp->getCollisionFilterMask() };
+        m_physicGroup->createWidget<Drag<int>>("Collision Mask", ImGuiDataType_S32, filterMask, 1, -1)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicBase>();
+            physicComp->setCollisionFilterMask(val[0]);
+        });
+
         std::array mass = {physicComp->getMass()};
         m_physicGroup->createWidget<Drag<float>>("Mass", ImGuiDataType_Float, mass, 0.01f, 0.01f)->getOnDataChangedEvent().addListener([this](auto &val) {
             auto physicComp = m_targetObject->getComponent<PhysicBase>();
@@ -1162,18 +1175,6 @@ namespace ige::creator
         m_physicGroup->createWidget<Drag<float, 3>>("Position Offset", ImGuiDataType_Float, posOffset)->getOnDataChangedEvent().addListener([this](auto &val) {
             auto physicComp = m_targetObject->getComponent<PhysicBase>();
             physicComp->setPositionOffset({val[0], val[1], val[2]});
-        });
-
-        std::array filterGroup = { physicComp->getCollisionFilterGroup() };
-        m_physicGroup->createWidget<Drag<int>>("Collision Group", ImGuiDataType_S32, filterGroup, 1, -1)->getOnDataChangedEvent().addListener([this](auto& val) {
-            auto physicComp = m_targetObject->getComponent<PhysicBase>();
-            physicComp->setCollisionFilterGroup(val[0]);
-        });
-
-        std::array filterMask = { physicComp->getCollisionFilterMask() };
-        m_physicGroup->createWidget<Drag<int>>("Collision Mask", ImGuiDataType_S32, filterMask, 1, -1)->getOnDataChangedEvent().addListener([this](auto& val) {
-            auto physicComp = m_targetObject->getComponent<PhysicBase>();
-            physicComp->setCollisionFilterMask(val[0]);
         });
     }
 
