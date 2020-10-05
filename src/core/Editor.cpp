@@ -13,6 +13,7 @@
 #include <scene/SceneManager.h>
 #include <scene/Scene.h>
 #include <physic/PhysicManager.h>
+#include <audio/AudioManager.h>
 using namespace ige::scene;
 
 namespace ige::creator
@@ -29,6 +30,8 @@ namespace ige::creator
 
         PhysicManager::destroy();
 
+        AudioManager::destroy();
+
         m_app = nullptr;
 
         ImGui_ImplOpenGL3_Shutdown();
@@ -42,6 +45,9 @@ namespace ige::creator
 
         // Create physic instance
         PhysicManager::getInstance()->initialize();
+
+        // Create audio manager
+        AudioManager::getInstance();
 
         m_canvas = std::make_shared<Canvas>();
         m_canvas->setDockable(true);
