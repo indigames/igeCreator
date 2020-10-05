@@ -299,8 +299,15 @@ namespace ige::creator
                     if (Editor::getCurrentScene() == nullptr)
                     {
                         auto scene = Editor::getSceneManager()->createScene("New scene");
-                        Editor::getSceneManager()->setCurrentScene(scene);
-                        Editor::getCurrentScene()->findObjectById(0)->setSelected(true);
+                        if (scene)
+                        {
+                            Editor::getSceneManager()->setCurrentScene(scene);
+                            auto obj = Editor::getCurrentScene()->findObjectById(0);
+                            if (obj)
+                            {
+                                obj->setSelected(true);
+                            }
+                        }
                     }
                     auto newObj = Editor::getCurrentScene()->createObject("New scene");
                     newObj->setSelected(true);

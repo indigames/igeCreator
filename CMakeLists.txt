@@ -130,6 +130,14 @@ target_link_libraries(${TARGET_NAME}
     debug ${LIB_PATH_DEBUG}igeBullet-static.${LIB_EXT}
 )
 
+# igeSound
+set (LIB_PATH ${LIBS_DIR}/igeSound/${PLATFORM_PATH})
+set (LIB_PATH_DEBUG ${LIBS_DIR}/igeSound/${PLATFORM_PATH_DEBUG})
+target_link_libraries(${TARGET_NAME}
+    optimized ${LIB_PATH}igeSound-static.${LIB_EXT}
+    debug ${LIB_PATH_DEBUG}igeSound-static.${LIB_EXT}
+)
+
 # SDL
 set (LIB_PATH ${LIBS_DIR}/SDL/${PLATFORM_PATH})
 target_link_libraries(${TARGET_NAME} ${LIB_PATH}SDL2.${LIB_EXT})
@@ -211,6 +219,8 @@ target_include_directories(${TARGET_NAME} PUBLIC
     ${LIBS_DIR}/stb/include
     ${LIBS_DIR}/igeBullet/include
     ${LIBS_DIR}/igeBullet/include/bullet
+    ${LIBS_DIR}/igeSound/include
+    ${LIBS_DIR}/igeSound/include/ThirdParty/soloud/include
 )
 
 # Python37

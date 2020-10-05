@@ -26,6 +26,9 @@ namespace ige::creator
         m_canvas = nullptr;
 
         SceneManager::destroy();
+
+        PhysicManager::destroy();
+
         m_app = nullptr;
 
         ImGui_ImplOpenGL3_Shutdown();

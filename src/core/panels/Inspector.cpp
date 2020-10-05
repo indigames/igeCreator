@@ -33,6 +33,8 @@
 #include <components/physic/PhysicBox.h>
 #include <components/physic/PhysicSphere.h>
 #include <components/physic/PhysicCapsule.h>
+#include <components/audio/AudioSource.h>
+#include <components/audio/AudioListener.h>
 using namespace ige::scene;
 
 #include <pyxieUtilities.h>
@@ -52,7 +54,9 @@ namespace ige::creator
         UITextField,
         PhysicBox,
         PhysicSphere,
-        PhysicCapsule
+        PhysicCapsule,
+        AudioSource,
+        AudioListener
     };
 
     Inspector::Inspector(const std::string &name, const Panel::Settings &settings)
@@ -117,6 +121,12 @@ namespace ige::creator
         // Script component
         m_createCompCombo->addChoice((int)ComponentType::Script, "Script Component");
 
+        // Audio source
+        m_createCompCombo->addChoice((int)ComponentType::AudioSource, "Audio Source");
+
+        // Audio listener
+        m_createCompCombo->addChoice((int)ComponentType::AudioListener, "Audio Listener");
+
         auto createCompButton = m_headerGroup->createWidget<Button>("Add", ImVec2(64.f, 0.f));
         createCompButton->getOnClickEvent().addListener([this](auto widget) {
             switch (m_createCompCombo->getSelectedIndex())
@@ -153,6 +163,12 @@ namespace ige::creator
                 break;
             case (int)ComponentType::PhysicCapsule:
                 m_targetObject->addComponent<PhysicCapsule>();
+                break;
+            case (int)ComponentType::AudioSource:
+                m_targetObject->addComponent<AudioSource>();
+                break;
+            case (int)ComponentType::AudioListener:
+                m_targetObject->addComponent<AudioListener>();
                 break;
             }
             redraw();
@@ -235,6 +251,16 @@ namespace ige::creator
             {
                 m_physicGroup = header->createWidget<Group>("PhysicGroup", false);
                 drawPhysicCapsule();
+            }
+            else if (component->getName() == "AudioSource")
+            {
+                m_audioSourceGroup = header->createWidget<Group>("AudioSource", false);
+                drawAudioSource();
+            }
+            else if (component->getName() == "AudioListener")
+            {
+                m_audioListenerGroup = header->createWidget<Group>("AudioListener", false);
+                drawAudioListener();
             }
         });
     }
@@ -1234,6 +1260,123 @@ namespace ige::creator
         });
     }
 
+    //! Draw PhysicCapsule component
+    void Inspector::drawAudioSource()
+    {
+        auto audioSourceComp = m_targetObject->getComponent<AudioSource>();
+        if (audioSourceComp == nullptr)
+            return;
+
+        auto columns = m_audioSourceGroup->createWidget<Columns<3>>();
+        columns->createWidget<CheckBox>("Enable", audioSourceComp->isEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto audioSourceComp = m_targetObject->getComponent<AudioSource>();
+            audioSourceComp->setEnabled(val);
+        });
+        columns->createWidget<CheckBox>("PlayOnEnable", audioSourceComp->getPlayOnEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto audioSourceComp = m_targetObject->getComponent<AudioSource>();
+            audioSourceComp->setPlayOnEnabled(val);
+        });
+        columns->createWidget<Label>(""); // Empty node
+        columns->createWidget<CheckBox>("Stream", audioSourceComp->isStream())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto audioSourceComp = m_targetObject->getComponent<AudioSource>();
+            audioSourceComp->setStream(val);
+        });
+        columns->createWidget<CheckBox>("Loop", audioSourceComp->isLooped())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto audioSourceComp = m_targetObject->getComponent<AudioSource>();
+            audioSourceComp->setLoop(val);
+        });
+        columns->createWidget<CheckBox>("Single", audioSourceComp->isSingleInstance())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto audioSourceComp = m_targetObject->getComponent<AudioSource>();
+            audioSourceComp->setSingleInstance(val);
+        });
+
+        std::array volume = { audioSourceComp->getVolume() };
+        m_audioSourceGroup->createWidget<Drag<float>>("Volume", ImGuiDataType_Float, volume, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto audioSourceComp = m_targetObject->getComponent<AudioSource>();
+            audioSourceComp->setVolume(val[0]);
+        });
+
+        std::array pan = { audioSourceComp->getPan() };
+        m_audioSourceGroup->createWidget<Drag<float>>("Pan", ImGuiDataType_Float, pan, 0.01f, -1.f, 1.f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto audioSourceComp = m_targetObject->getComponent<AudioSource>();
+            audioSourceComp->setPan(val[0]);
+        });
+
+        std::array minDistance = { audioSourceComp->getMinDistance() };
+        m_audioSourceGroup->createWidget<Drag<float>>("Min Distance", ImGuiDataType_Float, minDistance, 0.01f, 0.f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto audioSourceComp = m_targetObject->getComponent<AudioSource>();
+            audioSourceComp->setMinDistance(val[0]);
+        });
+
+        std::array maxDistance = { audioSourceComp->getMaxDistance() };
+        m_audioSourceGroup->createWidget<Drag<float>>("Max Distance", ImGuiDataType_Float, maxDistance, 0.01f, 0.f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto audioSourceComp = m_targetObject->getComponent<AudioSource>();
+            audioSourceComp->setMaxDistance(val[0]);
+        });
+
+        auto vel = audioSourceComp->getVelocity();
+        std::array velocity = { vel[0], vel[1], vel[2] };
+        m_audioSourceGroup->createWidget<Drag<float, 3>>("Velocity", ImGuiDataType_Float, velocity, 0.01f, 0.f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto audioSourceComp = m_targetObject->getComponent<AudioSource>();
+            audioSourceComp->setVelocity({ val[0], val[1], val[2] });
+        });
+
+        std::array attenuationModel = { audioSourceComp->getAttenuationModel() };
+        m_audioSourceGroup->createWidget<Drag<int>>("Attenuation Model", ImGuiDataType_S32, attenuationModel, 1, 0, SoLoud::AudioSource::ATTENUATION_MODELS::EXPONENTIAL_DISTANCE)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto audioSourceComp = m_targetObject->getComponent<AudioSource>();
+            audioSourceComp->setAttenuationModel(val[0]);
+        });
+
+        std::array attenuationFactor = { audioSourceComp->getAttenuationRollOffFactor() };
+        m_audioSourceGroup->createWidget<Drag<float>>("Attenuation Factor", ImGuiDataType_Float, attenuationFactor, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto audioSourceComp = m_targetObject->getComponent<AudioSource>();
+            audioSourceComp->setAttenuationRollOffFactor(val[0]);
+        });
+
+        std::array dopplerFactor = { audioSourceComp->getDopplerFactor() };
+        m_audioSourceGroup->createWidget<Drag<float>>("Doppler Factor", ImGuiDataType_Float, dopplerFactor, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto audioSourceComp = m_targetObject->getComponent<AudioSource>();
+            audioSourceComp->setDopplerFactor(val[0]);
+        });
+
+        auto txtPath = m_audioSourceGroup->createWidget<TextField>("Path", audioSourceComp->getPath().c_str(), true);
+        txtPath->setEndOfLine(false);
+        txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
+            auto audioSourceComp = m_targetObject->getComponent<AudioSource>();
+            audioSourceComp->setPath(txt);
+        });
+        for (const auto& type : GetFileExtensionSuported(E_FileExts::Audio))
+        {
+            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
+                auto audioSourceComp = m_targetObject->getComponent<AudioSource>();
+                audioSourceComp->setPath(txt);
+                redraw();
+            });
+        }
+        m_audioSourceGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
+            auto files = OpenFileDialog("Import Assets", "", { "Audio (*.wav, *.ogg, *.mp3)", "*.wav", "*.ogg", "*.mp3" }).result();
+            if (files.size() > 0)
+            {
+                auto audioSourceComp = m_targetObject->getComponent<AudioSource>();
+                audioSourceComp->setPath(files[0]);
+                redraw();
+            }
+        });
+    }
+
+    //! Draw AudioListener component
+    void Inspector::drawAudioListener()
+    {
+        auto audioListenerComp = m_targetObject->getComponent<AudioListener>();
+        if (audioListenerComp == nullptr)
+            return;
+
+        m_audioListenerGroup->createWidget<CheckBox>("Enable", audioListenerComp->isEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto audioListenerComp = m_targetObject->getComponent<AudioListener>();
+            audioListenerComp->setEnabled(val);
+        });
+    }
+
     void Inspector::_drawImpl()
     {
         if (m_bNeedRedraw)
@@ -1350,6 +1493,20 @@ namespace ige::creator
             m_physicGroup->removeAllWidgets();
             m_physicGroup->removeAllPlugins();
             m_physicGroup = nullptr;
+        }
+
+        if (m_audioSourceGroup)
+        {
+            m_audioSourceGroup->removeAllWidgets();
+            m_audioSourceGroup->removeAllPlugins();
+            m_audioSourceGroup = nullptr;
+        }
+
+        if (m_audioListenerGroup)
+        {
+            m_audioListenerGroup->removeAllWidgets();
+            m_audioListenerGroup->removeAllPlugins();
+            m_audioListenerGroup = nullptr;
         }
 
         removeAllWidgets();

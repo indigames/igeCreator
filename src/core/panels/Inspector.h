@@ -66,6 +66,12 @@ namespace ige::creator
         //! Draw PhysicCapsule component
         void drawPhysicCapsule();
 
+        //! Draw AudioSource component
+        void drawAudioSource();
+
+        //! Draw AudioListener component
+        void drawAudioListener();
+
         //! Redraw
         void redraw() { m_bNeedRedraw = true;  }
 
@@ -89,6 +95,8 @@ namespace ige::creator
         std::shared_ptr<Group> m_uiImageGroup = nullptr;
         std::shared_ptr<Group> m_uiTextGroup = nullptr;
         std::shared_ptr<Group> m_physicGroup = nullptr;
+        std::shared_ptr<Group> m_audioSourceGroup = nullptr;
+        std::shared_ptr<Group> m_audioListenerGroup = nullptr;
 
         //! Flags for redrawing component in main thread
         bool m_bNeedRedraw = false;
