@@ -32,6 +32,14 @@ namespace ige::creator
     GameScene::~GameScene()
     {
         clear();
+
+        // Clear the temp scene file if exist
+        auto name = SceneManager::getInstance()->getCurrentScene()->getName();
+        auto fsPath = fs::path(name + "_tmp");
+        auto ext = fsPath.extension();
+        if (ext.string() != ".json")
+            fsPath = fsPath.replace_extension(".json");
+        fs::remove(fsPath);
     }
 
     void GameScene::clear()
@@ -52,14 +60,6 @@ namespace ige::creator
             m_fbo->DecReference();
             m_fbo = nullptr;
         }
-
-        // Clear the temp scene file if exist
-        auto name = SceneManager::getInstance()->getCurrentScene()->getName();
-        auto fsPath = fs::path(name + "_tmp");
-        auto ext = fsPath.extension();
-        if (ext.string() != ".json")
-            fsPath = fsPath.replace_extension(".json");
-        fs::remove(fsPath);
     }
 
     void GameScene::initialize()
