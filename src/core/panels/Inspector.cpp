@@ -1316,7 +1316,7 @@ namespace ige::creator
 
         auto vel = audioSourceComp->getVelocity();
         std::array velocity = { vel[0], vel[1], vel[2] };
-        m_audioSourceGroup->createWidget<Drag<float, 3>>("Velocity", ImGuiDataType_Float, velocity, 0.01f, 0.f)->getOnDataChangedEvent().addListener([this](auto& val) {
+        m_audioSourceGroup->createWidget<Drag<float, 3>>("Velocity", ImGuiDataType_Float, velocity, 0.01f)->getOnDataChangedEvent().addListener([this](auto& val) {
             auto audioSourceComp = m_targetObject->getComponent<AudioSource>();
             audioSourceComp->setVelocity({ val[0], val[1], val[2] });
         });
