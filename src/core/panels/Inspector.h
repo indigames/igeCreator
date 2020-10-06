@@ -75,6 +75,10 @@ namespace ige::creator
         //! Redraw
         void redraw() { m_bNeedRedraw = true;  }
 
+        //! onTransformChanged
+        void onTransformChanged(SceneObject& sceneObject);
+
+    protected:
         //! Inspected scene object
         std::shared_ptr<SceneObject> m_targetObject = nullptr;
 

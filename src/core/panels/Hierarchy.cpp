@@ -32,7 +32,6 @@ namespace ige::creator
         SceneObject::getDestroyedEvent().addListener(std::bind(&Hierarchy::onSceneObjectDeleted, this, std::placeholders::_1));
         SceneObject::getAttachedEvent().addListener(std::bind(&Hierarchy::onSceneObjectAttached, this, std::placeholders::_1));
         SceneObject::getDetachedEvent().addListener(std::bind(&Hierarchy::onSceneObjectDetached, this, std::placeholders::_1));
-        SceneObject::getNameChangedEvent().addListener(std::bind(&Hierarchy::onSceneObjectChangedName, this, std::placeholders::_1));
         SceneObject::getSelectedEvent().addListener(std::bind(&Hierarchy::onSceneObjectSelected, this, std::placeholders::_1));
     }
 
@@ -42,7 +41,6 @@ namespace ige::creator
         SceneObject::getDestroyedEvent().removeAllListeners();
         SceneObject::getAttachedEvent().removeAllListeners();
         SceneObject::getDetachedEvent().removeAllListeners();
-        SceneObject::getNameChangedEvent().removeAllListeners();
         SceneObject::getSelectedEvent().removeAllListeners();
         clear();
         m_groupLayout = nullptr;
@@ -284,6 +282,14 @@ namespace ige::creator
 
             // Set this node open as well
             nodePair->second->open();
+
+            auto oldObject = Editor::getInstance()->getSelectedObject();
+            if (oldObject)
+            {
+                oldObject->getNameChangedEvent().removeAllListeners();
+            }
+            sceneObject.getNameChangedEvent().addListener(std::bind(&Hierarchy::onSceneObjectChangedName, this, std::placeholders::_1));
+
             Editor::getInstance()->setSelectedObject(sceneObject.getId());
         }
     }
