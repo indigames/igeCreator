@@ -20,8 +20,11 @@ if not exist "%GAME_BUILDER%" (
 cd %GAME_BUILDER%
 git clean -xfdf
 git reset --hard
+git submodule foreach git clean -xfdf
+git submodule foreach git reset --hard
 git checkout master
 git pull
+git submodule sync
 git submodule update --init --remote
 
 xcopy /q /y %ROM% %GAME_BUILDER%
