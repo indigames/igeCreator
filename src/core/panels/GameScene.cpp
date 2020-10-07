@@ -82,6 +82,13 @@ namespace ige::creator
 
                 SceneManager::getInstance()->setIsEditor(false);
 
+                // Adjust camera aspect ratio
+                if (Editor::getSceneManager()->getCurrentScene())
+                {
+                    for (auto cam : Editor::getSceneManager()->getCurrentScene()->getCameras())
+                        cam->setAspectRatio(size.x / size.y);
+                }
+
                 m_bInitialized = true;
             }
         }
@@ -105,11 +112,12 @@ namespace ige::creator
             m_fbo->Resize(size.x, size.y);
             m_imageWidget->setSize(size);
 
-            if (Editor::getSceneManager()->getCurrentScene()
-                && Editor::getSceneManager()->getCurrentScene()->getActiveCamera())
+            // Adjust camera aspect ratio
+            if (Editor::getSceneManager()->getCurrentScene())
             {
-                Editor::getSceneManager()->getCurrentScene()->getActiveCamera()->setAspectRatio(size.x / size.y);
-            }                
+                for(auto cam: Editor::getSceneManager()->getCurrentScene()->getCameras())
+                    cam->setAspectRatio(size.x / size.y);
+            }
             m_bNeedResize = false;
         }
 
@@ -152,7 +160,6 @@ namespace ige::creator
             m_lastObjectId = selectedObj ? selectedObj->getId() : -1;
             Editor::getCanvas()->getEditorScene()->setTargetObject(nullptr);
             SceneManager::getInstance()->saveScene(path);
-            Editor::getCanvas()->getEditorScene()->close();
             if (PhysicManager::getInstance()->getWorld())
                 PhysicManager::getInstance()->getWorld()->clearForces();
         }
@@ -182,7 +189,6 @@ namespace ige::creator
             SceneManager::getInstance()->loadScene(name + "_tmp");
 
             SceneManager::getInstance()->setIsEditor(true);
-            //Editor::getCanvas()->getEditorScene()->open();
             Editor::getCanvas()->getEditorScene()->setFocus();
 
             Editor::getInstance()->setSelectedObject(m_lastObjectId);
@@ -197,7 +203,6 @@ namespace ige::creator
         else
         {
             SceneManager::getInstance()->setIsEditor(true);
-            //Editor::getCanvas()->getEditorScene()->open();
             Editor::getCanvas()->getEditorScene()->setFocus();
         }
     }

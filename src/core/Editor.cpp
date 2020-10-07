@@ -51,6 +51,9 @@ namespace ige::creator
 
         m_canvas = std::make_shared<Canvas>();
         m_canvas->setDockable(true);
+
+        // Load the start scene
+        SceneManager::getInstance()->loadScene(m_canvas->getProjectSetting()->getStartScene());
     }
 
     void Editor::handleEvent(const void* event)

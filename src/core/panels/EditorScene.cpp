@@ -1,8 +1,10 @@
 #include <imgui.h>
 
 #include "core/panels/EditorScene.h"
+#include "core/panels/GameScene.h"
 #include "core/widgets/Image.h"
 #include "core/Editor.h"
+#include "core/Canvas.h"
 #include "core/ShapeDrawer.h"
 
 #include "utils/GraphicsHelper.h"
@@ -192,6 +194,9 @@ namespace ige::creator
 
     void EditorScene::update(float dt)
     {
+        if (Editor::getCanvas()->getGameScene()->isPlaying())
+            return;
+
         // Ensure initialization
         initialize();
 

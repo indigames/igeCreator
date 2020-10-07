@@ -24,10 +24,9 @@ namespace ige::creator
         Panel::Settings settings;
         settings.collapsable = true;
         settings.dockable = true;
-        settings.movable = false;
 
         createPanel<Inspector>("Inspector", settings);
-        createPanel<Hierarchy>("Hierarchy", settings);        
+        createPanel<Hierarchy>("Hierarchy", settings);
         createPanel<AssetBrowser>("Assets", settings);
         createPanel<Console>("Console", settings);
         createPanel<ProjectSetting>("Settings", settings);

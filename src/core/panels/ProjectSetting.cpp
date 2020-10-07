@@ -9,6 +9,7 @@
 #include "core/widgets/Separator.h"
 #include "core/widgets/Button.h"
 #include "core/widgets/Drag.h"
+#include "core/plugin/DragDropPlugin.h"
 
 #include <utils/Serialize.h>
 
@@ -20,19 +21,8 @@ namespace ige::creator
     ProjectSetting::ProjectSetting(const std::string& name, const Panel::Settings& settings)
         : Panel(name, settings)
     {
-    }
-
-    ProjectSetting::~ProjectSetting()
-    {
-
-    }
-
-    void ProjectSetting::initialize()
-    {
-        clear();
-
         json settingsJson;
-        auto fsPath = fs::path("settings.json");       
+        auto fsPath = fs::path("settings.json");
 
         std::ifstream file(fsPath);
         if (file.is_open())
@@ -43,11 +33,25 @@ namespace ige::creator
             setGravity(settingsJson.value("gravity", Vec3(0.f, -9.81f, 0.f)));
             setGlobalVolume(settingsJson.value("globalVolume", 1.f));
         }
+    }
+
+    ProjectSetting::~ProjectSetting()
+    {
+
+    }
+
+    void ProjectSetting::initialize()
+    {
+        clear();
         
         auto sceneGroup = createWidget<Group>("Scene Manager");
         auto startScene = sceneGroup->createWidget<TextField>("Start scene", getStartScene().c_str());
         startScene->getOnDataChangedEvent().addListener([this](auto val) {
             setStartScene(val);
+        });
+        startScene->addPlugin<DDTargetPlugin<std::string>>(".json")->getOnDataReceivedEvent().addListener([this](auto val) {
+            setStartScene(val);
+            redraw();
         });
 
         auto physicGroup = createWidget<Group>("Physic Manager");        
@@ -71,24 +75,40 @@ namespace ige::creator
 
     void ProjectSetting::_drawImpl()
     {
+        if (m_bNeedRedraw)
+        {
+            initialize();
+            m_bNeedRedraw = false;
+            return;
+        }
+
         Panel::_drawImpl();
     }
 
     void ProjectSetting::clear()
     {
-
+        removeAllWidgets();
     }
 
-    void ProjectSetting::setStartScene(const std::string& scene)
+    void ProjectSetting::setStartScene(const std::string& path)
     {
-        auto sceneName = fs::path(scene).stem().string();
-        std::replace(sceneName.begin(), sceneName.end(), '\\', '/');
-        if(m_startScene != sceneName)
-            m_startScene = sceneName;
+        auto fsPath = fs::path(path);
+        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
+        std::replace(relPath.begin(), relPath.end(), '\\', '/');
+        if(m_startScene != relPath)
+            m_startScene = relPath;
     }
 
     void ProjectSetting::saveSettings()
     {
-        //TODO
+        json settingsJson = json{
+            {"startScene", getStartScene()},
+            {"gravity", getGravity()},
+            {"globalVolume", getGlobalVolume()},
+        };
+
+        auto fsPath = fs::path("settings.json");
+        std::ofstream file(fsPath.string());
+        file << settingsJson;
     }
 }

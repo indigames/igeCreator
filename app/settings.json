@@ -1,3 +1,1 @@
-{
-    "startScene": "scene/animation_test.json"
-}
+{"globalVolume":1.0,"gravity":[0.0,-9.8100004196167,0.0],"startScene":"scene/animation_test.json"}

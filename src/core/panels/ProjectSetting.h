@@ -27,16 +27,23 @@ namespace ige::creator
         virtual void initialize() override;
         virtual void _drawImpl() override;
 
+        //! Save settings
         void saveSettings();
+
+        //! Redraw
+        void redraw() { m_bNeedRedraw = true; }
 
     protected:
         //! Scene settings
         std::string m_startScene;
 
         //! Physic settings
-        Vec3 m_gravity;
+        Vec3 m_gravity = {0.f, -9.81f, 0.f};
 
         //! Audio settings
-        float m_globalVolume;
+        float m_globalVolume = 1.f;
+
+        //! Flags for redrawing component in main thread
+        bool m_bNeedRedraw = false;
     };
 }
