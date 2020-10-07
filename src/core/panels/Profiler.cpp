@@ -12,7 +12,7 @@ namespace ige::creator
 
     Profiler::~Profiler()
     {
-
+        clear();
     }
 
     void Profiler::initialize()
@@ -34,6 +34,8 @@ namespace ige::creator
 
     void Profiler::clear()
     {
-
+        m_timeWidget = nullptr;
+        m_fpsWidget = nullptr;
+        removeAllWidgets();
     }
 }

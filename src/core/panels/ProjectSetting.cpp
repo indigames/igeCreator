@@ -37,7 +37,7 @@ namespace ige::creator
 
     ProjectSetting::~ProjectSetting()
     {
-
+        clear();
     }
 
     void ProjectSetting::initialize()
