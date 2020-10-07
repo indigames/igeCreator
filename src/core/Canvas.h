@@ -8,17 +8,20 @@
 #include <scene/SceneObject.h>
 using namespace ige::scene;
 
+#include "core/menu/MenuBar.h"
+#include "core/toolbar/ToolBar.h"
+
+#include "core/panels/EditorScene.h"
+#include "core/panels/GameScene.h"
+#include "core/panels/Hierarchy.h"
+#include "core/panels/Inspector.h"
+#include "core/panels/Console.h"
+#include "core/panels/AssetViewer.h"
+#include "core/panels/AssetBrowser.h"
+#include "core/panels/ProjectSetting.h"
+
 namespace ige::creator
 {
-    class Panel;
-    class MenuBar;
-    class ToolBar;
-    class Inspector;
-    class EditorScene;
-    class GameScene;
-    class Hierarchy;
-    class Console;
-
     class Canvas: public IDrawable
     {
     public:
@@ -56,21 +59,19 @@ namespace ige::creator
 
         std::shared_ptr<MenuBar>& getMenuBar() { return m_menuBar; }
         std::shared_ptr<ToolBar>& getToolBar() { return m_toolBar; }
-        std::shared_ptr<Inspector>& getInspector() { return m_inspector; }
-        std::shared_ptr<EditorScene>& getEditorScene() { return m_editorScene; }
-        std::shared_ptr<GameScene>& getGameScene() { return m_gameScene; }
-        std::shared_ptr<Hierarchy>& getHierarchy() { return m_hierarchy; }
-        std::shared_ptr<Console>& getConsole() { return m_console; }
+
+        std::shared_ptr<Inspector> getInspector() { return getPanelAs<Inspector>("Inspector"); }
+        std::shared_ptr<EditorScene> getEditorScene() { return getPanelAs<EditorScene>("Scene"); }
+        std::shared_ptr<GameScene> getGameScene() { return getPanelAs<GameScene>("Game"); }
+        std::shared_ptr<Hierarchy> getHierarchy() { return getPanelAs<Hierarchy>("Hierarchy"); }
+        std::shared_ptr<Console> getConsole() { return getPanelAs<Console>("Console"); }
+        std::shared_ptr<AssetBrowser> getAssetBrowser() { return getPanelAs<AssetBrowser>("Assets"); }
+        std::shared_ptr<ProjectSetting> getProjectSetting() { return getPanelAs<ProjectSetting>("Settings"); }
 
     protected:
         bool m_bDockable = false;
         std::shared_ptr<MenuBar> m_menuBar = nullptr;
         std::shared_ptr<ToolBar> m_toolBar = nullptr;
-        std::shared_ptr<Inspector> m_inspector = nullptr;
-        std::shared_ptr<EditorScene> m_editorScene = nullptr;
-        std::shared_ptr<GameScene> m_gameScene = nullptr;
-        std::shared_ptr<Hierarchy> m_hierarchy = nullptr;
-        std::shared_ptr<Console> m_console = nullptr;
         std::unordered_map<std::string, std::shared_ptr<Panel>> m_panels;
     };
 }

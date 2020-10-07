@@ -1540,6 +1540,8 @@ namespace ige::creator
                 m_targetObject->getTransformChangedEvent().addListener(std::bind(&Inspector::onTransformChanged, this, std::placeholders::_1));
                 initialize();
             }
+
+            setFocus();
         }
     }
 

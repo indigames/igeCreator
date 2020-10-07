@@ -12,6 +12,7 @@
 #include "core/panels/Console.h"
 #include "core/panels/AssetViewer.h"
 #include "core/panels/AssetBrowser.h"
+#include "core/panels/ProjectSetting.h"
 
 namespace ige::creator
 {
@@ -19,27 +20,26 @@ namespace ige::creator
     {
         m_menuBar = std::make_shared<MenuBar>("Menu");
         m_toolBar = std::make_shared<ToolBar>("ToolBar");
-        
+
         Panel::Settings settings;
         settings.collapsable = true;
         settings.dockable = true;
         settings.movable = false;
 
-        m_inspector = createPanel<Inspector>("Inspector", settings);
-        m_hierarchy = createPanel<Hierarchy>("Hierarchy", settings);
-        m_console = createPanel<Console>("Console", settings);
-        createPanel<AssetBrowser>("AssetBrowser", settings);
-        m_editorScene = createPanel<EditorScene>("Scene", settings);
-        m_gameScene = createPanel<GameScene>("Game", settings);
-        m_gameScene->close();
+        createPanel<Inspector>("Inspector", settings);
+        createPanel<Hierarchy>("Hierarchy", settings);        
+        createPanel<AssetBrowser>("Assets", settings);
+        createPanel<Console>("Console", settings);
+        createPanel<ProjectSetting>("Settings", settings);
+        createPanel<EditorScene>("Scene", settings);
+        createPanel<GameScene>("Game", settings);
     }
 
     Canvas::~Canvas()
     {
         m_menuBar = nullptr;
         m_toolBar = nullptr;
-        m_inspector = nullptr;
-        m_editorScene = nullptr;
+
         for (auto panel : m_panels)
             panel.second = nullptr;
         m_panels.clear();
@@ -47,8 +47,8 @@ namespace ige::creator
 
     void Canvas::setTargetObject(const std::shared_ptr<SceneObject>& obj)
     {
-        m_inspector->setTargetObject(obj);
-        m_editorScene->setTargetObject(obj);
+        getInspector()->setTargetObject(obj);
+        getEditorScene()->setTargetObject(obj);
     }
 
     void Canvas::update(float dt)
@@ -88,11 +88,12 @@ namespace ige::creator
                     ImGuiID dock_id_left = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.15f, NULL, &dock_main_id);
                     ImGuiID dock_id_right = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.20f, NULL, &dock_main_id);
                     ImGuiID dock_id_bottom = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down, 0.20f, NULL, &dock_main_id);
-                    
+
                     ImGui::DockBuilderDockWindow("Hierarchy", dock_id_left);
+                    ImGui::DockBuilderDockWindow("Settings", dock_id_right);
                     ImGui::DockBuilderDockWindow("Inspector", dock_id_right);
                     ImGui::DockBuilderDockWindow("Console", dock_id_bottom);
-                    ImGui::DockBuilderDockWindow("AssetBrowser", dock_id_bottom);
+                    ImGui::DockBuilderDockWindow("Assets", dock_id_bottom);
                     ImGui::DockBuilderDockWindow("Scene", dock_main_id);
                     ImGui::DockBuilderDockWindow("Game", dock_main_id);
                     ImGui::DockBuilderFinish(dockspace_id);
@@ -108,6 +109,15 @@ namespace ige::creator
             }
         }
 
+        static bool firstFrame = true;
+        if (firstFrame)
+        {
+            getAssetBrowser()->setFocus();
+            getEditorScene()->setFocus();
+
+            firstFrame = false;
+        }
+
         ImGui::End();
         ImGui::Render();
     }
@@ -115,7 +125,7 @@ namespace ige::creator
     void Canvas::removePanel(std::shared_ptr<Panel> panel)
     {
         auto found = std::find_if(m_panels.begin(), m_panels.end(), [&](auto itr)
-        { 
+        {
             return itr.second == panel;
         });
 

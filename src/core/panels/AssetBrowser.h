@@ -5,9 +5,6 @@
 #include "core/Panel.h"
 #include "core/layout/Columns.h"
 
-#include "core/filesystem/FileSystem.h"
-#include "core/filesystem/FileSystemCache.h"
-
 #include "pyxieTexture.h"
 using namespace pyxie;
 

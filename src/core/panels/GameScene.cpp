@@ -34,12 +34,15 @@ namespace ige::creator
         clear();
 
         // Clear the temp scene file if exist
-        auto name = SceneManager::getInstance()->getCurrentScene()->getName();
-        auto fsPath = fs::path(name + "_tmp");
-        auto ext = fsPath.extension();
-        if (ext.string() != ".json")
-            fsPath = fsPath.replace_extension(".json");
-        fs::remove(fsPath);
+        if (SceneManager::getInstance()->getCurrentScene())
+        {
+            auto name = SceneManager::getInstance()->getCurrentScene()->getName();
+            auto fsPath = fs::path(name + "_tmp");
+            auto ext = fsPath.extension();
+            if (ext.string() != ".json")
+                fsPath = fsPath.replace_extension(".json");
+            fs::remove(fsPath);
+        }        
     }
 
     void GameScene::clear()
@@ -154,7 +157,7 @@ namespace ige::creator
                 PhysicManager::getInstance()->getWorld()->clearForces();
         }
 
-        open();
+        // open();
         setFocus();
     }
 
@@ -166,7 +169,7 @@ namespace ige::creator
     void GameScene::stop()
     {
         m_bIsPlaying = false;
-        close();
+        // close();
         clear();
 
         if (SceneManager::getInstance()->getCurrentScene())
@@ -179,7 +182,7 @@ namespace ige::creator
             SceneManager::getInstance()->loadScene(name + "_tmp");
 
             SceneManager::getInstance()->setIsEditor(true);
-            Editor::getCanvas()->getEditorScene()->open();
+            //Editor::getCanvas()->getEditorScene()->open();
             Editor::getCanvas()->getEditorScene()->setFocus();
 
             Editor::getInstance()->setSelectedObject(m_lastObjectId);
@@ -194,7 +197,7 @@ namespace ige::creator
         else
         {
             SceneManager::getInstance()->setIsEditor(true);
-            Editor::getCanvas()->getEditorScene()->open();
+            //Editor::getCanvas()->getEditorScene()->open();
             Editor::getCanvas()->getEditorScene()->setFocus();
         }
     }
