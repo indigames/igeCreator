@@ -96,7 +96,7 @@ namespace ige::creator
 
     void GameScene::update(float dt)
     {
-        if (!m_bIsPlaying)
+        if (!m_bIsPlaying || m_bIsPausing)
             return;
 
         // Ensure initialization
@@ -151,59 +151,61 @@ namespace ige::creator
 
     void GameScene::play()
     {
-        m_bIsPlaying = true;
-
-        if (SceneManager::getInstance()->getCurrentScene())
+        if (!m_bIsPlaying)
         {
-            auto path = SceneManager::getInstance()->getCurrentScene()->getName() + "_tmp";
-            auto& selectedObj = Editor::getInstance()->getSelectedObject();
-            m_lastObjectId = selectedObj ? selectedObj->getId() : -1;
-            Editor::getCanvas()->getEditorScene()->setTargetObject(nullptr);
-            SceneManager::getInstance()->saveScene(path);
-            if (PhysicManager::getInstance()->getWorld())
-                PhysicManager::getInstance()->getWorld()->clearForces();
+            if (SceneManager::getInstance()->getCurrentScene())
+            {
+                auto path = SceneManager::getInstance()->getCurrentScene()->getName() + "_tmp";
+                auto& selectedObj = Editor::getInstance()->getSelectedObject();
+                m_lastObjectId = selectedObj ? selectedObj->getId() : -1;
+                Editor::getCanvas()->getEditorScene()->setTargetObject(nullptr);
+                SceneManager::getInstance()->saveScene(path);
+                if (PhysicManager::getInstance()->getWorld())
+                    PhysicManager::getInstance()->getWorld()->clearForces();
+            }
+            m_bIsPlaying = true;
         }
+        
+        m_bIsPausing = false;
 
-        // open();
         setFocus();
     }
 
     void GameScene::pause()
     {
-        m_bIsPlaying = false;
+        m_bIsPausing = true;
     }
 
     void GameScene::stop()
     {
-        m_bIsPlaying = false;
-        // close();
-        clear();
-
-        if (SceneManager::getInstance()->getCurrentScene())
+        if (m_bIsPlaying)
         {
-            auto name = SceneManager::getInstance()->getCurrentScene()->getName();
-            Editor::getInstance()->setSelectedObject(-1);
-            Editor::getCanvas()->getHierarchy()->clear();
-            Editor::getCanvas()->getHierarchy()->initialize();
-            SceneManager::getInstance()->unloadScene(name);
-            SceneManager::getInstance()->loadScene(name + "_tmp");
+            clear();
 
-            SceneManager::getInstance()->setIsEditor(true);
-            Editor::getCanvas()->getEditorScene()->setFocus();
+            if (SceneManager::getInstance()->getCurrentScene())
+            {
+                auto name = SceneManager::getInstance()->getCurrentScene()->getName();
+                Editor::getInstance()->setSelectedObject(-1);
+                Editor::getCanvas()->getHierarchy()->clear();
+                Editor::getCanvas()->getHierarchy()->initialize();
+                SceneManager::getInstance()->unloadScene(name);
+                SceneManager::getInstance()->loadScene(name + "_tmp");
 
-            Editor::getInstance()->setSelectedObject(m_lastObjectId);
-            m_lastObjectId = -1;
+                Editor::getInstance()->setSelectedObject(m_lastObjectId);
+                m_lastObjectId = -1;
 
-            auto fsPath = fs::path(name + "_tmp");
-            auto ext = fsPath.extension();
-            if (ext.string() != ".json")
-                fsPath = fsPath.replace_extension(".json");
-            fs::remove(fsPath);
+                auto fsPath = fs::path(name + "_tmp");
+                auto ext = fsPath.extension();
+                if (ext.string() != ".json")
+                    fsPath = fsPath.replace_extension(".json");
+                fs::remove(fsPath);
+            }
+
+            m_bIsPausing = false;
+            m_bIsPlaying = false;
         }
-        else
-        {
-            SceneManager::getInstance()->setIsEditor(true);
-            Editor::getCanvas()->getEditorScene()->setFocus();
-        }
+
+        SceneManager::getInstance()->setIsEditor(true);
+        Editor::getCanvas()->getEditorScene()->setFocus();
     }
 }
