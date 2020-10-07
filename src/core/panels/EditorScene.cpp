@@ -231,7 +231,7 @@ namespace ige::creator
 
         // If left button release, check selected object
         auto touch = Editor::getApp()->getInputHandler()->getTouchDevice();
-        if (isFocused() && touch->isFingerReleased(0))
+        if (isFocused() && isHovered() && touch->isFingerReleased(0) && touch->getFinger(0)->getFingerId() == 0)
         {
             float touchX, touchY;
             touch->getFingerPosition(0, touchX, touchY);
@@ -526,7 +526,6 @@ namespace ige::creator
         else if (touch->isFingerMoved(0))
         {
             auto finger = touch->getFinger(0);
-            auto fid = finger->getFingerId();
             if (finger->getFingerId() == 3) // right button
             {
                 float touchX, touchY;

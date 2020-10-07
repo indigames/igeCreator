@@ -14,6 +14,9 @@
 #include "core/panels/AssetBrowser.h"
 #include "core/panels/ProjectSetting.h"
 
+#include <scene/SceneManager.h>
+using namespace ige::scene;
+
 namespace ige::creator
 {
     Canvas::Canvas()
@@ -111,6 +114,9 @@ namespace ige::creator
         static bool firstFrame = true;
         if (firstFrame)
         {
+            if (SceneManager::getInstance()->getCurrentScene())
+                getInspector()->setFocus();
+
             getAssetBrowser()->setFocus();
             getEditorScene()->setFocus();
 
