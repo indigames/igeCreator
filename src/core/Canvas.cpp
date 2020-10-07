@@ -13,6 +13,7 @@
 #include "core/panels/AssetViewer.h"
 #include "core/panels/AssetBrowser.h"
 #include "core/panels/ProjectSetting.h"
+#include "core/panels/Profiler.h"
 
 #include <scene/SceneManager.h>
 using namespace ige::scene;
@@ -35,6 +36,7 @@ namespace ige::creator
         createPanel<ProjectSetting>("Settings", settings);
         createPanel<EditorScene>("Scene", settings);
         createPanel<GameScene>("Game", settings);
+        createPanel<Profiler>("Profiler", settings);
     }
 
     Canvas::~Canvas()
@@ -88,8 +90,10 @@ namespace ige::creator
 
                     ImGuiID dock_main_id = dockspace_id; // This variable will track the document node, however we are not using it here as we aren't docking anything into it.
                     ImGuiID dock_id_left = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.15f, NULL, &dock_main_id);
-                    ImGuiID dock_id_right = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.20f, NULL, &dock_main_id);
-                    ImGuiID dock_id_bottom = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down, 0.20f, NULL, &dock_main_id);
+                    ImGuiID dock_id_right = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.2f, NULL, &dock_main_id);
+                    ImGuiID dock_id_bottom = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down, 0.2f, NULL, &dock_main_id);
+                    ImGuiID dock_id_left_bottom = ImGui::DockBuilderSplitNode(dock_id_left, ImGuiDir_Down, 0.22f, NULL, &dock_id_left);
+                    ImGuiID dock_id_right_bottom = ImGui::DockBuilderSplitNode(dock_id_right, ImGuiDir_Down, 0.22f, NULL, &dock_id_right);
 
                     ImGui::DockBuilderDockWindow("Hierarchy", dock_id_left);
                     ImGui::DockBuilderDockWindow("Settings", dock_id_right);
@@ -98,6 +102,7 @@ namespace ige::creator
                     ImGui::DockBuilderDockWindow("Assets", dock_id_bottom);
                     ImGui::DockBuilderDockWindow("Scene", dock_main_id);
                     ImGui::DockBuilderDockWindow("Game", dock_main_id);
+                    ImGui::DockBuilderDockWindow("Profiler", dock_id_left_bottom);
                     ImGui::DockBuilderFinish(dockspace_id);
                 }
 

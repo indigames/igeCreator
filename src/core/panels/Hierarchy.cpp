@@ -342,9 +342,6 @@ namespace ige::creator
 
     void Hierarchy::drawWidgets()
     {
-        // Show FPS
-        ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-
         // Draw widgets
         Panel::drawWidgets();
     }
