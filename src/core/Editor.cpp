@@ -16,6 +16,8 @@
 #include <audio/AudioManager.h>
 using namespace ige::scene;
 
+#define VERSION "0.0.2"
+
 namespace ige::creator
 {
     Editor::Editor()
@@ -225,7 +227,7 @@ namespace ige::creator
 
     bool Editor::openAbout()
     {
-        auto msgBox = MsgBox("About", "igeCreator \n Version: 0.0.1 \n ©2020 Indi Games", MsgBox::EBtnLayout::ok, MsgBox::EMsgType::info);
+        auto msgBox = MsgBox("About", "igeCreator \n Version: " + std::string(VERSION) + "\n Indi Games © 2020", MsgBox::EBtnLayout::ok, MsgBox::EMsgType::info);
         while (!msgBox.ready(1000));
         return true;
     }

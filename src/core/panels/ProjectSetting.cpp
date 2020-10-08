@@ -29,7 +29,7 @@ namespace ige::creator
         {
             file >> settingsJson;
 
-            setStartScene(settingsJson.value("startScene", "scenes/main.json"));
+            setStartScene(settingsJson.value("startScene", "scene/main.json"));
             setGravity(settingsJson.value("gravity", Vec3(0.f, -9.81f, 0.f)));
             setGlobalVolume(settingsJson.value("globalVolume", 1.f));
         }

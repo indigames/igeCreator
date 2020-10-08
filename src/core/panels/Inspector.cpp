@@ -268,6 +268,9 @@ namespace ige::creator
 
     void Inspector::drawLocalTransformComponent()
     {
+        if (m_localTransformGroup == nullptr)
+            return;
+
         m_localTransformGroup->removeAllWidgets();
         auto transform = m_targetObject->getTransform();
         if (transform == nullptr)
@@ -313,6 +316,9 @@ namespace ige::creator
 
     void Inspector::drawWorldTransformComponent()
     {
+        if (m_worldTransformGroup == nullptr)
+            return;
+
         m_worldTransformGroup->removeAllWidgets();
         auto transform = m_targetObject->getTransform();
         if (transform == nullptr)
