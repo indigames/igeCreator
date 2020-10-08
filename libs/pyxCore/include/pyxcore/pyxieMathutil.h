@@ -347,24 +347,19 @@ namespace pyxie {
 			vmath_mat_rotationZ(radian, N, out.P());
 			return out;
 		}
-		static Mat<N, M> Scale(Vec3 xyz) {
+		static Mat<N, M> Scale(const Vec3& xyz) {
 			Mat<N, M> out;
 			vmath_mat_scale(xyz.P(), N, out.P());
 			return out;
 		}
 
-		static Mat<N, M> Translate(Vec3 xyz) {
+		static Mat<N, M> Translate(const Vec3& xyz) {
 			Mat<N, M> out;
 			vmath_mat4_translation(xyz.P(), out.P());
 			return out;
 		}
 
-		static Mat<N, M> Rotation(Quat rot) {
-			Mat<N, M> out;
-			vmath_mat_from_quat(rot.P(), N, out.P());
-			return out;
-		}
-
+		static Mat<N, M> Rotation(const Quat& rot);
 	};
 	using Mat2 = Mat<2, 2>;
 	using Mat3 = Mat<3, 3>;
@@ -488,8 +483,16 @@ namespace pyxie {
 		}
 	};
 
+	template <int N, int M>
+	Mat<N, M> Mat<N, M>::Rotation(const Quat& rot) {
+		Mat<N, M> out;
+		vmath_mat_from_quat(rot.P(), N, out.P());
+		return out;
+	}
+
 	inline void Matrix4ToJointMatrix(const Mat4& mat, float* joint)
 	{
+/*
 		joint[0] = mat[0][0];
 		joint[4] = mat[0][1];
 		joint[8] = mat[0][2];
@@ -506,6 +509,20 @@ namespace pyxie {
 		joint[7] = mat[3][1];
 		joint[11] = mat[3][2];
 		joint[15] = mat[3][3];
+*/
+		joint[0] = mat[0][0];
+		joint[4] = mat[0][1];
+		joint[8] = mat[0][2];
+		joint[1] = mat[1][0];
+		joint[5] = mat[1][1];
+		joint[9] = mat[1][2];
+		joint[2] = mat[2][0];
+		joint[6] = mat[2][1];
+		joint[10] = mat[2][2];
+		joint[3] = mat[3][0];
+		joint[7] = mat[3][1];
+		joint[11] = mat[3][2];
+
 	}
 
 	inline void JointMatrixToMatrix4(const float* joint, Mat4& outMatrix)

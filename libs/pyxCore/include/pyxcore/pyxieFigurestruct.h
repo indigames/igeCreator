@@ -29,7 +29,7 @@ namespace pyxie
 		uint16_t minfilter : 3;
 		uint16_t magfilter : 3;
 		uint16_t mipfilter : 3;
-		uint16_t pad : 1;
+		uint16_t borderColor : 1;
 		void Clear() { *((uint16_t*)this) = 0; }
 		inline bool operator ==(const SamplerState & ss) { return *((uint16_t*)this) == *((uint16_t*)&ss); }
 		inline bool operator !=(const SamplerState & ss) { return *((uint16_t*)this) != *((uint16_t*)&ss); }

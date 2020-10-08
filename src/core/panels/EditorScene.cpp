@@ -264,6 +264,18 @@ namespace ige::creator
             RayOBBChecker::setChecking(true);
         }
 
+        // Press "F" key focus on target object
+        auto keyboard = Editor::getApp()->getInputHandler()->getKeyboard();
+        if (keyboard->wasReleased(KeyCode::KEY_F))
+        {
+            auto target = Editor::getInstance()->getSelectedObject();
+            if (target && m_currCamera)
+            {
+                auto targetPos = target->getTransform()->getWorldPosition();
+                m_currCamera->SetPosition(targetPos + Vec3(0.f, 0.f, 20.f));
+            }
+        }
+
         // Update scene
         Editor::getSceneManager()->update(dt);
 

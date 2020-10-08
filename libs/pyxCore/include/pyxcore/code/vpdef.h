@@ -34,7 +34,8 @@
 #define SEMANTICS_ViewInverse
 #endif
 
-#ifndef LIGHT_VIEW_TRANSFORM
+
+#if (  (!defined(LIGHT_VIEW_TRANSFORM)) && (!defined(NO_VIEW_PROJ))  )
 uniform float4x4 ViewProj SEMANTICS_ViewProjection FX_WidgetNone;
 #endif
 

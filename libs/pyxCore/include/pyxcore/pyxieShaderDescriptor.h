@@ -186,6 +186,7 @@ namespace pyxie {
 					uint32_t FRONT_FACE_CULLING : 1;
 					uint32_t SCISSOR_TEST_ENABLE : 1;
 					uint32_t OVERLAY_TRANSPARENT_MAP_CHANNEL : 4;
+					uint32_t NO_VIEW_PROJ : 1;
 				};
 				uint32_t buffer[buffersize];
 			};
@@ -348,6 +349,7 @@ namespace pyxie {
 		inline int GetOverlayNormalTextureAlphaUVSet() { return desc.overlayNormalMapUVSet % 3; }
 
 		void DiscardColorMapRGB(bool enable);
+		void DicardViewProj(bool discard);
 
 		bool IsSkiningEnable() {return desc.SKINNING_ENABLE ? true : false;}
 		int NumBoneInfluence() {return desc.BONE_INFLUENCE; }

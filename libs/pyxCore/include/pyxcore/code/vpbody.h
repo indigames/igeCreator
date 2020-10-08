@@ -456,9 +456,16 @@ void main()
 			vHPosition = MUL(LightViewProj, TmpPosition);
 		#endif
 	#else
-		vHPosition = MUL(ViewProj, TmpPosition);
+		#ifdef NO_VIEW_PROJ
+			vHPosition = float4(TmpPosition.xyz, 1.0);
+		#else
+			vHPosition = MUL(ViewProj, TmpPosition);
+		#endif
 	#endif
 
+	#ifdef LIGHT_VIEW_POSITION
+		vPosition.z = min(1.0, vPosition.z);
+	#endif
 
 
 

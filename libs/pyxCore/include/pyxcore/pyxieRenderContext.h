@@ -76,6 +76,10 @@
 #define GL_QUADS 0x0007
 #define GL_QUAD_STRIP 0x0008
 
+#define GL_CLAMP_TO_BORDER  0x812D
+#define GL_TEXTURE_BORDER_COLOR 0x1004
+
+
 struct EdgeAnimPpuContext;
 
 namespace pyxie
