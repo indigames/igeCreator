@@ -272,7 +272,7 @@ namespace ige::creator
             if (target && m_currCamera)
             {
                 auto targetPos = target->getTransform()->getWorldPosition();
-                m_currCamera->SetPosition(targetPos + Vec3(0.f, 0.f, 20.f));
+                m_currCamera->SetPosition(targetPos + m_currCamera->GetCameraRotation() * Vec3(0.f, 0.f, 1.f) * 20.f);
             }
         }
 
