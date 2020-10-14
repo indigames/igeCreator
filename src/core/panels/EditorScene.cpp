@@ -144,7 +144,8 @@ namespace ige::creator
                 m_currShowcase->Add(m_grid2D);
 
                 m_currCamera = m_2dCamera;
-                auto canvas = obj->getRoot()->getComponent<ige::scene::Canvas>();
+
+                auto canvas = obj->getCanvas();
                 if (canvas)
                 {
                     auto canvasSize = canvas->getDesignCanvasSize();
@@ -156,6 +157,11 @@ namespace ige::creator
 
                     auto transformToViewport = Mat4::Translate(Vec3(-canvasSize.X() * 0.5f, -canvasSize.Y() * 0.5f, 0.f));
                     canvas->setCanvasToViewportMatrix(transformToViewport);
+                }
+
+                if (m_gizmo) {
+                    m_gizmo->setCamera(m_currCamera);
+                    m_gizmo->setMode(gizmo::MODE::LOCAL);
                 }
             }
         }
@@ -171,12 +177,12 @@ namespace ige::creator
                 auto size = getSize();
                 m_currCamera = m_3dCamera;
                 m_currCamera->SetAspectRate(size.x / size.y);
-            }
-        }
 
-        if (m_gizmo) {
-            m_gizmo->setCamera(m_currCamera);
-            m_gizmo->setMode(gizmo::MODE::WORLD);
+                if (m_gizmo) {
+                    m_gizmo->setCamera(m_currCamera);
+                    m_gizmo->setMode(gizmo::MODE::LOCAL);
+                }
+            }
         }
     }
 
