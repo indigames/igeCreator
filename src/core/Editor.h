@@ -55,6 +55,10 @@ namespace ige::creator
         bool isLocalGizmo() { return m_bIsLocalGizmo; }
         void toggleLocalGizmo();
 
+        //! Toggle perspective/orthor
+        bool is3DCamera() { return m_bIs3DCamera; }
+        void toggle3DCamera();
+
     protected:
         virtual void initImGUI();
         virtual bool handleEventImGUI(const SDL_Event* event);
@@ -68,5 +72,8 @@ namespace ige::creator
 
         //! Toggle local/global gizmo
         bool m_bIsLocalGizmo = true;
+
+        //! Toggle 3D/2D camera
+        bool m_bIs3DCamera = true;
     };
 }

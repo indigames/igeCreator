@@ -87,8 +87,7 @@ namespace ige::creator
                     m_bNeedResize = (currSize.x != size.x || currSize.y != size.y);
                 });
 
-                m_gizmo = createWidget<Gizmo>();
-                m_gizmo->setMode(Editor::getInstance()->isLocalGizmo() ? gizmo::MODE::LOCAL : gizmo::MODE::WORLD);
+                
 
                 m_grid2D = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, "sprite/grid");
                 m_grid2D->SetPosition(Vec3(0.f, 0.f, 0.f));
@@ -109,6 +108,12 @@ namespace ige::creator
                 m_3dCamera->LockonTarget(false);
                 m_3dCamera->SetAspectRate(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
 
+                m_currCamera = m_3dCamera;
+                
+                m_gizmo = createWidget<Gizmo>();
+                m_gizmo->setMode(Editor::getInstance()->isLocalGizmo() ? gizmo::MODE::LOCAL : gizmo::MODE::WORLD); 
+                m_gizmo->setCamera(m_currCamera);
+
                 ShapeDrawer::initialize();
 
                 SceneManager::getInstance()->setIsEditor(true);
@@ -118,71 +123,84 @@ namespace ige::creator
         }
     }
 
+    void EditorScene::set2DMode(bool is2D)
+    {
+        if (is2D && m_currCamera == m_3dCamera)
+        {
+            // Switch to 2D camera
+            m_currCamera = m_2dCamera;
+
+            if (Editor::getInstance()->getSelectedObject())
+            {
+                auto canvas = Editor::getInstance()->getSelectedObject()->getCanvas();
+                if (canvas)
+                {
+                    auto canvasSize = canvas->getDesignCanvasSize();
+                    if (m_currCamera == m_2dCamera)
+                    {
+                        m_currCamera->SetOrthoHeight(canvasSize.Y() * 0.5f);
+                    }
+                }
+            }
+
+            if (m_currShowcase)
+            {
+                m_currShowcase->Remove(m_grid3D);
+                m_currShowcase->Add(m_grid2D);
+            }
+        }
+        else if (m_currCamera == m_2dCamera)
+        {
+            // Switch to 3D camera
+            m_currCamera = m_3dCamera;
+
+            if (m_currShowcase)
+            {
+                m_currShowcase->Remove(m_grid2D);
+                m_currShowcase->Add(m_grid3D);
+            }
+        }
+
+        m_gizmo->setCamera(m_currCamera);
+    }
+
     void EditorScene::setTargetObject(const std::shared_ptr<SceneObject>& obj)
     {
         if (!isOpened() || !m_bIsInitialized)
             return;
 
+        if (m_currShowcase)
+        {
+            if (m_currCamera == m_2dCamera)
+                m_currShowcase->Remove(m_grid2D);
+            else
+                m_currShowcase->Remove(m_grid3D);
+        }
+
         if (obj == nullptr)
         {
-            if (m_currShowcase)
-            {
-                if (m_currCamera == m_2dCamera)
-                    m_currShowcase->Remove(m_grid2D);
-                if (m_currCamera == m_3dCamera)
-                    m_currShowcase->Remove(m_grid3D);
-            }
             m_currShowcase = nullptr;
             return;
         }
 
-        if (obj->isGUIObject())
-        {
-            if (m_currShowcase == nullptr || m_currCamera != m_2dCamera)
-            {
-                if(m_currShowcase)
-                    m_currShowcase->Remove(m_grid3D);
-                m_currShowcase = obj->getShowcase();
-                m_currShowcase->Add(m_grid2D);
-
-                m_currCamera = m_2dCamera;
-
-                auto canvas = obj->getCanvas();
-                if (canvas)
-                {
-                    auto canvasSize = canvas->getDesignCanvasSize();
-                    auto size = getSize();
-                    auto screenSize = Vec2(size.x, size.y);
-                    m_currCamera->SetOrthoHeight(canvasSize.Y() * 0.5f);
-                    m_currCamera->SetAspectRate(size.x / size.y);
-                    m_grid2D->SetScale({ canvasSize.Y() * 0.125f , canvasSize.Y() * 0.125f, 1.f });
-
-                    auto transformToViewport = Mat4::Translate(Vec3(-canvasSize.X() * 0.5f, -canvasSize.Y() * 0.5f, 0.f));
-                    canvas->setCanvasToViewportMatrix(transformToViewport);
-                }
-
-                if (m_gizmo) {
-                    m_gizmo->setCamera(m_currCamera);
-                }
-            }
-        }
+        m_currShowcase = obj->getShowcase();
+        if (m_currCamera == m_2dCamera)
+            m_currShowcase->Add(m_grid2D);
         else
+            m_currShowcase->Add(m_grid3D);
+
+        auto canvas = obj->getCanvas();
+        if (canvas)
         {
-            if (m_currShowcase == nullptr || m_currCamera != m_3dCamera)
+            auto canvasSize = canvas->getDesignCanvasSize();
+            if (m_currCamera == m_2dCamera)
             {
-                if (m_currShowcase)
-                    m_currShowcase->Remove(m_grid2D);
-                m_currShowcase = obj->getShowcase();
-                m_currShowcase->Add(m_grid3D);
-
-                auto size = getSize();
-                m_currCamera = m_3dCamera;
-                m_currCamera->SetAspectRate(size.x / size.y);
-
-                if (m_gizmo) {
-                    m_gizmo->setCamera(m_currCamera);
-                }
+                m_currCamera->SetOrthoHeight(canvasSize.Y() * 0.5f);
+                m_grid2D->SetScale({ canvasSize.Y() * 0.125f , canvasSize.Y() * 0.125f, 1.f });
             }
+
+            auto transformToViewport = Mat4::Translate(Vec3(-canvasSize.X() * 0.5f, -canvasSize.Y() * 0.5f, 0.f));
+            canvas->setCanvasToViewportMatrix(transformToViewport);
         }
     }
 
@@ -510,11 +528,11 @@ namespace ige::creator
 
     void EditorScene::updateCameraPosition()
     {
-        if (!isOpened() ||!isFocused() || m_currCamera == nullptr)
+        if (!isOpened() ||!isFocused() || m_currCamera == nullptr || m_currCamera == m_2dCamera)
             return;
 
         auto target = Editor::getInstance()->getSelectedObject();
-        if (target == nullptr || target->isGUIObject())
+        if (target == nullptr)
             return;
 
         auto touch = Editor::getApp()->getInputHandler()->getTouchDevice();

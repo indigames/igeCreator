@@ -240,4 +240,14 @@ namespace ige::creator
             m_canvas->getEditorScene()->getGizmo()->setMode(m_bIsLocalGizmo ? gizmo::MODE::LOCAL : gizmo::MODE::WORLD);
         }
     }
+
+    void Editor::toggle3DCamera()
+    {
+        m_bIs3DCamera = !m_bIs3DCamera;
+        if (m_canvas && m_canvas->getEditorScene())
+        {
+            m_canvas->getEditorScene()->set2DMode(!m_bIs3DCamera);
+        }
+    }
+
 }

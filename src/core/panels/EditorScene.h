@@ -27,7 +27,7 @@ namespace ige::creator
         virtual void update(float dt);
 
         bool isResizing();
-        void set2DMode(bool _2d) { m_bIs2DMode = _2d; }
+        void set2DMode(bool is2D = true);
 
         std::shared_ptr<Gizmo>& getGizmo() { return m_gizmo; }
 

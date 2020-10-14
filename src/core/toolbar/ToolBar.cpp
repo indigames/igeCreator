@@ -67,6 +67,14 @@ namespace ige::creator
                 ((Button*)widget)->setTextureId(ResourceCreator::Instance().NewTexture("icon/btn_global")->GetTextureHandle());
         });
 
+        gizmoGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/btn_3d")->GetTextureHandle(), ImVec2(16.f, 16.f), true, false)->getOnClickEvent().addListener([](auto widget) {
+            Editor::getInstance()->toggle3DCamera();
+            if (Editor::getInstance()->is3DCamera())
+                ((Button*)widget)->setTextureId(ResourceCreator::Instance().NewTexture("icon/btn_3d")->GetTextureHandle());
+            else
+                ((Button*)widget)->setTextureId(ResourceCreator::Instance().NewTexture("icon/btn_2d")->GetTextureHandle());
+        });
+
         auto playGroup = columns->createWidget<Group>("PlayGroup", false, false, Group::E_Align::CENTER);
         playGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/btn_play")->GetTextureHandle(), ImVec2(16.f, 16.f), true, false)->getOnClickEvent().addListener([](auto widget){
             Editor::getCanvas()->getGameScene()->play();
