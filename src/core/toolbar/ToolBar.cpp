@@ -62,9 +62,9 @@ namespace ige::creator
         gizmoGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture("icon/btn_local")->GetTextureHandle(), ImVec2(16.f, 16.f), true, false)->getOnClickEvent().addListener([](auto widget) {
             Editor::getInstance()->toggleLocalGizmo();
             if (Editor::getInstance()->isLocalGizmo())
-                (Button*)(widget)->setTextureId(ResourceCreator::Instance().NewTexture("icon/btn_local")->GetTextureHandle());
+                ((Button*)widget)->setTextureId(ResourceCreator::Instance().NewTexture("icon/btn_local")->GetTextureHandle());
             else
-                (Button*)(widget)->setTextureId(ResourceCreator::Instance().NewTexture("icon/btn_global")->GetTextureHandle());
+                ((Button*)widget)->setTextureId(ResourceCreator::Instance().NewTexture("icon/btn_global")->GetTextureHandle());
         });
 
         auto playGroup = columns->createWidget<Group>("PlayGroup", false, false, Group::E_Align::CENTER);
