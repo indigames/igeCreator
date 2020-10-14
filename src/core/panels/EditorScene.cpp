@@ -87,8 +87,6 @@ namespace ige::creator
                     m_bNeedResize = (currSize.x != size.x || currSize.y != size.y);
                 });
 
-                
-
                 m_grid2D = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, "sprite/grid");
                 m_grid2D->SetPosition(Vec3(0.f, 0.f, 0.f));
 
@@ -104,7 +102,7 @@ namespace ige::creator
                 m_2dCamera->SetWidthBase(false);
 
                 m_3dCamera = ResourceCreator::Instance().NewCamera("editor_3d_camera", nullptr);
-                m_3dCamera->SetPosition({ 0.f, 6.f, 20.f });
+                m_3dCamera->SetPosition({ 0.f, 3.f, 10.f });
                 m_3dCamera->LockonTarget(false);
                 m_3dCamera->SetAspectRate(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
 
@@ -139,6 +137,7 @@ namespace ige::creator
                     if (m_currCamera == m_2dCamera)
                     {
                         m_currCamera->SetOrthoHeight(canvasSize.Y() * 0.5f);
+                        m_grid2D->SetScale({ canvasSize.Y() * 0.125f , canvasSize.Y() * 0.125f, 1.f });
                     }
                 }
             }
