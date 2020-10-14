@@ -231,4 +231,13 @@ namespace ige::creator
         while (!msgBox.ready(1000));
         return true;
     }
+
+    void Editor::toggleLocalGizmo()
+    {
+        m_bIsLocalGizmo = !m_bIsLocalGizmo;
+        if (m_canvas && m_canvas->getEditorScene() && m_canvas->getEditorScene()->getGizmo())
+        {
+            m_canvas->getEditorScene()->getGizmo()->setMode(m_bIsLocalGizmo ? gizmo::MODE::LOCAL : gizmo::MODE::WORLD);
+        }
+    }
 }

@@ -51,6 +51,10 @@ namespace ige::creator
         void setSelectedObject(std::shared_ptr<SceneObject> obj);
         std::shared_ptr<SceneObject>& getSelectedObject();
 
+        //! Toggle local/global gizmo
+        bool isLocalGizmo() { return m_bIsLocalGizmo; }
+        void toggleLocalGizmo();
+
     protected:
         virtual void initImGUI();
         virtual bool handleEventImGUI(const SDL_Event* event);
@@ -61,5 +65,8 @@ namespace ige::creator
         std::shared_ptr<Canvas> m_canvas = nullptr;
         std::shared_ptr<Application> m_app = nullptr;
         std::shared_ptr<SceneObject> m_selectedObject = nullptr;
+
+        //! Toggle local/global gizmo
+        bool m_bIsLocalGizmo = true;
     };
 }

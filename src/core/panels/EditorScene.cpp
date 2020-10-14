@@ -88,6 +88,8 @@ namespace ige::creator
                 });
 
                 m_gizmo = createWidget<Gizmo>();
+                m_gizmo->setMode(Editor::getInstance()->isLocalGizmo() ? gizmo::MODE::LOCAL : gizmo::MODE::WORLD);
+
                 m_grid2D = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, "sprite/grid");
                 m_grid2D->SetPosition(Vec3(0.f, 0.f, 0.f));
 
@@ -161,7 +163,6 @@ namespace ige::creator
 
                 if (m_gizmo) {
                     m_gizmo->setCamera(m_currCamera);
-                    m_gizmo->setMode(gizmo::MODE::LOCAL);
                 }
             }
         }
@@ -180,7 +181,6 @@ namespace ige::creator
 
                 if (m_gizmo) {
                     m_gizmo->setCamera(m_currCamera);
-                    m_gizmo->setMode(gizmo::MODE::LOCAL);
                 }
             }
         }
