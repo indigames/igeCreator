@@ -134,6 +134,8 @@ namespace ige::creator
             {
             case (int)ComponentType::Camera:
                 m_targetObject->addComponent<CameraComponent>("camera");
+                if (m_targetObject->getComponent<FigureComponent>() == nullptr)
+                    m_targetObject->addComponent<FigureComponent>("figure/camera.pyxf");
                 break;
             case (int)ComponentType::Environment:
                 m_targetObject->addComponent<EnvironmentComponent>("environment");
