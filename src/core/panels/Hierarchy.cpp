@@ -53,26 +53,8 @@ namespace ige::creator
         auto isGuiObj = sceneObject.isGUIObject();
         auto node = createWidget<TreeNode>(sceneObject.getName(), false, sceneObject.getChildrenCount() == 0);
         node->getOnClickEvent().addListener([objId, this](auto widget) {
-            TaskManager::getInstance()->addTask([objId, this](){
-                // Set previous selected to false
-                auto nodePair = m_objectNodeMap.find(m_selectedNodeId);
-                if (nodePair != m_objectNodeMap.end())
-                {
-                    nodePair->second->setIsSelected(false);
-                }
-
-                // Update current selected id
-                nodePair = m_objectNodeMap.find(objId);
-                if (nodePair != m_objectNodeMap.end())
-                {
-                    m_selectedNodeId = objId;
-                    nodePair->second->setIsSelected(true);
-                }
-
-                // Update selected object
-                auto object = Editor::getCurrentScene()->findObjectById(objId);
-                if(object) object->setSelected(true);
-            });
+            auto object = Editor::getCurrentScene()->findObjectById(objId);
+            if(object) object->setSelected(true);
         });
         node->addPlugin<DDTargetPlugin<uint64_t>>(EDragDropID::OBJECT)->getOnDataReceivedEvent().addListener([this, objId](auto txt) {
             auto currentObject = Editor::getCurrentScene()->findObjectById(txt);

@@ -119,12 +119,9 @@ namespace ige::creator
         static bool firstFrame = true;
         if (firstFrame)
         {
-            if (SceneManager::getInstance()->getCurrentScene())
-                getInspector()->setFocus();
-
+            getInspector()->setFocus();
             getAssetBrowser()->setFocus();
             getEditorScene()->setFocus();
-
             firstFrame = false;
         }
 
