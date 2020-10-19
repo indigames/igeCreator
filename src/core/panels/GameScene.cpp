@@ -80,13 +80,10 @@ namespace ige::creator
                     m_bNeedResize = (currSize.x != size.x || currSize.y != size.y);
                 });
 
-                SceneManager::getInstance()->setIsEditor(false);
-
                 // Adjust camera aspect ratio
-                if (Editor::getSceneManager()->getCurrentScene())
+                if (Editor::getSceneManager()->getCurrentScene() && Editor::getSceneManager()->getCurrentScene()->getActiveCamera())
                 {
-                    for (auto cam : Editor::getSceneManager()->getCurrentScene()->getCameras())
-                        cam->setAspectRatio(size.x / size.y);
+                    Editor::getSceneManager()->getCurrentScene()->getActiveCamera()->setAspectRatio(size.x / size.y);
                 }
 
                 m_bInitialized = true;
@@ -113,10 +110,9 @@ namespace ige::creator
             m_imageWidget->setSize(size);
 
             // Adjust camera aspect ratio
-            if (Editor::getSceneManager()->getCurrentScene())
+            if (Editor::getSceneManager()->getCurrentScene() && Editor::getSceneManager()->getCurrentScene()->getActiveCamera())
             {
-                for(auto cam: Editor::getSceneManager()->getCurrentScene()->getCameras())
-                    cam->setAspectRatio(size.x / size.y);
+                Editor::getSceneManager()->getCurrentScene()->getActiveCamera()->setAspectRatio(size.x / size.y);
             }
             m_bNeedResize = false;
         }
@@ -153,6 +149,8 @@ namespace ige::creator
     {
         if (!m_bIsPlaying)
         {
+            SceneManager::getInstance()->setIsEditor(false);
+
             if (SceneManager::getInstance()->getCurrentScene())
             {
                 auto path = SceneManager::getInstance()->getCurrentScene()->getName() + "_tmp";

@@ -44,7 +44,6 @@ namespace ige::creator
         m_grid2D = nullptr;
         m_grid3D = nullptr;
 
-        m_currShowcase = nullptr;
         m_currCamera = nullptr;
 
         if (m_2dCamera)
@@ -182,7 +181,7 @@ namespace ige::creator
             return;
         }
 
-        m_currShowcase = obj->getShowcase();
+        m_currShowcase = obj->getScene()->getShowcase();
         if (m_currCamera == m_2dCamera)
             m_currShowcase->Add(m_grid2D);
         else
@@ -252,6 +251,68 @@ namespace ige::creator
         //! Update camera
         updateCameraPosition();
 
+        // Update object selection
+        updateObjectSelection();
+
+        // Update keyboard
+        updateKeyboard();
+
+        // Update scene
+        Editor::getSceneManager()->update(dt);
+
+        // Render
+        auto renderContext = RenderContext::InstancePtr();
+        if (renderContext && m_fbo)
+        {
+            renderContext->BeginScene(m_fbo, Vec4(0.2f, 0.2f, 0.2f, 1.f), true, true);
+
+            // Render camera
+            m_currCamera->Step(dt);
+            m_currCamera->Render();
+
+            Editor::getSceneManager()->render();
+
+            // Render debug context
+            ShapeDrawer::setViewProjectionMatrix(renderContext->GetRenderViewProjectionMatrix());
+
+            // Render bounding box
+            renderBoundingBox();
+
+            // Render physic debug
+            renderPhysicDebug();
+
+            // Render camera frustum
+            renderCameraFrustum();
+
+            renderContext->EndScene();
+        }
+    }
+
+    void EditorScene::_drawImpl()
+    {
+        Panel::_drawImpl();
+    }
+
+    //! Update keyboard
+    void EditorScene::updateKeyboard()
+    {
+        // Press "F" key focus on target object
+        auto keyboard = Editor::getApp()->getInputHandler()->getKeyboard();
+        if (keyboard->wasReleased(KeyCode::KEY_F))
+        {
+            auto target = Editor::getInstance()->getSelectedObject();
+            if (target && m_currCamera)
+            {
+                auto targetPos = target->getTransform()->getWorldPosition();
+                m_currCamera->SetPosition(targetPos + m_currCamera->GetCameraRotation() * Vec3(0.f, 0.f, 1.f) * 20.f);
+            }
+        }
+    }
+
+
+    //! Object selection with touch/mouse
+    void EditorScene::updateObjectSelection()
+    {
         // If left button release, check selected object
         auto touch = Editor::getApp()->getInputHandler()->getTouchDevice();
         if (isFocused() && isHovered() && touch->isFingerReleased(0) && touch->getFinger(0)->getFingerId() == 0)
@@ -284,59 +345,24 @@ namespace ige::creator
 
             RayOBBChecker::screenPosToWorldRay(x, y, w, h, viewInv, proj);
 
-            RayOBBChecker::setChecking(true);
-        }
+            bool intersected = false;
+            float distance;
 
-        // Press "F" key focus on target object
-        auto keyboard = Editor::getApp()->getInputHandler()->getKeyboard();
-        if (keyboard->wasReleased(KeyCode::KEY_F))
-        {
-            auto target = Editor::getInstance()->getSelectedObject();
-            if (target && m_currCamera)
+            for (const auto& obj : SceneManager::getInstance()->getCurrentScene()->getObjects())
             {
-                auto targetPos = target->getTransform()->getWorldPosition();
-                m_currCamera->SetPosition(targetPos + m_currCamera->GetCameraRotation() * Vec3(0.f, 0.f, 1.f) * 20.f);
+                if (obj)
+                {
+                    auto transform = obj->getTransform();
+                    intersected = RayOBBChecker::checkIntersect(transform->getAabbMin(), transform->getAabbMax(), transform->getWorldMatrix(), distance);
+
+                    // Update selected info
+                    obj->setSelected(intersected);
+
+                    if (intersected)
+                        break;
+                }
             }
         }
-
-        // Update scene
-        Editor::getSceneManager()->update(dt);
-
-        // All object updated, no more checking
-        RayOBBChecker::setChecking(false);
-
-        // Render
-        auto renderContext = RenderContext::InstancePtr();
-        if (renderContext && m_fbo)
-        {
-            renderContext->BeginScene(m_fbo, Vec4(0.2f, 0.2f, 0.2f, 1.f), true, true);
-
-            // Render camera
-            m_currCamera->Step(dt);
-            m_currCamera->Render();
-
-            // Render scene
-            m_currShowcase->Render();
-
-            // Render debug context
-            ShapeDrawer::setViewProjectionMatrix(renderContext->GetRenderViewProjectionMatrix());
-
-            // Render bounding box
-            renderBoundingBox();
-
-            // Render physic debug
-            renderPhysicDebug();
-
-            // Render camera frustum
-            renderCameraFrustum();
-
-            renderContext->EndScene();
-        }
-    }
-
-    void EditorScene::_drawImpl()
-    {
-        Panel::_drawImpl();
     }
 
     void EditorScene::renderBoundingBox()

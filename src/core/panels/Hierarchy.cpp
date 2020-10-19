@@ -51,7 +51,7 @@ namespace ige::creator
         auto objId = sceneObject.getId();
         auto name = sceneObject.getName();
         auto isGuiObj = sceneObject.isGUIObject();
-        auto node = createWidget<TreeNode>(sceneObject.getName(), false, sceneObject.getChildrenCount() == 0);
+        auto node = createWidget<TreeNode>(sceneObject.getName(), false, sceneObject.getChildren().size() == 0);
         node->getOnClickEvent().addListener([objId, this](auto widget) {
             auto object = Editor::getCurrentScene()->findObjectById(objId);
             if(object) object->setSelected(true);
@@ -59,9 +59,7 @@ namespace ige::creator
         node->addPlugin<DDTargetPlugin<uint64_t>>(EDragDropID::OBJECT)->getOnDataReceivedEvent().addListener([this, objId](auto txt) {
             auto currentObject = Editor::getCurrentScene()->findObjectById(txt);
             auto obj = Editor::getCurrentScene()->findObjectById(objId);
-            if (currentObject->getParent())
-                currentObject->getParent()->removeChild(currentObject);
-            obj->addChild(currentObject);
+            currentObject->setParent(obj.get());
         });
         node->addPlugin<DDSourcePlugin<uint64_t>>(EDragDropID::OBJECT, sceneObject.getName(), objId);
 
@@ -160,7 +158,7 @@ namespace ige::creator
                 newLabel->addComponent<UITextField>("TextField");
                 auto id = newLabel->getId();
                 newObject->getSelectedEvent().addListener([id](SceneObject& obj) {
-                    auto label = obj.findObjectById(id);
+                    auto label = Editor::getCurrentScene()->findObjectById(id);
                     if (label) {
                         auto txtField = label->getComponent<UITextField>();
                         if(txtField) {
@@ -204,7 +202,7 @@ namespace ige::creator
             if (widget->hasContainer())
                  widget->getContainer()->removeWidget(widget);
 
-            if (sceneObject.hasParent())
+            if (sceneObject.getParent())
             {
                 auto parentWidget = m_objectNodeMap.at(sceneObject.getParent()->getId());
                 parentWidget->setIsLeaf(false);
@@ -220,15 +218,15 @@ namespace ige::creator
 
         if (nodePair != m_objectNodeMap.end())
         {
-            if (sceneObject.hasParent() && sceneObject.getParent()->getChildrenCount() == 1)
+            if (sceneObject.getParent() && sceneObject.getParent()->getChildren().size() == 1)
             {
                 auto parentWidget = m_objectNodeMap.at(sceneObject.getParent()->getId());
                 parentWidget->setIsLeaf(true);
-            }
 
-            auto widget = nodePair->second;
-            if (widget->hasContainer())
-                widget->getContainer()->removeWidget(widget);
+                auto widget = nodePair->second;
+                if (widget->hasContainer())
+                    widget->getContainer()->removeWidget(widget);
+            }
         }
     }
 
@@ -291,15 +289,7 @@ namespace ige::creator
                     if (Editor::getCurrentScene() == nullptr)
                     {
                         auto scene = Editor::getSceneManager()->createScene("New scene");
-                        if (scene)
-                        {
-                            Editor::getSceneManager()->setCurrentScene(scene);
-                            auto obj = Editor::getCurrentScene()->findObjectById(0);
-                            if (obj)
-                            {
-                                obj->setSelected(true);
-                            }
-                        }
+                        Editor::getSceneManager()->setCurrentScene(scene);
                     }
                     auto newObj = Editor::getCurrentScene()->createObject("New scene");
                     newObj->setSelected(true);

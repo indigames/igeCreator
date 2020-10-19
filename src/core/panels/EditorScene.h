@@ -47,6 +47,12 @@ namespace ige::creator
         //! Camera movement with mouse
         void updateCameraPosition();
 
+        //! Object selection with touch/mouse
+        void updateObjectSelection();
+
+        //! Update keyboard
+        void updateKeyboard();
+
         //! Scene FBO
         std::shared_ptr<Image> m_imageWidget = nullptr;
         Texture* m_rtTexture = nullptr;
