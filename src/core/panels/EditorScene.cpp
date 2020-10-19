@@ -133,12 +133,15 @@ namespace ige::creator
                 if (canvas)
                 {
                     auto canvasSize = canvas->getDesignCanvasSize();
-                    if (m_currCamera == m_2dCamera)
-                    {
-                        m_currCamera->SetOrthoHeight(canvasSize.Y() * 0.5f);
-                        m_grid2D->SetScale({ canvasSize.Y() * 0.125f , canvasSize.Y() * 0.125f, 1.f });
-                    }
+                    m_currCamera->SetOrthoHeight(canvasSize.Y() * 0.5f);
+                    m_grid2D->SetScale({ canvasSize.Y() * 0.125f , canvasSize.Y() * 0.125f, 1.f });
                 }
+            }
+            else
+            {
+                const float canvasHeight = 960.f;
+                m_currCamera->SetOrthoHeight(canvasHeight * 0.5f);
+                m_grid2D->SetScale({ canvasHeight * 0.125f ,canvasHeight * 0.125f, 1.f });
             }
 
             if (m_currShowcase)
