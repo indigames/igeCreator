@@ -7,6 +7,7 @@
 #include "core/Canvas.h"
 #include "core/ShapeDrawer.h"
 #include "core/plugin/DragDropPlugin.h"
+#include "core/FileHandle.h"
 
 #include "utils/GraphicsHelper.h"
 #include "scene/Scene.h"
@@ -18,10 +19,14 @@
 #include "components/physic/PhysicBox.h"
 #include "components/physic/PhysicSphere.h"
 #include "components/physic/PhysicCapsule.h"
+#include "components/audio/AudioSource.h"
 using namespace ige::scene;
 
 #include <utils/PyxieHeaders.h>
 using namespace pyxie;
+
+#include "utils/filesystem.h"
+namespace fs = ghc::filesystem;
 
 namespace ige::creator
 {
@@ -116,12 +121,75 @@ namespace ige::creator
 
                 SceneManager::getInstance()->setIsEditor(true);
 
-                m_imageWidget->addPlugin<DDTargetPlugin<uint64_t>>(EDragDropID::OBJECT)->getOnDataReceivedEvent().addListener([](auto objectId) {
-                    auto currentObject = Editor::getCurrentScene()->findObjectById(objectId);
-                });
+                initDragDrop();
 
                 m_bIsInitialized = true;
             }
+        }
+    }
+
+    void EditorScene::initDragDrop()
+    {
+        // Scene drag/drop
+        for (const auto& type : GetFileExtensionSuported(E_FileExts::Scene))
+        {
+            m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto path) {
+                if (!path.empty()) {
+                    Editor::getInstance()->setSelectedObject(-1);
+
+                    auto& scene = Editor::getCurrentScene();
+                    if (scene) Editor::getSceneManager()->unloadScene(scene);
+                    scene = nullptr;
+
+                    Editor::getCanvas()->getHierarchy()->clear();
+                    Editor::getCanvas()->getHierarchy()->initialize();
+                    Editor::getSceneManager()->loadScene(path);
+                }
+            });
+        }
+
+        // Figure drag/drop
+        for (const auto& type : GetFileExtensionSuported(E_FileExts::Figure))
+        {
+            m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto path) {
+                if (Editor::getInstance()->getCurrentScene() && !path.empty()) {
+                    const auto& currentObject = Editor::getInstance()->getSelectedObject();
+                    Editor::getInstance()->getCurrentScene()->createObject(fs::path(path).stem(), currentObject)->addComponent<FigureComponent>(path);
+                }
+            });
+        }
+
+        // Sprite drag/drop
+        for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
+        {
+            m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto path) {
+                if (Editor::getInstance()->getCurrentScene() && !path.empty()) {
+                    const auto& currentObject = Editor::getInstance()->getSelectedObject();
+                    Editor::getInstance()->getCurrentScene()->createObject(fs::path(path).stem(), currentObject)->addComponent<SpriteComponent>(path);
+                }
+            });
+        }
+
+        // Audio drag/drop
+        for (const auto& type : GetFileExtensionSuported(E_FileExts::Audio))
+        {
+            m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto path) {
+                if (Editor::getInstance()->getCurrentScene() && !path.empty()) {
+                    const auto& currentObject = Editor::getInstance()->getSelectedObject();
+                    Editor::getInstance()->getCurrentScene()->createObject(fs::path(path).stem(), currentObject)->addComponent<AudioSource>(path);
+                }
+            });
+        }
+
+        // Prefab drag/drop
+        for (const auto& type : GetFileExtensionSuported(E_FileExts::Prefab))
+        {
+            m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto path) {
+                if (Editor::getInstance()->getCurrentScene() && !path.empty()) {
+                    const auto& currentObject = Editor::getInstance()->getSelectedObject();
+                    Editor::getInstance()->getCurrentScene()->loadPrefab(currentObject->getId(), path);
+                }
+            });
         }
     }
 

@@ -35,6 +35,8 @@ namespace ige::creator
         virtual void initialize() override;
         virtual void _drawImpl() override;
 
+        void initDragDrop();
+
         //! Render bouding box
         void renderBoundingBox();
 
