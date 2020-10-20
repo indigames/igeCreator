@@ -59,6 +59,10 @@ namespace ige::creator
         bool is3DCamera() { return m_bIs3DCamera; }
         void toggle3DCamera();
 
+        //! Prefab save/load
+        bool savePrefab(uint64_t objectId, const std::string& file);
+        bool loadPrefab(uint64_t parentId, const std::string& file);
+
     protected:
         virtual void initImGUI();
         virtual bool handleEventImGUI(const SDL_Event* event);

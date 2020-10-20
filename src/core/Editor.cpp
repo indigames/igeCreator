@@ -250,4 +250,18 @@ namespace ige::creator
         }
     }
 
+    //! Prefab save/load
+    bool Editor::savePrefab(uint64_t objectId, const std::string& file)
+    {
+        if (getSceneManager()->getCurrentScene())
+            return getSceneManager()->getCurrentScene()->savePrefab(objectId, file);
+        return false;
+    }
+
+    bool Editor::loadPrefab(uint64_t parentId, const std::string& file)
+    {
+        if (getSceneManager()->getCurrentScene())
+            return getSceneManager()->getCurrentScene()->loadPrefab(parentId, file);
+        return false;
+    }
 }

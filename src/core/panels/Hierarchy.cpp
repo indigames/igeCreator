@@ -124,10 +124,10 @@ namespace ige::creator
 
             guiMenu->createWidget<MenuItem>("Button")->getOnClickEvent().addListener([objId](auto widget) {
                 auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                auto newBtn = Editor::getCurrentScene()->createGUIObject("Button", currentObject);
+                auto newBtn = Editor::getCurrentScene()->createObject("Button", currentObject, true);
                 auto rect = std::dynamic_pointer_cast<RectTransform>(newBtn->getTransform());
                 newBtn->addComponent<UIImage>("sprite/rect", rect->getSize());
-                auto newBtnLabel = Editor::getCurrentScene()->createGUIObject("Label", newBtn, Vec3(), Vec2());
+                auto newBtnLabel = Editor::getCurrentScene()->createObject("Label", newBtn, true, Vec2());
                 newBtnLabel->addComponent<UIText>("Button");
                 newBtn->addComponent<ScriptComponent>(fs::createScript(newBtn->getName() + std::to_string(newBtn->getId())));
                 newBtn->setSelected(true);
@@ -135,7 +135,7 @@ namespace ige::creator
 
             guiMenu->createWidget<MenuItem>("UIImage")->getOnClickEvent().addListener([objId](auto widget) {
                 auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getCurrentScene()->createGUIObject("UIImage", currentObject);
+                auto newObject = Editor::getCurrentScene()->createObject("UIImage", currentObject, true);
                 auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
                 newObject->addComponent<UIImage>("sprite/rect", rect->getSize());
                 newObject->setSelected(true);
@@ -143,7 +143,7 @@ namespace ige::creator
 
             guiMenu->createWidget<MenuItem>("UIText")->getOnClickEvent().addListener([objId](auto widget) {
                 auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getCurrentScene()->createGUIObject("UIText", currentObject);
+                auto newObject = Editor::getCurrentScene()->createObject("UIText", currentObject, true);
                 auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
                 newObject->addComponent<UIText>("Text");
                 newObject->setSelected(true);
@@ -151,10 +151,10 @@ namespace ige::creator
             
             guiMenu->createWidget<MenuItem>("UITextField")->getOnClickEvent().addListener([objId](auto widget) {
                 auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getCurrentScene()->createGUIObject("UITextField", currentObject);
+                auto newObject = Editor::getCurrentScene()->createObject("UITextField", currentObject, true);
                 auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
                 newObject->addComponent<UIImage>("sprite/rect", rect->getSize());
-                auto newLabel = Editor::getCurrentScene()->createGUIObject("Label", newObject, Vec3(), Vec2());
+                auto newLabel = Editor::getCurrentScene()->createObject("Label", newObject, true, Vec2());
                 newLabel->addComponent<UITextField>("TextField");
                 auto id = newLabel->getId();
                 newObject->getSelectedEvent().addListener([id](SceneObject& obj) {
@@ -303,7 +303,7 @@ namespace ige::creator
                         auto scene = Editor::getSceneManager()->createScene("New scene");
                         Editor::getSceneManager()->setCurrentScene(scene);
                     }
-                    auto newObj = Editor::getCurrentScene()->createGUIObject("Canvas");
+                    auto newObj = Editor::getCurrentScene()->createObject("Canvas", nullptr, true);
                     auto canvas = newObj->getCanvas();
                     canvas->setDesignCanvasSize(Vec2(540.f, 960.f));
                     auto uiImage = newObj->addComponent<UIImage>();

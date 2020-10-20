@@ -6,6 +6,7 @@
 #include "core/Editor.h"
 #include "core/Canvas.h"
 #include "core/ShapeDrawer.h"
+#include "core/plugin/DragDropPlugin.h"
 
 #include "utils/GraphicsHelper.h"
 #include "scene/Scene.h"
@@ -114,6 +115,10 @@ namespace ige::creator
                 ShapeDrawer::initialize();
 
                 SceneManager::getInstance()->setIsEditor(true);
+
+                m_imageWidget->addPlugin<DDTargetPlugin<uint64_t>>(EDragDropID::OBJECT)->getOnDataReceivedEvent().addListener([](auto objectId) {
+                    auto currentObject = Editor::getCurrentScene()->findObjectById(objectId);
+                });
 
                 m_bIsInitialized = true;
             }
