@@ -180,6 +180,8 @@ namespace ige::creator
         {
             clear();
 
+            SceneManager::getInstance()->setIsEditor(true);
+
             if (SceneManager::getInstance()->getCurrentScene())
             {
                 auto name = SceneManager::getInstance()->getCurrentScene()->getName();
@@ -202,8 +204,6 @@ namespace ige::creator
             m_bIsPausing = false;
             m_bIsPlaying = false;
         }
-
-        SceneManager::getInstance()->setIsEditor(true);
         Editor::getCanvas()->getEditorScene()->setFocus();
     }
 }
