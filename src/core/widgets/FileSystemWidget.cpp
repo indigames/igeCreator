@@ -231,6 +231,7 @@ namespace ige::creator
 
             ImGui::PushID(id++);
             bool clicked = ImGui::Button(dir.filename().string().c_str());
+            ProcessDragDropTarget(dir);
             ImGui::PopID();
 
             if (clicked)

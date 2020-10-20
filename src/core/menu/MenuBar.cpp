@@ -66,7 +66,7 @@ namespace ige::creator
         });
 
         fileMenu->createWidget<MenuItem>("Open Scene", "CTRL + O")->getOnClickEvent().addListener([this](auto widget){
-            auto selectedFiles = OpenFileDialog("Open", ".", { "json", "*.json" }).result();
+            auto selectedFiles = OpenFileDialog("Open", ".", { "scene", "*.scene" }).result();
             if (!selectedFiles.empty() && !selectedFiles[0].empty())
             {
                 TaskManager::getInstance()->addTask([selectedFiles](){
@@ -85,7 +85,7 @@ namespace ige::creator
         });
 
         fileMenu->createWidget<MenuItem>("Save Scene", "CTRL + S")->getOnClickEvent().addListener([this](auto widget) {
-            auto selectedFile = SaveFileDialog("Save", ".", { "json", "*.json" }).result();
+            auto selectedFile = SaveFileDialog("Save", ".", { "scene", "*.scene" }).result();
             if (!selectedFile.empty())
             {
                 TaskManager::getInstance()->addTask([selectedFile, this]() {

@@ -2,6 +2,7 @@
 #include <imgui_internal.h>
 
 #include "core/filesystem/FileSystem.h"
+#include "core/FileHandle.h"
 
 #include <scene/Scene.h>
 #include <scene/SceneObject.h>
@@ -60,6 +61,9 @@ namespace ige::creator
             auto currentObject = Editor::getCurrentScene()->findObjectById(txt);
             auto obj = Editor::getCurrentScene()->findObjectById(objId);
             currentObject->setParent(obj.get());
+        });
+        node->addPlugin<DDTargetPlugin<std::string>>(GetFileExtensionSuported(E_FileExts::Prefab)[0])->getOnDataReceivedEvent().addListener([this, objId](auto path) {
+            Editor::getCurrentScene()->loadPrefab(objId, path);
         });
         node->addPlugin<DDSourcePlugin<uint64_t>>(EDragDropID::OBJECT, sceneObject.getName(), objId);
 
