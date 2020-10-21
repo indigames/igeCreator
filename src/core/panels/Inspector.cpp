@@ -528,8 +528,8 @@ namespace ige::creator
 
         // Shadow
         auto shadowGroup = m_environmentCompGroup->createWidget<Group>("Shadow");
-        std::array shadowColor = {environment->getShadowColor().X(), environment->getShadowColor().Y(), environment->getShadowColor().Z()};
-        shadowGroup->createWidget<Drag<float, 3>>("Color", ImGuiDataType_Float, shadowColor, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        auto shadowColor = Vec4(environment->getShadowColor(), 1.f);
+        shadowGroup->createWidget<Color>("Color", shadowColor)->getOnDataChangedEvent().addListener([this](auto val) {
             auto environment = m_targetObject->getComponent<EnvironmentComponent>();
             environment->setShadowColor({val[0], val[1], val[2]});
         });
@@ -547,10 +547,11 @@ namespace ige::creator
 
         // Fog
         auto fogGroup = m_environmentCompGroup->createWidget<Group>("Fog");
-        std::array fogColor = {environment->getDistanceFogColor().X(), environment->getDistanceFogColor().Y(), environment->getDistanceFogColor().Z()};
-        fogGroup->createWidget<Drag<float, 3>>("Color", ImGuiDataType_Float, fogColor, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        auto fogColor = Vec4(environment->getDistanceFogColor(), environment->getDistanceFogAlpha());
+        fogGroup->createWidget<Color>("Color", fogColor)->getOnDataChangedEvent().addListener([this](auto val) {
             auto environment = m_targetObject->getComponent<EnvironmentComponent>();
             environment->setDistanceFogColor({val[0], val[1], val[2]});
+            environment->setDistanceFogAlpha(val[4]);
         });
         auto fogColumn = fogGroup->createWidget<Columns<3>>(120.f);
         std::array fogNear = {environment->getDistanceFogNear()};
@@ -562,11 +563,6 @@ namespace ige::creator
         fogColumn->createWidget<Drag<float>>("Far", ImGuiDataType_Float, fogNear, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
             auto environment = m_targetObject->getComponent<EnvironmentComponent>();
             environment->setDistanceFogFar(val[0]);
-        });
-        std::array fogAlpha = {environment->getDistanceFogAlpha()};
-        fogColumn->createWidget<Drag<float>>("Alpha", ImGuiDataType_Float, fogAlpha, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto environment = m_targetObject->getComponent<EnvironmentComponent>();
-            environment->setDistanceFogAlpha(val[0]);
         });
     }
 
