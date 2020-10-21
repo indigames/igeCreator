@@ -628,7 +628,11 @@ namespace ige::creator
 
                         if ((currMat->params[j].type == ParamTypeFloat4))
                         {
-                            m_figureCompGroup->createWidget<Color>(info->name, currMat->params[j].fValue);
+                            auto color = Vec4(currMat->params[j].fValue[0], currMat->params[j].fValue[1], currMat->params[j].fValue[2], currMat->params[j].fValue[3]);
+                            m_figureCompGroup->createWidget<Color>(info->name, color)->getOnDataChangedEvent().addListener([currMat, j](auto val) {
+                                for (int i = 0; i < 4; ++i)
+                                    currMat->params[j].fValue[i] = val[i];
+                            });
                         }
                         else if ((currMat->params[j].type == ParamTypeSampler))
                         {
@@ -1134,10 +1138,8 @@ namespace ige::creator
             uiText->setFontSize((int)val[0]);
         });
 
-        static Vec4 color4;
-        color4 = uiText->getColor();
-        auto color = m_uiTextGroup->createWidget<Color>("Color", color4.P());
-        color->getOnDataChangedEvent().addListener([this](auto &color) {
+        auto color = uiText->getColor();
+        m_uiTextGroup->createWidget<Color>("Color", color)->getOnDataChangedEvent().addListener([this](auto &color) {
             auto uiText = m_targetObject->getComponent<UIText>();
             uiText->setColor({color[0], color[1], color[2], color[3]});
         });
@@ -1428,14 +1430,14 @@ namespace ige::creator
         if (ambientLight == nullptr)
             return;
 
-        std::array skyColor = { ambientLight->getSkyColor().X(), ambientLight->getSkyColor().Y(), ambientLight->getSkyColor().Z() };        
-        m_ambientLightGroup->createWidget<Drag<float, 3>>("SkyColor", ImGuiDataType_Float, skyColor, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        auto color = Vec4(ambientLight->getSkyColor(), 1.f);
+        m_ambientLightGroup->createWidget<Color>("SkyColor", color)->getOnDataChangedEvent().addListener([this](auto val) {
             auto ambientLight = m_targetObject->getComponent<AmbientLight>();
             ambientLight->setSkyColor({ val[0], val[1], val[2] });
         });
 
-        std::array groundColor = { ambientLight->getGroundColor().X(), ambientLight->getGroundColor().Y(), ambientLight->getGroundColor().Z() };
-        m_ambientLightGroup->createWidget<Drag<float, 3>>("GroundColor", ImGuiDataType_Float, groundColor, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        color = Vec4(ambientLight->getGroundColor(), 1.f);
+        m_ambientLightGroup->createWidget<Color>("GroundColor", color)->getOnDataChangedEvent().addListener([this](auto val) {
             auto ambientLight = m_targetObject->getComponent<AmbientLight>();
             ambientLight->setGroundColor({ val[0], val[1], val[2] });
         });
@@ -1458,14 +1460,14 @@ namespace ige::creator
         if (directionalLight == nullptr)
             return;
 
-        std::array color = { directionalLight->getColor().X(), directionalLight->getColor().Y(), directionalLight->getColor().Z() };
-        m_directionalLightGroup->createWidget<Drag<float, 3>>("Color", ImGuiDataType_Float, color, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        auto color = Vec4(directionalLight->getColor(), 1.f);
+        m_directionalLightGroup->createWidget<Color>("Color", color)->getOnDataChangedEvent().addListener([this](auto val) {
             auto directionalLight = m_targetObject->getComponent<DirectionalLight>();
             directionalLight->setColor({ val[0], val[1], val[2] });
         });
 
         std::array intensity = { directionalLight->getIntensity()};
-        m_directionalLightGroup->createWidget<Drag<float>>("Intensity", ImGuiDataType_Float, intensity)->getOnDataChangedEvent().addListener([this](auto val) {
+        m_directionalLightGroup->createWidget<Drag<float>>("Intensity", ImGuiDataType_Float, intensity, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
             auto directionalLight = m_targetObject->getComponent<DirectionalLight>();
             directionalLight->setIntensity(val[0]);
         });
@@ -1482,20 +1484,20 @@ namespace ige::creator
         if (pointLight == nullptr)
             return;
 
-        std::array color = { pointLight->getColor().X(), pointLight->getColor().Y(), pointLight->getColor().Z() };
-        m_pointLightGroup->createWidget<Drag<float, 3>>("Color", ImGuiDataType_Float, color, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        auto color = Vec4(pointLight->getColor(), 1.f);
+        m_pointLightGroup->createWidget<Color>("Color", color)->getOnDataChangedEvent().addListener([this](auto val) {
             auto pointLight = m_targetObject->getComponent<PointLight>();
             pointLight->setColor({ val[0], val[1], val[2] });
         });
 
         std::array intensity = { pointLight->getIntensity() };
-        m_pointLightGroup->createWidget<Drag<float>>("Intensity", ImGuiDataType_Float, intensity)->getOnDataChangedEvent().addListener([this](auto val) {
+        m_pointLightGroup->createWidget<Drag<float>>("Intensity", ImGuiDataType_Float, intensity, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
             auto pointLight = m_targetObject->getComponent<PointLight>();
             pointLight->setIntensity(val[0]);
         });
 
         std::array range = { pointLight->getRange() };
-        m_pointLightGroup->createWidget<Drag<float>>("Range", ImGuiDataType_Float, range)->getOnDataChangedEvent().addListener([this](auto val) {
+        m_pointLightGroup->createWidget<Drag<float>>("Range", ImGuiDataType_Float, range, 0.01f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
             auto pointLight = m_targetObject->getComponent<PointLight>();
             pointLight->setRange(val[0]);
         });

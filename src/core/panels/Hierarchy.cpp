@@ -222,7 +222,7 @@ namespace ige::creator
 
         if (nodePair != m_objectNodeMap.end())
         {
-            if (sceneObject.getParent() && sceneObject.getParent()->getChildren().size() == 1)
+            if (sceneObject.getParent() && sceneObject.getParent()->getChildren().size() == 0)
             {
                 auto parentWidget = m_objectNodeMap.at(sceneObject.getParent()->getId());
                 parentWidget->setIsLeaf(true);
