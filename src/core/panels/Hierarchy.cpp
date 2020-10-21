@@ -290,32 +290,18 @@ namespace ige::creator
             auto ctxMenu = m_groupLayout->addPlugin<WindowContextMenu>("Hierarchy_Context");
             ctxMenu->createWidget<MenuItem>("New Scene")->getOnClickEvent().addListener([](auto widget) {
                 TaskManager::getInstance()->addTask([]() {
-                    if (Editor::getCurrentScene() == nullptr)
+                    Editor::getInstance()->setSelectedObject(-1);
+
+                    auto& scene = Editor::getCurrentScene();
+                    if (scene)
                     {
-                        auto scene = Editor::getSceneManager()->createScene("New scene");
-                        Editor::getSceneManager()->setCurrentScene(scene);
+                        Editor::getSceneManager()->unloadScene(scene);
+                        scene = nullptr;
                     }
-                    auto newObj = Editor::getCurrentScene()->createObject("New scene");
-                    newObj->setSelected(true);
+                    scene = Editor::getSceneManager()->createScene();
+                    Editor::setCurrentScene(scene);
                 });
             });
-
-            ctxMenu->createWidget<MenuItem>("New Canvas")->getOnClickEvent().addListener([](auto widget) {
-                TaskManager::getInstance()->addTask([](){
-                    if (Editor::getCurrentScene() == nullptr)
-                    {
-                        auto scene = Editor::getSceneManager()->createScene("New scene");
-                        Editor::getSceneManager()->setCurrentScene(scene);
-                    }
-                    auto newObj = Editor::getCurrentScene()->createObject("Canvas", nullptr, true);
-                    auto canvas = newObj->getCanvas();
-                    canvas->setDesignCanvasSize(Vec2(540.f, 960.f));
-                    auto uiImage = newObj->addComponent<UIImage>();
-                    uiImage->setPath("sprite/rect");
-                    newObj->setSelected(true);
-                });
-            });
-
             m_bInitialized = true;
         }
     }

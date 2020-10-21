@@ -53,10 +53,9 @@ namespace ige::creator
     void MenuBar::createFileMenu()
     {
         auto fileMenu = createWidget<Menu>("File");
-        fileMenu->createWidget<MenuItem>("Emtpy Scene", "CTRL + N")->getOnClickEvent().addListener([this](auto widget) {
+        fileMenu->createWidget<MenuItem>("New Scene", "CTRL + N")->getOnClickEvent().addListener([this](auto widget) {
             TaskManager::getInstance()->addTask([](){
                 Editor::getInstance()->setSelectedObject(-1);
-                Editor::getCanvas()->getEditorScene()->clear();
 
                 auto& scene = Editor::getCurrentScene();
                 if (scene)
@@ -64,7 +63,7 @@ namespace ige::creator
                     Editor::getSceneManager()->unloadScene(scene);
                     scene = nullptr;
                 }
-                scene = Editor::getSceneManager()->createScene("New scene");
+                scene = Editor::getSceneManager()->createScene();
                 Editor::setCurrentScene(scene);
             });
         });

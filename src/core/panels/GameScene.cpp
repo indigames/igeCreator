@@ -189,7 +189,8 @@ namespace ige::creator
                 Editor::getCanvas()->getHierarchy()->clear();
                 Editor::getCanvas()->getHierarchy()->initialize();
                 SceneManager::getInstance()->unloadScene(name);
-                SceneManager::getInstance()->loadScene(name + "_tmp");
+                auto scene = SceneManager::getInstance()->loadScene(name + "_tmp");
+                SceneManager::getInstance()->setCurrentScene(scene);
 
                 Editor::getInstance()->setSelectedObject(m_lastObjectId);
                 m_lastObjectId = -1;
