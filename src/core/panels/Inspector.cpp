@@ -551,7 +551,7 @@ namespace ige::creator
         fogGroup->createWidget<Color>("Color", fogColor)->getOnDataChangedEvent().addListener([this](auto val) {
             auto environment = m_targetObject->getComponent<EnvironmentComponent>();
             environment->setDistanceFogColor({val[0], val[1], val[2]});
-            environment->setDistanceFogAlpha(val[4]);
+            environment->setDistanceFogAlpha(val[3]);
         });
         auto fogColumn = fogGroup->createWidget<Columns<3>>(120.f);
         std::array fogNear = {environment->getDistanceFogNear()};
