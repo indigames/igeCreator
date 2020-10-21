@@ -96,6 +96,15 @@ namespace ige::creator
         //! Draw AudioListener component
         void drawAudioListener();
 
+        //! Draw Ambient Light
+        void drawAmbientLight();
+
+        //! Draw Directional Light
+        void drawDirectionalLight();
+
+        //! Draw Point Light
+        void drawPointLight();
+
         //! Redraw
         void redraw() { m_bNeedRedraw = true;  }
 
@@ -118,6 +127,9 @@ namespace ige::creator
         std::shared_ptr<Group> m_figureCompGroup = nullptr;
         std::shared_ptr<Group> m_spriteCompGroup = nullptr;
         std::shared_ptr<Group> m_scriptCompGroup = nullptr;
+        std::shared_ptr<Group> m_ambientLightGroup = nullptr;
+        std::shared_ptr<Group> m_directionalLightGroup = nullptr;
+        std::shared_ptr<Group> m_pointLightGroup = nullptr;
         std::shared_ptr<Group> m_rectTransformGroup = nullptr;
         std::shared_ptr<Group> m_rectTransformAnchorGroup = nullptr;
         std::shared_ptr<Group> m_canvasGroup = nullptr;

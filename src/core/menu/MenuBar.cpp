@@ -58,8 +58,12 @@ namespace ige::creator
                 Editor::getInstance()->setSelectedObject(-1);
                 Editor::getCanvas()->getEditorScene()->clear();
 
-                auto scene = Editor::getCurrentScene();
-                if (scene) Editor::getSceneManager()->unloadScene(scene);
+                auto& scene = Editor::getCurrentScene();
+                if (scene)
+                {
+                    Editor::getSceneManager()->unloadScene(scene);
+                    scene = nullptr;
+                }
                 scene = Editor::getSceneManager()->createScene("New scene");
                 Editor::setCurrentScene(scene);
             });

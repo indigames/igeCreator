@@ -25,6 +25,9 @@
 #include <components/FigureComponent.h>
 #include <components/SpriteComponent.h>
 #include <components/ScriptComponent.h>
+#include <components/AmbientLight.h>
+#include <components/DirectionalLight.h>
+#include <components/PointLight.h>
 #include <components/gui/RectTransform.h>
 #include <components/gui/Canvas.h>
 #include <components/gui/UIImage.h>
@@ -36,6 +39,7 @@
 #include <components/physic/PhysicCapsule.h>
 #include <components/audio/AudioSource.h>
 #include <components/audio/AudioListener.h>
+#include <scene/Scene.h>
 using namespace ige::scene;
 
 #include <pyxieUtilities.h>
@@ -50,6 +54,9 @@ namespace ige::creator
         Figure,
         Sprite,
         Script,
+        AmbientLight,
+        DirectionalLight,
+        PointLight,
         UIImage,
         UIText,
         UITextField,
@@ -96,14 +103,19 @@ namespace ige::creator
         // Create component selection
         m_createCompCombo = m_headerGroup->createWidget<ComboBox>();
         m_createCompCombo->setEndOfLine(false);
-        m_createCompCombo->addChoice((int)ComponentType::Camera, "Camera Component");
-        m_createCompCombo->addChoice((int)ComponentType::Environment, "Environment Component");
+        m_createCompCombo->addChoice((int)ComponentType::Camera, "Camera");
+
+        if(m_targetObject->getScene()->isDirectionalLightAvailable())
+            m_createCompCombo->addChoice((int)ComponentType::DirectionalLight, "Directional Light");
+
+        if (m_targetObject->getScene()->isPointLightAvailable())
+            m_createCompCombo->addChoice((int)ComponentType::PointLight, "Point Light");
 
         // Scene Object
         if (!m_targetObject->isGUIObject())
         {
-            m_createCompCombo->addChoice((int)ComponentType::Figure, "Figure Component");
-            m_createCompCombo->addChoice((int)ComponentType::Sprite, "Sprite Component");
+            m_createCompCombo->addChoice((int)ComponentType::Figure, "Figure");
+            m_createCompCombo->addChoice((int)ComponentType::Sprite, "Sprite");
 
             if (m_targetObject->getComponent<PhysicBase>() == nullptr)
             {
@@ -138,10 +150,19 @@ namespace ige::creator
                     m_targetObject->addComponent<FigureComponent>("figure/camera.pyxf");
                 break;
             case (int)ComponentType::Environment:
-                m_targetObject->addComponent<EnvironmentComponent>("environment");
+                m_targetObject->addComponent<EnvironmentComponent>();
                 break;
             case (int)ComponentType::Script:
                 m_targetObject->addComponent<ScriptComponent>();
+                break;
+            case (int)ComponentType::AmbientLight:
+                m_targetObject->addComponent<AmbientLight>();
+                break;
+            case (int)ComponentType::DirectionalLight:
+                m_targetObject->addComponent<DirectionalLight>();
+                break;
+            case (int)ComponentType::PointLight:
+                m_targetObject->addComponent<PointLight>();
                 break;
             case (int)ComponentType::Figure:
                 m_targetObject->addComponent<FigureComponent>();
@@ -264,6 +285,21 @@ namespace ige::creator
             {
                 m_audioListenerGroup = header->createWidget<Group>("AudioListener", false);
                 drawAudioListener();
+            }
+            else if (component->getName() == "AmbientLight")
+            {
+                m_ambientLightGroup = header->createWidget<Group>("AmbientLight", false);
+                drawAmbientLight();
+            }
+            else if (component->getName() == "DirectionalLight")
+            {
+                m_directionalLightGroup = header->createWidget<Group>("DirectionalLight", false);
+                drawDirectionalLight();
+            }
+            else if (component->getName() == "PointLight")
+            {
+                m_pointLightGroup = header->createWidget<Group>("PointLight", false);
+                drawPointLight();
             }
         });
     }
@@ -489,75 +525,6 @@ namespace ige::creator
         auto environment = m_targetObject->getComponent<EnvironmentComponent>();
         if (environment == nullptr)
             return;
-
-        // Ambient
-        auto ambientGroup = m_environmentCompGroup->createWidget<Group>("AmbientLight");
-        std::array ambientSkyColor = {environment->getAmbientSkyColor().X(), environment->getAmbientSkyColor().Y(), environment->getAmbientSkyColor().Z()};
-        ambientGroup->createWidget<Drag<float, 3>>("SkyColor", ImGuiDataType_Float, ambientSkyColor, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto environment = m_targetObject->getComponent<EnvironmentComponent>();
-            environment->setAmbientSkyColor({val[0], val[1], val[2]});
-        });
-        std::array ambientGroundColor = {environment->getAmbientGroundColor().X(), environment->getAmbientGroundColor().Y(), environment->getAmbientGroundColor().Z()};
-        ambientGroup->createWidget<Drag<float, 3>>("GroundColor", ImGuiDataType_Float, ambientGroundColor, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto environment = m_targetObject->getComponent<EnvironmentComponent>();
-            environment->setAmbientGroundColor({val[0], val[1], val[2]});
-        });
-        std::array ambientDir = {environment->getAmbientDirection().X(), environment->getAmbientDirection().Y(), environment->getAmbientDirection().Z()};
-        ambientGroup->createWidget<Drag<float, 3>>("Direction", ImGuiDataType_Float, ambientDir)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto environment = m_targetObject->getComponent<EnvironmentComponent>();
-            environment->setAmbientDirection({val[0], val[1], val[2]});
-        });
-
-        // Directional
-        auto directionalGroup = m_environmentCompGroup->createWidget<Group>("DirectionalLight");
-        for (int i = 0; i < 3; i++)
-        {
-            directionalGroup->createWidget<Label>("Light " + std::to_string(i));
-            std::array directCol = {environment->getDirectionalLightColor(i).X(), environment->getDirectionalLightColor(i).Y(), environment->getDirectionalLightColor(i).Z()};
-            directionalGroup->createWidget<Drag<float, 3>>("Color", ImGuiDataType_Float, directCol, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([i, this](auto val) {
-                auto environment = m_targetObject->getComponent<EnvironmentComponent>();
-                environment->setDirectionalLightColor(i, {val[0], val[1], val[2]});
-            });
-            std::array dir = {environment->getDirectionalLightDirection(i).X(), environment->getDirectionalLightDirection(i).Y(), environment->getDirectionalLightDirection(i).Z()};
-            directionalGroup->createWidget<Drag<float, 3>>("Direction", ImGuiDataType_Float, dir)->getOnDataChangedEvent().addListener([i, this](auto val) {
-                auto environment = m_targetObject->getComponent<EnvironmentComponent>();
-                environment->setDirectionalLightDirection(i, {val[0], val[1], val[2]});
-            });
-            std::array intensity = {environment->getDirectionalLightIntensity(i)};
-            directionalGroup->createWidget<Drag<float>>("Intensity", ImGuiDataType_Float, intensity)->getOnDataChangedEvent().addListener([i, this](auto val) {
-                auto environment = m_targetObject->getComponent<EnvironmentComponent>();
-                environment->setDirectionalLightIntensity(i, val[0]);
-            });
-        }
-
-        // Point
-        auto pointGroup = m_environmentCompGroup->createWidget<Group>("PointLight");
-        for (int i = 0; i < 7; i++)
-        {
-            pointGroup->createWidget<Label>("Light " + std::to_string(i));
-            std::array color = {environment->getPointLightColor(i).X(), environment->getPointLightColor(i).Y(), environment->getPointLightColor(i).Z()};
-            pointGroup->createWidget<Drag<float, 3>>("Color", ImGuiDataType_Float, color, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([i, this](auto val) {
-                auto environment = m_targetObject->getComponent<EnvironmentComponent>();
-                environment->setPointLightColor(i, {val[0], val[1], val[2]});
-            });
-            std::array pos = {environment->getPointLightPosition(i).X(), environment->getPointLightPosition(i).Y(), environment->getPointLightPosition(i).Z()};
-            pointGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos)->getOnDataChangedEvent().addListener([i, this](auto val) {
-                auto environment = m_targetObject->getComponent<EnvironmentComponent>();
-                environment->setPointLightPosition(i, {val[0], val[1], val[2]});
-            });
-
-            auto col2 = pointGroup->createWidget<Columns<2>>(140.f);
-            std::array intensity = {environment->getPointLightIntensity(i)};
-            col2->createWidget<Drag<float>>("Int.", ImGuiDataType_Float, intensity)->getOnDataChangedEvent().addListener([i, this](auto val) {
-                auto environment = m_targetObject->getComponent<EnvironmentComponent>();
-                environment->setPointLightIntensity(i, val[0]);
-            });
-            std::array range = {environment->getPointLightRange(i)};
-            col2->createWidget<Drag<float>>("Range", ImGuiDataType_Float, range)->getOnDataChangedEvent().addListener([i, this](auto val) {
-                auto environment = m_targetObject->getComponent<EnvironmentComponent>();
-                environment->setPointLightRange(i, val[0]);
-            });
-        }
 
         // Shadow
         auto shadowGroup = m_environmentCompGroup->createWidget<Group>("Shadow");
@@ -1328,6 +1295,10 @@ namespace ige::creator
     //! Draw PhysicCapsule component
     void Inspector::drawAudioSource()
     {
+        if (m_audioSourceGroup == nullptr)
+            return;
+        m_audioSourceGroup->removeAllWidgets();
+
         auto audioSourceComp = m_targetObject->getComponent<AudioSource>();
         if (audioSourceComp == nullptr)
             return;
@@ -1432,6 +1403,10 @@ namespace ige::creator
     //! Draw AudioListener component
     void Inspector::drawAudioListener()
     {
+        if (m_audioListenerGroup == nullptr)
+            return;
+        m_audioListenerGroup->removeAllWidgets();
+
         auto audioListenerComp = m_targetObject->getComponent<AudioListener>();
         if (audioListenerComp == nullptr)
             return;
@@ -1439,6 +1414,90 @@ namespace ige::creator
         m_audioListenerGroup->createWidget<CheckBox>("Enable", audioListenerComp->isEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
             auto audioListenerComp = m_targetObject->getComponent<AudioListener>();
             audioListenerComp->setEnabled(val);
+        });
+    }
+
+    //! Draw Ambient Light
+    void Inspector::drawAmbientLight()
+    {
+        if (m_ambientLightGroup == nullptr)
+            return;
+        m_ambientLightGroup->removeAllWidgets();
+
+        auto ambientLight = m_targetObject->getComponent<AmbientLight>();
+        if (ambientLight == nullptr)
+            return;
+
+        std::array skyColor = { ambientLight->getSkyColor().X(), ambientLight->getSkyColor().Y(), ambientLight->getSkyColor().Z() };        
+        m_ambientLightGroup->createWidget<Drag<float, 3>>("SkyColor", ImGuiDataType_Float, skyColor, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto ambientLight = m_targetObject->getComponent<AmbientLight>();
+            ambientLight->setSkyColor({ val[0], val[1], val[2] });
+        });
+
+        std::array groundColor = { ambientLight->getGroundColor().X(), ambientLight->getGroundColor().Y(), ambientLight->getGroundColor().Z() };
+        m_ambientLightGroup->createWidget<Drag<float, 3>>("GroundColor", ImGuiDataType_Float, groundColor, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto ambientLight = m_targetObject->getComponent<AmbientLight>();
+            ambientLight->setGroundColor({ val[0], val[1], val[2] });
+        });
+
+        std::array direction = { ambientLight->getDirection().X(), ambientLight->getDirection().Y(), ambientLight->getDirection().Z() };
+        m_ambientLightGroup->createWidget<Drag<float, 3>>("Direction", ImGuiDataType_Float, direction)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto ambientLight = m_targetObject->getComponent<AmbientLight>();
+            ambientLight->setDirection({ val[0], val[1], val[2] });
+        });
+    }
+
+    //! Draw Directional Light
+    void Inspector::drawDirectionalLight()
+    {
+        if (m_directionalLightGroup == nullptr)
+            return;
+        m_directionalLightGroup->removeAllWidgets();
+
+        auto directionalLight = m_targetObject->getComponent<DirectionalLight>();
+        if (directionalLight == nullptr)
+            return;
+
+        std::array color = { directionalLight->getColor().X(), directionalLight->getColor().Y(), directionalLight->getColor().Z() };
+        m_directionalLightGroup->createWidget<Drag<float, 3>>("Color", ImGuiDataType_Float, color, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto directionalLight = m_targetObject->getComponent<DirectionalLight>();
+            directionalLight->setColor({ val[0], val[1], val[2] });
+        });
+
+        std::array intensity = { directionalLight->getIntensity()};
+        m_directionalLightGroup->createWidget<Drag<float>>("Intensity", ImGuiDataType_Float, intensity)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto directionalLight = m_targetObject->getComponent<DirectionalLight>();
+            directionalLight->setIntensity(val[0]);
+        });
+    }
+
+    //! Draw Point Light
+    void Inspector::drawPointLight()
+    {
+        if (m_pointLightGroup == nullptr)
+            return;
+        m_pointLightGroup->removeAllWidgets();
+
+        auto pointLight = m_targetObject->getComponent<PointLight>();
+        if (pointLight == nullptr)
+            return;
+
+        std::array color = { pointLight->getColor().X(), pointLight->getColor().Y(), pointLight->getColor().Z() };
+        m_pointLightGroup->createWidget<Drag<float, 3>>("Color", ImGuiDataType_Float, color, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto pointLight = m_targetObject->getComponent<PointLight>();
+            pointLight->setColor({ val[0], val[1], val[2] });
+        });
+
+        std::array intensity = { pointLight->getIntensity() };
+        m_pointLightGroup->createWidget<Drag<float>>("Intensity", ImGuiDataType_Float, intensity)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto pointLight = m_targetObject->getComponent<PointLight>();
+            pointLight->setIntensity(val[0]);
+        });
+
+        std::array range = { pointLight->getRange() };
+        m_pointLightGroup->createWidget<Drag<float>>("Range", ImGuiDataType_Float, range)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto pointLight = m_targetObject->getComponent<PointLight>();
+            pointLight->setRange(val[0]);
         });
     }
 
@@ -1572,6 +1631,27 @@ namespace ige::creator
             m_audioListenerGroup->removeAllWidgets();
             m_audioListenerGroup->removeAllPlugins();
             m_audioListenerGroup = nullptr;
+        }
+
+        if (m_ambientLightGroup)
+        {
+            m_ambientLightGroup->removeAllWidgets();
+            m_ambientLightGroup->removeAllPlugins();
+            m_ambientLightGroup = nullptr;
+        }
+
+        if (m_directionalLightGroup)
+        {
+            m_directionalLightGroup->removeAllWidgets();
+            m_directionalLightGroup->removeAllPlugins();
+            m_directionalLightGroup = nullptr;
+        }
+
+        if (m_pointLightGroup)
+        {
+            m_pointLightGroup->removeAllWidgets();
+            m_pointLightGroup->removeAllPlugins();
+            m_pointLightGroup = nullptr;
         }
 
         removeAllWidgets();
