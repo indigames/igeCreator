@@ -90,6 +90,9 @@ namespace ige::creator
         //! Draw PhysicCapsule component
         void drawPhysicCapsule();
 
+        //! Draw PhysicMesh component
+        void drawPhysicMesh();
+
         //! Draw AudioSource component
         void drawAudioSource();
 

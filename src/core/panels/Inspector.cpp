@@ -37,6 +37,7 @@
 #include <components/physic/PhysicBox.h>
 #include <components/physic/PhysicSphere.h>
 #include <components/physic/PhysicCapsule.h>
+#include <components/physic/PhysicMesh.h>
 #include <components/audio/AudioSource.h>
 #include <components/audio/AudioListener.h>
 #include <scene/Scene.h>
@@ -63,6 +64,7 @@ namespace ige::creator
         PhysicBox,
         PhysicSphere,
         PhysicCapsule,
+        PhysicMesh,
         AudioSource,
         AudioListener
     };
@@ -122,6 +124,7 @@ namespace ige::creator
                 m_createCompCombo->addChoice((int)ComponentType::PhysicBox, "PhysicBox");
                 m_createCompCombo->addChoice((int)ComponentType::PhysicSphere, "PhysicSphere");
                 m_createCompCombo->addChoice((int)ComponentType::PhysicCapsule, "PhysicCapsule");
+                m_createCompCombo->addChoice((int)ComponentType::PhysicMesh, "PhysicMesh");
             }
         }
         else // GUI Object
@@ -187,6 +190,9 @@ namespace ige::creator
                 break;
             case (int)ComponentType::PhysicCapsule:
                 m_targetObject->addComponent<PhysicCapsule>();
+                break;
+            case (int)ComponentType::PhysicMesh:
+                m_targetObject->addComponent<PhysicMesh>();
                 break;
             case (int)ComponentType::AudioSource:
                 m_targetObject->addComponent<AudioSource>();
@@ -275,6 +281,11 @@ namespace ige::creator
             {
                 m_physicGroup = header->createWidget<Group>("PhysicGroup", false);
                 drawPhysicCapsule();
+            }
+            else if (component->getName() == "PhysicMesh")
+            {
+                m_physicGroup = header->createWidget<Group>("PhysicGroup", false);
+                drawPhysicMesh();
             }
             else if (component->getName() == "AudioSource")
             {
@@ -1290,7 +1301,37 @@ namespace ige::creator
         });
     }
 
-    //! Draw PhysicCapsule component
+    //! Draw PhysicMesh component
+    void Inspector::drawPhysicMesh()
+    {
+        auto physicComp = m_targetObject->getComponent<PhysicMesh>();
+        if (physicComp == nullptr)
+            return;
+
+        drawPhysicBase();
+
+        m_physicGroup->createWidget<Separator>();
+        m_physicGroup->createWidget<CheckBox>("Convex", physicComp->isConvex())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto physicComp = m_targetObject->getComponent<PhysicMesh>();
+            physicComp->setConvex(val);
+        });
+
+        auto txtPath = m_physicGroup->createWidget<TextField>("Path", physicComp->getPath().c_str(), true);
+        txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
+            auto physicComp = m_targetObject->getComponent<PhysicMesh>();
+            physicComp->setPath(txt);
+        });
+        for (const auto& type : GetFileExtensionSuported(E_FileExts::Figure))
+        {
+            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
+                auto physicComp = m_targetObject->getComponent<PhysicMesh>();
+                physicComp->setPath(txt);
+                redraw();
+            });
+        }
+    }
+
+    //! Draw AudioSource
     void Inspector::drawAudioSource()
     {
         if (m_audioSourceGroup == nullptr)
@@ -1415,7 +1456,7 @@ namespace ige::creator
         });
     }
 
-    //! Draw Ambient Light
+    //! Draw AmbientLight
     void Inspector::drawAmbientLight()
     {
         if (m_ambientLightGroup == nullptr)
@@ -1445,7 +1486,7 @@ namespace ige::creator
         });
     }
 
-    //! Draw Directional Light
+    //! Draw DirectionalLight
     void Inspector::drawDirectionalLight()
     {
         if (m_directionalLightGroup == nullptr)
@@ -1469,7 +1510,7 @@ namespace ige::creator
         });
     }
 
-    //! Draw Point Light
+    //! Draw PointLight
     void Inspector::drawPointLight()
     {
         if (m_pointLightGroup == nullptr)
