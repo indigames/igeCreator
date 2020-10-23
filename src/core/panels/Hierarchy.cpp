@@ -68,111 +68,7 @@ namespace ige::creator
         node->addPlugin<DDSourcePlugin<uint64_t>>(EDragDropID::OBJECT, sceneObject.getName(), objId);
 
         auto ctxMenu = node->addPlugin<ContextMenu>(sceneObject.getName() + "_Context");
-        auto createMenu = ctxMenu->createWidget<Menu>("Create");
-
-        createMenu->createWidget<MenuItem>("New Object")->getOnClickEvent().addListener([objId](auto widget) {
-            auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-            auto newObject = Editor::getCurrentScene()->createObject("New Object", currentObject);
-            newObject->setSelected(true);
-            });
-
-        // Primitives
-        {
-            auto shapeMenu = createMenu->createWidget<Menu>("Primitives");
-            shapeMenu->createWidget<MenuItem>("Cube")->getOnClickEvent().addListener([objId](auto widget) {
-                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getCurrentScene()->createObject("Cube", currentObject);
-                newObject->addComponent<FigureComponent>("figure/cube.pyxf");
-                newObject->setSelected(true);
-            });
-
-            shapeMenu->createWidget<MenuItem>("Plane")->getOnClickEvent().addListener([objId](auto widget) {
-                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getCurrentScene()->createObject("Plane", currentObject);
-                newObject->addComponent<FigureComponent>("figure/plane.pyxf");
-                newObject->setSelected(true);
-            });
-
-            shapeMenu->createWidget<MenuItem>("Sphere")->getOnClickEvent().addListener([objId](auto widget) {
-                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getCurrentScene()->createObject("Sphere", currentObject);
-                newObject->addComponent<FigureComponent>("figure/sphere.pyxf");
-                newObject->setSelected(true);
-            });
-
-            shapeMenu->createWidget<MenuItem>("Cone")->getOnClickEvent().addListener([objId](auto widget) {
-                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getCurrentScene()->createObject("Cone", currentObject);
-                newObject->addComponent<FigureComponent>("figure/cone.pyxf");
-                newObject->setSelected(true);
-            });
-
-            shapeMenu->createWidget<MenuItem>("Cylinder")->getOnClickEvent().addListener([objId](auto widget) {
-                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getCurrentScene()->createObject("Cylinder", currentObject);
-                newObject->addComponent<FigureComponent>("figure/cylinder.pyxf");
-                newObject->setSelected(true);
-            });
-
-            shapeMenu->createWidget<MenuItem>("Torus")->getOnClickEvent().addListener([objId](auto widget) {
-                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getCurrentScene()->createObject("Torus", currentObject);
-                newObject->addComponent<FigureComponent>("figure/Torus.pyxf");
-                newObject->setSelected(true);
-            });
-        }
-
-        // GUI
-        {
-            auto guiMenu = createMenu->createWidget<Menu>("GUI");
-
-            guiMenu->createWidget<MenuItem>("Button")->getOnClickEvent().addListener([objId](auto widget) {
-                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                auto newBtn = Editor::getCurrentScene()->createObject("Button", currentObject, true);
-                auto rect = std::dynamic_pointer_cast<RectTransform>(newBtn->getTransform());
-                newBtn->addComponent<UIImage>("sprite/rect", rect->getSize());
-                auto newBtnLabel = Editor::getCurrentScene()->createObject("Label", newBtn, true, Vec2());
-                newBtnLabel->addComponent<UIText>("Button");
-                newBtn->addComponent<ScriptComponent>(fs::createScript(newBtn->getName() + std::to_string(newBtn->getId())));
-                newBtn->setSelected(true);
-            });
-
-            guiMenu->createWidget<MenuItem>("UIImage")->getOnClickEvent().addListener([objId](auto widget) {
-                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getCurrentScene()->createObject("UIImage", currentObject, true);
-                auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
-                newObject->addComponent<UIImage>("sprite/rect", rect->getSize());
-                newObject->setSelected(true);
-            });
-
-            guiMenu->createWidget<MenuItem>("UIText")->getOnClickEvent().addListener([objId](auto widget) {
-                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getCurrentScene()->createObject("UIText", currentObject, true);
-                auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
-                newObject->addComponent<UIText>("Text");
-                newObject->setSelected(true);
-            });
-            
-            guiMenu->createWidget<MenuItem>("UITextField")->getOnClickEvent().addListener([objId](auto widget) {
-                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                auto newObject = Editor::getCurrentScene()->createObject("UITextField", currentObject, true);
-                auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
-                newObject->addComponent<UIImage>("sprite/rect", rect->getSize());
-                auto newLabel = Editor::getCurrentScene()->createObject("Label", newObject, true, Vec2());
-                newLabel->addComponent<UITextField>("TextField");
-                auto id = newLabel->getId();
-                newObject->getSelectedEvent().addListener([id](SceneObject& obj) {
-                    auto label = Editor::getCurrentScene()->findObjectById(id);
-                    if (label) {
-                        auto txtField = label->getComponent<UITextField>();
-                        if(txtField) {
-                            txtField->onClick();
-                        }
-                    }
-                });
-                newObject->setSelected(true);
-            });
-        }
+        addCreationContextMenu(ctxMenu);
 
         ctxMenu->createWidget<MenuItem>("Delete")->getOnClickEvent().addListener([objId](auto widget) {
             TaskManager::getInstance()->addTask([objId](){
@@ -282,26 +178,129 @@ namespace ige::creator
         }
     }
 
+    void Hierarchy::addCreationContextMenu(std::shared_ptr<ContextMenu>& ctxMenu)
+    {
+        if (ctxMenu == nullptr)
+            return;
+
+        auto createMenu = ctxMenu->createWidget<Menu>("Create");
+        createMenu->createWidget<MenuItem>("New Object")->getOnClickEvent().addListener([](auto widget) {
+            auto currentObject = Editor::getInstance()->getSelectedObject();
+            auto newObject = Editor::getCurrentScene()->createObject("New Object", currentObject);
+            newObject->setSelected(true);
+        });
+
+        // Primitives
+        {
+            auto shapeMenu = createMenu->createWidget<Menu>("Primitives");
+            shapeMenu->createWidget<MenuItem>("Cube")->getOnClickEvent().addListener([](auto widget) {
+                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto newObject = Editor::getCurrentScene()->createObject("Cube", currentObject);
+                newObject->addComponent<FigureComponent>("figure/cube.pyxf");
+                newObject->setSelected(true);
+            });
+
+            shapeMenu->createWidget<MenuItem>("Plane")->getOnClickEvent().addListener([](auto widget) {
+                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto newObject = Editor::getCurrentScene()->createObject("Plane", currentObject);
+                newObject->addComponent<FigureComponent>("figure/plane.pyxf");
+                newObject->setSelected(true);
+            });
+
+            shapeMenu->createWidget<MenuItem>("Sphere")->getOnClickEvent().addListener([](auto widget) {
+                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto newObject = Editor::getCurrentScene()->createObject("Sphere", currentObject);
+                newObject->addComponent<FigureComponent>("figure/sphere.pyxf");
+                newObject->setSelected(true);
+            });
+
+            shapeMenu->createWidget<MenuItem>("Cone")->getOnClickEvent().addListener([](auto widget) {
+                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto newObject = Editor::getCurrentScene()->createObject("Cone", currentObject);
+                newObject->addComponent<FigureComponent>("figure/cone.pyxf");
+                newObject->setSelected(true);
+            });
+
+            shapeMenu->createWidget<MenuItem>("Cylinder")->getOnClickEvent().addListener([](auto widget) {
+                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto newObject = Editor::getCurrentScene()->createObject("Cylinder", currentObject);
+                newObject->addComponent<FigureComponent>("figure/cylinder.pyxf");
+                newObject->setSelected(true);
+            });
+
+            shapeMenu->createWidget<MenuItem>("Torus")->getOnClickEvent().addListener([](auto widget) {
+                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto newObject = Editor::getCurrentScene()->createObject("Torus", currentObject);
+                newObject->addComponent<FigureComponent>("figure/Torus.pyxf");
+                newObject->setSelected(true);
+            });
+        }
+
+        // GUI
+        {
+            auto guiMenu = createMenu->createWidget<Menu>("GUI");
+            guiMenu->createWidget<MenuItem>("Button")->getOnClickEvent().addListener([](auto widget) {
+                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto newBtn = Editor::getCurrentScene()->createObject("Button", currentObject, true);
+                auto rect = std::dynamic_pointer_cast<RectTransform>(newBtn->getTransform());
+                newBtn->addComponent<UIImage>("sprite/rect", rect->getSize());
+                auto newBtnLabel = Editor::getCurrentScene()->createObject("Label", newBtn, true, Vec2());
+                newBtnLabel->addComponent<UIText>("Button");
+                newBtn->addComponent<ScriptComponent>(fs::createScript(newBtn->getName() + std::to_string(newBtn->getId())));
+                newBtn->setSelected(true);
+            });
+
+            guiMenu->createWidget<MenuItem>("UIImage")->getOnClickEvent().addListener([](auto widget) {
+                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto newObject = Editor::getCurrentScene()->createObject("UIImage", currentObject, true);
+                auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
+                newObject->addComponent<UIImage>("sprite/rect", rect->getSize());
+                newObject->setSelected(true);
+            });
+
+            guiMenu->createWidget<MenuItem>("UIText")->getOnClickEvent().addListener([](auto widget) {
+                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto newObject = Editor::getCurrentScene()->createObject("UIText", currentObject, true);
+                auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
+                newObject->addComponent<UIText>("Text");
+                newObject->setSelected(true);
+            });
+
+            guiMenu->createWidget<MenuItem>("UITextField")->getOnClickEvent().addListener([](auto widget) {
+                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto newObject = Editor::getCurrentScene()->createObject("UITextField", currentObject, true);
+                auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
+                newObject->addComponent<UIImage>("sprite/rect", rect->getSize());
+                auto newLabel = Editor::getCurrentScene()->createObject("Label", newObject, true, Vec2());
+                newLabel->addComponent<UITextField>("TextField");
+                auto id = newLabel->getId();
+                newObject->getSelectedEvent().addListener([id](SceneObject& obj) {
+                    auto label = Editor::getCurrentScene()->findObjectById(id);
+                    if (label) {
+                        auto txtField = label->getComponent<UITextField>();
+                        if (txtField) {
+                            txtField->onClick();
+                        }
+                    }
+                });
+                newObject->setSelected(true);
+            });
+        }
+    }
+
     void Hierarchy::initialize()
     {
         if (!m_bInitialized)
         {
             m_groupLayout = createWidget<Group>("Hierarchy_Group", false, false);
             auto ctxMenu = m_groupLayout->addPlugin<WindowContextMenu>("Hierarchy_Context");
-            ctxMenu->createWidget<MenuItem>("New Scene")->getOnClickEvent().addListener([](auto widget) {
-                TaskManager::getInstance()->addTask([]() {
-                    Editor::getInstance()->setSelectedObject(-1);
+            addCreationContextMenu(std::dynamic_pointer_cast<ContextMenu>(ctxMenu));
 
-                    auto& scene = Editor::getCurrentScene();
-                    if (scene)
-                    {
-                        Editor::getSceneManager()->unloadScene(scene);
-                        scene = nullptr;
-                    }
-                    scene = Editor::getSceneManager()->createScene();
-                    Editor::setCurrentScene(scene);
-                });
-            });
+            if (Editor::getCurrentScene() == nullptr)
+            {
+                auto scene = Editor::getSceneManager()->createScene();
+                Editor::setCurrentScene(scene);
+            }
             m_bInitialized = true;
         }
     }

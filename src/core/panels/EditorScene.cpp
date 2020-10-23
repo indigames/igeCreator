@@ -119,8 +119,6 @@ namespace ige::creator
 
                 ShapeDrawer::initialize();
 
-                SceneManager::getInstance()->setIsEditor(true);
-
                 initDragDrop();
 
                 m_bIsInitialized = true;
