@@ -3,6 +3,7 @@
 
 #include "core/filesystem/FileSystem.h"
 #include "core/FileHandle.h"
+#include "core/dialog/MsgBox.h"
 
 #include <scene/Scene.h>
 #include <scene/SceneObject.h>
@@ -15,11 +16,15 @@
 #include "components/FigureComponent.h"
 #include "components/SpriteComponent.h"
 #include "components/ScriptComponent.h"
+#include "components/DirectionalLight.h"
+#include "components/PointLight.h"
 #include "components/gui/RectTransform.h"
 #include "components/gui/Canvas.h"
 #include "components/gui/UIImage.h"
 #include "components/gui/UIText.h"
 #include "components/gui/UITextField.h"
+#include "components/audio/AudioSource.h"
+#include "components/audio/AudioListener.h"
 using namespace ige::scene;
 
 #include <utils/PyxieHeaders.h>
@@ -192,47 +197,89 @@ namespace ige::creator
 
         // Primitives
         {
-            auto shapeMenu = createMenu->createWidget<Menu>("Primitives");
+            auto shapeMenu = createMenu->createWidget<Menu>("Primitive");
             shapeMenu->createWidget<MenuItem>("Cube")->getOnClickEvent().addListener([](auto widget) {
                 auto currentObject = Editor::getInstance()->getSelectedObject();
                 auto newObject = Editor::getCurrentScene()->createObject("Cube", currentObject);
                 newObject->addComponent<FigureComponent>("figure/cube.pyxf");
-                newObject->setSelected(true);
             });
 
             shapeMenu->createWidget<MenuItem>("Plane")->getOnClickEvent().addListener([](auto widget) {
                 auto currentObject = Editor::getInstance()->getSelectedObject();
                 auto newObject = Editor::getCurrentScene()->createObject("Plane", currentObject);
                 newObject->addComponent<FigureComponent>("figure/plane.pyxf");
-                newObject->setSelected(true);
             });
 
             shapeMenu->createWidget<MenuItem>("Sphere")->getOnClickEvent().addListener([](auto widget) {
                 auto currentObject = Editor::getInstance()->getSelectedObject();
                 auto newObject = Editor::getCurrentScene()->createObject("Sphere", currentObject);
                 newObject->addComponent<FigureComponent>("figure/sphere.pyxf");
-                newObject->setSelected(true);
             });
 
             shapeMenu->createWidget<MenuItem>("Cone")->getOnClickEvent().addListener([](auto widget) {
                 auto currentObject = Editor::getInstance()->getSelectedObject();
                 auto newObject = Editor::getCurrentScene()->createObject("Cone", currentObject);
                 newObject->addComponent<FigureComponent>("figure/cone.pyxf");
-                newObject->setSelected(true);
             });
 
             shapeMenu->createWidget<MenuItem>("Cylinder")->getOnClickEvent().addListener([](auto widget) {
                 auto currentObject = Editor::getInstance()->getSelectedObject();
                 auto newObject = Editor::getCurrentScene()->createObject("Cylinder", currentObject);
                 newObject->addComponent<FigureComponent>("figure/cylinder.pyxf");
-                newObject->setSelected(true);
             });
 
             shapeMenu->createWidget<MenuItem>("Torus")->getOnClickEvent().addListener([](auto widget) {
                 auto currentObject = Editor::getInstance()->getSelectedObject();
                 auto newObject = Editor::getCurrentScene()->createObject("Torus", currentObject);
                 newObject->addComponent<FigureComponent>("figure/Torus.pyxf");
-                newObject->setSelected(true);
+            });
+        }
+
+        // Lights
+        {
+            auto lightMenu = createMenu->createWidget<Menu>("Light");
+            lightMenu->createWidget<MenuItem>("Directional Light")->getOnClickEvent().addListener([](auto widget) {
+                if (!Editor::getCurrentScene()->isDirectionalLightAvailable())
+                {
+                    auto msgBox = MsgBox("Error", "Max number of Directional Light reached!", MsgBox::EBtnLayout::ok, MsgBox::EMsgType::error);
+                    while (!msgBox.ready(1000));
+                    return;
+                }
+                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto newObject = Editor::getCurrentScene()->createObject("Directional Light", currentObject);
+                newObject->addComponent<DirectionalLight>();
+                newObject->getTransform()->setPosition({ 0.f, 5.f, 0.f });
+                newObject->getTransform()->setRotation({ DEGREES_TO_RADIANS(90.f), 0.f, .0f });
+                newObject->addComponent<SpriteComponent>("sprite/sun", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
+            });
+
+            lightMenu->createWidget<MenuItem>("Point Light")->getOnClickEvent().addListener([](auto widget) {
+                if (!Editor::getCurrentScene()->isPointLightAvailable())
+                {
+                    auto msgBox = MsgBox("Error", "Max number of Point Light reached!", MsgBox::EBtnLayout::ok, MsgBox::EMsgType::error);
+                    while (!msgBox.ready(1000));
+                    return;
+                }
+                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto newObject = Editor::getCurrentScene()->createObject("Point Light", currentObject);
+                newObject->addComponent<PointLight>();
+                newObject->addComponent<SpriteComponent>("sprite/light", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
+            });
+        }
+
+        // Audio
+        {
+            auto audioMenu = createMenu->createWidget<Menu>("Audio");
+            audioMenu->createWidget<MenuItem>("Audio Source")->getOnClickEvent().addListener([](auto widget) {
+                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto newObject = Editor::getCurrentScene()->createObject("Audio Source", currentObject, true);
+                newObject->addComponent<AudioSource>();
+            });
+
+            audioMenu->createWidget<MenuItem>("Audio Listener")->getOnClickEvent().addListener([](auto widget) {
+                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto newObject = Editor::getCurrentScene()->createObject("Audio Listener", currentObject, true);
+                newObject->addComponent<AudioListener>();
             });
         }
 
@@ -247,7 +294,6 @@ namespace ige::creator
                 auto newBtnLabel = Editor::getCurrentScene()->createObject("Label", newBtn, true, Vec2());
                 newBtnLabel->addComponent<UIText>("Button");
                 newBtn->addComponent<ScriptComponent>(fs::createScript(newBtn->getName() + std::to_string(newBtn->getId())));
-                newBtn->setSelected(true);
             });
 
             guiMenu->createWidget<MenuItem>("UIImage")->getOnClickEvent().addListener([](auto widget) {
@@ -255,7 +301,6 @@ namespace ige::creator
                 auto newObject = Editor::getCurrentScene()->createObject("UIImage", currentObject, true);
                 auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
                 newObject->addComponent<UIImage>("sprite/rect", rect->getSize());
-                newObject->setSelected(true);
             });
 
             guiMenu->createWidget<MenuItem>("UIText")->getOnClickEvent().addListener([](auto widget) {
@@ -263,7 +308,6 @@ namespace ige::creator
                 auto newObject = Editor::getCurrentScene()->createObject("UIText", currentObject, true);
                 auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
                 newObject->addComponent<UIText>("Text");
-                newObject->setSelected(true);
             });
 
             guiMenu->createWidget<MenuItem>("UITextField")->getOnClickEvent().addListener([](auto widget) {
@@ -283,7 +327,6 @@ namespace ige::creator
                         }
                     }
                 });
-                newObject->setSelected(true);
             });
         }
     }
