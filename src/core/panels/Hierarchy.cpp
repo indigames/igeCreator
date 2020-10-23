@@ -195,6 +195,14 @@ namespace ige::creator
             newObject->setSelected(true);
         });
 
+        // Camera
+        createMenu->createWidget<MenuItem>("Camera")->getOnClickEvent().addListener([](auto widget) {
+            auto currentObject = Editor::getInstance()->getSelectedObject();
+            auto newObject = Editor::getCurrentScene()->createObject("Camera", currentObject);
+            newObject->addComponent<CameraComponent>("camera");
+            newObject->addComponent<FigureComponent>("figure/camera.pyxf")->setSkipSerialize(true);
+        });
+
         // Primitives
         {
             auto shapeMenu = createMenu->createWidget<Menu>("Primitive");
