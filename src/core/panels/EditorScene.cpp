@@ -8,6 +8,7 @@
 #include "core/ShapeDrawer.h"
 #include "core/plugin/DragDropPlugin.h"
 #include "core/FileHandle.h"
+#include "core/BulletDebugRender.h"
 
 #include "utils/GraphicsHelper.h"
 #include "scene/Scene.h"
@@ -27,6 +28,9 @@ using namespace pyxie;
 
 #include "utils/filesystem.h"
 namespace fs = ghc::filesystem;
+
+#include <physic/PhysicManager.h>
+using namespace ige::scene;
 
 namespace ige::creator
 {
@@ -117,7 +121,12 @@ namespace ige::creator
                 m_gizmo->setMode(Editor::getInstance()->isLocalGizmo() ? gizmo::MODE::LOCAL : gizmo::MODE::WORLD); 
                 m_gizmo->setCamera(m_currCamera);
 
+                // Initialize Shape Drawer
                 ShapeDrawer::initialize();
+
+                // Initialize Physic Debugger
+                static BulletDebugRender* debugRenderer = new BulletDebugRender();
+                PhysicManager::getInstance()->getWorld()->setDebugDrawer(debugRenderer);
 
                 initDragDrop();
 
@@ -334,6 +343,9 @@ namespace ige::creator
         // Update scene
         Editor::getSceneManager()->update(dt);
 
+        // Update Physic Transform infomation
+        PhysicManager::getInstance()->preUpdate();
+
         // Render
         auto renderContext = RenderContext::InstancePtr();
         if (renderContext && m_fbo)
@@ -357,6 +369,9 @@ namespace ige::creator
 
             // Render camera frustum
             renderCameraFrustum();
+
+            // Render Physic debug
+            PhysicManager::getInstance()->getWorld()->debugDrawWorld();
 
             renderContext->EndScene();
         }
@@ -382,7 +397,6 @@ namespace ige::creator
             }
         }
     }
-
 
     //! Object selection with touch/mouse
     void EditorScene::updateObjectSelection()
