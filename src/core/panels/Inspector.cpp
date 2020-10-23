@@ -716,6 +716,11 @@ namespace ige::creator
             auto spriteComp = m_targetObject->getComponent<SpriteComponent>();
             spriteComp->setSize({val[0], val[1]});
         });
+
+        m_spriteCompGroup->createWidget<CheckBox>("Billboard", spriteComp->isBillboard())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto spriteComp = m_targetObject->getComponent<SpriteComponent>();
+            spriteComp->setBillboard(val);
+        });
     }
 
     void Inspector::drawScriptComponent()

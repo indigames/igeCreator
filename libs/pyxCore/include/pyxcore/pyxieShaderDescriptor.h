@@ -179,8 +179,8 @@ namespace pyxie {
 					uint32_t GLOW_OFFSET : 1;						//_,o
 					uint32_t OVERLAY_COLOR_MAP_ADD : 1;				//_,a
 
-					uint32_t DISCARD_COLOR_MAP_RGB : 1;				//ƒJƒ‰[ƒeƒNƒXƒ`ƒƒ‚ÌRGBƒ`ƒƒƒlƒ‹‚ª•s—v‚Èê‡
-					uint32_t UNIFIED_COLOR : 1;						//DiffuseColor‚ÌƒOƒ[ƒoƒ‹ƒpƒ‰ƒ[ƒ^”Å(—LŒø‚É‚·‚é‚ÆDiffuseColor‚ª‚È‚­‚È‚é)
+					uint32_t DISCARD_COLOR_MAP_RGB : 1;				//ã‚«ãƒ©ãƒ¼ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®RGBãƒãƒ£ãƒãƒ«ãŒä¸è¦ãªå ´åˆ
+					uint32_t UNIFIED_COLOR : 1;						//DiffuseColorã®ã‚°ãƒ­ãƒ¼ãƒãƒ«ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ç‰ˆ(æœ‰åŠ¹ã«ã™ã‚‹ã¨DiffuseColorãŒãªããªã‚‹)
 					uint32_t DEPTH_SHADOW_ENABLE : 1;
 					uint32_t MAKE_SHADOW_SHADER : 1;
 					uint32_t FRONT_FACE_CULLING : 1;
@@ -316,6 +316,7 @@ namespace pyxie {
 		void SetAlphaBlendOP(int op);
 		void SetColorMask(bool enable);
 		void SetScissorTest(bool enable);
+		void SetBillboard(bool enable);
 
 		void SetAlphaMap(ReferenceMapChannel channel);
 		void SetOverlayTransparentMapChannel(ReferenceMapChannel channel);
@@ -335,6 +336,7 @@ namespace pyxie {
 
 		inline bool IsColorMaskEnable() { return desc.COLOR_MASK_ENABLE; }
 		inline bool IsStencilEnable() { return desc.STENCIL_ENABLE; }
+		inline bool IsBillboardEnable() { return desc.BILLBOARD; }
 
 
 		inline int GetColorTextureRGBUVSet() { return desc.colorMapUVSet / 3; }

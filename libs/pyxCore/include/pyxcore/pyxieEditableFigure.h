@@ -398,7 +398,7 @@ protected:
 		int NewVBO();
 
 		void ClearMesh(EditableMesh* emesh);
-
+		void OptimizeMesh();
 		friend class pyxieColladaLoader;
 	};
 
