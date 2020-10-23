@@ -149,8 +149,8 @@ namespace ige::creator
             {
             case (int)ComponentType::Camera:
                 m_targetObject->addComponent<CameraComponent>("camera");
-                if (m_targetObject->getComponent<FigureComponent>() == nullptr)
-                    m_targetObject->addComponent<FigureComponent>("figure/camera.pyxf");
+                if (!m_targetObject->getComponent<FigureComponent>())
+                    m_targetObject->addComponent<FigureComponent>("figure/camera.pyxf")->setSkipSerialize(true);
                 break;
             case (int)ComponentType::Environment:
                 m_targetObject->addComponent<EnvironmentComponent>();
@@ -163,9 +163,13 @@ namespace ige::creator
                 break;
             case (int)ComponentType::DirectionalLight:
                 m_targetObject->addComponent<DirectionalLight>();
+                if (!m_targetObject->getComponent<FigureComponent>() && !m_targetObject->getComponent<SpriteComponent>())
+                    m_targetObject->addComponent<SpriteComponent>("sprite/sun", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
                 break;
             case (int)ComponentType::PointLight:
                 m_targetObject->addComponent<PointLight>();
+                if (!m_targetObject->getComponent<FigureComponent>() && !m_targetObject->getComponent<SpriteComponent>())
+                    m_targetObject->addComponent<SpriteComponent>("sprite/light", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
                 break;
             case (int)ComponentType::Figure:
                 m_targetObject->addComponent<FigureComponent>();
