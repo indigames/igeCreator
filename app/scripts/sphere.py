@@ -1,13 +1,11 @@
 """
-    Hello.py
-    Script to print hello
+    Sphere.py
+    Script to control sphere object
 """
 
-import igeCore as core
-import igeVmath as vmath
 from igeScene import Script
 
-class Hello(Script):
+class Sphere(Script):
     def __init__(self, owner):
         super().__init__(owner)
         print("__init__!")
@@ -16,10 +14,13 @@ class Hello(Script):
     def onStart(self):
         print("onStart")
         print(f'Owner: {self.owner}')
-        body = self.owner.getComponent("PhysicSphere")
-        if body is not None:
-            body.applyForce(0, 0, -1000.0)
 
+        body = self.owner.getComponent("PhysicSphere")
+        print(f'applyForce, body: {body}')
+        if body is not None:
+            print(f'applyForce, body: {body}')
+            body.applyForce(0, 0, -1000.0)
+            print('applyForce OK')
 
     def onUpdate(self, dt):
         if not self.updated:
