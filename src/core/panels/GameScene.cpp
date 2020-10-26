@@ -39,8 +39,8 @@ namespace ige::creator
             auto name = SceneManager::getInstance()->getCurrentScene()->getName();
             auto fsPath = fs::path(name + "_tmp");
             auto ext = fsPath.extension();
-            if (ext.string() != ".json")
-                fsPath = fsPath.replace_extension(".json");
+            if (ext.string() != ".scene")
+                fsPath = fsPath.replace_extension(".scene");
             fs::remove(fsPath);
         }        
     }
@@ -197,8 +197,8 @@ namespace ige::creator
 
                 auto fsPath = fs::path(name + "_tmp");
                 auto ext = fsPath.extension();
-                if (ext.string() != ".json")
-                    fsPath = fsPath.replace_extension(".json");
+                if (ext.string() != ".scene")
+                    fsPath = fsPath.replace_extension(".scene");
                 fs::remove(fsPath);
             }
 
