@@ -346,12 +346,6 @@ namespace ige::creator
             m_groupLayout = createWidget<Group>("Hierarchy_Group", false, false);
             auto ctxMenu = m_groupLayout->addPlugin<WindowContextMenu>("Hierarchy_Context");
             addCreationContextMenu(std::dynamic_pointer_cast<ContextMenu>(ctxMenu));
-
-            if (Editor::getCurrentScene() == nullptr)
-            {
-                auto scene = Editor::getSceneManager()->createScene();
-                Editor::setCurrentScene(scene);
-            }
             m_bInitialized = true;
         }
     }

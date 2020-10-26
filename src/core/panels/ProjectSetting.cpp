@@ -29,7 +29,7 @@ namespace ige::creator
         {
             file >> settingsJson;
 
-            setStartScene(settingsJson.value("startScene", "scene/main.json"));
+            setStartScene(settingsJson.value("startScene", "scene/main.scene"));
             setGravity(settingsJson.value("gravity", Vec3(0.f, -9.81f, 0.f)));
             setGlobalVolume(settingsJson.value("globalVolume", 1.f));
         }
@@ -49,7 +49,7 @@ namespace ige::creator
         startScene->getOnDataChangedEvent().addListener([this](auto val) {
             setStartScene(val);
         });
-        startScene->addPlugin<DDTargetPlugin<std::string>>(".json")->getOnDataReceivedEvent().addListener([this](auto val) {
+        startScene->addPlugin<DDTargetPlugin<std::string>>(".scene")->getOnDataReceivedEvent().addListener([this](auto val) {
             setStartScene(val);
             redraw();
         });

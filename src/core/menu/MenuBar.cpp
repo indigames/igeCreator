@@ -75,12 +75,12 @@ namespace ige::creator
                 TaskManager::getInstance()->addTask([selectedFiles](){
                     Editor::getInstance()->setSelectedObject(-1);
 
-                    auto scene = Editor::getCurrentScene();
+                    auto& scene = Editor::getCurrentScene();
                     if (scene) Editor::getSceneManager()->unloadScene(scene);
                     scene = nullptr;
                     Editor::getCanvas()->getHierarchy()->clear();
-                    Editor::getCanvas()->getHierarchy()->initialize();
                     Editor::getCanvas()->getEditorScene()->clear();
+                    Editor::getCanvas()->getHierarchy()->initialize();
                     scene = Editor::getSceneManager()->loadScene(selectedFiles[0]);
                     Editor::setCurrentScene(scene);
                 });
@@ -88,13 +88,20 @@ namespace ige::creator
         });
 
         fileMenu->createWidget<MenuItem>("Save Scene", "CTRL + S")->getOnClickEvent().addListener([this](auto widget) {
-            auto selectedFile = SaveFileDialog("Save", ".", { "scene", "*.scene" }).result();
-            if (!selectedFile.empty())
-            {
-                TaskManager::getInstance()->addTask([selectedFile, this]() {
-                    Editor::getSceneManager()->saveScene(selectedFile);
-                });
-            }
+            TaskManager::getInstance()->addTask([]() {
+                if (Editor::getSceneManager()->getCurrentScene()->getPath().empty())
+                {
+                    auto selectedFile = SaveFileDialog("Save", ".", { "scene", "*.scene" }).result();
+                    if (!selectedFile.empty())
+                    {
+                        Editor::getSceneManager()->saveScene(selectedFile);
+                    }
+                }
+                else
+                {
+                    Editor::getSceneManager()->saveScene();
+                }
+            });
         });
 
         fileMenu->createWidget<MenuItem>("Exit", "ALT + F4")->getOnClickEvent().addListener([](auto widget) {

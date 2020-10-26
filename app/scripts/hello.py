@@ -23,7 +23,23 @@ class Hello(Script):
             print(f'owner, name = {self.owner.name}')
             self.updated = True
 
-    def onCollisionStart(self, other):
-        print("onCollisionStart")
-        print(f'Owner: {self.owner}')
-        print(f'Other: {other}')
+    # def onRender(self):
+    #     pass
+
+    # def onCollisionStart(self, other):
+    #     pass
+
+    # def onCollisionStay(self, other):
+    #     pass
+
+    # def onCollisionStop(self, other):
+    #     pass
+
+    # def onTriggerStart(self, other):
+    #     pass
+
+    # def onTriggerStay(self, other):
+    #     pass
+
+    # def onTriggerStop(self, other):
+    #     pass

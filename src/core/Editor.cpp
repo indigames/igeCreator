@@ -16,7 +16,7 @@
 #include <audio/AudioManager.h>
 using namespace ige::scene;
 
-#define VERSION "0.0.2"
+#define VERSION "0.0.3"
 
 namespace ige::creator
 {
@@ -58,7 +58,14 @@ namespace ige::creator
         SceneManager::getInstance()->setIsEditor(true);
 
         // Load the start scene
-        SceneManager::getInstance()->loadScene(m_canvas->getProjectSetting()->getStartScene());
+        auto scene = SceneManager::getInstance()->loadScene(m_canvas->getProjectSetting()->getStartScene());
+
+        // If no scene loaded, create empty scene
+        if (scene == nullptr)
+            scene = Editor::getSceneManager()->createScene();
+
+        // Set current scene to new loaded/created scene
+        Editor::setCurrentScene(scene);
     }
 
     void Editor::handleEvent(const void* event)
