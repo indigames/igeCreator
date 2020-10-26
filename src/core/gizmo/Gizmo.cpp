@@ -67,7 +67,7 @@ namespace ige::creator
         Mat4 projMat;
         auto proj = m_camera->GetProjectionMatrix(projMat).P();
 
-        Mat4 modelMat = (m_mode == gizmo::MODE::LOCAL ? transform->getLocalMatrix() : transform->getWorldMatrix());
+        Mat4 modelMat = transform->getWorldMatrix();
         auto model = modelMat.P();
 
         ImGui::PushStyleColor(ImGuiCol_Border, 0);
@@ -92,22 +92,7 @@ namespace ige::creator
         {
             float deltaTranslation[3], deltaRotation[3], deltaScale[3];
             gizmo::DecomposeMatrixToComponents(delta, deltaTranslation, deltaRotation, deltaScale);
-
-            auto dPos = Vec3(deltaTranslation[0], deltaTranslation[1], deltaTranslation[2]);
-            if(m_mode == gizmo::MODE::LOCAL)
-                transform->setPosition(transform->getPosition() + dPos);
-            else
-                transform->setWorldPosition(transform->getWorldPosition() + dPos);
-        }
-        else if(m_operation == gizmo::SCALE)
-        {
-            float deltaTranslation[3], deltaRotation[3], deltaScale[3];
-            gizmo::DecomposeMatrixToComponents(delta, deltaTranslation, deltaRotation, deltaScale);
-            auto scale = Vec3(deltaScale[0], deltaScale[1], deltaScale[2]);
-            if (m_mode == gizmo::MODE::LOCAL)
-                transform->scale(scale);
-            else
-                transform->scale(scale);
+            transform->worldTranslate(Vec3(deltaTranslation[0], deltaTranslation[1], deltaTranslation[2]));
         }
         else if(m_operation == gizmo::ROTATE)
         {            
@@ -115,14 +100,14 @@ namespace ige::creator
             Vec3 col1(delta[1], delta[5], delta[9]);
             Vec3 col2(delta[2], delta[6], delta[10]);
             Vec3 scale(col0.Length(), col1.Length(), col2.Length());
-
             Mat3 rotmat(col0 / scale.X(), col1 / scale.Y(), col2 / scale.Z());
-            Quat dQuatRotation = Quat(rotmat);
-
-            if (m_mode == gizmo::MODE::LOCAL)
-                transform->setRotation(transform->getRotation() * dQuatRotation);
-            else
-                transform->setWorldRotation(transform->getWorldRotation() * dQuatRotation);
+            transform->worldRotate(Quat(rotmat));
+        }
+        else if (m_operation == gizmo::SCALE)
+        {
+            float deltaTranslation[3], deltaRotation[3], deltaScale[3];
+            gizmo::DecomposeMatrixToComponents(delta, deltaTranslation, deltaRotation, deltaScale);
+            transform->worldScale(Vec3(deltaScale[0], deltaScale[1], deltaScale[2]));
         }
         ImGui::PopStyleColor();
     }

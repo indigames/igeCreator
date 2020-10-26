@@ -27,13 +27,15 @@ namespace ige::creator
         virtual void update(float dt);
 
         bool isResizing();
-        void set2DMode(bool _2d) { m_bIs2DMode = _2d; }
+        void set2DMode(bool is2D = true);
 
         std::shared_ptr<Gizmo>& getGizmo() { return m_gizmo; }
 
     protected:
         virtual void initialize() override;
         virtual void _drawImpl() override;
+
+        void initDragDrop();
 
         //! Render bouding box
         void renderBoundingBox();
@@ -46,6 +48,12 @@ namespace ige::creator
 
         //! Camera movement with mouse
         void updateCameraPosition();
+
+        //! Object selection with touch/mouse
+        void updateObjectSelection();
+
+        //! Update keyboard
+        void updateKeyboard();
 
         //! Scene FBO
         std::shared_ptr<Image> m_imageWidget = nullptr;

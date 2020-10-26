@@ -26,7 +26,7 @@ namespace ige::creator
 
     void Button::_drawImpl()
     {
-        if (m_textureId != 0xffffff && ImGui::ImageButton((ImTextureID)m_textureId, m_size))
+        if (m_textureId != 0xffffff && ImGui::ImageButton((ImTextureID)m_textureId, m_size, { 0, 1 }, { 1, 0 }))
         {
             getOnClickEvent().invoke(this);
         }

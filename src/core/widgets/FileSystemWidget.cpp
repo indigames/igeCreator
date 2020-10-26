@@ -1,6 +1,7 @@
 #include <imgui.h>
 #include "core/plugin/DragDropPlugin.h"
 #include "core/FileHandle.h"
+#include "core/Editor.h"
 
 #include "core/widgets/FileSystemWidget.h"
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
@@ -230,6 +231,7 @@ namespace ige::creator
 
             ImGui::PushID(id++);
             bool clicked = ImGui::Button(dir.filename().string().c_str());
+            ProcessDragDropTarget(dir);
             ImGui::PopID();
 
             if (clicked)
@@ -581,6 +583,14 @@ namespace ige::creator
 
     void FileSystemWidget::ProcessDragDropTarget(const fs::path &absolute_path)
     {
-        // TODO : prefab
+        if (ImGui::BeginDragDropTarget())
+        {
+            ImGuiDragDropFlags flags = 0;
+            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(std::to_string((int)EDragDropID::OBJECT).c_str(), flags))
+            {
+                Editor::getInstance()->savePrefab(*(uint64_t*)payload->Data, absolute_path.string());
+            }
+            ImGui::EndDragDropTarget();
+        }
     }
 } // namespace ige::creator

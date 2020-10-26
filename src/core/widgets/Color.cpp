@@ -4,23 +4,22 @@
 
 namespace ige::creator
 {
-    Color::Color(const std::string& label, float* value)
-        : DataWidget(value), m_label(label), m_value(value)
+    Color::Color(const std::string& label, const Vec4& value)
+        : DataWidget(value), m_label(label)
     {
     }
 
     Color::~Color()
     {
-        m_value = nullptr;
     }
 
     void Color::_drawImpl()
     {
         ImGui::PushID((m_label + m_id).c_str());
 
-        if (m_value && ImGui::ColorEdit4(m_label.c_str(), m_value))
+        if (ImGui::ColorEdit4(m_label.c_str(), m_data.P()))
         {
-            getOnDataChangedEvent().invoke(m_value);
+            getOnDataChangedEvent().invoke(m_data);
         }
 
         ImGui::PopID();

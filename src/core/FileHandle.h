@@ -17,7 +17,9 @@ enum class E_FileExts
     Figure,
     Script,
     Font,
-    Audio
+    Audio,
+    Prefab,
+    Scene
 };
 
 inline const std::vector<std::string> &GetFileExtensionSuported(E_FileExts fileExt)
@@ -39,6 +41,12 @@ inline const std::vector<std::string> &GetFileExtensionSuported(E_FileExts fileE
         break;
     case E_FileExts::Audio:
         formats = {".wav", ".ogg", ".mp3"};
+        break;
+    case E_FileExts::Prefab:
+        formats = { ".prefab" };
+        break;
+    case E_FileExts::Scene:
+        formats = { ".scene" };
         break;
     default:
         formats = {};

@@ -6,6 +6,7 @@ using namespace ige::scene;
 
 #include "core/Panel.h"
 #include "core/widgets/TreeNode.h"
+#include "core/menu/ContextMenu.h"
 #include "core/layout/Group.h"
 
 namespace ige::creator
@@ -21,6 +22,7 @@ namespace ige::creator
 
     protected:
         virtual void drawWidgets() override;       
+        void addCreationContextMenu(std::shared_ptr<ContextMenu>& ctxMenu);
 
         //! Object created/deleted
         void onSceneObjectCreated(SceneObject& sceneObject);

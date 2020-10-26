@@ -54,6 +54,9 @@ namespace ige::creator
         m_canvas = std::make_shared<Canvas>();
         m_canvas->setDockable(true);
 
+        // Set editor mode
+        SceneManager::getInstance()->setIsEditor(true);
+
         // Load the start scene
         SceneManager::getInstance()->loadScene(m_canvas->getProjectSetting()->getStartScene());
     }
@@ -230,5 +233,38 @@ namespace ige::creator
         auto msgBox = MsgBox("About", "igeCreator \n Version: " + std::string(VERSION) + "\n Indi Games © 2020", MsgBox::EBtnLayout::ok, MsgBox::EMsgType::info);
         while (!msgBox.ready(1000));
         return true;
+    }
+
+    void Editor::toggleLocalGizmo()
+    {
+        m_bIsLocalGizmo = !m_bIsLocalGizmo;
+        if (m_canvas && m_canvas->getEditorScene() && m_canvas->getEditorScene()->getGizmo())
+        {
+            m_canvas->getEditorScene()->getGizmo()->setMode(m_bIsLocalGizmo ? gizmo::MODE::LOCAL : gizmo::MODE::WORLD);
+        }
+    }
+
+    void Editor::toggle3DCamera()
+    {
+        m_bIs3DCamera = !m_bIs3DCamera;
+        if (m_canvas && m_canvas->getEditorScene())
+        {
+            m_canvas->getEditorScene()->set2DMode(!m_bIs3DCamera);
+        }
+    }
+
+    //! Prefab save/load
+    bool Editor::savePrefab(uint64_t objectId, const std::string& file)
+    {
+        if (getSceneManager()->getCurrentScene())
+            return getSceneManager()->getCurrentScene()->savePrefab(objectId, file);
+        return false;
+    }
+
+    bool Editor::loadPrefab(uint64_t parentId, const std::string& file)
+    {
+        if (getSceneManager()->getCurrentScene())
+            return getSceneManager()->getCurrentScene()->loadPrefab(parentId, file);
+        return false;
     }
 }

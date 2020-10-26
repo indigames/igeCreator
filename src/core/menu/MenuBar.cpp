@@ -53,20 +53,23 @@ namespace ige::creator
     void MenuBar::createFileMenu()
     {
         auto fileMenu = createWidget<Menu>("File");
-        fileMenu->createWidget<MenuItem>("Emtpy Scene", "CTRL + N")->getOnClickEvent().addListener([this](auto widget) {
+        fileMenu->createWidget<MenuItem>("New Scene", "CTRL + N")->getOnClickEvent().addListener([this](auto widget) {
             TaskManager::getInstance()->addTask([](){
                 Editor::getInstance()->setSelectedObject(-1);
-                Editor::getCanvas()->getEditorScene()->clear();
 
-                auto scene = Editor::getCurrentScene();
-                if (scene) Editor::getSceneManager()->unloadScene(scene);
-                scene = Editor::getSceneManager()->createScene("New scene");
+                auto& scene = Editor::getCurrentScene();
+                if (scene)
+                {
+                    Editor::getSceneManager()->unloadScene(scene);
+                    scene = nullptr;
+                }
+                scene = Editor::getSceneManager()->createScene();
                 Editor::setCurrentScene(scene);
             });
         });
 
         fileMenu->createWidget<MenuItem>("Open Scene", "CTRL + O")->getOnClickEvent().addListener([this](auto widget){
-            auto selectedFiles = OpenFileDialog("Open", ".", { "json", "*.json" }).result();
+            auto selectedFiles = OpenFileDialog("Open", ".", { "scene", "*.scene" }).result();
             if (!selectedFiles.empty() && !selectedFiles[0].empty())
             {
                 TaskManager::getInstance()->addTask([selectedFiles](){
@@ -85,7 +88,7 @@ namespace ige::creator
         });
 
         fileMenu->createWidget<MenuItem>("Save Scene", "CTRL + S")->getOnClickEvent().addListener([this](auto widget) {
-            auto selectedFile = SaveFileDialog("Save", ".", { "json", "*.json" }).result();
+            auto selectedFile = SaveFileDialog("Save", ".", { "scene", "*.scene" }).result();
             if (!selectedFile.empty())
             {
                 TaskManager::getInstance()->addTask([selectedFile, this]() {

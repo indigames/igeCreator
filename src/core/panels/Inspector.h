@@ -9,6 +9,27 @@ using namespace ige::scene;
 namespace ige::creator
 {
     class ComboBox;
+
+    class IgnoreTransformEventScope
+    {
+    public:
+        IgnoreTransformEventScope(std::shared_ptr<SceneObject> obj, const std::function<void(SceneObject&)>& task)
+            : m_object(obj), m_task(task)
+        {
+            m_object->getTransformChangedEvent().removeAllListeners();
+        }
+
+        ~IgnoreTransformEventScope()
+        {
+            m_object->getTransformChangedEvent().addListener(m_task);
+            m_object = nullptr;
+            m_task = nullptr;
+        }
+
+        std::shared_ptr<SceneObject> m_object;
+        std::function<void(SceneObject&)> m_task;
+    };
+
     class Inspector: public Panel
     {
     public:
@@ -42,6 +63,9 @@ namespace ige::creator
         //! Draw script component
         void drawScriptComponent();
 
+        //! Draw RectTransform anchor
+        void drawRectTransformAnchor();
+
         //! Draw RectTransform component
         void drawRectTransform();
 
@@ -66,11 +90,23 @@ namespace ige::creator
         //! Draw PhysicCapsule component
         void drawPhysicCapsule();
 
+        //! Draw PhysicMesh component
+        void drawPhysicMesh();
+
         //! Draw AudioSource component
         void drawAudioSource();
 
         //! Draw AudioListener component
         void drawAudioListener();
+
+        //! Draw Ambient Light
+        void drawAmbientLight();
+
+        //! Draw Directional Light
+        void drawDirectionalLight();
+
+        //! Draw Point Light
+        void drawPointLight();
 
         //! Redraw
         void redraw() { m_bNeedRedraw = true;  }
@@ -94,7 +130,11 @@ namespace ige::creator
         std::shared_ptr<Group> m_figureCompGroup = nullptr;
         std::shared_ptr<Group> m_spriteCompGroup = nullptr;
         std::shared_ptr<Group> m_scriptCompGroup = nullptr;
+        std::shared_ptr<Group> m_ambientLightGroup = nullptr;
+        std::shared_ptr<Group> m_directionalLightGroup = nullptr;
+        std::shared_ptr<Group> m_pointLightGroup = nullptr;
         std::shared_ptr<Group> m_rectTransformGroup = nullptr;
+        std::shared_ptr<Group> m_rectTransformAnchorGroup = nullptr;
         std::shared_ptr<Group> m_canvasGroup = nullptr;
         std::shared_ptr<Group> m_uiImageGroup = nullptr;
         std::shared_ptr<Group> m_uiTextGroup = nullptr;
