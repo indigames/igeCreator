@@ -10,6 +10,7 @@ namespace ige::creator
         CheckBox(const std::string& label, const bool& selected = false);
         virtual ~CheckBox();
 
+        void setSelected(bool selected = true) { m_bIsSelected = selected; }
         bool isSelected() const { return m_bIsSelected; }
 
     protected:

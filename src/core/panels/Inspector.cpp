@@ -216,6 +216,7 @@ namespace ige::creator
             auto header = m_componentGroup->createWidget<Group>(component->getName(), true, closable);
             header->getOnClosedEvent().addListener([this, &component]() {
                 m_targetObject->removeComponent(component);
+                redraw();
             });
 
             if (component->getName() == "TransformComponent")
@@ -1313,16 +1314,33 @@ namespace ige::creator
     //! Draw PhysicMesh component
     void Inspector::drawPhysicMesh()
     {
+        drawPhysicBase();
+
         auto physicComp = m_targetObject->getComponent<PhysicMesh>();
         if (physicComp == nullptr)
             return;
 
-        drawPhysicBase();
-
         m_physicGroup->createWidget<Separator>();
-        m_physicGroup->createWidget<CheckBox>("Convex", physicComp->isConvex())->getOnDataChangedEvent().addListener([this](bool val) {
+
+        bool convex = physicComp->isConvex();
+        auto convexChk = m_physicGroup->createWidget<CheckBox>("Convex Hull", convex);
+        convexChk->setEndOfLine(false);
+
+        auto concaveChk = m_physicGroup->createWidget<CheckBox>("Triangle Mesh", !convex);
+        m_physicGroup->createWidget<Separator>();
+
+        convexChk->getOnDataChangedEvent().addListener([this, convexChk, concaveChk](bool convex) {
             auto physicComp = m_targetObject->getComponent<PhysicMesh>();
-            physicComp->setConvex(val);
+            physicComp->setConvex(convex);
+            convexChk->setSelected(convex);
+            concaveChk->setSelected(!convex);
+        });
+
+        concaveChk->getOnDataChangedEvent().addListener([this, convexChk, concaveChk](bool concave) {
+            auto physicComp = m_targetObject->getComponent<PhysicMesh>();
+            physicComp->setConvex(!concave);
+            convexChk->setSelected(!concave);
+            concaveChk->setSelected(concave);
         });
 
         auto txtPath = m_physicGroup->createWidget<TextField>("Path", physicComp->getPath().c_str(), true);
