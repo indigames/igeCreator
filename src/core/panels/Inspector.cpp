@@ -1187,6 +1187,7 @@ namespace ige::creator
         columns->createWidget<CheckBox>("Kinematic", physicComp->isKinematic())->getOnDataChangedEvent().addListener([this](bool val) {
             auto physicComp = m_targetObject->getComponent<PhysicBase>();
             physicComp->setIsKinematic(val);
+            redraw();
         });
 
         columns->createWidget<CheckBox>("Trigger", physicComp->isTrigger())->getOnDataChangedEvent().addListener([this](bool val) {
@@ -1332,15 +1333,15 @@ namespace ige::creator
         convexChk->getOnDataChangedEvent().addListener([this, convexChk, concaveChk](bool convex) {
             auto physicComp = m_targetObject->getComponent<PhysicMesh>();
             physicComp->setConvex(convex);
-            convexChk->setSelected(convex);
-            concaveChk->setSelected(!convex);
+            convexChk->setSelected(physicComp->isConvex());
+            concaveChk->setSelected(!physicComp->isConvex());
         });
 
         concaveChk->getOnDataChangedEvent().addListener([this, convexChk, concaveChk](bool concave) {
             auto physicComp = m_targetObject->getComponent<PhysicMesh>();
             physicComp->setConvex(!concave);
-            convexChk->setSelected(!concave);
-            concaveChk->setSelected(concave);
+            convexChk->setSelected(physicComp->isConvex());
+            concaveChk->setSelected(!physicComp->isConvex());
         });
 
         auto txtPath = m_physicGroup->createWidget<TextField>("Path", physicComp->getPath().c_str(), true);
