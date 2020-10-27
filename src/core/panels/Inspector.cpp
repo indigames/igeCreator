@@ -549,16 +549,27 @@ namespace ige::creator
             auto environment = m_targetObject->getComponent<EnvironmentComponent>();
             environment->setShadowColor({val[0], val[1], val[2]});
         });
-        auto shadowColumn = shadowGroup->createWidget<Columns<2>>(140.f);
+
+        std::array size = { environment->getShadowTextureSize()[0], environment->getShadowTextureSize()[1] };
+        shadowGroup->createWidget<Drag<float, 2>>("Size", ImGuiDataType_Float, size, 1, 512, 4096)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto environment = m_targetObject->getComponent<EnvironmentComponent>();
+            environment->setShadowTextureSize(Vec2(val[0], val[1]));
+        });
+
         std::array density = {environment->getShadowDensity()};
-        shadowColumn->createWidget<Drag<float>>("Density", ImGuiDataType_Float, density, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        shadowGroup->createWidget<Drag<float>>("Density", ImGuiDataType_Float, density, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
             auto environment = m_targetObject->getComponent<EnvironmentComponent>();
             environment->setShadowDensity(val[0]);
         });
         std::array wideness = {environment->getShadowWideness()};
-        shadowColumn->createWidget<Drag<float>>("Wideness", ImGuiDataType_Float, wideness, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        shadowGroup->createWidget<Drag<float>>("Wideness", ImGuiDataType_Float, wideness, 0.01f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
             auto environment = m_targetObject->getComponent<EnvironmentComponent>();
             environment->setShadowWideness(val[0]);
+        });
+        std::array bias = { environment->getShadowBias() };
+        shadowGroup->createWidget<Drag<float>>("Bias", ImGuiDataType_Float, bias, 0.0001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto environment = m_targetObject->getComponent<EnvironmentComponent>();
+            environment->setShadowBias(val[0]);
         });
 
         // Fog
@@ -569,7 +580,7 @@ namespace ige::creator
             environment->setDistanceFogColor({val[0], val[1], val[2]});
             environment->setDistanceFogAlpha(val[3]);
         });
-        auto fogColumn = fogGroup->createWidget<Columns<3>>(120.f);
+        auto fogColumn = fogGroup->createWidget<Columns<2>>(120.f);
         std::array fogNear = {environment->getDistanceFogNear()};
         fogColumn->createWidget<Drag<float>>("Near", ImGuiDataType_Float, fogNear, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
             auto environment = m_targetObject->getComponent<EnvironmentComponent>();
