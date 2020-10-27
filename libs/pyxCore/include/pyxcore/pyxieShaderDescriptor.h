@@ -317,6 +317,7 @@ namespace pyxie {
 		void SetColorMask(bool enable);
 		void SetScissorTest(bool enable);
 		void SetBillboard(bool enable);
+		void SetFog(bool enable);
 
 		void SetAlphaMap(ReferenceMapChannel channel);
 		void SetOverlayTransparentMapChannel(ReferenceMapChannel channel);
@@ -337,6 +338,7 @@ namespace pyxie {
 		inline bool IsColorMaskEnable() { return desc.COLOR_MASK_ENABLE; }
 		inline bool IsStencilEnable() { return desc.STENCIL_ENABLE; }
 		inline bool IsBillboardEnable() { return desc.BILLBOARD; }
+		inline bool IsFogEnable() { return desc.FOG; }
 
 
 		inline int GetColorTextureRGBUVSet() { return desc.colorMapUVSet / 3; }

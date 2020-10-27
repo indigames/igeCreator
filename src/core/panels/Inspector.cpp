@@ -580,14 +580,16 @@ namespace ige::creator
             environment->setDistanceFogColor({val[0], val[1], val[2]});
             environment->setDistanceFogAlpha(val[3]);
         });
+
         auto fogColumn = fogGroup->createWidget<Columns<2>>(120.f);
         std::array fogNear = {environment->getDistanceFogNear()};
-        fogColumn->createWidget<Drag<float>>("Near", ImGuiDataType_Float, fogNear, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        fogColumn->createWidget<Drag<float>>("Near", ImGuiDataType_Float, fogNear, 0.01f, 0.1f)->getOnDataChangedEvent().addListener([this](auto val) {
             auto environment = m_targetObject->getComponent<EnvironmentComponent>();
             environment->setDistanceFogNear(val[0]);
         });
+
         std::array fogFar = {environment->getDistanceFogFar()};
-        fogColumn->createWidget<Drag<float>>("Far", ImGuiDataType_Float, fogNear, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        fogColumn->createWidget<Drag<float>>("Far", ImGuiDataType_Float, fogFar, 0.01f, 0.1f)->getOnDataChangedEvent().addListener([this](auto val) {
             auto environment = m_targetObject->getComponent<EnvironmentComponent>();
             environment->setDistanceFogFar(val[0]);
         });
@@ -627,6 +629,11 @@ namespace ige::creator
                 figureComp->setPath(files[0]);
                 redraw();
             }
+        });
+
+        m_figureCompGroup->createWidget<CheckBox>("Enable Fog", figureComp->isFogEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto figureComp = m_targetObject->getComponent<FigureComponent>();
+            figureComp->setFogEnabled(val);
         });
 
         auto figure = figureComp->getFigure();
@@ -797,7 +804,7 @@ namespace ige::creator
             anchor[3] = anchorWidget->getAnchorMax().y;
             rectTransform->setAnchor(anchor);
             redraw();
-            });
+        });
 
         auto anchorColumn = m_rectTransformAnchorGroup->createWidget<Columns<2>>();
         anchorColumn->setColumnWidth(0, 52.f);
@@ -805,7 +812,7 @@ namespace ige::creator
         auto offset = rectTransform->getOffset();
         anchorColumn->createWidget<AnchorWidget>(ImVec2(anchor[0], anchor[1]), ImVec2(anchor[2], anchor[3]), false)->getOnClickEvent().addListener([](auto widget) {
             ImGui::OpenPopup("AnchorPresets");
-            });
+        });
 
         auto anchorGroup = anchorColumn->createWidget<Group>("AnchorGroup", false, false);
         auto anchorGroupColums = anchorGroup->createWidget<Columns<3>>(-1.f, true, 52.f);
@@ -820,7 +827,7 @@ namespace ige::creator
                 offset[0] = val[0];
                 rectTransform->setOffset(offset);
                 rectTransform->onUpdate(0.f);
-                });
+            });
 
             std::array top = { offset[1] };
             anchorGroupColums->createWidget<Drag<float>>("T", ImGuiDataType_Float, top, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
@@ -830,7 +837,7 @@ namespace ige::creator
                 offset[1] = val[0];
                 rectTransform->setOffset(offset);
                 rectTransform->onUpdate(0.f);
-                });
+            });
 
             std::array posZ = { rectTransform->getPosition().Z() };
             anchorGroupColums->createWidget<Drag<float>>("Z", ImGuiDataType_Float, posZ, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
@@ -840,7 +847,7 @@ namespace ige::creator
                 position.Z(val[0]);
                 rectTransform->setPosition(position);
                 rectTransform->onUpdate(0.f);
-                });
+            });
 
             std::array right = { offset[2] };
             anchorGroupColums->createWidget<Drag<float>>("R", ImGuiDataType_Float, right, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
@@ -850,7 +857,7 @@ namespace ige::creator
                 offset[2] = val[0];
                 rectTransform->setOffset(offset);
                 rectTransform->onUpdate(0.f);
-                });
+            });
 
             std::array bottom = { offset[3] };
             anchorGroupColums->createWidget<Drag<float>>("B", ImGuiDataType_Float, bottom, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
@@ -860,7 +867,7 @@ namespace ige::creator
                 offset[3] = val[0];
                 rectTransform->setOffset(offset);
                 rectTransform->onUpdate(0.f);
-                });
+            });
         }
         else if (anchor[0] == 0.f && anchor[2] == 1.f)
         {
@@ -872,7 +879,7 @@ namespace ige::creator
                 offset[0] = val[0];
                 rectTransform->setOffset(offset);
                 rectTransform->onUpdate(0.f);
-                });
+            });
             std::array posY = { rectTransform->getPosition().Y() };
             anchorGroupColums->createWidget<Drag<float>>("Y", ImGuiDataType_Float, posY, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
                 IgnoreTransformEventScope scope(m_targetObject, std::bind(&Inspector::onTransformChanged, this, std::placeholders::_1));
@@ -881,7 +888,7 @@ namespace ige::creator
                 position.Y(val[0]);
                 rectTransform->setPosition(position);
                 rectTransform->onUpdate(0.f);
-                });
+            });
             std::array posZ = { rectTransform->getPosition().Z() };
             anchorGroupColums->createWidget<Drag<float>>("Z", ImGuiDataType_Float, posZ, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
                 IgnoreTransformEventScope scope(m_targetObject, std::bind(&Inspector::onTransformChanged, this, std::placeholders::_1));
@@ -890,7 +897,7 @@ namespace ige::creator
                 position.Z(val[0]);
                 rectTransform->setPosition(position);
                 rectTransform->onUpdate(0.f);
-                });
+            });
 
             std::array right = { offset[2] };
             anchorGroupColums->createWidget<Drag<float>>("R", ImGuiDataType_Float, right, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
@@ -900,7 +907,7 @@ namespace ige::creator
                 offset[2] = val[0];
                 rectTransform->setOffset(offset);
                 rectTransform->onUpdate(0.f);
-                });
+            });
 
             std::array height = { rectTransform->getSize().Y() };
             anchorGroupColums->createWidget<Drag<float>>("H", ImGuiDataType_Float, height, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
@@ -910,7 +917,7 @@ namespace ige::creator
                 size.Y(val[0]);
                 rectTransform->setSize(size);
                 rectTransform->onUpdate(0.f);
-                });
+            });
         }
         else if (anchor[1] == 0.f && anchor[3] == 1.f)
         {
@@ -922,7 +929,7 @@ namespace ige::creator
                 position.X(val[0]);
                 rectTransform->setPosition(position);
                 rectTransform->onUpdate(0.f);
-                });
+            });
 
             std::array top = { offset[1] };
             anchorGroupColums->createWidget<Drag<float>>("T", ImGuiDataType_Float, top, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
@@ -932,7 +939,7 @@ namespace ige::creator
                 offset[1] = val[0];
                 rectTransform->setOffset(offset);
                 rectTransform->onUpdate(0.f);
-                });
+            });
 
             std::array posZ = { rectTransform->getPosition().Z() };
             anchorGroupColums->createWidget<Drag<float>>("Z", ImGuiDataType_Float, posZ, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
@@ -942,7 +949,7 @@ namespace ige::creator
                 position.Z(val[0]);
                 rectTransform->setPosition(position);
                 rectTransform->onUpdate(0.f);
-                });
+            });
 
             std::array width = { rectTransform->getSize().X() };
             anchorGroupColums->createWidget<Drag<float>>("W", ImGuiDataType_Float, width, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
@@ -952,7 +959,7 @@ namespace ige::creator
                 size.X(val[0]);
                 rectTransform->setSize(size);
                 rectTransform->onUpdate(0.f);
-                });
+            });
 
             std::array bottom = { offset[3] };
             anchorGroupColums->createWidget<Drag<float>>("B", ImGuiDataType_Float, bottom, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
@@ -962,7 +969,7 @@ namespace ige::creator
                 offset[3] = val[0];
                 rectTransform->setOffset(offset);
                 rectTransform->onUpdate(0.f);
-                });
+            });
         }
         else
         {
@@ -974,7 +981,7 @@ namespace ige::creator
                 position.X(val[0]);
                 rectTransform->setPosition(position);
                 rectTransform->onUpdate(0.f);
-                });
+            });
 
             std::array posY = { rectTransform->getPosition().Y() };
             anchorGroupColums->createWidget<Drag<float>>("Y", ImGuiDataType_Float, posY, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
@@ -984,7 +991,7 @@ namespace ige::creator
                 position.Y(val[0]);
                 rectTransform->setPosition(position);
                 rectTransform->onUpdate(0.f);
-                });
+            });
 
             std::array posZ = { rectTransform->getPosition().Z() };
             anchorGroupColums->createWidget<Drag<float>>("Z", ImGuiDataType_Float, posZ, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
@@ -994,7 +1001,7 @@ namespace ige::creator
                 position.Z(val[0]);
                 rectTransform->setPosition(position);
                 rectTransform->onUpdate(0.f);
-                });
+            });
 
             std::array width = { rectTransform->getSize().X() };
             anchorGroupColums->createWidget<Drag<float>>("W", ImGuiDataType_Float, width, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
@@ -1004,7 +1011,7 @@ namespace ige::creator
                 size.X(val[0]);
                 rectTransform->setSize(size);
                 rectTransform->onUpdate(0.f);
-                });
+            });
 
             std::array height = { rectTransform->getSize().Y() };
             anchorGroupColums->createWidget<Drag<float>>("H", ImGuiDataType_Float, height, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
@@ -1014,7 +1021,7 @@ namespace ige::creator
                 size.Y(val[0]);
                 rectTransform->setSize(size);
                 rectTransform->onUpdate(0.f);
-                });
+            });
         }
     }
 
