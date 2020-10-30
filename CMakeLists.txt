@@ -123,6 +123,10 @@ set (LIB_PATH ${LIBS_DIR}/igeVMath/${PLATFORM_PATH})
 target_link_libraries(${TARGET_NAME} ${LIB_PATH}igeVMath-static.${LIB_EXT})
     
 # igeBullet
+# file(TO_CMAKE_PATH $ENV{IGE_LIBS} IGE_LIBS)
+# add_subdirectory(${IGE_LIBS}/../igeBullet ${CMAKE_BINARY_DIR}/igeBullet-static)
+# target_link_libraries(${TARGET_NAME} igeBullet-static)
+
 set (LIB_PATH ${LIBS_DIR}/igeBullet/${PLATFORM_PATH})
 set (LIB_PATH_DEBUG ${LIBS_DIR}/igeBullet/${PLATFORM_PATH_DEBUG})
 target_link_libraries(${TARGET_NAME}

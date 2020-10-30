@@ -38,6 +38,7 @@
 #include <components/physic/PhysicSphere.h>
 #include <components/physic/PhysicCapsule.h>
 #include <components/physic/PhysicMesh.h>
+#include <components/physic/PhysicSoftBody.h>
 #include <components/audio/AudioSource.h>
 #include <components/audio/AudioListener.h>
 #include <scene/Scene.h>
@@ -65,6 +66,7 @@ namespace ige::creator
         PhysicSphere,
         PhysicCapsule,
         PhysicMesh,
+        PhysicSoftBody,
         AudioSource,
         AudioListener
     };
@@ -119,12 +121,13 @@ namespace ige::creator
             m_createCompCombo->addChoice((int)ComponentType::Figure, "Figure");
             m_createCompCombo->addChoice((int)ComponentType::Sprite, "Sprite");
 
-            if (m_targetObject->getComponent<PhysicBase>() == nullptr)
+            if (m_targetObject->getComponent<PhysicBase>() == nullptr && m_targetObject->getComponent<PhysicSoftBody>() == nullptr)
             {
                 m_createCompCombo->addChoice((int)ComponentType::PhysicBox, "PhysicBox");
                 m_createCompCombo->addChoice((int)ComponentType::PhysicSphere, "PhysicSphere");
                 m_createCompCombo->addChoice((int)ComponentType::PhysicCapsule, "PhysicCapsule");
                 m_createCompCombo->addChoice((int)ComponentType::PhysicMesh, "PhysicMesh");
+                m_createCompCombo->addChoice((int)ComponentType::PhysicSoftBody, "PhysicSoftBody");
             }
         }
         else // GUI Object
@@ -197,6 +200,9 @@ namespace ige::creator
                 break;
             case (int)ComponentType::PhysicMesh:
                 m_targetObject->addComponent<PhysicMesh>();
+                break;
+            case (int)ComponentType::PhysicSoftBody:
+                m_targetObject->addComponent<PhysicSoftBody>("figure/cube.pyxf");
                 break;
             case (int)ComponentType::AudioSource:
                 m_targetObject->addComponent<AudioSource>();
@@ -291,6 +297,11 @@ namespace ige::creator
             {
                 m_physicGroup = header->createWidget<Group>("PhysicGroup", false);
                 drawPhysicMesh();
+            }
+            else if (component->getName() == "PhysicSoftBody")
+            {
+                m_physicGroup = header->createWidget<Group>("PhysicGroup", false);
+                drawPhysicSoftBody();
             }
             else if (component->getName() == "AudioSource")
             {
@@ -735,7 +746,7 @@ namespace ige::creator
         });
 
         std::array size = {spriteComp->getSize().X(), spriteComp->getSize().Y()};
-        m_spriteCompGroup->createWidget<Drag<float, 2>>("Size", ImGuiDataType_Float, size, 1.f, 0.f, 4096.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        m_spriteCompGroup->createWidget<Drag<float, 2>>("Size", ImGuiDataType_Float, size, 1.f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
             auto spriteComp = m_targetObject->getComponent<SpriteComponent>();
             spriteComp->setSize({val[0], val[1]});
         });
@@ -1168,7 +1179,7 @@ namespace ige::creator
         }
 
         std::array size = {(float)uiText->getFontSize()};
-        m_uiTextGroup->createWidget<Drag<float>>("Size", ImGuiDataType_Float, size, 1.f, 4.f, 50.f)->getOnDataChangedEvent().addListener([this](auto &val) {
+        m_uiTextGroup->createWidget<Drag<float>>("Size", ImGuiDataType_Float, size, 1.f, 4.f, 128.f)->getOnDataChangedEvent().addListener([this](auto &val) {
             auto uiText = m_targetObject->getComponent<UIText>();
             uiText->setFontSize((int)val[0]);
         });
@@ -1226,19 +1237,19 @@ namespace ige::creator
         });
 
         std::array mass = {physicComp->getMass()};
-        m_physicGroup->createWidget<Drag<float>>("Mass", ImGuiDataType_Float, mass, 0.01f, 0.01f)->getOnDataChangedEvent().addListener([this](auto &val) {
+        m_physicGroup->createWidget<Drag<float>>("Mass", ImGuiDataType_Float, mass, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto &val) {
             auto physicComp = m_targetObject->getComponent<PhysicBase>();
             physicComp->setMass(val[0]);
         });
 
         std::array friction = {physicComp->getFriction()};
-        m_physicGroup->createWidget<Drag<float>>("Friction", ImGuiDataType_Float, friction, 0.01f, 0.01f)->getOnDataChangedEvent().addListener([this](auto &val) {
+        m_physicGroup->createWidget<Drag<float>>("Friction", ImGuiDataType_Float, friction, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto &val) {
             auto physicComp = m_targetObject->getComponent<PhysicBase>();
             physicComp->setFriction(val[0]);
         });
 
         std::array restitution = {physicComp->getRestitution()};
-        m_physicGroup->createWidget<Drag<float>>("Restitution", ImGuiDataType_Float, restitution, 0.01f, 0.01f)->getOnDataChangedEvent().addListener([this](auto &val) {
+        m_physicGroup->createWidget<Drag<float>>("Restitution", ImGuiDataType_Float, restitution, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto &val) {
             auto physicComp = m_targetObject->getComponent<PhysicBase>();
             physicComp->setRestitution(val[0]);
         });
@@ -1267,10 +1278,10 @@ namespace ige::creator
             physicComp->setAngularFactor({val[0], val[1], val[2]});
         });
 
-        std::array posOffset = {physicComp->getPositionOffset()[0], physicComp->getPositionOffset()[1], physicComp->getPositionOffset()[2]};
-        m_physicGroup->createWidget<Drag<float, 3>>("Position Offset", ImGuiDataType_Float, posOffset)->getOnDataChangedEvent().addListener([this](auto &val) {
+        std::array margin = {physicComp->getCollisionMargin()};
+        m_physicGroup->createWidget<Drag<float>>("Margin", ImGuiDataType_Float, margin, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto &val) {
             auto physicComp = m_targetObject->getComponent<PhysicBase>();
-            physicComp->setPositionOffset({val[0], val[1], val[2]});
+            physicComp->setCollisionMargin(val[0]);
         });
     }
 
@@ -1285,7 +1296,7 @@ namespace ige::creator
 
         m_physicGroup->createWidget<Separator>();
         std::array size = {physicComp->getSize().X(), physicComp->getSize().Y(), physicComp->getSize().Z()};
-        m_physicGroup->createWidget<Drag<float, 3>>("Size", ImGuiDataType_Float, size, 0.01f, 0.01f)->getOnDataChangedEvent().addListener([this](auto &val) {
+        m_physicGroup->createWidget<Drag<float, 3>>("Size", ImGuiDataType_Float, size, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto &val) {
             auto physicComp = m_targetObject->getComponent<PhysicBox>();
             physicComp->setSize({val[0], val[1], val[2]});
         });
@@ -1302,7 +1313,7 @@ namespace ige::creator
 
         m_physicGroup->createWidget<Separator>();
         std::array radius = {physicComp->getRadius()};
-        m_physicGroup->createWidget<Drag<float>>("Radius", ImGuiDataType_Float, radius, 0.01f, 0.01f)->getOnDataChangedEvent().addListener([this](auto &val) {
+        m_physicGroup->createWidget<Drag<float>>("Radius", ImGuiDataType_Float, radius, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto &val) {
             auto physicComp = m_targetObject->getComponent<PhysicSphere>();
             physicComp->setRadius(val[0]);
         });
@@ -1319,12 +1330,12 @@ namespace ige::creator
 
         m_physicGroup->createWidget<Separator>();
         std::array height = {physicComp->getHeight()};
-        m_physicGroup->createWidget<Drag<float>>("Height", ImGuiDataType_Float, height, 0.01f, 0.01f)->getOnDataChangedEvent().addListener([this](auto &val) {
+        m_physicGroup->createWidget<Drag<float>>("Height", ImGuiDataType_Float, height, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto &val) {
             auto physicComp = m_targetObject->getComponent<PhysicCapsule>();
             physicComp->setHeight(val[0]);
         });
         std::array radius = {physicComp->getRadius()};
-        m_physicGroup->createWidget<Drag<float>>("Radius", ImGuiDataType_Float, radius, 0.01f, 0.01f)->getOnDataChangedEvent().addListener([this](auto &val) {
+        m_physicGroup->createWidget<Drag<float>>("Radius", ImGuiDataType_Float, radius, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto &val) {
             auto physicComp = m_targetObject->getComponent<PhysicCapsule>();
             physicComp->setRadius(val[0]);
         });
@@ -1371,6 +1382,96 @@ namespace ige::creator
         {
             txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
                 auto physicComp = m_targetObject->getComponent<PhysicMesh>();
+                physicComp->setPath(txt);
+                redraw();
+            });
+        }
+    }
+
+    void Inspector::drawPhysicSoftBody()
+    {
+        if (m_physicGroup == nullptr)
+            return;
+        m_physicGroup->removeAllWidgets();
+
+        auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+        if (physicComp == nullptr)
+            return;
+
+        auto columns = m_physicGroup->createWidget<Columns<2>>();
+        columns->createWidget<CheckBox>("Enable", physicComp->isEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setEnabled(val);
+        });
+
+        columns->createWidget<CheckBox>("Continous", physicComp->isCCD())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setCCD(val);
+        });
+
+        columns->createWidget<CheckBox>("Trigger", physicComp->isTrigger())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setIsTrigger(val);
+        });
+
+        std::array filterGroup = { physicComp->getCollisionFilterGroup() };
+        m_physicGroup->createWidget<Drag<int>>("Collision Group", ImGuiDataType_S32, filterGroup, 1, -1)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setCollisionFilterGroup(val[0]);
+            });
+
+        std::array filterMask = { physicComp->getCollisionFilterMask() };
+        m_physicGroup->createWidget<Drag<int>>("Collision Mask", ImGuiDataType_S32, filterMask, 1, -1)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setCollisionFilterMask(val[0]);
+            });
+
+        std::array mass = { physicComp->getMass() };
+        m_physicGroup->createWidget<Drag<float>>("Mass", ImGuiDataType_Float, mass, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setMass(val[0]);
+        });
+
+        std::array friction = { physicComp->getFriction() };
+        m_physicGroup->createWidget<Drag<float>>("Friction", ImGuiDataType_Float, friction, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setFriction(val[0]);
+        });
+
+        std::array restitution = { physicComp->getRestitution() };
+        m_physicGroup->createWidget<Drag<float>>("Restitution", ImGuiDataType_Float, restitution, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setRestitution(val[0]);
+        });
+
+        std::array linearVelocity = { physicComp->getLinearVelocity().x(), physicComp->getLinearVelocity().y(), physicComp->getLinearVelocity().z() };
+        m_physicGroup->createWidget<Drag<float, 3>>("Linear Velocity", ImGuiDataType_Float, linearVelocity)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setLinearVelocity({ val[0], val[1], val[2] });
+        });
+
+        std::array angularVelocity = { physicComp->getAngularVelocity().x(), physicComp->getAngularVelocity().y(), physicComp->getAngularVelocity().z() };
+        m_physicGroup->createWidget<Drag<float, 3>>("Angular Velocity", ImGuiDataType_Float, angularVelocity)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setAngularVelocity({ val[0], val[1], val[2] });
+        });
+
+        std::array margin = { physicComp->getCollisionMargin() };
+        m_physicGroup->createWidget<Drag<float>>("Margin", ImGuiDataType_Float, margin, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setCollisionMargin(val[0]);
+        });
+
+        m_physicGroup->createWidget<Separator>();
+        auto txtPath = m_physicGroup->createWidget<TextField>("Path", physicComp->getPath().c_str(), true);
+        txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setPath(txt);
+        });
+        for (const auto& type : GetFileExtensionSuported(E_FileExts::Figure))
+        {
+            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
+                auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
                 physicComp->setPath(txt);
                 redraw();
             });

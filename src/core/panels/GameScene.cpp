@@ -153,11 +153,11 @@ namespace ige::creator
 
             if (SceneManager::getInstance()->getCurrentScene())
             {
-                auto path = SceneManager::getInstance()->getCurrentScene()->getName() + "_tmp";
+                auto path = Editor::getSceneManager()->getCurrentScene()->getName() + "_tmp";
                 auto& selectedObj = Editor::getInstance()->getSelectedObject();
                 m_lastObjectId = selectedObj ? selectedObj->getId() : -1;
                 Editor::getCanvas()->getEditorScene()->setTargetObject(nullptr);
-                SceneManager::getInstance()->saveScene(path);
+                Editor::getSceneManager()->saveScene(path);
                 if (PhysicManager::getInstance()->getWorld())
                     PhysicManager::getInstance()->getWorld()->clearForces();
             }
@@ -188,9 +188,15 @@ namespace ige::creator
                 Editor::getInstance()->setSelectedObject(-1);
                 Editor::getCanvas()->getHierarchy()->clear();
                 Editor::getCanvas()->getHierarchy()->initialize();
-                SceneManager::getInstance()->unloadScene(name);
-                auto scene = SceneManager::getInstance()->loadScene(name + "_tmp");
-                SceneManager::getInstance()->setCurrentScene(scene);
+                auto& scene = Editor::getCurrentScene();
+                if (scene)
+                {
+                    Editor::getSceneManager()->unloadScene(scene);
+                    scene = nullptr;
+                }
+
+                scene = Editor::getSceneManager()->loadScene(name + "_tmp");
+                Editor::getSceneManager()->setCurrentScene(scene);
 
                 Editor::getInstance()->setSelectedObject(m_lastObjectId);
                 m_lastObjectId = -1;

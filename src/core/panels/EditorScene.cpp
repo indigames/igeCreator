@@ -497,7 +497,7 @@ namespace ige::creator
         
         auto transform = target->getTransform();
         auto rotation = transform->getWorldRotation();
-        auto position = transform->getWorldPosition() + transform->getCenter() + physicComp->getPositionOffset();
+        auto position = transform->getWorldPosition() + transform->getCenter();
         auto scale = transform->getWorldScale();
 
         /* Draw the box collider if any */
