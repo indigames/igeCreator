@@ -1357,8 +1357,6 @@ namespace ige::creator
         convexChk->setEndOfLine(false);
 
         auto concaveChk = m_physicGroup->createWidget<CheckBox>("Triangle Mesh", !convex);
-        m_physicGroup->createWidget<Separator>();
-
         convexChk->getOnDataChangedEvent().addListener([this, convexChk, concaveChk](bool convex) {
             auto physicComp = m_targetObject->getComponent<PhysicMesh>();
             physicComp->setConvex(convex);
@@ -1414,17 +1412,41 @@ namespace ige::creator
             physicComp->setIsTrigger(val);
         });
 
+        columns->createWidget<CheckBox>("Self Collision", physicComp->isSelfCollision())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setSelfCollision(val);
+        });
+
+        columns->createWidget<CheckBox>("Soft Collision", physicComp->isSoftSoftCollision())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setSoftSoftCollision(val);
+        });
+
+        auto txtPath = m_physicGroup->createWidget<TextField>("Path", physicComp->getPath().c_str(), true);
+        txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setPath(txt);
+        });
+        for (const auto& type : GetFileExtensionSuported(E_FileExts::Figure))
+        {
+            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
+                auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+                physicComp->setPath(txt);
+                redraw();
+            });
+        }
+
         std::array filterGroup = { physicComp->getCollisionFilterGroup() };
         m_physicGroup->createWidget<Drag<int>>("Collision Group", ImGuiDataType_S32, filterGroup, 1, -1)->getOnDataChangedEvent().addListener([this](auto& val) {
             auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
             physicComp->setCollisionFilterGroup(val[0]);
-            });
+        });
 
         std::array filterMask = { physicComp->getCollisionFilterMask() };
         m_physicGroup->createWidget<Drag<int>>("Collision Mask", ImGuiDataType_S32, filterMask, 1, -1)->getOnDataChangedEvent().addListener([this](auto& val) {
             auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
             physicComp->setCollisionFilterMask(val[0]);
-            });
+        });
 
         std::array mass = { physicComp->getMass() };
         m_physicGroup->createWidget<Drag<float>>("Mass", ImGuiDataType_Float, mass, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
@@ -1463,19 +1485,41 @@ namespace ige::creator
         });
 
         m_physicGroup->createWidget<Separator>();
-        auto txtPath = m_physicGroup->createWidget<TextField>("Path", physicComp->getPath().c_str(), true);
-        txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
+        std::array damping = { physicComp->getDampingCoefficient() };
+        m_physicGroup->createWidget<Drag<float>>("Damping", ImGuiDataType_Float, damping, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
             auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
-            physicComp->setPath(txt);
+            physicComp->setDampingCoefficient(val[0]);
         });
-        for (const auto& type : GetFileExtensionSuported(E_FileExts::Figure))
-        {
-            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-                auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
-                physicComp->setPath(txt);
-                redraw();
-            });
-        }
+
+        std::array spring = { physicComp->getRepulsionStiffness() };
+        m_physicGroup->createWidget<Drag<float>>("Spring", ImGuiDataType_Float, spring, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setRepulsionStiffness(val[0]);
+        });
+
+        std::array sleepThreshold = { physicComp->getSleepingThreshold() };
+        m_physicGroup->createWidget<Drag<float>>("Sleep TS", ImGuiDataType_Float, sleepThreshold, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setSleepingThreshold(val[0]);
+        });
+
+        std::array restLS = { physicComp->getRestLengthScale() };
+        m_physicGroup->createWidget<Drag<float>>("Rest Length Scale", ImGuiDataType_Float, restLS, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setRestLengthScale(val[0]);
+        });
+
+        std::array density = { physicComp->getDensity() };
+        m_physicGroup->createWidget<Drag<float>>("Density", ImGuiDataType_Float, density, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setDensity(val[0]);
+        });
+
+        std::array windVelocity = { physicComp->getWindVelocity().x(), physicComp->getWindVelocity().y(), physicComp->getWindVelocity().z() };
+        m_physicGroup->createWidget<Drag<float, 3>>("Wind Velocity", ImGuiDataType_Float, windVelocity)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setWindVelocity({ val[0], val[1], val[2] });
+        });
     }
 
     //! Draw AudioSource
