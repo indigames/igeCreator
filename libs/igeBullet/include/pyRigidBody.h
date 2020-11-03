@@ -8,7 +8,8 @@ namespace ige::bullet
     // Object declaration
     typedef struct
     {
-        PyObject_HEAD void *btbody;
+        PyObject_HEAD;
+        void* btbody;
         world_obj *world;
         short collisionGroup;
         short collisionMask;

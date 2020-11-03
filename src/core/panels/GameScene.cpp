@@ -11,7 +11,6 @@ namespace fs = std::filesystem;
 #include "core/panels/Hierarchy.h"
 #include "core/panels/EditorScene.h"
 #include "core/dialog/SaveFileDialog.h"
-#include "core/ShapeDrawer.h"
 
 #include <utils/GraphicsHelper.h>
 #include <scene/Scene.h>
@@ -136,13 +135,6 @@ namespace ige::creator
         if (renderContext && m_fbo)
         {
             renderContext->BeginScene(m_fbo, {0.f, 0.f, 0.f, 0.f}, true, true);
-            
-            // Render debug context
-            ShapeDrawer::setViewProjectionMatrix(renderContext->GetRenderViewProjectionMatrix());
-
-            // Render Physic debug
-            PhysicManager::getInstance()->getWorld()->debugDrawWorld();
-
             Editor::getSceneManager()->render();
             renderContext->EndScene();
         }
@@ -166,8 +158,6 @@ namespace ige::creator
                 m_lastObjectId = selectedObj ? selectedObj->getId() : -1;
                 Editor::getCanvas()->getEditorScene()->setTargetObject(nullptr);
                 Editor::getSceneManager()->saveScene(path);
-                if (PhysicManager::getInstance()->getWorld())
-                    PhysicManager::getInstance()->getWorld()->clearForces();
             }
             m_bIsPlaying = true;
         }

@@ -127,7 +127,8 @@ namespace ige::creator
                 m_createCompCombo->addChoice((int)ComponentType::PhysicSphere, "PhysicSphere");
                 m_createCompCombo->addChoice((int)ComponentType::PhysicCapsule, "PhysicCapsule");
                 m_createCompCombo->addChoice((int)ComponentType::PhysicMesh, "PhysicMesh");
-                m_createCompCombo->addChoice((int)ComponentType::PhysicSoftBody, "PhysicSoftBody");
+                if (m_targetObject->getComponent<FigureComponent>())
+                    m_createCompCombo->addChoice((int)ComponentType::PhysicSoftBody, "PhysicSoftBody");
             }
         }
         else // GUI Object
@@ -202,7 +203,7 @@ namespace ige::creator
                 m_targetObject->addComponent<PhysicMesh>();
                 break;
             case (int)ComponentType::PhysicSoftBody:
-                m_targetObject->addComponent<PhysicSoftBody>("figure/cube.pyxf");
+                m_targetObject->addComponent<PhysicSoftBody>();
                 break;
             case (int)ComponentType::AudioSource:
                 m_targetObject->addComponent<AudioSource>();
@@ -1422,20 +1423,6 @@ namespace ige::creator
             physicComp->setSoftSoftCollision(val);
         });
 
-        auto txtPath = m_physicGroup->createWidget<TextField>("Path", physicComp->getPath().c_str(), true);
-        txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
-            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
-            physicComp->setPath(txt);
-        });
-        for (const auto& type : GetFileExtensionSuported(E_FileExts::Figure))
-        {
-            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-                auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
-                physicComp->setPath(txt);
-                redraw();
-            });
-        }
-
         std::array filterGroup = { physicComp->getCollisionFilterGroup() };
         m_physicGroup->createWidget<Drag<int>>("Collision Group", ImGuiDataType_S32, filterGroup, 1, -1)->getOnDataChangedEvent().addListener([this](auto& val) {
             auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
@@ -1507,18 +1494,6 @@ namespace ige::creator
         m_physicGroup->createWidget<Drag<float>>("Rest Length Scale", ImGuiDataType_Float, restLS, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
             auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
             physicComp->setRestLengthScale(val[0]);
-        });
-
-        std::array density = { physicComp->getDensity() };
-        m_physicGroup->createWidget<Drag<float>>("Density", ImGuiDataType_Float, density, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
-            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
-            physicComp->setDensity(val[0]);
-        });
-
-        std::array windVelocity = { physicComp->getWindVelocity().x(), physicComp->getWindVelocity().y(), physicComp->getWindVelocity().z() };
-        m_physicGroup->createWidget<Drag<float, 3>>("Wind Velocity", ImGuiDataType_Float, windVelocity)->getOnDataChangedEvent().addListener([this](auto& val) {
-            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
-            physicComp->setWindVelocity({ val[0], val[1], val[2] });
         });
     }
 
@@ -1908,15 +1883,18 @@ namespace ige::creator
     void Inspector::onTransformChanged(SceneObject& sceneObject)
     {
         // Just redraw the transform in Inspector
-        TaskManager::getInstance()->addTask([&, this]() {
-            if (sceneObject.isGUIObject())
+        TaskManager::getInstance()->addTask([this](){
+            if (m_targetObject != nullptr)
             {
-                drawRectTransform();
-            }
-            else
-            {
-                drawLocalTransformComponent();
-                drawWorldTransformComponent();
+                if (m_targetObject->isGUIObject())
+                {
+                    drawRectTransform();
+                }
+                else
+                {
+                    drawLocalTransformComponent();
+                    drawWorldTransformComponent();
+                }
             }
         });
     }

@@ -56,16 +56,6 @@ namespace ige::creator
 
         // Set editor mode
         SceneManager::getInstance()->setIsEditor(true);
-
-        // Load the start scene
-        auto scene = SceneManager::getInstance()->loadScene(m_canvas->getProjectSetting()->getStartScene());
-
-        // If no scene loaded, create empty scene
-        if (scene == nullptr)
-            scene = Editor::getSceneManager()->createScene();
-
-        // Set current scene to new loaded/created scene
-        Editor::setCurrentScene(scene);
     }
 
     void Editor::handleEvent(const void* event)
@@ -83,6 +73,20 @@ namespace ige::creator
 
         // Update layouts
         m_canvas->update(dt);
+
+        // Load scene
+        if (SceneManager::getInstance()->getCurrentScene() == nullptr)
+        {
+            // Load the start scene
+            auto scene = SceneManager::getInstance()->loadScene(m_canvas->getProjectSetting()->getStartScene());
+
+            // If no scene loaded, create empty scene
+            if (scene == nullptr)
+                scene = Editor::getSceneManager()->createScene();
+
+            // Set current scene to new loaded/created scene
+            Editor::setCurrentScene(scene);
+        }
     }
 
     void Editor::render()

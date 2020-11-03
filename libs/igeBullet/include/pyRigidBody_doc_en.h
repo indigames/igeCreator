@@ -142,6 +142,16 @@ namespace ige::bullet
                  "\n"
                  "	type :  float (read / write)");
 
+    PyDoc_STRVAR(rigidbody_ccdSweptSphereRadius_doc,
+        "CcdSweptSphereRadius of rigid body.\n"
+        "\n"
+        "	type :  float (read / write)");
+
+    PyDoc_STRVAR(rigidbody_ccdMotionThreshold_doc,
+        "CcdMotionThreshold of rigid body.\n"
+        "\n"
+        "	type :  float (read / write)");
+
     PyDoc_STRVAR(rigidbody_linearFactor_doc,
                  "rigid body linear factor\n"
                  "\n"
@@ -216,4 +226,10 @@ namespace ige::bullet
                  "        tuple of (x,y,z) float vector value.\n"
                  "    max :  (float,float,float)\n"
                  "        tuple of (x,y,z) float vector value.\n");
+
+
+
+
+
+
 } // namespace ige::bullet

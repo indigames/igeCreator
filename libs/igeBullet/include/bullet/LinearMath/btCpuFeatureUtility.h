@@ -16,11 +16,7 @@
 #define ARM_NEON_GCC_COMPATIBILITY 1
 #include <arm_neon.h>
 #include <sys/types.h>
-// [IGE]: Android not have sysctl.h
-#ifndef ANDROID
-#  include <sys/sysctl.h>  //for sysctlbyname
-#endif
-// [/IGE]
+#include <sys/sysctl.h>  //for sysctlbyname
 #endif                   //BT_USE_NEON
 
 ///Rudimentary btCpuFeatureUtility for CPU features: only report the features that Bullet actually uses (SSE4/FMA3, NEON_HPFP)
@@ -46,17 +42,11 @@ public:
 
 #ifdef BT_USE_NEON
 		{
-		// [IGE]: Android with neon-fp16
-		#ifdef ANDROID
-			capabilities |= CPU_FEATURE_NEON_HPFP;
-		#else
 			uint32_t hasFeature = 0;
 			size_t featureSize = sizeof(hasFeature);
 			int err = sysctlbyname("hw.optional.neon_hpfp", &hasFeature, &featureSize, NULL, 0);
 			if (0 == err && hasFeature)
 				capabilities |= CPU_FEATURE_NEON_HPFP;
-		#endif
-		// [/IGE]
 		}
 #endif  //BT_USE_NEON
 

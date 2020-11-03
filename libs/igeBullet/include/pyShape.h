@@ -8,7 +8,8 @@ namespace ige::bullet
     typedef struct
     {
         PyObject_HEAD;
-        void *btshape;
+        void* btshape;
+        void* workPointer;
     } shape_obj;
 
     // Type declaration

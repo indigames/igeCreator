@@ -15,6 +15,8 @@ namespace ige::bullet
         char *name;
         int *orgMap;
         int numOrgPoss;
+        void* forceA;
+        void* forceB;
     } softbody_obj;
 
     // Type declaration
