@@ -1436,19 +1436,19 @@ namespace ige::creator
         });
 
         std::array mass = { physicComp->getMass() };
-        m_physicGroup->createWidget<Drag<float>>("Mass", ImGuiDataType_Float, mass, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
+        m_physicGroup->createWidget<Drag<float>>("Mass", ImGuiDataType_Float, mass, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto& val) {
             auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
             physicComp->setMass(val[0]);
         });
 
         std::array friction = { physicComp->getFriction() };
-        m_physicGroup->createWidget<Drag<float>>("Friction", ImGuiDataType_Float, friction, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
+        m_physicGroup->createWidget<Drag<float>>("Friction", ImGuiDataType_Float, friction, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto& val) {
             auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
             physicComp->setFriction(val[0]);
         });
 
         std::array restitution = { physicComp->getRestitution() };
-        m_physicGroup->createWidget<Drag<float>>("Restitution", ImGuiDataType_Float, restitution, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
+        m_physicGroup->createWidget<Drag<float>>("Restitution", ImGuiDataType_Float, restitution, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto& val) {
             auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
             physicComp->setRestitution(val[0]);
         });
@@ -1466,34 +1466,112 @@ namespace ige::creator
         });
 
         std::array margin = { physicComp->getCollisionMargin() };
-        m_physicGroup->createWidget<Drag<float>>("Margin", ImGuiDataType_Float, margin, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
+        m_physicGroup->createWidget<Drag<float>>("Margin", ImGuiDataType_Float, margin, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto& val) {
             auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
             physicComp->setCollisionMargin(val[0]);
         });
 
         m_physicGroup->createWidget<Separator>();
-        std::array damping = { physicComp->getDampingCoefficient() };
-        m_physicGroup->createWidget<Drag<float>>("Damping", ImGuiDataType_Float, damping, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
+        std::array damping = { physicComp->getDampingCoeff() };
+        m_physicGroup->createWidget<Drag<float>>("DampingCoeff", ImGuiDataType_Float, damping, 0.001f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto& val) {
             auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
-            physicComp->setDampingCoefficient(val[0]);
+            physicComp->setDampingCoeff(val[0]);
         });
 
         std::array spring = { physicComp->getRepulsionStiffness() };
-        m_physicGroup->createWidget<Drag<float>>("Spring", ImGuiDataType_Float, spring, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
+        m_physicGroup->createWidget<Drag<float>>("LinearStiffness", ImGuiDataType_Float, spring, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto& val) {
             auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
             physicComp->setRepulsionStiffness(val[0]);
         });
 
+        std::array pressure = { physicComp->getPressureCoeff() };
+        m_physicGroup->createWidget<Drag<float>>("PressureCoeff", ImGuiDataType_Float, pressure, 0.001f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setPressureCoeff(val[0]);
+        });
+
+        std::array volCoeff = { physicComp->getVolumeConvCoeff() };
+        m_physicGroup->createWidget<Drag<float>>("VolumeConvCoeff", ImGuiDataType_Float, volCoeff, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setVolumeConvCoeff(val[0]);
+        });
+
+        std::array fricCoeff = { physicComp->getDynamicFrictionCoeff() };
+        m_physicGroup->createWidget<Drag<float>>("FrictionCoeff", ImGuiDataType_Float, fricCoeff, 0.001f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setDynamicFrictionCoeff(val[0]);
+        });
+
+        std::array poseCoeff = { physicComp->getPoseMatchCoeff() };
+        m_physicGroup->createWidget<Drag<float>>("PoseMatchCoeff", ImGuiDataType_Float, poseCoeff, 0.001f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setPoseMatchCoeff(val[0]);
+        });
+
+        std::array graF = { physicComp->getGravityFactor() };
+        m_physicGroup->createWidget<Drag<float>>("GravityFactor", ImGuiDataType_Float, graF, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setGravityFactor(val[0]);
+        });
+
+        std::array velF = { physicComp->getVelocityFactor() };
+        m_physicGroup->createWidget<Drag<float>>("VelocityCorFactor", ImGuiDataType_Float, velF, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setVelocityFactor(val[0]);
+        });
+
+        std::array rigidH = { physicComp->getRigidContactHardness() };
+        m_physicGroup->createWidget<Drag<float>>("RigidHardness", ImGuiDataType_Float, rigidH, 0.001f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setRigidContactHardness(val[0]);
+        });
+
+        std::array kinH = { physicComp->getKineticContactHardness() };
+        m_physicGroup->createWidget<Drag<float>>("KineticHardness", ImGuiDataType_Float, kinH, 0.001f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setKineticContactHardness(val[0]);
+        });
+
+        std::array softH = { physicComp->getSoftContactHardness() };
+        m_physicGroup->createWidget<Drag<float>>("SoftHardness", ImGuiDataType_Float, softH, 0.001f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setSoftContactHardness(val[0]);
+        });
+
+        std::array anchorH = { physicComp->getAnchorHardness() };
+        m_physicGroup->createWidget<Drag<float>>("AnchorHardness", ImGuiDataType_Float, anchorH, 0.001f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setAnchorHardness(val[0]);
+        });
+
+        std::array posItrNum = { physicComp->getPosIterationNumber() };
+        m_physicGroup->createWidget<Drag<int>>("PosIterations", ImGuiDataType_S32, posItrNum, 1, 1)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setPosIterationNumber(val[0]);
+        });
+
         std::array sleepThreshold = { physicComp->getSleepingThreshold() };
-        m_physicGroup->createWidget<Drag<float>>("Sleep TS", ImGuiDataType_Float, sleepThreshold, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
+        m_physicGroup->createWidget<Drag<float>>("SleepThreshold", ImGuiDataType_Float, sleepThreshold, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
             auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
             physicComp->setSleepingThreshold(val[0]);
         });
 
         std::array restLS = { physicComp->getRestLengthScale() };
-        m_physicGroup->createWidget<Drag<float>>("Rest Length Scale", ImGuiDataType_Float, restLS, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
+        m_physicGroup->createWidget<Drag<float>>("RestLengthScale", ImGuiDataType_Float, restLS, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
             auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
             physicComp->setRestLengthScale(val[0]);
+        });
+
+        std::array aeroModel = { physicComp->getAeroModel() };
+        m_physicGroup->createWidget<Drag<int>>("AeroModel", ImGuiDataType_S32, aeroModel, 1, 0, 6)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setAeroModel(val[0]);
+        });
+
+        std::array windVelocity = { physicComp->getWindVelocity().x(), physicComp->getWindVelocity().y(), physicComp->getWindVelocity().z() };
+        m_physicGroup->createWidget<Drag<float, 3>>("WindVelocity", ImGuiDataType_Float, windVelocity)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setWindVelocity({ val[0], val[1], val[2] });
         });
     }
 
