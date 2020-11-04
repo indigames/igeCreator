@@ -643,10 +643,42 @@ namespace ige::creator
             }
         });
 
-        m_figureCompGroup->createWidget<CheckBox>("Enable Fog", figureComp->isFogEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
+        auto figColumn = m_figureCompGroup->createWidget<Columns<2>>();
+
+        figColumn->createWidget<CheckBox>("Fog", figureComp->isFogEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
             auto figureComp = m_targetObject->getComponent<FigureComponent>();
             figureComp->setFogEnabled(val);
         });
+
+        figColumn->createWidget<CheckBox>("CullFace", figureComp->isCullFaceEnable())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto figureComp = m_targetObject->getComponent<FigureComponent>();
+            figureComp->setCullFaceEnable(val);
+        });
+
+        figColumn->createWidget<CheckBox>("Z-Test", figureComp->isDepthTestEnable())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto figureComp = m_targetObject->getComponent<FigureComponent>();
+            figureComp->setDepthTestEnable(val);
+        });
+    
+        figColumn->createWidget<CheckBox>("Z-Write", figureComp->isDepthWriteEnable())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto figureComp = m_targetObject->getComponent<FigureComponent>();
+            figureComp->setDepthWriteEnable(val);
+        });
+
+        figColumn->createWidget<CheckBox>("AlphaBlend", figureComp->isAlphaBlendingEnable())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto figureComp = m_targetObject->getComponent<FigureComponent>();
+            figureComp->setAlphaBlendingEnable(val);
+            redraw();
+        });
+
+        if (figureComp->isAlphaBlendingEnable())
+        {
+            std::array val = { figureComp->getAlphaBlendingOp() };
+            m_figureCompGroup->createWidget<Drag<int>>("AlphaBlendOp", ImGuiDataType_S32, val, 1, 0, 3)->getOnDataChangedEvent().addListener([this](auto val) {
+                auto figureComp = m_targetObject->getComponent<FigureComponent>();
+                figureComp->setAlphaBlendingOp(val[0]);
+            });
+        }
 
         auto figure = figureComp->getFigure();
         if (figure)
@@ -667,42 +699,20 @@ namespace ige::creator
                             continue;
 
                         auto infoName = info->name;
-
                         if ((currMat->params[j].type == ParamTypeFloat4))
                         {
                             auto color = Vec4(currMat->params[j].fValue[0], currMat->params[j].fValue[1], currMat->params[j].fValue[2], currMat->params[j].fValue[3]);
-                            m_figureCompGroup->createWidget<Color>(info->name, color)->getOnDataChangedEvent().addListener([currMat, j](auto val) {
-                                for (int i = 0; i < 4; ++i)
-                                    currMat->params[j].fValue[i] = val[i];
-                            });
+                            m_figureCompGroup->createWidget<Color>(info->name, color);
                         }
                         else if ((currMat->params[j].type == ParamTypeSampler))
                         {
                             auto textPath = currMat->params[j].sampler.tex->ResourceName();
-                            auto txtPath = m_figureCompGroup->createWidget<TextField>(info->name, textPath, true);
-                            txtPath->getOnDataChangedEvent().addListener([this, index, infoName](auto txt) {
-                                updateMaterial(index, infoName, txt);
-                            });
-
-                            for (const auto &type : GetFileExtensionSuported(E_FileExts::Sprite))
-                            {
-                                txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this, index, infoName](auto txt) {
-                                    updateMaterial(index, infoName, txt);
-                                    redraw();
-                                });
-                            }
+                            m_figureCompGroup->createWidget<TextField>(info->name, textPath, true);
                         }
                         else if ((currMat->params[j].type == ParamTypeFloat))
                         {
                             std::array val = {currMat->params[j].fValue[0]};
-                            m_figureCompGroup->createWidget<Drag<float>>(info->name, ImGuiDataType_Float, val)->getOnDataChangedEvent().addListener([this, index, infoName](auto val) {
-                                auto figureComp = m_targetObject->getComponent<FigureComponent>();
-                                auto figure = figureComp->getFigure();
-                                if (figure)
-                                {
-                                    figure->SetMaterialParam(index, infoName, &val);
-                                }
-                            });
+                            m_figureCompGroup->createWidget<Drag<float>>(info->name, ImGuiDataType_Float, val);
                         }
                     }
                 }
