@@ -4,6 +4,13 @@ set(TARGET_NAME igeCreator)
 
 project(${TARGET_NAME})
 
+set (BUILD_FULL_SOURCE 1)
+
+if (BUILD_FULL_SOURCE)
+    file(TO_CMAKE_PATH $ENV{IGE_LIBS} IGE_LIBS)
+endif()
+
+
 if(NOT DEFINED BUILD_PLATFORM)
     set (BUILD_PLATFORM pc)
 endif()
@@ -13,11 +20,12 @@ if(NOT DEFINED BUILD_ARCH)
 endif()
 
 if(MSVC)
-    set (LIB_EXT lib)
     set (PLATFORM_PATH libs/${BUILD_PLATFORM}/${BUILD_ARCH}/)
+    set (PLATFORM_PATH_DEBUG libs/${BUILD_PLATFORM}/Debug/${BUILD_ARCH}/)
+    set (LIB_EXT lib)
 else()
-    set (LIB_EXT a)
     set (PLATFORM_PATH libs/${BUILD_PLATFORM}/${BUILD_ARCH}/lib)
+    set (LIB_EXT a)
 endif()
 
 set (CMAKE_CXX_STANDARD 17)
@@ -64,23 +72,6 @@ set(SRC_FILES ${SRC_FILES}
 
 add_executable(${TARGET_NAME} WIN32 ${SRC_FILES})
 
-if(NOT DEFINED BUILD_PLATFORM)
-    set (BUILD_PLATFORM pc)
-endif()
-
-if(NOT DEFINED BUILD_ARCH)
-    set (BUILD_ARCH x64)
-endif()
-
-if(MSVC)
-    set (PLATFORM_PATH libs/${BUILD_PLATFORM}/${BUILD_ARCH}/)
-    set (PLATFORM_PATH_DEBUG libs/${BUILD_PLATFORM}/Debug/${BUILD_ARCH}/)
-    set (LIB_EXT lib)
-else()
-    set (PLATFORM_PATH libs/${BUILD_PLATFORM}/${BUILD_ARCH}/lib)
-    set (LIB_EXT a)
-endif()
-
 # Python
 set (LIB_PATH ${LIBS_DIR}/Python/${PLATFORM_PATH})
 target_link_libraries(${TARGET_NAME}
@@ -88,51 +79,63 @@ target_link_libraries(${TARGET_NAME}
 )
 
 # igeCore
-set (LIB_PATH ${LIBS_DIR}/pyxCore/${PLATFORM_PATH})
-set (LIB_PATH_DEBUG ${LIBS_DIR}/pyxCore/${PLATFORM_PATH_DEBUG})
-target_link_libraries(${TARGET_NAME}
-    optimized ${LIB_PATH}pyxcore-static.${LIB_EXT}
-    optimized ${LIB_PATH}edgeanim.${LIB_EXT}
-    optimized ${LIB_PATH}doboz.${LIB_EXT}
-    optimized ${LIB_PATH}tokenizer.${LIB_EXT}
-    optimized ${LIB_PATH}simplecpp.${LIB_EXT}
-    debug ${LIB_PATH_DEBUG}pyxcore-static.${LIB_EXT}
-    debug ${LIB_PATH_DEBUG}edgeanim.${LIB_EXT}
-    debug ${LIB_PATH_DEBUG}doboz.${LIB_EXT}
-    debug ${LIB_PATH_DEBUG}tokenizer.${LIB_EXT}
-    debug ${LIB_PATH_DEBUG}simplecpp.${LIB_EXT}
-)
-if(MSVC)
+if (BUILD_FULL_SOURCE)
+    add_subdirectory(${IGE_LIBS}/..//pyxCore/pyxcore ${CMAKE_BINARY_DIR}/pyxcore-static)
+    target_link_libraries(${TARGET_NAME} pyxcore-static)
+
+    add_subdirectory(${IGE_LIBS}/..//pyxCore/pyxtools ${CMAKE_BINARY_DIR}/pyxtools-static)
+    target_link_libraries(${TARGET_NAME} pyxtools-static)
+
+    add_subdirectory(${IGE_LIBS}/../igeCore ${CMAKE_BINARY_DIR}/igeCore-static)
+    target_link_libraries(${TARGET_NAME} igeCore-static)    
+else()
+    set (LIB_PATH ${LIBS_DIR}/pyxCore/${PLATFORM_PATH})
+    set (LIB_PATH_DEBUG ${LIBS_DIR}/pyxCore/${PLATFORM_PATH_DEBUG})
     target_link_libraries(${TARGET_NAME}
-        optimized ${LIB_PATH}pyxtools-static.${LIB_EXT}
-        optimized ${LIB_PATH}GLEW.${LIB_EXT}
-        debug ${LIB_PATH_DEBUG}pyxtools-static.${LIB_EXT}
-        debug ${LIB_PATH_DEBUG}GLEW.${LIB_EXT}
+        optimized ${LIB_PATH}pyxcore-static.${LIB_EXT}
+        optimized ${LIB_PATH}edgeanim.${LIB_EXT}
+        optimized ${LIB_PATH}doboz.${LIB_EXT}
+        optimized ${LIB_PATH}tokenizer.${LIB_EXT}
+        optimized ${LIB_PATH}simplecpp.${LIB_EXT}
+        debug ${LIB_PATH_DEBUG}pyxcore-static.${LIB_EXT}
+        debug ${LIB_PATH_DEBUG}edgeanim.${LIB_EXT}
+        debug ${LIB_PATH_DEBUG}doboz.${LIB_EXT}
+        debug ${LIB_PATH_DEBUG}tokenizer.${LIB_EXT}
+        debug ${LIB_PATH_DEBUG}simplecpp.${LIB_EXT}
+    )
+    if(MSVC)
+        target_link_libraries(${TARGET_NAME}
+            optimized ${LIB_PATH}pyxtools-static.${LIB_EXT}
+            optimized ${LIB_PATH}GLEW.${LIB_EXT}
+            debug ${LIB_PATH_DEBUG}pyxtools-static.${LIB_EXT}
+            debug ${LIB_PATH_DEBUG}GLEW.${LIB_EXT}
+        )
+    endif()
+
+    set (LIB_PATH ${LIBS_DIR}/igeCore/${PLATFORM_PATH})
+    set (LIB_PATH_DEBUG ${LIBS_DIR}/igeCore/${PLATFORM_PATH_DEBUG})
+    target_link_libraries(${TARGET_NAME}
+        optimized ${LIB_PATH}igeCore-static.${LIB_EXT}
+        debug ${LIB_PATH_DEBUG}igeCore-static.${LIB_EXT}
     )
 endif()
-
-set (LIB_PATH ${LIBS_DIR}/igeCore/${PLATFORM_PATH})
-set (LIB_PATH_DEBUG ${LIBS_DIR}/igeCore/${PLATFORM_PATH_DEBUG})
-target_link_libraries(${TARGET_NAME}
-    optimized ${LIB_PATH}igeCore-static.${LIB_EXT}
-    debug ${LIB_PATH_DEBUG}igeCore-static.${LIB_EXT}
-)
 
 # igeVmath
 set (LIB_PATH ${LIBS_DIR}/igeVMath/${PLATFORM_PATH})
 target_link_libraries(${TARGET_NAME} ${LIB_PATH}igeVMath-static.${LIB_EXT})
     
 # igeBullet
-# file(TO_CMAKE_PATH $ENV{IGE_LIBS} IGE_LIBS)
-# add_subdirectory(${IGE_LIBS}/../igeBullet ${CMAKE_BINARY_DIR}/igeBullet-static)
-# target_link_libraries(${TARGET_NAME} igeBullet-static)
-
-set (LIB_PATH ${LIBS_DIR}/igeBullet/${PLATFORM_PATH})
-set (LIB_PATH_DEBUG ${LIBS_DIR}/igeBullet/${PLATFORM_PATH_DEBUG})
-target_link_libraries(${TARGET_NAME}
-    optimized ${LIB_PATH}igeBullet-static.${LIB_EXT}
-    debug ${LIB_PATH_DEBUG}igeBullet-static.${LIB_EXT}
-)
+if (BUILD_FULL_SOURCE)
+    add_subdirectory(${IGE_LIBS}/../igeBullet ${CMAKE_BINARY_DIR}/igeBullet-static)
+    target_link_libraries(${TARGET_NAME} igeBullet-static)
+else()
+    set (LIB_PATH ${LIBS_DIR}/igeBullet/${PLATFORM_PATH})
+    set (LIB_PATH_DEBUG ${LIBS_DIR}/igeBullet/${PLATFORM_PATH_DEBUG})
+    target_link_libraries(${TARGET_NAME}
+        optimized ${LIB_PATH}igeBullet-static.${LIB_EXT}
+        debug ${LIB_PATH_DEBUG}igeBullet-static.${LIB_EXT}
+    )
+endif()
 
 # igeSound
 set (LIB_PATH ${LIBS_DIR}/igeSound/${PLATFORM_PATH})

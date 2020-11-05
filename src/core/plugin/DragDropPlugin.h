@@ -12,7 +12,8 @@ namespace ige::creator
     enum class EDragDropID
     {
        FILE = 0,
-       OBJECT = 1,
+       OBJECT,
+       MESH,
     };
 
     // Drag & Drop source plugin

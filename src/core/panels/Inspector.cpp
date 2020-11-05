@@ -683,36 +683,63 @@ namespace ige::creator
         auto figure = figureComp->getFigure();
         if (figure)
         {
-            for (int i = 0; i < figure->NumMaterials(); i++)
+            if (figure->NumMeshes() > 0)
             {
-                const char *matName = figure->GetMaterialName(i);
-                if (matName)
+                auto meshGroup = m_figureCompGroup->createWidget<Group>("Mesh");
+                auto meshColumn = meshGroup->createWidget<Columns<3>>();
+                for (int i = 0; i < figure->NumMeshes(); i++)
                 {
-                    m_figureCompGroup->createWidget<Label>(matName);
-                    int index = figure->GetMaterialIndex(GenerateNameHash(matName));
-                    auto currMat = figure->GetMaterial(i);
+                    auto mesh = figure->GetMesh(i);
+                    auto txtName = meshColumn->createWidget<TextField>("", figure->GetMeshName(i), false, true);
+                    txtName->addPlugin<DDSourcePlugin<int>>(EDragDropID::MESH, figure->GetMeshName(i), i);
+                    meshColumn->createWidget<TextField>("V", std::to_string(mesh->numVerticies).c_str(), false, true);
+                    meshColumn->createWidget<TextField>("I", std::to_string(mesh->numIndices).c_str(), false, true);
+                }
+            }
 
-                    for (auto j = 0; j < currMat->numParams; j++)
+            if (figure->NumJoints() > 0)
+            {
+                auto joinGroup = m_figureCompGroup->createWidget<Group>("Joint");
+                for (int i = 0; i < figure->NumJoints(); i++)
+                {
+                    joinGroup->createWidget<TextField>("", figure->GetJointName(i), false, true);
+                }
+            }
+
+            if (figure->NumMaterials() > 0)
+            {
+                auto materialGroup = m_figureCompGroup->createWidget<Group>("Material");
+                for (int i = 0; i < figure->NumMaterials(); i++)
+                {
+                    const char* matName = figure->GetMaterialName(i);
+                    if (matName)
                     {
-                        auto info = RenderContext::Instance().GetShaderParameterInfoByHash(currMat->params[j].hash);
-                        if (!info)
-                            continue;
+                        materialGroup->createWidget<Label>(matName);
+                        int index = figure->GetMaterialIndex(GenerateNameHash(matName));
+                        auto currMat = figure->GetMaterial(i);
 
-                        auto infoName = info->name;
-                        if ((currMat->params[j].type == ParamTypeFloat4))
+                        for (auto j = 0; j < currMat->numParams; j++)
                         {
-                            auto color = Vec4(currMat->params[j].fValue[0], currMat->params[j].fValue[1], currMat->params[j].fValue[2], currMat->params[j].fValue[3]);
-                            m_figureCompGroup->createWidget<Color>(info->name, color);
-                        }
-                        else if ((currMat->params[j].type == ParamTypeSampler))
-                        {
-                            auto textPath = currMat->params[j].sampler.tex->ResourceName();
-                            m_figureCompGroup->createWidget<TextField>(info->name, textPath, true);
-                        }
-                        else if ((currMat->params[j].type == ParamTypeFloat))
-                        {
-                            std::array val = {currMat->params[j].fValue[0]};
-                            m_figureCompGroup->createWidget<Drag<float>>(info->name, ImGuiDataType_Float, val);
+                            auto info = RenderContext::Instance().GetShaderParameterInfoByHash(currMat->params[j].hash);
+                            if (!info)
+                                continue;
+
+                            auto infoName = info->name;
+                            if ((currMat->params[j].type == ParamTypeFloat4))
+                            {
+                                auto color = Vec4(currMat->params[j].fValue[0], currMat->params[j].fValue[1], currMat->params[j].fValue[2], currMat->params[j].fValue[3]);
+                                materialGroup->createWidget<Color>(info->name, color);
+                            }
+                            else if ((currMat->params[j].type == ParamTypeSampler))
+                            {
+                                auto textPath = currMat->params[j].sampler.tex->ResourceName();
+                                materialGroup->createWidget<TextField>(info->name, textPath, true);
+                            }
+                            else if ((currMat->params[j].type == ParamTypeFloat))
+                            {
+                                std::array val = { currMat->params[j].fValue[0] };
+                                materialGroup->createWidget<Drag<float>>(info->name, ImGuiDataType_Float, val);
+                            }
                         }
                     }
                 }
@@ -1382,6 +1409,18 @@ namespace ige::creator
             concaveChk->setSelected(!physicComp->isConvex());
         });
 
+        std::array meshIdx = { physicComp->getMeshIndex() };
+        auto meshIdxWg = m_physicGroup->createWidget<Drag<int>>("Mesh Index", ImGuiDataType_S32, meshIdx, 1, 0);
+        meshIdxWg->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicMesh>();
+            physicComp->setMeshIndex(val[0]);
+        });
+        meshIdxWg->addPlugin<DDTargetPlugin<int>>(EDragDropID::MESH)->getOnDataReceivedEvent().addListener([this](auto val) {
+            auto physicComp = m_targetObject->getComponent<PhysicMesh>();
+            physicComp->setMeshIndex(val);
+            redraw();
+        });
+
         auto txtPath = m_physicGroup->createWidget<TextField>("Path", physicComp->getPath().c_str(), true);
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
             auto physicComp = m_targetObject->getComponent<PhysicMesh>();
@@ -1407,6 +1446,23 @@ namespace ige::creator
         if (physicComp == nullptr)
             return;
 
+        int maxMeshIdx = 0;
+        auto figureComp = m_targetObject->getComponent<FigureComponent>();
+        if (figureComp && figureComp->getFigure())
+            maxMeshIdx = figureComp->getFigure()->NumMeshes() - 1;
+        std::array meshIdx = { physicComp->getMeshIndex() };
+        auto meshIdxWg = m_physicGroup->createWidget<Drag<int>>("Mesh Index", ImGuiDataType_S32, meshIdx, 1, 0, maxMeshIdx);
+        meshIdxWg->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setMeshIndex(val[0]);
+        });
+        meshIdxWg->addPlugin<DDTargetPlugin<int>>(EDragDropID::MESH)->getOnDataReceivedEvent().addListener([this](auto val) {
+            auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
+            physicComp->setMeshIndex(val);
+            redraw();
+        });
+
+        m_physicGroup->createWidget<Separator>();
         auto columns = m_physicGroup->createWidget<Columns<2>>();
         columns->createWidget<CheckBox>("Enable", physicComp->isEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
             auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
