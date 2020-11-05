@@ -111,6 +111,9 @@ namespace ige::creator
         //! Draw Point Light
         void drawPointLight();
 
+        //! Draw Spot Light
+        void drawSpotLight();
+
         //! Redraw
         void redraw() { m_bNeedRedraw = true;  }
 
@@ -136,6 +139,7 @@ namespace ige::creator
         std::shared_ptr<Group> m_ambientLightGroup = nullptr;
         std::shared_ptr<Group> m_directionalLightGroup = nullptr;
         std::shared_ptr<Group> m_pointLightGroup = nullptr;
+        std::shared_ptr<Group> m_spotLightGroup = nullptr;
         std::shared_ptr<Group> m_rectTransformGroup = nullptr;
         std::shared_ptr<Group> m_rectTransformAnchorGroup = nullptr;
         std::shared_ptr<Group> m_canvasGroup = nullptr;

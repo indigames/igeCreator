@@ -28,6 +28,7 @@
 #include <components/light/AmbientLight.h>
 #include <components/light/DirectionalLight.h>
 #include <components/light/PointLight.h>
+#include <components/light/SpotLight.h>
 #include <components/gui/RectTransform.h>
 #include <components/gui/Canvas.h>
 #include <components/gui/UIImage.h>
@@ -59,6 +60,7 @@ namespace ige::creator
         AmbientLight,
         DirectionalLight,
         PointLight,
+        SpotLight,
         UIImage,
         UIText,
         UITextField,
@@ -114,6 +116,9 @@ namespace ige::creator
 
         if (m_targetObject->getScene()->isPointLightAvailable())
             m_createCompCombo->addChoice((int)ComponentType::PointLight, "Point Light");
+
+        if (m_targetObject->getScene()->isSpotLightAvailable())
+            m_createCompCombo->addChoice((int)ComponentType::SpotLight, "Spot Light");
 
         // Scene Object
         if (!m_targetObject->isGUIObject())
@@ -174,6 +179,11 @@ namespace ige::creator
                 m_targetObject->addComponent<PointLight>();
                 if (!m_targetObject->getComponent<FigureComponent>() && !m_targetObject->getComponent<SpriteComponent>())
                     m_targetObject->addComponent<SpriteComponent>("sprite/light", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
+                break;
+            case (int)ComponentType::SpotLight:
+                m_targetObject->addComponent<SpotLight>();
+                if (!m_targetObject->getComponent<FigureComponent>() && !m_targetObject->getComponent<SpriteComponent>())
+                    m_targetObject->addComponent<SpriteComponent>("sprite/spot-light", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
                 break;
             case (int)ComponentType::Figure:
                 m_targetObject->addComponent<FigureComponent>();
@@ -328,6 +338,11 @@ namespace ige::creator
             {
                 m_pointLightGroup = header->createWidget<Group>("PointLight", false);
                 drawPointLight();
+            }
+            else if (component->getName() == "SpotLight")
+            {
+                m_spotLightGroup = header->createWidget<Group>("SpotLight", false);
+                drawSpotLight();
             }
         });
     }
@@ -1849,6 +1864,42 @@ namespace ige::creator
             pointLight->setRange(val[0]);
         });
     }
+    
+    //! Draw Spot Light
+    void Inspector::drawSpotLight()
+    {
+        if (m_spotLightGroup == nullptr)
+            return;
+        m_spotLightGroup->removeAllWidgets();
+
+        auto light = m_targetObject->getComponent<SpotLight>();
+        if (light == nullptr)
+            return;
+
+        auto color = Vec4(light->getColor(), 1.f);
+        m_spotLightGroup->createWidget<Color>("Color", color)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto light = m_targetObject->getComponent<SpotLight>();
+            light->setColor({ val[0], val[1], val[2] });
+        });
+
+        std::array intensity = { light->getIntensity() };
+        m_spotLightGroup->createWidget<Drag<float>>("Intensity", ImGuiDataType_Float, intensity, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto light = m_targetObject->getComponent<SpotLight>();
+            light->setIntensity(val[0]);
+        });
+
+        std::array range = { light->getRange() };
+        m_spotLightGroup->createWidget<Drag<float>>("Range", ImGuiDataType_Float, range, 0.01f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto light = m_targetObject->getComponent<SpotLight>();
+            light->setRange(val[0]);
+        });
+
+        std::array angle = { light->getAngle() };
+        m_spotLightGroup->createWidget<Drag<float>>("Angle", ImGuiDataType_Float, angle, 0.01f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto light = m_targetObject->getComponent<SpotLight>();
+            light->setAngle(val[0]);
+        });
+    }
 
     void Inspector::_drawImpl()
     {
@@ -2001,6 +2052,13 @@ namespace ige::creator
             m_pointLightGroup->removeAllWidgets();
             m_pointLightGroup->removeAllPlugins();
             m_pointLightGroup = nullptr;
+        }
+
+        if (m_spotLightGroup)
+        {
+            m_spotLightGroup->removeAllWidgets();
+            m_spotLightGroup->removeAllPlugins();
+            m_spotLightGroup = nullptr;
         }
 
         removeAllWidgets();

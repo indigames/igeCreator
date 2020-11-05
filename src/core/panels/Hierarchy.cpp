@@ -18,6 +18,7 @@
 #include "components/ScriptComponent.h"
 #include "components/light/DirectionalLight.h"
 #include "components/light/PointLight.h"
+#include "components/light/SpotLight.h"
 #include "components/gui/RectTransform.h"
 #include "components/gui/Canvas.h"
 #include "components/gui/UIImage.h"
@@ -272,6 +273,19 @@ namespace ige::creator
                 auto newObject = Editor::getCurrentScene()->createObject("Point Light", currentObject);
                 newObject->addComponent<PointLight>();
                 newObject->addComponent<SpriteComponent>("sprite/light", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
+            });
+
+            lightMenu->createWidget<MenuItem>("Spot Light")->getOnClickEvent().addListener([](auto widget) {
+                if (!Editor::getCurrentScene()->isSpotLightAvailable())
+                {
+                    auto msgBox = MsgBox("Error", "Max number of Spot Light reached!", MsgBox::EBtnLayout::ok, MsgBox::EMsgType::error);
+                    while (!msgBox.ready(1000));
+                    return;
+                }
+                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto newObject = Editor::getCurrentScene()->createObject("Spot Light", currentObject);
+                newObject->addComponent<SpotLight>();
+                newObject->addComponent<SpriteComponent>("sprite/spot-light", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
             });
         }
 
