@@ -61,7 +61,10 @@ out mediump float2 vTexcoord1 TEXCOORD_TEX1
 out mediump float2 vTexcoord2 TEXCOORD_TEX2
 #endif
 #ifdef USE_WPOS
-out mediump float4 vPosition TEXCOORD_WPOS
+out mediump float4 vWorldPosition TEXCOORD_WPOS
+#endif
+#ifdef USE_LVPOS
+out mediump float4 vLViewPosition TEXCOORD_LVPOS
 #endif
 #ifdef USE_COUV
 out mediump float2 vCoverUV TEXCOORD_COUV
@@ -87,28 +90,6 @@ out mediump float4 vScreenPos TEXCOORD_SPOS
 #ifdef USE_SHDW
 out mediump float4 vShadowMapCoord TEXCOORD_SHDW
 #endif
-#if(NUM_POINT_LAMP >=1)
-out mediump float4 vPointLamp01Dir TEXCOORD_PL01
-#endif
-#if(NUM_POINT_LAMP >=2)
-out mediump float4 vPointLamp02Dir TEXCOORD_PL02
-#endif
-#if(NUM_POINT_LAMP >=3)
-out mediump float4 vPointLamp03Dir TEXCOORD_PL03
-#endif
-#if(NUM_POINT_LAMP >=4)
-out mediump float4 vPointLamp04Dir TEXCOORD_PL04
-#endif
-#if(NUM_POINT_LAMP >=5)
-out mediump float4 vPointLamp05Dir TEXCOORD_PL05
-#endif
-#if(NUM_POINT_LAMP >=6)
-out mediump float4 vPointLamp06Dir TEXCOORD_PL06
-#endif
-#if(NUM_POINT_LAMP >=7)
-out mediump float4 vPointLamp07Dir TEXCOORD_PL07
-#endif
-
 #ifdef USE_FOG
 out lowp float vFogFactor TEXCOORD_FOG
 #endif
@@ -415,43 +396,17 @@ void main()
 		#endif
 	#endif
 
-	#define PointLampVP(i)\\
-		vPointLamp0##i##Dir.xyz = PointLamp0##i##Pos.xyz - TmpPosition.xyz; \\
-		l = length(vPointLamp0##i##Dir.xyz);\\
-		vPointLamp0##i##Dir.xyz /= l;\\
-		vPointLamp0##i##Dir.w = max(PointLamp0##i##Range - l, 0.0) / PointLamp0##i##Range
-
-	#if(NUM_POINT_LAMP >=1)
-		float l;
-		PointLampVP(1);
+	#ifdef USE_WPOS
+		vWorldPosition = TmpPosition;
 	#endif
-	#if(NUM_POINT_LAMP >=2)
-		PointLampVP(2);
-	#endif
-	#if(NUM_POINT_LAMP >=3)
-		PointLampVP(3);
-	#endif
-	#if(NUM_POINT_LAMP >=4)
-		PointLampVP(4);
-	#endif
-	#if(NUM_POINT_LAMP >=5)
-		PointLampVP(5);
-	#endif
-	#if(NUM_POINT_LAMP >=6)
-		PointLampVP(6);
-	#endif
-	#if(NUM_POINT_LAMP >=7)
-		PointLampVP(7);
-	#endif
-
 
 	#ifdef LIGHT_VIEW_POSITION
-		vPosition = MUL(LightViewProj, TmpPosition);
+		vLViewPosition = MUL(LightViewProj, TmpPosition);
 	#endif
 
 	#ifdef LIGHT_VIEW_TRANSFORM
 		#ifdef LIGHT_VIEW_POSITION
-			vHPosition = vPosition;
+			vHPosition = vLViewPosition;
 		#else
 			vHPosition = MUL(LightViewProj, TmpPosition);
 		#endif
@@ -464,12 +419,10 @@ void main()
 	#endif
 
 	#ifdef LIGHT_VIEW_POSITION
-		vPosition.z = min(1.0, vPosition.z);
+			vLViewPosition.z = min(1.0, vLViewPosition.z);
 	#endif
 
-
-
-#ifdef USE_TEX0	
+	#ifdef USE_TEX0	
 		#ifdef PROJ_MAP0
 			vTexcoord0.xy = vHPosition.xy/vHPosition.w;
 		#else

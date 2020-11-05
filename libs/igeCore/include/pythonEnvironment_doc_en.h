@@ -199,6 +199,178 @@ PyDoc_STRVAR(setPointLampPosition_doc,
 	"       lamp position\n"\
 );
 
+
+
+
+PyDoc_STRVAR(getSpotLampRange_doc,
+	"Get spot lamp range value\n"\
+	"\n"\
+	"range = environment.getSpotLampRange(index)\n"\
+	"\n"\
+	"Parameters\n"\
+	"----------\n"\
+	"    index : int\n"\
+	"        light index no (0 - 6)"
+	"Returns\n"\
+	"-------\n"\
+	"    range : float\n"\
+	"        range distance value of spot lamp"
+);
+
+PyDoc_STRVAR(setSpotLampRange_doc,
+	"Set spot lamp range value\n"\
+	"\n"\
+	"environment.setSpotLampRange(index, range)\n"\
+	"\n"\
+	"Parameters\n"\
+	"----------\n"\
+	"    index : int\n"\
+	"        light index no (0 - 6)"
+	"    range : float\n"\
+	"        range distance value of spot lamp"
+);
+
+PyDoc_STRVAR(getSpotLampIntensity_doc,
+	"Get intensity value of spot lamp\n"\
+	"\n"\
+	"intensity = environment.getSpotLampIntensity(index)\n"\
+	"\n"\
+	"Parameters\n"\
+	"----------\n"\
+	"    index : int\n"\
+	"        light index no (0 - 6)"
+	"Returns\n"\
+	"-------\n"\
+	"    intensity : float\n"\
+	"        intensity value of spot lamp"
+);
+
+PyDoc_STRVAR(setSpotLampIntensity_doc,
+	"Set intensity value of spot lamp\n"\
+	"\n"\
+	"environment.getSpotLampIntensity(index, value)\n"\
+	"\n"\
+	"Parameters\n"\
+	"----------\n"\
+	"    index : int\n"\
+	"        light index no (0 - 6)"
+	"    value : float\n"\
+	"        intensity value of spot lamp\n"\
+);
+
+PyDoc_STRVAR(getSpotLampColor_doc,
+	"Get spot lamp color\n"\
+	"\n"\
+	"color = environment.getSpotLampColor(index)\n"\
+	"\n"\
+	"Parameters\n"\
+	"----------\n"\
+	"    index : int\n"\
+	"        light index no (0 - 6)\n"\
+	"Returns\n"\
+	"-------\n"\
+	"    color : igeVmath.vec3\n"\
+	"       color value of spot lamp\n"\
+);
+
+PyDoc_STRVAR(setSpotLampColor_doc,
+	"Set spot lamp color\n"\
+	"\n"\
+	"environment.setSpotLampColor(index, color)\n"\
+	"\n"\
+	"Parameters\n"\
+	"----------\n"\
+	"    index : int\n"\
+	"        light index no (0 - 2)\n"\
+	"    value : igeVmath.vec3\n"\
+	"        lamp color"
+);
+
+PyDoc_STRVAR(getSpotLampPosition_doc,
+	"Get spot lamp position\n"\
+	"\n"\
+	"pos = environment.getSpotLampPosition(index)\n"\
+	"\n"\
+	"Parameters\n"\
+	"----------\n"\
+	"    index : int\n"\
+	"        light index no (0 - 6)\n"\
+	"Returns\n"\
+	"-------\n"\
+	"    pos : igeVmath.vec3\n"\
+	"       lamp position\n"\
+);
+
+PyDoc_STRVAR(setSpotLampPosition_doc,
+	"Set spot lamp position\n"\
+	"\n"\
+	"environment.getSpotLampPosition(index, pos)\n"\
+	"\n"\
+	"Parameters\n"\
+	"----------\n"\
+	"    index : int\n"\
+	"        light index no (0 - 6)\n"\
+	"    pos : igeVmath.vec3\n"\
+	"       lamp position\n"\
+);
+
+PyDoc_STRVAR(getSpotLampAngle_doc,
+	"Get angle value of spot lamp\n"\
+	"\n"\
+	"angle = environment.getSpotLampAngle(index)\n"\
+	"\n"\
+	"Parameters\n"\
+	"----------\n"\
+	"    index : int\n"\
+	"        light index no (0 - 6)"
+	"Returns\n"\
+	"-------\n"\
+	"    angle : float\n"\
+	"        angle value of spot lamp"
+);
+
+PyDoc_STRVAR(setSpotLampAngle_doc,
+	"Set angle value of spot lamp\n"\
+	"\n"\
+	"environment.getSpotLampAngle(index, value)\n"\
+	"\n"\
+	"Parameters\n"\
+	"----------\n"\
+	"    index : int\n"\
+	"        light index no (0 - 6)"
+	"    value : float\n"\
+	"        angle value of spot lamp\n"\
+);
+
+PyDoc_STRVAR(getSpotLampDirection_doc,
+	"Get spot lamp direction\n"\
+	"\n"\
+	"dir = environment.getSpotLampPosition(index)\n"\
+	"\n"\
+	"Parameters\n"\
+	"----------\n"\
+	"    index : int\n"\
+	"        light index no (0 - 6)\n"\
+	"Returns\n"\
+	"-------\n"\
+	"    dir : igeVmath.vec3\n"\
+	"       lamp direction\n"\
+);
+
+PyDoc_STRVAR(setSpotLampDirection_doc,
+	"Set spot lamp direction\n"\
+	"\n"\
+	"environment.getSpotLampDirection(index, dir)\n"\
+	"\n"\
+	"Parameters\n"\
+	"----------\n"\
+	"    index : int\n"\
+	"        light index no (0 - 6)\n"\
+	"    dir : igeVmath.vec3\n"\
+	"       lamp direction\n"\
+);
+
+
 PyDoc_STRVAR(ambientColor_doc,
 	"Ambient color	\n"\
 	"igeVmath.vec3\n"\

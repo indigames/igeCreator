@@ -292,6 +292,49 @@ namespace pyxie
 		Key_ColorTextureSize = 173,
 		Key_ShadowBias = 174,
 
+		Key_SpotLamp01Color = 175,
+		Key_SpotLight01Intensity = 176,
+		Key_SpotLight01Range = 177,
+		Key_SpotLamp01Pos = 178,
+		Key_SpotLight01Dir = 179,
+		Key_SpotLamp01Angle = 180,
+		Key_SpotLamp02Color = 181,
+		Key_SpotLight02Intensity = 182,
+		Key_SpotLight02Range = 183,
+		Key_SpotLamp02Pos = 184,
+		Key_SpotLight02Dir = 185,
+		Key_SpotLamp02Angle = 186,
+		Key_SpotLamp03Color = 187,
+		Key_SpotLight03Intensity = 188,
+		Key_SpotLight03Range = 189,
+		Key_SpotLamp03Pos = 190,
+		Key_SpotLight03Dir = 191,
+		Key_SpotLamp03Angle = 192,
+		Key_SpotLamp04Color = 193,
+		Key_SpotLight04Intensity = 194,
+		Key_SpotLight04Range = 195,
+		Key_SpotLamp04Pos = 196,
+		Key_SpotLight04Dir = 197,
+		Key_SpotLamp04Angle = 198,
+		Key_SpotLamp05Color = 199,
+		Key_SpotLight05Intensity = 200,
+		Key_SpotLight05Range = 201,
+		Key_SpotLamp05Pos = 202,
+		Key_SpotLight05Dir = 203,
+		Key_SpotLamp05Angle = 204,
+		Key_SpotLamp06Color = 205,
+		Key_SpotLight06Intensity = 206,
+		Key_SpotLight06Range = 207,
+		Key_SpotLamp06Pos = 208,
+		Key_SpotLight06Dir = 209,
+		Key_SpotLamp06Angle = 210,
+		Key_SpotLamp07Color = 211,
+		Key_SpotLight07Intensity = 212,
+		Key_SpotLight07Range = 213,
+		Key_SpotLamp07Pos = 214,
+		Key_SpotLight07Dir = 215,
+		Key_SpotLamp07Angle = 216,
+
 		Key_alpha_func = 220,
 		Key_alpha_test_enable = 221,
 		Key_blend_func = 222,
@@ -351,10 +394,14 @@ namespace pyxie
 
 		static const int numDirLithts = 3;
 		static const int numPointLithts = 7;
+		static const int numSpotLithts = 7;
 		Vec3		dirLight[numDirLithts];
 		Vec3		dirLightCol[numDirLithts];
 		Vec4		pointLight[numPointLithts];
 		Vec4		pointLightCol[numPointLithts];
+		Vec4		spotLight[numSpotLithts];
+		Vec4		spotLightCol[numSpotLithts];
+		Vec4		spotLightDir[numSpotLithts];
 
 		//float		totalTime;
 		//TimeVal	startTime;
@@ -414,6 +461,8 @@ namespace pyxie
 		}
 
 		void SetPointLight(int no, const Vec3& pos, float intensity, const Vec3& col, float range);
+
+		void SetSpotLight(int no, const Vec3& pos, float intensity, const Vec3& col, float range, const Vec3& dir, float angle);
 
 
 		inline const Vec4& GetPointLightColor(int no) { return pointLightCol[no]; }

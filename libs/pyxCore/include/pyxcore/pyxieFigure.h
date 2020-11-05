@@ -139,6 +139,9 @@ namespace pyxie
 		void AllocTransformBuffer(int space, float*& palettebuffer, float*& inbindSkinningMatrices);
 		void ReadPositions(int index, int offset, int size, int space, float* palettebuffer, float* inbindSkinningMatrices, std::vector<Vec3>* out);
 
+		bool SetMeshVertexValues(int index, const void* ptr, uint32_t numVerts, AttributeID attr, uint32_t startPosition);
+		bool SetMeshIndices(int index, uint32_t startPosition, const uint32_t* triangles, uint32_t numTriangles, uint32_t datasize=4);
+
 	/*
 		///アルファ値
 		void SetAlpha(float a) { color.setW(a); }

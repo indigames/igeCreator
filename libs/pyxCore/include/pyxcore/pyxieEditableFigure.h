@@ -323,7 +323,6 @@ namespace pyxie
 		bool SetMeshPlaneGeometory(int index, float width = 1.0f, float height = 1.0f, uint32_t wSlice = 1, uint32_t hSlice = 1,
 			const Vec3& normal = Vec3(0.0f, 0.0f, 1.0f), const Vec3& offset = Vec3(0.0f, 0.0f, 0.0f), uint32_t jointIndex = 0);
 
-
 		EditableMesh* GetMesh(int index);
 		FigureMaterial* GetMaterial(int index);
 		bool MergeMesh();

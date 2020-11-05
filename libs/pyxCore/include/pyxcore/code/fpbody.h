@@ -88,7 +88,10 @@ void std_PS(
 	in mediump FLOAT2 vTexcoord2 TEXCOORD_TEX2
 #endif
 #ifdef USE_WPOS
-	in mediump FLOAT4 vPosition TEXCOORD_WPOS
+	in mediump FLOAT4 vWorldPosition TEXCOORD_WPOS
+#endif
+#ifdef USE_LVPOS
+	in mediump FLOAT4 vLViewPosition TEXCOORD_LVPOS
 #endif
 #ifdef USE_COUV
 	in mediump FLOAT2 vCoverUV TEXCOORD_COUV
@@ -113,28 +116,6 @@ void std_PS(
 #endif
 #ifdef USE_SHDW
 	in mediump FLOAT4 vShadowMapCoord TEXCOORD_SHDW
-#endif
-
-#if(NUM_POINT_LAMP >= 1)
-	in mediump FLOAT4 vPointLamp01Dir TEXCOORD_PL01
-#endif	
-#if(NUM_POINT_LAMP >= 2)
-	in mediump FLOAT4 vPointLamp02Dir TEXCOORD_PL02
-#endif
-#if(NUM_POINT_LAMP >= 3)
-	in mediump FLOAT4 vPointLamp03Dir TEXCOORD_PL03
-#endif
-#if(NUM_POINT_LAMP >= 4)
-	in mediump FLOAT4 vPointLamp04Dir TEXCOORD_PL04
-#endif
-#if(NUM_POINT_LAMP >= 5)
-	in mediump FLOAT4 vPointLamp05Dir TEXCOORD_PL05
-#endif
-#if(NUM_POINT_LAMP >= 6)
-	in mediump FLOAT4 vPointLamp06Dir TEXCOORD_PL06
-#endif
-#if(NUM_POINT_LAMP >= 7)
-	in mediump FLOAT4 vPointLamp07Dir TEXCOORD_PL07
 #endif
 
 #ifdef USE_FOG
@@ -381,7 +362,7 @@ if (colorRGBA.w < AlphaRef) discard;
 
 #ifdef MAKE_SHADOW_SHADER
 #ifdef LIGHT_VIEW_POSITION
-	FLOAT z = vPosition.z / vPosition.w;
+	FLOAT z = vLViewPosition.z / vLViewPosition.w;
 	diffuseColor = FLOAT4(z, z, z, 1.0);
 #else
 	diffuseColor = FLOAT4(ShadowColor.w, 0.0, 0.0, 1.0);
@@ -509,6 +490,7 @@ if (colorRGBA.w < AlphaRef) discard;
 	FLOAT3 Lc;
 	FLOAT l;
 	FLOAT ldn;
+	FLOAT attenuation;
 
 #ifdef SPECULAR_ENABLE
 	FLOAT3 Hn;
@@ -624,60 +606,60 @@ if (colorRGBA.w < AlphaRef) discard;
 	specContrib_ADD_specTmp
 
 #if (NUM_DIR_LAMP >= 1)
-		DIR_LAMP_IMPL(1)
+DIR_LAMP_IMPL(1)
 #endif
 #if (NUM_DIR_LAMP >= 2)
-		DIR_LAMP_IMPL(2)
+DIR_LAMP_IMPL(2)
 #endif
 #if (NUM_DIR_LAMP >= 3)
-		DIR_LAMP_IMPL(3)
+DIR_LAMP_IMPL(3)
 #endif
 
 ////////Point Lamp
 #ifndef TARGET
-	#define Lc_MUL_PointLampIntensity(i) Lc *= PointLamp0##i##Intensity;
+#define Lc_MUL_PointLampIntensity(i) Lc *= PointLamp0##i##Intensity;
 #else
-	#define Lc_MUL_PointLampIntensity(i)
+#define Lc_MUL_PointLampIntensity(i)
 #endif
 
 #ifdef SPECULAR_ENABLE
-	#ifdef CLUT_LIGHT_ENABLE
-		#define POINT_LAMP_CALC\\ 
-			Hn = normalize(vView + Ln);\\
-			clut = FLOAT2(ldn*0.495 + 0.5, (ONE_MINUS dot(Hn, Nn))*0.98 + 0.01);\\
-			lampPow = tex2D(CLUTSampler, clut);\\
-			diffTmp = lampPow.rgb * Lc;\\
-			specTmp = lampPow.a * spStr * diffTmp;
-	#else
-		#define POINT_LAMP_CALC\\
+#ifdef CLUT_LIGHT_ENABLE
+#define POINT_LAMP_CALC\\ 
+Hn = normalize(vView + Ln); \\
+clut = FLOAT2(ldn * 0.495 + 0.5, (ONE_MINUS dot(Hn, Nn)) * 0.98 + 0.01); \\
+lampPow = tex2D(CLUTSampler, clut); \\
+diffTmp = lampPow.rgb * Lc; \\
+specTmp = lampPow.a * spStr * diffTmp;
+#else
+#define POINT_LAMP_CALC\\
 			Hn = normalize(vView + Ln);\\
 			d = dot(Hn, Nn);\\
 			pw = max(d / (SpecularPower *(1.0 - d) + d), 0.0);\\
 			specPow = step(0.0, ldn) * pw;\\
 			diffTmp = ldn * Lc;\\
 			specTmp = specPow * spStr * diffTmp;
-	#endif
+#endif
 #else
-	#ifdef CLUT_LIGHT_ENABLE
-		#define POINT_LAMP_CALC\\
+#ifdef CLUT_LIGHT_ENABLE
+#define POINT_LAMP_CALC\\
 			clut = FLOAT2(ldn*0.495 + 0.5, 0.5);\\
 			diffTmp = tex2D(CLUTSampler, clut).xyz * Lc;
-	#else
-			#define POINT_LAMP_CALC diffTmp = ldn * Lc;
-	#endif
+#else
+#define POINT_LAMP_CALC diffTmp = ldn * Lc;
+#endif
 #endif
 
 #ifdef VELVET_ENABLE
-	#ifdef SPECULAR_ENABLE
-		#define POINT_LAMP_VELVET_SPECULAR_CALC\\
+#ifdef SPECULAR_ENABLE
+#define POINT_LAMP_VELVET_SPECULAR_CALC\\
 			vdn = 1.0 - dot(vView, Nn);\\
 			vecColor = vdn.xxx;\\
 			specTmp += (vecColor*FuzzySpecColor.rgb).xyz*VelvetStrength;
-	#else
-		#define POINT_LAMP_VELVET_SPECULAR_CALC
-	#endif
+#else
+#define POINT_LAMP_VELVET_SPECULAR_CALC
+#endif
 
-	#define POINT_LAMP_VELVET_CALC\\
+#define POINT_LAMP_VELVET_CALC\\
 		diffTmp *= SurfaceColor.rgb;\\
 		subLamb = smoothstep(-RollOff, 1.0, ldn) - smoothstep(0.0, 1.0, ldn);\\
 		subLamb = max(0.0, subLamb);\\
@@ -685,13 +667,15 @@ if (colorRGBA.w < AlphaRef) discard;
 		diffTmp += subContrib * VelvetStrength;\\
 		POINT_LAMP_VELVET_SPECULAR_CALC
 #else
-	#define POINT_LAMP_VELVET_CALC
+#define POINT_LAMP_VELVET_CALC
 #endif
 
-
 #define POINT_LAMP_IMPL(i)\\
-	Ln = vPointLamp0##i##Dir.xyz;\\
-	Lc = PointLamp0##i##Color.rgb * vPointLamp0##i##Dir.w;\\
+	Ln = PointLamp0##i##Pos.xyz - vWorldPosition.xyz; \\
+	l = length(Ln); \\
+	Ln /= l; \\
+	attenuation = max(PointLamp0##i##Range - l, 0.0) / PointLamp0##i##Range; \\
+	Lc = PointLamp0##i##Color.rgb * attenuation;\\
 	Lc_MUL_PointLampIntensity(i)\\
 	Lc_MUL_LocalIntensity\\
 	ldn = dot(Ln, Nn);\\
@@ -702,26 +686,76 @@ if (colorRGBA.w < AlphaRef) discard;
 	specContrib_ADD_specTmp
 
 #if(NUM_POINT_LAMP >= 1)
-		POINT_LAMP_IMPL(1)
+	POINT_LAMP_IMPL(1)
 #endif
 #if(NUM_POINT_LAMP >= 2)
-		POINT_LAMP_IMPL(2)
+	POINT_LAMP_IMPL(2)
 #endif
 #if(NUM_POINT_LAMP >= 3)
-		POINT_LAMP_IMPL(3)
+	POINT_LAMP_IMPL(3)
 #endif
 #if(NUM_POINT_LAMP >= 4)
-		POINT_LAMP_IMPL(4)
+	POINT_LAMP_IMPL(4)
 #endif
 #if(NUM_POINT_LAMP >= 5)
-		POINT_LAMP_IMPL(5)
+	POINT_LAMP_IMPL(5)
 #endif
 #if(NUM_POINT_LAMP >= 6)
-		POINT_LAMP_IMPL(6)
+	POINT_LAMP_IMPL(6)
 #endif
 #if(NUM_POINT_LAMP >= 7)
-		POINT_LAMP_IMPL(7)
+	POINT_LAMP_IMPL(7)
 #endif
+
+
+////////Spot Lamp
+#ifndef TARGET
+#define Lc_MUL_SpotLampIntensity(i) Lc *= SpotLamp0##i##Intensity;
+#else
+#define Lc_MUL_SpotLampIntensity(i)
+#endif
+
+#define SPOT_LAMP_IMPL(i)\\
+	Ln = SpotLamp0##i##Pos.xyz - vWorldPosition.xyz; \\
+	l = length(Ln); \\
+	Ln /= l; \\
+	attenuation = max(SpotLamp0##i##Range - l, 0.0) / SpotLamp0##i##Range; \\
+	ldn = dot(-Ln, SpotLamp0##i##Dir.xyz); \\
+	attenuation *= (ldn < SpotLamp0##i##Angle) ? 0.0 : smoothstep(SpotLamp0##i##Angle, min(SpotLamp0##i##Angle+0.04,1.0), ldn); \\
+	Lc = SpotLamp0##i##Color.rgb * attenuation; \\
+	Lc_MUL_SpotLampIntensity(i)\\
+	Lc_MUL_LocalIntensity\\
+	ldn = dot(Ln, Nn);\\
+	MAX_LDN\\
+	POINT_LAMP_CALC\\
+	POINT_LAMP_VELVET_CALC\\
+	diffContrib += diffTmp;\\
+	specContrib_ADD_specTmp
+
+#if(NUM_SPOT_LAMP >= 1)
+SPOT_LAMP_IMPL(1)
+#endif
+#if(NUM_SPOT_LAMP >= 2)
+SPOT_LAMP_IMPL(2)
+#endif
+#if(NUM_SPOT_LAMP >= 3)
+SPOT_LAMP_IMPL(3)
+#endif
+#if(NUM_SPOT_LAMP >= 4)
+SPOT_LAMP_IMPL(4)
+#endif
+#if(NUM_SPOT_LAMP >= 5)
+SPOT_LAMP_IMPL(5)
+#endif
+#if(NUM_SPOT_LAMP >= 6)
+SPOT_LAMP_IMPL(6)
+#endif
+#if(NUM_SPOT_LAMP >= 7)
+SPOT_LAMP_IMPL(7)
+#endif
+
+
+
 
 #ifndef NOLIGHT
 	#if (DIFFUSE_LIGHT_MAP_CHANNEL == DiffuseMapAlphaChannel)
@@ -839,7 +873,7 @@ if (colorRGBA.w < AlphaRef) discard;
 #ifdef TARGET
 	obscure = tex2Dproj(ShadowSampler, vShadowMapCoord.xyw).x;
 	#ifdef LIGHT_VIEW_POSITION
-		obscure = ((obscure * vPosition.w) < (vPosition.z - ShadowBias)) ? ShadowColor.w : 1.0;
+		obscure = ((obscure * vLViewPosition.w) < (vLViewPosition.z - ShadowBias)) ? ShadowColor.w : 1.0;
 	#endif
 #endif
 #endif

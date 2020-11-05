@@ -187,6 +187,7 @@ namespace pyxie {
 					uint32_t SCISSOR_TEST_ENABLE : 1;
 					uint32_t OVERLAY_TRANSPARENT_MAP_CHANNEL : 4;
 					uint32_t NO_VIEW_PROJ : 1;
+					uint32_t NUM_SPOT_LAMP : 3;					//0,1,2,3,4,5,6,7
 				};
 				uint32_t buffer[buffersize];
 			};
@@ -219,6 +220,7 @@ namespace pyxie {
 					uint32_t USE_TEX1 : 1;
 					uint32_t USE_TEX2 : 1;
 					uint32_t USE_WPOS : 1;
+					uint32_t USE_LVPOS : 1;
 					uint32_t USE_COUV : 1;
 					uint32_t USE_NOM : 1;
 					uint32_t USE_TAN : 1;
@@ -280,6 +282,7 @@ namespace pyxie {
 		void SetCalcBinormalInShader(bool enable);
 		void SetNumDirLamp(int num);
 		void SetNumPointLamp(int num);
+		void SetNumSpotLamp(int num);
 		void SetAmbientType(int type);
 		void SetClutLamp(bool enable);
 		void SetSpecular(bool enable, ReferenceMapChannel textureChannel);

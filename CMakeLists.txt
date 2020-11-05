@@ -4,7 +4,7 @@ set(TARGET_NAME igeCreator)
 
 project(${TARGET_NAME})
 
-set (BUILD_FULL_SOURCE 1)
+set (BUILD_FULL_SOURCE 0)
 
 if (BUILD_FULL_SOURCE)
     file(TO_CMAKE_PATH $ENV{IGE_LIBS} IGE_LIBS)

@@ -10,7 +10,8 @@
 	#define FX_WidgetShadowBuffer <float2 Dimensions = { 1024, 1024 }; string Format = ("r32f"); string UIWidget = "None";>
 	#ifndef FX_WidgetSpinner
 	#define FX_WidgetSpinner(name,min,max,def) <string UIType = "FloatSpinner"; string UIName = name; float UIMin = min; float UIMax = max;> = def
-	#endif
+	#define FX_WorldPos(name,x,y,z,w) < string Object = name; string UIName = name; string Space = "World"; > = { x,y,z,w }
+#endif
 	#ifdef DIRECT3D_VERSION	
 		#define NearestMipmapNearest Point
 		#define LinearMipmapLinear Linear
@@ -41,6 +42,7 @@
 	#define SEMANTICS_LIGHTCOLOR
 	#define SEMANTICS_Direction
 	#define SEMANTICS_POWER
+	#define FX_WorldPos(name,x,y,z,w)
 #endif
 
 #ifdef POINT_SAMPLING
@@ -97,30 +99,170 @@ precision mediump float;
 
 
 #if(NUM_POINT_LAMP >= 1)
-		uniform FLOAT4 PointLamp01Color SEMANTICS_LIGHTCOLOR FX_WidgetRGBA("PointLamp01Color", 0, 0, 0, 1);
+	uniform FLOAT4 PointLamp01Pos FX_WorldPos("PointLamp01Pos", 0.0, 0.0, 0.0, 100.0);
+#ifndef TARGET
+	uniform FLOAT PointLamp01Intensity FX_WidgetSlider(0.0, 100.0, 0.1, "PointLamp01Intensity", 1.0);
+	uniform FLOAT PointLamp01Range FX_WidgetSlider(1.0, 1000.0, 1.0, "PointLamp01Range", 1000.0);
+#else
+#define PointLamp01Range PointLamp01Pos.w
+#endif
+	uniform FLOAT4 PointLamp01Color SEMANTICS_LIGHTCOLOR FX_WidgetRGBA("PointLamp01Color", 0, 0, 0, 1);
 #endif
 #if(NUM_POINT_LAMP >= 2)
-		uniform FLOAT4 PointLamp02Color SEMANTICS_LIGHTCOLOR FX_WidgetRGBA("PointLamp02Color", 0, 0, 0, 1);
+	uniform FLOAT4 PointLamp02Pos FX_WorldPos("PointLamp02Pos", 0.0, 0.0, 0.0, 100.0);
+#ifndef TARGET
+	uniform FLOAT PointLamp02Intensity FX_WidgetSlider(0.0, 100.0, 0.1, "PointLamp02Intensity", 1.0);
+	uniform FLOAT PointLamp02Range FX_WidgetSlider(1.0, 1000.0, 1.0, "PointLamp02Range", 1000.0);
+#else
+#define PointLamp02Range PointLamp02Pos.w
+#endif
+	uniform FLOAT4 PointLamp02Color SEMANTICS_LIGHTCOLOR FX_WidgetRGBA("PointLamp02Color", 0, 0, 0, 1);
 #endif
 #if(NUM_POINT_LAMP >= 3)
-		uniform FLOAT4 PointLamp03Color SEMANTICS_LIGHTCOLOR FX_WidgetRGBA("PointLamp03Color", 0, 0, 0, 1);
+	uniform FLOAT4 PointLamp03Pos FX_WorldPos("PointLamp03Pos", 0.0, 0.0, 0.0, 100.0);
+#ifndef TARGET
+	uniform FLOAT PointLamp03Intensity FX_WidgetSlider(0.0, 100.0, 0.1, "PointLamp03Intensity", 1.0);
+	uniform FLOAT PointLamp03Range FX_WidgetSlider(1.0, 1000.0, 1.0, "PointLamp03Range", 1000.0);
+#else
+#define PointLamp03Range PointLamp03Pos.w
+#endif
+	uniform FLOAT4 PointLamp03Color SEMANTICS_LIGHTCOLOR FX_WidgetRGBA("PointLamp03Color", 0, 0, 0, 1);
 #endif
 #if(NUM_POINT_LAMP >= 4)
-		uniform FLOAT4 PointLamp04Color SEMANTICS_LIGHTCOLOR FX_WidgetRGBA("PointLamp04Color", 0, 0, 0, 1);
+	uniform FLOAT4 PointLamp04Pos FX_WorldPos("PointLamp04Pos", 0.0, 0.0, 0.0, 100.0);
+#ifndef TARGET
+	uniform FLOAT PointLamp04Intensity FX_WidgetSlider(0.0, 100.0, 0.1, "PointLamp04Intensity", 1.0);
+	uniform FLOAT PointLamp04Range FX_WidgetSlider(1.0, 1000.0, 1.0, "PointLamp04Range", 1000.0);
+#else
+#define PointLamp04Range PointLamp04Pos.w
+#endif
+	uniform FLOAT4 PointLamp04Color SEMANTICS_LIGHTCOLOR FX_WidgetRGBA("PointLamp04Color", 0, 0, 0, 1);
 #endif
 #if(NUM_POINT_LAMP >= 5)
-		uniform FLOAT4 PointLamp05Color SEMANTICS_LIGHTCOLOR FX_WidgetRGBA("PointLamp05Color", 0, 0, 0, 1);
+	uniform FLOAT4 PointLamp05Pos FX_WorldPos("PointLamp05Pos", 0.0, 0.0, 0.0, 100.0);
+#ifndef TARGET
+	uniform FLOAT PointLamp05Intensity FX_WidgetSlider(0.0, 100.0, 0.1, "PointLamp05Intensity", 1.0);
+	uniform FLOAT PointLamp05Range FX_WidgetSlider(1.0, 1000.0, 1.0, "PointLamp05Range", 1000.0);
+#else
+#define PointLamp05Range PointLamp05Pos.w
+#endif
+	uniform FLOAT4 PointLamp05Color SEMANTICS_LIGHTCOLOR FX_WidgetRGBA("PointLamp05Color", 0, 0, 0, 1);
 #endif
 #if(NUM_POINT_LAMP >= 6)
-		uniform FLOAT4 PointLamp06Color SEMANTICS_LIGHTCOLOR FX_WidgetRGBA("PointLamp06Color", 0, 0, 0, 1);
+	uniform FLOAT4 PointLamp06Pos FX_WorldPos("PointLamp06Pos", 0.0, 0.0, 0.0, 100.0);
+#ifndef TARGET
+	uniform FLOAT PointLamp06Intensity FX_WidgetSlider(0.0, 100.0, 0.1, "PointLamp06Intensity", 1.0);
+	uniform FLOAT PointLamp06Range FX_WidgetSlider(1.0, 1000.0, 1.0, "PointLamp06Range", 1000.0);
+#else
+#define PointLamp06Range PointLamp06Pos.w
+#endif
+	uniform FLOAT4 PointLamp06Color SEMANTICS_LIGHTCOLOR FX_WidgetRGBA("PointLamp06Color", 0, 0, 0, 1);
 #endif
 #if(NUM_POINT_LAMP >= 7)
-		uniform FLOAT4 PointLamp07Color SEMANTICS_LIGHTCOLOR FX_WidgetRGBA("PointLamp07Color", 0, 0, 0, 1);
+	uniform FLOAT4 PointLamp07Pos FX_WorldPos("PointLamp07Pos", 0.0, 0.0, 0.0, 100.0);
+#ifndef TARGET
+	uniform FLOAT PointLamp07Intensity FX_WidgetSlider(0.0, 100.0, 0.1, "PointLamp07Intensity", 1.0);
+	uniform FLOAT PointLamp07Range FX_WidgetSlider(1.0, 1000.0, 1.0, "PointLamp07Range", 1000.0);
+#else
+#define PointLamp07Range PointLamp07Pos.w
+#endif
+	uniform FLOAT4 PointLamp07Color SEMANTICS_LIGHTCOLOR FX_WidgetRGBA("PointLamp07Color", 0, 0, 0, 1);
 #endif
 
+
+#if(NUM_SPOT_LAMP >= 1)
+	uniform FLOAT4 SpotLamp01Pos FX_WorldPos("SpotLamp01Pos", 0.0, 0.0, 0.0, 100.0);
+	uniform FLOAT4 SpotLamp01Dir SEMANTICS_Direction FX_WidgetDirLamp("SpotLamp01Direction", 0.0, 0.0, 1.0);
+	uniform FLOAT4 SpotLamp01Color SEMANTICS_LIGHTCOLOR FX_WidgetRGBA("SpotLamp01Color", 0, 0, 0, 1);
+#ifndef TARGET
+	uniform FLOAT SpotLamp01Intensity FX_WidgetSlider(0.0, 100.0, 0.1, "SpotLamp01Intensity", 1.0);
+	uniform FLOAT SpotLamp01Range FX_WidgetSlider(1.0, 1000.0, 1.0, "SpotLamp01Range", 1000.0);
+	uniform FLOAT SpotLamp01Angle FX_WidgetSlider(1.0, 90.0, 1.0, "SpotLamp01Angle", 30.0);
+#else
+	#define SpotLamp01Range SpotLamp01Pos.w
+	#define SpotLamp01Angle SpotLamp01Dir.w
+#endif
+#endif
+#if(NUM_SPOT_LAMP >= 2)
+	uniform FLOAT4 SpotLamp02Pos FX_WorldPos("SpotLamp02Pos", 0.0, 0.0, 0.0, 100.0);
+	uniform FLOAT4 SpotLamp02Dir SEMANTICS_Direction FX_WidgetDirLamp("SpotLamp02Direction", 0.0, 0.0, 1.0);
+	uniform FLOAT4 SpotLamp02Color SEMANTICS_LIGHTCOLOR FX_WidgetRGBA("SpotLamp02Color", 0, 0, 0, 1);
+#ifndef TARGET
+	uniform FLOAT SpotLamp02Intensity FX_WidgetSlider(0.0, 100.0, 0.1, "SpotLamp02Intensity", 1.0);
+	uniform FLOAT SpotLamp02Range FX_WidgetSlider(1.0, 1000.0, 1.0, "SpotLamp02Range", 1000.0);
+	uniform FLOAT SpotLamp02Angle FX_WidgetSlider(1.0, 90.0, 1.0, "SpotLamp02Angle", 30.0);
+#else
+#define SpotLamp02Range SpotLamp02Pos.w
+#define SpotLamp02Angle SpotLamp02Dir.w
+#endif
+#endif
+#if(NUM_SPOT_LAMP >= 3)
+	uniform FLOAT4 SpotLamp03Pos FX_WorldPos("SpotLamp03Pos", 0.0, 0.0, 0.0, 100.0);
+	uniform FLOAT4 SpotLamp03Dir SEMANTICS_Direction FX_WidgetDirLamp("SpotLamp03Direction", 0.0, 0.0, 1.0);
+	uniform FLOAT4 SpotLamp03Color SEMANTICS_LIGHTCOLOR FX_WidgetRGBA("SpotLamp03Color", 0, 0, 0, 1);
+#ifndef TARGET
+	uniform FLOAT SpotLamp03Intensity FX_WidgetSlider(0.0, 100.0, 0.1, "SpotLamp03Intensity", 1.0);
+	uniform FLOAT SpotLamp03Range FX_WidgetSlider(1.0, 1000.0, 1.0, "SpotLamp03Range", 1000.0);
+	uniform FLOAT SpotLamp03Angle FX_WidgetSlider(1.0, 90.0, 1.0, "SpotLamp03Angle", 30.0);
+#else
+#define SpotLamp03Range SpotLamp03Pos.w
+#define SpotLamp03Angle SpotLamp03Dir.w
+#endif
+#endif
+#if(NUM_SPOT_LAMP >= 4)
+	uniform FLOAT4 SpotLamp04Pos FX_WorldPos("SpotLamp04Pos", 0.0, 0.0, 0.0, 100.0);
+	uniform FLOAT4 SpotLamp04Dir SEMANTICS_Direction FX_WidgetDirLamp("SpotLamp04Direction", 0.0, 0.0, 1.0);
+	uniform FLOAT4 SpotLamp04Color SEMANTICS_LIGHTCOLOR FX_WidgetRGBA("SpotLamp04Color", 0, 0, 0, 1);
+#ifndef TARGET
+	uniform FLOAT SpotLamp04Intensity FX_WidgetSlider(0.0, 100.0, 0.1, "SpotLamp04Intensity", 1.0);
+	uniform FLOAT SpotLamp04Range FX_WidgetSlider(1.0, 1000.0, 1.0, "SpotLamp04Range", 1000.0);
+	uniform FLOAT SpotLamp04Angle FX_WidgetSlider(1.0, 90.0, 1.0, "SpotLamp04Angle", 30.0);
+#else
+#define SpotLamp04Range SpotLamp04Pos.w
+#define SpotLamp04Angle SpotLamp04Dir.w
+#endif
+#endif
+#if(NUM_SPOT_LAMP >= 5)
+	uniform FLOAT4 SpotLamp05Pos FX_WorldPos("SpotLamp05Pos", 0.0, 0.0, 0.0, 100.0);
+	uniform FLOAT4 SpotLamp05Dir SEMANTICS_Direction FX_WidgetDirLamp("SpotLamp05Direction", 0.0, 0.0, 1.0);
+	uniform FLOAT4 SpotLamp05Color SEMANTICS_LIGHTCOLOR FX_WidgetRGBA("SpotLamp05Color", 0, 0, 0, 1);
+#ifndef TARGET
+	uniform FLOAT SpotLamp05Intensity FX_WidgetSlider(0.0, 100.0, 0.1, "SpotLamp05Intensity", 1.0);
+	uniform FLOAT SpotLamp05Range FX_WidgetSlider(1.0, 1000.0, 1.0, "SpotLamp05Range", 1000.0);
+	uniform FLOAT SpotLamp05Angle FX_WidgetSlider(1.0, 90.0, 1.0, "SpotLamp05Angle", 30.0);
+#else
+#define SpotLamp05Range SpotLamp05Pos.w
+#define SpotLamp05Angle SpotLamp05Dir.w
+#endif
+#endif
+#if(NUM_SPOT_LAMP >= 6)
+	uniform FLOAT4 SpotLamp06Pos FX_WorldPos("SpotLamp06Pos", 0.0, 0.0, 0.0, 100.0);
+	uniform FLOAT4 SpotLamp06Dir SEMANTICS_Direction FX_WidgetDirLamp("SpotLamp06Direction", 0.0, 0.0, 1.0);
+	uniform FLOAT4 SpotLamp06Color SEMANTICS_LIGHTCOLOR FX_WidgetRGBA("SpotLamp06Color", 0, 0, 0, 1);
+#ifndef TARGET
+	uniform FLOAT SpotLamp06Intensity FX_WidgetSlider(0.0, 100.0, 0.1, "SpotLamp06Intensity", 1.0);
+	uniform FLOAT SpotLamp06Range FX_WidgetSlider(1.0, 1000.0, 1.0, "SpotLamp06Range", 1000.0);
+	uniform FLOAT SpotLamp06Angle FX_WidgetSlider(1.0, 90.0, 1.0, "SpotLamp06Angle", 30.0);
+#else
+#define SpotLamp06Range SpotLamp06Pos.w
+#define SpotLamp06Angle SpotLamp06Dir.w
+#endif
+#endif
+#if(NUM_SPOT_LAMP >= 7)
+	uniform FLOAT4 SpotLamp07Pos FX_WorldPos("SpotLamp07Pos", 0.0, 0.0, 0.0, 100.0);
+	uniform FLOAT4 SpotLamp07Dir SEMANTICS_Direction FX_WidgetDirLamp("SpotLamp07Direction", 0.0, 0.0, 1.0);
+	uniform FLOAT4 SpotLamp07Color SEMANTICS_LIGHTCOLOR FX_WidgetRGBA("SpotLamp07Color", 0, 0, 0, 1);
+#ifndef TARGET
+	uniform FLOAT SpotLamp07Intensity FX_WidgetSlider(0.0, 100.0, 0.1, "SpotLamp07Intensity", 1.0);
+	uniform FLOAT SpotLamp07Range FX_WidgetSlider(1.0, 1000.0, 1.0, "SpotLamp07Range", 1000.0);
+	uniform FLOAT SpotLamp07Angle FX_WidgetSlider(1.0, 90.0, 1.0, "SpotLamp07Angle", 30.0);
+#else
+#define SpotLamp07Range SpotLamp07Pos.w
+#define SpotLamp07Angle SpotLamp07Dir.w
+#endif
+#endif
+	
 ///////Ambient Light//////////////////////////
-
-
 #if (AMBIENT_TYPE > AMBIENT_None)
 	uniform FLOAT3 AmbientColor FX_WidgetFloat3("AmbientColor", 0.1, 0.2, 0.5);
 	#ifndef TARGET

@@ -101,11 +101,11 @@ namespace pyxie
 		};
 		enum Type {
 			POINT = 0,
-			SPOT,
 			AMBIENT,
 			DIRECTIONAL,
 			FOG,
-			SHADOW
+			SHADOW,
+			SPOT
 		};
 		uint32_t hash;
 		uint16_t type;
@@ -123,6 +123,11 @@ namespace pyxie
 				float color[4];
 				float dir[4];
 			}directionalLamp;
+			struct {
+				float color[4];
+				float position[4];
+				float dir[4];
+			}spotLamp;
 			struct {
 				float color[4];
 				float position[4];

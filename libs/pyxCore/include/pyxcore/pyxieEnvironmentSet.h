@@ -18,6 +18,7 @@ namespace pyxie
 		EnvironmentSource* ambient;
 		EnvironmentSource* dirLamp[3];
 		EnvironmentSource* pointLamp[7];
+		EnvironmentSource* spotLamp[7];
 		EnvironmentSource* distfog;
 		EnvironmentSource* shadow;
 
@@ -35,6 +36,13 @@ namespace pyxie
 			new_point6,
 			new_fog,
 			new_shadow,
+			new_spot0,
+			new_spot1,
+			new_spot2,
+			new_spot3,
+			new_spot4,
+			new_spot5,
+			new_spot6,
 			num_new
 		};
 		uint32_t newflag;
@@ -61,6 +69,7 @@ namespace pyxie
 		void SetDirectionalLampColor(uint32_t index, const Vec3& col);
 		Vec3 GetDirectionalLampDirection(uint32_t index);
 		void SetDirectionalLampDirection(uint32_t index, const Vec3& dir);
+
 		float GetPointLampRange(uint32_t index);
 		void SetPointLampRange(uint32_t index, float range);
 		float GetPointLampIntensity(uint32_t index);
@@ -69,6 +78,20 @@ namespace pyxie
 		void SetPointLampColor(uint32_t index, const Vec3& col);
 		Vec3 GetPointLampPosition(uint32_t index);
 		void SetPointLampPosition(uint32_t index, const Vec3& pos);
+
+		float GetSpotLampRange(uint32_t index);
+		void SetSpotLampRange(uint32_t index, float range);
+		float GetSpotLampIntensity(uint32_t index);
+		void SetSpotLampIntensity(uint32_t index, float intensity);
+		Vec3 GetSpotLampColor(uint32_t index);
+		void SetSpotLampColor(uint32_t index, const Vec3& col);
+		Vec3 GetSpotLampPosition(uint32_t index);
+		void SetSpotLampPosition(uint32_t index, const Vec3& pos);
+		Vec3 GetSpotLampDirection(uint32_t index);
+		void SetSpotLampDirection(uint32_t index, const Vec3& dir);
+		float GetSpotLampAngle(uint32_t index);
+		void SetSpotLampAngle(uint32_t index, const float angle);
+
 		float GetDistanceFogNear();
 		void SetDistanceFogNear(float _near);
 		float GetDistanceFogFar();
@@ -89,6 +112,7 @@ namespace pyxie
 		EnvironmentSource* CreateAmbient();
 		EnvironmentSource* CreateDir(int idx);
 		EnvironmentSource* CreatePoint(int idx);
+		EnvironmentSource* CreateSpot(int idx);
 		EnvironmentSource* CreateFog();
 		EnvironmentSource* CreateShadow();
 	};

@@ -189,6 +189,7 @@ uniform float4x4 World SEMANTICS_World FX_WidgetNone;
 #ifdef FOG
 #ifdef TARGET
 	uniform float3 FogParams;
+	uniform float3 FogParams;
 	#define FogParamA FogParams.x
 	#define FogParamB FogParams.y
 	#define FogAlpha FogParams.z
@@ -209,70 +210,6 @@ uniform float4x4 World SEMANTICS_World FX_WidgetNone;
 #endif
 #endif
 
-///////Point Light////////////////////////////
-#if(NUM_POINT_LAMP >=1)
-	uniform FLOAT4 PointLamp01Pos FX_WorldPos("PointLamp01Pos", 0.0, 0.0, 0.0, 100.0);
-#ifndef TARGET
-	uniform FLOAT PointLamp01Intensity FX_WidgetSlider(0.0, 100.0, 0.1, "PointLamp01Intensity", 1.0);
-	uniform FLOAT PointLamp01Range FX_WidgetSlider(1.0, 1000.0, 1.0, "PointLamp01Range", 1000.0);
-#else
-	#define PointLamp01Range PointLamp01Pos.w
-#endif
-#endif
-#if(NUM_POINT_LAMP >= 2)
-	uniform FLOAT4 PointLamp02Pos FX_WorldPos("PointLamp02Pos", 0.0, 0.0, 0.0, 100.0);
-#ifndef TARGET
-	uniform FLOAT PointLamp02Intensity FX_WidgetSlider(0.0, 100.0, 0.1, "PointLamp02Intensity", 1.0);
-	uniform FLOAT PointLamp02Range FX_WidgetSlider(1.0, 1000.0, 1.0, "PointLamp02Range", 1000.0);
-#else
-#define PointLamp02Range PointLamp02Pos.w
-#endif
-#endif
-#if(NUM_POINT_LAMP >= 3)
-	uniform FLOAT4 PointLamp03Pos FX_WorldPos("PointLamp03Pos", 0.0, 0.0, 0.0, 100.0);
-#ifndef TARGET
-	uniform FLOAT PointLamp03Intensity FX_WidgetSlider(0.0, 100.0, 0.1, "PointLamp03Intensity", 1.0);
-	uniform FLOAT PointLamp03Range FX_WidgetSlider(1.0, 1000.0, 1.0, "PointLamp03Range", 1000.0);
-#else
-#define PointLamp03Range PointLamp03Pos.w
-#endif
-#endif
-#if(NUM_POINT_LAMP >= 4)
-	uniform FLOAT4 PointLamp04Pos FX_WorldPos("PointLamp04Pos", 0.0, 0.0, 0.0, 100.0);
-#ifndef TARGET
-	uniform FLOAT PointLamp04Intensity FX_WidgetSlider(0.0, 100.0, 0.1, "PointLamp04Intensity", 1.0);
-	uniform FLOAT PointLamp04Range FX_WidgetSlider(1.0, 1000.0, 1.0, "PointLamp04Range", 1000.0);
-#else
-#define PointLamp04Range PointLamp04Pos.w
-#endif
-#endif
-#if(NUM_POINT_LAMP >= 5)
-	uniform FLOAT4 PointLamp05Pos FX_WorldPos("PointLamp05Pos", 0.0, 0.0, 0.0, 100.0);
-#ifndef TARGET
-	uniform FLOAT PointLamp05Intensity FX_WidgetSlider(0.0, 100.0, 0.1, "PointLamp05Intensity", 1.0);
-	uniform FLOAT PointLamp05Range FX_WidgetSlider(1.0, 1000.0, 1.0, "PointLamp05Range", 1000.0);
-#else
-#define PointLamp05Range PointLamp05Pos.w
-#endif
-#endif
-#if(NUM_POINT_LAMP >= 6)
-	uniform FLOAT4 PointLamp06Pos FX_WorldPos("PointLamp06Pos", 0.0, 0.0, 0.0, 100.0);
-#ifndef TARGET
-	uniform FLOAT PointLamp06Intensity FX_WidgetSlider(0.0, 100.0, 0.1, "PointLamp06Intensity", 1.0);
-	uniform FLOAT PointLamp06Range FX_WidgetSlider(1.0, 1000.0, 1.0, "PointLamp06Range", 1000.0);
-#else
-#define PointLamp06Range PointLamp06Pos.w
-#endif
-#endif
-#if(NUM_POINT_LAMP >= 7)
-	uniform FLOAT4 PointLamp07Pos FX_WorldPos("PointLamp07Pos", 0.0, 0.0, 0.0, 100.0);
-#ifndef TARGET
-	uniform FLOAT PointLamp07Intensity FX_WidgetSlider(0.0, 100.0, 0.1, "PointLamp07Intensity", 1.0);
-	uniform FLOAT PointLamp07Range FX_WidgetSlider(1.0, 1000.0, 1.0, "PointLamp07Range", 1000.0);
-#else
-#define PointLamp07Range PointLamp07Pos.w
-#endif
-#endif
 
 //////////////// Glass Map ///////////////////
 #ifdef GLASS_MAP_ENABLE
