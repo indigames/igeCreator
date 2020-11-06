@@ -491,7 +491,7 @@ namespace ige::creator
         if (target == nullptr)
             return;
 
-        auto physicComp = target->getComponent<PhysicBase>();
+        auto physicComp = target->getComponent<PhysicObject>();
         if (physicComp == nullptr)
             return;
         

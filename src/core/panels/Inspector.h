@@ -78,8 +78,8 @@ namespace ige::creator
         //! Draw UIText component
         void drawUIText();
 
-        //! Draw PhysicBase component
-        void drawPhysicBase();
+        //! Draw PhysicObject component
+        void drawPhysicObject();
 
         //! Draw PhysicBox component
         void drawPhysicBox();
