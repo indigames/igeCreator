@@ -39,6 +39,11 @@
 #include <components/physic/PhysicCapsule.h>
 #include <components/physic/PhysicMesh.h>
 #include <components/physic/PhysicSoftBody.h>
+#include <components/physic/FixedConstraint.h>
+#include <components/physic/HingeConstraint.h>
+#include <components/physic/SliderConstraint.h>
+#include <components/physic/SpringConstraint.h>
+#include <components/physic/Dof6SpringConstraint.h>
 #include <components/audio/AudioSource.h>
 #include <components/audio/AudioListener.h>
 #include <scene/Scene.h>
@@ -1655,6 +1660,104 @@ namespace ige::creator
         });
     }
 
+    //! Draw Physic Constraints
+    void Inspector::drawPhysicConstraints()
+    {
+        m_constraintGroup = m_physicGroup->createWidget<Group>("ConstraintGroup");
+
+        // Create constraint selection
+        m_constraintCreateCombo = m_constraintGroup->createWidget<ComboBox>(0, true, false);
+        m_constraintCreateCombo->addChoice((int)PhysicConstraint::ConstraintType::Fixed, "Fixed Constraint");
+        m_constraintCreateCombo->addChoice((int)PhysicConstraint::ConstraintType::Hinge, "Hinge Constraint");
+        m_constraintCreateCombo->addChoice((int)PhysicConstraint::ConstraintType::Slider, "Slider Constraint");
+        m_constraintCreateCombo->addChoice((int)PhysicConstraint::ConstraintType::Spring, "Spring Constraint");
+        m_constraintCreateCombo->addChoice((int)PhysicConstraint::ConstraintType::Dof6Spring, "Dof6-Spring Constraint");
+
+        // Add button
+        auto createCompButton = m_constraintGroup->createWidget<Button>("Add", ImVec2(64.f, 0.f));
+        createCompButton->getOnClickEvent().addListener([this](auto widget) {
+            switch (m_constraintCreateCombo->getSelectedIndex())
+            {
+                case (int)PhysicConstraint::ConstraintType::Fixed:
+                    m_targetObject->getComponent<PhysicObject>()->addConstraint<FixedConstraint>();
+                    break;
+                case (int)PhysicConstraint::ConstraintType::Hinge:
+                    m_targetObject->getComponent<PhysicObject>()->addConstraint<HingeConstraint>();
+                    break;
+                case (int)PhysicConstraint::ConstraintType::Slider:
+                    m_targetObject->getComponent<PhysicObject>()->addConstraint<SliderConstraint>();
+                    break;
+                case (int)PhysicConstraint::ConstraintType::Spring:  
+                    m_targetObject->getComponent<PhysicObject>()->addConstraint<SpringConstraint>();
+                    break;
+                case (int)PhysicConstraint::ConstraintType::Dof6Spring:
+                    m_targetObject->getComponent<PhysicObject>()->addConstraint<Dof6SpringConstraint>();
+                    break;
+            }
+            redraw();
+        });
+        m_constraintGroup->createWidget<Separator>();
+
+        const auto& constraints = m_targetObject->getComponent<PhysicObject>()->getContraints();
+        for (const auto& constraint : constraints)
+        {
+            if (constraint->getType() == PhysicConstraint::ConstraintType::Fixed)
+            {
+                drawFixedConstraint(constraint);
+            }
+            else if (constraint->getType() == PhysicConstraint::ConstraintType::Hinge)
+            {
+                drawHingeConstraint(constraint);
+            }
+            else if (constraint->getType() == PhysicConstraint::ConstraintType::Slider)
+            {
+                drawSliderConstraint(constraint);
+            }
+            else if (constraint->getType() == PhysicConstraint::ConstraintType::Spring)
+            {
+                drawSpringConstraint(constraint);
+            }
+            else if (constraint->getType() == PhysicConstraint::ConstraintType::Dof6Spring)
+            {
+                drawDof6SpringConstraint(constraint);
+            }
+        }
+    }
+
+    //! Draw Fixed Constraint
+    void Inspector::drawFixedConstraint(const std::shared_ptr<PhysicConstraint>& constraint)
+    {
+        auto fixedConstraintGroup = m_constraintGroup->createWidget<Group>("FixedConstraint", true, true);
+        fixedConstraintGroup->getOnClosedEvent().addListener([&, this]() {
+            m_targetObject->getComponent<PhysicObject>()->removeConstraint(constraint);
+            redraw();
+        });
+    }
+
+    //! draw Hinge Constraint
+    void Inspector::drawHingeConstraint(const std::shared_ptr<PhysicConstraint>& constraint)
+    {
+
+    }
+
+    //! draw Slider Constraint
+    void Inspector::drawSliderConstraint(const std::shared_ptr<PhysicConstraint>& constraint)
+    {
+
+    }
+
+    //! draw Spring Constraint
+    void Inspector::drawSpringConstraint(const std::shared_ptr<PhysicConstraint>& constraint)
+    {
+
+    }
+
+    //! draw Dof6 Spring Constraint
+    void Inspector::drawDof6SpringConstraint(const std::shared_ptr<PhysicConstraint>& constraint)
+    {
+
+    }
+
     //! Draw AudioSource
     void Inspector::drawAudioSource()
     {
@@ -2058,6 +2161,19 @@ namespace ige::creator
             m_spotLightGroup->removeAllWidgets();
             m_spotLightGroup->removeAllPlugins();
             m_spotLightGroup = nullptr;
+        }
+
+        if (m_constraintGroup)
+        {
+            m_constraintGroup->removeAllWidgets();
+            m_constraintGroup->removeAllPlugins();
+            m_constraintGroup = nullptr;
+        }
+
+        if (m_constraintCreateCombo)
+        {
+            m_constraintCreateCombo->removeAllPlugins();
+            m_constraintCreateCombo = nullptr;
         }
 
         removeAllWidgets();

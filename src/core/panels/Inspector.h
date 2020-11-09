@@ -4,6 +4,7 @@
 #include "core/layout/Group.h"
 
 #include "scene/SceneObject.h"
+#include "components/physic/PhysicConstraint.h"
 using namespace ige::scene;
 
 namespace ige::creator
@@ -114,6 +115,24 @@ namespace ige::creator
         //! Draw Spot Light
         void drawSpotLight();
 
+        //! Draw Physic Constraints
+        void drawPhysicConstraints();
+
+        //! Draw Fixed Constraint
+        void drawFixedConstraint(const std::shared_ptr<PhysicConstraint>& constraint);
+
+        //! draw Hinge Constraint
+        void drawHingeConstraint(const std::shared_ptr<PhysicConstraint>& constraint);
+
+        //! draw Slider Constraint
+        void drawSliderConstraint(const std::shared_ptr<PhysicConstraint>& constraint);
+        
+        //! draw Spring Constraint
+        void drawSpringConstraint(const std::shared_ptr<PhysicConstraint>& constraint);
+
+        //! draw Dof6 Spring Constraint
+        void drawDof6SpringConstraint(const std::shared_ptr<PhysicConstraint>& constraint);
+
         //! Redraw
         void redraw() { m_bNeedRedraw = true;  }
 
@@ -148,6 +167,8 @@ namespace ige::creator
         std::shared_ptr<Group> m_physicGroup = nullptr;
         std::shared_ptr<Group> m_audioSourceGroup = nullptr;
         std::shared_ptr<Group> m_audioListenerGroup = nullptr;
+        std::shared_ptr<Group> m_constraintGroup = nullptr;
+        std::shared_ptr<ComboBox> m_constraintCreateCombo = nullptr;
 
         //! Flags for redrawing component in main thread
         bool m_bNeedRedraw = false;
