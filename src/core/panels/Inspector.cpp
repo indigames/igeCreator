@@ -1823,7 +1823,6 @@ namespace ige::creator
             hingeConstraint->setAxis2({ val[0], val[1], val[2] });
         });
 
-
         // Lower limit
         std::array lowerLimit = { hingeConstraint->getLowerLimit() };
         constraintGroup->createWidget<Drag<float>>("Lower Limit", ImGuiDataType_Float, lowerLimit, 0.001f, -SIMD_PI, SIMD_PI)->getOnDataChangedEvent().addListener([hingeConstraint](const auto& val) {
@@ -1840,7 +1839,30 @@ namespace ige::creator
     //! draw Slider Constraint
     void Inspector::drawSliderConstraint(const std::shared_ptr<PhysicConstraint>& constraint)
     {
+        auto constraintGroup = m_constraintGroup->createWidget<Group>("HingeConstraint", true, true);
+        constraintGroup->getOnClosedEvent().addListener([&, this]() {
+            m_targetObject->getComponent<PhysicObject>()->removeConstraint(constraint);
+            redraw();
+            });
 
+        // Draw Physic Constraint base
+        drawPhysicConstraint(constraint, constraintGroup);
+
+        auto sliderConstraint = std::dynamic_pointer_cast<SliderConstraint>(constraint);
+        if (sliderConstraint == nullptr)
+            return;
+
+        // Lower limit
+        std::array lowerLimit = { sliderConstraint->getLowerLimit().x(), sliderConstraint->getLowerLimit().y(), sliderConstraint->getLowerLimit().z() };
+        constraintGroup->createWidget<Drag<float, 3>>("Lower Limit", ImGuiDataType_Float, lowerLimit, 0.001f, -SIMD_PI, SIMD_PI)->getOnDataChangedEvent().addListener([sliderConstraint](const auto& val) {
+            sliderConstraint->setLowerLimit({ val[0], val[1], val[2] });
+        });
+
+        // Upper limit
+        std::array upperLimit = { sliderConstraint->getUpperLimit().x(), sliderConstraint->getUpperLimit().y(), sliderConstraint->getUpperLimit().z() };
+        constraintGroup->createWidget<Drag<float, 3>>("Upper Limit", ImGuiDataType_Float, upperLimit, 0.001f, -SIMD_PI, SIMD_PI)->getOnDataChangedEvent().addListener([sliderConstraint](const auto& val) {
+            sliderConstraint->setUpperLimit({ val[0], val[1], val[2] });
+        });
     }
 
     //! draw Spring Constraint
