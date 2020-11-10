@@ -1,0 +1,27 @@
+
+Version 0.0.4 - 11 Nov 2020
+- Add spot light component
+- Add Physic Softbody
+- Add Physic Constraints
+
+
+Version 0.0.3 - 30 Oct 2020
+- Add point light, directional light, ambient light as components
+- Add Fog and Shadow
+- Add Physic Ridgid Body: Box, Sphere, Capsule
+
+
+Version 0.0.2 - 14 Oct 2020
+- Add build tools: Windows and Android
+- Add audio support
+- Prefab support
+
+
+Version 0.0.1 - 30 Sep 2020
+- Initial version, includes:
+  + Scene management
+  + Figure and environment settings
+  + Python binding
+  + Serialize/deserialize using Json
+  + Win32 demo  
+  
