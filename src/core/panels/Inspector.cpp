@@ -1852,6 +1852,8 @@ namespace ige::creator
         if (sliderConstraint == nullptr)
             return;
 
+        constraintGroup->createWidget<Separator>();
+
         // Lower limit
         std::array lowerLimit = { sliderConstraint->getLowerLimit().x(), sliderConstraint->getLowerLimit().y(), sliderConstraint->getLowerLimit().z() };
         constraintGroup->createWidget<Drag<float, 3>>("Lower Limit", ImGuiDataType_Float, lowerLimit, 0.001f)->getOnDataChangedEvent().addListener([sliderConstraint](const auto& val) {
@@ -1880,6 +1882,8 @@ namespace ige::creator
         auto springConstraint = std::dynamic_pointer_cast<SpringConstraint>(constraint);
         if (springConstraint == nullptr)
             return;
+
+        constraintGroup->createWidget<Separator>();
 
         // Enable
         std::array enable = { springConstraint->getEnable().x(), springConstraint->getEnable().y(), springConstraint->getEnable().z() };
@@ -1915,7 +1919,163 @@ namespace ige::creator
     //! draw Dof6 Spring Constraint
     void Inspector::drawDof6SpringConstraint(const std::shared_ptr<PhysicConstraint>& constraint)
     {
+        auto constraintGroup = m_constraintGroup->createWidget<Group>("Dof6Constraint", true, true);
+        constraintGroup->getOnClosedEvent().addListener([&, this]() {
+            m_targetObject->getComponent<PhysicObject>()->removeConstraint(constraint);
+            redraw();
+        });
 
+        // Draw Physic Constraint base
+        drawPhysicConstraint(constraint, constraintGroup);
+
+        auto dof6Constraint = std::dynamic_pointer_cast<Dof6SpringConstraint>(constraint);
+        if (dof6Constraint == nullptr)
+            return;
+
+        // Linear constraints
+        auto linearGroup = constraintGroup->createWidget<Group>("Linear Constraints", true);
+        {
+            // Lower limit
+            std::array lowerLimit = { dof6Constraint->getLowerLinearLimit().x(), dof6Constraint->getLowerLinearLimit().y(), dof6Constraint->getLowerLinearLimit().z() };
+            linearGroup->createWidget<Drag<float, 3>>("Lower Limit", ImGuiDataType_Float, lowerLimit, 0.001f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+                dof6Constraint->setLowerLinearLimit({ val[0], val[1], val[2] });
+            });
+
+            // Upper limit
+            std::array upperLimit = { dof6Constraint->getUpperLinearLimit().x(), dof6Constraint->getUpperLinearLimit().y(), dof6Constraint->getUpperLinearLimit().z() };
+            linearGroup->createWidget<Drag<float, 3>>("Upper Limit", ImGuiDataType_Float, upperLimit, 0.001f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+                dof6Constraint->setUpperLinearLimit({ val[0], val[1], val[2] });
+            });
+
+            // Velocity target
+            std::array targetVelocity = { dof6Constraint->getTargetLinearVelocity().x(), dof6Constraint->getTargetLinearVelocity().y(), dof6Constraint->getTargetLinearVelocity().z() };
+            linearGroup->createWidget<Drag<float, 3>>("Target Velocity", ImGuiDataType_Float, targetVelocity, 0.001f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+                dof6Constraint->setTargetLinearVelocity({ val[0], val[1], val[2] });
+            });
+
+            // Bounce
+            std::array bounce = { dof6Constraint->getLinearBounce().x(), dof6Constraint->getLinearBounce().y(), dof6Constraint->getLinearBounce().z() };
+            linearGroup->createWidget<Drag<float, 3>>("Bounce", ImGuiDataType_Float, bounce, 1.f, 0.f, 1.f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+                dof6Constraint->setLinearBounce({ val[0], val[1], val[2] });
+            });
+
+            linearGroup->createWidget<Separator>();
+            // Spring
+            std::array spring = { dof6Constraint->getEnableLinearSpring().x(), dof6Constraint->getEnableLinearSpring().y(), dof6Constraint->getEnableLinearSpring().z() };
+            linearGroup->createWidget<Drag<float, 3>>("Enable Spring", ImGuiDataType_Float, spring, 1.f, 0.f, 1.f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+                dof6Constraint->setEnableLinearSpring({ val[0], val[1], val[2] });
+            });
+
+            // Stiffness
+            std::array stiffness = { dof6Constraint->getLinearStiffness().x(), dof6Constraint->getLinearStiffness().y(), dof6Constraint->getLinearStiffness().z() };
+            linearGroup->createWidget<Drag<float, 3>>("Stiffness", ImGuiDataType_Float, stiffness, 0.001f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+                dof6Constraint->setLinearStiffness({ val[0], val[1], val[2] });
+            });
+
+            // Damping
+            std::array damping = { dof6Constraint->getLinearDamping().x(), dof6Constraint->getLinearDamping().y(), dof6Constraint->getLinearDamping().z() };
+            linearGroup->createWidget<Drag<float, 3>>("Damping", ImGuiDataType_Float, damping, 0.001f, 0.f, 1.f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+                dof6Constraint->setLinearDamping({ val[0], val[1], val[2] });
+            });
+
+            linearGroup->createWidget<Separator>();
+            // Motor
+            std::array motor = { dof6Constraint->getEnabledLinearMotor().x(), dof6Constraint->getEnabledLinearMotor().y(), dof6Constraint->getEnabledLinearMotor().z() };
+            linearGroup->createWidget<Drag<float, 3>>("Enable Motor", ImGuiDataType_Float, motor, 1.f, 0.f, 1.f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+                dof6Constraint->setEnabledLinearMotor({ val[0], val[1], val[2] });
+            });
+
+            // Max motor force
+            std::array motorMaxForce = { dof6Constraint->getLinearMaxMotorForce().x(), dof6Constraint->getLinearMaxMotorForce().y(), dof6Constraint->getLinearMaxMotorForce().z() };
+            linearGroup->createWidget<Drag<float, 3>>("Max Motor Force", ImGuiDataType_Float, motorMaxForce, 0.001f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+                dof6Constraint->setLinearMaxMotorForce({ val[0], val[1], val[2] });
+            });
+
+            // Servo
+            std::array servo = { dof6Constraint->getEnableLinearServo().x(), dof6Constraint->getEnableLinearServo().y(), dof6Constraint->getEnableLinearServo().z() };
+            linearGroup->createWidget<Drag<float, 3>>("Enable Servo", ImGuiDataType_Float, servo, 1.f, 0.f, 1.f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+                dof6Constraint->setEnableLinearServo({ val[0], val[1], val[2] });
+            });
+
+            // Servo target
+            std::array servoTarget = { dof6Constraint->getLinearServoTarget().x(), dof6Constraint->getLinearServoTarget().y(), dof6Constraint->getLinearServoTarget().z() };
+            linearGroup->createWidget<Drag<float, 3>>("Servo Target", ImGuiDataType_Float, servoTarget, 0.001f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+                dof6Constraint->setLinearServoTarget({ val[0], val[1], val[2] });
+            });
+        }
+        
+
+        // Angular constraints
+        auto angularGroup = constraintGroup->createWidget<Group>("Angular Constraints", true);
+        {
+            // Lower limit
+            std::array lowerLimit = { dof6Constraint->getLowerAngularLimit().x(), dof6Constraint->getLowerAngularLimit().y(), dof6Constraint->getLowerAngularLimit().z() };
+            angularGroup->createWidget<Drag<float, 3>>("Lower Limit", ImGuiDataType_Float, lowerLimit, 0.001f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+                dof6Constraint->setLowerAngularLimit({ val[0], val[1], val[2] });
+            });
+
+            // Upper limit
+            std::array upperLimit = { dof6Constraint->getUpperAngularLimit().x(), dof6Constraint->getUpperAngularLimit().y(), dof6Constraint->getUpperAngularLimit().z() };
+            angularGroup->createWidget<Drag<float, 3>>("Upper Limit", ImGuiDataType_Float, upperLimit, 0.001f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+                dof6Constraint->setUpperAngularLimit({ val[0], val[1], val[2] });
+            });
+
+            // Velocity target
+            std::array targetVelocity = { dof6Constraint->getTargetAngularVelocity().x(), dof6Constraint->getTargetAngularVelocity().y(), dof6Constraint->getTargetAngularVelocity().z() };
+            angularGroup->createWidget<Drag<float, 3>>("Target Velocity", ImGuiDataType_Float, targetVelocity, 0.001f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+                dof6Constraint->setTargetAngularVelocity({ val[0], val[1], val[2] });
+            });
+
+            // Bounce
+            std::array bounce = { dof6Constraint->getAngularBounce().x(), dof6Constraint->getAngularBounce().y(), dof6Constraint->getAngularBounce().z() };
+            angularGroup->createWidget<Drag<float, 3>>("Bounce", ImGuiDataType_Float, bounce, 1.f, 0.f, 1.f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+                dof6Constraint->setAngularBounce({ val[0], val[1], val[2] });
+            });
+
+            angularGroup->createWidget<Separator>();
+            // Spring
+            std::array spring = { dof6Constraint->getEnableAngularSpring().x(), dof6Constraint->getEnableAngularSpring().y(), dof6Constraint->getEnableAngularSpring().z() };
+            angularGroup->createWidget<Drag<float, 3>>("Enable Spring", ImGuiDataType_Float, spring, 1.f, 0.f, 1.f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+                dof6Constraint->setEnableAngularSpring({ val[0], val[1], val[2] });
+            });
+
+            // Stiffness
+            std::array stiffness = { dof6Constraint->getAngularStiffness().x(), dof6Constraint->getAngularStiffness().y(), dof6Constraint->getAngularStiffness().z() };
+            angularGroup->createWidget<Drag<float, 3>>("Stiffness", ImGuiDataType_Float, stiffness, 0.001f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+                dof6Constraint->setAngularStiffness({ val[0], val[1], val[2] });
+            });
+
+            // Damping
+            std::array damping = { dof6Constraint->getAngularDamping().x(), dof6Constraint->getAngularDamping().y(), dof6Constraint->getAngularDamping().z() };
+            angularGroup->createWidget<Drag<float, 3>>("Damping", ImGuiDataType_Float, damping, 0.001f, 0.f, 1.f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+                dof6Constraint->setAngularDamping({ val[0], val[1], val[2] });
+            });
+
+            angularGroup->createWidget<Separator>();
+            // Motor
+            std::array motor = { dof6Constraint->getEnabledAngularMotor().x(), dof6Constraint->getEnabledAngularMotor().y(), dof6Constraint->getEnabledAngularMotor().z() };
+            angularGroup->createWidget<Drag<float, 3>>("Enable Motor", ImGuiDataType_Float, motor, 1.f, 0.f, 1.f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+                dof6Constraint->setEnabledAngularMotor({ val[0], val[1], val[2] });
+            });
+
+            // Max motor force
+            std::array motorMaxForce = { dof6Constraint->getAngularMaxMotorForce().x(), dof6Constraint->getAngularMaxMotorForce().y(), dof6Constraint->getAngularMaxMotorForce().z() };
+            angularGroup->createWidget<Drag<float, 3>>("Max Motor Force", ImGuiDataType_Float, motorMaxForce, 0.001f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+                dof6Constraint->setAngularMaxMotorForce({ val[0], val[1], val[2] });
+            });
+
+            // Servo
+            std::array servo = { dof6Constraint->getEnableAngularServo().x(), dof6Constraint->getEnableAngularServo().y(), dof6Constraint->getEnableAngularServo().z() };
+            angularGroup->createWidget<Drag<float, 3>>("Enable Servo", ImGuiDataType_Float, servo, 1.f, 0.f, 1.f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+                dof6Constraint->setEnableAngularServo({ val[0], val[1], val[2] });
+            });
+
+            // Servo target
+            std::array servoTarget = { dof6Constraint->getAngularServoTarget().x(), dof6Constraint->getAngularServoTarget().y(), dof6Constraint->getAngularServoTarget().z() };
+            angularGroup->createWidget<Drag<float, 3>>("Servo Target", ImGuiDataType_Float, servoTarget, 0.001f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+                dof6Constraint->setAngularServoTarget({ val[0], val[1], val[2] });
+            });
+        }
     }
 
     //! Draw AudioSource
