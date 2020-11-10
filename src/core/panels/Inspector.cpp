@@ -1776,20 +1776,65 @@ namespace ige::creator
     //! Draw Fixed Constraint
     void Inspector::drawFixedConstraint(const std::shared_ptr<PhysicConstraint>& constraint)
     {
-        auto fixedConstraintGroup = m_constraintGroup->createWidget<Group>("FixedConstraint", true, true);
-        fixedConstraintGroup->getOnClosedEvent().addListener([&, this]() {
+        auto constraintGroup = m_constraintGroup->createWidget<Group>("FixedConstraint", true, true);
+        constraintGroup->getOnClosedEvent().addListener([&, this]() {
             m_targetObject->getComponent<PhysicObject>()->removeConstraint(constraint);
             redraw();
         });
 
         // Draw Physic Constraint base
-        drawPhysicConstraint(constraint, fixedConstraintGroup);        
+        drawPhysicConstraint(constraint, constraintGroup);
     }
 
     //! draw Hinge Constraint
     void Inspector::drawHingeConstraint(const std::shared_ptr<PhysicConstraint>& constraint)
     {
+        auto constraintGroup = m_constraintGroup->createWidget<Group>("HingeConstraint", true, true);
+        constraintGroup->getOnClosedEvent().addListener([&, this]() {
+            m_targetObject->getComponent<PhysicObject>()->removeConstraint(constraint);
+            redraw();
+        });
 
+        // Draw Physic Constraint base
+        drawPhysicConstraint(constraint, constraintGroup);
+
+        auto hingeConstraint = std::dynamic_pointer_cast<HingeConstraint>(constraint);
+        if (hingeConstraint == nullptr)
+            return;
+
+        // Draw Hinge Constraint properties
+        constraintGroup->createWidget<Separator>();
+
+        // Anchor
+        std::array anchor = { hingeConstraint->getAnchor().x(), hingeConstraint->getAnchor().y(), hingeConstraint->getAnchor().z() };
+        constraintGroup->createWidget<Drag<float, 3>>("Anchor", ImGuiDataType_Float, anchor)->getOnDataChangedEvent().addListener([hingeConstraint](const auto& val) {
+            hingeConstraint->setAnchor({ val[0], val[1], val[2] });
+        });
+
+        // Axis1
+        std::array axis1 = { hingeConstraint->getAxis1().x(), hingeConstraint->getAxis1().y(), hingeConstraint->getAxis1().z() };
+        constraintGroup->createWidget<Drag<float, 3>>("Axis1", ImGuiDataType_Float, axis1)->getOnDataChangedEvent().addListener([hingeConstraint](const auto& val) {
+            hingeConstraint->setAxis1({ val[0], val[1], val[2] });
+        });
+
+        // Axis 2
+        std::array axis2 = { hingeConstraint->getAxis2().x(), hingeConstraint->getAxis2().y(), hingeConstraint->getAxis2().z() };
+        constraintGroup->createWidget<Drag<float, 3>>("Axis2", ImGuiDataType_Float, axis2)->getOnDataChangedEvent().addListener([hingeConstraint](const auto& val) {
+            hingeConstraint->setAxis2({ val[0], val[1], val[2] });
+        });
+
+
+        // Lower limit
+        std::array lowerLimit = { hingeConstraint->getLowerLimit() };
+        constraintGroup->createWidget<Drag<float>>("Lower Limit", ImGuiDataType_Float, lowerLimit, 0.001f, -SIMD_PI, SIMD_PI)->getOnDataChangedEvent().addListener([hingeConstraint](const auto& val) {
+            hingeConstraint->setLowerLimit(val[0]);
+        });
+
+        // Upper limit
+        std::array upperLimit = { hingeConstraint->getUpperLimit() };
+        constraintGroup->createWidget<Drag<float>>("Upper Limit", ImGuiDataType_Float, upperLimit, 0.001f, -SIMD_PI, SIMD_PI)->getOnDataChangedEvent().addListener([hingeConstraint](const auto& val) {
+            hingeConstraint->setUpperLimit(val[0]);
+        });
     }
 
     //! draw Slider Constraint
