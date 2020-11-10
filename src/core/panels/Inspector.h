@@ -118,6 +118,9 @@ namespace ige::creator
         //! Draw Physic Constraints
         void drawPhysicConstraints();
 
+        //! Draw Physic Constraint
+        void drawPhysicConstraint(const std::shared_ptr<PhysicConstraint>& constraint, std::shared_ptr<Group> group);
+
         //! Draw Fixed Constraint
         void drawFixedConstraint(const std::shared_ptr<PhysicConstraint>& constraint);
 

@@ -636,7 +636,7 @@ namespace ige::creator
         if (figureComp == nullptr)
             return;
 
-        auto txtPath = m_figureCompGroup->createWidget<TextField>("Path", figureComp->getPath().c_str(), true);
+        auto txtPath = m_figureCompGroup->createWidget<TextField>("Path", figureComp->getPath().c_str());
         txtPath->setEndOfLine(false);
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
             auto figureComp = m_targetObject->getComponent<FigureComponent>();
@@ -709,10 +709,10 @@ namespace ige::creator
                 for (int i = 0; i < figure->NumMeshes(); i++)
                 {
                     auto mesh = figure->GetMesh(i);
-                    auto txtName = meshColumn->createWidget<TextField>("", figure->GetMeshName(i), false, true);
+                    auto txtName = meshColumn->createWidget<TextField>("", figure->GetMeshName(i), true);
                     txtName->addPlugin<DDSourcePlugin<int>>(EDragDropID::MESH, figure->GetMeshName(i), i);
-                    meshColumn->createWidget<TextField>("V", std::to_string(mesh->numVerticies).c_str(), false, true);
-                    meshColumn->createWidget<TextField>("I", std::to_string(mesh->numIndices).c_str(), false, true);
+                    meshColumn->createWidget<TextField>("V", std::to_string(mesh->numVerticies).c_str(), true);
+                    meshColumn->createWidget<TextField>("I", std::to_string(mesh->numIndices).c_str(), true);
                 }
             }
 
@@ -721,7 +721,7 @@ namespace ige::creator
                 auto joinGroup = m_figureCompGroup->createWidget<Group>("Joint");
                 for (int i = 0; i < figure->NumJoints(); i++)
                 {
-                    joinGroup->createWidget<TextField>("", figure->GetJointName(i), false, true);
+                    joinGroup->createWidget<TextField>("", figure->GetJointName(i), true);
                 }
             }
 
@@ -752,7 +752,7 @@ namespace ige::creator
                             else if ((currMat->params[j].type == ParamTypeSampler))
                             {
                                 auto textPath = currMat->params[j].sampler.tex->ResourceName();
-                                materialGroup->createWidget<TextField>(info->name, textPath, true);
+                                materialGroup->createWidget<TextField>(info->name, textPath);
                             }
                             else if ((currMat->params[j].type == ParamTypeFloat))
                             {
@@ -776,7 +776,7 @@ namespace ige::creator
         if (spriteComp == nullptr)
             return;
 
-        auto txtPath = m_spriteCompGroup->createWidget<TextField>("Path", spriteComp->getPath().c_str(), true);
+        auto txtPath = m_spriteCompGroup->createWidget<TextField>("Path", spriteComp->getPath().c_str());
         txtPath->setEndOfLine(false);
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
             auto spriteComp = m_targetObject->getComponent<SpriteComponent>();
@@ -824,7 +824,7 @@ namespace ige::creator
         if (scriptComp == nullptr)
             return;
 
-        auto txtPath = m_scriptCompGroup->createWidget<TextField>("Path", scriptComp->getPath().c_str(), true);
+        auto txtPath = m_scriptCompGroup->createWidget<TextField>("Path", scriptComp->getPath().c_str());
         txtPath->setEndOfLine(false);
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
             auto scriptComp = m_targetObject->getComponent<ScriptComponent>();
@@ -1178,7 +1178,7 @@ namespace ige::creator
         if (uiImage == nullptr)
             return;
 
-        auto txtPath = m_uiImageGroup->createWidget<TextField>("Path", uiImage->getPath().c_str(), true);
+        auto txtPath = m_uiImageGroup->createWidget<TextField>("Path", uiImage->getPath().c_str());
         txtPath->setEndOfLine(false);
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
             auto uiImage = m_targetObject->getComponent<UIImage>();
@@ -1215,13 +1215,13 @@ namespace ige::creator
         if (uiText == nullptr)
             return;
 
-        auto txtText = m_uiTextGroup->createWidget<TextField>("Text", uiText->getText().c_str(), true);
+        auto txtText = m_uiTextGroup->createWidget<TextField>("Text", uiText->getText().c_str());
         txtText->getOnDataChangedEvent().addListener([this](auto txt) {
             auto uiText = m_targetObject->getComponent<UIText>();
             uiText->setText(txt);
         });
 
-        auto txtFontPath = m_uiTextGroup->createWidget<TextField>("Font", uiText->getFontPath().c_str(), true);
+        auto txtFontPath = m_uiTextGroup->createWidget<TextField>("Font", uiText->getFontPath().c_str());
         txtFontPath->getOnDataChangedEvent().addListener([this](auto txt) {
             auto uiText = m_targetObject->getComponent<UIText>();
             uiText->setFontPath(txt);
@@ -1357,6 +1357,9 @@ namespace ige::creator
             auto physicComp = m_targetObject->getComponent<PhysicBox>();
             physicComp->setSize({val[0], val[1], val[2]});
         });
+
+        // Draw constraints
+        drawPhysicConstraints();
     }
 
     //! Draw PhysicSphere component
@@ -1374,6 +1377,9 @@ namespace ige::creator
             auto physicComp = m_targetObject->getComponent<PhysicSphere>();
             physicComp->setRadius(val[0]);
         });
+
+        // Draw constraints
+        drawPhysicConstraints();
     }
 
     //! Draw PhysicCapsule component
@@ -1396,6 +1402,9 @@ namespace ige::creator
             auto physicComp = m_targetObject->getComponent<PhysicCapsule>();
             physicComp->setRadius(val[0]);
         });
+
+        // Draw constraints
+        drawPhysicConstraints();
     }
 
     //! Draw PhysicMesh component
@@ -1440,7 +1449,7 @@ namespace ige::creator
             redraw();
         });
 
-        auto txtPath = m_physicGroup->createWidget<TextField>("Path", physicComp->getPath().c_str(), true);
+        auto txtPath = m_physicGroup->createWidget<TextField>("Path", physicComp->getPath().c_str());
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
             auto physicComp = m_targetObject->getComponent<PhysicMesh>();
             physicComp->setPath(txt);
@@ -1453,6 +1462,9 @@ namespace ige::creator
                 redraw();
             });
         }
+
+        // Draw constraints
+        drawPhysicConstraints();
     }
 
     void Inspector::drawPhysicSoftBody()
@@ -1658,6 +1670,9 @@ namespace ige::creator
             auto physicComp = m_targetObject->getComponent<PhysicSoftBody>();
             physicComp->setWindVelocity({ val[0], val[1], val[2] });
         });
+
+        // Draw constraints
+        drawPhysicConstraints();
     }
 
     //! Draw Physic Constraints
@@ -1724,6 +1739,40 @@ namespace ige::creator
         }
     }
 
+    //! Draw Physic Constraint
+    void Inspector::drawPhysicConstraint(const std::shared_ptr<PhysicConstraint>& constraint, std::shared_ptr<Group> constraintGroup)
+    {
+        auto columns = constraintGroup->createWidget<Columns<2>>();
+
+        // Enabled
+        columns->createWidget<CheckBox>("Enable", constraint->isEnabled())->getOnDataChangedEvent().addListener([&](bool val) {
+            constraint->setEnabled(val);
+        });        
+
+        // Bodies Collision
+        columns->createWidget<CheckBox>("Bodies Collision", constraint->isEnableCollisionBetweenBodies())->getOnDataChangedEvent().addListener([&](bool val) {
+            constraint->setEnableCollisionBetweenBodies(val);
+        });
+
+        // Other body
+        auto otherBodyTxt = constraintGroup->createWidget<TextField>("Other body", constraint->getOther() ? constraint->getOther()->getOwner()->getName() : std::string());
+        otherBodyTxt->getOnDataChangedEvent().addListener([&](const auto& val) {
+            auto obj = Editor::getCurrentScene()->findObjectByName(val);
+            constraint->setOtherUUID(obj->getUUID());
+        });
+        otherBodyTxt->addPlugin<DDTargetPlugin<int>>(EDragDropID::OBJECT)->getOnDataReceivedEvent().addListener([&](auto val) {
+            auto obj = Editor::getCurrentScene()->findObjectById(val);
+            constraint->setOtherUUID(obj->getUUID());
+            redraw();
+        });
+
+        // Breaking impulse
+        std::array breakImpulse = { constraint->getBreakingImpulseThreshold() };
+        constraintGroup->createWidget<Drag<float>>("Break Impulse", ImGuiDataType_Float, breakImpulse)->getOnDataChangedEvent().addListener([&](const auto& val) { 
+            constraint->setBreakingImpulseThreshold(val[0]);
+        });
+    }
+
     //! Draw Fixed Constraint
     void Inspector::drawFixedConstraint(const std::shared_ptr<PhysicConstraint>& constraint)
     {
@@ -1732,6 +1781,9 @@ namespace ige::creator
             m_targetObject->getComponent<PhysicObject>()->removeConstraint(constraint);
             redraw();
         });
+
+        // Draw Physic Constraint base
+        drawPhysicConstraint(constraint, fixedConstraintGroup);        
     }
 
     //! draw Hinge Constraint
@@ -1841,7 +1893,7 @@ namespace ige::creator
             audioSourceComp->setDopplerFactor(val[0]);
         });
 
-        auto txtPath = m_audioSourceGroup->createWidget<TextField>("Path", audioSourceComp->getPath().c_str(), true);
+        auto txtPath = m_audioSourceGroup->createWidget<TextField>("Path", audioSourceComp->getPath().c_str());
         txtPath->setEndOfLine(false);
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
             auto audioSourceComp = m_targetObject->getComponent<AudioSource>();

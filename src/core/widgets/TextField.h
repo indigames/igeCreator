@@ -5,11 +5,11 @@
 
 namespace ige::creator
 {
-    static const int MAX_TEXT_LENGHT = 128;
+    static const int MAX_TEXT_LENGHT = 512;
     class TextField: public DataWidget<std::string>
     {
     public:
-        TextField(const std::string& label, const char* content, bool needEnter = false,  bool readOnly = false);
+        TextField(const std::string& label, const std::string& content = {}, bool readOnly = false);
         virtual ~TextField();
 
     protected:
@@ -18,6 +18,5 @@ namespace ige::creator
         std::string m_label;
         std::array<char, MAX_TEXT_LENGHT> m_content;
         bool m_bIsReadOnly;
-        bool m_bIsNeedEnter;
     };
 }
