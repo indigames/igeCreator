@@ -1839,7 +1839,7 @@ namespace ige::creator
     //! draw Slider Constraint
     void Inspector::drawSliderConstraint(const std::shared_ptr<PhysicConstraint>& constraint)
     {
-        auto constraintGroup = m_constraintGroup->createWidget<Group>("HingeConstraint", true, true);
+        auto constraintGroup = m_constraintGroup->createWidget<Group>("SliderConstraint", true, true);
         constraintGroup->getOnClosedEvent().addListener([&, this]() {
             m_targetObject->getComponent<PhysicObject>()->removeConstraint(constraint);
             redraw();
@@ -1854,13 +1854,13 @@ namespace ige::creator
 
         // Lower limit
         std::array lowerLimit = { sliderConstraint->getLowerLimit().x(), sliderConstraint->getLowerLimit().y(), sliderConstraint->getLowerLimit().z() };
-        constraintGroup->createWidget<Drag<float, 3>>("Lower Limit", ImGuiDataType_Float, lowerLimit, 0.001f, -SIMD_PI, SIMD_PI)->getOnDataChangedEvent().addListener([sliderConstraint](const auto& val) {
+        constraintGroup->createWidget<Drag<float, 3>>("Lower Limit", ImGuiDataType_Float, lowerLimit, 0.001f)->getOnDataChangedEvent().addListener([sliderConstraint](const auto& val) {
             sliderConstraint->setLowerLimit({ val[0], val[1], val[2] });
         });
 
         // Upper limit
         std::array upperLimit = { sliderConstraint->getUpperLimit().x(), sliderConstraint->getUpperLimit().y(), sliderConstraint->getUpperLimit().z() };
-        constraintGroup->createWidget<Drag<float, 3>>("Upper Limit", ImGuiDataType_Float, upperLimit, 0.001f, -SIMD_PI, SIMD_PI)->getOnDataChangedEvent().addListener([sliderConstraint](const auto& val) {
+        constraintGroup->createWidget<Drag<float, 3>>("Upper Limit", ImGuiDataType_Float, upperLimit, 0.001f)->getOnDataChangedEvent().addListener([sliderConstraint](const auto& val) {
             sliderConstraint->setUpperLimit({ val[0], val[1], val[2] });
         });
     }
@@ -1868,7 +1868,48 @@ namespace ige::creator
     //! draw Spring Constraint
     void Inspector::drawSpringConstraint(const std::shared_ptr<PhysicConstraint>& constraint)
     {
+        auto constraintGroup = m_constraintGroup->createWidget<Group>("SpringConstraint", true, true);
+        constraintGroup->getOnClosedEvent().addListener([&, this]() {
+            m_targetObject->getComponent<PhysicObject>()->removeConstraint(constraint);
+            redraw();
+            });
 
+        // Draw Physic Constraint base
+        drawPhysicConstraint(constraint, constraintGroup);
+
+        auto springConstraint = std::dynamic_pointer_cast<SpringConstraint>(constraint);
+        if (springConstraint == nullptr)
+            return;
+
+        // Enable
+        std::array enable = { springConstraint->getEnable().x(), springConstraint->getEnable().y(), springConstraint->getEnable().z() };
+        constraintGroup->createWidget<Drag<float, 3>>("Enable", ImGuiDataType_Float, enable, 1.f, 0.f, 1.f)->getOnDataChangedEvent().addListener([springConstraint](const auto& val) {
+            springConstraint->setEnable({ val[0], val[1], val[2] });
+        });
+
+        // Stiffness
+        std::array stiffness = { springConstraint->getStiffness().x(), springConstraint->getStiffness().y(), springConstraint->getStiffness().z() };
+        constraintGroup->createWidget<Drag<float, 3>>("Stiffness", ImGuiDataType_Float, stiffness, 0.001f, 0.f)->getOnDataChangedEvent().addListener([springConstraint](const auto& val) {
+            springConstraint->setStiffness({ val[0], val[1], val[2] });
+        });
+
+        // Damping
+        std::array damping = { springConstraint->getDamping().x(), springConstraint->getDamping().y(), springConstraint->getDamping().z() };
+        constraintGroup->createWidget<Drag<float, 3>>("Damping", ImGuiDataType_Float, damping, 0.001f, 0.f)->getOnDataChangedEvent().addListener([springConstraint](const auto& val) {
+            springConstraint->setDamping({ val[0], val[1], val[2] });
+        });
+
+        // Lower limit
+        std::array lowerLimit = { springConstraint->getLowerLimit().x(), springConstraint->getLowerLimit().y(), springConstraint->getLowerLimit().z() };
+        constraintGroup->createWidget<Drag<float, 3>>("Lower Limit", ImGuiDataType_Float, lowerLimit, 0.001f, -SIMD_PI, SIMD_PI)->getOnDataChangedEvent().addListener([springConstraint](const auto& val) {
+            springConstraint->setLowerLimit({ val[0], val[1], val[2] });
+        });
+
+        // Upper limit
+        std::array upperLimit = { springConstraint->getUpperLimit().x(), springConstraint->getUpperLimit().y(), springConstraint->getUpperLimit().z() };
+        constraintGroup->createWidget<Drag<float, 3>>("Upper Limit", ImGuiDataType_Float, upperLimit, 0.001f, -SIMD_PI, SIMD_PI)->getOnDataChangedEvent().addListener([springConstraint](const auto& val) {
+            springConstraint->setUpperLimit({ val[0], val[1], val[2] });
+        });
     }
 
     //! draw Dof6 Spring Constraint
