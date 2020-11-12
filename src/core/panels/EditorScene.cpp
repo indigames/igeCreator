@@ -29,7 +29,8 @@ using namespace pyxie;
 #include "utils/filesystem.h"
 namespace fs = ghc::filesystem;
 
-#include <physic/PhysicManager.h>
+#include <systems/physic/PhysicManager.h>
+#include <systems/particle/ParticleManager.h>
 using namespace ige::scene;
 
 namespace ige::creator
@@ -129,6 +130,9 @@ namespace ige::creator
                 PhysicManager::getInstance()->getWorld()->setDebugDrawer(debugRenderer);
 
                 initDragDrop();
+
+                // Create particle manager instance
+                ParticleManager::getInstance();
 
                 m_bIsInitialized = true;
             }
@@ -346,6 +350,9 @@ namespace ige::creator
         // Update Physic Transform infomation
         PhysicManager::getInstance()->preUpdate();
 
+        // Update particle
+        ParticleManager::getInstance()->onUpdate(dt);
+
         // Render
         auto renderContext = RenderContext::InstancePtr();
         if (renderContext && m_fbo)
@@ -358,6 +365,11 @@ namespace ige::creator
 
             Editor::getSceneManager()->render();
 
+            // Render particle
+            ParticleManager::getInstance()->setProjectionMatrix(renderContext->GetRenderProjectionMatrix());
+            ParticleManager::getInstance()->setCameraMatrix(renderContext->GetRenderViewMatrix());
+            ParticleManager::getInstance()->onRender();
+
             // Render debug context
             ShapeDrawer::setViewProjectionMatrix(renderContext->GetRenderViewProjectionMatrix());
 
@@ -369,9 +381,6 @@ namespace ige::creator
 
             // Render camera frustum
             renderCameraFrustum();
-
-            // Render Physic debug
-            PhysicManager::getInstance()->getWorld()->debugDrawWorld();
 
             renderContext->EndScene();
         }
@@ -487,83 +496,8 @@ namespace ige::creator
         if (!isOpened())
             return;
 
-        auto target = Editor::getInstance()->getSelectedObject();
-        if (target == nullptr)
-            return;
-
-        auto physicComp = target->getComponent<PhysicObject>();
-        if (physicComp == nullptr)
-            return;
-        
-        auto transform = target->getTransform();
-        auto rotation = transform->getWorldRotation();
-        auto position = transform->getWorldPosition() + transform->getCenter();
-        auto scale = transform->getWorldScale();
-
-        /* Draw the box collider if any */
-        if (auto physicBox = target->getComponent<PhysicBox>(); physicBox)
-        {
-            auto colliderSize = physicBox->getSize();
-            Vec3 halfSize = { colliderSize[0] * scale[0], colliderSize[1] * scale[1], colliderSize[2] * scale[2] };
-            auto size = halfSize * 2.f;
-
-            ShapeDrawer::drawLine(position + rotation * Vec3{ -halfSize[0], -halfSize[1], -halfSize[2] }, position + rotation * Vec3{ -halfSize[0], -halfSize[1], +halfSize[2] });
-            ShapeDrawer::drawLine(position + rotation * Vec3{ -halfSize[0], halfSize[1], -halfSize[2] }, position + rotation * Vec3{ -halfSize[0], +halfSize[1], +halfSize[2] });
-            ShapeDrawer::drawLine(position + rotation * Vec3{ -halfSize[0], -halfSize[1], -halfSize[2] }, position + rotation * Vec3{ -halfSize[0], +halfSize[1], -halfSize[2] });
-            ShapeDrawer::drawLine(position + rotation * Vec3{ -halfSize[0], -halfSize[1], +halfSize[2] }, position + rotation * Vec3{ -halfSize[0], +halfSize[1], +halfSize[2] });
-            ShapeDrawer::drawLine(position + rotation * Vec3{ +halfSize[0], -halfSize[1], -halfSize[2] }, position + rotation * Vec3{ +halfSize[0], -halfSize[1], +halfSize[2] });
-            ShapeDrawer::drawLine(position + rotation * Vec3{ +halfSize[0], halfSize[1], -halfSize[2] }, position + rotation * Vec3{ +halfSize[0], +halfSize[1], +halfSize[2] });
-            ShapeDrawer::drawLine(position + rotation * Vec3{ +halfSize[0], -halfSize[1], -halfSize[2] }, position + rotation * Vec3{ +halfSize[0], +halfSize[1], -halfSize[2] });
-            ShapeDrawer::drawLine(position + rotation * Vec3{ +halfSize[0], -halfSize[1], +halfSize[2] }, position + rotation * Vec3{ +halfSize[0], +halfSize[1], +halfSize[2] });
-            ShapeDrawer::drawLine(position + rotation * Vec3{ -halfSize[0], -halfSize[1], -halfSize[2] }, position + rotation * Vec3{ +halfSize[0], -halfSize[1], -halfSize[2] });
-            ShapeDrawer::drawLine(position + rotation * Vec3{ -halfSize[0], +halfSize[1], -halfSize[2] }, position + rotation * Vec3{ +halfSize[0], +halfSize[1], -halfSize[2] });
-            ShapeDrawer::drawLine(position + rotation * Vec3{ -halfSize[0], -halfSize[1], +halfSize[2] }, position + rotation * Vec3{ +halfSize[0], -halfSize[1], +halfSize[2] });
-            ShapeDrawer::drawLine(position + rotation * Vec3{ -halfSize[0], +halfSize[1], +halfSize[2] }, position + rotation * Vec3{ +halfSize[0], +halfSize[1], +halfSize[2] });
-        }
-
-        /* Draw the sphere collider if any */
-        if (auto physicSphere = target->getComponent<PhysicSphere>(); physicSphere)
-        {           
-            float radius = physicSphere->getRadius() * std::max(std::max(std::max(scale[0], scale[1]), scale[2]), 0.0f);
-
-            for (float i = 0; i <= 360.0f; i += 10.0f)
-            {
-                ShapeDrawer::drawLine(position + rotation * (Vec3{ cos(i * (3.14f / 180.0f)), sin(i * (3.14f / 180.0f)), 0.f } *radius), position + rotation * (Vec3{ cos((i + 10.0f) * (3.14f / 180.0f)), sin((i + 10.0f) * (3.14f / 180.0f)), 0.f } *radius));
-                ShapeDrawer::drawLine(position + rotation * (Vec3{ 0.f, sin(i * (3.14f / 180.0f)), cos(i * (3.14f / 180.0f)) } *radius), position + rotation * (Vec3{ 0.f, sin((i + 10.0f) * (3.14f / 180.0f)), cos((i + 10.0f) * (3.14f / 180.0f)) } *radius));
-                ShapeDrawer::drawLine(position + rotation * (Vec3{ cos(i * (3.14f / 180.0f)), 0.f, sin(i * (3.14f / 180.0f)) } *radius), position + rotation * (Vec3{ cos((i + 10.0f) * (3.14f / 180.0f)), 0.f, sin((i + 10.0f) * (3.14f / 180.0f)) } *radius));
-            }
-        }
-
-        /* Draw the capsule collider if any */
-        if (auto physicCapsule = target->getComponent<PhysicCapsule>(); physicCapsule)
-        {
-            float radius = abs(physicCapsule->getRadius() * std::max(std::max(scale[01], scale[2]), 0.f));
-            float height = abs(physicCapsule->getHeight() * scale[1]);
-            float halfHeight = height / 2;
-
-            Vec3 hVec = { 0.0f, halfHeight, 0.0f };
-            for (float i = 0; i < 360.0f; i += 10.0f)
-            {
-                ShapeDrawer::drawLine(position + rotation * (hVec + Vec3{ cos(i * (3.14f / 180.0f)), 0.f, sin(i * (3.14f / 180.0f)) } *radius), position + rotation * (hVec + Vec3{ cos((i + 10.0f) * (3.14f / 180.0f)), 0.f, sin((i + 10.0f) * (3.14f / 180.0f)) } *radius));
-                ShapeDrawer::drawLine(position + rotation * (-hVec + Vec3{ cos(i * (3.14f / 180.0f)), 0.f, sin(i * (3.14f / 180.0f)) } *radius), position + rotation * (-hVec + Vec3{ cos((i + 10.0f) * (3.14f / 180.0f)), 0.f, sin((i + 10.0f) * (3.14f / 180.0f)) } *radius));
-
-                if (i < 180.f)
-                {
-                    ShapeDrawer::drawLine(position + rotation * (hVec + Vec3{ cos(i * (3.14f / 180.0f)), sin(i * (3.14f / 180.0f)), 0.f } *radius), position + rotation * (hVec + Vec3{ cos((i + 10.0f) * (3.14f / 180.0f)), sin((i + 10.0f) * (3.14f / 180.0f)), 0.f } *radius));
-                    ShapeDrawer::drawLine(position + rotation * (hVec + Vec3{ 0.f, sin(i * (3.14f / 180.0f)), cos(i * (3.14f / 180.0f)) } *radius), position + rotation * (hVec + Vec3{ 0.f, sin((i + 10.0f) * (3.14f / 180.0f)), cos((i + 10.0f) * (3.14f / 180.0f)) } *radius));
-                }
-                else
-                {
-                    ShapeDrawer::drawLine(position + rotation * (-hVec + Vec3{ cos(i * (3.14f / 180.0f)), sin(i * (3.14f / 180.0f)), 0.f } *radius), position + rotation * (-hVec + Vec3{ cos((i + 10.0f) * (3.14f / 180.0f)), sin((i + 10.0f) * (3.14f / 180.0f)), 0.f } *radius));
-                    ShapeDrawer::drawLine(position + rotation * (-hVec + Vec3{ 0.f, sin(i * (3.14f / 180.0f)), cos(i * (3.14f / 180.0f)) } *radius), position + rotation * (-hVec + Vec3{ 0.f, sin((i + 10.0f) * (3.14f / 180.0f)), cos((i + 10.0f) * (3.14f / 180.0f)) } *radius));
-                }
-            }
-
-            ShapeDrawer::drawLine(position + rotation * (Vec3{ -radius, -halfHeight, 0.f }), position + rotation * (Vec3{ -radius, +halfHeight, 0.f }));
-            ShapeDrawer::drawLine(position + rotation * (Vec3{ radius, -halfHeight, 0.f }), position + rotation * (Vec3{ radius, +halfHeight, 0.f }));
-            ShapeDrawer::drawLine(position + rotation * (Vec3{ 0.f, -halfHeight, -radius }), position + rotation * (Vec3{ 0.f, +halfHeight, -radius }));
-            ShapeDrawer::drawLine(position + rotation * (Vec3{ 0.f, -halfHeight, radius }), position + rotation * (Vec3{ 0.f, +halfHeight, radius }));
-        }
+        // Render Physic debug
+        PhysicManager::getInstance()->getWorld()->debugDrawWorld();
     }
 
     //! Render camera frustum

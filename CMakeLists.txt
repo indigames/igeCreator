@@ -50,11 +50,11 @@ file(GLOB_RECURSE SRC_FILES
 )
 
 set (EXCLUDE_DIR 
-    "examples"
-    "example"
-    "bin"
-    "misc"
-    "docs"
+    "/examples"
+    "/example"
+    "/bin"
+    "/misc"
+    "/docs"
 )
 foreach (TMP_PATH ${SRC_FILES})
     foreach (TMP_DIR ${EXCLUDE_DIR})
@@ -80,14 +80,14 @@ target_link_libraries(${TARGET_NAME}
 
 # igeCore
 if (BUILD_FULL_SOURCE)
-    add_subdirectory(${IGE_LIBS}/..//pyxCore/pyxcore ${CMAKE_BINARY_DIR}/pyxcore-static)
+    add_subdirectory(${IGE_LIBS}/../pyxCore/pyxcore ${CMAKE_BINARY_DIR}/pyxcore-static)
     target_link_libraries(${TARGET_NAME} pyxcore-static)
 
-    add_subdirectory(${IGE_LIBS}/..//pyxCore/pyxtools ${CMAKE_BINARY_DIR}/pyxtools-static)
+    add_subdirectory(${IGE_LIBS}/../pyxCore/pyxtools ${CMAKE_BINARY_DIR}/pyxtools-static)
     target_link_libraries(${TARGET_NAME} pyxtools-static)
 
     add_subdirectory(${IGE_LIBS}/../igeCore ${CMAKE_BINARY_DIR}/igeCore-static)
-    target_link_libraries(${TARGET_NAME} igeCore-static)    
+    target_link_libraries(${TARGET_NAME} igeCore-static)
 else()
     set (LIB_PATH ${LIBS_DIR}/pyxCore/${PLATFORM_PATH})
     set (LIB_PATH_DEBUG ${LIBS_DIR}/pyxCore/${PLATFORM_PATH_DEBUG})
@@ -123,7 +123,7 @@ endif()
 # igeVmath
 set (LIB_PATH ${LIBS_DIR}/igeVMath/${PLATFORM_PATH})
 target_link_libraries(${TARGET_NAME} ${LIB_PATH}igeVMath-static.${LIB_EXT})
-    
+
 # igeBullet
 if (BUILD_FULL_SOURCE)
     add_subdirectory(${IGE_LIBS}/../igeBullet ${CMAKE_BINARY_DIR}/igeBullet-static)
@@ -143,6 +143,18 @@ set (LIB_PATH_DEBUG ${LIBS_DIR}/igeSound/${PLATFORM_PATH_DEBUG})
 target_link_libraries(${TARGET_NAME}
     optimized ${LIB_PATH}igeSound-static.${LIB_EXT}
     debug ${LIB_PATH_DEBUG}igeSound-static.${LIB_EXT}
+)
+
+# igeEffekseer
+set (LIB_PATH ${LIBS_DIR}/igeEffekseer/${PLATFORM_PATH})
+set (LIB_PATH_DEBUG ${LIBS_DIR}/igeEffekseer/${PLATFORM_PATH_DEBUG})
+target_link_libraries(${TARGET_NAME}
+    optimized ${LIB_PATH}igeEffekseer-static.${LIB_EXT}
+    optimized ${LIB_PATH}Effekseer.${LIB_EXT}
+    optimized ${LIB_PATH}EffekseerRendererGL.${LIB_EXT}
+    debug ${LIB_PATH_DEBUG}igeEffekseer-static.${LIB_EXT}
+    debug ${LIB_PATH_DEBUG}Effekseer.${LIB_EXT}
+    debug ${LIB_PATH_DEBUG}EffekseerRendererGL.${LIB_EXT}
 )
 
 # SDL
@@ -228,6 +240,9 @@ target_include_directories(${TARGET_NAME} PUBLIC
     ${LIBS_DIR}/igeBullet/include/bullet
     ${LIBS_DIR}/igeSound/include
     ${LIBS_DIR}/igeSound/include/ThirdParty/soloud/include
+    ${LIBS_DIR}/igeEffekseer/include/ThirdParty/Effekseer/Dev/Cpp
+    ${LIBS_DIR}/igeEffekseer/include/ThirdParty/Effekseer/Dev/Cpp/Effekseer
+    ${LIBS_DIR}/igeEffekseer/include/ThirdParty/Effekseer/Dev/Cpp/EffekseerRendererCommon
 )
 
 # Python37

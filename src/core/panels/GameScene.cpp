@@ -16,8 +16,8 @@ namespace fs = std::filesystem;
 #include <scene/Scene.h>
 #include <scene/SceneObject.h>
 #include <scene/SceneManager.h>
-#include <physic/PhysicManager.h>
-#include <audio/AudioManager.h>
+#include <systems/physic/PhysicManager.h>
+#include <systems/audio/AudioManager.h>
 using namespace ige::scene;
 
 #include <utils/PyxieHeaders.h>

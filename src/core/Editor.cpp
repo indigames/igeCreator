@@ -12,8 +12,8 @@
 
 #include <scene/SceneManager.h>
 #include <scene/Scene.h>
-#include <physic/PhysicManager.h>
-#include <audio/AudioManager.h>
+#include <systems/physic/PhysicManager.h>
+#include <systems/audio/AudioManager.h>
 using namespace ige::scene;
 
 #define VERSION "0.0.4"
