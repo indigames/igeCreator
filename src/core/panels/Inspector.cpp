@@ -46,6 +46,7 @@
 #include <components/physic/Dof6SpringConstraint.h>
 #include <components/audio/AudioSource.h>
 #include <components/audio/AudioListener.h>
+#include <components/particle/Particle.h>
 #include <scene/Scene.h>
 using namespace ige::scene;
 
@@ -74,7 +75,8 @@ namespace ige::creator
         PhysicMesh,
         PhysicSoftBody,
         AudioSource,
-        AudioListener
+        AudioListener,
+        Particle
     };
 
     Inspector::Inspector(const std::string &name, const Panel::Settings &settings)
@@ -156,6 +158,9 @@ namespace ige::creator
         // Audio listener
         m_createCompCombo->addChoice((int)ComponentType::AudioListener, "Audio Listener");
 
+        // Particle
+        m_createCompCombo->addChoice((int)ComponentType::Particle, "Particle");
+
         auto createCompButton = m_headerGroup->createWidget<Button>("Add", ImVec2(64.f, 0.f));
         createCompButton->getOnClickEvent().addListener([this](auto widget) {
             switch (m_createCompCombo->getSelectedIndex())
@@ -224,6 +229,9 @@ namespace ige::creator
                 break;
             case (int)ComponentType::AudioListener:
                 m_targetObject->addComponent<AudioListener>();
+                break;
+            case (int)ComponentType::Particle:
+                m_targetObject->addComponent<Particle>();
                 break;
             }
             redraw();
@@ -347,6 +355,11 @@ namespace ige::creator
             {
                 m_spotLightGroup = header->createWidget<Group>("SpotLight", false);
                 drawSpotLight();
+            }
+            else if (component->getName() == "Particle")
+            {
+                m_particleGroup = header->createWidget<Group>("Particle", false);
+                drawParticle();
             }
         });
     }
@@ -636,7 +649,7 @@ namespace ige::creator
         if (figureComp == nullptr)
             return;
 
-        auto txtPath = m_figureCompGroup->createWidget<TextField>("Path", figureComp->getPath().c_str());
+        auto txtPath = m_figureCompGroup->createWidget<TextField>("Path", figureComp->getPath());
         txtPath->setEndOfLine(false);
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
             auto figureComp = m_targetObject->getComponent<FigureComponent>();
@@ -776,7 +789,7 @@ namespace ige::creator
         if (spriteComp == nullptr)
             return;
 
-        auto txtPath = m_spriteCompGroup->createWidget<TextField>("Path", spriteComp->getPath().c_str());
+        auto txtPath = m_spriteCompGroup->createWidget<TextField>("Path", spriteComp->getPath());
         txtPath->setEndOfLine(false);
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
             auto spriteComp = m_targetObject->getComponent<SpriteComponent>();
@@ -824,7 +837,7 @@ namespace ige::creator
         if (scriptComp == nullptr)
             return;
 
-        auto txtPath = m_scriptCompGroup->createWidget<TextField>("Path", scriptComp->getPath().c_str());
+        auto txtPath = m_scriptCompGroup->createWidget<TextField>("Path", scriptComp->getPath());
         txtPath->setEndOfLine(false);
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
             auto scriptComp = m_targetObject->getComponent<ScriptComponent>();
@@ -1178,7 +1191,7 @@ namespace ige::creator
         if (uiImage == nullptr)
             return;
 
-        auto txtPath = m_uiImageGroup->createWidget<TextField>("Path", uiImage->getPath().c_str());
+        auto txtPath = m_uiImageGroup->createWidget<TextField>("Path", uiImage->getPath());
         txtPath->setEndOfLine(false);
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
             auto uiImage = m_targetObject->getComponent<UIImage>();
@@ -1449,7 +1462,7 @@ namespace ige::creator
             redraw();
         });
 
-        auto txtPath = m_physicGroup->createWidget<TextField>("Path", physicComp->getPath().c_str());
+        auto txtPath = m_physicGroup->createWidget<TextField>("Path", physicComp->getPath());
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
             auto physicComp = m_targetObject->getComponent<PhysicMesh>();
             physicComp->setPath(txt);
@@ -2161,7 +2174,7 @@ namespace ige::creator
             audioSourceComp->setDopplerFactor(val[0]);
         });
 
-        auto txtPath = m_audioSourceGroup->createWidget<TextField>("Path", audioSourceComp->getPath().c_str());
+        auto txtPath = m_audioSourceGroup->createWidget<TextField>("Path", audioSourceComp->getPath());
         txtPath->setEndOfLine(false);
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
             auto audioSourceComp = m_targetObject->getComponent<AudioSource>();
@@ -2321,6 +2334,90 @@ namespace ige::creator
             auto light = m_targetObject->getComponent<SpotLight>();
             light->setAngle(val[0]);
         });
+    }
+    
+    //! Draw Particle
+    void Inspector::drawParticle()
+    {
+        if (m_particleGroup == nullptr)
+            return;
+        m_particleGroup->removeAllWidgets();
+
+        auto particle = m_targetObject->getComponent<Particle>();
+        if (particle == nullptr)
+            return;
+
+        auto column = m_particleGroup->createWidget<Columns<3>>();
+        column->createWidget<CheckBox>("Enable", particle->isEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto particle = m_targetObject->getComponent<Particle>();
+            particle->setEnabled(val);
+        });
+        column->createWidget<CheckBox>("Loop", particle->isLooped())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto particle = m_targetObject->getComponent<Particle>();
+            particle->setLoop(val);
+        });
+        column->createWidget<CheckBox>("Auto Drawing", particle->isAutoDrawing())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto particle = m_targetObject->getComponent<Particle>();
+            particle->setAutoDrawing(val);
+        });
+
+        std::array layer = { particle->getLayer() };
+        m_particleGroup->createWidget<Drag<int>>("Layer", ImGuiDataType_U32, layer, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto particle = m_targetObject->getComponent<Particle>();
+            particle->setLayer(val[0]);
+        });
+
+        std::array mask = { particle->getGroupMask() };
+        m_particleGroup->createWidget<Drag<int>>("Group Mask", ImGuiDataType_U32, mask, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto particle = m_targetObject->getComponent<Particle>();
+            particle->setGroupMask(val[0]);
+        });
+
+        std::array speed = { particle->getSpeed() };
+        m_particleGroup->createWidget<Drag<float>>("Speed", ImGuiDataType_Float, speed, 0.01f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto particle = m_targetObject->getComponent<Particle>();
+            particle->setSpeed(val[0]);
+        });
+
+        std::array timeScale = { particle->getTimeScale() };
+        m_particleGroup->createWidget<Drag<float>>("Time Scale", ImGuiDataType_Float, timeScale, 0.01f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto particle = m_targetObject->getComponent<Particle>();
+            particle->setTimeScale(val[0]);
+        });
+
+        std::array target = { particle->getTargetLocation().X(), particle->getTargetLocation().Y(), particle->getTargetLocation().Z()};
+        m_particleGroup->createWidget<Drag<float, 3>>("Target Location", ImGuiDataType_Float, target, 0.01f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto particle = m_targetObject->getComponent<Particle>();
+            particle->setTargetLocation({ val[0], val[1], val[2] });
+        });
+
+        std::array params = { particle->getDynamicInputParameter().X(), particle->getDynamicInputParameter().Y(), particle->getDynamicInputParameter().Z(), particle->getDynamicInputParameter().W() };
+        m_particleGroup->createWidget<Drag<float, 4>>("Dynamic Parameters", ImGuiDataType_Float, params, 0.01f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto particle = m_targetObject->getComponent<Particle>();
+            particle->setDynamicInputParameter({ val[0], val[1], val[2], val[3] });
+        });
+        
+        std::array color = { particle->getColor().X(), particle->getColor().Y(), particle->getColor().Z(), particle->getColor().W() };
+        m_particleGroup->createWidget<Drag<float, 4>>("Color", ImGuiDataType_Float, color, 0.001f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto particle = m_targetObject->getComponent<Particle>();
+            particle->setColor({ val[0], val[1], val[2], val[3] });
+        });
+
+        auto txtPath = m_particleGroup->createWidget<TextField>("Path", particle->getPath());
+        txtPath->getOnDataChangedEvent().addListener([this](const auto& val) {
+            auto particle = m_targetObject->getComponent<Particle>();
+            particle->setPath(val);
+            particle->play();
+        });
+        for (const auto& type : GetFileExtensionSuported(E_FileExts::Particle))
+        {
+            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& val) {
+                auto particle = m_targetObject->getComponent<Particle>();
+                particle->setPath(val);
+                particle->play();
+                redraw();
+            });
+        }
     }
 
     void Inspector::_drawImpl()
@@ -2494,6 +2591,12 @@ namespace ige::creator
         {
             m_constraintCreateCombo->removeAllPlugins();
             m_constraintCreateCombo = nullptr;
+        }
+
+        if (m_particleGroup)
+        {
+            m_particleGroup->removeAllPlugins();
+            m_particleGroup = nullptr;
         }
 
         removeAllWidgets();

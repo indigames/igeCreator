@@ -21,6 +21,7 @@
 #include "components/physic/PhysicSphere.h"
 #include "components/physic/PhysicCapsule.h"
 #include "components/audio/AudioSource.h"
+#include "components/particle/Particle.h"
 using namespace ige::scene;
 
 #include <utils/PyxieHeaders.h>
@@ -131,9 +132,6 @@ namespace ige::creator
 
                 initDragDrop();
 
-                // Create particle manager instance
-                ParticleManager::getInstance();
-
                 m_bIsInitialized = true;
             }
         }
@@ -199,6 +197,17 @@ namespace ige::creator
                 if (Editor::getInstance()->getCurrentScene() && !path.empty()) {
                     const auto& currentObject = Editor::getInstance()->getSelectedObject();
                     Editor::getInstance()->getCurrentScene()->loadPrefab(currentObject->getId(), path);
+                }
+            });
+        }
+
+        // Particle
+        for (const auto& type : GetFileExtensionSuported(E_FileExts::Particle))
+        {
+            m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto path) {
+                if (Editor::getInstance()->getCurrentScene() && !path.empty()) {
+                    const auto& currentObject = Editor::getInstance()->getSelectedObject();
+                    Editor::getInstance()->getCurrentScene()->createObject(fs::path(path).stem(), currentObject)->addComponent<Particle>(path);
                 }
             });
         }

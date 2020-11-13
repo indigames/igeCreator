@@ -124,17 +124,20 @@ namespace ige::creator
         //! Draw Fixed Constraint
         void drawFixedConstraint(const std::shared_ptr<PhysicConstraint>& constraint);
 
-        //! draw Hinge Constraint
+        //! Draw Hinge Constraint
         void drawHingeConstraint(const std::shared_ptr<PhysicConstraint>& constraint);
 
-        //! draw Slider Constraint
+        //! Draw Slider Constraint
         void drawSliderConstraint(const std::shared_ptr<PhysicConstraint>& constraint);
         
-        //! draw Spring Constraint
+        //! Draw Spring Constraint
         void drawSpringConstraint(const std::shared_ptr<PhysicConstraint>& constraint);
 
-        //! draw Dof6 Spring Constraint
+        //! Draw Dof6 Spring Constraint
         void drawDof6SpringConstraint(const std::shared_ptr<PhysicConstraint>& constraint);
+
+        //! Draw Particle
+        void drawParticle();
 
         //! Redraw
         void redraw() { m_bNeedRedraw = true;  }
@@ -172,6 +175,7 @@ namespace ige::creator
         std::shared_ptr<Group> m_audioListenerGroup = nullptr;
         std::shared_ptr<Group> m_constraintGroup = nullptr;
         std::shared_ptr<ComboBox> m_constraintCreateCombo = nullptr;
+        std::shared_ptr<Group> m_particleGroup = nullptr;
 
         //! Flags for redrawing component in main thread
         bool m_bNeedRedraw = false;

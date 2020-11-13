@@ -19,7 +19,8 @@ enum class E_FileExts
     Font,
     Audio,
     Prefab,
-    Scene
+    Scene,
+    Particle
 };
 
 inline const std::vector<std::string> &GetFileExtensionSuported(E_FileExts fileExt)
@@ -47,6 +48,9 @@ inline const std::vector<std::string> &GetFileExtensionSuported(E_FileExts fileE
         break;
     case E_FileExts::Scene:
         formats = { ".scene" };
+        break;
+    case E_FileExts::Particle:
+        formats = { ".efk" };
         break;
     default:
         formats = {};

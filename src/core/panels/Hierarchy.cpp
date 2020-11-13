@@ -26,6 +26,7 @@
 #include "components/gui/UITextField.h"
 #include "components/audio/AudioSource.h"
 #include "components/audio/AudioListener.h"
+#include "components/particle/Particle.h"
 using namespace ige::scene;
 
 #include <utils/PyxieHeaders.h>
@@ -302,6 +303,16 @@ namespace ige::creator
                 auto currentObject = Editor::getInstance()->getSelectedObject();
                 auto newObject = Editor::getCurrentScene()->createObject("Audio Listener", currentObject, true);
                 newObject->addComponent<AudioListener>();
+            });
+        }
+
+        // Effects
+        {
+            auto effectMenu = createMenu->createWidget<Menu>("Effect");
+            effectMenu->createWidget<MenuItem>("Particle")->getOnClickEvent().addListener([](auto widget) {
+                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto newObject = Editor::getCurrentScene()->createObject("Particle", currentObject, true);
+                newObject->addComponent<Particle>();
             });
         }
 
