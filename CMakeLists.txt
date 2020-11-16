@@ -157,6 +157,22 @@ target_link_libraries(${TARGET_NAME}
     debug ${LIB_PATH_DEBUG}EffekseerRendererGL.${LIB_EXT}
 )
 
+# igeNavigation
+set (LIB_PATH ${LIBS_DIR}/igeNavigation/${PLATFORM_PATH})
+set (LIB_PATH_DEBUG ${LIBS_DIR}/igeNavigation/${PLATFORM_PATH_DEBUG})
+target_link_libraries(${TARGET_NAME}
+    optimized ${LIB_PATH}igeNavigation-static.${LIB_EXT}
+    optimized ${LIB_PATH}Recast.${LIB_EXT}
+    optimized ${LIB_PATH}Detour.${LIB_EXT}
+    optimized ${LIB_PATH}DetourCrowd.${LIB_EXT}
+    optimized ${LIB_PATH}DetourTileCache.${LIB_EXT}
+    debug ${LIB_PATH_DEBUG}igeNavigation-static.${LIB_EXT}
+    debug ${LIB_PATH_DEBUG}Recast-d.${LIB_EXT}
+    debug ${LIB_PATH_DEBUG}Detour-d.${LIB_EXT}
+    debug ${LIB_PATH_DEBUG}DetourCrowd-d.${LIB_EXT}
+    debug ${LIB_PATH_DEBUG}DetourTileCache-d.${LIB_EXT}
+)
+
 # SDL
 set (LIB_PATH ${LIBS_DIR}/SDL/${PLATFORM_PATH})
 target_link_libraries(${TARGET_NAME} ${LIB_PATH}SDL2.${LIB_EXT})
@@ -243,6 +259,11 @@ target_include_directories(${TARGET_NAME} PUBLIC
     ${LIBS_DIR}/igeEffekseer/include/ThirdParty/Effekseer/Dev/Cpp
     ${LIBS_DIR}/igeEffekseer/include/ThirdParty/Effekseer/Dev/Cpp/Effekseer
     ${LIBS_DIR}/igeEffekseer/include/ThirdParty/Effekseer/Dev/Cpp/EffekseerRendererCommon
+    ${LIBS_DIR}/igeNavigation/include
+    ${LIBS_DIR}/igeNavigation/include/3rd-party/recast/Recast/Include
+    ${LIBS_DIR}/igeNavigation/include/3rd-party/recast/Detour/Include
+    ${LIBS_DIR}/igeNavigation/include/3rd-party/recast/DetourCrowd/Include
+    ${LIBS_DIR}/igeNavigation/include/3rd-party/recast/DetourTileCache/Include
 )
 
 # Python37
