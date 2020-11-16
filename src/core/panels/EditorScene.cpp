@@ -454,7 +454,16 @@ namespace ige::creator
             bool intersected = false;
             float distance;
 
-            for (const auto& obj : SceneManager::getInstance()->getCurrentScene()->getObjects())
+            // Sort the object from the camera
+            auto& objects = SceneManager::getInstance()->getCurrentScene()->getObjects();
+            std::sort(objects.begin(), objects.end(), [this](const auto& elem1, const auto& elem2) {
+                auto elem1Pos = elem1->getTransform()->getWorldPosition();
+                auto elem2Pos = elem2->getTransform()->getWorldPosition();
+                auto camPos = m_currCamera->GetCameraPosition();
+                return Vec3::Length(elem1Pos - camPos) < Vec3::Length(elem2Pos - camPos);
+            });
+
+            for (const auto& obj : objects)
             {
                 if (obj)
                 {
