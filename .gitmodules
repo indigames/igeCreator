@@ -14,6 +14,3 @@
 	path = 3rd-party/imgui
 	url = https://github.com/indigames/imgui
     branch = docking
-[submodule "3rd-party\\soloud"]
-	path = 3rd-party\\soloud
-	url = https://github.com/jarikomppa/soloud
