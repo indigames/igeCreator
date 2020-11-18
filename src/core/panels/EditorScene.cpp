@@ -468,7 +468,8 @@ namespace ige::creator
                 if (obj)
                 {
                     auto transform = obj->getTransform();
-                    intersected = RayOBBChecker::checkIntersect(transform->getAabbMin(), transform->getAabbMax(), transform->getWorldMatrix(), distance);
+                    auto aabb = transform->getAABB();
+                    intersected = RayOBBChecker::checkIntersect(aabb.MinEdge, aabb.MaxEdge, transform->getWorldMatrix(), distance);
 
                     // Update selected info
                     obj->setSelected(intersected);
@@ -486,11 +487,12 @@ namespace ige::creator
         if (target == nullptr)
             return;
                 
-        auto transform = target->getTransform(); 
-        auto position = transform->getWorldPosition() + transform->getCenter();
+        auto transform = target->getTransform();
+        auto aabb = transform->getAABB();
+        auto position = transform->getWorldPosition() + aabb.getCenter();
 
-        auto min = transform->getAabbMin();
-        auto max = transform->getAabbMax();
+        auto min = aabb.MinEdge;
+        auto max = aabb.MaxEdge;
 
         auto colliderSize = (min.Abs() + max.Abs()) * 0.5f;
         Vec3 halfSize = { colliderSize[0], colliderSize[1], colliderSize[2] };

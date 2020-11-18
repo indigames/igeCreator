@@ -320,6 +320,7 @@ namespace pyxie {
 
 			return(res);
 		}
+
 		Vec3 GetVertexN(const Vec3 & normal) const
 		{
 			Vec3 res = MinEdge;
@@ -341,6 +342,19 @@ namespace pyxie {
 			return Vec3::LengthSqr(MaxEdge - MinEdge);
 		}
 
+		void Transform(const Mat4& transform)
+		{
+			auto centerVec4 = transform * Vec4(getCenter(), 1.f);
+			auto newCenter = Vec3(centerVec4.X(), centerVec4.Y(), centerVec4.Z());
+			auto oldEdge = getExtent() * 0.5f;
+			auto newEdge = Vec3(
+				std::abs(transform[0][0]) *  oldEdge.X() + std::abs(transform[0][1]) *  oldEdge.Y() + std::abs(transform[0][2]) *  oldEdge.Z(),
+				std::abs(transform[1][0]) *  oldEdge.X() + std::abs(transform[1][1]) *  oldEdge.Y() + std::abs(transform[1][2]) *  oldEdge.Z(),
+				std::abs(transform[2][0]) *  oldEdge.X() + std::abs(transform[2][1]) *  oldEdge.Y() + std::abs(transform[2][2]) *  oldEdge.Z()
+			);
+			MinEdge = newCenter - newEdge;
+			MaxEdge = newCenter + newEdge;
+		}
 
 		//! The near edge
 		Vec3 MinEdge;
