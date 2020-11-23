@@ -139,6 +139,15 @@ namespace ige::creator
         //! Draw Particle
         void drawParticle();
 
+        //! Draw Navigable
+        void drawNavigable();
+
+        //! Draw NavMesh
+        void drawNavMesh();
+
+        //! Draw NavAgent
+        void drawNavAgent();
+
         //! Redraw
         void redraw() { m_bNeedRedraw = true;  }
 
@@ -176,6 +185,9 @@ namespace ige::creator
         std::shared_ptr<Group> m_constraintGroup = nullptr;
         std::shared_ptr<ComboBox> m_constraintCreateCombo = nullptr;
         std::shared_ptr<Group> m_particleGroup = nullptr;
+        std::shared_ptr<Group> m_navigableGroup = nullptr;
+        std::shared_ptr<Group> m_navMeshGroup = nullptr;
+        std::shared_ptr<Group> m_navAgentGroup = nullptr;
 
         //! Flags for redrawing component in main thread
         bool m_bNeedRedraw = false;
