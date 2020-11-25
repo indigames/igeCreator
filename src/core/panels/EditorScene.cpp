@@ -629,33 +629,34 @@ namespace ige::creator
         else if (touch->isFingerMoved(0))
         {
             auto finger = touch->getFinger(0);
-            if (finger->getFingerId() == 3) // right button
+
+            float touchX, touchY;
+            touch->getFingerPosition(0, touchX, touchY);
+
+            Vec2 offset = { touchX - m_lastMousePosX, touchY - m_lastMousePosY };
+            m_lastMousePosX = touchX;
+            m_lastMousePosY = touchY;
+
+            if (finger->getFingerId() == 1) // middle button
             {
-                float touchX, touchY;
-                touch->getFingerPosition(0, touchX, touchY);
-
-                Vec2 offset = { touchX - m_lastMousePosX, touchY - m_lastMousePosY };
-                m_lastMousePosX = touchX;
-                m_lastMousePosY = touchY;
-
+                offset *= m_cameraRotationSpeed;
+                auto pos = m_currCamera->GetPosition();
+                pos.X(pos.X() - offset.X());
+                pos.Y(pos.Y() - offset.Y());
+                m_currCamera->SetPosition(pos);
+            }
+            else if (finger->getFingerId() == 3) // right button
+            {
                 if (m_bIsFirstTouch)
                 {
                     auto cameraRotation = m_currCamera->GetRotation();
                     vmath_quatToEuler(cameraRotation.P(), m_cameraRotationEuler.P());
-
-                    //! remove roll
-                    if (m_cameraRotationEuler[2] >= 179.0f || m_cameraRotationEuler[2] <= -179.0f)
-                    {
-                        m_cameraRotationEuler[0] += m_cameraRotationEuler[2];
-                        m_cameraRotationEuler[1] = 180.0f - m_cameraRotationEuler[1];
-                        m_cameraRotationEuler[2] = 0.0f;
-                    }
                     m_bIsFirstTouch = false;
                 }
 
                 auto mouseOffset = offset * m_cameraRotationSpeed;
-                m_cameraRotationEuler[1] -= mouseOffset.X();
-                m_cameraRotationEuler[0] -= mouseOffset.Y();
+                m_cameraRotationEuler[1] += mouseOffset.X();
+                m_cameraRotationEuler[0] += mouseOffset.Y();
 
                 Quat rot;
                 vmath_eulerToQuat(m_cameraRotationEuler.P(), rot.P());

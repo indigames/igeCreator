@@ -86,7 +86,7 @@ namespace ige::creator
         //! Camera control
         bool m_bIsFirstTouch = true;
         float m_cameraDragSpeed = 0.5f;
-        float m_cameraRotationSpeed = 0.005f;
+        float m_cameraRotationSpeed = 0.0033f;
         float m_lastMousePosX = 0.f;
         float m_lastMousePosY = 0.f;
         Vec3 m_cameraRotationEuler = {};
