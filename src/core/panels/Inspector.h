@@ -148,6 +148,18 @@ namespace ige::creator
         //! Draw NavAgent
         void drawNavAgent();
 
+        //! Draw NavAgentManager
+        void drawNavAgentManager();
+
+        //! Draw DynamicNavMesh
+        void drawDynamicNavMesh();
+
+        //! Draw NavObstacle
+        void drawNavObstacle();
+
+        //! Draw OffMeshLink
+        void drawOffMeshLink();
+
         //! Redraw
         void redraw() { m_bNeedRedraw = true;  }
 
@@ -188,6 +200,9 @@ namespace ige::creator
         std::shared_ptr<Group> m_navigableGroup = nullptr;
         std::shared_ptr<Group> m_navMeshGroup = nullptr;
         std::shared_ptr<Group> m_navAgentGroup = nullptr;
+        std::shared_ptr<Group> m_navAgentManagerGroup = nullptr;
+        std::shared_ptr<Group> m_navObstacleGroup = nullptr;
+        std::shared_ptr<Group> m_offMeshLinkGroup = nullptr;
 
         //! Flags for redrawing component in main thread
         bool m_bNeedRedraw = false;

@@ -375,24 +375,24 @@ if (colorRGBA.w < AlphaRef) discard;
 #endif	
 #elif(TRANSPARENT_MAP_CHANNEL == DiffuseMapRedChannel)
 #ifndef COLOR_MAP_ENABLE	
-	iffuseColor.a = colorRGBA.r;
+	diffuseColor.a = colorRGBA.r;
 #endif	
 #elif(TRANSPARENT_MAP_CHANNEL == NormalMapAlphaChannel)
-	iffuseColor.a = normalRGBA.a;
+	diffuseColor.a = normalRGBA.a;
 #elif(TRANSPARENT_MAP_CHANNEL == NormalMapRedChannel)
-	iffuseColor.a = normalRGBA.r;
+	diffuseColor.a = normalRGBA.r;
 #elif(TRANSPARENT_MAP_CHANNEL == LightMapAlphaChannel)
-	iffuseColor.a = lightRGBA.a;
+	diffuseColor.a = lightRGBA.a;
 #elif(TRANSPARENT_MAP_CHANNEL == LightMapRedChannel)
-	iffuseColor.a = lightRGBA.r;
+	diffuseColor.a = lightRGBA.r;
 #elif(TRANSPARENT_MAP_CHANNEL == OverlayDiffuseMapAlphaChannel)
-	iffuseColor.a = overlayColorRGBA.a;
+	diffuseColor.a = overlayColorRGBA.a;
 #elif(TRANSPARENT_MAP_CHANNEL == OverlayDiffuseMapRedChannel)
-	iffuseColor.a = overlayColorRGBA.r;
+	diffuseColor.a = overlayColorRGBA.r;
 #elif(TRANSPARENT_MAP_CHANNEL == OverlayNormalMapAlphaChannel)
-	iffuseColor.a = overlayNormalRGBA.a;
+	diffuseColor.a = overlayNormalRGBA.a;
 #elif(TRANSPARENT_MAP_CHANNEL == OverlayNormalMapRedChannel)
-	iffuseColor.a = overlayNormalRGBA.r;
+	diffuseColor.a = overlayNormalRGBA.r;
 #endif
 
 #ifdef OVERLAY_COLOR_MAP_ENABLE

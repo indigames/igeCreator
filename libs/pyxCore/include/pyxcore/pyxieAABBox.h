@@ -1,6 +1,6 @@
 /****************************************************************************
   MVGL (Media Vision Game Library)
- 
+
  Axis Aligned Bounding Box
  ****************************************************************************/
 #pragma once
@@ -95,7 +95,7 @@ namespace pyxie {
 		/** \return Center of the bounding box. */
 		Vec3 getCenter() const
 		{
-			return (MinEdge + MaxEdge) / 2;
+			return (MinEdge + MaxEdge) * 0.5f;
 		}
 
 		//! Get extent of the box (maximal distance of two points in the box)
@@ -344,8 +344,7 @@ namespace pyxie {
 
 		pyxieAABBox Transform(const Mat4& transform) const
 		{
-			const auto centerVec4 = transform * Vec4(getCenter(), 1.f);
-			const auto newCenter = Vec3(centerVec4.X(), centerVec4.Y(), centerVec4.Z());
+			const auto newCenter = transform * getCenter();
 			const auto oldEdge = getExtent() * 0.5f;
 			const auto newEdge = Vec3(
 				std::abs(transform[0][0]) *  oldEdge.X() + std::abs(transform[0][1]) *  oldEdge.Y() + std::abs(transform[0][2]) *  oldEdge.Z(),

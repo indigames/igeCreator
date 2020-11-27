@@ -285,7 +285,7 @@ namespace pyxie
 		std::vector<std::string> materialNames;
 
 	public:
-		pyxieEditableFigure(const char* name);
+		pyxieEditableFigure(const char* name, bool newFigure=false);
 		pyxieEditableFigure(pyxieEditableFigure* org);
 		~pyxieEditableFigure();
 
@@ -303,9 +303,21 @@ namespace pyxie
 		bool AddJoint(int parentIndex, Joint& pose, bool scaleCompensate, const char* jointName);	//parentIndex == -1 if root
 
 		//cont elemet
-		int NumMeshes() { return editableMeshes.size(); }
-		int NumMaterials() { return figureMaterials.size(); }
-		int NumJoints() { return skeleton ? skeleton->m_numJoints : 0; }
+		int NumMeshes() 
+		{ 
+			if (!WaitBuild()) return 0;
+			return editableMeshes.size();
+		}
+		int NumMaterials() 
+		{
+			if (!WaitBuild()) return 0;
+			return figureMaterials.size();
+		}
+		int NumJoints() 
+		{
+			if (!WaitBuild()) return 0;
+			return skeleton ? skeleton->m_numJoints : 0; 
+		}
 
 		//edit mesh
 		int GetMeshIndex(uint32_t meshNameHash);
@@ -373,6 +385,7 @@ namespace pyxie
 
 		static const VertexAttribute& GetVertexAttribute(AttributeID id);
 
+		bool ImportFigure(const char* path);
 
 #if defined __ENABLE_SUSPEND_RECOVER__
 		virtual bool Restore();
@@ -381,6 +394,8 @@ namespace pyxie
 	protected:
 		// save figure
 protected:
+		Animation* LoadAnimation(void* animeset);
+	
 		void ConvertGPUSkinningScene(EditableMesh* emesh);
 		bool ExportSkeleton(pyxieMemostream* pStream, const Skeleton* skeleton, CustomDataCallback customDataCallback, void* customData);
 		bool BuildSimdHierarchy(std::vector<HierachyQuad>& hierachyQuads, const Skeleton* skeleton, const std::set<int>& boneSet);
@@ -392,6 +407,8 @@ protected:
 		void SaveNames(FigureHeader* figureHeader, pyxieBinaryFileHelper& fileHelper);
 		void SaveLights(FigureHeader* figureHeader, pyxieBinaryFileHelper& fileHelper);
 		void SaveCameras(FigureHeader* figureHeader, pyxieBinaryFileHelper& fileHelper);
+
+		bool _ImportFigure(const char* path);
 
 		void ResetVertexBuffers();
 		int NewVBO();

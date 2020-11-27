@@ -186,12 +186,19 @@ namespace pyxie {
 
 	class MemoryCleaner {
 		void* ptr;
+		bool aligned;
 	public:
-		MemoryCleaner(void* _ptr) {
+		MemoryCleaner(void* _ptr, bool _aligned=false) {
 			ptr = _ptr;
+			aligned = _aligned;
 		}
 		~MemoryCleaner() {
-			PYXIE_FREE(ptr);
+			if (aligned) {
+				PYXIE_FREE_ALIGNED(ptr);
+			}
+			else {
+				PYXIE_FREE(ptr);
+			}
 		}
 	};
 

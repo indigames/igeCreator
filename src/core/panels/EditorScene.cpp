@@ -22,6 +22,7 @@
 #include "components/physic/PhysicCapsule.h"
 #include "components/audio/AudioSource.h"
 #include "components/particle/Particle.h"
+#include "components/navigation/NavMesh.h"
 using namespace ige::scene;
 
 #include <utils/PyxieHeaders.h>
@@ -391,6 +392,9 @@ namespace ige::creator
             // Render camera frustum
             renderCameraFrustum();
 
+            // Render navigation mesh
+            renderNavMesh();
+
             renderContext->EndScene();
         }
     }
@@ -520,6 +524,41 @@ namespace ige::creator
         PhysicManager::getInstance()->getWorld()->debugDrawWorld();
     }
 
+    // Render navigation mesh
+    void EditorScene::renderNavMesh()
+    {
+        if (!isOpened())
+            return;
+
+        auto target = Editor::getInstance()->getSelectedObject();
+        if (target == nullptr)
+            return;
+
+        auto navMesh = target->getComponent<NavMesh>();
+        if (navMesh == nullptr || !navMesh->getNavMesh())
+            return;
+
+        const dtNavMesh* mesh = navMesh->getNavMesh();
+        const auto& worldTransform = target->getTransform()->getWorldMatrix();
+        for (int j = 0; j < mesh->getMaxTiles(); ++j)
+        {
+            const auto* tile = mesh->getTile(j);
+            if (!tile || !tile->header)
+                continue;
+
+            for (int i = 0; i < tile->header->polyCount; ++i)
+            {
+                dtPoly* poly = tile->polys + i;
+                for (unsigned j = 0; j < poly->vertCount; ++j)
+                {
+                    auto start = worldTransform * *reinterpret_cast<const Vec3*>(&tile->verts[poly->verts[j] * 3]);
+                    auto end = worldTransform * *reinterpret_cast<const Vec3*>(&tile->verts[poly->verts[(j + 1) % poly->vertCount] * 3]);
+                    ShapeDrawer::drawLine(start, end, { 1.f, 1.f, 0.f });
+                }
+            }
+        }
+    }
+
     //! Render camera frustum
     void EditorScene::renderCameraFrustum()
     {
@@ -645,8 +684,14 @@ namespace ige::creator
             if (finger->getFingerId() == 1) // middle button
             {
                 auto pos = m_currCamera->GetPosition();
-                offset *= std::abs(pos.Z() / (m_currCamera->GetFarPlane() * 0.5f));
-                m_currCamera->SetPosition(Vec3(pos.X() - offset.X(), pos.Y() - offset.Y(), pos.Z()));
+                auto mouseOffset = offset * std::abs(std::max(0.0025f, pos.Length() / (m_currCamera->GetFarPlane() * 0.5f)));
+                auto cameraPosition = m_currCamera->GetPosition();
+                auto cameraRotation = m_currCamera->GetRotation();
+                const Vec3 rightVec = { 1.f, 0.f, 0.f };
+                const Vec3 upVec = { 0.f, 1.f, 0.f };
+                cameraPosition -= cameraRotation * rightVec * mouseOffset.X();
+                cameraPosition -= cameraRotation * upVec * mouseOffset.Y();
+                m_currCamera->SetPosition(cameraPosition);
             }
             else if (finger->getFingerId() == 3) // right button
             {

@@ -21,7 +21,7 @@ namespace pyxie {
 	public:
 		static pyxieResourceCreator& Instance();
 		pyxieFigure* NewFigure(const char* path);
-		pyxieEditableFigure* NewEditableFigure(const char* path);
+		pyxieEditableFigure* NewEditableFigure(const char* path, bool newFigre);
 		pyxieAnimator* NewAnimator(const char* path);
 		pyxieCamera* NewCamera(const char* name, pyxieFigure* parent);
 		pyxieEnvironmentSet* NewEnvironmentSet(const char* name, pyxieFigure* parent);

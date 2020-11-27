@@ -343,6 +343,8 @@ namespace pyxie {
 		inline bool IsBillboardEnable() { return desc.BILLBOARD; }
 		inline bool IsFogEnable() { return desc.FOG; }
 
+		inline bool IsSpecular() { return desc.SPECULAR_ENABLE; }
+		inline int GetSpecularMap() { return desc.USE_SPECULAR_MAP_CHANNEL; }
 
 		inline int GetColorTextureRGBUVSet() { return desc.colorMapUVSet / 3; }
 		inline int GetNormalTextureRGBUVSet() { return desc.normalMapUVSet / 3; }

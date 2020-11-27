@@ -49,7 +49,11 @@
 #include <components/particle/Particle.h>
 #include <components/navigation/NavMesh.h>
 #include <components/navigation/NavAgent.h>
+#include <components/navigation/NavAgentManager.h>
 #include <components/navigation/Navigable.h>
+#include <components/navigation/DynamicNavMesh.h>
+#include <components/navigation/NavObstacle.h>
+#include <components/navigation/OffMeshLink.h>
 #include <scene/Scene.h>
 using namespace ige::scene;
 
@@ -82,7 +86,10 @@ namespace ige::creator
         Particle,
         Navigable,
         NavMesh,
-        NavAgent
+        NavAgent,
+        DynamicNavMesh,
+        NavObstacle,
+        OffMeshLink,
     };
 
     Inspector::Inspector(const std::string &name, const Panel::Settings &settings)
@@ -168,9 +175,15 @@ namespace ige::creator
         m_createCompCombo->addChoice((int)ComponentType::Particle, "Particle");
 
         // Navigation
+        if (!m_targetObject->getComponent<NavMesh>() && !m_targetObject->getComponent<DynamicNavMesh>())
+        {
+            m_createCompCombo->addChoice((int)ComponentType::NavMesh, "NavMesh");
+            m_createCompCombo->addChoice((int)ComponentType::DynamicNavMesh, "DynamicNavMesh");
+        }
         m_createCompCombo->addChoice((int)ComponentType::Navigable, "Navigable");
-        m_createCompCombo->addChoice((int)ComponentType::NavMesh, "NavMesh");
         m_createCompCombo->addChoice((int)ComponentType::NavAgent, "NavAgent");
+        m_createCompCombo->addChoice((int)ComponentType::NavObstacle, "NavObstacle");
+        m_createCompCombo->addChoice((int)ComponentType::OffMeshLink, "OffMeshLink");
 
         auto createCompButton = m_headerGroup->createWidget<Button>("Add", ImVec2(64.f, 0.f));
         createCompButton->getOnClickEvent().addListener([this](auto widget) {
@@ -252,6 +265,18 @@ namespace ige::creator
                 break;
             case (int)ComponentType::NavAgent:
                 m_targetObject->addComponent<NavAgent>();
+                break;
+            
+            case (int)ComponentType::DynamicNavMesh:
+                m_targetObject->addComponent<DynamicNavMesh>();
+                break;
+            
+            case (int)ComponentType::NavObstacle:
+                m_targetObject->addComponent<NavObstacle>();
+                break;
+            
+            case (int)ComponentType::OffMeshLink:
+                m_targetObject->addComponent<OffMeshLink>();
                 break;
             }
             redraw();
@@ -395,6 +420,26 @@ namespace ige::creator
             {
                 m_navAgentGroup = header->createWidget<Group>("NavAgent", false);
                 drawNavAgent();
+            }
+            else if (component->getName() == "NavAgentManager")
+            {
+                m_navAgentManagerGroup = header->createWidget<Group>("NavAgentManager", false);
+                drawNavAgentManager();
+            }        
+            else if (component->getName() == "DynamicNavMesh")
+            {
+                m_navMeshGroup = header->createWidget<Group>("DynamicNavMesh", false);
+                drawDynamicNavMesh();
+            }        
+            else if (component->getName() == "NavObstacle")
+            {
+                m_navObstacleGroup = header->createWidget<Group>("NavObstacle", false);
+                drawNavObstacle();
+            }        
+            else if (component->getName() == "OffMeshLink")
+            {
+                m_offMeshLinkGroup = header->createWidget<Group>("OffMeshLink", false);
+                drawOffMeshLink();
             }
         });
     }
@@ -2573,7 +2618,7 @@ namespace ige::creator
         });
 
         std::array padding = { navMesh->getPadding().X(), navMesh->getPadding().Y(), navMesh->getPadding().Z() };
-        m_navMeshGroup->createWidget<Drag<float, 3>>("Bound Padding", ImGuiDataType_Float, padding, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        m_navMeshGroup->createWidget<Drag<float, 3>>("AABB Padding", ImGuiDataType_Float, padding, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
             auto navMesh = m_targetObject->getComponent<NavMesh>();
             navMesh->setPadding({ val[0], val[1], val[2] });
         });
@@ -2618,18 +2663,6 @@ namespace ige::creator
             navAgent->setHeight(val[0]);
         });
 
-        std::array targetPosition = { navAgent->getTargetPosition().X(), navAgent->getTargetPosition().Y(), navAgent->getTargetPosition().Z() };
-        m_navAgentGroup->createWidget<Drag<float, 3>>("Target Position", ImGuiDataType_Float, targetPosition, 0.001f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto navAgent = m_targetObject->getComponent<NavAgent>();
-            navAgent->setTargetPosition({ val[0], val[1], val[2] });
-        });
-
-        std::array targetVelocity = { navAgent->getTargetVelocity().X(), navAgent->getTargetVelocity().Y(), navAgent->getTargetVelocity().Z() };
-        m_navAgentGroup->createWidget<Drag<float, 3>>("Target Velocity", ImGuiDataType_Float, targetVelocity, 0.001f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto navAgent = m_targetObject->getComponent<NavAgent>();
-            navAgent->setTargetVelocity({ val[0], val[1], val[2] });
-        });
-
         std::array maxAcceleration = { navAgent->getMaxAcceleration() };
         m_navAgentGroup->createWidget<Drag<float>>("Max Acceleration", ImGuiDataType_Float, maxAcceleration, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
             auto navAgent = m_targetObject->getComponent<NavAgent>();
@@ -2640,6 +2673,12 @@ namespace ige::creator
         m_navAgentGroup->createWidget<Drag<float>>("Max Speed", ImGuiDataType_Float, maxSpeed, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
             auto navAgent = m_targetObject->getComponent<NavAgent>();
             navAgent->setMaxSpeed(val[0]);
+        });
+
+        std::array targetPosition = { navAgent->getTargetPosition().X(), navAgent->getTargetPosition().Y(), navAgent->getTargetPosition().Z() };
+        m_navAgentGroup->createWidget<Drag<float, 3>>("Target Position", ImGuiDataType_Float, targetPosition, 0.001f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto navAgent = m_targetObject->getComponent<NavAgent>();
+            navAgent->setTargetPosition({ val[0], val[1], val[2] });
         });
 
         std::array queryFilterType = { (int)navAgent->getQueryFilterType() };
@@ -2664,6 +2703,136 @@ namespace ige::creator
         m_navAgentGroup->createWidget<Drag<int>>("Navigation Pushiness", ImGuiDataType_S32, navigationPushiness, 1, (int)NavAgent::NavPushiness::LOW, (int)NavAgent::NavPushiness::HIGH)->getOnDataChangedEvent().addListener([this](auto val) {
             auto navAgent = m_targetObject->getComponent<NavAgent>();
             navAgent->setNavigationPushiness((NavAgent::NavPushiness)val[0]);
+        });
+    }
+
+    //! Draw NavAgentManager
+    void Inspector::drawNavAgentManager()
+    {
+        if (m_navAgentManagerGroup == nullptr)
+            return;
+        m_navAgentManagerGroup->removeAllWidgets();
+
+        auto navAgentManager = m_targetObject->getComponent<NavAgentManager>();
+        if (navAgentManager == nullptr)
+            return;
+
+        std::array maxAgents = { (int)navAgentManager->getMaxAgentNumber() };
+        m_navAgentManagerGroup->createWidget<Drag<int>>("Max Agents", ImGuiDataType_S32, maxAgents, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto navAgentManager = m_targetObject->getComponent<NavAgentManager>();
+            navAgentManager->setMaxAgentNumber(val[0]);
+        });
+
+        std::array maxRadius = { navAgentManager->getMaxAgentRadius() };
+        m_navAgentManagerGroup->createWidget<Drag<float>>("Max Agent Radius", ImGuiDataType_Float, maxRadius, 0.001f, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto navAgentManager = m_targetObject->getComponent<NavAgentManager>();
+            navAgentManager->setMaxAgentRadius(val[0]);
+        });
+    }
+
+    //! Draw DynamicNavMesh
+    void Inspector::drawDynamicNavMesh()
+    {
+        drawNavMesh();
+
+        auto navMesh = m_targetObject->getComponent<DynamicNavMesh>();
+        if (navMesh == nullptr)
+            return;
+
+        std::array maxObstacles = { (int)navMesh->getMaxObstacles() };
+        m_navMeshGroup->createWidget<Drag<int>>("Max Obstacles", ImGuiDataType_S32, maxObstacles, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto navMesh = m_targetObject->getComponent<DynamicNavMesh>();
+            navMesh->setMaxObstacles(val[0]);
+        });
+
+        std::array maxLayers = { (int)navMesh->getMaxLayers() };
+        m_navMeshGroup->createWidget<Drag<int>>("Max Layers", ImGuiDataType_S32, maxLayers, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto navMesh = m_targetObject->getComponent<DynamicNavMesh>();
+            navMesh->setMaxLayers(val[0]);
+        });
+    }
+
+    //! Draw NavObstacle
+    void Inspector::drawNavObstacle()
+    {
+        if (m_navObstacleGroup == nullptr)
+            return;
+        m_navObstacleGroup->removeAllWidgets();
+
+        auto obstacle = m_targetObject->getComponent<NavObstacle>();
+        if (obstacle == nullptr)
+            return;
+
+        auto column = m_navObstacleGroup->createWidget<Columns<3>>();
+        column->createWidget<CheckBox>("Enable", obstacle->isEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto obstacle = m_targetObject->getComponent<NavObstacle>();
+            obstacle->setEnabled(val);
+        });
+
+        std::array radius = { obstacle->getRadius() };
+        m_navObstacleGroup->createWidget<Drag<float>>("Radius", ImGuiDataType_Float, radius, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto obstacle = m_targetObject->getComponent<NavObstacle>();
+            obstacle->setRadius(val[0]);
+        });
+
+        std::array height = { obstacle->getHeight() };
+        m_navObstacleGroup->createWidget<Drag<float>>("Height", ImGuiDataType_Float, height, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto obstacle = m_targetObject->getComponent<NavObstacle>();
+            obstacle->setHeight(val[0]);
+        });
+    }
+
+    //! Draw OffMeshLink
+    void Inspector::drawOffMeshLink()
+    {
+        if (m_offMeshLinkGroup == nullptr)
+            return;
+        m_offMeshLinkGroup->removeAllWidgets();
+
+        auto offMeshLink = m_targetObject->getComponent<OffMeshLink>();
+        if (offMeshLink == nullptr)
+            return;
+
+        auto column = m_offMeshLinkGroup->createWidget<Columns<3>>();
+        column->createWidget<CheckBox>("Enable", offMeshLink->isEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto offMeshLink = m_targetObject->getComponent<OffMeshLink>();
+            offMeshLink->setEnabled(val);
+        });
+        column->createWidget<CheckBox>("Bidirectional", offMeshLink->isBidirectional())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto offMeshLink = m_targetObject->getComponent<OffMeshLink>();
+            offMeshLink->setBidirectional(val);
+        });
+
+        // Endpoint
+        auto endPointTxt = m_offMeshLinkGroup->createWidget<TextField>("Endpoint", offMeshLink->getEndPoint() ? offMeshLink->getEndPoint()->getName() : std::string());
+        endPointTxt->getOnDataChangedEvent().addListener([&](const auto& val) {
+            auto offMeshLink = m_targetObject->getComponent<OffMeshLink>();
+            auto obj = Editor::getCurrentScene()->findObjectByName(val);
+            offMeshLink->setEndPoint(obj.get());
+        });
+        endPointTxt->addPlugin<DDTargetPlugin<int>>(EDragDropID::OBJECT)->getOnDataReceivedEvent().addListener([&](auto val) {
+            auto offMeshLink = m_targetObject->getComponent<OffMeshLink>();
+            auto obj = Editor::getCurrentScene()->findObjectById(val);
+            offMeshLink->setEndPoint(obj.get());
+            redraw();
+        });
+
+        std::array radius = { offMeshLink->getRadius() };
+        m_navObstacleGroup->createWidget<Drag<float>>("Radius", ImGuiDataType_Float, radius, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto offMeshLink = m_targetObject->getComponent<OffMeshLink>();
+            offMeshLink->setRadius(val[0]);
+        });
+
+        std::array mask = { (int)offMeshLink->getMask() };
+        m_navMeshGroup->createWidget<Drag<int>>("Mask", ImGuiDataType_S32, mask, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto offMeshLink = m_targetObject->getComponent<OffMeshLink>();
+            offMeshLink->setMask(val[0]);
+        });
+    
+        std::array areaId = { (int)offMeshLink->getAreaId() };
+        m_navMeshGroup->createWidget<Drag<int>>("Area ID", ImGuiDataType_S32, areaId, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto offMeshLink = m_targetObject->getComponent<OffMeshLink>();
+            offMeshLink->setAreaId(val[0]);
         });
     }
 
@@ -2866,6 +3035,27 @@ namespace ige::creator
             m_navAgentGroup->removeAllWidgets();
             m_navAgentGroup->removeAllPlugins();
             m_navAgentGroup = nullptr;
+        }
+
+        if (m_navAgentManagerGroup)
+        {
+            m_navAgentManagerGroup->removeAllWidgets();
+            m_navAgentManagerGroup->removeAllPlugins();
+            m_navAgentManagerGroup = nullptr;
+        }
+
+        if (m_navObstacleGroup)
+        {
+            m_navObstacleGroup->removeAllWidgets();
+            m_navObstacleGroup->removeAllPlugins();
+            m_navObstacleGroup = nullptr;
+        }
+
+        if (m_offMeshLinkGroup)
+        {
+            m_offMeshLinkGroup->removeAllWidgets();
+            m_offMeshLinkGroup->removeAllPlugins();
+            m_offMeshLinkGroup = nullptr;
         }
 
         removeAllWidgets();

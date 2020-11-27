@@ -10,7 +10,7 @@ namespace pyxie
 {
 	class pyxieTexture;
 
-#define GEOM_VER 12
+#define GEOM_VER 13
 
 #define align64(v,n) union{v n; uint64_t n##64;}
 
@@ -78,10 +78,14 @@ namespace pyxie
 		uint32_t nameHash;
 		uint8_t numParams;
 		uint8_t numStates;
+		uint8_t numSpare;
 		uint8_t flags;
 		uint8_t passFilter;
+		uint8_t dummy0;
+		uint8_t dummy1;
+		uint8_t dummy2;
 		FigureMaterialParam params[1];
-		uint32_t size() { return 32 + 8 + sizeof(FigureMaterialParam)*(numParams + numStates); }
+		uint32_t size() { return 32 + 8 + sizeof(FigureMaterialParam)*(numParams + numStates + numSpare); }
 		enum
 		{
 			FlagSkin = 0x01,
@@ -127,10 +131,12 @@ namespace pyxie
 				float color[4];
 				float position[4];
 				float dir[4];
+				float params[4];
 			}spotLamp;
 			struct {
 				float color[4];
 				float position[4];
+				float params[4];
 			}pointLamp;
 			struct {
 				float color[4];
@@ -230,13 +236,13 @@ namespace pyxie
 		uint32_t numVerticies;
 		uint32_t numIndices;
 		uint32_t material;
-		int32_t verticesUid;	//unused
-		int32_t indicesUid;		//
 		uint16_t numSkinTransforms;
 		uint16_t vertexFormatSize;
 		uint16_t numVertexAttributes;
 		uint8_t numWeightsPerVertex;
 		uint8_t flags;
+		int32_t dummy1;
+		int32_t dummy2;
 
 		enum MeshAttributeFlag{
 			TRIANGLE_STRIP = 1,
@@ -273,11 +279,6 @@ namespace pyxie
 		align64(EnvironmentSource*,envsrc);
 		align64(FigureCamera*,cameras);
 		align64(void*, dummy);
-
-		enum {
-			EXPORT_NAMES=1
-		};
-
 	};
 
 

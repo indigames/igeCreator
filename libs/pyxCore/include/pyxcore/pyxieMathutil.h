@@ -283,10 +283,14 @@ namespace pyxie {
 			vmath_mul_matrix_vector(vec.P(), v, N, N, out.P());
 			return out;
 		}
-		inline Vec<N> operator *(Vec<N-1> vec) const {
+		inline Vec<N-1> operator *(Vec<N-1> vec) const {
+			Vec<N> in(vec, 1.f);
 			Vec<N> out;
-			vmath_mul_matrix_vector(vec.P(), v, N, N-1, out.P());
-			return out;
+			vmath_mul_matrix_vector(in.P(), v, N, N, out.P());
+			Vec<N - 1> ret;
+			for (int i = 0; i < N - 1; ++i)
+				ret[i] = out[i];
+			return ret;
 		}
 
 		inline Mat<N,M> operator *=(Mat<N,M> mat) const {

@@ -4,7 +4,7 @@ set(TARGET_NAME igeCreator)
 
 project(${TARGET_NAME})
 
-set (BUILD_FULL_SOURCE 0)
+set (BUILD_FULL_SOURCE 1)
 
 if (BUILD_FULL_SOURCE)
     file(TO_CMAKE_PATH $ENV{IGE_LIBS} IGE_LIBS)
@@ -158,20 +158,25 @@ target_link_libraries(${TARGET_NAME}
 )
 
 # igeNavigation
-set (LIB_PATH ${LIBS_DIR}/igeNavigation/${PLATFORM_PATH})
-set (LIB_PATH_DEBUG ${LIBS_DIR}/igeNavigation/${PLATFORM_PATH_DEBUG})
-target_link_libraries(${TARGET_NAME}
-    optimized ${LIB_PATH}igeNavigation-static.${LIB_EXT}
-    optimized ${LIB_PATH}Recast.${LIB_EXT}
-    optimized ${LIB_PATH}Detour.${LIB_EXT}
-    optimized ${LIB_PATH}DetourCrowd.${LIB_EXT}
-    optimized ${LIB_PATH}DetourTileCache.${LIB_EXT}
-    debug ${LIB_PATH_DEBUG}igeNavigation-static.${LIB_EXT}
-    debug ${LIB_PATH_DEBUG}Recast-d.${LIB_EXT}
-    debug ${LIB_PATH_DEBUG}Detour-d.${LIB_EXT}
-    debug ${LIB_PATH_DEBUG}DetourCrowd-d.${LIB_EXT}
-    debug ${LIB_PATH_DEBUG}DetourTileCache-d.${LIB_EXT}
-)
+if (BUILD_FULL_SOURCE)
+    add_subdirectory(${IGE_LIBS}/../igeNavigation ${CMAKE_BINARY_DIR}/igeNavigation-static)
+    target_link_libraries(${TARGET_NAME} igeNavigation-static)
+else()
+    set (LIB_PATH ${LIBS_DIR}/igeNavigation/${PLATFORM_PATH})
+    set (LIB_PATH_DEBUG ${LIBS_DIR}/igeNavigation/${PLATFORM_PATH_DEBUG})
+    target_link_libraries(${TARGET_NAME}
+        optimized ${LIB_PATH}igeNavigation-static.${LIB_EXT}
+        optimized ${LIB_PATH}Recast.${LIB_EXT}
+        optimized ${LIB_PATH}Detour.${LIB_EXT}
+        optimized ${LIB_PATH}DetourCrowd.${LIB_EXT}
+        optimized ${LIB_PATH}DetourTileCache.${LIB_EXT}
+        debug ${LIB_PATH_DEBUG}igeNavigation-static.${LIB_EXT}
+        debug ${LIB_PATH_DEBUG}Recast-d.${LIB_EXT}
+        debug ${LIB_PATH_DEBUG}Detour-d.${LIB_EXT}
+        debug ${LIB_PATH_DEBUG}DetourCrowd-d.${LIB_EXT}
+        debug ${LIB_PATH_DEBUG}DetourTileCache-d.${LIB_EXT}
+    )
+endif()
 
 # SDL
 set (LIB_PATH ${LIBS_DIR}/SDL/${PLATFORM_PATH})

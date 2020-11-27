@@ -46,6 +46,9 @@ namespace ige::creator
         //! Render camera frustum
         void renderCameraFrustum();
 
+        //! Render navigation mesh
+        void renderNavMesh();
+
         //! Camera movement with mouse
         void updateCameraPosition();
 
