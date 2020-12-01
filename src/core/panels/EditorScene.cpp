@@ -22,7 +22,7 @@
 #include "components/physic/PhysicCapsule.h"
 #include "components/audio/AudioSource.h"
 #include "components/particle/Particle.h"
-#include "components/navigation/NavMesh.h"
+#include "components/navigation/DynamicNavMesh.h"
 using namespace ige::scene;
 
 #include <utils/PyxieHeaders.h>
@@ -490,16 +490,10 @@ namespace ige::creator
         auto target = Editor::getInstance()->getSelectedObject();
         if (target == nullptr)
             return;
-                
-        auto transform = target->getTransform();
-        auto aabb = transform->getAABB();
-        auto position = transform->getWorldPosition() + aabb.getCenter();
 
-        auto min = aabb.MinEdge;
-        auto max = aabb.MaxEdge;
-
-        auto colliderSize = (min.Abs() + max.Abs()) * 0.5f;
-        Vec3 halfSize = { colliderSize[0], colliderSize[1], colliderSize[2] };
+        const auto& aabb = target->getTransform()->getWorldAABB();
+        auto position = aabb.getCenter();
+        Vec3 halfSize = aabb.getExtent() * 0.5f;
 
         ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], -halfSize[2] }, position + Vec3{ -halfSize[0], -halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
         ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], -halfSize[2] }, position + Vec3{ -halfSize[0], +halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
@@ -534,25 +528,27 @@ namespace ige::creator
         if (target == nullptr)
             return;
 
+        // Render navigation mesh
         auto navMesh = target->getComponent<NavMesh>();
         if (navMesh == nullptr || !navMesh->getNavMesh())
             return;
 
         const dtNavMesh* mesh = navMesh->getNavMesh();
         const auto& worldTransform = target->getTransform()->getWorldMatrix();
-        for (int j = 0; j < mesh->getMaxTiles(); ++j)
+
+        for (int i = 0; i < mesh->getMaxTiles(); ++i)
         {
-            const auto* tile = mesh->getTile(j);
+            const auto* tile = mesh->getTile(i);
             if (!tile || !tile->header)
                 continue;
 
-            for (int i = 0; i < tile->header->polyCount; ++i)
+            for (int j = 0; j < tile->header->polyCount; ++j)
             {
-                dtPoly* poly = tile->polys + i;
-                for (unsigned j = 0; j < poly->vertCount; ++j)
+                auto poly = tile->polys + j;
+                for (int k = 0; k < poly->vertCount; ++k)
                 {
-                    auto start = worldTransform * *reinterpret_cast<const Vec3*>(&tile->verts[poly->verts[j] * 3]);
-                    auto end = worldTransform * *reinterpret_cast<const Vec3*>(&tile->verts[poly->verts[(j + 1) % poly->vertCount] * 3]);
+                    auto start = worldTransform * *reinterpret_cast<const Vec3*>(&tile->verts[poly->verts[k] * 3]);
+                    auto end = worldTransform * *reinterpret_cast<const Vec3*>(&tile->verts[poly->verts[(k + 1) % poly->vertCount] * 3]);
                     ShapeDrawer::drawLine(start, end, { 1.f, 1.f, 0.f });
                 }
             }

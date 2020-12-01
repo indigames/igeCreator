@@ -284,11 +284,10 @@ namespace pyxie {
 			return out;
 		}
 		inline Vec<N-1> operator *(Vec<N-1> vec) const {
-			Vec<N> in(vec, 1.f);
-			Vec<N> out;
-			vmath_mul_matrix_vector(in.P(), v, N, N, out.P());
+			float out[N];
+			vmath_mul_matrix_vector(Vec<N>(vec, 1.f).P(), v, N, N, out);
 			Vec<N - 1> ret;
-			for (int i = 0; i < N - 1; ++i)
+			for(int i = 0; i < N - 1; ++i)
 				ret[i] = out[i];
 			return ret;
 		}

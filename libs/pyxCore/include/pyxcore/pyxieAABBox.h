@@ -214,6 +214,17 @@ namespace pyxie {
 				MaxEdge.X() <= other.MaxEdge.X() && MaxEdge.Y() <= other.MaxEdge.Y() && MaxEdge.Z() <= other.MaxEdge.Z());
 		}
 
+		//! Check if this box is partially inside the 'other' box.
+		/** \param other: Other box to check against.
+		\return True if this box is partially inside the other box,
+		otherwise false. */
+		bool IsPartiallyInside(const pyxieAABBox & other) const
+		{
+			return !(other.MaxEdge.X() < MinEdge.X() || other.MinEdge.X() > MaxEdge.X()
+					|| other.MaxEdge.Y() < MinEdge.Y() || other.MinEdge.Y() > MaxEdge.Y()
+					|| other.MaxEdge.Z() < MinEdge.Z() || other.MinEdge.Z() > MaxEdge.Z());
+		}
+
 		//! Determines if the axis-aligned box intersects with another axis-aligned box.
 		/** \param other: Other box to check a intersection with.
 		\return True if there is an intersection with the other box,
