@@ -2818,19 +2818,19 @@ namespace ige::creator
         });
 
         std::array radius = { offMeshLink->getRadius() };
-        m_navObstacleGroup->createWidget<Drag<float>>("Radius", ImGuiDataType_Float, radius, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        m_offMeshLinkGroup->createWidget<Drag<float>>("Radius", ImGuiDataType_Float, radius, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
             auto offMeshLink = m_targetObject->getComponent<OffMeshLink>();
             offMeshLink->setRadius(val[0]);
         });
 
         std::array mask = { (int)offMeshLink->getMask() };
-        m_navMeshGroup->createWidget<Drag<int>>("Mask", ImGuiDataType_S32, mask, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+        m_offMeshLinkGroup->createWidget<Drag<int>>("Mask", ImGuiDataType_S32, mask, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
             auto offMeshLink = m_targetObject->getComponent<OffMeshLink>();
             offMeshLink->setMask(val[0]);
         });
     
         std::array areaId = { (int)offMeshLink->getAreaId() };
-        m_navMeshGroup->createWidget<Drag<int>>("Area ID", ImGuiDataType_S32, areaId, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+        m_offMeshLinkGroup->createWidget<Drag<int>>("Area ID", ImGuiDataType_S32, areaId, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
             auto offMeshLink = m_targetObject->getComponent<OffMeshLink>();
             offMeshLink->setAreaId(val[0]);
         });
