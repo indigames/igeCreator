@@ -395,6 +395,9 @@ namespace ige::creator
             // Render navigation mesh
             renderNavMesh();
 
+            // Flush debug render
+            ShapeDrawer::flush();
+
             renderContext->EndScene();
         }
     }
@@ -464,7 +467,7 @@ namespace ige::creator
                 auto elem1Pos = elem1->getTransform()->getWorldPosition();
                 auto elem2Pos = elem2->getTransform()->getWorldPosition();
                 auto camPos = m_currCamera->GetCameraPosition();
-                return Vec3::Length(elem1Pos - camPos) < Vec3::Length(elem2Pos - camPos);
+                return Vec3::LengthSqr(elem1Pos - camPos) < Vec3::LengthSqr(elem2Pos - camPos);
             });
 
             for (const auto& obj : objects)
@@ -472,7 +475,7 @@ namespace ige::creator
                 if (obj)
                 {
                     auto transform = obj->getTransform();
-                    auto aabb = transform->getAABB();
+                    const auto& aabb = transform->getAABB();
                     intersected = RayOBBChecker::checkIntersect(aabb.MinEdge, aabb.MaxEdge, transform->getWorldMatrix(), distance);
 
                     // Update selected info

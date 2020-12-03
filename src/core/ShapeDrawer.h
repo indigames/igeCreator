@@ -11,6 +11,7 @@ namespace ige::creator
         static void initialize();
 
         static void setViewProjectionMatrix(const Mat4 &viewProjection);
-        static void drawLine(const Vec3 &start, const Vec3 &end, const Vec3 &color = { 0.f, 1.f, 0.f }, float width = 1.f);
+        static void drawLine(const Vec3 &start, const Vec3 &end, const Vec3 &color = { 0.f, 1.f, 0.f });
+        static void flush();
     };
 } // namespace ige::creator
