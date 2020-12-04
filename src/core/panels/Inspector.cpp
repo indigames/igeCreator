@@ -2538,6 +2538,10 @@ namespace ige::creator
             auto navMesh = m_targetObject->getComponent<NavMesh>();
             navMesh->setEnabled(val);
         });
+        column->createWidget<Button>("Build", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
+            auto navMesh = m_targetObject->getComponent<NavMesh>();
+            navMesh->build();
+        });
 
         std::array tileSize = { navMesh->getTileSize() };
         m_navMeshGroup->createWidget<Drag<int>>("Tile Size", ImGuiDataType_S32, tileSize, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
