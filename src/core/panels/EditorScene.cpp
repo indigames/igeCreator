@@ -496,17 +496,13 @@ namespace ige::creator
         if (!isOpened())
             return;
 
-        auto target = Editor::getInstance()->getSelectedObject();
-        if (target == nullptr)
-            return;
-
         // Render navigation mesh
-        auto navMesh = target->getComponent<NavMesh>();
+        auto navMesh = Editor::getInstance()->getCurrentScene()->getRoot()->getComponent<NavMesh>();
         if (navMesh == nullptr || !navMesh->getNavMesh())
             return;
 
         const dtNavMesh* mesh = navMesh->getNavMesh();
-        const auto& worldTransform = target->getTransform()->getWorldMatrix();
+        const auto& worldTransform = Editor::getInstance()->getCurrentScene()->getRoot()->getTransform()->getWorldMatrix();
 
         for (int i = 0; i < mesh->getMaxTiles(); ++i)
         {
@@ -527,7 +523,7 @@ namespace ige::creator
         }
 
         std::vector<Component*> offMeshLinkComps;
-        target->getComponentsRecursive(offMeshLinkComps, "OffMeshLink");
+        Editor::getInstance()->getCurrentScene()->getRoot()->getComponentsRecursive(offMeshLinkComps, "OffMeshLink");
 
         std::vector<OffMeshLink*> offMeshLinks;
         for (auto comp : offMeshLinkComps)
@@ -535,8 +531,8 @@ namespace ige::creator
             auto link = static_cast<OffMeshLink*>(comp);
             if (link && link->isEnabled() && link->getEndPoint())
             {
-                auto start = link->getOwner()->getTransform()->getWorldPosition();
-                auto end = link->getEndPoint()->getTransform()->getWorldPosition();;
+                const auto& start = link->getOwner()->getTransform()->getWorldPosition();
+                const auto& end = link->getEndPoint()->getTransform()->getWorldPosition();;
                 ShapeDrawer::drawLine(start, end, { 1.f, 0.f, 0.f });
             }
         }
