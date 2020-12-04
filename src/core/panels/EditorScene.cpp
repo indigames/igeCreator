@@ -23,6 +23,7 @@
 #include "components/audio/AudioSource.h"
 #include "components/particle/Particle.h"
 #include "components/navigation/DynamicNavMesh.h"
+#include "components/navigation/OffMeshLink.h"
 using namespace ige::scene;
 
 #include <utils/PyxieHeaders.h>
@@ -450,41 +451,9 @@ namespace ige::creator
             x = x + (screenW - (w + dx)) / 2.f;
             y = y - (screenH - (h + dy)) / 2.f;
 
-            Mat4 proj;
-            m_currCamera->GetProjectionMatrix(proj);
-
-            Mat4 viewInv;
-            m_currCamera->GetViewInverseMatrix(viewInv);
-
-            RayOBBChecker::screenPosToWorldRay(x, y, w, h, viewInv, proj);
-
-            bool intersected = false;
-            float distance;
-
-            // Sort the object from the camera
-            auto& objects = SceneManager::getInstance()->getCurrentScene()->getObjects();
-            std::sort(objects.begin(), objects.end(), [this](const auto& elem1, const auto& elem2) {
-                auto elem1Pos = elem1->getTransform()->getWorldPosition();
-                auto elem2Pos = elem2->getTransform()->getWorldPosition();
-                auto camPos = m_currCamera->GetCameraPosition();
-                return Vec3::LengthSqr(elem1Pos - camPos) < Vec3::LengthSqr(elem2Pos - camPos);
-            });
-
-            for (const auto& obj : objects)
-            {
-                if (obj)
-                {
-                    auto transform = obj->getTransform();
-                    const auto& aabb = transform->getAABB();
-                    intersected = RayOBBChecker::checkIntersect(aabb.MinEdge, aabb.MaxEdge, transform->getWorldMatrix(), distance);
-
-                    // Update selected info
-                    obj->setSelected(intersected);
-
-                    if (intersected)
-                        break;
-                }
-            }
+            auto hit = SceneManager::getInstance()->getCurrentScene()->raycast(Vec2(x, y), m_currCamera, 10000.f, Vec2(w, h));
+            if (hit.first)
+                hit.first->setSelected(true);
         }
     }
 
@@ -554,6 +523,21 @@ namespace ige::creator
                     auto end = worldTransform * *reinterpret_cast<const Vec3*>(&tile->verts[poly->verts[(k + 1) % poly->vertCount] * 3]);
                     ShapeDrawer::drawLine(start, end, { 1.f, 1.f, 0.f });
                 }
+            }
+        }
+
+        std::vector<Component*> offMeshLinkComps;
+        target->getComponentsRecursive(offMeshLinkComps, "OffMeshLink");
+
+        std::vector<OffMeshLink*> offMeshLinks;
+        for (auto comp : offMeshLinkComps)
+        {
+            auto link = static_cast<OffMeshLink*>(comp);
+            if (link && link->isEnabled() && link->getEndPoint())
+            {
+                auto start = link->getOwner()->getTransform()->getWorldPosition();
+                auto end = link->getEndPoint()->getTransform()->getWorldPosition();;
+                ShapeDrawer::drawLine(start, end, { 1.f, 0.f, 0.f });
             }
         }
     }
