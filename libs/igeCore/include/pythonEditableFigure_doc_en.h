@@ -837,6 +837,36 @@ PyDoc_STRVAR(getMeshAlpha_doc,
 	"	alpha : float\n"\
 	"		alpha values.\n");
 
+
+PyDoc_STRVAR(getNumMeshTriangles_doc,
+	"Get the number of polygons in the mesh.\n"\
+	"\n"\
+	"number = editableFigure.getNumMeshTriangles(meshName)\n"\
+	"\n"\
+	"Parameters\n"\
+	"----------\n"\
+	"	meshName : string (or int)\n"\
+	"		string of mesh name or int of mesh index to get the value.\n	"\
+	"Returns\n"\
+	"-------\n"\
+	"	number : int\n"\
+	"		number of triangles.\n");
+
+PyDoc_STRVAR(getNumMeshVertices_doc,
+	"Get the number of vertices in the mesh.\n"\
+	"\n"\
+	"number = editableFigure.getNumMeshVertices(meshName)\n"\
+	"\n"\
+	"Parameters\n"\
+	"----------\n"\
+	"	meshName : string (or int)\n"\
+	"		string of mesh name or int of mesh index to get the value.\n	"\
+	"Returns\n"\
+	"-------\n"\
+	"	number : int\n"\
+	"		number of vertices.\n");
+
+
 //getMeshWireframe
 PyDoc_STRVAR(getMeshWireframe_doc,
 	"Get whether the specified mesh is in wireframe rendering mode.\n"\
@@ -993,3 +1023,18 @@ PyDoc_STRVAR(getJointIndex_doc,
 	"    index : int\n"\
 	"        joint indexNo	\n"\
 	"        return -1 if joint is not found");
+
+PyDoc_STRVAR(importFigure_doc,
+	"Import the figure (pyxf) file.\n"\
+	"\n"\
+	"rv = editableFigure.importFigure(path)\n"\
+	"\n"\
+	"Parameters\n"\
+	"----------\n"\
+	"    path : string\n"\
+	"        figure file path\n"\
+	"Returns\n"\
+	"-------\n"\
+	"    rv : bool\n"\
+	"        Success or failure of reading\n");
+

@@ -118,6 +118,42 @@ target_link_libraries(${TARGET_NAME}
     debug ${LIB_PATH_DEBUG}igeBullet-static.${LIB_EXT}
 )
 
+# igeSound
+set (LIB_PATH ${LIBS_DIR}/igeSound/${PLATFORM_PATH})
+set (LIB_PATH_DEBUG ${LIBS_DIR}/igeSound/${PLATFORM_PATH_DEBUG})
+target_link_libraries(${TARGET_NAME}
+    optimized ${LIB_PATH}igeSound-static.${LIB_EXT}
+    debug ${LIB_PATH_DEBUG}igeSound-static.${LIB_EXT}
+)
+
+# igeEffekseer
+set (LIB_PATH ${LIBS_DIR}/igeEffekseer/${PLATFORM_PATH})
+set (LIB_PATH_DEBUG ${LIBS_DIR}/igeEffekseer/${PLATFORM_PATH_DEBUG})
+target_link_libraries(${TARGET_NAME}
+    optimized ${LIB_PATH}igeEffekseer-static.${LIB_EXT}
+    optimized ${LIB_PATH}Effekseer.${LIB_EXT}
+    optimized ${LIB_PATH}EffekseerRendererGL.${LIB_EXT}
+    debug ${LIB_PATH_DEBUG}igeEffekseer-static.${LIB_EXT}
+    debug ${LIB_PATH_DEBUG}Effekseer.${LIB_EXT}
+    debug ${LIB_PATH_DEBUG}EffekseerRendererGL.${LIB_EXT}
+)
+
+# igeNavigation
+set (LIB_PATH ${LIBS_DIR}/igeNavigation/${PLATFORM_PATH})
+set (LIB_PATH_DEBUG ${LIBS_DIR}/igeNavigation/${PLATFORM_PATH_DEBUG})
+target_link_libraries(${TARGET_NAME}
+    optimized ${LIB_PATH}igeNavigation-static.${LIB_EXT}
+    optimized ${LIB_PATH}Recast.${LIB_EXT}
+    optimized ${LIB_PATH}Detour.${LIB_EXT}
+    optimized ${LIB_PATH}DetourCrowd.${LIB_EXT}
+    optimized ${LIB_PATH}DetourTileCache.${LIB_EXT}
+    debug ${LIB_PATH_DEBUG}igeNavigation-static.${LIB_EXT}
+    debug ${LIB_PATH_DEBUG}Recast-d.${LIB_EXT}
+    debug ${LIB_PATH_DEBUG}Detour-d.${LIB_EXT}
+    debug ${LIB_PATH_DEBUG}DetourCrowd-d.${LIB_EXT}
+    debug ${LIB_PATH_DEBUG}DetourTileCache-d.${LIB_EXT}
+)
+
 # SDL
 set (LIB_PATH ${LIBS_DIR}/SDL/${PLATFORM_PATH})
 target_link_libraries(${TARGET_NAME} ${LIB_PATH}SDL2.${LIB_EXT})

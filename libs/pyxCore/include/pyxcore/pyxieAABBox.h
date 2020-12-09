@@ -1,6 +1,6 @@
 /****************************************************************************
   MVGL (Media Vision Game Library)
-
+ 
  Axis Aligned Bounding Box
  ****************************************************************************/
 #pragma once
@@ -358,9 +358,9 @@ namespace pyxie {
 			const auto newCenter = transform * getCenter();
 			const auto oldEdge = getExtent() * 0.5f;
 			const auto newEdge = Vec3(
-				std::abs(transform[0][0]) *  oldEdge.X() + std::abs(transform[0][1]) *  oldEdge.Y() + std::abs(transform[0][2]) *  oldEdge.Z(),
-				std::abs(transform[1][0]) *  oldEdge.X() + std::abs(transform[1][1]) *  oldEdge.Y() + std::abs(transform[1][2]) *  oldEdge.Z(),
-				std::abs(transform[2][0]) *  oldEdge.X() + std::abs(transform[2][1]) *  oldEdge.Y() + std::abs(transform[2][2]) *  oldEdge.Z()
+				fabs(transform[0][0]) *  oldEdge.X() + fabs(transform[0][1]) *  oldEdge.Y() + fabs(transform[0][2]) *  oldEdge.Z(),
+				fabs(transform[1][0]) *  oldEdge.X() + fabs(transform[1][1]) *  oldEdge.Y() + fabs(transform[1][2]) *  oldEdge.Z(),
+				fabs(transform[2][0]) *  oldEdge.X() + fabs(transform[2][1]) *  oldEdge.Y() + fabs(transform[2][2]) *  oldEdge.Z()
 			);
 			return pyxieAABBox(newCenter - newEdge, newCenter + newEdge);
 		}

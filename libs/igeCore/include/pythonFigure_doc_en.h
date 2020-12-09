@@ -351,6 +351,36 @@ PyDoc_STRVAR(setMeshWireframe_doc,
 	"\n");
 
 
+PyDoc_STRVAR(getNumMeshTriangles_doc,
+	"Get the number of polygons in the mesh.\n"\
+	"\n"\
+	"number = figure.getNumMeshTriangles(meshName)\n"\
+	"\n"\
+	"Parameters\n"\
+	"----------\n"\
+	"	meshName : string (or int)\n"\
+	"		string of mesh name or int of mesh index to get the value.\n	"\
+	"Returns\n"\
+	"-------\n"\
+	"	number : int\n"\
+	"		number of triangles.\n");
+
+PyDoc_STRVAR(getNumMeshVertices_doc,
+	"Get the number of vertices in the mesh.\n"\
+	"\n"\
+	"number = figure.getNumMeshVertices(meshName)\n"\
+	"\n"\
+	"Parameters\n"\
+	"----------\n"\
+	"	meshName : string (or int)\n"\
+	"		string of mesh name or int of mesh index to get the value.\n	"\
+	"Returns\n"\
+	"-------\n"\
+	"	number : int\n"\
+	"		number of vertices.\n");
+
+
+
 //getShaderGenerator
 PyDoc_STRVAR(getShaderGenerator_doc,
 	"Get shaderGenerator.\n"\

@@ -2,11 +2,14 @@
 
 #include <scene/SceneManager.h>
 #include <scene/Scene.h>
-#include <physic/PhysicManager.h>
+#include <systems/physic/PhysicManager.h>
 using namespace ige::scene;
 
 #include <json/json.hpp>
 using json = nlohmann::json;
+
+#include <iostream>
+#include <fstream>
 
 Game::Game()
 {
