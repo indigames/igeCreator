@@ -5,16 +5,15 @@
 #include "core/widgets/Image.h"
 #include "core/Editor.h"
 #include "core/Canvas.h"
-#include "core/ShapeDrawer.h"
 #include "core/plugin/DragDropPlugin.h"
 #include "core/FileHandle.h"
-#include "core/BulletDebugRender.h"
 
 #include "utils/GraphicsHelper.h"
 #include "scene/Scene.h"
 #include "scene/SceneObject.h"
 #include "scene/SceneManager.h"
 #include "utils/RayOBBChecker.h"
+#include "utils/ShapeDrawer.h"
 #include "components/gui/RectTransform.h"
 #include "components/gui/Canvas.h"
 #include "components/physic/PhysicBox.h"
@@ -31,10 +30,6 @@ using namespace pyxie;
 
 #include "utils/filesystem.h"
 namespace fs = ghc::filesystem;
-
-#include <systems/physic/PhysicManager.h>
-#include <systems/particle/ParticleManager.h>
-using namespace ige::scene;
 
 namespace ige::creator
 {
@@ -124,13 +119,6 @@ namespace ige::creator
                 m_gizmo = createWidget<Gizmo>();
                 m_gizmo->setMode(Editor::getInstance()->isLocalGizmo() ? gizmo::MODE::LOCAL : gizmo::MODE::WORLD); 
                 m_gizmo->setCamera(m_currCamera);
-
-                // Initialize Shape Drawer
-                ShapeDrawer::initialize();
-
-                // Initialize Physic Debugger
-                static BulletDebugRender* debugRenderer = new BulletDebugRender();
-                PhysicManager::getInstance()->getWorld()->setDebugDrawer(debugRenderer);
 
                 initDragDrop();
 
@@ -357,13 +345,6 @@ namespace ige::creator
 
         // Update scene
         Editor::getSceneManager()->update(dt);
-
-        // Update Physic Transform infomation
-        PhysicManager::getInstance()->preUpdate();
-
-        // Update particle
-        ParticleManager::getInstance()->onUpdate(dt);
-
         // Render
         auto renderContext = RenderContext::InstancePtr();
         if (renderContext && m_fbo)
@@ -376,28 +357,11 @@ namespace ige::creator
 
             Editor::getSceneManager()->render();
 
-            // Render particle
-            ParticleManager::getInstance()->setProjectionMatrix(renderContext->GetRenderProjectionMatrix());
-            ParticleManager::getInstance()->setCameraMatrix(renderContext->GetRenderViewMatrix());
-            ParticleManager::getInstance()->onRender();
-
-            // Render debug context
-            ShapeDrawer::setViewProjectionMatrix(renderContext->GetRenderViewProjectionMatrix());
-
             // Render bounding box
             renderBoundingBox();
 
-            // Render physic debug
-            renderPhysicDebug();
-
             // Render camera frustum
             renderCameraFrustum();
-
-            // Render navigation mesh
-            renderNavMesh();
-
-            // Flush debug render
-            ShapeDrawer::flush();
 
             renderContext->EndScene();
         }
@@ -479,63 +443,6 @@ namespace ige::creator
         ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], -halfSize[2] }, position + Vec3{ +halfSize[0], +halfSize[1], -halfSize[2] }, { 1.f, 0.f, 0.f });
         ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], +halfSize[2] }, position + Vec3{ +halfSize[0], -halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
         ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], +halfSize[2] }, position + Vec3{ +halfSize[0], +halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
-    }
-
-    void EditorScene::renderPhysicDebug()
-    {
-        if (!isOpened())
-            return;
-
-        // Render Physic debug
-        PhysicManager::getInstance()->getWorld()->debugDrawWorld();
-    }
-
-    // Render navigation mesh
-    void EditorScene::renderNavMesh()
-    {
-        if (!isOpened())
-            return;
-
-        // Render navigation mesh
-        auto navMesh = Editor::getInstance()->getCurrentScene()->getRoot()->getComponent<NavMesh>();
-        if (navMesh == nullptr || !navMesh->getNavMesh())
-            return;
-
-        const dtNavMesh* mesh = navMesh->getNavMesh();
-        const auto& worldTransform = Editor::getInstance()->getCurrentScene()->getRoot()->getTransform()->getWorldMatrix();
-
-        for (int i = 0; i < mesh->getMaxTiles(); ++i)
-        {
-            const auto* tile = mesh->getTile(i);
-            if (!tile || !tile->header)
-                continue;
-
-            for (int j = 0; j < tile->header->polyCount; ++j)
-            {
-                auto poly = tile->polys + j;
-                for (int k = 0; k < poly->vertCount; ++k)
-                {
-                    auto start = worldTransform * *reinterpret_cast<const Vec3*>(&tile->verts[poly->verts[k] * 3]);
-                    auto end = worldTransform * *reinterpret_cast<const Vec3*>(&tile->verts[poly->verts[(k + 1) % poly->vertCount] * 3]);
-                    ShapeDrawer::drawLine(start, end, { 1.f, 1.f, 0.f });
-                }
-            }
-        }
-
-        std::vector<Component*> offMeshLinkComps;
-        Editor::getInstance()->getCurrentScene()->getRoot()->getComponentsRecursive(offMeshLinkComps, "OffMeshLink");
-
-        std::vector<OffMeshLink*> offMeshLinks;
-        for (auto comp : offMeshLinkComps)
-        {
-            auto link = static_cast<OffMeshLink*>(comp);
-            if (link && link->isEnabled() && link->getEndPoint())
-            {
-                const auto& start = link->getOwner()->getTransform()->getWorldPosition();
-                const auto& end = link->getEndPoint()->getTransform()->getWorldPosition();;
-                ShapeDrawer::drawLine(start, end, { 1.f, 0.f, 0.f });
-            }
-        }
     }
 
     //! Render camera frustum

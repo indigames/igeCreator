@@ -28,10 +28,7 @@ namespace ige::creator
         if (file.is_open())
         {
             file >> settingsJson;
-
             setStartScene(settingsJson.value("startScene", "scene/main.scene"));
-            setGravity(settingsJson.value("gravity", Vec3(0.f, -9.81f, 0.f)));
-            setGlobalVolume(settingsJson.value("globalVolume", 1.f));
         }
     }
 
@@ -45,25 +42,10 @@ namespace ige::creator
         clear();
         
         auto sceneGroup = createWidget<Group>("Scene Manager");
-        auto startScene = sceneGroup->createWidget<TextField>("Start scene", getStartScene().c_str());
-        startScene->getOnDataChangedEvent().addListener([this](auto val) {
-            setStartScene(val);
-        });
+        auto startScene = sceneGroup->createWidget<TextField>("Start scene", getStartScene().c_str(), true);
         startScene->addPlugin<DDTargetPlugin<std::string>>(".scene")->getOnDataReceivedEvent().addListener([this](auto val) {
             setStartScene(val);
             redraw();
-        });
-
-        auto physicGroup = createWidget<Group>("Physic Manager");        
-        std::array gravity = { m_gravity[0], m_gravity[1], m_gravity[2] };
-        physicGroup->createWidget<Drag<float, 3>>("Gravity", ImGuiDataType_Float, gravity, 0.01f)->getOnDataChangedEvent().addListener([this](auto& val) {
-            setGravity({ val[0], val[1], val[2] });
-        });
-
-        auto audioGroup = createWidget<Group>("Audio Manager");
-        std::array volume = { getGlobalVolume() };
-        audioGroup->createWidget<Drag<float>>("Global Volume", ImGuiDataType_Float, volume, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto& val) {
-            setGlobalVolume(val[0]);
         });
 
         createWidget<Separator>();

@@ -34,6 +34,7 @@
 #include <components/gui/UIImage.h>
 #include <components/gui/UIText.h>
 #include <components/gui/UITextField.h>
+#include <components/physic/PhysicManager.h>
 #include <components/physic/PhysicBox.h>
 #include <components/physic/PhysicSphere.h>
 #include <components/physic/PhysicCapsule.h>
@@ -44,6 +45,7 @@
 #include <components/physic/SliderConstraint.h>
 #include <components/physic/SpringConstraint.h>
 #include <components/physic/Dof6SpringConstraint.h>
+#include <components/audio/AudioManager.h>
 #include <components/audio/AudioSource.h>
 #include <components/audio/AudioListener.h>
 #include <components/particle/Particle.h>
@@ -187,99 +189,101 @@ namespace ige::creator
 
         auto createCompButton = m_headerGroup->createWidget<Button>("Add", ImVec2(64.f, 0.f));
         createCompButton->getOnClickEvent().addListener([this](auto widget) {
-            switch (m_createCompCombo->getSelectedIndex())
-            {
-            case (int)ComponentType::Camera:
-                m_targetObject->addComponent<CameraComponent>("camera");
-                if (!m_targetObject->getComponent<FigureComponent>())
-                    m_targetObject->addComponent<FigureComponent>("figure/camera.pyxf")->setSkipSerialize(true);
-                break;
-            case (int)ComponentType::Environment:
-                m_targetObject->addComponent<EnvironmentComponent>();
-                break;
-            case (int)ComponentType::Script:
-                m_targetObject->addComponent<ScriptComponent>();
-                break;
-            case (int)ComponentType::AmbientLight:
-                m_targetObject->addComponent<AmbientLight>();
-                break;
-            case (int)ComponentType::DirectionalLight:
-                m_targetObject->addComponent<DirectionalLight>();
-                if (!m_targetObject->getComponent<FigureComponent>() && !m_targetObject->getComponent<SpriteComponent>())
-                    m_targetObject->addComponent<SpriteComponent>("sprite/sun", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
-                break;
-            case (int)ComponentType::PointLight:
-                m_targetObject->addComponent<PointLight>();
-                if (!m_targetObject->getComponent<FigureComponent>() && !m_targetObject->getComponent<SpriteComponent>())
-                    m_targetObject->addComponent<SpriteComponent>("sprite/light", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
-                break;
-            case (int)ComponentType::SpotLight:
-                m_targetObject->addComponent<SpotLight>();
-                if (!m_targetObject->getComponent<FigureComponent>() && !m_targetObject->getComponent<SpriteComponent>())
-                    m_targetObject->addComponent<SpriteComponent>("sprite/spot-light", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
-                break;
-            case (int)ComponentType::Figure:
-                m_targetObject->addComponent<FigureComponent>();
-                break;
-            case (int)ComponentType::Sprite:
-                m_targetObject->addComponent<SpriteComponent>();
-                break;
-            case (int)ComponentType::UIImage:
-                m_targetObject->addComponent<UIImage>();
-                break;
-            case (int)ComponentType::UIText:
-                m_targetObject->addComponent<UIText>("Text", "fonts/Manjari-Regular.ttf");
-                break;
-            case (int)ComponentType::UITextField:
-                m_targetObject->addComponent<UITextField>("TextField");
-                break;
-            case (int)ComponentType::PhysicBox:
-                m_targetObject->addComponent<PhysicBox>();
-                break;
-            case (int)ComponentType::PhysicSphere:
-                m_targetObject->addComponent<PhysicSphere>();
-                break;
-            case (int)ComponentType::PhysicCapsule:
-                m_targetObject->addComponent<PhysicCapsule>();
-                break;
-            case (int)ComponentType::PhysicMesh:
-                m_targetObject->addComponent<PhysicMesh>();
-                break;
-            case (int)ComponentType::PhysicSoftBody:
-                m_targetObject->addComponent<PhysicSoftBody>();
-                break;
-            case (int)ComponentType::AudioSource:
-                m_targetObject->addComponent<AudioSource>();
-                break;
-            case (int)ComponentType::AudioListener:
-                m_targetObject->addComponent<AudioListener>();
-                break;
-            case (int)ComponentType::Particle:
-                m_targetObject->addComponent<Particle>();
-                break;
-            case (int)ComponentType::Navigable:
-                m_targetObject->addComponent<Navigable>();
-                break;
-            case (int)ComponentType::NavMesh:
-                m_targetObject->addComponent<NavMesh>();
-                break;
-            case (int)ComponentType::NavAgent:
-                m_targetObject->addComponent<NavAgent>();
-                break;
-            
-            case (int)ComponentType::DynamicNavMesh:
-                m_targetObject->addComponent<DynamicNavMesh>();
-                break;
-            
-            case (int)ComponentType::NavObstacle:
-                m_targetObject->addComponent<NavObstacle>();
-                break;
-            
-            case (int)ComponentType::OffMeshLink:
-                m_targetObject->addComponent<OffMeshLink>();
-                break;
-            }
-            redraw();
+            TaskManager::getInstance()->addTask([this]() {
+                switch (m_createCompCombo->getSelectedIndex())
+                {
+                case (int)ComponentType::Camera:
+                    m_targetObject->addComponent<CameraComponent>("camera");
+                    if (!m_targetObject->getComponent<FigureComponent>())
+                        m_targetObject->addComponent<FigureComponent>("figure/camera.pyxf")->setSkipSerialize(true);
+                    break;
+                case (int)ComponentType::Environment:
+                    m_targetObject->addComponent<EnvironmentComponent>();
+                    break;
+                case (int)ComponentType::Script:
+                    m_targetObject->addComponent<ScriptComponent>();
+                    break;
+                case (int)ComponentType::AmbientLight:
+                    m_targetObject->addComponent<AmbientLight>();
+                    break;
+                case (int)ComponentType::DirectionalLight:
+                    m_targetObject->addComponent<DirectionalLight>();
+                    if (!m_targetObject->getComponent<FigureComponent>() && !m_targetObject->getComponent<SpriteComponent>())
+                        m_targetObject->addComponent<SpriteComponent>("sprite/sun", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
+                    break;
+                case (int)ComponentType::PointLight:
+                    m_targetObject->addComponent<PointLight>();
+                    if (!m_targetObject->getComponent<FigureComponent>() && !m_targetObject->getComponent<SpriteComponent>())
+                        m_targetObject->addComponent<SpriteComponent>("sprite/light", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
+                    break;
+                case (int)ComponentType::SpotLight:
+                    m_targetObject->addComponent<SpotLight>();
+                    if (!m_targetObject->getComponent<FigureComponent>() && !m_targetObject->getComponent<SpriteComponent>())
+                        m_targetObject->addComponent<SpriteComponent>("sprite/spot-light", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
+                    break;
+                case (int)ComponentType::Figure:
+                    m_targetObject->addComponent<FigureComponent>();
+                    break;
+                case (int)ComponentType::Sprite:
+                    m_targetObject->addComponent<SpriteComponent>();
+                    break;
+                case (int)ComponentType::UIImage:
+                    m_targetObject->addComponent<UIImage>();
+                    break;
+                case (int)ComponentType::UIText:
+                    m_targetObject->addComponent<UIText>("Text", "fonts/Manjari-Regular.ttf");
+                    break;
+                case (int)ComponentType::UITextField:
+                    m_targetObject->addComponent<UITextField>("TextField");
+                    break;
+                case (int)ComponentType::PhysicBox:
+                    m_targetObject->addComponent<PhysicBox>();
+                    break;
+                case (int)ComponentType::PhysicSphere:
+                    m_targetObject->addComponent<PhysicSphere>();
+                    break;
+                case (int)ComponentType::PhysicCapsule:
+                    m_targetObject->addComponent<PhysicCapsule>();
+                    break;
+                case (int)ComponentType::PhysicMesh:
+                    m_targetObject->addComponent<PhysicMesh>();
+                    break;
+                case (int)ComponentType::PhysicSoftBody:
+                    m_targetObject->addComponent<PhysicSoftBody>();
+                    break;
+                case (int)ComponentType::AudioSource:
+                    m_targetObject->addComponent<AudioSource>();
+                    break;
+                case (int)ComponentType::AudioListener:
+                    m_targetObject->addComponent<AudioListener>();
+                    break;
+                case (int)ComponentType::Particle:
+                    m_targetObject->addComponent<Particle>();
+                    break;
+                case (int)ComponentType::Navigable:
+                    m_targetObject->addComponent<Navigable>();
+                    break;
+                case (int)ComponentType::NavMesh:
+                    m_targetObject->addComponent<NavMesh>();
+                    break;
+                case (int)ComponentType::NavAgent:
+                    m_targetObject->addComponent<NavAgent>();
+                    break;
+
+                case (int)ComponentType::DynamicNavMesh:
+                    m_targetObject->addComponent<DynamicNavMesh>();
+                    break;
+
+                case (int)ComponentType::NavObstacle:
+                    m_targetObject->addComponent<NavObstacle>();
+                    break;
+
+                case (int)ComponentType::OffMeshLink:
+                    m_targetObject->addComponent<OffMeshLink>();
+                    break;
+                }
+                redraw();
+            });
         });
 
         // Component
@@ -346,6 +350,11 @@ namespace ige::creator
                 m_uiTextGroup = header->createWidget<Group>("UITextGroup", false);
                 drawUIText();
             }
+            else if (component->getName() == "PhysicManager")
+            {
+                m_physicManagerGroup = header->createWidget<Group>("PhysicManagerGroup", false);
+                drawPhysicManager();
+            }
             else if (component->getName() == "PhysicBox")
             {
                 m_physicGroup = header->createWidget<Group>("PhysicGroup", false);
@@ -370,6 +379,11 @@ namespace ige::creator
             {
                 m_physicGroup = header->createWidget<Group>("PhysicGroup", false);
                 drawPhysicSoftBody();
+            }
+            else if (component->getName() == "AudioManager")
+            {
+                m_audioManagerGroup = header->createWidget<Group>("AudioManager", false);
+                drawAudioManager();
             }
             else if (component->getName() == "AudioSource")
             {
@@ -1341,6 +1355,58 @@ namespace ige::creator
         });
     }
 
+    //! Draw PhysicManager component
+    void Inspector::drawPhysicManager()
+    {
+        if (m_physicManagerGroup == nullptr)
+            return;
+        m_physicManagerGroup->removeAllWidgets();
+
+        auto physicComp = m_targetObject->getComponent<PhysicManager>();
+        if (physicComp == nullptr)
+            return;
+
+        auto columns = m_physicManagerGroup->createWidget<Columns<2>>();
+        columns->createWidget<CheckBox>("Deformable", physicComp->isDeformable())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto physicComp = m_targetObject->getComponent<PhysicManager>();
+            physicComp->setDeformable(val);
+        });
+        columns->createWidget<CheckBox>("Debug", physicComp->isShowDebug())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto physicComp = m_targetObject->getComponent<PhysicManager>();
+            physicComp->setShowDebug(val);
+        });
+
+        std::array numItr = { physicComp->getNumIteration() };
+        m_physicManagerGroup->createWidget<Drag<int>>("Iterations Number", ImGuiDataType_S32, numItr, 1, 1, 32)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicManager>();
+            physicComp->setNumIteration(val[0]);
+        });
+
+        std::array subSteps = { physicComp->getFrameMaxSubStep() };
+        m_physicManagerGroup->createWidget<Drag<int>>("Max Substeps Number", ImGuiDataType_S32, subSteps, 1, 1, 32)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicManager>();
+            physicComp->setFrameMaxSubStep(val[0]);
+        });
+
+        std::array timeStep = { physicComp->getFixedTimeStep() };
+        m_physicManagerGroup->createWidget<Drag<float>>("Time Step", ImGuiDataType_Float, timeStep, 0.001f, 0.001f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicManager>();
+            physicComp->setFixedTimeStep(val[0]);
+        });
+
+        std::array frameRatio = { physicComp->getFrameUpdateRatio() };
+        m_physicManagerGroup->createWidget<Drag<float>>("Update Ratio", ImGuiDataType_Float, frameRatio, 0.001f, 0.001f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicManager>();
+            physicComp->setFrameUpdateRatio(val[0]);
+        });
+
+        std::array gravity = { physicComp->getGravity().x(), physicComp->getGravity().y(), physicComp->getGravity().z() };
+        m_physicManagerGroup->createWidget<Drag<float, 3>>("Gravity", ImGuiDataType_Float, gravity, 0.001f, 0.001f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto physicComp = m_targetObject->getComponent<PhysicManager>();
+            physicComp->setGravity({ val[0], val[1], val[2] });
+        });
+    }
+
     //! Draw PhysicObject component
     void Inspector::drawPhysicObject()
     {
@@ -2171,6 +2237,24 @@ namespace ige::creator
         }
     }
 
+    //! Draw AudioManager component
+    void Inspector::drawAudioManager()
+    {
+        if (m_audioManagerGroup == nullptr)
+            return;
+        m_audioManagerGroup->removeAllWidgets();
+
+        auto audioMngComp = m_targetObject->getComponent<AudioManager>();
+        if (audioMngComp == nullptr)
+            return;
+
+        std::array volume = { audioMngComp->getGlobalVolume() };
+        m_audioManagerGroup->createWidget<Drag<float>>("Global Volume", ImGuiDataType_Float, volume, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto& val) {
+            auto audioMngComp = m_targetObject->getComponent<AudioManager>();
+            audioMngComp->setGlobalVolume(val[0]);
+        });
+    }
+
     //! Draw AudioSource
     void Inspector::drawAudioSource()
     {
@@ -2484,18 +2568,22 @@ namespace ige::creator
         });
 
         auto txtPath = m_particleGroup->createWidget<TextField>("Path", particle->getPath());
-        txtPath->getOnDataChangedEvent().addListener([this](const auto& val) {
-            auto particle = m_targetObject->getComponent<Particle>();
-            particle->setPath(val);
-            particle->play();
-        });
-        for (const auto& type : GetFileExtensionSuported(E_FileExts::Particle))
-        {
-            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& val) {
+        txtPath->getOnDataChangedEvent().addListener([this](auto val) {
+            TaskManager::getInstance()->addTask([val, this]() {
                 auto particle = m_targetObject->getComponent<Particle>();
                 particle->setPath(val);
                 particle->play();
-                redraw();
+            });
+        });
+        for (const auto& type : GetFileExtensionSuported(E_FileExts::Particle))
+        {
+            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto val) {
+                TaskManager::getInstance()->addTask([val, this]() {
+                    auto particle = m_targetObject->getComponent<Particle>();
+                    particle->setPath(val);
+                    particle->play();
+                    redraw();
+                });
             });
         }
     }
@@ -2537,6 +2625,10 @@ namespace ige::creator
         column->createWidget<CheckBox>("Enable", navMesh->isEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
             auto navMesh = m_targetObject->getComponent<NavMesh>();
             navMesh->setEnabled(val);
+        });
+        column->createWidget<CheckBox>("Debug", navMesh->isShowDebug())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto navMesh = m_targetObject->getComponent<NavMesh>();
+            navMesh->setShowDebug(val);
         });
         column->createWidget<Button>("Build", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
             auto navMesh = m_targetObject->getComponent<NavMesh>();
@@ -2951,11 +3043,25 @@ namespace ige::creator
             m_uiTextGroup = nullptr;
         }
 
+        if (m_physicManagerGroup)
+        {
+            m_physicManagerGroup->removeAllWidgets();
+            m_physicManagerGroup->removeAllPlugins();
+            m_physicManagerGroup = nullptr;
+        }
+
         if (m_physicGroup)
         {
             m_physicGroup->removeAllWidgets();
             m_physicGroup->removeAllPlugins();
             m_physicGroup = nullptr;
+        }
+
+        if (m_audioManagerGroup)
+        {
+            m_audioManagerGroup->removeAllWidgets();
+            m_audioManagerGroup->removeAllPlugins();
+            m_audioManagerGroup = nullptr;
         }
 
         if (m_audioSourceGroup)

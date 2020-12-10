@@ -2,7 +2,6 @@
 
 #include <scene/SceneManager.h>
 #include <scene/Scene.h>
-#include <systems/physic/PhysicManager.h>
 using namespace ige::scene;
 
 #include <json/json.hpp>
@@ -25,9 +24,6 @@ bool Game::onInit(DeviceHandle dh)
 {
     // Init super
     Application::onInit(dh);
-
-    // Create physic instance
-    PhysicManager::getInstance()->initialize();
 
     // Load config
     std::string scenePath = "scene/main.json";
@@ -55,9 +51,6 @@ bool Game::onUpdate()
     // Update scene
     SceneManager::getInstance()->update(dt);
 
-    // Update Physic
-    PhysicManager::getInstance()->onUpdate(dt);
-
     return true;
 }
 
@@ -78,8 +71,6 @@ void Game::onRender()
 void Game::onShutdown()
 {
     SceneManager::destroy();
-
-    PhysicManager::destroy();
 
     // Destroy super
     Application::onShutdown();

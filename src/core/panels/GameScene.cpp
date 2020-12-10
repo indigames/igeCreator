@@ -16,8 +16,6 @@ namespace fs = std::filesystem;
 #include <scene/Scene.h>
 #include <scene/SceneObject.h>
 #include <scene/SceneManager.h>
-#include <systems/physic/PhysicManager.h>
-#include <systems/audio/AudioManager.h>
 using namespace ige::scene;
 
 #include <utils/PyxieHeaders.h>
@@ -121,14 +119,8 @@ namespace ige::creator
         //! Update Panel
         Panel::update(dt);
 
-        // Update Physic
-        PhysicManager::getInstance()->onUpdate(dt);
-
         // Update scene
         Editor::getSceneManager()->update(dt);
-
-        // Update Audio
-        AudioManager::getInstance()->onUpdate(dt);
 
         // Render
         auto renderContext = RenderContext::InstancePtr();

@@ -40,14 +40,8 @@ namespace ige::creator
         //! Render bouding box
         void renderBoundingBox();
 
-        //! Render physic shape
-        void renderPhysicDebug();
-
         //! Render camera frustum
         void renderCameraFrustum();
-
-        //! Render navigation mesh
-        void renderNavMesh();
 
         //! Camera movement with mouse
         void updateCameraPosition();

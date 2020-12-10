@@ -12,9 +12,6 @@
 
 #include <scene/SceneManager.h>
 #include <scene/Scene.h>
-#include <systems/physic/PhysicManager.h>
-#include <systems/audio/AudioManager.h>
-#include <systems/particle/ParticleManager.h>
 using namespace ige::scene;
 
 #define VERSION "0.0.4"
@@ -30,13 +27,6 @@ namespace ige::creator
         m_canvas = nullptr;
 
         SceneManager::destroy();
-
-        PhysicManager::destroy();
-
-        AudioManager::destroy();
-
-        ParticleManager::destroy();
-
         m_app = nullptr;
 
         ImGui_ImplOpenGL3_Shutdown();
@@ -47,15 +37,6 @@ namespace ige::creator
     void Editor::initialize()
     {
         initImGUI();
-
-        // Create physic instance
-        PhysicManager::getInstance()->initialize();
-
-        // Create audio manager
-        AudioManager::getInstance();
-
-        // Create particle manager instance
-        ParticleManager::getInstance();
 
         m_canvas = std::make_shared<Canvas>();
         m_canvas->setDockable(true);

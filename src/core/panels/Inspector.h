@@ -79,6 +79,9 @@ namespace ige::creator
         //! Draw UIText component
         void drawUIText();
 
+        //! Draw PhysicManager component
+        void drawPhysicManager();
+
         //! Draw PhysicObject component
         void drawPhysicObject();
 
@@ -96,6 +99,9 @@ namespace ige::creator
 
         //! Draw PhysicSoftBody component
         void drawPhysicSoftBody();
+
+        //! Draw AudioManager component
+        void drawAudioManager();
 
         //! Draw AudioSource component
         void drawAudioSource();
@@ -191,7 +197,9 @@ namespace ige::creator
         std::shared_ptr<Group> m_canvasGroup = nullptr;
         std::shared_ptr<Group> m_uiImageGroup = nullptr;
         std::shared_ptr<Group> m_uiTextGroup = nullptr;
+        std::shared_ptr<Group> m_physicManagerGroup = nullptr;
         std::shared_ptr<Group> m_physicGroup = nullptr;
+        std::shared_ptr<Group> m_audioManagerGroup = nullptr;
         std::shared_ptr<Group> m_audioSourceGroup = nullptr;
         std::shared_ptr<Group> m_audioListenerGroup = nullptr;
         std::shared_ptr<Group> m_constraintGroup = nullptr;
