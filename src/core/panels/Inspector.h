@@ -142,6 +142,9 @@ namespace ige::creator
         //! Draw Dof6 Spring Constraint
         void drawDof6SpringConstraint(const std::shared_ptr<PhysicConstraint>& constraint);
 
+        //! Draw ParticleManager component
+        void drawParticleManager();
+
         //! Draw Particle
         void drawParticle();
 
@@ -204,6 +207,7 @@ namespace ige::creator
         std::shared_ptr<Group> m_audioListenerGroup = nullptr;
         std::shared_ptr<Group> m_constraintGroup = nullptr;
         std::shared_ptr<ComboBox> m_constraintCreateCombo = nullptr;
+        std::shared_ptr<Group> m_particleManagerGroup = nullptr;
         std::shared_ptr<Group> m_particleGroup = nullptr;
         std::shared_ptr<Group> m_navigableGroup = nullptr;
         std::shared_ptr<Group> m_navMeshGroup = nullptr;

@@ -48,6 +48,7 @@
 #include <components/audio/AudioManager.h>
 #include <components/audio/AudioSource.h>
 #include <components/audio/AudioListener.h>
+#include <components/particle/ParticleManager.h>
 #include <components/particle/Particle.h>
 #include <components/navigation/NavMesh.h>
 #include <components/navigation/NavAgent.h>
@@ -414,6 +415,11 @@ namespace ige::creator
             {
                 m_spotLightGroup = header->createWidget<Group>("SpotLight", false);
                 drawSpotLight();
+            }
+            else if (component->getName() == "ParticleManager")
+            {
+                m_particleManagerGroup = header->createWidget<Group>("ParticleManager", false);
+                drawParticleManager();
             }
             else if (component->getName() == "Particle")
             {
@@ -2500,6 +2506,52 @@ namespace ige::creator
         });
     }
     
+    //! Draw ParticleManager
+    void Inspector::drawParticleManager()
+    {
+        if (m_particleManagerGroup == nullptr)
+            return;
+        m_particleManagerGroup->removeAllWidgets();
+
+        auto particleManager = m_targetObject->getComponent<ParticleManager>();
+        if (particleManager == nullptr)
+            return;
+
+        auto column = m_particleManagerGroup->createWidget<Columns<2>>();
+        column->createWidget<CheckBox>("Culling", particleManager->isCullingEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
+            auto particleManager = m_targetObject->getComponent<ParticleManager>();
+            particleManager->setCullingEnabled(val);
+            redraw();
+        });
+
+        if (particleManager->isCullingEnabled())
+        {
+            std::array cullingWorld = { particleManager->getCullingWorldSize().X(), particleManager->getCullingWorldSize().Y(), particleManager->getCullingWorldSize().Z() };
+            m_particleManagerGroup->createWidget<Drag<float, 3>>("Culling World Size", ImGuiDataType_Float, cullingWorld, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
+                auto particleManager = m_targetObject->getComponent<ParticleManager>();
+                particleManager->setCullingWorldSize({ val[0], val[1], val[2] });
+            });
+
+            std::array numLayer = { particleManager->getCullingLayerNumber() };
+            m_particleManagerGroup->createWidget<Drag<int>>("Number Layers", ImGuiDataType_S32, numLayer, 1, 1)->getOnDataChangedEvent().addListener([this](auto val) {
+                auto particleManager = m_targetObject->getComponent<ParticleManager>();
+                particleManager->setCullingLayerNumber(val[0]);
+            });
+        }
+        
+        std::array maxParticles = { particleManager->getMaxParticleNumber() };
+        m_particleManagerGroup->createWidget<Drag<int>>("Max Parcicles", ImGuiDataType_S32, maxParticles, 1, 1)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto particleManager = m_targetObject->getComponent<ParticleManager>();
+            particleManager->setMaxParticleNumber(val[0]);
+        });
+
+        std::array threadNum = { particleManager->getNumberOfThreads() };
+        m_particleManagerGroup->createWidget<Drag<int>>("Number Threads", ImGuiDataType_S32, threadNum, 1, 1)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto particleManager = m_targetObject->getComponent<ParticleManager>();
+            particleManager->setNumberOfThreads(val[0]);
+        });
+    }
+
     //! Draw Particle
     void Inspector::drawParticle()
     {
@@ -3117,6 +3169,13 @@ namespace ige::creator
         {
             m_constraintCreateCombo->removeAllPlugins();
             m_constraintCreateCombo = nullptr;
+        }
+
+        if (m_particleManagerGroup)
+        {
+            m_particleManagerGroup->removeAllWidgets();
+            m_particleManagerGroup->removeAllPlugins();
+            m_particleManagerGroup = nullptr;
         }
 
         if (m_particleGroup)
