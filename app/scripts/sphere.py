@@ -21,7 +21,11 @@ class Sphere(Script):
             print(f'applyForce, body: {body}')
             body.applyForce(0, 0, -1000.0)
             print('applyForce OK')
-
+        navAgent = self.owner.getComponent("NavAgent")
+        if navAgent is not None:
+            print(f'agent: {navAgent}')
+            navAgent.targetPosition = (0, 0, -30.0)
+            print(f'agent pos: {navAgent.targetPosition}')
     def onUpdate(self, dt):
         if not self.updated:
             print(f'onUpdate, dt = {dt}')
