@@ -78,7 +78,6 @@ namespace ige::creator
         //! Initialize states
         bool m_bIs2DMode = false;
         bool m_bIsInitialized = false;
-        bool m_bNeedResize = false;
 
         //! Camera control
         bool m_bIsFirstTouch = true;

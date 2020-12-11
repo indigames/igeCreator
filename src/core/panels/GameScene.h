@@ -43,7 +43,6 @@ namespace ige::creator
         bool m_bInitialized = false;
         bool m_bIsPlaying = false;
         bool m_bIsPausing = false;
-        bool m_bNeedResize = false;
         uint64_t m_lastObjectId = -1;
     };
 }

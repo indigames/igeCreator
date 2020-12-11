@@ -49,7 +49,7 @@ class Sphere(Script):
                 print(f' camera: {camera}')
                 if camera is not None:
                     hit = self.scene.raycast(pos, camera)
-					if hit is not None:
+                    if hit is not None:
                         print(f' hit: {hit}')
                         self.navAgent.targetPosition = hit["hitPosition"]
                         print(f'agent pos: {self.navAgent.targetPosition}')

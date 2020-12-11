@@ -7,6 +7,7 @@
 #include "core/Canvas.h"
 #include "core/plugin/DragDropPlugin.h"
 #include "core/FileHandle.h"
+#include "core/task/TaskManager.h"
 
 #include "utils/GraphicsHelper.h"
 #include "scene/Scene.h"
@@ -90,9 +91,29 @@ namespace ige::creator
                 m_fbo = ResourceCreator::Instance().NewRenderTarget(m_rtTexture, true, true);
                 m_imageWidget = createWidget<Image>(m_fbo->GetColorTexture()->GetTextureHandle(), size);
 
+                // Position changed event
+                getOnPositionChangedEvent().addListener([this](auto pos) {
+                    TaskManager::getInstance()->addTask([this]() {
+                        if (SceneManager::getInstance()->getCurrentScene())
+                            SceneManager::getInstance()->getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y + 25.f }); // Title bar size
+                    });
+                });
+
+                // Size changed event
                 getOnSizeChangedEvent().addListener([this](auto size) {
-                    auto currSize = getSize();
-                    m_bNeedResize = (currSize.x != size.x || currSize.y != size.y);
+                    TaskManager::getInstance()->addTask([this]() {
+                        auto size = getSize();
+                        m_fbo->Resize(size.x, size.y);
+                        m_imageWidget->setSize(size);
+
+                        // Update camera aspect rate
+                        if (m_currCamera)
+                            m_currCamera->SetAspectRate(size.x / size.y);
+
+                        // Update window pos and size
+                        if (SceneManager::getInstance()->getCurrentScene())                                                    
+                            SceneManager::getInstance()->getCurrentScene()->setWindowSize({ getSize().x, getSize().y });                        
+                    });
                 });
 
                 m_grid2D = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, "sprite/grid");
@@ -121,6 +142,13 @@ namespace ige::creator
                 m_gizmo->setCamera(m_currCamera);
 
                 initDragDrop();
+
+                // Initialize window pos and size
+                if (SceneManager::getInstance()->getCurrentScene())
+                {
+                    SceneManager::getInstance()->getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y + 25.f }); // Title bar size
+                    SceneManager::getInstance()->getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
+                }
 
                 m_bIsInitialized = true;
             }
@@ -308,17 +336,6 @@ namespace ige::creator
         // Ensure initialization
         initialize();
 
-        // Update render target size
-        if (m_bNeedResize)
-        {
-            auto size = getSize();
-            m_fbo->Resize(size.x, size.y);
-            m_imageWidget->setSize(size);
-            if(m_currCamera)
-                m_currCamera->SetAspectRate(size.x / size.y);
-            m_bNeedResize = false;
-        }
-
         //! If there is no scene, just do nothing
         if (!m_bIsInitialized || !Editor::getCurrentScene() || m_currCamera == nullptr || m_currShowcase == nullptr)
         {
@@ -397,25 +414,7 @@ namespace ige::creator
         {
             float touchX, touchY;
             touch->getFingerPosition(0, touchX, touchY);
-
-            float screenW = SystemInfo::Instance().GetGameW();
-            float screenH = SystemInfo::Instance().GetGameH();
-
-            auto size = getSize();
-            float w = size.x;
-            float h = size.y;
-
-            auto pos = getPosition();
-            float dx = pos.x;
-            float dy = (pos.y + 25.f); // Add title offset
-
-            float x = touchX - dx / 2.f;
-            float y = touchY + dy / 2.f;
-
-            x = x + (screenW - (w + dx)) / 2.f;
-            y = y - (screenH - (h + dy)) / 2.f;
-
-            auto hit = SceneManager::getInstance()->getCurrentScene()->raycast(Vec2(x, y), m_currCamera, 10000.f, Vec2(w, h));
+            auto hit = SceneManager::getInstance()->getCurrentScene()->raycast(Vec2(touchX, touchY), m_currCamera, 10000.f);
             if (hit.first)
                 hit.first->setSelected(true);
         }

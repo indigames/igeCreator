@@ -11,6 +11,7 @@ namespace fs = std::filesystem;
 #include "core/panels/Hierarchy.h"
 #include "core/panels/EditorScene.h"
 #include "core/dialog/SaveFileDialog.h"
+#include "core/task/TaskManager.h"
 
 #include <utils/GraphicsHelper.h>
 #include <scene/Scene.h>
@@ -73,15 +74,42 @@ namespace ige::creator
                 m_fbo = ResourceCreator::Instance().NewRenderTarget(m_rtTexture, true, true);
                 m_imageWidget = createWidget<Image>(m_fbo->GetColorTexture()->GetTextureHandle(), size);
 
+                // Position changed event
+                getOnPositionChangedEvent().addListener([this](auto pos) {
+                    TaskManager::getInstance()->addTask([this]() {
+                        if (SceneManager::getInstance()->getCurrentScene())
+                            SceneManager::getInstance()->getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y + 25.f }); // Title bar size
+                    });
+                });
+
+                // Size changed event
                 getOnSizeChangedEvent().addListener([this](auto size) {
-                    auto currSize = getSize();
-                    m_bNeedResize = (currSize.x != size.x || currSize.y != size.y);
+                    TaskManager::getInstance()->addTask([this]() {
+                        auto size = getSize();
+                        m_fbo->Resize(size.x, size.y);
+                        m_imageWidget->setSize(size);
+
+                        // Adjust camera aspect ratio
+                        if (Editor::getSceneManager()->getCurrentScene() 
+                            && Editor::getSceneManager()->getCurrentScene()->getActiveCamera())                        
+                            Editor::getSceneManager()->getCurrentScene()->getActiveCamera()->setAspectRatio(size.x / size.y);                        
+
+                        if (SceneManager::getInstance()->getCurrentScene())
+                            SceneManager::getInstance()->getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
+                    });
                 });
 
                 // Adjust camera aspect ratio
                 if (Editor::getSceneManager()->getCurrentScene() && Editor::getSceneManager()->getCurrentScene()->getActiveCamera())
                 {
                     Editor::getSceneManager()->getCurrentScene()->getActiveCamera()->setAspectRatio(size.x / size.y);
+                }
+
+                // Initialize window pos and size
+                if (SceneManager::getInstance()->getCurrentScene())
+                {
+                    SceneManager::getInstance()->getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y + 25.f }); // Title bar size
+                    SceneManager::getInstance()->getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
                 }
 
                 m_bInitialized = true;
@@ -99,22 +127,6 @@ namespace ige::creator
 
         if (!m_bInitialized)
             return;
-
-        // Update render target size
-        if (m_bNeedResize)
-        {
-            auto size = getSize();
-            m_fbo->Resize(size.x, size.y);
-            m_imageWidget->setSize(size);
-
-            // Adjust camera aspect ratio
-            if (Editor::getSceneManager()->getCurrentScene() && Editor::getSceneManager()->getCurrentScene()->getActiveCamera())
-            {
-                Editor::getSceneManager()->getCurrentScene()->getActiveCamera()->setAspectRatio(size.x / size.y);
-            }
-            m_bNeedResize = false;
-        }
-
 
         //! Update Panel
         Panel::update(dt);

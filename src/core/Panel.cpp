@@ -6,7 +6,7 @@ namespace ige::creator
 {
     uint64_t Panel::s_idCounter = 0;
 
-    Panel::Panel(const std::string& name, const Panel::Settings& settings)
+    Panel::Panel(const std::string& name, Panel::Settings settings)
     {
         m_name = name;
         m_settings = settings;
@@ -17,6 +17,8 @@ namespace ige::creator
     {
         getOnOpenedEvent().removeAllListeners();
         getOnClosedEvent().removeAllListeners();
+        getOnSizeChangedEvent().removeAllListeners();
+        getOnPositionChangedEvent().removeAllListeners();
     }
 
     void Panel::update(float dt)
@@ -98,6 +100,7 @@ namespace ige::creator
                 auto windowPos = ImGui::GetWindowPos();
                 if (m_position.x != windowPos.x || m_position.y != windowPos.y)
                 {
+                    getOnPositionChangedEvent().invoke(windowPos);
                     m_position = windowPos;
                 }
                 
