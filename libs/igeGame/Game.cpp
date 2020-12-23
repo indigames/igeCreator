@@ -26,13 +26,14 @@ bool Game::onInit(DeviceHandle dh)
     Application::onInit(dh);
 
     // Load config
-    std::string scenePath = "scene/main.json";
     std::ifstream file("settings.json");
+	std::string scenePath = "scene/main.scene";
+
     if (file.is_open())
     {
         json jScene;
         file >> jScene;
-        scenePath = jScene.value("startScene", "scene/main.json");
+        scenePath = jScene.value("startScene", "scene/main.scene");
     }
 
     // Load scene

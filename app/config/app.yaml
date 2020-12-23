@@ -61,6 +61,7 @@ Modules: # Modules config
     igeGamesServices: true
     igeInAppPurchase: false
     igeNanoGUI: false
+    igeNavigation: true
     igeNotify: true
     igePAL: true
     igeSocial: true
