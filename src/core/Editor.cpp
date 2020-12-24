@@ -3,6 +3,7 @@
 #include <examples/imgui_impl_sdl.h>
 #include <examples/imgui_impl_opengl3.h>
 
+#include "core/Version.h"
 #include "core/Editor.h"
 #include "core/Canvas.h"
 #include "core/panels/Inspector.h"
@@ -13,8 +14,6 @@
 #include <scene/SceneManager.h>
 #include <scene/Scene.h>
 using namespace ige::scene;
-
-#define VERSION "0.0.4"
 
 namespace ige::creator
 {
