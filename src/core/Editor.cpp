@@ -10,10 +10,14 @@
 #include "core/panels/EditorScene.h"
 #include "core/task/TaskManager.h"
 #include "core/dialog/MsgBox.h"
+#include "core/dialog/SaveFileDialog.h"
 
 #include <scene/SceneManager.h>
 #include <scene/Scene.h>
 using namespace ige::scene;
+
+#include "utils/filesystem.h"
+namespace fs = ghc::filesystem;
 
 namespace ige::creator
 {
@@ -35,8 +39,13 @@ namespace ige::creator
 
     void Editor::initialize()
     {
+        // Set engine path to the runtime path
+        setEnginePath(fs::current_path().string());
+
+        // Init ImGUI
         initImGUI();
 
+        // Init Canvas
         m_canvas = std::make_shared<Canvas>();
         m_canvas->setDockable(true);
 
@@ -68,7 +77,7 @@ namespace ige::creator
 
             // If no scene loaded, create empty scene
             if (scene == nullptr)
-                scene = Editor::getSceneManager()->createScene();
+                scene = SceneManager::getInstance()->createScene();
 
             // Set current scene to new loaded/created scene
             Editor::setCurrentScene(scene);
@@ -134,12 +143,12 @@ namespace ige::creator
     //! Set current selected object by its Id
     void Editor::setSelectedObject(uint64_t objId)
     {
-        if (objId == (uint64_t)-1 || !getSceneManager()->getCurrentScene())
+        if (objId == (uint64_t)-1 || !SceneManager::getInstance()->getCurrentScene())
         {
             setSelectedObject(nullptr);
             return;
         }
-        auto obj = getSceneManager()->getCurrentScene()->findObjectById(objId);
+        auto obj = SceneManager::getInstance()->getCurrentScene()->findObjectById(objId);
         setSelectedObject(obj);
     }
 
@@ -162,6 +171,54 @@ namespace ige::creator
     std::shared_ptr<SceneObject>& Editor::getSelectedObject()
     {
         return m_selectedObject;
+    }
+
+    bool Editor::createProject(const std::string& path)
+    {
+        if (!fs::is_empty(fs::path(path)))
+        {
+            auto btn = MsgBox("Warning", "Folder is not empty.\nDo you want to create project anyway?", MsgBox::EBtnLayout::yes_no, MsgBox::EMsgType::info).result();
+            if (btn == MsgBox::EButton::no)
+                return false;
+        }
+        
+        return true;
+    }
+
+    bool Editor::createScene()
+    {
+        setSelectedObject(-1);
+        SceneManager::getInstance()->unloadScene(SceneManager::getInstance()->getCurrentScene());
+        setCurrentScene(SceneManager::getInstance()->createScene());
+        return true;
+    }
+
+    bool Editor::loadScene(const std::string& path)
+    {
+        setSelectedObject(-1);
+        SceneManager::getInstance()->unloadScene(SceneManager::getInstance()->getCurrentScene());
+        getCanvas()->getHierarchy()->clear();
+        getCanvas()->getEditorScene()->clear();
+        getCanvas()->getHierarchy()->initialize();
+        setCurrentScene(SceneManager::getInstance()->loadScene(path));
+        return true;
+    }
+
+    bool Editor::saveScene()
+    {
+        if (SceneManager::getInstance()->getCurrentScene()->getPath().empty())
+        {
+            auto selectedFile = SaveFileDialog("Save", ".", { "scene", "*.scene" }).result();
+            if (!selectedFile.empty())
+            {
+                SceneManager::getInstance()->saveScene(selectedFile);
+            }
+        }
+        else
+        {
+            SceneManager::getInstance()->saveScene();
+        }
+        return true;
     }
 
     bool Editor::buildRom()
@@ -253,15 +310,15 @@ namespace ige::creator
     //! Prefab save/load
     bool Editor::savePrefab(uint64_t objectId, const std::string& file)
     {
-        if (getSceneManager()->getCurrentScene())
-            return getSceneManager()->getCurrentScene()->savePrefab(objectId, file);
+        if (SceneManager::getInstance()->getCurrentScene())
+            return SceneManager::getInstance()->getCurrentScene()->savePrefab(objectId, file);
         return false;
     }
 
     bool Editor::loadPrefab(uint64_t parentId, const std::string& file)
     {
-        if (getSceneManager()->getCurrentScene())
-            return getSceneManager()->getCurrentScene()->loadPrefab(parentId, file);
+        if (SceneManager::getInstance()->getCurrentScene())
+            return SceneManager::getInstance()->getCurrentScene()->loadPrefab(parentId, file);
         return false;
     }
 }

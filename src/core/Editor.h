@@ -36,15 +36,19 @@ namespace ige::creator
         bool openDocument();
         bool openAbout();
 
+        bool createProject(const std::string& path);
+        bool createScene();
+        bool loadScene(const std::string& path);
+        bool saveScene();
+
         void registerApp(std::shared_ptr<Application> app) { m_app = app; }
 
         static std::shared_ptr<Application>& getApp() { return getInstance()->m_app; }
         static std::shared_ptr<Canvas>& getCanvas() { return getInstance()->m_canvas; }
-        static std::unique_ptr<SceneManager>& getSceneManager() { return SceneManager::getInstance(); }
 
         //! Short-cut access to current scene
-        static std::shared_ptr<Scene> getCurrentScene() { return getSceneManager() ? getSceneManager()->getCurrentScene() : nullptr; }
-        static void setCurrentScene(const std::shared_ptr<Scene>& scene) { if (getSceneManager()) getSceneManager()->setCurrentScene(scene); }
+        static std::shared_ptr<Scene> getCurrentScene() { return SceneManager::getInstance()->getCurrentScene(); }
+        static void setCurrentScene(const std::shared_ptr<Scene>& scene) { SceneManager::getInstance()->setCurrentScene(scene); }
 
         //! Set current selected object by its id
         void setSelectedObject(uint64_t objId);
@@ -63,6 +67,14 @@ namespace ige::creator
         bool savePrefab(uint64_t objectId, const std::string& file);
         bool loadPrefab(uint64_t parentId, const std::string& file);
 
+        //! Engine path
+        const std::string& getEnginePath() const { return m_enginePath; }
+        void setEnginePath(const std::string& path) { m_enginePath = path; }
+
+        //! Project path
+        const std::string& getProjectPath() const { return m_projectPath; }
+        void setProjectPath(const std::string& path) { m_projectPath = path; }
+
     protected:
         virtual void initImGUI();
         virtual bool handleEventImGUI(const SDL_Event* event);
@@ -73,6 +85,10 @@ namespace ige::creator
         std::shared_ptr<Canvas> m_canvas = nullptr;
         std::shared_ptr<Application> m_app = nullptr;
         std::shared_ptr<SceneObject> m_selectedObject = nullptr;
+
+        //! Path settings
+        std::string m_enginePath;
+        std::string m_projectPath;
 
         //! Toggle local/global gizmo
         bool m_bIsLocalGizmo = true;

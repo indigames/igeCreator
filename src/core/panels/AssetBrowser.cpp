@@ -21,8 +21,8 @@
 
 namespace ige::creator
 {
-    AssetBrowser::AssetBrowser(const std::string& name, const Panel::Settings& settings, const std::string& engineAssetPath, const std::string& projectAssetPath)
-        : Panel(name, settings), m_engineAssetFolder(engineAssetPath), m_projectAssetFolder(projectAssetPath)
+    AssetBrowser::AssetBrowser(const std::string& name, const Panel::Settings& settings)
+        : Panel(name, settings)
     {
             
     }

@@ -53,18 +53,19 @@ namespace ige::creator
     void MenuBar::createFileMenu()
     {
         auto fileMenu = createWidget<Menu>("File");
+        fileMenu->createWidget<MenuItem>("New Project", "CTRL + Shift + N")->getOnClickEvent().addListener([this](auto widget) {
+            auto path = OpenFolderDialog("Path", ".", OpenFileDialog::Option::force_path).result();
+            if (!path.empty())
+            {
+                TaskManager::getInstance()->addTask([path]() {
+                    Editor::getInstance()->createProject(path);
+                });
+            }
+        });
+
         fileMenu->createWidget<MenuItem>("New Scene", "CTRL + N")->getOnClickEvent().addListener([this](auto widget) {
             TaskManager::getInstance()->addTask([](){
-                Editor::getInstance()->setSelectedObject(-1);
-
-                auto& scene = Editor::getCurrentScene();
-                if (scene)
-                {
-                    Editor::getSceneManager()->unloadScene(scene);
-                    scene = nullptr;
-                }
-                scene = Editor::getSceneManager()->createScene();
-                Editor::setCurrentScene(scene);
+                Editor::getInstance()->createScene();
             });
         });
 
@@ -72,35 +73,16 @@ namespace ige::creator
             auto selectedFiles = OpenFileDialog("Open", ".", { "scene", "*.scene" }).result();
             if (!selectedFiles.empty() && !selectedFiles[0].empty())
             {
-                TaskManager::getInstance()->addTask([selectedFiles](){
-                    Editor::getInstance()->setSelectedObject(-1);
-
-                    auto& scene = Editor::getCurrentScene();
-                    if (scene) Editor::getSceneManager()->unloadScene(scene);
-                    scene = nullptr;
-                    Editor::getCanvas()->getHierarchy()->clear();
-                    Editor::getCanvas()->getEditorScene()->clear();
-                    Editor::getCanvas()->getHierarchy()->initialize();
-                    scene = Editor::getSceneManager()->loadScene(selectedFiles[0]);
-                    Editor::setCurrentScene(scene);
+                auto sceneFile = selectedFiles[0];
+                TaskManager::getInstance()->addTask([sceneFile](){
+                    Editor::getInstance()->loadScene(sceneFile);
                 });
             }
         });
 
         fileMenu->createWidget<MenuItem>("Save Scene", "CTRL + S")->getOnClickEvent().addListener([this](auto widget) {
             TaskManager::getInstance()->addTask([]() {
-                if (Editor::getSceneManager()->getCurrentScene()->getPath().empty())
-                {
-                    auto selectedFile = SaveFileDialog("Save", ".", { "scene", "*.scene" }).result();
-                    if (!selectedFile.empty())
-                    {
-                        Editor::getSceneManager()->saveScene(selectedFile);
-                    }
-                }
-                else
-                {
-                    Editor::getSceneManager()->saveScene();
-                }
+                Editor::getInstance()->saveScene();
             });
         });
 

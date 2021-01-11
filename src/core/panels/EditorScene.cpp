@@ -165,12 +165,12 @@ namespace ige::creator
                     Editor::getInstance()->setSelectedObject(-1);
 
                     auto& scene = Editor::getCurrentScene();
-                    if (scene) Editor::getSceneManager()->unloadScene(scene);
+                    if (scene) SceneManager::getInstance()->unloadScene(scene);
                     scene = nullptr;
 
                     Editor::getCanvas()->getHierarchy()->clear();
                     Editor::getCanvas()->getHierarchy()->initialize();
-                    Editor::getSceneManager()->loadScene(path);
+                    SceneManager::getInstance()->loadScene(path);
                 }
             });
         }
@@ -261,7 +261,7 @@ namespace ige::creator
                 m_currShowcase->Add(m_grid2D);
             }
         }
-        else if (m_currCamera == m_2dCamera)
+        else if (!is2D && m_currCamera == m_2dCamera)
         {
             // Switch to 3D camera
             m_currCamera = m_3dCamera;
@@ -281,25 +281,36 @@ namespace ige::creator
         if (!isOpened() || !m_bIsInitialized)
             return;
 
-        if (m_currShowcase)
-        {
-            if (m_currCamera == m_2dCamera)
-                m_currShowcase->Remove(m_grid2D);
-            else
-                m_currShowcase->Remove(m_grid3D);
-        }
-
         if (obj == nullptr)
         {
+            if (m_currShowcase)
+            {
+                if (m_currCamera == m_2dCamera)
+                    m_currShowcase->Remove(m_grid2D);
+                else
+                    m_currShowcase->Remove(m_grid3D);
+            }
             m_currShowcase = nullptr;
             return;
         }
 
+        auto lastShowcase = m_currShowcase;
         m_currShowcase = obj->getScene()->getShowcase();
-        if (m_currCamera == m_2dCamera)
-            m_currShowcase->Add(m_grid2D);
-        else
-            m_currShowcase->Add(m_grid3D);
+        if (lastShowcase != m_currShowcase)
+        {
+            if (m_currCamera == m_2dCamera)
+            {
+                if(lastShowcase)
+                    lastShowcase->Remove(m_grid2D);
+                m_currShowcase->Add(m_grid2D);
+            }
+            else
+            {
+                if(lastShowcase)
+                    lastShowcase->Remove(m_grid3D);
+                m_currShowcase->Add(m_grid3D);
+            }
+        }
 
         auto canvas = obj->getCanvas();
         if (canvas)
@@ -314,6 +325,8 @@ namespace ige::creator
             auto transformToViewport = Mat4::Translate(Vec3(-canvasSize.X() * 0.5f, -canvasSize.Y() * 0.5f, 0.f));
             canvas->setCanvasToViewportMatrix(transformToViewport);
         }
+
+        set2DMode(canvas != nullptr);
     }
 
     bool EditorScene::isResizing()
@@ -361,7 +374,7 @@ namespace ige::creator
         updateKeyboard();
 
         // Update scene
-        Editor::getSceneManager()->update(dt);
+        SceneManager::getInstance()->update(dt);
         // Render
         auto renderContext = RenderContext::InstancePtr();
         if (renderContext && m_fbo)
@@ -372,7 +385,7 @@ namespace ige::creator
             m_currCamera->Step(dt);
             m_currCamera->Render();
 
-            Editor::getSceneManager()->render();
+            SceneManager::getInstance()->render();
 
             // Render bounding box
             renderBoundingBox();

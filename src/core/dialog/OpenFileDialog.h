@@ -19,4 +19,17 @@ namespace ige::creator
             Option opt = Option::none
         );
     };
+
+    //! class OpenFolderDialog
+    // Usage: auto path = OpenFolderDialog("Open", ".").result();
+    class OpenFolderDialog : public pfd::select_folder
+    {
+    public:
+        typedef pfd::opt Option;
+
+        OpenFolderDialog(std::string const& title,
+            std::string const& defaultPath = "",
+            Option opt = Option::none
+        );
+    };
 }
