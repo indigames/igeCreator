@@ -416,6 +416,17 @@ namespace ige::creator
                 m_currCamera->SetPosition(targetPos + m_currCamera->GetCameraRotation() * Vec3(0.f, 0.f, 1.f) * 20.f);
             }
         }
+        if (keyboard->wasReleased(KeyCode::KEY_DEL))
+        {
+            bool focused = Editor::getCanvas()->getHierarchy()->isFocused() || Editor::getCanvas()->getEditorScene()->isFocused();
+            auto target = Editor::getInstance()->getSelectedObject();
+            if (target && focused) {
+                uint64_t objId = target->getId();
+                if (target->getParent()) target->getParent()->setSelected(true);
+                Editor::getInstance()->setSelectedObject(-1);
+                Editor::getCurrentScene()->removeObjectById(objId);
+            }
+        }
     }
 
     //! Object selection with touch/mouse
