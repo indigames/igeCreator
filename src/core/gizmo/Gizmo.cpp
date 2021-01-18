@@ -11,6 +11,7 @@ namespace ige::creator
     {
         m_operation = gizmo::OPERATION::TRANSLATE;
         m_mode = gizmo::MODE::LOCAL;
+        m_visible = true;
     }
 
     Gizmo::~Gizmo()
@@ -50,7 +51,7 @@ namespace ige::creator
 
     void Gizmo::_drawImpl()
     {
-        if(!m_bEnabled || m_camera == nullptr) return;
+        if(!m_bEnabled || m_camera == nullptr || !m_visible) return;
 
         auto target = Editor::getInstance()->getSelectedObject();
         if(!target) return;

@@ -30,6 +30,7 @@ using namespace ige::scene;
 using namespace pyxie;
 
 #include "utils/filesystem.h"
+#include <iostream>
 namespace fs = ghc::filesystem;
 
 namespace ige::creator
@@ -149,6 +150,14 @@ namespace ige::creator
                     SceneManager::getInstance()->getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y + 25.f }); // Title bar size
                     SceneManager::getInstance()->getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
                 }
+
+                //viet.nv : create dummy object to focus
+                m_focusPosition = Vec3(0, 0, 0);
+                m_resetFocus = true;
+                m_viewSize = k_defaultViewSize;
+                findFocusPoint();
+
+                m_HandleCameraTouchId = -1;
 
                 m_bIsInitialized = true;
             }
@@ -412,8 +421,9 @@ namespace ige::creator
             auto target = Editor::getInstance()->getSelectedObject();
             if (target && m_currCamera)
             {
-                auto targetPos = target->getTransform()->getWorldPosition();
-                m_currCamera->SetPosition(targetPos + m_currCamera->GetCameraRotation() * Vec3(0.f, 0.f, 1.f) * 20.f);
+                /*auto targetPos = target->getTransform()->getWorldPosition();
+                m_currCamera->SetPosition(targetPos + m_currCamera->GetCameraRotation() * Vec3(0.f, 0.f, 1.f) * 20.f);*/
+                lookAtObject(target.get());
             }
         }
         if (keyboard->wasReleased(KeyCode::KEY_DEL))
@@ -426,6 +436,64 @@ namespace ige::creator
                 Editor::getInstance()->setSelectedObject(-1);
                 Editor::getCurrentScene()->removeObjectById(objId);
             }
+        }
+        if (keyboard->isKeyDown(KeyCode::KEY_Q)) {
+            bool focused = Editor::getCanvas()->getHierarchy()->isFocused() || Editor::getCanvas()->getEditorScene()->isFocused();
+            auto target = Editor::getInstance()->getSelectedObject();
+            if (target && focused) {
+                auto gizmo = Editor::getCanvas()->getEditorScene()->getGizmo();
+                if (gizmo)
+                {
+                    gizmo->setVisible(false);
+                }
+            }
+        }
+        if (keyboard->isKeyDown(KeyCode::KEY_W)) {
+            bool focused = Editor::getCanvas()->getHierarchy()->isFocused() || Editor::getCanvas()->getEditorScene()->isFocused();
+            auto target = Editor::getInstance()->getSelectedObject();
+            if (target && focused) {
+                auto gizmo = Editor::getCanvas()->getEditorScene()->getGizmo();
+                if (gizmo)
+                {
+                    gizmo->setVisible(true);
+                    gizmo->setOperation(gizmo::OPERATION::TRANSLATE);
+                }
+            }
+        }
+        if (keyboard->isKeyDown(KeyCode::KEY_E)) {
+            bool focused = Editor::getCanvas()->getHierarchy()->isFocused() || Editor::getCanvas()->getEditorScene()->isFocused();
+            auto target = Editor::getInstance()->getSelectedObject();
+            if (target && focused) {
+                auto gizmo = Editor::getCanvas()->getEditorScene()->getGizmo();
+                if (gizmo)
+                {
+                    gizmo->setVisible(true);
+                    gizmo->setOperation(gizmo::OPERATION::ROTATE);
+                }
+            }
+        }
+        if (keyboard->isKeyDown(KeyCode::KEY_R)) {
+            bool focused = Editor::getCanvas()->getHierarchy()->isFocused() || Editor::getCanvas()->getEditorScene()->isFocused();
+            auto target = Editor::getInstance()->getSelectedObject();
+            if (target && focused) {
+                auto gizmo = Editor::getCanvas()->getEditorScene()->getGizmo();
+                if (gizmo)
+                {
+                    gizmo->setVisible(true);
+                    gizmo->setOperation(gizmo::OPERATION::SCALE);
+                }
+            }
+        }
+
+        m_fnKeyPressed = 1;
+        if (keyboard->isKeyDown(KeyCode::KEY_LALT) || keyboard->isKeyDown(KeyCode::KEY_RALT) || keyboard->isKeyHold(KeyCode::KEY_LALT) || keyboard->isKeyHold(KeyCode::KEY_RALT)) {
+            m_fnKeyPressed = SYSTEM_KEYCODE_ALT_VALUE;
+        }
+        if (keyboard->isKeyDown(KeyCode::KEY_LCTRL) || keyboard->isKeyDown(KeyCode::KEY_RCTRL) || keyboard->isKeyHold(KeyCode::KEY_LCTRL) || keyboard->isKeyHold(KeyCode::KEY_RCTRL)) {
+            m_fnKeyPressed = (m_fnKeyPressed == 1 ? SYSTEM_KEYCODE_CTRL_VALUE : m_fnKeyPressed | SYSTEM_KEYCODE_CTRL_VALUE);
+        }
+        if (keyboard->isKeyDown(KeyCode::KEY_LSHIFT) || keyboard->isKeyDown(KeyCode::KEY_RSHIFT) || keyboard->isKeyHold(KeyCode::KEY_LSHIFT) || keyboard->isKeyHold(KeyCode::KEY_RSHIFT)) {
+            m_fnKeyPressed = (m_fnKeyPressed == 1 ? SYSTEM_KEYCODE_SHIFT_VALUE : m_fnKeyPressed | SYSTEM_KEYCODE_SHIFT_VALUE);
         }
     }
 
@@ -550,7 +618,8 @@ namespace ige::creator
         if (target == nullptr)
             return;
 
-        auto touch = Editor::getApp()->getInputHandler()->getTouchDevice();
+        auto touch = Editor::getApp()->getInputHandler()->getTouchDevice(); 
+        
         if (touch->isFingerScrolled(0))
         {
             float scrollX, scrollY;
@@ -574,15 +643,15 @@ namespace ige::creator
         if (touch->isFingerMoved(0))
         {
             auto finger = touch->getFinger(0);
-
-            if (m_bIsFirstTouch)
+            if (m_bIsFirstTouch && m_HandleCameraTouchId == -1)
             {
                 touch->getFingerPosition(0, m_lastMousePosX, m_lastMousePosY);
                 auto cameraRotation = m_currCamera->GetRotation();
                 vmath_quatToEuler(cameraRotation.P(), m_cameraRotationEuler.P());
                 m_bIsFirstTouch = false;
+                m_HandleCameraTouchId = finger->getFingerId();
             }
-
+            pyxie_printf("finger id %d\n", finger->getFingerId());
             float touchX, touchY;
             touch->getFingerPosition(0, touchX, touchY);
 
@@ -601,6 +670,42 @@ namespace ige::creator
                 cameraPosition -= cameraRotation * rightVec * mouseOffset.X();
                 cameraPosition -= cameraRotation * upVec * mouseOffset.Y();
                 m_currCamera->SetPosition(cameraPosition);
+                
+                if (m_resetFocus) {
+                    m_resetFocus = false;
+                    m_bIsFocusObject = false;
+                }
+            }
+            else if (finger->getFingerId() == 0) // left button
+            {
+                if (m_fnKeyPressed & SYSTEM_KEYCODE_ALT_VALUE) {
+                    auto cameraPosition = m_currCamera->GetPosition();
+                    auto cameraRotation = m_currCamera->GetRotation();
+
+                    if (m_resetFocus) {
+                        m_cameraDistance = Vec3::Length(cameraPosition - m_focusPosition);
+                        m_resetFocus = false;
+                        m_bIsFocusObject = true;
+                        return;
+                    }
+
+                    auto mouseOffset = offset * m_cameraRotationSpeed;
+                    m_cameraRotationEuler[1] -= mouseOffset.X();
+                    m_cameraRotationEuler[0] += mouseOffset.Y();
+                    m_cameraRotationEuler[0] = clampEulerAngle(m_cameraRotationEuler[0]);
+
+                    Vec3 newEuler = Vec3(m_cameraRotationEuler[0], m_cameraRotationEuler[1], 0);
+                    Quat newQuat;
+                    vmath_eulerToQuat(newEuler.P(), newQuat.P());
+
+                    Vec3 negDistance = Vec3(0, 0, -m_cameraDistance);
+                    Vec3 fwd = Vec3::Normalize(getForwardVector(newQuat));
+
+                    Vec3 newPos = fwd * m_cameraDistance + m_focusPosition;
+                    
+                    m_currCamera->SetRotation(newQuat);
+                    m_currCamera->SetPosition(newPos);
+                }
             }
             else if (finger->getFingerId() == 3) // right button
             {
@@ -611,12 +716,85 @@ namespace ige::creator
                 Quat rot;
                 vmath_eulerToQuat(m_cameraRotationEuler.P(), rot.P());
                 m_currCamera->SetRotation(rot);
+
+                if (m_resetFocus) {
+                    m_resetFocus = false;
+                    m_bIsFocusObject = false;
+                }
             }
         }
 
-        if(touch->isFingerReleased(0))
+        if (touch->isFingerReleased(0))
         {
-            m_bIsFirstTouch = true;
+            auto finger = touch->getFinger(0);
+            pyxie_printf("release id %d vs %d \n", finger->getFingerId(), m_HandleCameraTouchId);
+            if (touch->getFinger(0)->getFingerId() == m_HandleCameraTouchId) {
+                m_HandleCameraTouchId = -1;
+                m_bIsFirstTouch = true;
+                m_resetFocus = true;
+                if (!m_bIsFocusObject) {
+                    findFocusPoint();
+                }
+            }
         }
     }
+
+    void EditorScene::lookAtObject(SceneObject* object) {
+        auto targetPos = object->getTransform()->getWorldPosition();
+        m_currCamera->SetPosition(targetPos + m_currCamera->GetCameraRotation() * Vec3(0.f, 0.f, 1.f) * calcCameraViewDistance());
+        m_focusPosition = targetPos;
+        m_bIsFocusObject = true;
+    }
+
+    //Camera Helper function
+    float EditorScene::getPerspectiveCameraViewDistance(float objectSize, float fov)
+    {
+        //        A
+        //        |\        We want to place camera at a
+        //        | \       distance that, at the given FOV,
+        //        |  \      would enclose a sphere of radius
+        //     _..+.._\     "size". Here |BC|=size, and we
+        //   .'   |   '\    need to find |AB|. ACB is a right
+        //  /     |    _C   angle, andBAC is half the FOV. So
+        // |      | _-   |  that gives: sin(BAC)=|BC|/|AB|,
+        // |      B      |  and thus |AB|=|BC|/sin(BAC).
+        // |             |
+        //  \           /
+        //   '._     _.'
+        //      `````
+        return objectSize / sin(fov * 0.5f * DEGREE_TO_RAD);
+    }
+
+    float EditorScene::calcCameraViewDistance() {
+        float fov = m_currCamera->GetFieldOfView();
+        return getPerspectiveCameraViewDistance(m_viewSize, fov);
+    }
+
+    float EditorScene::clampEulerAngle(float angle)
+    {
+        if (angle < -DEG360_TO_RAD)
+            angle += DEG360_TO_RAD;
+        if (angle > DEG360_TO_RAD)
+            angle -= DEG360_TO_RAD;
+        return angle > DEG360_TO_RAD ? DEG360_TO_RAD : angle < -DEG360_TO_RAD ? -DEG360_TO_RAD : angle;
+    }
+
+    Vec3 EditorScene::getForwardVector(Quat quat) {
+        Vec3 out;
+        out.X(2 * (quat.X() * quat.Z() + quat.W() * quat.Y()));
+        out.Y(2 * (quat.Y() * quat.Z() - quat.W() * quat.X()));
+        out.Z(1 - 2 * (quat.X() * quat.X() + quat.Y() * quat.Y()));
+        return out;
+    }
+
+    void EditorScene::findFocusPoint()
+    {
+        m_cameraDistance = calcCameraViewDistance();
+        auto cameraPosition = m_currCamera->GetPosition();
+        auto cameraRotation = m_currCamera->GetRotation();
+        auto fwd = Vec3::Normalize(getForwardVector(cameraRotation));
+        m_focusPosition = cameraPosition - fwd * m_cameraDistance;
+
+    }
+
 }

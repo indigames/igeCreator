@@ -14,6 +14,13 @@ namespace ige::creator
 {
     class Image;
 
+#define SYSTEM_KEYCODE_ALT_VALUE        1 << 2
+#define SYSTEM_KEYCODE_CTRL_VALUE       1 << 3
+#define SYSTEM_KEYCODE_SHIFT_VALUE      1 << 4
+#define RAD_TO_DEGREE                   57.2957795f
+#define DEGREE_TO_RAD                   0.01745329f
+#define DEG360_TO_RAD                   6.2831844f
+
     class EditorScene: public Panel
     {
     public:
@@ -81,10 +88,32 @@ namespace ige::creator
 
         //! Camera control
         bool m_bIsFirstTouch = true;
+        int m_HandleCameraTouchId = -1;
         float m_cameraDragSpeed = 0.5f;
         float m_cameraRotationSpeed = 0.0033f;
         float m_lastMousePosX = 0.f;
         float m_lastMousePosY = 0.f;
         Vec3 m_cameraRotationEuler = {};
+
+        //keyboard helper
+        unsigned short m_fnKeyPressed = 1;
+
+        bool m_bIsFocusObject = false;
+        Vec3 m_focusPosition = {};
+        bool m_resetFocus = true;
+        float m_cameraDistance = 0;
+
+        const float k_defaultViewSize = 5;
+        float m_viewSize = 0;
+
+        //camera Look
+        void lookAtObject(SceneObject* object);
+
+        //camera helper functions
+        float clampEulerAngle(float angle);
+        Vec3 getForwardVector(Quat rot);
+        void findFocusPoint();
+        float calcCameraViewDistance();
+        static float getPerspectiveCameraViewDistance(float size, float fov);
     };
 }
