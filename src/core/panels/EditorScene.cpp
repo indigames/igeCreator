@@ -155,7 +155,7 @@ namespace ige::creator
                 m_focusPosition = Vec3(0, 0, 0);
                 m_resetFocus = true;
                 m_viewSize = k_defaultViewSize;
-                findFocusPoint();
+                findFocusPoint(true);
 
                 m_HandleCameraTouchId = -1;
 
@@ -373,14 +373,11 @@ namespace ige::creator
         //! Update Panel
         Panel::update(dt);
 
-        //! Update camera
-        updateCameraPosition();
-
-        // Update object selection
-        updateObjectSelection();
-
         // Update keyboard
         updateKeyboard();
+
+        // Update touch
+        updateTouch();
 
         // Update scene
         SceneManager::getInstance()->update(dt);
@@ -416,7 +413,7 @@ namespace ige::creator
     {
         // Press "F" key focus on target object
         auto keyboard = Editor::getApp()->getInputHandler()->getKeyboard();
-        if (keyboard->wasReleased(KeyCode::KEY_F))
+        if (keyboard->isKeyDown(KeyCode::KEY_F) && !keyboard->isKeyHold(KeyCode::KEY_F))
         {
             auto target = Editor::getInstance()->getSelectedObject();
             if (target && m_currCamera)
@@ -426,7 +423,7 @@ namespace ige::creator
                 lookAtObject(target.get());
             }
         }
-        if (keyboard->wasReleased(KeyCode::KEY_DEL))
+        if (keyboard->isKeyDown(KeyCode::KEY_DEL))
         {
             bool focused = Editor::getCanvas()->getHierarchy()->isFocused() || Editor::getCanvas()->getEditorScene()->isFocused();
             auto target = Editor::getInstance()->getSelectedObject();
@@ -485,15 +482,118 @@ namespace ige::creator
             }
         }
 
-        m_fnKeyPressed = 1;
+        m_fnKeyPressed = 0;
         if (keyboard->isKeyDown(KeyCode::KEY_LALT) || keyboard->isKeyDown(KeyCode::KEY_RALT) || keyboard->isKeyHold(KeyCode::KEY_LALT) || keyboard->isKeyHold(KeyCode::KEY_RALT)) {
-            m_fnKeyPressed = SYSTEM_KEYCODE_ALT_VALUE;
+            m_fnKeyPressed |= SYSTEM_KEYCODE_ALT_MASK;
         }
         if (keyboard->isKeyDown(KeyCode::KEY_LCTRL) || keyboard->isKeyDown(KeyCode::KEY_RCTRL) || keyboard->isKeyHold(KeyCode::KEY_LCTRL) || keyboard->isKeyHold(KeyCode::KEY_RCTRL)) {
-            m_fnKeyPressed = (m_fnKeyPressed == 1 ? SYSTEM_KEYCODE_CTRL_VALUE : m_fnKeyPressed | SYSTEM_KEYCODE_CTRL_VALUE);
+            m_fnKeyPressed |= SYSTEM_KEYCODE_CTRL_MASK;
         }
         if (keyboard->isKeyDown(KeyCode::KEY_LSHIFT) || keyboard->isKeyDown(KeyCode::KEY_RSHIFT) || keyboard->isKeyHold(KeyCode::KEY_LSHIFT) || keyboard->isKeyHold(KeyCode::KEY_RSHIFT)) {
-            m_fnKeyPressed = (m_fnKeyPressed == 1 ? SYSTEM_KEYCODE_SHIFT_VALUE : m_fnKeyPressed | SYSTEM_KEYCODE_SHIFT_VALUE);
+            m_fnKeyPressed |= SYSTEM_KEYCODE_SHIFT_MASK;
+        }
+    }
+
+    void EditorScene::updateTouch() 
+    {
+        if (!isOpened() || m_currCamera == nullptr || m_currCamera == m_2dCamera)
+            return;
+
+        auto touch = Editor::getApp()->getInputHandler()->getTouchDevice();
+
+        if (touch->isFingerScrolled(0))
+        {
+            float scrollX, scrollY;
+            float targetSize;
+            bool isInverse;
+            touch->getFingerScrolledData(0, scrollX, scrollY, isInverse);
+            handleCameraZoom(scrollX, scrollY);
+        }
+
+        if (touch->isFingerMoved(0))
+        {
+            auto finger = touch->getFinger(0);
+            if (m_HandleCameraTouchId == -1) {
+                m_HandleCameraTouchId = finger->getFingerId();
+                updateViewTool(finger->getFingerId());
+                m_touchDelay = 0;
+            }
+            else if (finger->getFingerId() == m_HandleCameraTouchId) {
+                if(m_touchDelay < 0.02f)
+                    m_touchDelay += Time::Instance().GetElapsedTime();
+                else 
+                {
+                    m_bIsDragging = true;
+                    float touchX, touchY;
+                    touch->getFingerPosition(0, touchX, touchY);
+                    updateCameraPosition(touchX, touchY);
+                }
+            }
+            
+        }
+
+        if (touch->isFingerReleased(0))
+        {
+            auto finger = touch->getFinger(0);
+            if (!m_bIsDragging) {
+                //Perform Click
+                updateObjectSelection();
+                if (finger->getFingerId() == m_HandleCameraTouchId || m_HandleCameraTouchId == -1) {
+                    m_HandleCameraTouchId = -1;
+                    m_viewTool = ViewTool::None;
+                    m_touchDelay = 0;
+                }
+            }
+            else {
+                if (finger->getFingerId() == m_HandleCameraTouchId || m_HandleCameraTouchId == -1) {
+                    m_HandleCameraTouchId = -1;
+                    m_bIsFirstTouch = true;
+                    m_resetFocus = true;
+                    if (!m_bIsFocusObject) {
+                        findFocusPoint(false);
+                    }
+                    m_viewTool = ViewTool::None;
+                    m_touchDelay = 0;
+                    m_bIsDragging = false;
+                }
+            }
+
+        }
+
+    }
+
+    void EditorScene::updateViewTool(int touchID) 
+    {
+        if (m_bIsDragging) return;
+        switch (touchID) {
+        case 0 : // Left 
+            //! Important => because this is bit shift, so we can compile multi function key
+            //! in this case, only 1 key will be access, so Shift < Ctrl < Alt
+            if (m_fnKeyPressed & SYSTEM_KEYCODE_ALT_MASK)
+            {
+                m_viewTool = ViewTool::Orbit;
+            }
+            else if (m_fnKeyPressed & SYSTEM_KEYCODE_CTRL_MASK)
+            {
+                m_viewTool = ViewTool::MultiDeSelectArea;
+            }
+            else if (m_fnKeyPressed & SYSTEM_KEYCODE_SHIFT_MASK)
+            {
+                m_viewTool = ViewTool::MultiSelectArea;
+            }
+            break;
+        case 1: // Middle
+            m_viewTool = ViewTool::Pan;
+            break;
+        case 2: // Right
+            m_viewTool = ViewTool::FPS;
+            if (m_fnKeyPressed & SYSTEM_KEYCODE_ALT_MASK)
+            {
+                m_viewTool = ViewTool::Zoom;
+            }
+            break;
+        default:
+            break;
         }
     }
 
@@ -609,141 +709,171 @@ namespace ige::creator
         draw(d + cameraForward * f_near, h + cameraForward * f_far, 0);
     }
 
-    void EditorScene::updateCameraPosition()
+    void EditorScene::updateCameraPosition(float touchX, float touchY)
     {
-        if (!isOpened() ||!isFocused() || m_currCamera == nullptr || m_currCamera == m_2dCamera)
-            return;
-
-        auto target = Editor::getInstance()->getSelectedObject();
-        if (target == nullptr)
-            return;
-
-        auto touch = Editor::getApp()->getInputHandler()->getTouchDevice(); 
-        
-        if (touch->isFingerScrolled(0))
+        if (m_bIsFirstTouch)
         {
-            float scrollX, scrollY;
-            bool isInverse;
-            touch->getFingerScrolledData(0, scrollX, scrollY, isInverse);
-
-            Vec2 offset = { scrollX, scrollY };
-            auto mouseOffset = offset * m_cameraDragSpeed;
-
-            auto cameraPosition = m_currCamera->GetPosition();
-            auto cameraRotation = m_currCamera->GetRotation();
-
-            const Vec3 rightVec = { 1.f, 0.f, 0.f };
-            const Vec3 upVec = { 0.f, 0.f, 1.f };
-            cameraPosition += cameraRotation * rightVec * mouseOffset.X();
-            cameraPosition -= cameraRotation * upVec * mouseOffset.Y();
-            m_currCamera->SetPosition(cameraPosition);
-
-        }
-
-        if (touch->isFingerMoved(0))
-        {
-            auto finger = touch->getFinger(0);
-            if (m_bIsFirstTouch && m_HandleCameraTouchId == -1)
-            {
-                touch->getFingerPosition(0, m_lastMousePosX, m_lastMousePosY);
-                auto cameraRotation = m_currCamera->GetRotation();
-                vmath_quatToEuler(cameraRotation.P(), m_cameraRotationEuler.P());
-                m_bIsFirstTouch = false;
-                m_HandleCameraTouchId = finger->getFingerId();
-            }
-            pyxie_printf("finger id %d\n", finger->getFingerId());
-            float touchX, touchY;
-            touch->getFingerPosition(0, touchX, touchY);
-
-            Vec2 offset = { touchX - m_lastMousePosX, touchY - m_lastMousePosY };
             m_lastMousePosX = touchX;
             m_lastMousePosY = touchY;
-
-            if (finger->getFingerId() == 1) // middle button
-            {
-                auto pos = m_currCamera->GetPosition();
-                auto mouseOffset = offset * std::abs(std::max(0.0025f, pos.Length() / (m_currCamera->GetFarPlane() * 0.5f)));
-                auto cameraPosition = m_currCamera->GetPosition();
-                auto cameraRotation = m_currCamera->GetRotation();
-                const Vec3 rightVec = { 1.f, 0.f, 0.f };
-                const Vec3 upVec = { 0.f, 1.f, 0.f };
-                cameraPosition -= cameraRotation * rightVec * mouseOffset.X();
-                cameraPosition -= cameraRotation * upVec * mouseOffset.Y();
-                m_currCamera->SetPosition(cameraPosition);
-                
-                if (m_resetFocus) {
-                    m_resetFocus = false;
-                    m_bIsFocusObject = false;
-                }
-            }
-            else if (finger->getFingerId() == 0) // left button
-            {
-                if (m_fnKeyPressed & SYSTEM_KEYCODE_ALT_VALUE) {
-                    auto cameraPosition = m_currCamera->GetPosition();
-                    auto cameraRotation = m_currCamera->GetRotation();
-
-                    if (m_resetFocus) {
-                        m_cameraDistance = Vec3::Length(cameraPosition - m_focusPosition);
-                        m_resetFocus = false;
-                        m_bIsFocusObject = true;
-                        return;
-                    }
-
-                    auto mouseOffset = offset * m_cameraRotationSpeed;
-                    m_cameraRotationEuler[1] -= mouseOffset.X();
-                    m_cameraRotationEuler[0] += mouseOffset.Y();
-                    m_cameraRotationEuler[0] = clampEulerAngle(m_cameraRotationEuler[0]);
-
-                    Vec3 newEuler = Vec3(m_cameraRotationEuler[0], m_cameraRotationEuler[1], 0);
-                    Quat newQuat;
-                    vmath_eulerToQuat(newEuler.P(), newQuat.P());
-
-                    Vec3 negDistance = Vec3(0, 0, -m_cameraDistance);
-                    Vec3 fwd = Vec3::Normalize(getForwardVector(newQuat));
-
-                    Vec3 newPos = fwd * m_cameraDistance + m_focusPosition;
-                    
-                    m_currCamera->SetRotation(newQuat);
-                    m_currCamera->SetPosition(newPos);
-                }
-            }
-            else if (finger->getFingerId() == 3) // right button
-            {
-                auto mouseOffset = offset * m_cameraRotationSpeed;
-                m_cameraRotationEuler[1] += mouseOffset.X();
-                m_cameraRotationEuler[0] += mouseOffset.Y();
-
-                Quat rot;
-                vmath_eulerToQuat(m_cameraRotationEuler.P(), rot.P());
-                m_currCamera->SetRotation(rot);
-
-                if (m_resetFocus) {
-                    m_resetFocus = false;
-                    m_bIsFocusObject = false;
-                }
-            }
+            m_bIsFirstTouch = false;
+            auto cameraRotation = m_currCamera->GetRotation();
+            vmath_quatToEuler(cameraRotation.P(), m_cameraRotationEuler.P());
+            return;
         }
+        Vec2 offset = { touchX - m_lastMousePosX, touchY - m_lastMousePosY };
+        m_lastMousePosX = touchX;
+        m_lastMousePosY = touchY;
 
-        if (touch->isFingerReleased(0))
-        {
-            auto finger = touch->getFinger(0);
-            pyxie_printf("release id %d vs %d \n", finger->getFingerId(), m_HandleCameraTouchId);
-            if (touch->getFinger(0)->getFingerId() == m_HandleCameraTouchId) {
-                m_HandleCameraTouchId = -1;
-                m_bIsFirstTouch = true;
-                m_resetFocus = true;
-                if (!m_bIsFocusObject) {
-                    findFocusPoint();
-                }
-            }
+        switch (m_viewTool) {
+        case ViewTool::Pan:
+            handleCameraPan(offset.X(), offset.Y());
+            break;
+        case ViewTool::Orbit:
+            handleCameraOrbit(offset.X(), offset.Y());
+            break;
+        case ViewTool::FPS:
+            handleCameraFPS(offset.X(), offset.Y());
+            break;
+        case ViewTool::Zoom:
+            float s_Len = Vec2::Length(offset);
+            bool inverse = abs(offset.X()) > abs(offset.Y()) ? offset.X() < 0 : offset.Y() >= 0;
+            if(inverse) s_Len = -s_Len;
+            s_Len = s_Len / k_zoomFocusOffsetRate;
+            handleCameraZoomFocus(0, s_Len);
+            break;
         }
     }
 
     void EditorScene::lookAtObject(SceneObject* object) {
         auto targetPos = object->getTransform()->getWorldPosition();
-        m_currCamera->SetPosition(targetPos + m_currCamera->GetCameraRotation() * Vec3(0.f, 0.f, 1.f) * calcCameraViewDistance());
+        m_viewSize = k_defaultViewSize; //Reset ViewSize
+        
+        auto aabb = getRenderableAABBox(object);
+        Vec3 halfSize = aabb.getExtent() * 0.5f;
+        if (halfSize != Vec3(0, 0)) {
+            float objectSize = Vec3::Length(halfSize);
+            m_viewSize = clampViewSize(objectSize);
+        }
+
+        m_cameraDistance = calcCameraViewDistance();
+
+        m_currCamera->SetPosition(targetPos + m_currCamera->GetCameraRotation() * Vec3(0.f, 0.f, 1.f) * m_cameraDistance);
         m_focusPosition = targetPos;
         m_bIsFocusObject = true;
+    }
+
+    //! Handle Camera View
+    void EditorScene::handleCameraOrbit(float offsetX, float offsetY) {
+        auto offset = Vec2(offsetX, offsetY);
+        auto cameraPosition = m_currCamera->GetPosition();
+        auto cameraRotation = m_currCamera->GetRotation();
+
+        if (m_resetFocus) {
+            m_cameraDistance = Vec3::Length(cameraPosition - m_focusPosition);
+            m_resetFocus = false;
+            m_bIsFocusObject = true;
+            return;
+        }
+
+        auto mouseOffset = offset * m_cameraRotationSpeed;
+        m_cameraRotationEuler[1] -= mouseOffset.X();
+        m_cameraRotationEuler[0] += mouseOffset.Y();
+        m_cameraRotationEuler[0] = clampEulerAngle(m_cameraRotationEuler[0]);
+
+        Vec3 newEuler = Vec3(m_cameraRotationEuler[0], m_cameraRotationEuler[1], 0);
+        Quat newQuat;
+        vmath_eulerToQuat(newEuler.P(), newQuat.P());
+
+        Vec3 negDistance = Vec3(0, 0, -m_cameraDistance);
+        Vec3 fwd = Vec3::Normalize(getForwardVector(newQuat));
+
+        Vec3 newPos = fwd * m_cameraDistance + m_focusPosition;
+
+        m_currCamera->SetRotation(newQuat);
+        m_currCamera->SetPosition(newPos);
+    }
+
+    void EditorScene::handleCameraPan(float offsetX, float offsetY)
+    {
+        float panDelta = m_fnKeyPressed & SYSTEM_KEYCODE_SHIFT_MASK ? 3 : 1;
+        auto offset = Vec2(offsetX, offsetY);
+        auto pos = m_currCamera->GetPosition();
+        auto mouseOffset = offset * std::abs(std::max(0.0025f, pos.Length() / (m_currCamera->GetFarPlane() * 0.5f))) * panDelta;
+        auto cameraPosition = m_currCamera->GetPosition();
+        auto cameraRotation = m_currCamera->GetRotation();
+        const Vec3 rightVec = { 1.f, 0.f, 0.f };
+        const Vec3 upVec = { 0.f, 1.f, 0.f };
+        cameraPosition -= cameraRotation * rightVec * mouseOffset.X();
+        cameraPosition -= cameraRotation * upVec * mouseOffset.Y();
+        m_currCamera->SetPosition(cameraPosition);
+
+        if (m_resetFocus) {
+            m_resetFocus = false;
+            m_bIsFocusObject = false;
+        }
+    }
+    
+    void EditorScene::handleCameraFPS(float offsetX, float offsetY) 
+    {
+        auto offset = Vec2(offsetX, offsetY);
+        auto mouseOffset = offset * m_cameraRotationSpeed;
+        m_cameraRotationEuler[1] += mouseOffset.X();
+        m_cameraRotationEuler[0] += mouseOffset.Y();
+
+        Quat rot;
+        vmath_eulerToQuat(m_cameraRotationEuler.P(), rot.P());
+        m_currCamera->SetRotation(rot);
+
+        if (m_resetFocus) {
+            m_resetFocus = false;
+            m_bIsFocusObject = false;
+        }
+    }
+    
+    void EditorScene::handleCameraZoom(float offsetX, float offsetY) {
+        float zoomDelta = m_fnKeyPressed & SYSTEM_KEYCODE_SHIFT_MASK ? 3 : 1;
+
+        float targetSize;
+
+        Vec2 offset = { offsetX, offsetY };
+        auto mouseOffset = offset * m_cameraDragSpeed * zoomDelta;
+
+        auto cameraPosition = m_currCamera->GetPosition();
+        auto cameraRotation = m_currCamera->GetRotation();
+
+        const Vec3 rightVec = { 1.f, 0.f, 0.f };
+        const Vec3 upVec = { 0.f, 0.f, 1.f };
+        cameraPosition += cameraRotation * rightVec * mouseOffset.X();
+        cameraPosition -= cameraRotation * upVec * mouseOffset.Y();
+        m_currCamera->SetPosition(cameraPosition);
+
+        targetSize = clampViewSize(m_viewSize - mouseOffset.Y());
+        m_viewSize = targetSize;
+        findFocusPoint(true);
+    }
+
+    void EditorScene::handleCameraZoomFocus(float offsetX, float offsetY) {
+        float zoomDelta = m_fnKeyPressed & SYSTEM_KEYCODE_SHIFT_MASK ? 3 : 1;
+        float targetSize;
+
+        Vec2 offset = { offsetX, offsetY };
+        auto mouseOffset = offset * m_cameraDragSpeed * zoomDelta;
+
+        auto cameraPosition = m_currCamera->GetPosition();
+        auto cameraRotation = m_currCamera->GetRotation();
+        auto currentDist = Vec3::Length(m_focusPosition - cameraPosition);
+        float percent = currentDist / (m_viewSize > 4 ? 4 : m_viewSize);
+        percent = percent > 50 ? 50 : percent < 0.01f ? 0.01f : percent;
+        mouseOffset *= percent;
+        if (currentDist - mouseOffset.Y() <= 0) mouseOffset.Y(currentDist - k_minViewSize);
+
+        const Vec3 rightVec = { 1.f, 0.f, 0.f };
+        const Vec3 fowardVec = { 0.f, 0.f, 1.f };
+        cameraPosition += cameraRotation * rightVec * mouseOffset.X();
+        cameraPosition -= cameraRotation * fowardVec * mouseOffset.Y();
+        
+        m_currCamera->SetPosition(cameraPosition);
+
     }
 
     //Camera Helper function
@@ -766,7 +896,7 @@ namespace ige::creator
     }
 
     float EditorScene::calcCameraViewDistance() {
-        float fov = m_currCamera->GetFieldOfView();
+        float fov = m_currCamera != nullptr ? m_currCamera->GetFieldOfView() : k_defaultFOV;
         return getPerspectiveCameraViewDistance(m_viewSize, fov);
     }
 
@@ -787,14 +917,31 @@ namespace ige::creator
         return out;
     }
 
-    void EditorScene::findFocusPoint()
+    void EditorScene::findFocusPoint(bool changeDistance)
     {
-        m_cameraDistance = calcCameraViewDistance();
-        auto cameraPosition = m_currCamera->GetPosition();
-        auto cameraRotation = m_currCamera->GetRotation();
-        auto fwd = Vec3::Normalize(getForwardVector(cameraRotation));
-        m_focusPosition = cameraPosition - fwd * m_cameraDistance;
-
+        if (changeDistance) 
+            m_cameraDistance = calcCameraViewDistance();
+        if (!m_bIsFocusObject) {
+            auto cameraPosition = m_currCamera->GetPosition();
+            auto cameraRotation = m_currCamera->GetRotation();
+            auto fwd = Vec3::Normalize(getForwardVector(cameraRotation));
+            m_focusPosition = cameraPosition - fwd * m_cameraDistance;
+        }
     }
 
+    float EditorScene::clampViewSize(float value) {
+        return value > k_maxViewSize ? k_maxViewSize : value < k_minViewSize ? k_minViewSize : value;
+    }
+
+    AABBox EditorScene::getRenderableAABBox(SceneObject *object) 
+    {
+        AABBox sumAABB;
+        const AABBox& aabb = object->getTransform()->getFrameAABB();
+        sumAABB.addInternalBox(aabb);
+        for (const auto child : object->getChildren()) {
+            auto childAABB = getRenderableAABBox(child);
+            sumAABB.addInternalBox(childAABB);
+        }
+        return sumAABB;
+    }
 }

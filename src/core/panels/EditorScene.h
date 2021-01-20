@@ -14,9 +14,15 @@ namespace ige::creator
 {
     class Image;
 
-#define SYSTEM_KEYCODE_ALT_VALUE        1 << 2
-#define SYSTEM_KEYCODE_CTRL_VALUE       1 << 3
-#define SYSTEM_KEYCODE_SHIFT_VALUE      1 << 4
+#define SYSTEM_KEYPRESSED(X)            (1 << ((X)-1))
+#define SYSTEM_KEYCODE_ALT_VALUE        1
+#define SYSTEM_KEYCODE_CTRL_VALUE       2
+#define SYSTEM_KEYCODE_SHIFT_VALUE      3
+#define SYSTEM_KEYCODE_ALT_MASK         SYSTEM_KEYPRESSED(SYSTEM_KEYCODE_ALT_VALUE)
+#define SYSTEM_KEYCODE_CTRL_MASK        SYSTEM_KEYPRESSED(SYSTEM_KEYCODE_CTRL_VALUE)
+#define SYSTEM_KEYCODE_SHIFT_MASK       SYSTEM_KEYPRESSED(SYSTEM_KEYCODE_SHIFT_VALUE)
+
+
 #define RAD_TO_DEGREE                   57.2957795f
 #define DEGREE_TO_RAD                   0.01745329f
 #define DEG360_TO_RAD                   6.2831844f
@@ -39,6 +45,20 @@ namespace ige::creator
         std::shared_ptr<Gizmo>& getGizmo() { return m_gizmo; }
 
     protected:
+        enum ViewTool
+        {
+            None                = -1,
+            Pan                 = 0,
+            Orbit               = 1,
+            FPS                 = 2,
+            Zoom                = 3,
+            MultiSelectArea     = 4,
+            MultiDeSelectArea   = 5,
+        };
+
+
+    protected:
+
         virtual void initialize() override;
         virtual void _drawImpl() override;
 
@@ -51,13 +71,16 @@ namespace ige::creator
         void renderCameraFrustum();
 
         //! Camera movement with mouse
-        void updateCameraPosition();
+        void updateCameraPosition(float touchX, float touchY);
 
         //! Object selection with touch/mouse
         void updateObjectSelection();
 
         //! Update keyboard
         void updateKeyboard();
+
+        //! Update mouse & touch
+        void updateTouch();
 
         //! Scene FBO
         std::shared_ptr<Image> m_imageWidget = nullptr;
@@ -86,8 +109,17 @@ namespace ige::creator
         bool m_bIs2DMode = false;
         bool m_bIsInitialized = false;
 
-        //! Camera control
+        //keyboard helper
+        unsigned short m_fnKeyPressed = 1;
+        ViewTool m_viewTool = ViewTool::None;
+
+        //Mouse Helper
         bool m_bIsFirstTouch = true;
+        bool m_bIsDragging = false;
+        //! use to determine which is click or drag
+        float m_touchDelay = 0;
+
+        //! Camera control
         int m_HandleCameraTouchId = -1;
         float m_cameraDragSpeed = 0.5f;
         float m_cameraRotationSpeed = 0.0033f;
@@ -95,25 +127,35 @@ namespace ige::creator
         float m_lastMousePosY = 0.f;
         Vec3 m_cameraRotationEuler = {};
 
-        //keyboard helper
-        unsigned short m_fnKeyPressed = 1;
-
         bool m_bIsFocusObject = false;
         Vec3 m_focusPosition = {};
         bool m_resetFocus = true;
         float m_cameraDistance = 0;
 
         const float k_defaultViewSize = 5;
+        const float k_maxViewSize = 3.2e34f;
+        const float k_minViewSize = 1e-5f;
+        const float k_defaultFOV = 45;
+        const float k_zoomFocusOffsetRate = 100.f;
         float m_viewSize = 0;
+
+        void updateViewTool(int TouchID);
 
         //camera Look
         void lookAtObject(SceneObject* object);
+        void handleCameraOrbit(float offsetX, float offsetY);
+        void handleCameraPan(float offsetX, float offsetY);
+        void handleCameraFPS(float offsetX, float offsetY);
+        void handleCameraZoom(float offsetX, float offsetY);
+        void handleCameraZoomFocus(float offsetX, float offsetY);
 
         //camera helper functions
         float clampEulerAngle(float angle);
         Vec3 getForwardVector(Quat rot);
-        void findFocusPoint();
+        void findFocusPoint(bool changeDistance = false);
         float calcCameraViewDistance();
+        float clampViewSize(float value);
         static float getPerspectiveCameraViewDistance(float size, float fov);
+        static AABBox getRenderableAABBox(SceneObject* object);
     };
 }
