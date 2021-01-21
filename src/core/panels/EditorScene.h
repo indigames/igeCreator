@@ -127,9 +127,8 @@ namespace ige::creator
         float m_lastMousePosY = 0.f;
         Vec3 m_cameraRotationEuler = {};
 
-        bool m_bIsFocusObject = false;
         Vec3 m_focusPosition = {};
-        bool m_resetFocus = true;
+        bool m_resetFocus = false;
         float m_cameraDistance = 0;
 
         const float k_defaultViewSize = 5;
@@ -152,7 +151,7 @@ namespace ige::creator
         //camera helper functions
         float clampEulerAngle(float angle);
         Vec3 getForwardVector(Quat rot);
-        void findFocusPoint(bool changeDistance = false);
+        void updateFocusPoint(bool resetView, bool resetFocus);
         float calcCameraViewDistance();
         float clampViewSize(float value);
         static float getPerspectiveCameraViewDistance(float size, float fov);

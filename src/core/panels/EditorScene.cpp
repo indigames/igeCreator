@@ -153,9 +153,9 @@ namespace ige::creator
 
                 //viet.nv : create dummy object to focus
                 m_focusPosition = Vec3(0, 0, 0);
-                m_resetFocus = true;
+                m_resetFocus = false;
                 m_viewSize = k_defaultViewSize;
-                findFocusPoint(true);
+                updateFocusPoint(true, true);
 
                 m_HandleCameraTouchId = -1;
 
@@ -289,7 +289,6 @@ namespace ige::creator
     {
         if (!isOpened() || !m_bIsInitialized)
             return;
-
         if (obj == nullptr)
         {
             if (m_currShowcase)
@@ -411,8 +410,21 @@ namespace ige::creator
     //! Update keyboard
     void EditorScene::updateKeyboard()
     {
-        // Press "F" key focus on target object
+        
         auto keyboard = Editor::getApp()->getInputHandler()->getKeyboard();
+
+        m_fnKeyPressed = 0;
+        if (keyboard->isKeyDown(KeyCode::KEY_LALT) || keyboard->isKeyDown(KeyCode::KEY_RALT) || keyboard->isKeyHold(KeyCode::KEY_LALT) || keyboard->isKeyHold(KeyCode::KEY_RALT)) {
+            m_fnKeyPressed |= SYSTEM_KEYCODE_ALT_MASK;
+        }
+        if (keyboard->isKeyDown(KeyCode::KEY_LCTRL) || keyboard->isKeyDown(KeyCode::KEY_RCTRL) || keyboard->isKeyHold(KeyCode::KEY_LCTRL) || keyboard->isKeyHold(KeyCode::KEY_RCTRL)) {
+            m_fnKeyPressed |= SYSTEM_KEYCODE_CTRL_MASK;
+        }
+        if (keyboard->isKeyDown(KeyCode::KEY_LSHIFT) || keyboard->isKeyDown(KeyCode::KEY_RSHIFT) || keyboard->isKeyHold(KeyCode::KEY_LSHIFT) || keyboard->isKeyHold(KeyCode::KEY_RSHIFT)) {
+            m_fnKeyPressed |= SYSTEM_KEYCODE_SHIFT_MASK;
+        }
+
+        //! Press "F" key focus on target object
         if (keyboard->isKeyDown(KeyCode::KEY_F) && !keyboard->isKeyHold(KeyCode::KEY_F))
         {
             auto target = Editor::getInstance()->getSelectedObject();
@@ -423,6 +435,7 @@ namespace ige::creator
                 lookAtObject(target.get());
             }
         }
+        //! Press "Del" key to delete target object
         if (keyboard->isKeyDown(KeyCode::KEY_DEL))
         {
             bool focused = Editor::getCanvas()->getHierarchy()->isFocused() || Editor::getCanvas()->getEditorScene()->isFocused();
@@ -434,6 +447,7 @@ namespace ige::creator
                 Editor::getCurrentScene()->removeObjectById(objId);
             }
         }
+        //! Press "Q" key to disable transform tool
         if (keyboard->isKeyDown(KeyCode::KEY_Q)) {
             bool focused = Editor::getCanvas()->getHierarchy()->isFocused() || Editor::getCanvas()->getEditorScene()->isFocused();
             auto target = Editor::getInstance()->getSelectedObject();
@@ -445,6 +459,7 @@ namespace ige::creator
                 }
             }
         }
+        //! Press "W" key to Translate target object
         if (keyboard->isKeyDown(KeyCode::KEY_W)) {
             bool focused = Editor::getCanvas()->getHierarchy()->isFocused() || Editor::getCanvas()->getEditorScene()->isFocused();
             auto target = Editor::getInstance()->getSelectedObject();
@@ -457,6 +472,7 @@ namespace ige::creator
                 }
             }
         }
+        //! Press "E" key to Rotate target object
         if (keyboard->isKeyDown(KeyCode::KEY_E)) {
             bool focused = Editor::getCanvas()->getHierarchy()->isFocused() || Editor::getCanvas()->getEditorScene()->isFocused();
             auto target = Editor::getInstance()->getSelectedObject();
@@ -469,6 +485,7 @@ namespace ige::creator
                 }
             }
         }
+        //! Press "R" key to Scale target object
         if (keyboard->isKeyDown(KeyCode::KEY_R)) {
             bool focused = Editor::getCanvas()->getHierarchy()->isFocused() || Editor::getCanvas()->getEditorScene()->isFocused();
             auto target = Editor::getInstance()->getSelectedObject();
@@ -480,17 +497,6 @@ namespace ige::creator
                     gizmo->setOperation(gizmo::OPERATION::SCALE);
                 }
             }
-        }
-
-        m_fnKeyPressed = 0;
-        if (keyboard->isKeyDown(KeyCode::KEY_LALT) || keyboard->isKeyDown(KeyCode::KEY_RALT) || keyboard->isKeyHold(KeyCode::KEY_LALT) || keyboard->isKeyHold(KeyCode::KEY_RALT)) {
-            m_fnKeyPressed |= SYSTEM_KEYCODE_ALT_MASK;
-        }
-        if (keyboard->isKeyDown(KeyCode::KEY_LCTRL) || keyboard->isKeyDown(KeyCode::KEY_RCTRL) || keyboard->isKeyHold(KeyCode::KEY_LCTRL) || keyboard->isKeyHold(KeyCode::KEY_RCTRL)) {
-            m_fnKeyPressed |= SYSTEM_KEYCODE_CTRL_MASK;
-        }
-        if (keyboard->isKeyDown(KeyCode::KEY_LSHIFT) || keyboard->isKeyDown(KeyCode::KEY_RSHIFT) || keyboard->isKeyHold(KeyCode::KEY_LSHIFT) || keyboard->isKeyHold(KeyCode::KEY_RSHIFT)) {
-            m_fnKeyPressed |= SYSTEM_KEYCODE_SHIFT_MASK;
         }
     }
 
@@ -548,10 +554,10 @@ namespace ige::creator
                 if (finger->getFingerId() == m_HandleCameraTouchId || m_HandleCameraTouchId == -1) {
                     m_HandleCameraTouchId = -1;
                     m_bIsFirstTouch = true;
-                    m_resetFocus = true;
-                    if (!m_bIsFocusObject) {
-                        findFocusPoint(false);
-                    }
+                    
+                    updateFocusPoint(false, m_resetFocus);
+                    m_resetFocus = false;
+                    
                     m_viewTool = ViewTool::None;
                     m_touchDelay = 0;
                     m_bIsDragging = false;
@@ -609,6 +615,9 @@ namespace ige::creator
             auto hit = SceneManager::getInstance()->getCurrentScene()->raycast(Vec2(touchX, touchY), m_currCamera, 10000.f);
             if (hit.first)
                 hit.first->setSelected(true);
+            else {
+                Editor::getInstance()->setSelectedObject(-1);
+            }
         }
     }
 
@@ -759,7 +768,6 @@ namespace ige::creator
 
         m_currCamera->SetPosition(targetPos + m_currCamera->GetCameraRotation() * Vec3(0.f, 0.f, 1.f) * m_cameraDistance);
         m_focusPosition = targetPos;
-        m_bIsFocusObject = true;
     }
 
     //! Handle Camera View
@@ -767,13 +775,7 @@ namespace ige::creator
         auto offset = Vec2(offsetX, offsetY);
         auto cameraPosition = m_currCamera->GetPosition();
         auto cameraRotation = m_currCamera->GetRotation();
-
-        if (m_resetFocus) {
-            m_cameraDistance = Vec3::Length(cameraPosition - m_focusPosition);
-            m_resetFocus = false;
-            m_bIsFocusObject = true;
-            return;
-        }
+        m_cameraDistance = Vec3::Length(cameraPosition - m_focusPosition);
 
         auto mouseOffset = offset * m_cameraRotationSpeed;
         m_cameraRotationEuler[1] -= mouseOffset.X();
@@ -807,10 +809,7 @@ namespace ige::creator
         cameraPosition -= cameraRotation * upVec * mouseOffset.Y();
         m_currCamera->SetPosition(cameraPosition);
 
-        if (m_resetFocus) {
-            m_resetFocus = false;
-            m_bIsFocusObject = false;
-        }
+        m_resetFocus = true;
     }
     
     void EditorScene::handleCameraFPS(float offsetX, float offsetY) 
@@ -824,10 +823,7 @@ namespace ige::creator
         vmath_eulerToQuat(m_cameraRotationEuler.P(), rot.P());
         m_currCamera->SetRotation(rot);
 
-        if (m_resetFocus) {
-            m_resetFocus = false;
-            m_bIsFocusObject = false;
-        }
+        m_resetFocus = true;
     }
     
     void EditorScene::handleCameraZoom(float offsetX, float offsetY) {
@@ -846,10 +842,18 @@ namespace ige::creator
         cameraPosition += cameraRotation * rightVec * mouseOffset.X();
         cameraPosition -= cameraRotation * upVec * mouseOffset.Y();
         m_currCamera->SetPosition(cameraPosition);
-
-        targetSize = clampViewSize(m_viewSize - mouseOffset.Y());
-        m_viewSize = targetSize;
-        findFocusPoint(true);
+        
+        auto currentDist = Vec3::Length(m_focusPosition - cameraPosition);
+        if (currentDist - mouseOffset.Y() <= 0) {
+            m_viewSize = k_defaultViewSize / 2;
+            updateFocusPoint(true, true);
+        }
+        else {
+            targetSize = clampViewSize(m_viewSize - mouseOffset.Y());
+            m_viewSize = targetSize;
+            updateFocusPoint(false, false);
+        }
+        
     }
 
     void EditorScene::handleCameraZoomFocus(float offsetX, float offsetY) {
@@ -874,6 +878,9 @@ namespace ige::creator
         
         m_currCamera->SetPosition(cameraPosition);
 
+        targetSize = clampViewSize(m_viewSize - mouseOffset.Y());
+        m_viewSize = targetSize;
+        updateFocusPoint(false, false);
     }
 
     //Camera Helper function
@@ -917,12 +924,15 @@ namespace ige::creator
         return out;
     }
 
-    void EditorScene::findFocusPoint(bool changeDistance)
+    void EditorScene::updateFocusPoint(bool resetView, bool resetFocus)
     {
-        if (changeDistance) 
+        auto cameraPosition = m_currCamera->GetPosition();
+        if (resetView)
             m_cameraDistance = calcCameraViewDistance();
-        if (!m_bIsFocusObject) {
-            auto cameraPosition = m_currCamera->GetPosition();
+        else
+            m_cameraDistance = Vec3::Length(m_focusPosition - cameraPosition);
+
+        if (resetFocus) {
             auto cameraRotation = m_currCamera->GetRotation();
             auto fwd = Vec3::Normalize(getForwardVector(cameraRotation));
             m_focusPosition = cameraPosition - fwd * m_cameraDistance;
