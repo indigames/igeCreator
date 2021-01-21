@@ -187,7 +187,7 @@ namespace ige::creator
             if (SceneManager::getInstance()->getCurrentScene())
             {
                 auto name = SceneManager::getInstance()->getCurrentScene()->getName();
-                Editor::getInstance()->setSelectedObject(-1);
+                Editor::getInstance()->refreshScene();
                 Editor::getCanvas()->getHierarchy()->clear();
                 Editor::getCanvas()->getHierarchy()->initialize();
                 auto& scene = Editor::getCurrentScene();

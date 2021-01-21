@@ -40,6 +40,7 @@ namespace ige::creator
         bool createScene();
         bool loadScene(const std::string& path);
         bool saveScene();
+        void refreshScene();
 
         void registerApp(std::shared_ptr<Application> app) { m_app = app; }
 
@@ -74,6 +75,7 @@ namespace ige::creator
         //! Project path
         const std::string& getProjectPath() const { return m_projectPath; }
         void setProjectPath(const std::string& path) { m_projectPath = path; }
+
 
     protected:
         virtual void initImGUI();

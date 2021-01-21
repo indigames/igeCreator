@@ -30,7 +30,7 @@ using namespace ige::scene;
 using namespace pyxie;
 
 #include "utils/filesystem.h"
-#include <iostream>
+//#include <iostream>
 namespace fs = ghc::filesystem;
 
 namespace ige::creator
@@ -48,11 +48,25 @@ namespace ige::creator
     {
         m_bIsInitialized = false;
 
+        if (m_imageWidget) m_imageWidget.reset();
         m_imageWidget = nullptr;
+
         m_currentScene = nullptr;
+        if (m_gizmo) m_gizmo.reset();
         m_gizmo = nullptr;
 
+        if (m_currShowcase)
+        {
+            if (m_currCamera == m_2dCamera)
+                m_currShowcase->Remove(m_grid2D);
+            else
+                m_currShowcase->Remove(m_grid3D);
+        }
+        m_currShowcase = nullptr;
+
+        m_grid2D->DecReference();
         m_grid2D = nullptr;
+        m_grid3D->DecReference();
         m_grid3D = nullptr;
 
         m_currCamera = nullptr;
@@ -291,14 +305,14 @@ namespace ige::creator
             return;
         if (obj == nullptr)
         {
-            if (m_currShowcase)
+            /*if (m_currShowcase)
             {
                 if (m_currCamera == m_2dCamera)
                     m_currShowcase->Remove(m_grid2D);
                 else
                     m_currShowcase->Remove(m_grid3D);
             }
-            m_currShowcase = nullptr;
+            m_currShowcase = nullptr;*/
             return;
         }
 
@@ -335,6 +349,17 @@ namespace ige::creator
         }
 
         set2DMode(canvas != nullptr);
+    }
+
+    void EditorScene::resetShowcase() {
+        if (m_currShowcase)
+        {
+            if (m_currCamera == m_2dCamera)
+                m_currShowcase->Remove(m_grid2D);
+            else
+                m_currShowcase->Remove(m_grid3D);
+        }
+        m_currShowcase = nullptr;
     }
 
     bool EditorScene::isResizing()
@@ -405,6 +430,11 @@ namespace ige::creator
     void EditorScene::_drawImpl()
     {
         Panel::_drawImpl();
+    }
+
+    //! Refresh Scene
+    void EditorScene::refresh() {
+        resetShowcase();
     }
 
     //! Update keyboard
@@ -506,8 +536,8 @@ namespace ige::creator
             return;
 
         auto touch = Editor::getApp()->getInputHandler()->getTouchDevice();
-
-        if (touch->isFingerScrolled(0))
+        auto isFocus = isFocused();
+        if (touch->isFingerScrolled(0) && isFocus)
         {
             float scrollX, scrollY;
             float targetSize;
@@ -519,7 +549,7 @@ namespace ige::creator
         if (touch->isFingerMoved(0))
         {
             auto finger = touch->getFinger(0);
-            if (m_HandleCameraTouchId == -1) {
+            if (m_HandleCameraTouchId == -1 && isFocus) {
                 m_HandleCameraTouchId = finger->getFingerId();
                 updateViewTool(finger->getFingerId());
                 m_touchDelay = 0;
@@ -543,7 +573,7 @@ namespace ige::creator
             auto finger = touch->getFinger(0);
             if (!m_bIsDragging) {
                 //Perform Click
-                updateObjectSelection();
+                if (isFocus) updateObjectSelection();
                 if (finger->getFingerId() == m_HandleCameraTouchId || m_HandleCameraTouchId == -1) {
                     m_HandleCameraTouchId = -1;
                     m_viewTool = ViewTool::None;

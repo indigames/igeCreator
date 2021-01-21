@@ -26,7 +26,7 @@ namespace ige::creator
 
     Editor::~Editor()
     {
-        setSelectedObject(-1);
+        refreshScene();
         m_canvas = nullptr;
 
         SceneManager::destroy();
@@ -187,7 +187,7 @@ namespace ige::creator
 
     bool Editor::createScene()
     {
-        setSelectedObject(-1);
+        refreshScene();
         SceneManager::getInstance()->unloadScene(SceneManager::getInstance()->getCurrentScene());
         setCurrentScene(SceneManager::getInstance()->createScene());
         return true;
@@ -195,7 +195,7 @@ namespace ige::creator
 
     bool Editor::loadScene(const std::string& path)
     {
-        setSelectedObject(-1);
+        refreshScene();
         SceneManager::getInstance()->unloadScene(SceneManager::getInstance()->getCurrentScene());
         getCanvas()->getHierarchy()->clear();
         getCanvas()->getEditorScene()->clear();
@@ -219,6 +219,11 @@ namespace ige::creator
             SceneManager::getInstance()->saveScene();
         }
         return true;
+    }
+
+    void Editor::refreshScene() {
+        setSelectedObject(-1);
+        getCanvas()->getEditorScene()->refresh();
     }
 
     bool Editor::buildRom()

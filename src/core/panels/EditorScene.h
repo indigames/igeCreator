@@ -38,6 +38,7 @@ namespace ige::creator
 
         virtual void clear();
         virtual void update(float dt);
+        virtual void refresh();
 
         bool isResizing();
         void set2DMode(bool is2D = true);
@@ -82,6 +83,30 @@ namespace ige::creator
         //! Update mouse & touch
         void updateTouch();
 
+        void updateViewTool(int TouchID);
+
+        //! reset showcase
+        void resetShowcase();
+
+        //! camera Look
+        void lookAtObject(SceneObject* object);
+        void handleCameraOrbit(float offsetX, float offsetY);
+        void handleCameraPan(float offsetX, float offsetY);
+        void handleCameraFPS(float offsetX, float offsetY);
+        void handleCameraZoom(float offsetX, float offsetY);
+        void handleCameraZoomFocus(float offsetX, float offsetY);
+
+        //! camera helper functions
+        float clampEulerAngle(float angle);
+        Vec3 getForwardVector(Quat rot);
+        void updateFocusPoint(bool resetView, bool resetFocus);
+        float calcCameraViewDistance();
+        float clampViewSize(float value);
+        static float getPerspectiveCameraViewDistance(float size, float fov);
+        static AABBox getRenderableAABBox(SceneObject* object);
+
+
+    protected:
         //! Scene FBO
         std::shared_ptr<Image> m_imageWidget = nullptr;
         Texture* m_rtTexture = nullptr;
@@ -137,24 +162,5 @@ namespace ige::creator
         const float k_defaultFOV = 45;
         const float k_zoomFocusOffsetRate = 100.f;
         float m_viewSize = 0;
-
-        void updateViewTool(int TouchID);
-
-        //camera Look
-        void lookAtObject(SceneObject* object);
-        void handleCameraOrbit(float offsetX, float offsetY);
-        void handleCameraPan(float offsetX, float offsetY);
-        void handleCameraFPS(float offsetX, float offsetY);
-        void handleCameraZoom(float offsetX, float offsetY);
-        void handleCameraZoomFocus(float offsetX, float offsetY);
-
-        //camera helper functions
-        float clampEulerAngle(float angle);
-        Vec3 getForwardVector(Quat rot);
-        void updateFocusPoint(bool resetView, bool resetFocus);
-        float calcCameraViewDistance();
-        float clampViewSize(float value);
-        static float getPerspectiveCameraViewDistance(float size, float fov);
-        static AABBox getRenderableAABBox(SceneObject* object);
     };
 }
