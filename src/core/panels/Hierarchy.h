@@ -37,8 +37,11 @@ namespace ige::creator
 
         //! Object selected
         void onSceneObjectSelected(SceneObject& sceneObject);
+        void onSceneObjectDeselected(SceneObject& sceneObject);
 
         void onSceneObjectCollapse(std::shared_ptr<SceneObject> sceneObject, bool IsCollapse);
+
+
 
         //! Tree node objects
         std::unordered_map<uint64_t, std::shared_ptr<TreeNode>> m_objectNodeMap;

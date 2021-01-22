@@ -150,7 +150,7 @@ namespace ige::creator
                 m_3dCamera->LockonTarget(false);
                 m_3dCamera->SetAspectRate(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
 
-                m_currCamera = m_3dCamera;
+                m_currCamera = Editor::getInstance()->is3DCamera() ? m_3dCamera : m_2dCamera;
                 
                 m_gizmo = createWidget<Gizmo>();
                 m_gizmo->setMode(Editor::getInstance()->isLocalGizmo() ? gizmo::MODE::LOCAL : gizmo::MODE::WORLD); 
@@ -334,7 +334,7 @@ namespace ige::creator
             }
         }
 
-        auto canvas = obj->getCanvas();
+        /*auto canvas = obj->getCanvas();
         if (canvas)
         {
             auto canvasSize = canvas->getDesignCanvasSize();
@@ -346,9 +346,9 @@ namespace ige::creator
 
             auto transformToViewport = Mat4::Translate(Vec3(-canvasSize.X() * 0.5f, -canvasSize.Y() * 0.5f, 0.f));
             canvas->setCanvasToViewportMatrix(transformToViewport);
-        }
+        }*/
 
-        set2DMode(canvas != nullptr);
+        //set2DMode(canvas != nullptr);
     }
 
     void EditorScene::resetShowcase() {
@@ -532,7 +532,7 @@ namespace ige::creator
 
     void EditorScene::updateTouch() 
     {
-        if (!isOpened() || m_currCamera == nullptr || m_currCamera == m_2dCamera)
+        if (!isOpened() || m_currCamera == nullptr)
             return;
 
         auto touch = Editor::getApp()->getInputHandler()->getTouchDevice();
@@ -562,6 +562,7 @@ namespace ige::creator
                     m_bIsDragging = true;
                     float touchX, touchY;
                     touch->getFingerPosition(0, touchX, touchY);
+                    
                     updateCameraPosition(touchX, touchY);
                 }
             }
@@ -603,19 +604,25 @@ namespace ige::creator
         if (m_bIsDragging) return;
         switch (touchID) {
         case 0 : // Left 
-            //! Important => because this is bit shift, so we can compile multi function key
-            //! in this case, only 1 key will be access, so Shift < Ctrl < Alt
-            if (m_fnKeyPressed & SYSTEM_KEYCODE_ALT_MASK)
-            {
-                m_viewTool = ViewTool::Orbit;
+            if (Editor::getInstance()->is3DCamera()) {
+                //! Important => because this is bit shift, so we can compile multi function key
+                //! in this case, only 1 key will be access, so Shift < Ctrl < Alt
+                if (m_fnKeyPressed & SYSTEM_KEYCODE_ALT_MASK)
+                {
+                    m_viewTool = ViewTool::Orbit;
+                }
+                else if (m_fnKeyPressed & SYSTEM_KEYCODE_CTRL_MASK)
+                {
+                    m_viewTool = ViewTool::MultiDeSelectArea;
+                }
+                else if (m_fnKeyPressed & SYSTEM_KEYCODE_SHIFT_MASK)
+                {
+                    m_viewTool = ViewTool::MultiSelectArea;
+                }
             }
-            else if (m_fnKeyPressed & SYSTEM_KEYCODE_CTRL_MASK)
-            {
-                m_viewTool = ViewTool::MultiDeSelectArea;
-            }
-            else if (m_fnKeyPressed & SYSTEM_KEYCODE_SHIFT_MASK)
-            {
-                m_viewTool = ViewTool::MultiSelectArea;
+            else {
+                //! In 2D mode, rotate camera will be locked, only pan available
+                m_viewTool = ViewTool::Pan;
             }
             break;
         case 1: // Middle

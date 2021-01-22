@@ -41,6 +41,7 @@ namespace ige::creator
         SceneObject::getAttachedEvent().addListener(std::bind(&Hierarchy::onSceneObjectAttached, this, std::placeholders::_1));
         SceneObject::getDetachedEvent().addListener(std::bind(&Hierarchy::onSceneObjectDetached, this, std::placeholders::_1));
         SceneObject::getSelectedEvent().addListener(std::bind(&Hierarchy::onSceneObjectSelected, this, std::placeholders::_1));
+        SceneObject::getDeselectedEvent().addListener(std::bind(&Hierarchy::onSceneObjectDeselected, this, std::placeholders::_1));
     }
 
     Hierarchy::~Hierarchy()
@@ -50,6 +51,7 @@ namespace ige::creator
         SceneObject::getAttachedEvent().removeAllListeners();
         SceneObject::getDetachedEvent().removeAllListeners();
         SceneObject::getSelectedEvent().removeAllListeners();
+        SceneObject::getDeselectedEvent().removeAllListeners();
         clear();
         m_groupLayout = nullptr;
     }
@@ -197,6 +199,25 @@ namespace ige::creator
             sceneObject.getNameChangedEvent().addListener(std::bind(&Hierarchy::onSceneObjectChangedName, this, std::placeholders::_1));
 
             Editor::getInstance()->setSelectedObject(sceneObject.getId());
+        }
+    }
+
+    void Hierarchy::onSceneObjectDeselected(SceneObject& sceneObject)
+    {
+        // Update current selected id
+        auto nodePair = m_objectNodeMap.find(sceneObject.getId());
+        if (nodePair != m_objectNodeMap.end())
+        {
+            m_selectedNodeId = sceneObject.getId();
+            nodePair->second->setIsSelected(false);
+
+            auto oldObject = Editor::getInstance()->getSelectedObject();
+            if (oldObject)
+            {
+                oldObject->getNameChangedEvent().removeAllListeners();
+            }
+            sceneObject.getNameChangedEvent().addListener(std::bind(&Hierarchy::onSceneObjectChangedName, this, std::placeholders::_1));
+            Editor::getInstance()->setSelectedObject(-1);
         }
     }
 

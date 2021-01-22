@@ -105,7 +105,7 @@ namespace ige::creator
         static float getPerspectiveCameraViewDistance(float size, float fov);
         static AABBox getRenderableAABBox(SceneObject* object);
 
-
+        
     protected:
         //! Scene FBO
         std::shared_ptr<Image> m_imageWidget = nullptr;
@@ -131,7 +131,6 @@ namespace ige::creator
         std::shared_ptr<Scene> m_currentScene = nullptr;
 
         //! Initialize states
-        bool m_bIs2DMode = false;
         bool m_bIsInitialized = false;
 
         //keyboard helper

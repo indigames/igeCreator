@@ -161,6 +161,7 @@ namespace ige::creator
                 auto& selectedObj = Editor::getInstance()->getSelectedObject();
                 m_lastObjectId = selectedObj ? selectedObj->getId() : -1;
                 Editor::getCanvas()->getEditorScene()->setTargetObject(nullptr);
+                Editor::getInstance()->refreshScene();
                 SceneManager::getInstance()->saveScene(path);
             }
             m_bIsPlaying = true;
