@@ -11,6 +11,8 @@
 #include "core/task/TaskManager.h"
 #include "core/dialog/MsgBox.h"
 #include "core/dialog/SaveFileDialog.h"
+#include "core/AutoReleasePool.h"
+#include "core/shortcut/ShortcutController.h"
 
 #include <scene/SceneManager.h>
 #include <scene/Scene.h>
@@ -28,6 +30,13 @@ namespace ige::creator
     {
         refreshScene();
         m_canvas = nullptr;
+
+        if (m_shortcutController != nullptr) {
+            m_shortcutController->release();
+        }
+        m_shortcutController = nullptr;
+
+        PoolManager::destroyInstance();
 
         SceneManager::destroy();
         m_app = nullptr;
@@ -51,6 +60,12 @@ namespace ige::creator
 
         // Set editor mode
         SceneManager::getInstance()->setIsEditor(true);
+
+        //! Init Shortcut
+        m_shortcutController = std::make_shared<ShortcutController>();
+        m_shortcutController->retain();
+        //! init default shortcut
+        ShortcutDictionary::initShortcuts();
     }
 
     void Editor::handleEvent(const void* event)
@@ -69,6 +84,8 @@ namespace ige::creator
         // Update layouts
         m_canvas->update(dt);
 
+        // Update shortcut
+        m_shortcutController->update(dt);
         // Load scene
         if (SceneManager::getInstance()->getCurrentScene() == nullptr)
         {

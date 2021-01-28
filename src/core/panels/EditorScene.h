@@ -1,52 +1,47 @@
 #pragma once
 
 #include <utils/PyxieHeaders.h>
-using namespace pyxie;
 
+#include "core/Macros.h"
 #include "core/Panel.h"
 #include "core/gizmo/Gizmo.h"
+#include "core/shortcut/IShortcut.h"
 
 #include "components/gui/RectTransform.h"
 #include "scene/Scene.h"
-using namespace ige::scene;
 
-namespace ige::creator
+
+USING_NS_PYXIE
+USING_NS_IGE_CREATOR
+NS_IGE_BEGIN
+
+class Image;
+
+class EditorScene: public Panel, IShortcut
 {
-    class Image;
+public:
+    EditorScene(const std::string& name = "", const Panel::Settings& settings = {});
+    virtual ~EditorScene();
 
-#define SYSTEM_KEYPRESSED(X)            (1 << ((X)-1))
-#define SYSTEM_KEYCODE_ALT_VALUE        1
-#define SYSTEM_KEYCODE_CTRL_VALUE       2
-#define SYSTEM_KEYCODE_SHIFT_VALUE      3
-#define SYSTEM_KEYCODE_ALT_MASK         SYSTEM_KEYPRESSED(SYSTEM_KEYCODE_ALT_VALUE)
-#define SYSTEM_KEYCODE_CTRL_MASK        SYSTEM_KEYPRESSED(SYSTEM_KEYCODE_CTRL_VALUE)
-#define SYSTEM_KEYCODE_SHIFT_MASK       SYSTEM_KEYPRESSED(SYSTEM_KEYCODE_SHIFT_VALUE)
+    //! Set target object
+    void setTargetObject(const std::shared_ptr<SceneObject>& obj);
 
+    virtual void clear();
+    virtual void update(float dt);
+    virtual void refresh();
 
-#define RAD_TO_DEGREE                   57.2957795f
-#define DEGREE_TO_RAD                   0.01745329f
-#define DEG360_TO_RAD                   6.2831844f
+    void registerShortcut() override;
+    void unregisterShortcut() override;
 
-    class EditorScene: public Panel
-    {
-    public:
-        EditorScene(const std::string& name = "", const Panel::Settings& settings = {});
-        virtual ~EditorScene();
+    bool isResizing();
+    void set2DMode(bool is2D = true);
 
-        //! Set target object
-        void setTargetObject(const std::shared_ptr<SceneObject>& obj);
+    std::shared_ptr<Gizmo>& getGizmo() { return m_gizmo; }
+    
+    void lookSelectedObject();
 
-        virtual void clear();
-        virtual void update(float dt);
-        virtual void refresh();
-
-        bool isResizing();
-        void set2DMode(bool is2D = true);
-
-        std::shared_ptr<Gizmo>& getGizmo() { return m_gizmo; }
-
-    protected:
-        enum ViewTool
+protected:
+    enum ViewTool
         {
             None                = -1,
             Pan                 = 0,
@@ -58,108 +53,114 @@ namespace ige::creator
         };
 
 
-    protected:
+protected:
 
-        virtual void initialize() override;
-        virtual void _drawImpl() override;
+    virtual void initialize() override;
+    virtual void _drawImpl() override;
 
-        void initDragDrop();
+    void initDragDrop();
 
-        //! Render bouding box
-        void renderBoundingBox();
+    //! Render bouding box
+    void renderBoundingBox();
 
-        //! Render camera frustum
-        void renderCameraFrustum();
+    //! Render camera frustum
+    void renderCameraFrustum();
 
-        //! Camera movement with mouse
-        void updateCameraPosition(float touchX, float touchY);
+    //! Camera movement with mouse
+    void updateCameraPosition(float touchX, float touchY);
 
-        //! Object selection with touch/mouse
-        void updateObjectSelection();
+    //! Object selection with touch/mouse
+    void updateObjectSelection();
 
-        //! Update keyboard
-        void updateKeyboard();
+    //! Update keyboard
+    void updateKeyboard();
 
-        //! Update mouse & touch
-        void updateTouch();
+    //! Update mouse & touch
+    void updateTouch();
 
-        void updateViewTool(int TouchID);
+    void updateViewTool(int TouchID);
 
-        //! reset showcase
-        void resetShowcase();
+    //! reset showcase
+    void resetShowcase();
 
-        //! camera Look
-        void lookAtObject(SceneObject* object);
-        void handleCameraOrbit(float offsetX, float offsetY);
-        void handleCameraPan(float offsetX, float offsetY);
-        void handleCameraFPS(float offsetX, float offsetY);
-        void handleCameraZoom(float offsetX, float offsetY);
-        void handleCameraZoomFocus(float offsetX, float offsetY);
+    //! camera Look
+    void lookAtObject(SceneObject* object);
+    void handleCameraOrbit(float offsetX, float offsetY);
+    void handleCameraPan(float offsetX, float offsetY);
+    void handleCameraFPS(float offsetX, float offsetY);
+    void handleCameraZoom(float offsetX, float offsetY);
+    void handleCameraZoomFocus(float offsetX, float offsetY);
 
-        //! camera helper functions
-        float clampEulerAngle(float angle);
-        Vec3 getForwardVector(Quat rot);
-        void updateFocusPoint(bool resetView, bool resetFocus);
-        float calcCameraViewDistance();
-        float clampViewSize(float value);
-        static float getPerspectiveCameraViewDistance(float size, float fov);
-        static AABBox getRenderableAABBox(SceneObject* object);
+    //! camera helper functions
+    float clampEulerAngle(float angle);
+    Vec3 getForwardVector(Quat rot);
+    void updateFocusPoint(bool resetView, bool resetFocus);
+    float calcCameraViewDistance();
+    float clampViewSize(float value);
+    static float getPerspectiveCameraViewDistance(float size, float fov);
+    static AABBox getRenderableAABBox(SceneObject* object);
 
-        
-    protected:
-        //! Scene FBO
-        std::shared_ptr<Image> m_imageWidget = nullptr;
-        Texture* m_rtTexture = nullptr;
-        RenderTarget* m_fbo = nullptr;
+    
+protected:
+    //! Scene FBO
+    std::shared_ptr<Image> m_imageWidget = nullptr;
+    Texture* m_rtTexture = nullptr;
+    RenderTarget* m_fbo = nullptr;
 
-        //! Grids
-        EditableFigure* m_grid2D = nullptr;
-        EditableFigure* m_grid3D = nullptr; 
+    //! Grids
+    EditableFigure* m_grid2D = nullptr;
+    EditableFigure* m_grid3D = nullptr; 
 
-        //! Camera
-        Camera* m_2dCamera = nullptr;
-        Camera* m_3dCamera = nullptr;
-        Camera* m_currCamera = nullptr;
+    //! Camera
+    Camera* m_2dCamera = nullptr;
+    Camera* m_3dCamera = nullptr;
+    Camera* m_currCamera = nullptr;
 
-        //! Showcase
-        Showcase* m_currShowcase = nullptr;
+    //! Showcase
+    Showcase* m_currShowcase = nullptr;
 
-        //! Gizmo
-        std::shared_ptr<Gizmo> m_gizmo = nullptr;
 
-        //! Cache current scene
-        std::shared_ptr<Scene> m_currentScene = nullptr;
+    //! Gizmo
+    std::shared_ptr<Gizmo> m_gizmo = nullptr;
 
-        //! Initialize states
-        bool m_bIsInitialized = false;
+    //! Cache current scene
+    std::shared_ptr<Scene> m_currentScene = nullptr;
 
-        //keyboard helper
-        unsigned short m_fnKeyPressed = 1;
-        ViewTool m_viewTool = ViewTool::None;
+    //! Initialize states
+    bool m_bIsInitialized = false;
 
-        //Mouse Helper
-        bool m_bIsFirstTouch = true;
-        bool m_bIsDragging = false;
-        //! use to determine which is click or drag
-        float m_touchDelay = 0;
+    //keyboard helper
+    unsigned short m_fnKeyPressed = 1;
+    ViewTool m_viewTool = ViewTool::None;
 
-        //! Camera control
-        int m_HandleCameraTouchId = -1;
-        float m_cameraDragSpeed = 0.5f;
-        float m_cameraRotationSpeed = 0.0033f;
-        float m_lastMousePosX = 0.f;
-        float m_lastMousePosY = 0.f;
-        Vec3 m_cameraRotationEuler = {};
+    //Mouse Helper
+    bool m_bIsFirstTouch = true;
+    bool m_bIsDragging = false; //! check is mouse if drag or not
+    bool m_bIsDraggingCam = false; //! Mark Camera is dragging
+    //! use to determine which is click or drag
+    float m_touchDelay = 0;
 
-        Vec3 m_focusPosition = {};
-        bool m_resetFocus = false;
-        float m_cameraDistance = 0;
+    //! Camera control
+    int m_HandleCameraTouchId = -1;
+    float m_cameraDragSpeed = 0.5f;
+    float m_cameraRotationSpeed = 0.0033f;
+    float m_lastMousePosX = 0.f;
+    float m_lastMousePosY = 0.f;
+    Vec3 m_cameraRotationEuler = {};
 
-        const float k_defaultViewSize = 5;
-        const float k_maxViewSize = 3.2e34f;
-        const float k_minViewSize = 1e-5f;
-        const float k_defaultFOV = 45;
-        const float k_zoomFocusOffsetRate = 100.f;
-        float m_viewSize = 0;
-    };
-}
+    Vec3 m_focusPosition = {};
+    bool m_resetFocus = false;
+    float m_cameraDistance = 0;
+
+    const float k_defaultViewSize = 5;
+    const float k_maxViewSize = 3.2e34f;
+    const float k_minViewSize = 1e-5f;
+    const float k_defaultFOV = 45;
+    const float k_zoomFocusOffsetRate = 100.f;
+    float m_viewSize = 0;
+
+    //! Camera 2D
+    float m_currentCanvasHeight = 0;
+    float m_canvasRatio = 0;
+};
+NS_IGE_END
