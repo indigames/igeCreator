@@ -797,7 +797,11 @@ namespace ige::creator
                     float viewSize = Vec2::Length(rect->getSize());
                     m_currentCanvasHeight = viewSize < 0 ? 0.001f : viewSize;
                     m_currCamera->SetOrthoHeight(m_currentCanvasHeight * 0.5f);
-
+                    auto cameraPosition = m_currCamera->GetPosition();
+                    auto pos = object->getTransform()->getPosition();
+                    cameraPosition.X(pos.X());
+                    cameraPosition.Y(pos.Y());
+                    m_currCamera->SetPosition(cameraPosition);
                 }
 
             } 
@@ -850,7 +854,6 @@ namespace ige::creator
         }
         else {
             auto offset = Vec2(offsetX, offsetY);
-            auto pos = m_currCamera->GetPosition();
             // Scale with Zoom Offset
             auto zoomOffset = m_currentCanvasHeight / SystemInfo::Instance().GetGameH();
             auto mouseOffset = offset * zoomOffset * panDelta;
@@ -919,29 +922,36 @@ namespace ige::creator
 
     void EditorScene::handleCameraZoomFocus(float offsetX, float offsetY) {
         float zoomDelta = m_fnKeyPressed & SYSTEM_KEYCODE_SHIFT_MASK ? 3 : 1;
-        float targetSize;
-
-        Vec2 offset = { offsetX, offsetY };
-        auto mouseOffset = offset * m_cameraDragSpeed * zoomDelta;
-
-        auto cameraPosition = m_currCamera->GetPosition();
-        auto cameraRotation = m_currCamera->GetRotation();
-        auto currentDist = Vec3::Length(m_focusPosition - cameraPosition);
-        float percent = currentDist / (m_viewSize > 4 ? 4 : m_viewSize);
-        percent = percent > 50 ? 50 : percent < 0.01f ? 0.01f : percent;
-        mouseOffset *= percent;
-        if (currentDist - mouseOffset.Y() <= 0) mouseOffset.Y(currentDist - k_minViewSize);
-
-        const Vec3 rightVec = { 1.f, 0.f, 0.f };
-        const Vec3 fowardVec = { 0.f, 0.f, 1.f };
-        cameraPosition += cameraRotation * rightVec * mouseOffset.X();
-        cameraPosition -= cameraRotation * fowardVec * mouseOffset.Y();
         
-        m_currCamera->SetPosition(cameraPosition);
+        if (Editor::getInstance()->is3DCamera()) {
+            Vec2 offset = { offsetX, offsetY };
+            auto mouseOffset = offset * m_cameraDragSpeed * zoomDelta;
 
-        targetSize = clampViewSize(m_viewSize - mouseOffset.Y());
-        m_viewSize = targetSize;
-        updateFocusPoint(false, false);
+            auto cameraPosition = m_currCamera->GetPosition();
+            auto cameraRotation = m_currCamera->GetRotation();
+            auto currentDist = Vec3::Length(m_focusPosition - cameraPosition);
+            float percent = currentDist / (m_viewSize > 4 ? 4 : m_viewSize);
+            percent = percent > 50 ? 50 : percent < 0.01f ? 0.01f : percent;
+            mouseOffset *= percent;
+            if (currentDist - mouseOffset.Y() <= 0) mouseOffset.Y(currentDist - k_minViewSize);
+
+            const Vec3 rightVec = { 1.f, 0.f, 0.f };
+            const Vec3 fowardVec = { 0.f, 0.f, 1.f };
+            cameraPosition += cameraRotation * rightVec * mouseOffset.X();
+            cameraPosition -= cameraRotation * fowardVec * mouseOffset.Y();
+
+            m_currCamera->SetPosition(cameraPosition);
+
+            m_viewSize = clampViewSize(m_viewSize - mouseOffset.Y());
+            updateFocusPoint(false, false);
+        }
+        else {
+            Vec2 offset = { offsetX, offsetY };
+            auto mouseOffset = offset * m_cameraDragSpeed * zoomDelta * 100;
+            m_currentCanvasHeight -= mouseOffset.Y();
+            m_currentCanvasHeight = m_currentCanvasHeight < 0 ? 0.001f : m_currentCanvasHeight;
+            m_currCamera->SetOrthoHeight(m_currentCanvasHeight * 0.5f);
+        }
     }
 
     //Camera Helper function
