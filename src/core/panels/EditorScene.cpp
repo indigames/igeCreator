@@ -186,10 +186,15 @@ namespace ige::creator
     void EditorScene::registerShortcut() {
         ASSIGN_COMMAND_TO_DICT(ShortcutDictionary::EDIT_SCENE_OBJECT_SELECTED, CALLBACK_0(EditorScene::lookSelectedObject, this));
         ASSIGN_KEY_TO_COMMAND(ShortcutDictionary::EDIT_SCENE_OBJECT_SELECTED, KeyCode::KEY_F, false, false, false);
+
+        ASSIGN_COMMAND_TO_DICT(ShortcutDictionary::DELETE_SCENE_OBJECT_SELECTED, CALLBACK_0(EditorScene::deleteSelectedObject, this));
+        ASSIGN_KEY_TO_COMMAND(ShortcutDictionary::DELETE_SCENE_OBJECT_SELECTED, KeyCode::KEY_DEL, false, false, false);
     }
 
     void EditorScene::unregisterShortcut() {
         REMOVE_COMMAND(ShortcutDictionary::EDIT_SCENE_OBJECT_SELECTED);
+
+        REMOVE_COMMAND(ShortcutDictionary::DELETE_SCENE_OBJECT_SELECTED);
     }
 
     void EditorScene::initDragDrop()
@@ -805,6 +810,21 @@ namespace ige::creator
                 }
 
             } 
+        }
+    }
+
+
+    void EditorScene::deleteSelectedObject() {
+        auto target = Editor::getInstance()->getSelectedObject();
+        if (target && m_currCamera)
+        {
+            TaskManager::getInstance()->addTask([this]() {
+                auto currentObject = Editor::getInstance()->getSelectedObject();
+                if (currentObject && currentObject->getParent()) currentObject->getParent()->setSelected(true);
+                Editor::getInstance()->setSelectedObject(-1);
+                auto objId = currentObject->getId();
+                Editor::getCurrentScene()->removeObjectById(objId);
+                });
         }
     }
 

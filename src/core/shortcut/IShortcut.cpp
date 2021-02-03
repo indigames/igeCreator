@@ -3,38 +3,43 @@
 NS_IGE_BEGIN
 
 IShortcut::IShortcut() {
-	IShortcutRegistration::getInstance()->addObject(this);
+	ShortcutRegistration::getInstance()->addObject(this);
+	autorelease();
+	retain();
 }
-
-void IShortcut::unregisterShortcut() { }
 
 IShortcut::~IShortcut() {
 	unregisterShortcut();
 }
 
+void IShortcut::unregisterShortcut() { }
 
-IShortcutRegistration* IShortcutRegistration::s_singleInstance = nullptr;
-IShortcutRegistration* IShortcutRegistration::getInstance() {
+
+ShortcutRegistration* ShortcutRegistration::s_singleInstance = nullptr;
+ShortcutRegistration* ShortcutRegistration::getInstance() {
 	if (s_singleInstance == nullptr)
 	{
-		s_singleInstance = new IShortcutRegistration();
+		s_singleInstance = new ShortcutRegistration();
 	}
 	return s_singleInstance;
 }
 
-IShortcutRegistration::IShortcutRegistration() {
+ShortcutRegistration::ShortcutRegistration() {
 	_managedObjectArray.reserve(150);
+
+	autorelease();
+	retain();
 }
 
-IShortcutRegistration::~IShortcutRegistration() {
+ShortcutRegistration::~ShortcutRegistration() {
 	clear();
 }
 
-void IShortcutRegistration::addObject(IShortcut* object) {
+void ShortcutRegistration::addObject(IShortcut* object) {
 	_managedObjectArray.push_back(object);
 }
 
-void IShortcutRegistration::clear() {
+void ShortcutRegistration::clear() {
 	std::vector<IShortcut*> releasings;
 	releasings.swap(_managedObjectArray);
 	for (const auto& obj : releasings)
@@ -43,7 +48,7 @@ void IShortcutRegistration::clear() {
 	}
 }
 
-bool IShortcutRegistration::contains(IShortcut* object) const
+bool ShortcutRegistration::contains(IShortcut* object) const
 {
 	for (const auto& obj : _managedObjectArray)
 	{
@@ -53,7 +58,7 @@ bool IShortcutRegistration::contains(IShortcut* object) const
 	return false;
 }
 
-void IShortcutRegistration::registerShortcuts() {
+void ShortcutRegistration::registerShortcuts() {
 	for (const auto& obj : _managedObjectArray)
 	{
 		obj->registerShortcut();

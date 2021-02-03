@@ -14,12 +14,13 @@ const char* ShortcutDictionary::TOOL_PIVOT_POSITION = "Tools/Toggle Pivot Positi
 const char* ShortcutDictionary::TOOL_PIVOT_ORIENTATION = "Tools/Toggle Pivot Orientation";
 
 const char* ShortcutDictionary::EDIT_SCENE_OBJECT_SELECTED = "Edit/Scene Object Selected";
+const char* ShortcutDictionary::DELETE_SCENE_OBJECT_SELECTED = "Edit/Delete Object Selected";
 
 
 void ShortcutDictionary::initShortcuts() {
 	initDefaultShortcutCommand();
 	assignDefaultShortcut();
-	IShortcutRegistration::getInstance()->registerShortcuts();
+	ShortcutRegistration::getInstance()->registerShortcuts();
 }
 
 //! Default Shortcut Store

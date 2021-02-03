@@ -72,6 +72,7 @@ ShortcutEntry::ShortcutEntry(uint32_t id, const std::string& name, ShortcutStage
 {
 	m_keyCombinations.reserve(10);
 	m_callback = callback;
+	autorelease();
 	retain();
 }
 

@@ -39,6 +39,7 @@ public:
     std::shared_ptr<Gizmo>& getGizmo() { return m_gizmo; }
     
     void lookSelectedObject();
+    void deleteSelectedObject();
 
 protected:
     enum ViewTool

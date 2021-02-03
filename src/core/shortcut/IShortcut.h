@@ -8,19 +8,20 @@ NS_IGE_BEGIN
 class IShortcut : public Ref
 {
 public:
-	virtual void registerShortcut() = 0;
-	virtual void unregisterShortcut() = 0;
 	IShortcut();
 	virtual ~IShortcut();
+
+	virtual void registerShortcut() = 0;
+	virtual void unregisterShortcut() = 0;
 };
 
-class IShortcutRegistration : public Ref
+class ShortcutRegistration : public Ref
 {
 public:
-	static IShortcutRegistration* getInstance();
+	static ShortcutRegistration* getInstance();
 
-	IShortcutRegistration();
-	~IShortcutRegistration();
+	ShortcutRegistration();
+	~ShortcutRegistration();
 
 	void addObject(IShortcut* object);
 	void clear();
@@ -28,7 +29,7 @@ public:
 	void registerShortcuts();
 
 private:
-	static IShortcutRegistration* s_singleInstance;
+	static ShortcutRegistration* s_singleInstance;
 	std::vector<IShortcut*> _managedObjectArray;
 
 };
