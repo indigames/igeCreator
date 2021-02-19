@@ -74,7 +74,7 @@ void UIImageEditorComponent::drawUIImage()
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
             auto uiImage = m_targetObject->getComponent<UIImage>();
             uiImage->setPath(txt);
-            m_bisDirty = true;
+            dirty();
             });
     }
 
@@ -84,7 +84,7 @@ void UIImageEditorComponent::drawUIImage()
         {
             auto uiImage = m_targetObject->getComponent<UIImage>();
             uiImage->setPath(files[0]);
-            m_bisDirty = true;
+            dirty();
         }
         });
 }

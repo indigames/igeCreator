@@ -65,7 +65,7 @@ void ParticleManagerEditorComponent::drawParticleManager()
     column->createWidget<CheckBox>("Culling", particleManager->isCullingEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
         auto particleManager = m_targetObject->getComponent<ParticleManager>();
         particleManager->setCullingEnabled(val);
-        m_bisDirty = true;
+        dirty();
         });
 
     if (particleManager->isCullingEnabled())

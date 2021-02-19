@@ -92,7 +92,7 @@ void PhysicMeshEditorComponent::drawPhysicMesh()
     meshIdxWg->addPlugin<DDTargetPlugin<int>>(EDragDropID::MESH)->getOnDataReceivedEvent().addListener([this](auto val) {
         auto physicComp = m_targetObject->getComponent<PhysicMesh>();
         physicComp->setMeshIndex(val);
-        m_bisDirty = true;
+        dirty();
         });
 
     auto txtPath = m_physicGroup->createWidget<TextField>("Path", physicComp->getPath());
@@ -107,7 +107,7 @@ void PhysicMeshEditorComponent::drawPhysicMesh()
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
             auto physicComp = m_targetObject->getComponent<PhysicMesh>();
             physicComp->setPath(txt);
-            m_bisDirty = true;
+            dirty();
             });
     }
     m_physicGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
@@ -116,7 +116,7 @@ void PhysicMeshEditorComponent::drawPhysicMesh()
         {
             auto physicComp = m_targetObject->getComponent<PhysicMesh>();
             physicComp->setPath(files[0]);
-            m_bisDirty = true;
+            dirty();
         }
         });
 

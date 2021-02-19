@@ -137,7 +137,7 @@ void ParticleEditorComponent::drawParticle()
                 auto particle = m_targetObject->getComponent<Particle>();
                 particle->setPath(val);
                 particle->play();
-                m_bisDirty = true;
+                dirty();
                 });
             });
     }

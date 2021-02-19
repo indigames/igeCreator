@@ -16,6 +16,7 @@ NS_IGE_BEGIN
 TransformEditorComponent::TransformEditorComponent() {
     m_localTransformGroup = nullptr;
     m_worldTransformGroup = nullptr;
+    m_dirtyFlag = 0;
 }
 
 TransformEditorComponent::~TransformEditorComponent()
@@ -57,12 +58,26 @@ void TransformEditorComponent::redraw()
 
     if(m_localTransformGroup == nullptr)
         m_localTransformGroup = m_group->createWidget<Group>("LocalTransformGroup", false);
-    drawLocalTransformComponent();
-
     if(m_worldTransformGroup == nullptr)
         m_worldTransformGroup = m_group->createWidget<Group>("WorldTransformGroup", false);
-    drawWorldTransformComponent();
 
+    switch (m_dirtyFlag) {
+    case 0:
+        drawLocalTransformComponent();
+        drawWorldTransformComponent();
+        break;
+    case 1:
+        drawLocalTransformComponent();
+        break;
+    case 2:
+        drawWorldTransformComponent();
+        break;
+    default:
+        break;
+    }
+    
+    /*m_dirtyFlag = 0;
+    setDirty(false);*/
     EditorComponent::redraw();
 }
 
@@ -104,7 +119,9 @@ void TransformEditorComponent::drawLocalTransformComponent() {
         auto transform = this->m_component->getOwner()->getTransform();
         transform->setPosition({ val[0], val[1], val[2] });
         transform->onUpdate(0.f);
-        drawWorldTransformComponent();
+        //drawWorldTransformComponent();
+        m_dirtyFlag = 2;
+        dirty();
         });
 
     
@@ -120,7 +137,8 @@ void TransformEditorComponent::drawLocalTransformComponent() {
         vmath_eulerToQuat(rad, quat.P());
         transform->setRotation(quat);
         transform->onUpdate(0.f);
-        drawWorldTransformComponent();
+        m_dirtyFlag = 2;
+        dirty();
         });
 
     std::array scale = { transform->getScale().X(), transform->getScale().Y(), transform->getScale().Z() };
@@ -129,7 +147,8 @@ void TransformEditorComponent::drawLocalTransformComponent() {
         auto transform = this->m_component->getOwner()->getTransform();
         transform->setScale({ val[0], val[1], val[2] });
         transform->onUpdate(0.f);
-        drawWorldTransformComponent();
+        m_dirtyFlag = 2;
+        dirty();
         });
 }
 
@@ -150,7 +169,8 @@ void TransformEditorComponent::drawWorldTransformComponent() {
         auto transform = this->m_component->getOwner()->getTransform();
         transform->setWorldPosition({ val[0], val[1], val[2] });
         transform->onUpdate(0.f);
-        drawLocalTransformComponent();
+        m_dirtyFlag = 1;
+        dirty();
         });
 
     Vec3 euler;
@@ -164,7 +184,8 @@ void TransformEditorComponent::drawWorldTransformComponent() {
         vmath_eulerToQuat(rad, quat.P());
         transform->setWorldRotation(quat);
         transform->onUpdate(0.f);
-        drawLocalTransformComponent();
+        m_dirtyFlag = 1;
+        dirty();
         });
 
     std::array scale = { transform->getWorldScale().X(), transform->getWorldScale().Y(), transform->getWorldScale().Z() };
@@ -173,7 +194,8 @@ void TransformEditorComponent::drawWorldTransformComponent() {
         auto transform = this->m_component->getOwner()->getTransform();
         transform->setWorldScale({ val[0], val[1], val[2] });
         transform->onUpdate(0.f);
-        drawLocalTransformComponent();
+        m_dirtyFlag = 1;
+        dirty();
         });
 }
 
@@ -183,7 +205,8 @@ void TransformEditorComponent::onTransformChanged(SceneObject& sceneObject)
     TaskManager::getInstance()->addTask([this]() {
         if (m_targetObject != nullptr)
         {
-            m_bisDirty = true;
+            m_dirtyFlag = 0;
+            dirty();
         }
         });
 }

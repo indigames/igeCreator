@@ -75,7 +75,7 @@ void SpriteEditorComponent::drawSpriteComponent()
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
             auto spriteComp = m_targetObject->getComponent<SpriteComponent>();
             spriteComp->setPath(txt);
-            m_bisDirty = true;
+            dirty();
             });
     }
 
@@ -85,7 +85,7 @@ void SpriteEditorComponent::drawSpriteComponent()
         {
             auto spriteComp = m_targetObject->getComponent<SpriteComponent>();
             spriteComp->setPath(files[0]);
-            m_bisDirty = true;
+            dirty();
         }
         });
 

@@ -146,7 +146,7 @@ void AudioSourceEditorComponent::drawAudioSource()
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
             auto audioSourceComp = m_targetObject->getComponent<AudioSource>();
             audioSourceComp->setPath(txt);
-            m_bisDirty = true;
+            dirty();
             });
     }
     m_audioSourceGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
@@ -155,7 +155,7 @@ void AudioSourceEditorComponent::drawAudioSource()
         {
             auto audioSourceComp = m_targetObject->getComponent<AudioSource>();
             audioSourceComp->setPath(files[0]);
-            m_bisDirty = true;
+            dirty();
         }
         });
 }

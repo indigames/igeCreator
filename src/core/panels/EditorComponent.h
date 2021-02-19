@@ -29,6 +29,7 @@ public:
 	virtual void draw(std::shared_ptr<Group> group);
 	virtual void redraw();
 
+	void dirty() { m_bisDirty = true; }
 	bool isDirty() { return m_bisDirty; }
 	void setDirty(bool value) { m_bisDirty = value; }
 protected:

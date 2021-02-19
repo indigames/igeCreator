@@ -74,7 +74,7 @@ void FigureEditorComponent::drawFigureComponent()
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
             auto figureComp = m_targetObject->getComponent<FigureComponent>();
             figureComp->setPath(txt);
-            m_bisDirty = true;
+            dirty();
             });
     }
 
@@ -84,7 +84,7 @@ void FigureEditorComponent::drawFigureComponent()
         {
             auto figureComp = m_targetObject->getComponent<FigureComponent>();
             figureComp->setPath(files[0]);
-            m_bisDirty = true;
+            dirty();
         }
         });
 
@@ -113,7 +113,7 @@ void FigureEditorComponent::drawFigureComponent()
     figColumn->createWidget<CheckBox>("AlphaBlend", figureComp->isAlphaBlendingEnable())->getOnDataChangedEvent().addListener([this](bool val) {
         auto figureComp = m_targetObject->getComponent<FigureComponent>();
         figureComp->setAlphaBlendingEnable(val);
-        m_bisDirty = true;
+        dirty();
         });
 
     if (figureComp->isAlphaBlendingEnable())

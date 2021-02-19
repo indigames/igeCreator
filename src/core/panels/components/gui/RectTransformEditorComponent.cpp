@@ -149,7 +149,7 @@ void RectTransformEditorComponent::drawRectTransform() {
         anchor[3] = anchorWidget->getAnchorMax().y;
         rectTransform->setAnchor(anchor);
         m_dirtyFlagSupport = 1;
-        m_bisDirty = true;
+        dirty();
         });
     
     auto anchorColumn = m_rectTransformAnchorGroup->createWidget<Columns<2>>();
@@ -424,7 +424,7 @@ void RectTransformEditorComponent::drawTransform() {
         rectTransform->setPivot({ val[0], val[1] });
         rectTransform->onUpdate(0.f);
         m_dirtyFlagSupport = 3;
-        m_bisDirty = true;
+        dirty();
         });
 
     Vec3 euler;
@@ -439,7 +439,7 @@ void RectTransformEditorComponent::drawTransform() {
         rectTransform->setRotation(quat);
         rectTransform->onUpdate(0.f);
         m_dirtyFlagSupport = 3;
-        m_bisDirty = true;
+        dirty();
         });
 
     std::array scale = { rectTransform->getScale().X(), rectTransform->getScale().Y(), rectTransform->getScale().Z() };
@@ -449,7 +449,7 @@ void RectTransformEditorComponent::drawTransform() {
         rectTransform->setScale({ val[0], val[1], val[2] });
         rectTransform->onUpdate(0.f);
         m_dirtyFlagSupport = 3;
-        m_bisDirty = true;
+        dirty();
         });
 }
 
@@ -460,7 +460,7 @@ void RectTransformEditorComponent::onTransformChanged(SceneObject& sceneObject)
         if (m_targetObject != nullptr)
         {
             m_dirtyFlagSupport = 2;
-            m_bisDirty = true;
+            dirty();
         }
     });
 }

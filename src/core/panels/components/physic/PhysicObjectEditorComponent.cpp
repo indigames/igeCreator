@@ -87,7 +87,7 @@ void PhysicObjectEditorComponent::drawPhysicObject()
     columns->createWidget<CheckBox>("Kinematic", physicComp->isKinematic())->getOnDataChangedEvent().addListener([this](bool val) {
         auto physicComp = m_targetObject->getComponent<PhysicObject>();
         physicComp->setIsKinematic(val);
-        m_bisDirty = true;
+        dirty();
         });
 
     columns->createWidget<CheckBox>("Trigger", physicComp->isTrigger())->getOnDataChangedEvent().addListener([this](bool val) {
@@ -196,7 +196,7 @@ void PhysicObjectEditorComponent::drawPhysicConstraints()
             m_targetObject->getComponent<PhysicObject>()->addConstraint<Dof6SpringConstraint>();
             break;
         }
-        m_bisDirty = true;
+        dirty();
         });
     m_constraintGroup->createWidget<Separator>();
 
@@ -250,7 +250,7 @@ void PhysicObjectEditorComponent::drawPhysicConstraint(const std::shared_ptr<Phy
     otherBodyTxt->addPlugin<DDTargetPlugin<int>>(EDragDropID::OBJECT)->getOnDataReceivedEvent().addListener([&](auto val) {
         auto obj = Editor::getCurrentScene()->findObjectById(val);
         constraint->setOtherUUID(obj->getUUID());
-        m_bisDirty = true;
+        dirty();
         });
 
     // Breaking impulse
@@ -266,7 +266,7 @@ void PhysicObjectEditorComponent::drawFixedConstraint(const std::shared_ptr<Phys
     auto constraintGroup = m_constraintGroup->createWidget<Group>("FixedConstraint", true, true);
     constraintGroup->getOnClosedEvent().addListener([&, this]() {
         m_targetObject->getComponent<PhysicObject>()->removeConstraint(constraint);
-        m_bisDirty = true;
+        dirty();
         });
 
     // Draw Physic Constraint base
@@ -279,7 +279,7 @@ void PhysicObjectEditorComponent::drawHingeConstraint(const std::shared_ptr<Phys
     auto constraintGroup = m_constraintGroup->createWidget<Group>("HingeConstraint", true, true);
     constraintGroup->getOnClosedEvent().addListener([&, this]() {
         m_targetObject->getComponent<PhysicObject>()->removeConstraint(constraint);
-        m_bisDirty = true;
+        dirty();
         });
 
     // Draw Physic Constraint base
@@ -329,7 +329,7 @@ void PhysicObjectEditorComponent::drawSliderConstraint(const std::shared_ptr<Phy
     auto constraintGroup = m_constraintGroup->createWidget<Group>("SliderConstraint", true, true);
     constraintGroup->getOnClosedEvent().addListener([&, this]() {
         m_targetObject->getComponent<PhysicObject>()->removeConstraint(constraint);
-        m_bisDirty = true;
+        dirty();
         });
 
     // Draw Physic Constraint base
@@ -360,7 +360,7 @@ void PhysicObjectEditorComponent::drawSpringConstraint(const std::shared_ptr<Phy
     auto constraintGroup = m_constraintGroup->createWidget<Group>("SpringConstraint", true, true);
     constraintGroup->getOnClosedEvent().addListener([&, this]() {
         m_targetObject->getComponent<PhysicObject>()->removeConstraint(constraint);
-        m_bisDirty = true;
+        dirty();
         });
 
     // Draw Physic Constraint base
@@ -409,7 +409,7 @@ void PhysicObjectEditorComponent::drawDof6SpringConstraint(const std::shared_ptr
     auto constraintGroup = m_constraintGroup->createWidget<Group>("Dof6Constraint", true, true);
     constraintGroup->getOnClosedEvent().addListener([&, this]() {
         m_targetObject->getComponent<PhysicObject>()->removeConstraint(constraint);
-        m_bisDirty = true;
+        dirty();
         });
 
     // Draw Physic Constraint base

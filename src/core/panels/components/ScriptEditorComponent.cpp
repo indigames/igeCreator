@@ -74,7 +74,7 @@ void ScriptEditorComponent::drawScriptComponent()
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
             auto scriptComp = m_targetObject->getComponent<ScriptComponent>();
             scriptComp->setPath(txt);
-            m_bisDirty = true;
+            dirty();
             });
     }
 
@@ -84,7 +84,7 @@ void ScriptEditorComponent::drawScriptComponent()
         {
             auto scriptComp = m_targetObject->getComponent<ScriptComponent>();
             scriptComp->setPath(files[0]);
-            m_bisDirty = true;
+            dirty();
         }
         });
 }
