@@ -14,6 +14,7 @@
 #include "core/AutoReleasePool.h"
 #include "core/shortcut/ShortcutController.h"
 
+
 #include <scene/SceneManager.h>
 #include <scene/Scene.h>
 using namespace ige::scene;
@@ -66,6 +67,8 @@ namespace ige::creator
         m_shortcutController->retain();
         //! init default shortcut
         ShortcutDictionary::initShortcuts();
+
+
     }
 
     void Editor::handleEvent(const void* event)

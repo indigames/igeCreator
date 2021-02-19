@@ -7,6 +7,7 @@
 #include <utils/PyxieHeaders.h>
 #include <utils/Singleton.h>
 #include <scene/SceneManager.h>
+#include "core/Macros.h"
 
 
 using namespace pyxie;
@@ -90,6 +91,7 @@ namespace ige::creator
         std::shared_ptr<Application> m_app = nullptr;
         std::shared_ptr<SceneObject> m_selectedObject = nullptr;
         std::shared_ptr<ShortcutController> m_shortcutController = nullptr;
+
         //! Path settings
         std::string m_enginePath;
         std::string m_projectPath;

@@ -340,8 +340,11 @@ namespace ige::creator
             return;
         }
 
+        if (obj->getScene()->getShowcase() == nullptr) return;
+        
         auto lastShowcase = m_currShowcase;
         m_currShowcase = obj->getScene()->getShowcase();
+        
         if (lastShowcase != m_currShowcase)
         {
             if (m_currCamera == m_2dCamera)

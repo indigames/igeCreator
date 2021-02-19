@@ -33,4 +33,8 @@ unsigned int Ref::getReferenceCount() const
 	return _referenceCount;
 }
 
+bool Ref::init() {
+	return true;
+}
+
 NS_IGE_END
