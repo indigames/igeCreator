@@ -41,6 +41,7 @@ namespace ige::creator
         SceneObject::getAttachedEvent().addListener(std::bind(&Hierarchy::onSceneObjectAttached, this, std::placeholders::_1));
         SceneObject::getDetachedEvent().addListener(std::bind(&Hierarchy::onSceneObjectDetached, this, std::placeholders::_1));
         SceneObject::getSelectedEvent().addListener(std::bind(&Hierarchy::onSceneObjectSelected, this, std::placeholders::_1));
+        SceneObject::getDeselectedEvent().addListener(std::bind(&Hierarchy::onSceneObjectDeselected, this, std::placeholders::_1));
     }
 
     Hierarchy::~Hierarchy()
@@ -50,6 +51,7 @@ namespace ige::creator
         SceneObject::getAttachedEvent().removeAllListeners();
         SceneObject::getDetachedEvent().removeAllListeners();
         SceneObject::getSelectedEvent().removeAllListeners();
+        SceneObject::getDeselectedEvent().removeAllListeners();
         clear();
         m_groupLayout = nullptr;
     }
@@ -64,6 +66,18 @@ namespace ige::creator
             auto object = Editor::getCurrentScene()->findObjectById(objId);
             if(object) object->setSelected(true);
         });
+
+        //! Update List Content Size 
+        node->getOnClosedEvent().addListener([objId, this]() {
+            auto object = Editor::getCurrentScene()->findObjectById(objId);
+            this->onSceneObjectCollapse(object, true);
+
+        });
+        node->getOnOpenedEvent().addListener([objId, this]() {
+            auto object = Editor::getCurrentScene()->findObjectById(objId);
+            this->onSceneObjectCollapse(object, false);
+        });
+
         node->addPlugin<DDTargetPlugin<uint64_t>>(EDragDropID::OBJECT)->getOnDataReceivedEvent().addListener([this, objId](auto txt) {
             auto currentObject = Editor::getCurrentScene()->findObjectById(txt);
             auto obj = Editor::getCurrentScene()->findObjectById(objId);
@@ -86,6 +100,8 @@ namespace ige::creator
             });
         });
         m_objectNodeMap[objId] = node;
+
+        m_NodeCollapseMap[objId] = true;
     }
 
     void Hierarchy::onSceneObjectDeleted(SceneObject& sceneObject)
@@ -97,6 +113,7 @@ namespace ige::creator
                 nodePair->second->getContainer()->removeWidget(nodePair->second);
             m_objectNodeMap.erase(nodePair);
         }
+        m_NodeCollapseMap.erase(sceneObject.getId());
     }
 
     void Hierarchy::onSceneObjectAttached(SceneObject& sceneObject)
@@ -182,6 +199,25 @@ namespace ige::creator
             sceneObject.getNameChangedEvent().addListener(std::bind(&Hierarchy::onSceneObjectChangedName, this, std::placeholders::_1));
 
             Editor::getInstance()->setSelectedObject(sceneObject.getId());
+        }
+    }
+
+    void Hierarchy::onSceneObjectDeselected(SceneObject& sceneObject)
+    {
+        // Update current selected id
+        auto nodePair = m_objectNodeMap.find(sceneObject.getId());
+        if (nodePair != m_objectNodeMap.end())
+        {
+            m_selectedNodeId = sceneObject.getId();
+            nodePair->second->setIsSelected(false);
+
+            auto oldObject = Editor::getInstance()->getSelectedObject();
+            if (oldObject)
+            {
+                oldObject->getNameChangedEvent().removeAllListeners();
+            }
+            sceneObject.getNameChangedEvent().addListener(std::bind(&Hierarchy::onSceneObjectChangedName, this, std::placeholders::_1));
+            Editor::getInstance()->setSelectedObject(-1);
         }
     }
 
@@ -370,7 +406,8 @@ namespace ige::creator
         {
             m_groupLayout = createWidget<Group>("Hierarchy_Group", false, false);
             auto ctxMenu = m_groupLayout->addPlugin<WindowContextMenu>("Hierarchy_Context");
-            addCreationContextMenu(std::dynamic_pointer_cast<ContextMenu>(ctxMenu));
+            addCreationContextMenu(std::dynamic_pointer_cast<ContextMenu>(ctxMenu));            
+
             m_bInitialized = true;
         }
     }
@@ -379,6 +416,30 @@ namespace ige::creator
     {
         // Draw widgets
         Panel::drawWidgets();
+
+        if (m_bIsOpened && ImGui::IsWindowFocused() && ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+            auto vMin = ImGui::GetWindowContentRegionMin();
+            auto vMax = ImGui::GetWindowContentRegionMax();
+            
+            vMin.y += 6; // padding
+
+            vMin.x += ImGui::GetWindowPos().x;
+            vMin.y += ImGui::GetWindowPos().y;
+            vMax.x += ImGui::GetWindowPos().x;
+            vMax.y += ImGui::GetWindowPos().y;
+
+            float m_nodeMapHeight = 0;
+            for (auto item : m_NodeCollapseMap) {
+                if (item.second)
+                    m_nodeMapHeight += k_nodeDefaultHeight;
+            }
+            vMin.y += m_nodeMapHeight;
+
+            if (ImGui::GetMousePos().x >= vMin.x && ImGui::GetMousePos().x <= vMax.x
+                && ImGui::GetMousePos().y >= vMin.y && ImGui::GetMousePos().y <= vMax.y) {
+                Editor::getInstance()->setSelectedObject(-1);
+            }
+        }
     }
 
     void Hierarchy::clear()
@@ -392,5 +453,13 @@ namespace ige::creator
         removeAllWidgets();
         m_objectNodeMap.clear();
         m_bInitialized = false;
+    }
+
+    void Hierarchy::onSceneObjectCollapse(std::shared_ptr<SceneObject> sceneObject, bool IsCollapse) {
+        if (sceneObject == nullptr) return;
+        for (auto child : sceneObject->getChildren()) {
+            auto objId = child->getId();
+            m_NodeCollapseMap[objId] = !IsCollapse;
+        }
     }
 }

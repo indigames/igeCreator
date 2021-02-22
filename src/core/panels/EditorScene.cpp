@@ -8,6 +8,7 @@
 #include "core/plugin/DragDropPlugin.h"
 #include "core/FileHandle.h"
 #include "core/task/TaskManager.h"
+#include "core/shortcut/ShortcutController.h"
 
 #include "utils/GraphicsHelper.h"
 #include "scene/Scene.h"
@@ -30,6 +31,7 @@ using namespace ige::scene;
 using namespace pyxie;
 
 #include "utils/filesystem.h"
+//#include <iostream>
 namespace fs = ghc::filesystem;
 
 namespace ige::creator
@@ -47,11 +49,25 @@ namespace ige::creator
     {
         m_bIsInitialized = false;
 
+        if (m_imageWidget) m_imageWidget.reset();
         m_imageWidget = nullptr;
+
         m_currentScene = nullptr;
+        if (m_gizmo) m_gizmo.reset();
         m_gizmo = nullptr;
 
+        if (m_currShowcase)
+        {
+            if (m_currCamera == m_2dCamera)
+                m_currShowcase->Remove(m_grid2D);
+            else
+                m_currShowcase->Remove(m_grid3D);
+        }
+        m_currShowcase = nullptr;
+
+        m_grid2D->DecReference();
         m_grid2D = nullptr;
+        m_grid3D->DecReference();
         m_grid3D = nullptr;
 
         m_currCamera = nullptr;
@@ -96,8 +112,8 @@ namespace ige::creator
                     TaskManager::getInstance()->addTask([this]() {
                         if (SceneManager::getInstance()->getCurrentScene())
                             SceneManager::getInstance()->getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y + 25.f }); // Title bar size
+                        });
                     });
-                });
 
                 // Size changed event
                 getOnSizeChangedEvent().addListener([this](auto size) {
@@ -111,10 +127,10 @@ namespace ige::creator
                             m_currCamera->SetAspectRate(size.x / size.y);
 
                         // Update window pos and size
-                        if (SceneManager::getInstance()->getCurrentScene())                                                    
-                            SceneManager::getInstance()->getCurrentScene()->setWindowSize({ getSize().x, getSize().y });                        
+                        if (SceneManager::getInstance()->getCurrentScene())
+                            SceneManager::getInstance()->getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
+                        });
                     });
-                });
 
                 m_grid2D = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, "sprite/grid");
                 m_grid2D->SetPosition(Vec3(0.f, 0.f, 0.f));
@@ -135,10 +151,10 @@ namespace ige::creator
                 m_3dCamera->LockonTarget(false);
                 m_3dCamera->SetAspectRate(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
 
-                m_currCamera = m_3dCamera;
-                
+                m_currCamera = Editor::getInstance()->is3DCamera() ? m_3dCamera : m_2dCamera;
+
                 m_gizmo = createWidget<Gizmo>();
-                m_gizmo->setMode(Editor::getInstance()->isLocalGizmo() ? gizmo::MODE::LOCAL : gizmo::MODE::WORLD); 
+                m_gizmo->setMode(Editor::getInstance()->isLocalGizmo() ? gizmo::MODE::LOCAL : gizmo::MODE::WORLD);
                 m_gizmo->setCamera(m_currCamera);
 
                 initDragDrop();
@@ -150,9 +166,35 @@ namespace ige::creator
                     SceneManager::getInstance()->getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
                 }
 
+                //viet.nv : create dummy object to focus
+                m_focusPosition = Vec3(0, 0, 0);
+                m_resetFocus = false;
+                m_viewSize = k_defaultViewSize;
+                updateFocusPoint(true, true);
+
+                m_currentCanvasHeight = SystemInfo::Instance().GetGameH();
+                m_canvasRatio = SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH();
+
+                m_HandleCameraTouchId = -1;
+
                 m_bIsInitialized = true;
             }
         }
+    }
+
+    //! Register Shortcut functions
+    void EditorScene::registerShortcut() {
+        ASSIGN_COMMAND_TO_DICT(ShortcutDictionary::EDIT_SCENE_OBJECT_SELECTED, CALLBACK_0(EditorScene::lookSelectedObject, this));
+        ASSIGN_KEY_TO_COMMAND(ShortcutDictionary::EDIT_SCENE_OBJECT_SELECTED, KeyCode::KEY_F, false, false, false);
+
+        ASSIGN_COMMAND_TO_DICT(ShortcutDictionary::DELETE_SCENE_OBJECT_SELECTED, CALLBACK_0(EditorScene::deleteSelectedObject, this));
+        ASSIGN_KEY_TO_COMMAND(ShortcutDictionary::DELETE_SCENE_OBJECT_SELECTED, KeyCode::KEY_DEL, false, false, false);
+    }
+
+    void EditorScene::unregisterShortcut() {
+        REMOVE_COMMAND(ShortcutDictionary::EDIT_SCENE_OBJECT_SELECTED);
+
+        REMOVE_COMMAND(ShortcutDictionary::DELETE_SCENE_OBJECT_SELECTED);
     }
 
     void EditorScene::initDragDrop()
@@ -246,13 +288,18 @@ namespace ige::creator
                     auto canvasSize = canvas->getDesignCanvasSize();
                     m_currCamera->SetOrthoHeight(canvasSize.Y() * 0.5f);
                     m_grid2D->SetScale({ canvasSize.Y() * 0.125f , canvasSize.Y() * 0.125f, 1.f });
+
+                    /*auto transformToViewport = Mat4::Translate(Vec3(-canvasSize.X() * 0.5f, -canvasSize.Y() * 0.5f, 0.f));
+                    canvas->setCanvasToViewportMatrix(transformToViewport);*/
+                    m_currentCanvasHeight = canvasSize.Y();
+                    m_canvasRatio = canvasSize.X() / canvasSize.Y();
                 }
             }
             else
             {
-                const float canvasHeight = 960.f;
-                m_currCamera->SetOrthoHeight(canvasHeight * 0.5f);
-                m_grid2D->SetScale({ canvasHeight * 0.125f ,canvasHeight * 0.125f, 1.f });
+                m_currentCanvasHeight = SystemInfo::Instance().GetGameH();
+                m_currCamera->SetOrthoHeight(m_currentCanvasHeight * 0.5f);
+                m_grid2D->SetScale({ m_currentCanvasHeight * 0.125f ,m_currentCanvasHeight * 0.125f, 1.f });
             }
 
             if (m_currShowcase)
@@ -280,22 +327,24 @@ namespace ige::creator
     {
         if (!isOpened() || !m_bIsInitialized)
             return;
-
         if (obj == nullptr)
         {
-            if (m_currShowcase)
+            /*if (m_currShowcase)
             {
                 if (m_currCamera == m_2dCamera)
                     m_currShowcase->Remove(m_grid2D);
                 else
                     m_currShowcase->Remove(m_grid3D);
             }
-            m_currShowcase = nullptr;
+            m_currShowcase = nullptr;*/
             return;
         }
 
+        if (obj->getScene()->getShowcase() == nullptr) return;
+        
         auto lastShowcase = m_currShowcase;
         m_currShowcase = obj->getScene()->getShowcase();
+        
         if (lastShowcase != m_currShowcase)
         {
             if (m_currCamera == m_2dCamera)
@@ -312,7 +361,7 @@ namespace ige::creator
             }
         }
 
-        auto canvas = obj->getCanvas();
+        /*auto canvas = obj->getCanvas();
         if (canvas)
         {
             auto canvasSize = canvas->getDesignCanvasSize();
@@ -324,9 +373,20 @@ namespace ige::creator
 
             auto transformToViewport = Mat4::Translate(Vec3(-canvasSize.X() * 0.5f, -canvasSize.Y() * 0.5f, 0.f));
             canvas->setCanvasToViewportMatrix(transformToViewport);
-        }
+        }*/
 
-        set2DMode(canvas != nullptr);
+        //set2DMode(canvas != nullptr);
+    }
+
+    void EditorScene::resetShowcase() {
+        if (m_currShowcase)
+        {
+            if (m_currCamera == m_2dCamera)
+                m_currShowcase->Remove(m_grid2D);
+            else
+                m_currShowcase->Remove(m_grid3D);
+        }
+        m_currShowcase = nullptr;
     }
 
     bool EditorScene::isResizing()
@@ -364,14 +424,11 @@ namespace ige::creator
         //! Update Panel
         Panel::update(dt);
 
-        //! Update camera
-        updateCameraPosition();
-
-        // Update object selection
-        updateObjectSelection();
-
         // Update keyboard
         updateKeyboard();
+
+        // Update touch
+        updateTouch();
 
         // Update scene
         SceneManager::getInstance()->update(dt);
@@ -402,19 +459,160 @@ namespace ige::creator
         Panel::_drawImpl();
     }
 
+    //! Refresh Scene
+    void EditorScene::refresh() {
+        resetShowcase();
+    }
+
     //! Update keyboard
     void EditorScene::updateKeyboard()
     {
-        // Press "F" key focus on target object
         auto keyboard = Editor::getApp()->getInputHandler()->getKeyboard();
-        if (keyboard->wasReleased(KeyCode::KEY_F))
+
+        m_fnKeyPressed = 0;
+        if (keyboard->isKeyDown(KeyCode::KEY_LALT) || keyboard->isKeyDown(KeyCode::KEY_RALT) || keyboard->isKeyHold(KeyCode::KEY_LALT) || keyboard->isKeyHold(KeyCode::KEY_RALT)) {
+            m_fnKeyPressed |= SYSTEM_KEYCODE_ALT_MASK;
+        }
+        if (keyboard->isKeyDown(KeyCode::KEY_LCTRL) || keyboard->isKeyDown(KeyCode::KEY_RCTRL) || keyboard->isKeyHold(KeyCode::KEY_LCTRL) || keyboard->isKeyHold(KeyCode::KEY_RCTRL)) {
+            m_fnKeyPressed |= SYSTEM_KEYCODE_CTRL_MASK;
+        }
+        if (keyboard->isKeyDown(KeyCode::KEY_LSHIFT) || keyboard->isKeyDown(KeyCode::KEY_RSHIFT) || keyboard->isKeyHold(KeyCode::KEY_LSHIFT) || keyboard->isKeyHold(KeyCode::KEY_RSHIFT)) {
+            m_fnKeyPressed |= SYSTEM_KEYCODE_SHIFT_MASK;
+        }
+    }
+
+    void EditorScene::updateTouch() 
+    {
+        if (!isOpened() || m_currCamera == nullptr)
+            return;
+
+        auto touch = Editor::getApp()->getInputHandler()->getTouchDevice();
+        auto isFocus = isFocused();
+        auto isHover = isHovered();
+        if (touch->isFingerScrolled(0) && isHover)
         {
-            auto target = Editor::getInstance()->getSelectedObject();
-            if (target && m_currCamera)
-            {
-                auto targetPos = target->getTransform()->getWorldPosition();
-                m_currCamera->SetPosition(targetPos + m_currCamera->GetCameraRotation() * Vec3(0.f, 0.f, 1.f) * 20.f);
+            float scrollX, scrollY;
+            float targetSize;
+            bool isInverse;
+            touch->getFingerScrolledData(0, scrollX, scrollY, isInverse);
+            handleCameraZoom(scrollX, scrollY);
+        }
+
+        if (touch->isFingerMoved(0))
+        {
+            auto finger = touch->getFinger(0);
+            if (m_HandleCameraTouchId == -1 && (!m_bIsDragging && isHover) ) {
+                m_HandleCameraTouchId = finger->getFingerId();
+                updateViewTool(finger->getFingerId());
+                m_touchDelay = 0;
             }
+            else if (finger->getFingerId() == m_HandleCameraTouchId) {
+                if(m_touchDelay < 0.02f)
+                    m_touchDelay += Time::Instance().GetElapsedTime();
+                else 
+                {
+                    m_bIsDraggingCam = true;
+                    float touchX, touchY;
+                    touch->getFingerPosition(0, touchX, touchY);
+                    
+                    updateCameraPosition(touchX, touchY);
+                }
+            }
+            m_bIsDragging = true;
+        }
+
+        if (touch->isFingerReleased(0))
+        {
+            auto finger = touch->getFinger(0);
+            if (finger->getFingerId() == m_HandleCameraTouchId || m_HandleCameraTouchId == -1)
+                m_bIsDragging = false;
+            if (!m_bIsDraggingCam) {
+                //Perform Click
+                if (isFocus) updateObjectSelection();
+                if (finger->getFingerId() == m_HandleCameraTouchId || m_HandleCameraTouchId == -1) {
+                    m_HandleCameraTouchId = -1;
+                    m_viewTool = ViewTool::None;
+                    m_touchDelay = 0;
+                }
+            }
+            else {
+                if (finger->getFingerId() == m_HandleCameraTouchId || m_HandleCameraTouchId == -1) {
+                    m_HandleCameraTouchId = -1;
+                    m_bIsFirstTouch = true;
+                    
+                    updateFocusPoint(false, m_resetFocus);
+                    m_resetFocus = false;
+                    
+                    m_viewTool = ViewTool::None;
+                    m_touchDelay = 0;
+                    m_bIsDraggingCam = false;
+                }
+            }
+        }
+
+    }
+
+    void EditorScene::updateViewTool(int touchID) 
+    {
+        if (m_bIsDraggingCam) return;
+        switch (touchID) {
+        case 0 : // Left 
+            if (Editor::getInstance()->is3DCamera()) {
+                //! Important => because this is bit shift, so we can compile multi function key
+                //! in this case, only 1 key will be access, so Shift < Ctrl < Alt
+                //! Incase nothing press, active Select ViewTool
+                m_viewTool = ViewTool::MultiDeSelectArea;
+                if (m_fnKeyPressed & SYSTEM_KEYCODE_ALT_MASK)
+                {
+                    m_viewTool = ViewTool::Orbit;
+                }
+                else if (m_fnKeyPressed & SYSTEM_KEYCODE_CTRL_MASK)
+                {
+                    m_viewTool = ViewTool::MultiDeSelectArea;
+                }
+                else if (m_fnKeyPressed & SYSTEM_KEYCODE_SHIFT_MASK)
+                {
+                    m_viewTool = ViewTool::MultiSelectArea;
+                }
+            }
+            else {
+                //! In 2D mode, rotate camera will be locked, only Select Obj & pan available
+                m_viewTool = ViewTool::MultiDeSelectArea;
+                if (m_fnKeyPressed & SYSTEM_KEYCODE_ALT_MASK)
+                {
+                    m_viewTool = ViewTool::Pan;
+                }
+                else if (m_fnKeyPressed & SYSTEM_KEYCODE_CTRL_MASK)
+                {
+                    m_viewTool = ViewTool::MultiDeSelectArea;
+                }
+                else if (m_fnKeyPressed & SYSTEM_KEYCODE_SHIFT_MASK)
+                {
+                    m_viewTool = ViewTool::MultiSelectArea;
+                }
+            }
+            break;
+        case 1: // Middle
+            m_viewTool = ViewTool::Pan;
+            break;
+        case 2: // Right
+            if (Editor::getInstance()->is3DCamera()) {
+                m_viewTool = ViewTool::FPS;
+                if (m_fnKeyPressed & SYSTEM_KEYCODE_ALT_MASK)
+                {
+                    m_viewTool = ViewTool::Zoom;
+                }
+            }
+            else {
+                m_viewTool = ViewTool::Pan;
+                if (m_fnKeyPressed & SYSTEM_KEYCODE_ALT_MASK)
+                {
+                    m_viewTool = ViewTool::Zoom;
+                }
+            }
+            break;
+        default:
+            break;
         }
     }
 
@@ -430,6 +628,9 @@ namespace ige::creator
             auto hit = SceneManager::getInstance()->getCurrentScene()->raycast(Vec2(touchX, touchY), m_currCamera, 10000.f);
             if (hit.first)
                 hit.first->setSelected(true);
+            else {
+                Editor::getInstance()->setSelectedObject(-1);
+            }
         }
     }
 
@@ -530,24 +731,188 @@ namespace ige::creator
         draw(d + cameraForward * f_near, h + cameraForward * f_far, 0);
     }
 
-    void EditorScene::updateCameraPosition()
+    void EditorScene::updateCameraPosition(float touchX, float touchY)
     {
-        if (!isOpened() ||!isFocused() || m_currCamera == nullptr || m_currCamera == m_2dCamera)
-            return;
-
-        auto target = Editor::getInstance()->getSelectedObject();
-        if (target == nullptr)
-            return;
-
-        auto touch = Editor::getApp()->getInputHandler()->getTouchDevice();
-        if (touch->isFingerScrolled(0))
+        if (m_bIsFirstTouch)
         {
-            float scrollX, scrollY;
-            bool isInverse;
-            touch->getFingerScrolledData(0, scrollX, scrollY, isInverse);
+            m_lastMousePosX = touchX;
+            m_lastMousePosY = touchY;
+            m_bIsFirstTouch = false;
+            auto cameraRotation = m_currCamera->GetRotation();
+            vmath_quatToEuler(cameraRotation.P(), m_cameraRotationEuler.P());
+            return;
+        }
+        Vec2 offset = { touchX - m_lastMousePosX, touchY - m_lastMousePosY };
+        m_lastMousePosX = touchX;
+        m_lastMousePosY = touchY;
 
-            Vec2 offset = { scrollX, scrollY };
-            auto mouseOffset = offset * m_cameraDragSpeed;
+        switch (m_viewTool) {
+        case ViewTool::Pan:
+            handleCameraPan(offset.X(), offset.Y());
+            break;
+        case ViewTool::Orbit:
+            handleCameraOrbit(offset.X(), offset.Y());
+            break;
+        case ViewTool::FPS:
+            handleCameraFPS(offset.X(), offset.Y());
+            break;
+        case ViewTool::Zoom:
+            float s_Len = Vec2::Length(offset);
+            bool inverse = abs(offset.X()) > abs(offset.Y()) ? offset.X() < 0 : offset.Y() >= 0;
+            if(inverse) s_Len = -s_Len;
+            s_Len = s_Len / k_zoomFocusOffsetRate;
+            handleCameraZoomFocus(0, s_Len);
+            break;
+        }
+    }
+
+    void EditorScene::lookSelectedObject() {
+        auto target = Editor::getInstance()->getSelectedObject();
+        if (target && m_currCamera)
+        {
+            lookAtObject(target.get());
+        }
+    }
+
+    void EditorScene::lookAtObject(SceneObject* object) {
+        if (Editor::getInstance()->is3DCamera()) {
+            auto targetPos = object->getTransform()->getWorldPosition();
+            m_viewSize = k_defaultViewSize; //Reset ViewSize
+
+            auto aabb = getRenderableAABBox(object);
+            Vec3 halfSize = aabb.getExtent() * 0.5f;
+            if (halfSize != Vec3(0, 0)) {
+                float objectSize = Vec3::Length(halfSize);
+                m_viewSize = clampViewSize(objectSize);
+            }
+
+            m_cameraDistance = calcCameraViewDistance();
+
+            m_currCamera->SetPosition(targetPos + m_currCamera->GetCameraRotation() * Vec3(0.f, 0.f, 1.f) * m_cameraDistance);
+            m_focusPosition = targetPos;
+        }
+        else {
+            auto canvas = object->getCanvas();
+            if (canvas)
+            {
+                auto canvasSize = canvas->getDesignCanvasSize();
+                auto transformToViewport = Mat4::Translate(Vec3(-canvasSize.X() * 0.5f, -canvasSize.Y() * 0.5f, 0.f));
+                canvas->setCanvasToViewportMatrix(transformToViewport);
+
+                auto rect = object->getRectTransform();
+                if (rect)
+                {
+                    float viewSize = Vec2::Length(rect->getSize());
+                    m_currentCanvasHeight = viewSize < 0 ? 0.001f : viewSize;
+                    m_currCamera->SetOrthoHeight(m_currentCanvasHeight * 0.5f);
+                    auto cameraPosition = m_currCamera->GetPosition();
+                    auto pos = object->getTransform()->getPosition();
+                    cameraPosition.X(pos.X());
+                    cameraPosition.Y(pos.Y());
+                    m_currCamera->SetPosition(cameraPosition);
+                }
+
+            } 
+        }
+    }
+
+
+    void EditorScene::deleteSelectedObject() {
+        auto target = Editor::getInstance()->getSelectedObject();
+        if (target && m_currCamera)
+        {
+            TaskManager::getInstance()->addTask([this]() {
+                auto currentObject = Editor::getInstance()->getSelectedObject();
+                if (currentObject && currentObject->getParent()) currentObject->getParent()->setSelected(true);
+                Editor::getInstance()->setSelectedObject(-1);
+                auto objId = currentObject->getId();
+                Editor::getCurrentScene()->removeObjectById(objId);
+                });
+        }
+    }
+
+    //! Handle Camera View
+    void EditorScene::handleCameraOrbit(float offsetX, float offsetY) {
+        if (Editor::getInstance()->is3DCamera()) {
+            auto offset = Vec2(offsetX, offsetY);
+            auto cameraPosition = m_currCamera->GetPosition();
+            auto cameraRotation = m_currCamera->GetRotation();
+            m_cameraDistance = Vec3::Length(cameraPosition - m_focusPosition);
+
+            auto mouseOffset = offset * m_cameraRotationSpeed;
+            m_cameraRotationEuler[1] -= mouseOffset.X();
+            m_cameraRotationEuler[0] += mouseOffset.Y();
+            m_cameraRotationEuler[0] = clampEulerAngle(m_cameraRotationEuler[0]);
+
+            Vec3 newEuler = Vec3(m_cameraRotationEuler[0], m_cameraRotationEuler[1], 0);
+            Quat newQuat;
+            vmath_eulerToQuat(newEuler.P(), newQuat.P());
+
+            Vec3 negDistance = Vec3(0, 0, -m_cameraDistance);
+            Vec3 fwd = Vec3::Normalize(getForwardVector(newQuat));
+
+            Vec3 newPos = fwd * m_cameraDistance + m_focusPosition;
+
+            m_currCamera->SetRotation(newQuat);
+            m_currCamera->SetPosition(newPos);
+        }
+    }
+
+    void EditorScene::handleCameraPan(float offsetX, float offsetY)
+    {
+        float panDelta = m_fnKeyPressed & SYSTEM_KEYCODE_SHIFT_MASK ? 3 : 1;
+        if (Editor::getInstance()->is3DCamera()) {
+            auto offset = Vec2(offsetX, offsetY);
+            auto pos = m_currCamera->GetPosition();
+            auto mouseOffset = offset * std::abs(std::max(0.0025f, pos.Length() / (m_currCamera->GetFarPlane() * 0.5f))) * panDelta;
+            auto cameraPosition = m_currCamera->GetPosition();
+            auto cameraRotation = m_currCamera->GetRotation();
+            const Vec3 rightVec = { 1.f, 0.f, 0.f };
+            const Vec3 upVec = { 0.f, 1.f, 0.f };
+            cameraPosition -= cameraRotation * rightVec * mouseOffset.X();
+            cameraPosition -= cameraRotation * upVec * mouseOffset.Y();
+            m_currCamera->SetPosition(cameraPosition);
+
+            m_resetFocus = true;
+        }
+        else {
+            auto offset = Vec2(offsetX, offsetY);
+            // Scale with Zoom Offset
+            auto zoomOffset = m_currentCanvasHeight / SystemInfo::Instance().GetGameH();
+            auto mouseOffset = offset * zoomOffset * panDelta;
+            auto cameraPosition = m_currCamera->GetPosition();
+            auto cameraRotation = m_currCamera->GetRotation();
+            const Vec3 rightVec = { 1.f, 0.f, 0.f };
+            const Vec3 upVec = { 0.f, 1.f, 0.f };
+            cameraPosition -= cameraRotation * rightVec * mouseOffset.X();
+            cameraPosition -= cameraRotation * upVec * mouseOffset.Y();
+            m_currCamera->SetPosition(cameraPosition);
+        }
+    }
+    
+    void EditorScene::handleCameraFPS(float offsetX, float offsetY) 
+    {
+        if (Editor::getInstance()->is3DCamera()) {
+            auto offset = Vec2(offsetX, offsetY);
+            auto mouseOffset = offset * m_cameraRotationSpeed;
+            m_cameraRotationEuler[1] += mouseOffset.X();
+            m_cameraRotationEuler[0] += mouseOffset.Y();
+
+            Quat rot;
+            vmath_eulerToQuat(m_cameraRotationEuler.P(), rot.P());
+            m_currCamera->SetRotation(rot);
+
+            m_resetFocus = true;
+        }
+    }
+    
+    void EditorScene::handleCameraZoom(float offsetX, float offsetY) {
+        float zoomDelta = m_fnKeyPressed & SYSTEM_KEYCODE_SHIFT_MASK ? 3 : 1;
+        if (Editor::getInstance()->is3DCamera()) {
+            float targetSize;
+
+            Vec2 offset = { offsetX, offsetY };
+            auto mouseOffset = offset * m_cameraDragSpeed * zoomDelta;
 
             auto cameraPosition = m_currCamera->GetPosition();
             auto cameraRotation = m_currCamera->GetRotation();
@@ -558,54 +923,129 @@ namespace ige::creator
             cameraPosition -= cameraRotation * upVec * mouseOffset.Y();
             m_currCamera->SetPosition(cameraPosition);
 
-        }
-
-        if (touch->isFingerMoved(0))
-        {
-            auto finger = touch->getFinger(0);
-
-            if (m_bIsFirstTouch)
-            {
-                touch->getFingerPosition(0, m_lastMousePosX, m_lastMousePosY);
-                auto cameraRotation = m_currCamera->GetRotation();
-                vmath_quatToEuler(cameraRotation.P(), m_cameraRotationEuler.P());
-                m_bIsFirstTouch = false;
+            auto currentDist = Vec3::Length(m_focusPosition - cameraPosition);
+            if (currentDist - mouseOffset.Y() <= 0) {
+                m_viewSize = k_defaultViewSize / 2;
+                updateFocusPoint(true, true);
             }
-
-            float touchX, touchY;
-            touch->getFingerPosition(0, touchX, touchY);
-
-            Vec2 offset = { touchX - m_lastMousePosX, touchY - m_lastMousePosY };
-            m_lastMousePosX = touchX;
-            m_lastMousePosY = touchY;
-
-            if (finger->getFingerId() == 1) // middle button
-            {
-                auto pos = m_currCamera->GetPosition();
-                auto mouseOffset = offset * std::abs(std::max(0.0025f, pos.Length() / (m_currCamera->GetFarPlane() * 0.5f)));
-                auto cameraPosition = m_currCamera->GetPosition();
-                auto cameraRotation = m_currCamera->GetRotation();
-                const Vec3 rightVec = { 1.f, 0.f, 0.f };
-                const Vec3 upVec = { 0.f, 1.f, 0.f };
-                cameraPosition -= cameraRotation * rightVec * mouseOffset.X();
-                cameraPosition -= cameraRotation * upVec * mouseOffset.Y();
-                m_currCamera->SetPosition(cameraPosition);
-            }
-            else if (finger->getFingerId() == 3) // right button
-            {
-                auto mouseOffset = offset * m_cameraRotationSpeed;
-                m_cameraRotationEuler[1] += mouseOffset.X();
-                m_cameraRotationEuler[0] += mouseOffset.Y();
-
-                Quat rot;
-                vmath_eulerToQuat(m_cameraRotationEuler.P(), rot.P());
-                m_currCamera->SetRotation(rot);
+            else {
+                targetSize = clampViewSize(m_viewSize - mouseOffset.Y());
+                m_viewSize = targetSize;
+                updateFocusPoint(false, false);
             }
         }
-
-        if(touch->isFingerReleased(0))
-        {
-            m_bIsFirstTouch = true;
+        else {
+            Vec2 offset = { offsetX, offsetY };
+            auto mouseOffset = offset * m_cameraDragSpeed * zoomDelta * 100;
+            m_currentCanvasHeight -= mouseOffset.Y();
+            m_currentCanvasHeight = m_currentCanvasHeight < 0 ? 0.001f : m_currentCanvasHeight;
+            m_currCamera->SetOrthoHeight(m_currentCanvasHeight * 0.5f);
         }
+    }
+
+    void EditorScene::handleCameraZoomFocus(float offsetX, float offsetY) {
+        float zoomDelta = m_fnKeyPressed & SYSTEM_KEYCODE_SHIFT_MASK ? 3 : 1;
+        
+        if (Editor::getInstance()->is3DCamera()) {
+            Vec2 offset = { offsetX, offsetY };
+            auto mouseOffset = offset * m_cameraDragSpeed * zoomDelta;
+
+            auto cameraPosition = m_currCamera->GetPosition();
+            auto cameraRotation = m_currCamera->GetRotation();
+            auto currentDist = Vec3::Length(m_focusPosition - cameraPosition);
+            float percent = currentDist / (m_viewSize > 4 ? 4 : m_viewSize);
+            percent = percent > 50 ? 50 : percent < 0.01f ? 0.01f : percent;
+            mouseOffset *= percent;
+            if (currentDist - mouseOffset.Y() <= 0) mouseOffset.Y(currentDist - k_minViewSize);
+
+            const Vec3 rightVec = { 1.f, 0.f, 0.f };
+            const Vec3 fowardVec = { 0.f, 0.f, 1.f };
+            cameraPosition += cameraRotation * rightVec * mouseOffset.X();
+            cameraPosition -= cameraRotation * fowardVec * mouseOffset.Y();
+
+            m_currCamera->SetPosition(cameraPosition);
+
+            m_viewSize = clampViewSize(m_viewSize - mouseOffset.Y());
+            updateFocusPoint(false, false);
+        }
+        else {
+            Vec2 offset = { offsetX, offsetY };
+            auto mouseOffset = offset * m_cameraDragSpeed * zoomDelta * 100;
+            m_currentCanvasHeight -= mouseOffset.Y();
+            m_currentCanvasHeight = m_currentCanvasHeight < 0 ? 0.001f : m_currentCanvasHeight;
+            m_currCamera->SetOrthoHeight(m_currentCanvasHeight * 0.5f);
+        }
+    }
+
+    //Camera Helper function
+    float EditorScene::getPerspectiveCameraViewDistance(float objectSize, float fov)
+    {
+        //        A
+        //        |\        We want to place camera at a
+        //        | \       distance that, at the given FOV,
+        //        |  \      would enclose a sphere of radius
+        //     _..+.._\     "size". Here |BC|=size, and we
+        //   .'   |   '\    need to find |AB|. ACB is a right
+        //  /     |    _C   angle, andBAC is half the FOV. So
+        // |      | _-   |  that gives: sin(BAC)=|BC|/|AB|,
+        // |      B      |  and thus |AB|=|BC|/sin(BAC).
+        // |             |
+        //  \           /
+        //   '._     _.'
+        //      `````
+        return objectSize / sin(fov * 0.5f * DEGREE_TO_RAD);
+    }
+
+    float EditorScene::calcCameraViewDistance() {
+        float fov = m_currCamera != nullptr ? m_currCamera->GetFieldOfView() : k_defaultFOV;
+        return getPerspectiveCameraViewDistance(m_viewSize, fov);
+    }
+
+    float EditorScene::clampEulerAngle(float angle)
+    {
+        if (angle < -DEG360_TO_RAD)
+            angle += DEG360_TO_RAD;
+        if (angle > DEG360_TO_RAD)
+            angle -= DEG360_TO_RAD;
+        return angle > DEG360_TO_RAD ? DEG360_TO_RAD : angle < -DEG360_TO_RAD ? -DEG360_TO_RAD : angle;
+    }
+
+    Vec3 EditorScene::getForwardVector(Quat quat) {
+        Vec3 out;
+        out.X(2 * (quat.X() * quat.Z() + quat.W() * quat.Y()));
+        out.Y(2 * (quat.Y() * quat.Z() - quat.W() * quat.X()));
+        out.Z(1 - 2 * (quat.X() * quat.X() + quat.Y() * quat.Y()));
+        return out;
+    }
+
+    void EditorScene::updateFocusPoint(bool resetView, bool resetFocus)
+    {
+        auto cameraPosition = m_currCamera->GetPosition();
+        if (resetView)
+            m_cameraDistance = calcCameraViewDistance();
+        else
+            m_cameraDistance = Vec3::Length(m_focusPosition - cameraPosition);
+
+        if (resetFocus) {
+            auto cameraRotation = m_currCamera->GetRotation();
+            auto fwd = Vec3::Normalize(getForwardVector(cameraRotation));
+            m_focusPosition = cameraPosition - fwd * m_cameraDistance;
+        }
+    }
+
+    float EditorScene::clampViewSize(float value) {
+        return value > k_maxViewSize ? k_maxViewSize : value < k_minViewSize ? k_minViewSize : value;
+    }
+
+    AABBox EditorScene::getRenderableAABBox(SceneObject *object) 
+    {
+        AABBox sumAABB;
+        const AABBox& aabb = object->getTransform()->getFrameAABB();
+        sumAABB.addInternalBox(aabb);
+        for (const auto child : object->getChildren()) {
+            auto childAABB = getRenderableAABBox(child);
+            sumAABB.addInternalBox(childAABB);
+        }
+        return sumAABB;
     }
 }

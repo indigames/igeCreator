@@ -37,6 +37,11 @@ namespace ige::creator
 
         //! Object selected
         void onSceneObjectSelected(SceneObject& sceneObject);
+        void onSceneObjectDeselected(SceneObject& sceneObject);
+
+        void onSceneObjectCollapse(std::shared_ptr<SceneObject> sceneObject, bool IsCollapse);
+
+
 
         //! Tree node objects
         std::unordered_map<uint64_t, std::shared_ptr<TreeNode>> m_objectNodeMap;
@@ -44,5 +49,9 @@ namespace ige::creator
 
         //! Group layout to add WindowContextMenu
         std::shared_ptr<Group> m_groupLayout;
+
+        //! Use for catch click
+        std::unordered_map<uint64_t, bool> m_NodeCollapseMap;
+        const float k_nodeDefaultHeight = 17;
     };
 }

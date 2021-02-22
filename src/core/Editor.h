@@ -7,6 +7,8 @@
 #include <utils/PyxieHeaders.h>
 #include <utils/Singleton.h>
 #include <scene/SceneManager.h>
+#include "core/Macros.h"
+
 
 using namespace pyxie;
 using namespace ige::scene;
@@ -14,6 +16,7 @@ using namespace ige::scene;
 namespace ige::creator
 {
     class Canvas;
+    class ShortcutController;
     class Editor : public Singleton<Editor>
     {
     public:
@@ -40,11 +43,13 @@ namespace ige::creator
         bool createScene();
         bool loadScene(const std::string& path);
         bool saveScene();
+        void refreshScene();
 
         void registerApp(std::shared_ptr<Application> app) { m_app = app; }
 
         static std::shared_ptr<Application>& getApp() { return getInstance()->m_app; }
         static std::shared_ptr<Canvas>& getCanvas() { return getInstance()->m_canvas; }
+        static std::shared_ptr<ShortcutController>& getShortcut() { return getInstance()->m_shortcutController; }
 
         //! Short-cut access to current scene
         static std::shared_ptr<Scene> getCurrentScene() { return SceneManager::getInstance()->getCurrentScene(); }
@@ -85,6 +90,7 @@ namespace ige::creator
         std::shared_ptr<Canvas> m_canvas = nullptr;
         std::shared_ptr<Application> m_app = nullptr;
         std::shared_ptr<SceneObject> m_selectedObject = nullptr;
+        std::shared_ptr<ShortcutController> m_shortcutController = nullptr;
 
         //! Path settings
         std::string m_enginePath;

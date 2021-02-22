@@ -11,6 +11,9 @@
 #include "core/task/TaskManager.h"
 #include "core/dialog/MsgBox.h"
 #include "core/dialog/SaveFileDialog.h"
+#include "core/AutoReleasePool.h"
+#include "core/shortcut/ShortcutController.h"
+
 
 #include <scene/SceneManager.h>
 #include <scene/Scene.h>
@@ -26,8 +29,15 @@ namespace ige::creator
 
     Editor::~Editor()
     {
-        setSelectedObject(-1);
+        refreshScene();
         m_canvas = nullptr;
+
+        if (m_shortcutController != nullptr) {
+            m_shortcutController->release();
+        }
+        m_shortcutController = nullptr;
+
+        PoolManager::destroyInstance();
 
         SceneManager::destroy();
         m_app = nullptr;
@@ -51,6 +61,14 @@ namespace ige::creator
 
         // Set editor mode
         SceneManager::getInstance()->setIsEditor(true);
+
+        //! Init Shortcut
+        m_shortcutController = std::make_shared<ShortcutController>();
+        m_shortcutController->retain();
+        //! init default shortcut
+        ShortcutDictionary::initShortcuts();
+
+
     }
 
     void Editor::handleEvent(const void* event)
@@ -69,6 +87,8 @@ namespace ige::creator
         // Update layouts
         m_canvas->update(dt);
 
+        // Update shortcut
+        m_shortcutController->update(dt);
         // Load scene
         if (SceneManager::getInstance()->getCurrentScene() == nullptr)
         {
@@ -187,7 +207,7 @@ namespace ige::creator
 
     bool Editor::createScene()
     {
-        setSelectedObject(-1);
+        refreshScene();
         SceneManager::getInstance()->unloadScene(SceneManager::getInstance()->getCurrentScene());
         setCurrentScene(SceneManager::getInstance()->createScene());
         return true;
@@ -195,7 +215,7 @@ namespace ige::creator
 
     bool Editor::loadScene(const std::string& path)
     {
-        setSelectedObject(-1);
+        refreshScene();
         SceneManager::getInstance()->unloadScene(SceneManager::getInstance()->getCurrentScene());
         getCanvas()->getHierarchy()->clear();
         getCanvas()->getEditorScene()->clear();
@@ -219,6 +239,11 @@ namespace ige::creator
             SceneManager::getInstance()->saveScene();
         }
         return true;
+    }
+
+    void Editor::refreshScene() {
+        setSelectedObject(-1);
+        getCanvas()->getEditorScene()->refresh();
     }
 
     bool Editor::buildRom()

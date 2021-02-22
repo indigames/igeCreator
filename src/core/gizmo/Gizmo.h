@@ -33,6 +33,10 @@ namespace ige::creator
         //! Get gizmo mode
         gizmo::MODE getMode() const;
 
+        void setVisible(bool value) { m_visible = value; }
+
+        bool isVisible() { return m_visible; }
+
         //! Set gizmo operation
         void setOperation(gizmo::OPERATION value);
 
@@ -46,6 +50,8 @@ namespace ige::creator
         
         gizmo::OPERATION m_operation;
         gizmo::MODE m_mode;
+
+        bool m_visible = false;
 
         bool m_bIsUsing = false;
     };

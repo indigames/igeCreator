@@ -21,5 +21,7 @@ namespace ige::creator
 
     protected:
         std::shared_ptr<Group> m_logGroup = nullptr;
+
+        int _scrollToBottom = 0;
     };
 }

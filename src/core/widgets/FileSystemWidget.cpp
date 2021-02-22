@@ -517,6 +517,7 @@ namespace ige::creator
             {
                 on_click();
             }
+            getOnClickEvent().invoke(this);
         }
         break;
         case entry_action::double_clicked:

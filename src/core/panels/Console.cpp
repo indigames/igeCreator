@@ -47,7 +47,67 @@ namespace ige::creator
 
     void Console::_drawImpl()
     {
-        Panel::_drawImpl();
+        //Panel::_drawImpl();
+        if (isOpened())
+        {
+            int windowFlags = ImGuiWindowFlags_None;
+
+            if (m_settings.hideTitle)					windowFlags |= ImGuiWindowFlags_NoTitleBar;
+            if (!m_settings.resizable)					windowFlags |= ImGuiWindowFlags_NoResize;
+            if (!m_settings.movable)					windowFlags |= ImGuiWindowFlags_NoMove;
+            if (!m_settings.dockable)					windowFlags |= ImGuiWindowFlags_NoDocking;
+            if (m_settings.hideBackground)				windowFlags |= ImGuiWindowFlags_NoBackground;
+            if (m_settings.forceHorizontalScrollbar)	windowFlags |= ImGuiWindowFlags_AlwaysHorizontalScrollbar;
+            if (m_settings.forceVerticalScrollbar)		windowFlags |= ImGuiWindowFlags_AlwaysVerticalScrollbar;
+            if (m_settings.allowHorizontalScrollbar)	windowFlags |= ImGuiWindowFlags_HorizontalScrollbar;
+            if (!m_settings.bringToFrontOnFocus)		windowFlags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
+            if (!m_settings.collapsable)				windowFlags |= ImGuiWindowFlags_NoCollapse;
+            if (!m_settings.allowInputs)				windowFlags |= ImGuiWindowFlags_NoInputs;
+
+            ImVec2 vMin = ImGui::GetWindowContentRegionMin();
+            ImVec2 vMax = ImGui::GetWindowContentRegionMax();
+
+            vMin.x += ImGui::GetWindowPos().x;
+            vMin.y += ImGui::GetWindowPos().y;
+
+            vMax.x += ImGui::GetWindowPos().x;
+            vMax.y += ImGui::GetWindowPos().y;
+
+            ImGui::SetNextWindowSizeConstraints(vMin, vMax);
+
+            if (ImGui::Begin((m_name).c_str(), m_settings.closable ? &m_bIsOpened : nullptr, windowFlags))
+            {
+                m_bIsHovered = ImGui::IsWindowHovered();
+                m_bIsFocused = ImGui::IsWindowFocused();
+
+                if (!m_bIsOpened) m_closeEvent.invoke();
+
+                auto windowPos = ImGui::GetWindowPos();
+                if (m_position.x != windowPos.x || m_position.y != windowPos.y)
+                {
+                    getOnPositionChangedEvent().invoke(windowPos);
+                    m_position = windowPos;
+                }
+
+                auto newSize = ImGui::GetContentRegionAvail();
+                if (m_size.x != newSize.x || m_size.y != newSize.y)
+                {
+                    getOnSizeChangedEvent().invoke(newSize);
+                    m_size = newSize;
+                }
+
+                drawWidgets();
+
+                if (_scrollToBottom == 1)
+                    _scrollToBottom++;
+                else if (_scrollToBottom > 1) {
+                    auto pos = ImGui::GetScrollMaxY();
+                    ImGui::SetScrollY(pos);
+                    _scrollToBottom = 0;
+                }
+            }
+            ImGui::End();
+        }
     }
 
     void Console::clear()
@@ -75,5 +135,6 @@ namespace ige::creator
         auto msg = std::string(buffer) + "\t" + std::string(message);
 
         m_logGroup->createWidget<Label>(msg);
+        _scrollToBottom = 1;
     }
 }
