@@ -2,7 +2,6 @@
 #define __NAVIGABLE_EDITOR_COMPONENT_H_
 
 #include "core/Macros.h"
-#include "core/Ref.h"
 
 #include "core/panels/EditorComponent.h"
 #include "components/Component.h"

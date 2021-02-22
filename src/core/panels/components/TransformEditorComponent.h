@@ -1,5 +1,4 @@
 #include "core/Macros.h"
-#include "core/Ref.h"
 
 #include "core/panels/EditorComponent.h"
 #include "components/Component.h"
@@ -27,7 +26,6 @@ protected:
 	void onTransformChanged(SceneObject& sceneObject);
 
 protected:
-
 	std::shared_ptr<Group> m_localTransformGroup = nullptr;
 	std::shared_ptr<Group> m_worldTransformGroup = nullptr;
 	int m_dirtyFlag = 0;
