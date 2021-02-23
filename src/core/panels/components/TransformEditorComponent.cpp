@@ -202,7 +202,6 @@ void TransformEditorComponent::drawWorldTransformComponent() {
 
 void TransformEditorComponent::onTransformChanged(SceneObject& sceneObject)
 {
-    return;
     // Just redraw the transform in Inspector
     TaskManager::getInstance()->addTask([this]() {
         if (m_targetObject != nullptr)
