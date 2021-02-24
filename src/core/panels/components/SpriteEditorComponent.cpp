@@ -66,7 +66,7 @@ void SpriteEditorComponent::drawSpriteComponent()
     auto txtPath = m_spriteCompGroup->createWidget<TextField>("Path", spriteComp->getPath());
     txtPath->setEndOfLine(false);
     txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
-        auto spriteComp = m_targetObject->getComponent<SpriteComponent>();
+        auto spriteComp = dynamic_cast<SpriteComponent*>(m_component);
         spriteComp->setPath(txt);
         });
 
@@ -83,7 +83,7 @@ void SpriteEditorComponent::drawSpriteComponent()
         auto files = OpenFileDialog("Import Assets", "", { "Texture (*.pyxi)", "*.pyxi" }).result();
         if (files.size() > 0)
         {
-            auto spriteComp = m_targetObject->getComponent<SpriteComponent>();
+            auto spriteComp = dynamic_cast<SpriteComponent*>(m_component);
             spriteComp->setPath(files[0]);
             dirty();
         }
@@ -91,13 +91,39 @@ void SpriteEditorComponent::drawSpriteComponent()
 
     std::array size = { spriteComp->getSize().X(), spriteComp->getSize().Y() };
     m_spriteCompGroup->createWidget<Drag<float, 2>>("Size", ImGuiDataType_Float, size, 1.f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto spriteComp = m_targetObject->getComponent<SpriteComponent>();
+        auto spriteComp = dynamic_cast<SpriteComponent*>(m_component);
         spriteComp->setSize({ val[0], val[1] });
         });
 
     m_spriteCompGroup->createWidget<CheckBox>("Billboard", spriteComp->isBillboard())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto spriteComp = m_targetObject->getComponent<SpriteComponent>();
+        auto spriteComp = dynamic_cast<SpriteComponent*>(m_component);
         spriteComp->setBillboard(val);
         });
+
+    std::array tiling = { spriteComp->getTiling().X(), spriteComp->getTiling().Y() };
+    m_spriteCompGroup->createWidget<Drag<float, 2>>("Tiling", ImGuiDataType_Float, tiling, 0.01f, -16384.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        auto spriteComp = dynamic_cast<SpriteComponent*>(m_component);
+        spriteComp->setTiling({ val[0], val[1] });
+        });
+
+    std::array offset = { spriteComp->getOffset().X(), spriteComp->getOffset().Y() };
+    m_spriteCompGroup->createWidget<Drag<float, 2>>("Offset", ImGuiDataType_Float, offset, 0.01f, -16384.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        auto spriteComp = dynamic_cast<SpriteComponent*>(m_component);
+        spriteComp->setOffset({ val[0], val[1] });
+        });
+        
+    auto m_compCombo = m_spriteCompGroup->createWidget<ComboBox>((int)spriteComp->getWrapMode());
+    m_compCombo->getOnDataChangedEvent().addListener([this](auto val) {
+        auto spriteComp = dynamic_cast<SpriteComponent*>(m_component);
+        spriteComp->setWrapMode(val);
+        dirty();
+        });
+    m_compCombo->setEndOfLine(false);
+    m_compCombo->addChoice((int)SamplerState::WrapMode::WRAP, "Wrap");
+    m_compCombo->addChoice((int)SamplerState::WrapMode::MIRROR, "Mirror");
+    m_compCombo->addChoice((int)SamplerState::WrapMode::CLAMP, "Clamp");
+    m_compCombo->addChoice((int)SamplerState::WrapMode::BORDER, "Border");
+    m_compCombo->setEndOfLine(true);
+    
 }
 NS_IGE_END
