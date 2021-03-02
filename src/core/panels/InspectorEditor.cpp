@@ -64,8 +64,10 @@ void InspectorEditor::clear() {
 	releasings.swap(m_groups);
 	for (const auto& obj : releasings)
 	{
-		obj.second->removeAllWidgets();
-		obj.second->removeAllPlugins();
+		if (obj.second != nullptr) {
+			obj.second->removeAllWidgets();
+			obj.second->removeAllPlugins();
+		}
 	}
 
 	m_components.clear();
@@ -88,44 +90,10 @@ void InspectorEditor::setTargetObject(const std::shared_ptr<SceneObject>& obj)
 		m_targetObject = obj;
 
 		for (auto& comp : m_components) {
-			comp.second->setTargetObject(obj);
+			if(comp.second != nullptr)
+				comp.second->setTargetObject(obj);
 		}
 	}
-}
-
-std::shared_ptr<EditorComponent> InspectorEditor::addComponent(int type, Component* comp) {
-	if (comp == nullptr) return nullptr;
-
-	ComponentType m_type = (ComponentType)type;
-
-	std::shared_ptr<Group> header = m_componentGroup->createWidget<Group>(comp->getName(), true);
-	std::shared_ptr<EditorComponent> view = nullptr;
-	switch(m_type) {
-	case ComponentType::Transform:
-		{
-			view = std::make_shared<TransformEditorComponent>();
-		}
-		break;
-	case ComponentType::RectTransform:
-		{
-			view = std::make_shared<RectTransformEditorComponent>();
-		}
-		break;
-	default:
-		return nullptr;
-	}
-
-	if (view == nullptr) return nullptr;
-	
-	view->setComponent(comp);
-	view->setTargetObject(m_targetObject);
-
-	m_groups[comp->getInstanceId()] = header;
-	m_components[comp->getInstanceId()] = view;
-
-	view->draw(header);
-
-	return view;
 }
 
 std::shared_ptr<EditorComponent> InspectorEditor::addComponent(int type, Component* comp, std::shared_ptr<Group> header) {
@@ -321,17 +289,30 @@ std::shared_ptr<EditorComponent> InspectorEditor::addComponent(int type, Compone
 	return view;
 }
 
+void InspectorEditor::removeComponent(uint64_t componentInstanceId) {
+	m_groups[componentInstanceId] = nullptr;
+	m_components[componentInstanceId] = nullptr;
+	m_components.erase(componentInstanceId);
+}
+
 void InspectorEditor::update(float dt) {
 	m_deltaTime += dt;
 	if (m_deltaTime < INSPECTOR_EDITOR_DELTA_LIMIT) return;
 	m_deltaTime = 0;
-
-	for (auto component : m_components) {
-		if (component.second->isDirty())
-			component.second->redraw();
+	
+	try {
+		for (auto const& component : m_components) {
+			if (component.second != nullptr && component.second->isDirty()) {
+				component.second->redraw();
+			}
+		}
+	}
+	catch(...)
+	{
+		pyxie_printf("ERROR !!!");
 	}
 
-	for (auto& watch : m_watcher) {
+	/*for (auto& watch : m_watcher) {
 		for (auto& _obj : watch.second) {
 			auto vec = (Vec3*)_obj.getAddress();
 			auto old = std::any_cast<Vec3>(_obj.getValue());
@@ -341,13 +322,13 @@ void InspectorEditor::update(float dt) {
 			}
 			
 		}
-	}
+	}*/
 }
 
 void InspectorEditor::makeDirty(Component* comp) {
 	std::shared_ptr<EditorComponent> view = nullptr;
 	for (auto obj : m_components) {
-		if (obj.second->getComponent() == comp) {
+		if (obj.second != nullptr && obj.second->getComponent() == comp) {
 			view = obj.second;
 			break;
 		}
@@ -359,7 +340,7 @@ void InspectorEditor::makeDirty(Component* comp) {
 void InspectorEditor::makeDirty(uint64_t componentInstanceId) {
 	std::shared_ptr<EditorComponent> view = nullptr;
 	for (auto obj : m_components) {
-		if (obj.second->getComponent()->getInstanceId() == componentInstanceId) {
+		if (obj.second != nullptr && obj.second->getComponent()->getInstanceId() == componentInstanceId) {
 			view = obj.second;
 			break;
 		}
@@ -370,6 +351,8 @@ void InspectorEditor::makeDirty(uint64_t componentInstanceId) {
 
 void InspectorEditor::addWatcherValue(uint64_t componentInstanceId, std::type_index _typeId, void* address, std::any value)
 {
+	if (m_watcher[componentInstanceId].size() == 0)
+		m_watcher[componentInstanceId].reserve(10);
 	m_watcher[componentInstanceId].push_back(WatcherPair(_typeId, address, value));
 }
 

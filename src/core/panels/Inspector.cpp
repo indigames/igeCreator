@@ -272,6 +272,7 @@ namespace ige::creator
             auto closable = (component->getName() != "TransformComponent" && component->getName() != "RectTransform");
             auto header = m_componentGroup->createWidget<Group>(component->getName(), true, closable);
             header->getOnClosedEvent().addListener([this, &component]() {
+                m_inspectorEditor->removeComponent(component->getInstanceId());
                 m_targetObject->removeComponent(component);
                 redraw();
             });
@@ -463,8 +464,8 @@ namespace ige::creator
     {
         if (m_targetObject != obj)
         {
-            /*if(m_targetObject)
-                m_targetObject->getTransformChangedEvent().removeAllListeners();*/
+            if(m_targetObject)
+                m_targetObject->getTransformChangedEvent().removeAllListeners();
             m_targetObject = obj;
 
             clear();

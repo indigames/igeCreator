@@ -639,11 +639,12 @@ namespace ige::creator
         auto target = Editor::getInstance()->getSelectedObject();
         if (target == nullptr)
             return;
-
-        const auto& aabb = target->getTransform()->getWorldAABB();
+        auto transform = target->getTransform();
+        if (transform == nullptr) return;
+        const auto& aabb = transform->getWorldAABB();
         auto position = aabb.getCenter();
         Vec3 halfSize = aabb.getExtent() * 0.5f;
-
+        
         ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], -halfSize[2] }, position + Vec3{ -halfSize[0], -halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
         ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], -halfSize[2] }, position + Vec3{ -halfSize[0], +halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
         ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], -halfSize[2] }, position + Vec3{ -halfSize[0], +halfSize[1], -halfSize[2] }, { 1.f, 0.f, 0.f });

@@ -1,5 +1,4 @@
 #include "core/Macros.h"
-#include "core/Ref.h"
 
 #include <map>
 #include <vector>
@@ -35,8 +34,9 @@ public:
 	~InspectorEditor();
 
 	void update(float dt);
-	std::shared_ptr<EditorComponent> addComponent(int type, Component* component);
 	std::shared_ptr<EditorComponent> addComponent(int type, Component* component, std::shared_ptr<Group> header);
+	void removeComponent(uint64_t componentInstanceId);
+
 	void clear();
 	void setParentGroup(std::shared_ptr<Group> componentGroup);
 	void setTargetObject(const std::shared_ptr<SceneObject>& obj);
