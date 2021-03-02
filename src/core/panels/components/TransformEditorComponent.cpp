@@ -79,13 +79,10 @@ void TransformEditorComponent::redraw()
     default:
         break;
     }
-
-    if (m_targetObject != nullptr)
-    {
+    if (m_targetObject != nullptr) {
         m_targetObject->getTransformChangedEvent().removeAllListeners();
         m_targetObject->getTransformChangedEvent().addListener(CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
     }
-
     EditorComponent::redraw();
 }
 
@@ -124,7 +121,7 @@ void TransformEditorComponent::drawLocalTransformComponent() {
 
     std::array pos = { transform->getPosition().X(), transform->getPosition().Y(), transform->getPosition().Z() };
     m_localTransformGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos)->getOnDataChangedEvent().addListener([this](auto val) {
-        //IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
+        IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
         auto transform = dynamic_cast<TransformComponent*>(m_component);
         transform->setPosition({ val[0], val[1], val[2] });
         transform->onUpdate(0.f);
@@ -136,7 +133,7 @@ void TransformEditorComponent::drawLocalTransformComponent() {
     vmath_quatToEuler(transform->getRotation().P(), euler.P());
     std::array rot = { RADIANS_TO_DEGREES(euler.X()), RADIANS_TO_DEGREES(euler.Y()), RADIANS_TO_DEGREES(euler.Z()) };
     m_localTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot)->getOnDataChangedEvent().addListener([this](auto val) {
-        //IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
+        IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
         auto transform = dynamic_cast<TransformComponent*>(m_component);
         Quat quat;
         float rad[3] = { DEGREES_TO_RADIANS(val[0]), DEGREES_TO_RADIANS(val[1]), DEGREES_TO_RADIANS(val[2]) };
@@ -149,7 +146,7 @@ void TransformEditorComponent::drawLocalTransformComponent() {
 
     std::array scale = { transform->getScale().X(), transform->getScale().Y(), transform->getScale().Z() };
     m_localTransformGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scale)->getOnDataChangedEvent().addListener([this](auto val) {
-        //IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
+        IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
         auto transform = dynamic_cast<TransformComponent*>(m_component);
         transform->setScale({ val[0], val[1], val[2] });
         transform->onUpdate(0.f);
@@ -172,7 +169,7 @@ void TransformEditorComponent::drawWorldTransformComponent() {
     m_worldTransformGroup->createWidget<Label>("World");
     std::array pos = { transform->getWorldPosition().X(), transform->getWorldPosition().Y(), transform->getWorldPosition().Z() };
     m_worldTransformGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos)->getOnDataChangedEvent().addListener([this](auto val) {
-        //IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
+        IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
         auto transform = dynamic_cast<TransformComponent*>(m_component);
         transform->setWorldPosition({ val[0], val[1], val[2] });
         transform->onUpdate(0.f);
@@ -184,7 +181,7 @@ void TransformEditorComponent::drawWorldTransformComponent() {
     vmath_quatToEuler(transform->getWorldRotation().P(), euler.P());
     std::array rot = { RADIANS_TO_DEGREES(euler.X()), RADIANS_TO_DEGREES(euler.Y()), RADIANS_TO_DEGREES(euler.Z()) };
     m_worldTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot)->getOnDataChangedEvent().addListener([this](auto val) {
-        //IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
+        IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
         auto transform = dynamic_cast<TransformComponent*>(m_component);
         Quat quat;
         float rad[3] = { DEGREES_TO_RADIANS(val[0]), DEGREES_TO_RADIANS(val[1]), DEGREES_TO_RADIANS(val[2]) };
@@ -197,7 +194,7 @@ void TransformEditorComponent::drawWorldTransformComponent() {
 
     std::array scale = { transform->getWorldScale().X(), transform->getWorldScale().Y(), transform->getWorldScale().Z() };
     m_worldTransformGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scale)->getOnDataChangedEvent().addListener([this](auto val) {
-        //IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
+        IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
         auto transform = dynamic_cast<TransformComponent*>(m_component);
         transform->setWorldScale({ val[0], val[1], val[2] });
         transform->onUpdate(0.f);
