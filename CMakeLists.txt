@@ -4,12 +4,30 @@ set(TARGET_NAME igeCreator)
 
 project(${TARGET_NAME})
 
-set (BUILD_FULL_SOURCE 0)
+set(BUILD_FULL_SOURCE FALSE)
+set(USE_MSVC_RELEASE_RUNTIME_ALWAYS TRUE)
 
 if (BUILD_FULL_SOURCE)
     file(TO_CMAKE_PATH $ENV{IGE_LIBS} IGE_LIBS)
+    set(LIBS_DIR ${IGE_LIBS})
+else()
+    set(LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/igeLibs)
 endif()
 
+IF (USE_MSVC_RELEASE_RUNTIME_ALWAYS)
+    FOREACH(flag_var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO )
+        IF(${flag_var} MATCHES "/MDd")
+            STRING(REGEX REPLACE "/MDd" "/MD" ${flag_var} "${${flag_var}}")
+        ENDIF(${flag_var} MATCHES "/MDd")
+        IF(${flag_var} MATCHES "/MTd")
+            STRING(REGEX REPLACE "/MTd" "/MT" ${flag_var} "${${flag_var}}")
+        ENDIF(${flag_var} MATCHES "/MTd")
+        # Need to remove _DEBUG too otherwise things like _ITERATOR_DEBUG_LEVEL mismatch
+        IF(${flag_var} MATCHES "-D_DEBUG")
+            STRING(REGEX REPLACE "-D_DEBUG" "" ${flag_var} "${${flag_var}}")
+        ENDIF(${flag_var} MATCHES "-D_DEBUG")
+    ENDFOREACH(flag_var)
+ENDIF (USE_MSVC_RELEASE_RUNTIME_ALWAYS)
 
 if(NOT DEFINED BUILD_PLATFORM)
     set (BUILD_PLATFORM pc)
@@ -21,19 +39,17 @@ endif()
 
 if(MSVC)
     set (PLATFORM_PATH libs/${BUILD_PLATFORM}/${BUILD_ARCH}/)
-    set (PLATFORM_PATH_DEBUG libs/${BUILD_PLATFORM}/Debug/${BUILD_ARCH}/)
     set (LIB_EXT lib)
 else()
     set (PLATFORM_PATH libs/${BUILD_PLATFORM}/${BUILD_ARCH}/lib)
     set (LIB_EXT a)
 endif()
 
-set (CMAKE_CXX_STANDARD 17)
-set(LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs)
+set(CMAKE_CXX_STANDARD 17)
 set(APP_STYLE STATIC)
 
 add_compile_definitions(EDITOR_MODE=1)
-add_subdirectory(${LIBS_DIR}/igeScene  ${CMAKE_BINARY_DIR}/igeScene)
+add_subdirectory(libs/igeScene  ${CMAKE_BINARY_DIR}/igeScene)
 
 # Source files
 file(GLOB_RECURSE SRC_FILES
@@ -49,7 +65,7 @@ file(GLOB_RECURSE SRC_FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui/*.cpp"
 )
 
-set (EXCLUDE_DIR 
+set (EXCLUDE_DIR
     "/examples"
     "/example"
     "/bin"
@@ -90,33 +106,23 @@ if (BUILD_FULL_SOURCE)
     target_link_libraries(${TARGET_NAME} igeCore-static)
 else()
     set (LIB_PATH ${LIBS_DIR}/pyxCore/${PLATFORM_PATH})
-    set (LIB_PATH_DEBUG ${LIBS_DIR}/pyxCore/${PLATFORM_PATH_DEBUG})
     target_link_libraries(${TARGET_NAME}
-        optimized ${LIB_PATH}pyxcore-static.${LIB_EXT}
-        optimized ${LIB_PATH}edgeanim.${LIB_EXT}
-        optimized ${LIB_PATH}doboz.${LIB_EXT}
-        optimized ${LIB_PATH}tokenizer.${LIB_EXT}
-        optimized ${LIB_PATH}simplecpp.${LIB_EXT}
-        debug ${LIB_PATH_DEBUG}pyxcore-static.${LIB_EXT}
-        debug ${LIB_PATH_DEBUG}edgeanim.${LIB_EXT}
-        debug ${LIB_PATH_DEBUG}doboz.${LIB_EXT}
-        debug ${LIB_PATH_DEBUG}tokenizer.${LIB_EXT}
-        debug ${LIB_PATH_DEBUG}simplecpp.${LIB_EXT}
+        ${LIB_PATH}pyxcore-static.${LIB_EXT}
+        ${LIB_PATH}edgeanim.${LIB_EXT}
+        ${LIB_PATH}doboz.${LIB_EXT}
+        ${LIB_PATH}tokenizer.${LIB_EXT}
+        ${LIB_PATH}simplecpp.${LIB_EXT}
     )
     if(MSVC)
         target_link_libraries(${TARGET_NAME}
-            optimized ${LIB_PATH}pyxtools-static.${LIB_EXT}
-            optimized ${LIB_PATH}GLEW.${LIB_EXT}
-            debug ${LIB_PATH_DEBUG}pyxtools-static.${LIB_EXT}
-            debug ${LIB_PATH_DEBUG}GLEW.${LIB_EXT}
+            ${LIB_PATH}pyxtools-static.${LIB_EXT}
+            ${LIB_PATH}GLEW.${LIB_EXT}
         )
     endif()
 
     set (LIB_PATH ${LIBS_DIR}/igeCore/${PLATFORM_PATH})
-    set (LIB_PATH_DEBUG ${LIBS_DIR}/igeCore/${PLATFORM_PATH_DEBUG})
     target_link_libraries(${TARGET_NAME}
-        optimized ${LIB_PATH}igeCore-static.${LIB_EXT}
-        debug ${LIB_PATH_DEBUG}igeCore-static.${LIB_EXT}
+        ${LIB_PATH}igeCore-static.${LIB_EXT}
     )
 endif()
 
@@ -130,31 +136,43 @@ if (BUILD_FULL_SOURCE)
     target_link_libraries(${TARGET_NAME} igeBullet-static)
 else()
     set (LIB_PATH ${LIBS_DIR}/igeBullet/${PLATFORM_PATH})
-    set (LIB_PATH_DEBUG ${LIBS_DIR}/igeBullet/${PLATFORM_PATH_DEBUG})
     target_link_libraries(${TARGET_NAME}
-        optimized ${LIB_PATH}igeBullet-static.${LIB_EXT}
-        debug ${LIB_PATH_DEBUG}igeBullet-static.${LIB_EXT}
-    )
+        ${LIB_PATH}igeBullet-static.${LIB_EXT}
+    )    
 endif()
+
+# bullet
+set (LIB_PATH ${LIBS_DIR}/bullet/${PLATFORM_PATH})
+target_link_libraries(${TARGET_NAME} 
+    ${LIB_PATH}Bullet3Common.${LIB_EXT}
+    ${LIB_PATH}BulletCollision.${LIB_EXT}
+    ${LIB_PATH}BulletDynamics.${LIB_EXT}
+    ${LIB_PATH}BulletFileLoader.${LIB_EXT}
+    ${LIB_PATH}BulletInverseDynamics.${LIB_EXT}
+    ${LIB_PATH}BulletInverseDynamicsUtils.${LIB_EXT}
+    ${LIB_PATH}BulletRobotics.${LIB_EXT}
+    ${LIB_PATH}BulletRoboticsGUI.${LIB_EXT}
+    ${LIB_PATH}BulletSoftBody.${LIB_EXT}
+    ${LIB_PATH}BulletWorldImporter.${LIB_EXT}
+    ${LIB_PATH}BulletXmlWorldImporter.${LIB_EXT}
+    ${LIB_PATH}ConvexDecomposition.${LIB_EXT}
+    ${LIB_PATH}GIMPACTUtils.${LIB_EXT}
+    ${LIB_PATH}HACD.${LIB_EXT}
+    ${LIB_PATH}LinearMath.${LIB_EXT}
+)
 
 # igeSound
 set (LIB_PATH ${LIBS_DIR}/igeSound/${PLATFORM_PATH})
-set (LIB_PATH_DEBUG ${LIBS_DIR}/igeSound/${PLATFORM_PATH_DEBUG})
 target_link_libraries(${TARGET_NAME}
-    optimized ${LIB_PATH}igeSound-static.${LIB_EXT}
-    debug ${LIB_PATH_DEBUG}igeSound-static.${LIB_EXT}
+    ${LIB_PATH}igeSound-static.${LIB_EXT}
 )
 
 # igeEffekseer
 set (LIB_PATH ${LIBS_DIR}/igeEffekseer/${PLATFORM_PATH})
-set (LIB_PATH_DEBUG ${LIBS_DIR}/igeEffekseer/${PLATFORM_PATH_DEBUG})
 target_link_libraries(${TARGET_NAME}
-    optimized ${LIB_PATH}igeEffekseer-static.${LIB_EXT}
-    optimized ${LIB_PATH}Effekseer.${LIB_EXT}
-    optimized ${LIB_PATH}EffekseerRendererGL.${LIB_EXT}
-    debug ${LIB_PATH_DEBUG}igeEffekseer-static.${LIB_EXT}
-    debug ${LIB_PATH_DEBUG}Effekseer.${LIB_EXT}
-    debug ${LIB_PATH_DEBUG}EffekseerRendererGL.${LIB_EXT}
+    ${LIB_PATH}igeEffekseer-static.${LIB_EXT}
+    ${LIB_PATH}Effekseer.${LIB_EXT}
+    ${LIB_PATH}EffekseerRendererGL.${LIB_EXT}
 )
 
 # igeNavigation
@@ -163,18 +181,12 @@ if (BUILD_FULL_SOURCE)
     target_link_libraries(${TARGET_NAME} igeNavigation-static)
 else()
     set (LIB_PATH ${LIBS_DIR}/igeNavigation/${PLATFORM_PATH})
-    set (LIB_PATH_DEBUG ${LIBS_DIR}/igeNavigation/${PLATFORM_PATH_DEBUG})
     target_link_libraries(${TARGET_NAME}
-        optimized ${LIB_PATH}igeNavigation-static.${LIB_EXT}
-        optimized ${LIB_PATH}Recast.${LIB_EXT}
-        optimized ${LIB_PATH}Detour.${LIB_EXT}
-        optimized ${LIB_PATH}DetourCrowd.${LIB_EXT}
-        optimized ${LIB_PATH}DetourTileCache.${LIB_EXT}
-        debug ${LIB_PATH_DEBUG}igeNavigation-static.${LIB_EXT}
-        debug ${LIB_PATH_DEBUG}Recast-d.${LIB_EXT}
-        debug ${LIB_PATH_DEBUG}Detour-d.${LIB_EXT}
-        debug ${LIB_PATH_DEBUG}DetourCrowd-d.${LIB_EXT}
-        debug ${LIB_PATH_DEBUG}DetourTileCache-d.${LIB_EXT}
+        ${LIB_PATH}igeNavigation-static.${LIB_EXT}
+        ${LIB_PATH}Recast.${LIB_EXT}
+        ${LIB_PATH}Detour.${LIB_EXT}
+        ${LIB_PATH}DetourCrowd.${LIB_EXT}
+        ${LIB_PATH}DetourTileCache.${LIB_EXT}
     )
 endif()
 
@@ -245,6 +257,7 @@ target_include_directories(${TARGET_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/pfd
     ${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/ImGuizmo
     ${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui
+    ${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene
     ${PYTHON_INCLUDE_DIRS}
     ${LIBS_DIR}/pyxCore/include/pyxcore
     ${LIBS_DIR}/pyxCore/include/ThirdParty/GLEW
@@ -254,9 +267,10 @@ target_include_directories(${TARGET_NAME} PUBLIC
     ${LIBS_DIR}/json/include
     ${LIBS_DIR}/igeVmath/include
     ${LIBS_DIR}/igeCore/include
-    ${LIBS_DIR}/igeScene
     ${LIBS_DIR}/SDL/include
     ${LIBS_DIR}/stb/include
+    ${LIBS_DIR}/bullet/include
+    ${LIBS_DIR}/bullet/include/src
     ${LIBS_DIR}/igeBullet/include
     ${LIBS_DIR}/igeBullet/include/bullet
     ${LIBS_DIR}/igeSound/include
@@ -284,3 +298,5 @@ set_target_properties(
     ${TARGET_NAME} PROPERTIES
     VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/app"
 )
+
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${TARGET_NAME})

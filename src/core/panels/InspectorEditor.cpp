@@ -54,9 +54,13 @@ InspectorEditor::InspectorEditor() {
 
 InspectorEditor::~InspectorEditor() {
 	clear();
-	m_componentGroup->removeAllWidgets();
-	m_componentGroup->removeAllPlugins();
-	m_componentGroup = nullptr;
+
+	if (m_componentGroup)
+	{
+		m_componentGroup->removeAllWidgets();
+		m_componentGroup->removeAllPlugins();
+		m_componentGroup = nullptr;
+	}
 }
 
 void InspectorEditor::clear() {
