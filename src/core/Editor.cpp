@@ -29,7 +29,7 @@ namespace ige::creator
 
     Editor::~Editor()
     {
-        refreshScene();
+        m_selectedObject = nullptr;
         m_canvas = nullptr;
 
         if (m_shortcutController != nullptr) {
@@ -38,7 +38,6 @@ namespace ige::creator
         m_shortcutController = nullptr;
 
         PoolManager::destroyInstance();
-
         SceneManager::destroy();
         m_app = nullptr;
 

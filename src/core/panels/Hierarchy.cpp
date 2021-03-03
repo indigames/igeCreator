@@ -210,13 +210,7 @@ namespace ige::creator
         {
             m_selectedNodeId = sceneObject.getId();
             nodePair->second->setIsSelected(false);
-
-            auto oldObject = Editor::getInstance()->getSelectedObject();
-            if (oldObject)
-            {
-                oldObject->getNameChangedEvent().removeAllListeners();
-            }
-            sceneObject.getNameChangedEvent().addListener(std::bind(&Hierarchy::onSceneObjectChangedName, this, std::placeholders::_1));
+            sceneObject.getNameChangedEvent().removeAllListeners();
             Editor::getInstance()->setSelectedObject(-1);
         }
     }

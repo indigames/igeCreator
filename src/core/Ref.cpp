@@ -5,7 +5,7 @@ NS_IGE_BEGIN
 	
 Ref::Ref() : _referenceCount(0) {}
 
-Ref::~Ref() { }
+Ref::~Ref() { _referenceCount = 0; }
 
 void Ref::retain()
 {
