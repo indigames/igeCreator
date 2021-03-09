@@ -38,15 +38,18 @@ void TransformEditorComponent::setTargetObject(const std::shared_ptr<SceneObject
     if (m_targetObject != obj)
     {
         if (m_targetObject)
-            m_targetObject->getTransformChangedEvent().removeAllListeners();
+        {
+            auto listenerId = Editor::getInstance()->getCanvas()->getInspector()->getTransformListenerId();
+            if (listenerId != (uint64_t)-1)
+                m_targetObject->getTransformChangedEvent().removeListener(listenerId);
+        }
         m_targetObject = obj;
 
         if (m_targetObject != nullptr)
         {
-            m_targetObject->getTransformChangedEvent().addListener(CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
+            auto listenerId = m_targetObject->getTransformChangedEvent().addListener(CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
+            Editor::getInstance()->getCanvas()->getInspector()->setTransformListenerId(listenerId);
         }
-
-        //INSPECTOR_WATCH(m_targetObject->getTransform(), Vec3, m_targetObject->getTransform()->getPosition());
     }
 }
 
@@ -78,10 +81,6 @@ void TransformEditorComponent::redraw()
         break;
     default:
         break;
-    }
-    if (m_targetObject != nullptr) {
-        m_targetObject->getTransformChangedEvent().removeAllListeners();
-        m_targetObject->getTransformChangedEvent().addListener(CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
     }
     EditorComponent::redraw();
 }

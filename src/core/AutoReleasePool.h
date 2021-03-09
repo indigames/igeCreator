@@ -1,4 +1,4 @@
-#pragma one
+#pragma once
 #ifndef __AUTORELEASEPOOL_H__
 #define __AUTORELEASEPOOL_H__
 

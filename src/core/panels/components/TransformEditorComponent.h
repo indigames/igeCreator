@@ -28,8 +28,8 @@ protected:
 protected:
 	std::shared_ptr<Group> m_localTransformGroup = nullptr;
 	std::shared_ptr<Group> m_worldTransformGroup = nullptr;
+
 	int m_dirtyFlag = 0;
-	
 };
 
 NS_IGE_END

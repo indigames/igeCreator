@@ -1,4 +1,4 @@
-#pragma one
+#pragma once
 #ifndef __CORE_REF_H__
 #define __CORE_REF_H__
 

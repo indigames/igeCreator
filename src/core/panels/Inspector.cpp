@@ -13,6 +13,7 @@
 #include "core/widgets/AnchorWidget.h"
 #include "core/panels/Inspector.h"
 #include "core/Editor.h"
+#include "core/Canvas.h"
 #include "core/FileHandle.h"
 #include "core/task/TaskManager.h"
 
@@ -68,6 +69,22 @@ using namespace pyxie;
 
 namespace ige::creator
 {
+    IgnoreTransformEventScope::IgnoreTransformEventScope(std::shared_ptr<SceneObject> obj, const std::function<void(SceneObject&)>& task)
+        : m_object(obj), m_task(task)
+    {
+        auto listenerId = Editor::getInstance()->getCanvas()->getInspector()->getTransformListenerId();
+        if (listenerId != (uint64_t)-1)
+            m_object->getTransformChangedEvent().removeListener(listenerId);
+    }
+
+    IgnoreTransformEventScope::~IgnoreTransformEventScope()
+    {
+        auto listenerId = m_object->getTransformChangedEvent().addListener(m_task);
+        Editor::getInstance()->getCanvas()->getInspector()->setTransformListenerId(listenerId);
+        m_object = nullptr;
+        m_task = nullptr;
+    }
+
     Inspector::Inspector(const std::string &name, const Panel::Settings &settings)
         : Panel(name, settings)
     {
@@ -464,8 +481,8 @@ namespace ige::creator
     {
         if (m_targetObject != obj)
         {
-            if(m_targetObject)
-                m_targetObject->getTransformChangedEvent().removeAllListeners();
+            if (m_targetObject && m_transformListenerId != (uint64_t)-1)
+                m_targetObject->getTransformChangedEvent().removeListener(m_transformListenerId);
             m_targetObject = obj;
 
             clear();
