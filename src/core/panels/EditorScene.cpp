@@ -628,9 +628,6 @@ namespace ige::creator
             auto hit = SceneManager::getInstance()->getCurrentScene()->raycast(Vec2(touchX, touchY), m_currCamera, 10000.f);
             if (hit.first)
                 hit.first->setSelected(true);
-            else {
-                Editor::getInstance()->setSelectedObject(-1);
-            }
         }
     }
 
