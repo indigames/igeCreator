@@ -8,6 +8,8 @@
 #include <core/panels/Inspector.h>
 
 #include "core/task/TaskManager.h"
+#include "core/Editor.h"
+#include "core/Canvas.h"
 
 NS_IGE_BEGIN
 
@@ -51,12 +53,17 @@ void RectTransformEditorComponent::setTargetObject(const std::shared_ptr<SceneOb
     if (m_targetObject != obj)
     {
         if (m_targetObject)
-            m_targetObject->getTransformChangedEvent().removeAllListeners();
+        {
+            auto listenerId = Editor::getInstance()->getCanvas()->getInspector()->getTransformListenerId();
+            if (listenerId != (uint64_t)-1)
+                m_targetObject->getTransformChangedEvent().removeListener(listenerId);
+        }
         m_targetObject = obj;
 
         if (m_targetObject != nullptr)
         {
-            m_targetObject->getTransformChangedEvent().addListener(CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
+            auto listenerId = m_targetObject->getTransformChangedEvent().addListener(CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
+            Editor::getInstance()->getCanvas()->getInspector()->setTransformListenerId(listenerId);
         }
     }
 }

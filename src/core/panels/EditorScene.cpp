@@ -639,9 +639,7 @@ namespace ige::creator
         auto target = Editor::getInstance()->getSelectedObject();
         if (target == nullptr)
             return;
-        auto transform = target->getTransform();
-        if (transform == nullptr) return;
-        const auto& aabb = transform->getWorldAABB();
+        const auto& aabb = target->getWorldAABB();
         auto position = aabb.getCenter();
         Vec3 halfSize = aabb.getExtent() * 0.5f;
         
@@ -1041,7 +1039,7 @@ namespace ige::creator
     AABBox EditorScene::getRenderableAABBox(SceneObject *object) 
     {
         AABBox sumAABB;
-        const AABBox& aabb = object->getTransform()->getFrameAABB();
+        const AABBox& aabb = object->getFrameAABB();
         sumAABB.addInternalBox(aabb);
         for (const auto child : object->getChildren()) {
             auto childAABB = getRenderableAABBox(child);

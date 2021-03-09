@@ -1,4 +1,5 @@
 #pragma once
+#include <functional>
 
 #include "core/Panel.h"
 #include "core/layout/Group.h"
@@ -17,19 +18,10 @@ namespace ige::creator
     class IgnoreTransformEventScope
     {
     public:
-        IgnoreTransformEventScope(std::shared_ptr<SceneObject> obj, const std::function<void(SceneObject&)>& task)
-            : m_object(obj), m_task(task)
-        {
-            m_object->getTransformChangedEvent().removeAllListeners();
-        }
+        IgnoreTransformEventScope(std::shared_ptr<SceneObject> obj, const std::function<void(SceneObject&)>& task);
+        ~IgnoreTransformEventScope();
 
-        ~IgnoreTransformEventScope()
-        {
-            m_object->getTransformChangedEvent().addListener(m_task);
-            m_object = nullptr;
-            m_task = nullptr;
-        }
-
+    protected:
         std::shared_ptr<SceneObject> m_object;
         std::function<void(SceneObject&)> m_task;
     };
@@ -46,8 +38,6 @@ namespace ige::creator
 
         virtual void update(float dt) override;
 
-        
-
     protected:
         virtual void initialize() override;
         virtual void _drawImpl() override;
@@ -58,6 +48,11 @@ namespace ige::creator
 
     public:
         std::shared_ptr<InspectorEditor> getInspectorEditor() { return m_inspectorEditor; }
+
+        //! Transform listener
+        inline uint64_t getTransformListenerId() const { return m_transformListenerId; }
+        inline void setTransformListenerId(uint64_t id) { m_transformListenerId = id; }
+
     protected:
         //! Inspected scene object
         std::shared_ptr<SceneObject> m_targetObject = nullptr;
@@ -70,5 +65,8 @@ namespace ige::creator
         //! Flags for redrawing component in main thread
         bool m_bNeedRedraw = false;
         std::shared_ptr<InspectorEditor> m_inspectorEditor = nullptr;
+
+        //! Transform listener id
+        uint64_t m_transformListenerId = (uint64_t)-1;
     };
 }

@@ -1,4 +1,4 @@
-#pragma one
+#pragma once
 #ifndef __WIDGETS_H__
 #define __WIDGETS_H__
 #include "core/Macros.h"

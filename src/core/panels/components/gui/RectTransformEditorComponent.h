@@ -7,8 +7,6 @@
 USING_NS_IGE_SCENE
 NS_IGE_BEGIN
 
-
-
 class RectTransformEditorComponent : public EditorComponent
 {
 public:
@@ -34,9 +32,6 @@ protected:
 	std::shared_ptr<Group> m_rectTransformAnchorGroup = nullptr;
 	std::shared_ptr<Group> m_anchorGroup = nullptr;
 	std::shared_ptr<Group> m_anchorTransformGroup = nullptr;
-
-
-
 
 	int m_dirtyFlagSupport = 0;
 };
