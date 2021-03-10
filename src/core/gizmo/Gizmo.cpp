@@ -82,13 +82,16 @@ namespace ige::creator
         float delta[16] = { 0.f };
         gizmo::Manipulate(&view[0], &proj[0], m_operation, m_mode, &model[0], &delta[0]);
         
-        ImVec4 newEye, newTarget;
-        if (gizmo::ViewManipulate(&view[0], 0.8f, ImVec2(ImGui::GetWindowPos().x + ImGui::GetWindowWidth() - 128, ImGui::GetWindowPos().y), ImVec2(128, 128), 0x10101010, newEye, newTarget))
+        // Show view manipulation in 3D mode only
+        if (!m_camera->IsOrthographicProjection())
         {
-            m_camera->SetCameraPosition({ newEye.x, newEye.y, newEye.z });
-            m_camera->SetTarget({ newTarget.x, newTarget.y, newTarget.z });
+            ImVec4 newEye, newTarget;
+            if (gizmo::ViewManipulate(&view[0], 8.f, ImVec2(ImGui::GetWindowPos().x + ImGui::GetWindowWidth() - 128, ImGui::GetWindowPos().y), ImVec2(128, 128), 0x10101010, newEye, newTarget))
+            {
+                m_camera->SetCameraPosition({ newEye.x, newEye.y, newEye.z });
+                m_camera->SetTarget({ newTarget.x, newTarget.y, newTarget.z });
+            }
         }
-
 
         m_bIsUsing = gizmo::IsUsing();
         if (!m_bIsUsing)
