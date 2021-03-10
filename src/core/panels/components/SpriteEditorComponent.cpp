@@ -125,5 +125,26 @@ void SpriteEditorComponent::drawSpriteComponent()
     m_compCombo->addChoice((int)SamplerState::WrapMode::BORDER, "Border");
     m_compCombo->setEndOfLine(true);
     
+    m_spriteCompGroup->createWidget<CheckBox>("Alpha Blend", spriteComp->isAlphaBlendingEnable())->getOnDataChangedEvent().addListener([this](bool val) {
+        auto spriteComp = dynamic_cast<SpriteComponent*>(m_component);
+        spriteComp->setAlphaBlendingEnable(val);
+        dirty();
+    });
+
+    if (spriteComp->isAlphaBlendingEnable())
+    {
+        auto m_alphaCombo = m_spriteCompGroup->createWidget<ComboBox>((int)spriteComp->getAlphaBlendingOp());
+        m_alphaCombo->getOnDataChangedEvent().addListener([this](auto val) {
+            auto spriteComp = dynamic_cast<SpriteComponent*>(m_component);
+            spriteComp->setAlphaBlendingOp(val);
+            dirty();
+        });
+        m_alphaCombo->setEndOfLine(false);
+        m_alphaCombo->addChoice((int)ShaderDescriptor::AlphaBlendOP::COL, "COL");
+        m_alphaCombo->addChoice((int)ShaderDescriptor::AlphaBlendOP::ADD, "ADD");
+        m_alphaCombo->addChoice((int)ShaderDescriptor::AlphaBlendOP::SUB, "SUB");
+        m_alphaCombo->addChoice((int)ShaderDescriptor::AlphaBlendOP::MUL, "MUL");
+        m_alphaCombo->setEndOfLine(true);
+    }
 }
 NS_IGE_END

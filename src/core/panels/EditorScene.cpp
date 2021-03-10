@@ -432,6 +432,7 @@ namespace ige::creator
 
         // Update scene
         SceneManager::getInstance()->update(dt);
+
         // Render
         auto renderContext = RenderContext::InstancePtr();
         if (renderContext && m_fbo)
@@ -442,6 +443,8 @@ namespace ige::creator
             m_currCamera->Step(dt);
             m_currCamera->Render();
 
+            // Render scene
+            SceneManager::getInstance()->getCurrentScene()->getShowcase()->ZSort(m_currCamera);
             SceneManager::getInstance()->render();
 
             // Render bounding box
