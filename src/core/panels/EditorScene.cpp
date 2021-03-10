@@ -636,7 +636,10 @@ namespace ige::creator
         auto target = Editor::getInstance()->getSelectedObject();
         if (target == nullptr)
             return;
+
         const auto& aabb = target->getWorldAABB();
+        if (aabb.getVolume() <= 0) return;
+
         auto position = aabb.getCenter();
         Vec3 halfSize = aabb.getExtent() * 0.5f;
         
