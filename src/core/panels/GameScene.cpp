@@ -17,6 +17,8 @@ namespace fs = std::filesystem;
 #include <scene/Scene.h>
 #include <scene/SceneObject.h>
 #include <scene/SceneManager.h>
+
+
 using namespace ige::scene;
 
 #include <utils/PyxieHeaders.h>
@@ -61,6 +63,11 @@ namespace ige::creator
         {
             m_fbo->DecReference();
             m_fbo = nullptr;
+        }
+
+        if (m_inputProcessor)
+        {
+            m_inputProcessor = nullptr;
         }
     }
 
@@ -113,6 +120,8 @@ namespace ige::creator
                 }
 
                 m_bInitialized = true;
+
+                m_inputProcessor = std::make_shared<InputProcessor>();
             }
         }
     }
@@ -130,6 +139,10 @@ namespace ige::creator
 
         //! Update Panel
         Panel::update(dt);
+
+        //! Update Touch & Keyboard, using for UI Object to capture touch before any raycast
+        updateKeyboard();
+        updateTouch();
 
         // Update scene
         SceneManager::getInstance()->update(dt);
@@ -215,5 +228,53 @@ namespace ige::creator
             m_bIsPlaying = false;
         }
         Editor::getCanvas()->getEditorScene()->setFocus();
+    }
+
+    void GameScene::updateKeyboard()
+    {
+
+    }
+
+    void GameScene::updateTouch()
+    {
+        auto touch = Editor::getApp()->getInputHandler()->getTouchDevice();
+        auto isFocus = isFocused();
+        auto isHover = isHovered();
+        if (!isFocus || !isHover) return;
+
+        if (touch->isFingerPressed(0))
+        {
+            float touchX, touchY;
+            touch->getFingerPosition(0, touchX, touchY);
+            m_inputProcessor->touchDown(0, touchX, touchY);
+        }
+
+        if (touch->isFingerMoved(0)) 
+        {
+            float touchX, touchY;
+            touch->getFingerPosition(0, touchX, touchY);
+            m_inputProcessor->touchMove(0, touchX, touchY);
+        }
+
+        if (touch->isFingerReleased(0))
+        {
+            float touchX, touchY;
+            touch->getFingerPosition(0, touchX, touchY);
+
+            /*auto hit = SceneManager::getInstance()->getCurrentScene()->raycastUI(Vec2(touchX, touchY));
+            if (hit.first)
+            {
+                pyxie_printf("Hit Object %s\n", hit.first->getName().c_str());
+                if (hit.first->getComponentsCount() > 0) {
+                    auto components = hit.first->getComponents();
+                    for (auto component : components) {
+                        component->onClick();
+                    }
+                }
+
+            }*/
+            m_inputProcessor->touchUp(0, touchX, touchY);
+            
+        }
     }
 }

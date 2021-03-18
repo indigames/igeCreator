@@ -44,6 +44,7 @@ enum class ComponentType
     UIImage,
     UIText,
     UITextField,
+    UIButton,
     PhysicManager,
     PhysicBox,
     PhysicSphere,

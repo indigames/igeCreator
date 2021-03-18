@@ -35,6 +35,7 @@ public:
 
     bool isResizing();
     void set2DMode(bool is2D = true);
+    bool is2DMode() const;
 
     std::shared_ptr<Gizmo>& getGizmo() { return m_gizmo; }
     
@@ -152,6 +153,7 @@ protected:
     Vec3 m_focusPosition = {};
     bool m_resetFocus = false;
     float m_cameraDistance = 0;
+    bool m_cameraMoving = false;
 
     const float k_defaultViewSize = 5;
     const float k_maxViewSize = 3.2e34f;
