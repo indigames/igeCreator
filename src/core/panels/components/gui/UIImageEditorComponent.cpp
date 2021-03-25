@@ -88,6 +88,11 @@ void UIImageEditorComponent::drawUIImage()
         }
         });
 
+    auto m_interactable = m_uiImageGroup->createWidget<CheckBox>("Interactable", uiImage->isInteractable())->getOnDataChangedEvent().addListener([this](bool val) {
+        auto uiImage = dynamic_cast<UIImage*>(m_component);
+        uiImage->setInteractable(val);
+        });
+
     auto fillMethod = uiImage->getFillMethod();
     auto m_compComboFillMethod = m_uiImageGroup->createWidget<ComboBox>((int)fillMethod);
     m_compComboFillMethod->getOnDataChangedEvent().addListener([this](auto val) {
@@ -153,10 +158,16 @@ void UIImageEditorComponent::drawUIImage()
         }
     }
 
-    std::array alpha = { uiImage->getAlpha() };
+    /*std::array alpha = { uiImage->getAlpha() };
     m_uiImageGroup->createWidget<Drag<float, 1>>("Alpha", ImGuiDataType_Float, alpha, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
         auto uiImage = dynamic_cast<UIImage*>(m_component);
         uiImage->setAlpha(val[0]);
+        });*/
+
+    auto color = uiImage->getColor();
+    m_uiImageGroup->createWidget<Color>("Color", color)->getOnDataChangedEvent().addListener([this](auto val) {
+        auto uiImage = dynamic_cast<UIImage*>(m_component);
+        uiImage->setColor(val[0], val[1], val[2], val[3]);
         });
 }
 NS_IGE_END
