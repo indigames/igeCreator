@@ -393,7 +393,7 @@ namespace ige::creator
                 // Create Label
                 auto newBtnLabel = Editor::getCurrentScene()->createObject("Label", newBtn, true, Vec2());
                 newBtnLabel->addComponent<UIText>("Button");
-                newBtn->addComponent<ScriptComponent>(fs::createScript(newBtn->getName() + std::to_string(newBtn->getId())));
+                //newBtn->addComponent<ScriptComponent>(fs::createScript(newBtn->getName() + std::to_string(newBtn->getId())));
                 });
         }
     }
