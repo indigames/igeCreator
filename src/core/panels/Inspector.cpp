@@ -35,6 +35,7 @@
 #include <components/gui/UIImage.h>
 #include <components/gui/UIText.h>
 #include <components/gui/UITextField.h>
+#include <components/gui/UIButton.h>
 #include <components/physic/PhysicManager.h>
 #include <components/physic/PhysicBox.h>
 #include <components/physic/PhysicSphere.h>
@@ -156,6 +157,7 @@ namespace ige::creator
             m_createCompCombo->addChoice((int)ComponentType::UIImage, "UIImage");
             m_createCompCombo->addChoice((int)ComponentType::UIText, "UIText");
             m_createCompCombo->addChoice((int)ComponentType::UITextField, "UITextField");
+            m_createCompCombo->addChoice((int)ComponentType::UIButton, "UIButton");
         }
 
         // Script component
@@ -230,6 +232,9 @@ namespace ige::creator
                     break;
                 case (int)ComponentType::UITextField:
                     m_targetObject->addComponent<UITextField>("TextField");
+                    break;
+                case (int)ComponentType::UIButton:
+                    m_targetObject->addComponent<UIButton>();
                     break;
                 case (int)ComponentType::PhysicBox:
                     m_targetObject->addComponent<PhysicBox>();
@@ -337,6 +342,10 @@ namespace ige::creator
             else if (component->getName() == "UITextField")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::UITextField, component.get(), header);
+            }
+            else if (component->getName() == "UIButton")
+            {
+                m_inspectorEditor->addComponent((int)ComponentType::UIButton, component.get(), header);
             }
             else if (component->getName() == "PhysicManager")
             {

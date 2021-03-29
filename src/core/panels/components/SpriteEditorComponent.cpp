@@ -95,6 +95,12 @@ void SpriteEditorComponent::drawSpriteComponent()
         spriteComp->setSize({ val[0], val[1] });
         });
 
+    auto color = spriteComp->getColor();
+    m_spriteCompGroup->createWidget<Color>("Color", color)->getOnDataChangedEvent().addListener([this](auto val) {
+        auto spriteComp = dynamic_cast<SpriteComponent*>(m_component);
+        spriteComp->setColor(val[0], val[1], val[2], val[3]);
+        });
+
     m_spriteCompGroup->createWidget<CheckBox>("Billboard", spriteComp->isBillboard())->getOnDataChangedEvent().addListener([this](bool val) {
         auto spriteComp = dynamic_cast<SpriteComponent*>(m_component);
         spriteComp->setBillboard(val);

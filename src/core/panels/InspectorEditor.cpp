@@ -19,6 +19,7 @@
 #include "core/panels/components/gui/UIImageEditorComponent.h"
 #include "core/panels/components/gui/UITextEditorComponent.h"
 #include "core/panels/components/gui/UITextFieldEditorComponent.h"
+#include "core/panels/components/gui/UIButtonEditorComponent.h"
 
 #include "core/panels/components/physic/PhysicManagerEditorComponent.h"
 #include "core/panels/components/physic/PhysicBoxEditorComponent.h"
@@ -170,6 +171,11 @@ std::shared_ptr<EditorComponent> InspectorEditor::addComponent(int type, Compone
 	case ComponentType::UITextField:
 	{
 		view = std::make_shared<UITextFieldEditorComponent>();
+	}
+	break;
+	case ComponentType::UIButton:
+	{
+		view = std::make_shared<UIButtonEditorComponent>();
 	}
 	break;
 	case ComponentType::PhysicManager:

@@ -104,6 +104,7 @@ namespace ige::creator
         {
             float deltaTranslation[3], deltaRotation[3], deltaScale[3];
             gizmo::DecomposeMatrixToComponents(delta, deltaTranslation, deltaRotation, deltaScale);
+            if (isnan(deltaTranslation[0]) || isnan(deltaTranslation[1]) || isnan(deltaTranslation[2])) return;
             transform->worldTranslate(Vec3(deltaTranslation[0], deltaTranslation[1], deltaTranslation[2]));
         }
         else if(m_operation == gizmo::ROTATE)
@@ -119,6 +120,7 @@ namespace ige::creator
         {
             float deltaTranslation[3], deltaRotation[3], deltaScale[3];
             gizmo::DecomposeMatrixToComponents(delta, deltaTranslation, deltaRotation, deltaScale);
+            if (isnan(deltaScale[0]) || isnan(deltaScale[1]) || isnan(deltaScale[2])) return;
             transform->worldScale(Vec3(deltaScale[0], deltaScale[1], deltaScale[2]));
         }
         ImGui::PopStyleColor();

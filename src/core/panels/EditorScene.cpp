@@ -25,6 +25,11 @@
 #include "components/particle/Particle.h"
 #include "components/navigation/DynamicNavMesh.h"
 #include "components/navigation/OffMeshLink.h"
+
+#include "components/tween/Tween.h"
+#include "components/tween/Tweener.h"
+
+
 using namespace ige::scene;
 
 #include <utils/PyxieHeaders.h>
@@ -319,9 +324,13 @@ namespace ige::creator
                 m_currShowcase->Add(m_grid3D);
             }
         }
-
         m_gizmo->setCamera(m_currCamera);
     }
+    
+    bool EditorScene::is2DMode() const {
+        return m_currCamera ? m_currCamera == m_2dCamera : false;
+    }
+
 
     void EditorScene::setTargetObject(const std::shared_ptr<SceneObject>& obj)
     {
@@ -329,21 +338,14 @@ namespace ige::creator
             return;
         if (obj == nullptr)
         {
-            /*if (m_currShowcase)
-            {
-                if (m_currCamera == m_2dCamera)
-                    m_currShowcase->Remove(m_grid2D);
-                else
-                    m_currShowcase->Remove(m_grid3D);
-            }
-            m_currShowcase = nullptr;*/
             return;
         }
 
         if (obj->getScene()->getShowcase() == nullptr) return;
+        if (!SceneManager::getInstance()->isEditor()) return;
         
         auto lastShowcase = m_currShowcase;
-        m_currShowcase = obj->getScene()->getShowcase();
+        m_currShowcase = m_currCamera == m_2dCamera ? obj->getScene()->getUIShowcase() : obj->getScene()->getShowcase();
         
         if (lastShowcase != m_currShowcase)
         {
@@ -639,25 +641,75 @@ namespace ige::creator
         auto target = Editor::getInstance()->getSelectedObject();
         if (target == nullptr)
             return;
-
-        const auto& aabb = target->getWorldAABB();
-        if (aabb.getVolume() <= 0) return;
-
-        auto position = aabb.getCenter();
-        Vec3 halfSize = aabb.getExtent() * 0.5f;
         
-        ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], -halfSize[2] }, position + Vec3{ -halfSize[0], -halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
-        ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], -halfSize[2] }, position + Vec3{ -halfSize[0], +halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
-        ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], -halfSize[2] }, position + Vec3{ -halfSize[0], +halfSize[1], -halfSize[2] }, { 1.f, 0.f, 0.f });
-        ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], +halfSize[2] }, position + Vec3{ -halfSize[0], +halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
-        ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], -halfSize[1], -halfSize[2] }, position + Vec3{ +halfSize[0], -halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
-        ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], +halfSize[1], -halfSize[2] }, position + Vec3{ +halfSize[0], +halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
-        ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], -halfSize[1], -halfSize[2] }, position + Vec3{ +halfSize[0], +halfSize[1], -halfSize[2] }, { 1.f, 0.f, 0.f });
-        ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], -halfSize[1], +halfSize[2] }, position + Vec3{ +halfSize[0], +halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
-        ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], -halfSize[2] }, position + Vec3{ +halfSize[0], -halfSize[1], -halfSize[2] }, { 1.f, 0.f, 0.f });
-        ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], -halfSize[2] }, position + Vec3{ +halfSize[0], +halfSize[1], -halfSize[2] }, { 1.f, 0.f, 0.f });
-        ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], +halfSize[2] }, position + Vec3{ +halfSize[0], -halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
-        ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], +halfSize[2] }, position + Vec3{ +halfSize[0], +halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
+        auto transform = target->getTransform();
+        if (transform == nullptr) return;
+
+        if (!target->isGUIObject()) {
+            const auto& aabb = target->getWorldAABB();
+            if (aabb.getVolume() <= 0) return;
+            auto position = aabb.getCenter();
+            Vec3 halfSize = aabb.getExtent() * 0.5f;
+
+            ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], -halfSize[2] }, position + Vec3{ -halfSize[0], -halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
+            ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], -halfSize[2] }, position + Vec3{ -halfSize[0], +halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
+            ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], -halfSize[2] }, position + Vec3{ -halfSize[0], +halfSize[1], -halfSize[2] }, { 1.f, 0.f, 0.f });
+            ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], +halfSize[2] }, position + Vec3{ -halfSize[0], +halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
+            ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], -halfSize[1], -halfSize[2] }, position + Vec3{ +halfSize[0], -halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
+            ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], +halfSize[1], -halfSize[2] }, position + Vec3{ +halfSize[0], +halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
+            ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], -halfSize[1], -halfSize[2] }, position + Vec3{ +halfSize[0], +halfSize[1], -halfSize[2] }, { 1.f, 0.f, 0.f });
+            ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], -halfSize[1], +halfSize[2] }, position + Vec3{ +halfSize[0], +halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
+            ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], -halfSize[2] }, position + Vec3{ +halfSize[0], -halfSize[1], -halfSize[2] }, { 1.f, 0.f, 0.f });
+            ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], -halfSize[2] }, position + Vec3{ +halfSize[0], +halfSize[1], -halfSize[2] }, { 1.f, 0.f, 0.f });
+            ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], +halfSize[2] }, position + Vec3{ +halfSize[0], -halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
+            ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], +halfSize[2] }, position + Vec3{ +halfSize[0], +halfSize[1], +halfSize[2] }, { 1.f, 0.f, 0.f });
+        }
+        else 
+        {
+            auto canvas = target->getComponent<ige::scene::Canvas>();
+            if (canvas)
+            {
+                const auto& designSize = canvas->getDesignCanvasSize();
+                auto position = transform->getPosition();
+                Vec2 halfSize = designSize * 0.5f;
+                ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 1.f });
+                ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 1.f });
+                ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], -halfSize[1], 0 }, { 1.f, 0.f, 1.f });
+                ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], -halfSize[1], 0 }, { 1.f, 0.f, 1.f });
+            }
+            else 
+            {
+                //! Draw Canvas Parent
+                auto canvasParent = target->getCanvas();
+                if (canvasParent)
+                {
+                    const auto& designSize = canvasParent->getDesignCanvasSize();
+                    auto canvasTransform = canvasParent->getOwner()->getTransform();
+                    if (canvasTransform) {
+                        auto& position = canvasTransform->getPosition();
+                        Vec2 halfSize = designSize * 0.5f;
+                        ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 1.f });
+                        ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 1.f });
+                        ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], -halfSize[1], 0 }, { 1.f, 0.f, 1.f });
+                        ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], -halfSize[1], 0 }, { 1.f, 0.f, 1.f });
+                    }
+                }
+
+                //! Draw RectTransform
+                auto rectTransform = target->getComponent<RectTransform>();
+                if (rectTransform)
+                {
+                    auto& position = rectTransform->getWorldPosition();
+                    auto& size = rectTransform->getSize();
+                    Vec2 halfSize = size * 0.5f;
+                    ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 0.f });
+                    ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 0.f });
+                    ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], -halfSize[1], 0 }, { 1.f, 0.f, 0.f });
+                    ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], -halfSize[1], 0 }, { 1.f, 0.f, 0.f });
+                }
+
+            }
+        }
     }
 
     //! Render camera frustum
@@ -778,6 +830,7 @@ namespace ige::creator
 
     void EditorScene::lookAtObject(SceneObject* object) {
         if (Editor::getInstance()->is3DCamera()) {
+            if (m_cameraMoving) return;
             auto targetPos = object->getTransform()->getWorldPosition();
             m_viewSize = k_defaultViewSize; //Reset ViewSize
 
@@ -790,17 +843,21 @@ namespace ige::creator
 
             m_cameraDistance = calcCameraViewDistance();
 
-            m_currCamera->SetPosition(targetPos + m_currCamera->GetCameraRotation() * Vec3(0.f, 0.f, 1.f) * m_cameraDistance);
+            //m_currCamera->SetPosition(targetPos + m_currCamera->GetCameraRotation() * Vec3(0.f, 0.f, 1.f) * m_cameraDistance);
+            auto currentPos = m_currCamera->GetPosition();
+            auto newPos = targetPos + m_currCamera->GetCameraRotation() * Vec3(0.f, 0.f, 1.f) * m_cameraDistance;
+            auto tween = Tween::tween(currentPos, targetPos + m_currCamera->GetCameraRotation() * Vec3(0.f, 0.f, 1.f) * m_cameraDistance, 0.5f);
+            m_cameraMoving = true;
+            tween->onUpdate([this](Tweener* tweener) {
+                m_currCamera->SetPosition(tweener->value.getVec3());
+                })->onComplete([this]() { m_cameraMoving = false; });
+
             m_focusPosition = targetPos;
         }
         else {
             auto canvas = object->getCanvas();
             if (canvas)
             {
-                auto canvasSize = canvas->getDesignCanvasSize();
-                auto transformToViewport = Mat4::Translate(Vec3(-canvasSize.X() * 0.5f, -canvasSize.Y() * 0.5f, 0.f));
-                canvas->setCanvasToViewportMatrix(transformToViewport);
-
                 auto rect = object->getRectTransform();
                 if (rect)
                 {
@@ -808,10 +865,15 @@ namespace ige::creator
                     m_currentCanvasHeight = viewSize < 0 ? 0.001f : viewSize;
                     m_currCamera->SetOrthoHeight(m_currentCanvasHeight * 0.5f);
                     auto cameraPosition = m_currCamera->GetPosition();
-                    auto pos = object->getTransform()->getPosition();
-                    cameraPosition.X(pos.X());
-                    cameraPosition.Y(pos.Y());
-                    m_currCamera->SetPosition(cameraPosition);
+                    auto pos = object->getTransform()->getWorldPosition();
+                    /*cameraPosition.X(pos.X());
+                    cameraPosition.Y(pos.Y());*/
+                    //m_currCamera->SetPosition(cameraPosition);
+                    auto tween = Tween::tween(cameraPosition, pos, 0.3f);
+                    m_cameraMoving = true;
+                    tween->onUpdate([this](Tweener* tweener) {
+                        m_currCamera->SetPosition(tweener->value.getVec3());
+                        })->onComplete([this]() { m_cameraMoving = false; });
                 }
 
             } 

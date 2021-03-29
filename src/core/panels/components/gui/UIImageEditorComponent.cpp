@@ -58,21 +58,21 @@ void UIImageEditorComponent::drawUIImage()
         return;
     m_uiImageGroup->removeAllWidgets();
 
-    auto uiImage = m_targetObject->getComponent<UIImage>();
+    auto uiImage = dynamic_cast<UIImage*>(m_component);
     if (uiImage == nullptr)
         return;
 
     auto txtPath = m_uiImageGroup->createWidget<TextField>("Path", uiImage->getPath());
     txtPath->setEndOfLine(false);
     txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
-        auto uiImage = m_targetObject->getComponent<UIImage>();
+        auto uiImage = dynamic_cast<UIImage*>(m_component);
         uiImage->setPath(txt);
         });
 
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
     {
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-            auto uiImage = m_targetObject->getComponent<UIImage>();
+            auto uiImage = dynamic_cast<UIImage*>(m_component);
             uiImage->setPath(txt);
             dirty();
             });
@@ -86,6 +86,88 @@ void UIImageEditorComponent::drawUIImage()
             uiImage->setPath(files[0]);
             dirty();
         }
+        });
+
+    auto m_interactable = m_uiImageGroup->createWidget<CheckBox>("Interactable", uiImage->isInteractable())->getOnDataChangedEvent().addListener([this](bool val) {
+        auto uiImage = dynamic_cast<UIImage*>(m_component);
+        uiImage->setInteractable(val);
+        });
+
+    auto fillMethod = uiImage->getFillMethod();
+    auto m_compComboFillMethod = m_uiImageGroup->createWidget<ComboBox>((int)fillMethod);
+    m_compComboFillMethod->getOnDataChangedEvent().addListener([this](auto val) {
+        auto uiImage = dynamic_cast<UIImage*>(m_component);
+        uiImage->setFillMethod(val);
+        dirty();
+        });
+    m_compComboFillMethod->setEndOfLine(false);
+    m_compComboFillMethod->addChoice((int)FillMethod::None, "Simple");
+    m_compComboFillMethod->addChoice((int)FillMethod::Horizontal, "Horizontal");
+    m_compComboFillMethod->addChoice((int)FillMethod::Vertical, "Vertical");
+    m_compComboFillMethod->addChoice((int)FillMethod::Radial90, "Radial 90");
+    m_compComboFillMethod->addChoice((int)FillMethod::Radial180, "Radial 180");
+    m_compComboFillMethod->addChoice((int)FillMethod::Radial360, "Radial 360");
+    m_compComboFillMethod->setEndOfLine(true);
+
+    if (fillMethod != FillMethod::None) {
+
+        auto m_compComboFillOrigin = m_uiImageGroup->createWidget<ComboBox>((int)uiImage->getFillOrigin());
+        m_compComboFillOrigin->getOnDataChangedEvent().addListener([this](auto val) {
+            auto uiImage = dynamic_cast<UIImage*>(m_component);
+            uiImage->setFillOrigin(val);
+            dirty();
+            });
+        m_compComboFillOrigin->setEndOfLine(false);
+        if (fillMethod == FillMethod::Horizontal) 
+        {
+            m_compComboFillOrigin->addChoice((int)FillOrigin::Left, "Left");
+            m_compComboFillOrigin->addChoice((int)FillOrigin::Right, "Right");
+        }
+        else if (fillMethod == FillMethod::Vertical)
+        {
+            m_compComboFillOrigin->addChoice((int)FillOrigin::Top, "Top");
+            m_compComboFillOrigin->addChoice((int)FillOrigin::Bottom, "Bottom");
+        }
+        else if (fillMethod == FillMethod::Radial90) 
+        {
+            m_compComboFillOrigin->addChoice((int)FillOrigin::BottomLeft, "Bottom Left");
+            m_compComboFillOrigin->addChoice((int)FillOrigin::TopLeft, "Top Left");
+            m_compComboFillOrigin->addChoice((int)FillOrigin::TopRight, "Top Right");
+            m_compComboFillOrigin->addChoice((int)FillOrigin::BottomRight, "Bottom Right");
+        }
+        else 
+        {
+            m_compComboFillOrigin->addChoice((int)FillOrigin::Bottom, "Bottom");
+            m_compComboFillOrigin->addChoice((int)FillOrigin::Top, "Top");
+            m_compComboFillOrigin->addChoice((int)FillOrigin::Left, "Left");
+            m_compComboFillOrigin->addChoice((int)FillOrigin::Right, "Right");
+        }
+        m_compComboFillOrigin->setEndOfLine(true);
+        
+        std::array fillAmount = { uiImage->getFillAmount() };
+        m_uiImageGroup->createWidget<Drag<float, 1>>("Fill Amount", ImGuiDataType_Float, fillAmount, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto uiImage = dynamic_cast<UIImage*>(m_component);
+            uiImage->setFillAmount(val[0]);
+            });
+
+        if (fillMethod == FillMethod::Radial90 || fillMethod == FillMethod::Radial180 || fillMethod == FillMethod::Radial360) {
+            m_uiImageGroup->createWidget<CheckBox>("Clockwise", uiImage->getClockwise())->getOnDataChangedEvent().addListener([this](bool val) {
+                auto uiImage = dynamic_cast<UIImage*>(m_component);
+                uiImage->setClockwise(val);
+                });
+        }
+    }
+
+    /*std::array alpha = { uiImage->getAlpha() };
+    m_uiImageGroup->createWidget<Drag<float, 1>>("Alpha", ImGuiDataType_Float, alpha, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        auto uiImage = dynamic_cast<UIImage*>(m_component);
+        uiImage->setAlpha(val[0]);
+        });*/
+
+    auto color = uiImage->getColor();
+    m_uiImageGroup->createWidget<Color>("Color", color)->getOnDataChangedEvent().addListener([this](auto val) {
+        auto uiImage = dynamic_cast<UIImage*>(m_component);
+        uiImage->setColor(val[0], val[1], val[2], val[3]);
         });
 }
 NS_IGE_END

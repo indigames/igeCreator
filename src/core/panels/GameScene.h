@@ -7,6 +7,7 @@
 
 #include "components/gui/RectTransform.h"
 #include "scene/Scene.h"
+#include "event/InputProcessor.h"
 using namespace ige::scene;
 
 namespace ige::creator
@@ -33,11 +34,17 @@ namespace ige::creator
 
         virtual void _drawImpl() override;
 
+        //! Update keyboard
+        void updateKeyboard();
+        //! Update mouse & touch
+        void updateTouch();
+
     protected:
         //! Rendering FBO
         Texture* m_rtTexture = nullptr;
         RenderTarget* m_fbo = nullptr;
         std::shared_ptr<Image> m_imageWidget = nullptr;
+        std::shared_ptr<InputProcessor> m_inputProcessor = nullptr;
 
         //! Cached states
         bool m_bInitialized = false;

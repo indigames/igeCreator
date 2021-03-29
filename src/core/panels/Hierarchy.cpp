@@ -24,6 +24,7 @@
 #include "components/gui/UIImage.h"
 #include "components/gui/UIText.h"
 #include "components/gui/UITextField.h"
+#include "components/gui/UIButton.h"
 #include "components/audio/AudioSource.h"
 #include "components/audio/AudioListener.h"
 #include "components/particle/Particle.h"
@@ -349,15 +350,6 @@ namespace ige::creator
         // GUI
         {
             auto guiMenu = createMenu->createWidget<Menu>("GUI");
-            guiMenu->createWidget<MenuItem>("Button")->getOnClickEvent().addListener([](auto widget) {
-                auto currentObject = Editor::getInstance()->getSelectedObject();
-                auto newBtn = Editor::getCurrentScene()->createObject("Button", currentObject, true);
-                auto rect = std::dynamic_pointer_cast<RectTransform>(newBtn->getTransform());
-                newBtn->addComponent<UIImage>("sprite/rect", rect->getSize());
-                auto newBtnLabel = Editor::getCurrentScene()->createObject("Label", newBtn, true, Vec2());
-                newBtnLabel->addComponent<UIText>("Button");
-                newBtn->addComponent<ScriptComponent>(fs::createScript(newBtn->getName() + std::to_string(newBtn->getId())));
-            });
 
             guiMenu->createWidget<MenuItem>("UIImage")->getOnClickEvent().addListener([](auto widget) {
                 auto currentObject = Editor::getInstance()->getSelectedObject();
@@ -391,6 +383,18 @@ namespace ige::creator
                     }
                 });
             });
+
+            guiMenu->createWidget<MenuItem>("Button")->getOnClickEvent().addListener([](auto widget) {
+                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto newBtn = Editor::getCurrentScene()->createObject("Button", currentObject, true);
+                auto rect = std::dynamic_pointer_cast<RectTransform>(newBtn->getTransform());
+                // Create Btn
+                newBtn->addComponent<UIButton>("sprite/rect", rect->getSize());
+                // Create Label
+                auto newBtnLabel = Editor::getCurrentScene()->createObject("Label", newBtn, true, Vec2());
+                newBtnLabel->addComponent<UIText>("Button");
+                //newBtn->addComponent<ScriptComponent>(fs::createScript(newBtn->getName() + std::to_string(newBtn->getId())));
+                });
         }
     }
 
