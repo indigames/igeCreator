@@ -646,7 +646,8 @@ namespace ige::creator
         if (transform == nullptr) return;
 
         if (!target->isGUIObject()) {
-            const auto& aabb = transform->getWorldAABB();
+            const auto& aabb = target->getWorldAABB();
+            if (aabb.getVolume() <= 0) return;
             auto position = aabb.getCenter();
             Vec3 halfSize = aabb.getExtent() * 0.5f;
 
