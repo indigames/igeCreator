@@ -36,6 +36,7 @@
 #include <components/gui/UIText.h>
 #include <components/gui/UITextField.h>
 #include <components/gui/UIButton.h>
+#include <components/gui/UISlider.h>
 #include <components/physic/PhysicManager.h>
 #include <components/physic/PhysicBox.h>
 #include <components/physic/PhysicSphere.h>
@@ -346,6 +347,10 @@ namespace ige::creator
             else if (component->getName() == "UIButton")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::UIButton, component.get(), header);
+            }
+            else if (component->getName() == "UISlider")
+            {
+                m_inspectorEditor->addComponent((int)ComponentType::UISlider, component.get(), header);
             }
             else if (component->getName() == "PhysicManager")
             {

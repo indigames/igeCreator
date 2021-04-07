@@ -31,12 +31,12 @@ namespace ige::creator
         auto isStretchH = (m_anchorMin.y == 0.f && m_anchorMax.y == 1.f);
 
         // Now, just consider 09 fixed anchor points
-        auto anchorX = (m_anchorMin.x + m_anchorMax.x) / 2.f;
-        auto anchorY = (m_anchorMin.y + m_anchorMax.y) / 2.f;
+        auto anchorX = 1 - (m_anchorMin.x + m_anchorMax.x) / 2.f;
+        auto anchorY = 1 - (m_anchorMin.y + m_anchorMax.y) / 2.f;
 
         auto curX = maxPos.x - (maxPos.x - minPos.x) * anchorX;
         auto curY = minPos.y + (maxPos.y - minPos.y) * anchorY;
-
+        
         // Draw anchor indicator first
         if(!isStretchW)
             drawList->AddRect(ImVec2(curX, minPos.y), ImVec2(curX, maxPos.y), color, false, ImDrawCornerFlags_None, 1.f);
@@ -60,21 +60,21 @@ namespace ige::creator
     AnchorPresets::AnchorPresets(const std::string& label)
         : Widget(), m_label(label)
     {
-        for(int y = 0; y < 3; y++)
+        for(int y = 2; y >= 0; y--)
         {
-            for(int x = 2; x >= 0; x--)
+            for(int x = 0; x < 3; x++)
             {
                 createWidget<AnchorWidget>(ImVec2(x / 2.f, y / 2.f), ImVec2(x / 2.f, y / 2.f), false);
-                if (x == 0)
+                if (x == 2)
                 {
                     createWidget<AnchorWidget>(ImVec2(0.f, y / 2.f), ImVec2(1.f, y / 2.f));
                 }
             }
         }
-        for (int x = 2; x >= 0; x--)
+        for (int x = 0; x < 3; x++)
         {
             createWidget<AnchorWidget>(ImVec2(x / 2.f, 0.f), ImVec2(x / 2.f, 1.f), false);
-            if (x == 0)
+            if (x == 2)
             {
                 createWidget<AnchorWidget>(ImVec2(0.f, 0.f), ImVec2(1.f, 1.f));
             }
