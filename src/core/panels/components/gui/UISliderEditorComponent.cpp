@@ -166,6 +166,11 @@ void UISliderEditorComponent::drawUISlider()
     drawMin();
     drawMax();
     drawValue();
+
+    m_uiSliderGroup->createWidget<CheckBox>("Whole Numbers", uiSlider->getWholeNumbers())->getOnDataChangedEvent().addListener([this](bool val) {
+        auto uiSlider = dynamic_cast<UISlider*>(m_component);
+        uiSlider->setWholeNumbers(val);
+        });
 }
 
 void UISliderEditorComponent::drawMin()
