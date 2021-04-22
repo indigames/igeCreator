@@ -237,6 +237,9 @@ namespace ige::creator
                 case (int)ComponentType::UIButton:
                     m_targetObject->addComponent<UIButton>();
                     break;
+                case (int)ComponentType::UISlider:
+                    m_targetObject->addComponent<UISlider>();
+                    break;
                 case (int)ComponentType::PhysicBox:
                     m_targetObject->addComponent<PhysicBox>();
                     break;

@@ -700,9 +700,11 @@ namespace ige::creator
                 auto rectTransform = target->getComponent<RectTransform>();
                 if (rectTransform)
                 {
-                    auto& position = rectTransform->getWorldPosition();
-                    auto& size = rectTransform->getSize();
-                    Vec2 halfSize = size * 0.5f;
+                    const auto& aabb = target->getWorldAABB();
+                    if (aabb.getVolume() <= 0) return;
+                    auto position = aabb.getCenter();
+                    Vec3 halfSize = aabb.getExtent() * 0.5f;
+
                     ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 0.f });
                     ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 0.f });
                     ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], -halfSize[1], 0 }, { 1.f, 0.f, 0.f });

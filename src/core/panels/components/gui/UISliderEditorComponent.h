@@ -21,8 +21,17 @@ protected:
 	virtual void onInspectorUpdate() override;
 
 	void drawUISlider();
+
+	void drawMin();
+	void drawMax();
+	void drawValue();
 protected:
 	std::shared_ptr<Group> m_uiSliderGroup = nullptr;
+	std::shared_ptr<Group> m_uiSliderMinGroup = nullptr;
+	std::shared_ptr<Group> m_uiSliderMaxGroup = nullptr;
+	std::shared_ptr<Group> m_uiSliderValueGroup = nullptr;
+
+	int m_dirtyFlag = 0;
 };
 
 NS_IGE_END

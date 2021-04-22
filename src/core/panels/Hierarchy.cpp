@@ -66,7 +66,8 @@ namespace ige::creator
         auto node = createWidget<TreeNode>(sceneObject.getName(), false, sceneObject.getChildren().size() == 0);
         node->getOnClickEvent().addListener([objId, this](auto widget) {
             auto object = Editor::getCurrentScene()->findObjectById(objId);
-            if(object) object->setSelected(true);
+            if (object) object->setSelected(true);
+            else pyxie_printf("Cant find Id %ld \n", objId);
         });
 
         //! Update List Content Size 
@@ -398,7 +399,7 @@ namespace ige::creator
                 });
             guiMenu->createWidget<MenuItem>("UISlider")->getOnClickEvent().addListener([](auto widget) {
                 auto currentObject = Editor::getInstance()->getSelectedObject();
-                auto newSlider = Editor::getCurrentScene()->createObject("UISlider", currentObject, true, Vec2(160.f, 20.f));
+                auto newSlider = Editor::getCurrentScene()->createObject("UISlider", currentObject, true, Vec2(160.f, 40.f));
                 // Create Slider
                 auto sliderComp = newSlider->addComponent<UISlider>();
                 // Create Background
@@ -406,15 +407,44 @@ namespace ige::creator
                 auto rectBG = std::dynamic_pointer_cast<RectTransform>(newBG->getTransform());
                 auto imgBG = newBG->addComponent<UIImage>("sprite/background", rectBG->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
                 imgBG->setColor(0.84f, 0.84f, 0.84f, 1);
+                newBG->setIsRaycastTarget(false);
+                if (rectBG) {
+                    rectBG->setAnchor(Vec4(0.f, 0.f, 1.f, 1.f));
+                    rectBG->setAnchoredPosition(Vec2(0, 0));
+                }
                 // Create Fill
-                auto newFill = Editor::getCurrentScene()->createObject("fill", newSlider, true, Vec2(158.f, 14.f));
+                auto newFillArea = Editor::getCurrentScene()->createObject("fillArea", newSlider, true, Vec2(158.f, 14.f));
+                newFillArea->setIsRaycastTarget(false);
+                auto rectFillArea = std::dynamic_pointer_cast<RectTransform>(newFillArea->getTransform());
+                if (rectFillArea) {
+                    rectFillArea->setAnchor(Vec4(0.f, 0.f, 1.f, 1.f));
+                }
+                
+                auto newFill = Editor::getCurrentScene()->createObject("fill", newFillArea, true, Vec2(1.f, 14.f));
                 auto rectFill = std::dynamic_pointer_cast<RectTransform>(newFill->getTransform());
+                if (rectFill) {
+                    rectFill->setAnchor(Vec4(0.f, 0.f, 0.f, 1.f));
+                    rectFill->setAnchoredPosition(Vec2(0, 0));
+                }
                 auto imgFill = newFill->addComponent<UIImage>("sprite/background", rectFill->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
+                newFill->setIsRaycastTarget(false);
                 // Create Handle
-                auto newHandle = Editor::getCurrentScene()->createObject("handle", newSlider, true, Vec2(30.f, 30.f));
+                auto newHandleArea = Editor::getCurrentScene()->createObject("handleArea", newSlider, true, Vec2(140.f, 30.f));
+                newHandleArea->setIsRaycastTarget(false);
+                auto rectHandleArea = std::dynamic_pointer_cast<RectTransform>(newHandleArea->getTransform());
+                if (rectHandleArea) {
+                    rectHandleArea->setAnchor(Vec4(0.f, 0.f, 1.f, 1.f));
+                    rectHandleArea->setAnchoredPosition(Vec2(0, 0));
+                }
+                auto newHandle = Editor::getCurrentScene()->createObject("handle", newHandleArea, true, Vec2(30.f, 30.f));
+                
                 auto rectHandle = std::dynamic_pointer_cast<RectTransform>(newHandle->getTransform());
+                if (rectHandle) {
+                    rectHandle->setAnchor(Vec4(0.f, 0.f, 0.f, 1.f));
+                    rectHandle->setAnchoredPosition(Vec2(0, 0));
+                }
                 newHandle->addComponent<UIImage>("sprite/background", rectHandle->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
-
+                newHandle->setIsRaycastTarget(false);
                 sliderComp->setFillObject(newFill);
                 sliderComp->setHandleObject(newHandle);
                 });
