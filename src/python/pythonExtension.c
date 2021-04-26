@@ -1,11 +1,10 @@
 #include "pythonExtension.h"
 
 struct _inittab g_customInitTabs[] = {
-#ifdef USE_IGE
-    {"igeCore._igeCore", _PyInit__igeCore},
+#ifdef USE_IGECORE
+    {"igeCore._igeCore", PyInit__igeCore},
     {"igeCore.devtool._igeTools", PyInit__igeTools},
     {"igeVmath", PyInit_igeVmath},
-    {"igeScene", PyInit_igeScene},
 #endif
 
 #ifdef USE_NUMPY
@@ -18,7 +17,7 @@ struct _inittab g_customInitTabs[] = {
     {"numpy.linalg.lapack_lite", PyInit_lapack_lite},
     {"numpy.linalg._umath_linalg", PyInit__umath_linalg},
     {"numpy.fft._pocketfft_internal", PyInit__pocketfft_internal},
-    {"numpy.random._bit_generator", PyInit__bit_generator},
+    {"numpy.random.bit_generator", PyInit_bit_generator},
     {"numpy.random._bounded_integers", PyInit__bounded_integers},
     {"numpy.random._common", PyInit__common},
     {"numpy.random._generator", PyInit__generator},
@@ -29,15 +28,15 @@ struct _inittab g_customInitTabs[] = {
     {"numpy.random._sfc64", PyInit__sfc64},
 #endif
 
-#ifdef USE_IMGUI
+#ifdef USE_PYIMGUI
     {"imguicore", PyInit_core},
 #endif
 
-#ifdef USE_BOX2D
+#ifdef USE_PYBOX2D
     {"_Box2D", PyInit__Box2D},
 #endif
 
-#ifdef USE_IGE_BULLET
+#ifdef USE_IGEBULLET
     {"igeBullet", PyInit_igeBullet},
 #endif
 
@@ -49,60 +48,90 @@ struct _inittab g_customInitTabs[] = {
     {"dlib", PyInit_dlib},
 #endif
 
-#ifdef USE_IGE_DLIB_EXT
+#ifdef USE_IGEDLIBEXT
     {"igeDlibExt", PyInit_igeDlibExt},
 #endif
 
-#ifdef USE_IGE_FIREBASE
+#ifdef USE_IGEFIREBASE
     {"igeFirebase", PyInit_igeFirebase},
 #endif
 
-#ifdef USE_IGE_WEBVIEW
+#ifdef USE_IGEWEBVIEW
     {"igeWebview", PyInit_igeWebview},
 #endif
 
-#ifdef USE_IGE_ADS
+#ifdef USE_IGEADS
     {"igeAds", PyInit_igeAds},
 #endif
 
-#ifdef USE_IGE_SOCIAL
+#ifdef USE_IGESOCIAL
     {"igeSocial", PyInit_igeSocial},
 #endif
 
-#ifdef USE_IGE_GAME_SERVICES
+#ifdef USE_IGEGAMESSERVICES
     {"igeGamesServices", PyInit_igeGamesServices},
 #endif
 
-#ifdef USE_IGE_IN_APP_PURCHASE
+#ifdef USE_IGEINAPPPURCHASE
     {"igeInAppPurchase", PyInit_igeInAppPurchase},
 #endif
 
-#ifdef USE_IGE_APPFLYER
+#ifdef USE_IGEAPPSFLYER
     {"igeAppsFlyer", PyInit_igeAppsFlyer},
 #endif
 
-#ifdef USE_IGE_SOUND
+#ifdef USE_IGESOUND
     {"igeSound", PyInit_igeSound},
 #endif
 
-#ifdef USE_IGE_NANOGUI
+#ifdef USE_IGENANOGUI
     {"igeNanoGUI", PyInit_igeNanoGUI},
 #endif
 
-#ifdef USE_IGE_NOTIFY
+#ifdef USE_IGENOTIFY
     {"igeNotify", PyInit_igeNotify},
 #endif
 
-#ifdef USE_IGE_CAMERA
+#ifdef USE_IGECAMERA
     {"igeCamera", PyInit_igeCamera},
 #endif
 
-#ifdef USE_IGE_PAL
+#ifdef USE_IGEPAL
     {"igePAL", PyInit__igePAL},
 #endif
 
-#ifdef USE_IGE_ADJUST
+#ifdef USE_IGEADJUST
     {"igeAdjust", PyInit_igeAdjust},
+#endif
+
+#ifdef USE_IGEGAMEANALYTICS
+    {"igeGameAnalytics", PyInit_igeGameAnalytics},
+#endif
+
+#ifdef USE_IGEAUTOTEST
+    {"igeAutoTest", PyInit_igeAutoTest},
+#endif
+
+#ifdef USE_IGEEFFEKSEER
+    {"igeEffekseer", PyInit_igeEffekseer},
+#endif
+
+#ifdef USE_TENSORFLOW
+    {"_pywrap_tensorflow_interpreter_wrapper", PyInit__pywrap_tensorflow_interpreter_wrapper },
+#endif
+
+#ifdef USE_PILLOW
+    {"_webp", PyInit__webp },
+    {"_imagingtk", PyInit__imagingtk },
+    {"_imagingmorph", PyInit__imagingmorph },
+    {"_imagingmath", PyInit__imagingmath },
+    {"_imagingft", PyInit__imagingft },
+    {"_imagingcms", PyInit__imagingcms },
+    {"_imaging", PyInit__imaging },
+#endif
+
+#ifdef USE_BULLET
+    {"pybullet", PyInit_pybullet },
 #endif
 
     {0, 0}};
