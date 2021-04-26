@@ -6,14 +6,7 @@
 	path = 3rd-party/ImGuizmo
 	url = https://github.com/indigames/ImGuizmo.git
 	branch = dev-ige
-[submodule "libs/igeScene"]
-	path = libs/igeScene
-	url = https://github.com/indigames/igeScene
-    branch = dev
 [submodule "3rd-party/imgui"]
 	path = 3rd-party/imgui
 	url = https://github.com/indigames/imgui
-    branch = docking
-[submodule "igeLibs"]
-	path = igeLibs
-	url = https://github.com/indigames/igeLibs
+	branch = docking
