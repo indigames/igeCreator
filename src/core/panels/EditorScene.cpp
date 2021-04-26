@@ -645,7 +645,8 @@ namespace ige::creator
         auto transform = target->getTransform();
         if (transform == nullptr) return;
 
-        if (!target->isGUIObject()) {
+        if (!target->isGUIObject()) 
+        {
             const auto& aabb = target->getWorldAABB();
             if (aabb.getVolume() <= 0) return;
             auto position = aabb.getCenter();
@@ -699,13 +700,22 @@ namespace ige::creator
                 auto rectTransform = target->getComponent<RectTransform>();
                 if (rectTransform)
                 {
-                    auto& position = rectTransform->getWorldPosition();
-                    auto& size = rectTransform->getSize();
-                    Vec2 halfSize = size * 0.5f;
+                    const auto& aabb = target->getWorldAABB();
+                    if (aabb.getVolume() <= 0) return;
+                    auto position = aabb.getCenter();
+                    Vec3 halfSize = aabb.getExtent() * 0.5f;
+
                     ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 0.f });
                     ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 0.f });
                     ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], -halfSize[1], 0 }, { 1.f, 0.f, 0.f });
                     ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], -halfSize[1], 0 }, { 1.f, 0.f, 0.f });
+
+                    auto& anchorOffset = rectTransform->getAnchorOffset();
+
+                    ShapeDrawer::drawLine(Vec3{ anchorOffset[0], anchorOffset[1], 0 }, Vec3{ anchorOffset[0], anchorOffset[3], 0 }, { 0.f, 0.f, 1.f });
+                    ShapeDrawer::drawLine(Vec3{ anchorOffset[0], anchorOffset[3], 0 }, Vec3{ anchorOffset[2], anchorOffset[3], 0 }, { 0.f, 0.f, 1.f });
+                    ShapeDrawer::drawLine(Vec3{ anchorOffset[2], anchorOffset[3], 0 }, Vec3{ anchorOffset[2], anchorOffset[1], 0 }, { 0.f, 0.f, 1.f });
+                    ShapeDrawer::drawLine(Vec3{ anchorOffset[2], anchorOffset[1], 0 }, Vec3{ anchorOffset[0], anchorOffset[1], 0 }, { 0.f, 0.f, 1.f });
                 }
 
             }
@@ -866,10 +876,11 @@ namespace ige::creator
                     m_currCamera->SetOrthoHeight(m_currentCanvasHeight * 0.5f);
                     auto cameraPosition = m_currCamera->GetPosition();
                     auto pos = object->getTransform()->getWorldPosition();
-                    /*cameraPosition.X(pos.X());
-                    cameraPosition.Y(pos.Y());*/
+                    //cameraPosition.X(pos.X());
+                    //cameraPosition.Y(pos.Y());
                     //m_currCamera->SetPosition(cameraPosition);
-                    auto tween = Tween::tween(cameraPosition, pos, 0.3f);
+                    pos.Z(cameraPosition.Z());
+                    auto tween = Tween::tween(cameraPosition, pos + Vec3(0,1.f,0), 0.3f);
                     m_cameraMoving = true;
                     tween->onUpdate([this](Tweener* tweener) {
                         m_currCamera->SetPosition(tweener->value.getVec3());

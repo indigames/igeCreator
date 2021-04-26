@@ -14,11 +14,15 @@
 NS_IGE_BEGIN
 
 RectTransformEditorComponent::RectTransformEditorComponent() {
-    m_rectTransformGroup = nullptr;
-    m_rectTransformAnchorGroup = nullptr;
+    m_anchor_transform_ParentGroup = nullptr;
+    m_pivotGroup = nullptr;
     m_anchorGroup = nullptr;
-    m_anchorTransformGroup = nullptr;
+    m_rectGroup = nullptr;
+    m_anchorMinMaxGroup = nullptr;
+
     m_dirtyFlagSupport = 0;
+    m_bIsLockTransformUpdate = false;
+    m_listenerId = -1;
 }
 
 RectTransformEditorComponent::~RectTransformEditorComponent()
@@ -26,26 +30,32 @@ RectTransformEditorComponent::~RectTransformEditorComponent()
     if (m_anchorGroup) {
         m_anchorGroup->removeAllWidgets();
         m_anchorGroup->removeAllPlugins();
+        m_anchorGroup = nullptr;
     }
-    m_anchorGroup = nullptr;
 
-    if (m_anchorTransformGroup) {
-        m_anchorTransformGroup->removeAllWidgets();
-        m_anchorTransformGroup->removeAllPlugins();
+    if (m_rectGroup) {
+        m_rectGroup->removeAllWidgets();
+        m_rectGroup->removeAllPlugins();
+        m_rectGroup = nullptr;
     }
-    m_anchorTransformGroup = nullptr;
 
-    if (m_rectTransformGroup) {
-        m_rectTransformGroup->removeAllWidgets();
-        m_rectTransformGroup->removeAllPlugins();
+    if (m_anchorMinMaxGroup) {
+        m_anchorMinMaxGroup->removeAllWidgets();
+        m_anchorMinMaxGroup->removeAllPlugins();
+        m_anchorMinMaxGroup = nullptr;
     }
-    m_rectTransformGroup = nullptr;
 
-    if (m_rectTransformAnchorGroup) {
-        m_rectTransformAnchorGroup->removeAllWidgets();
-        m_rectTransformAnchorGroup->removeAllPlugins();
+    if (m_pivotGroup) {
+        m_pivotGroup->removeAllWidgets();
+        m_pivotGroup->removeAllPlugins();
+        m_pivotGroup = nullptr;
     }
-    m_rectTransformAnchorGroup = nullptr;
+
+    if (m_anchor_transform_ParentGroup) {
+        m_anchor_transform_ParentGroup->removeAllWidgets();
+        m_anchor_transform_ParentGroup->removeAllPlugins();
+        m_anchor_transform_ParentGroup = nullptr;
+    }
 }
 
 void RectTransformEditorComponent::setTargetObject(const std::shared_ptr<SceneObject>& obj)
@@ -54,16 +64,18 @@ void RectTransformEditorComponent::setTargetObject(const std::shared_ptr<SceneOb
     {
         if (m_targetObject)
         {
-            auto listenerId = Editor::getInstance()->getCanvas()->getInspector()->getTransformListenerId();
-            if (listenerId != (uint64_t)-1)
-                m_targetObject->getTransformChangedEvent().removeListener(listenerId);
+            m_listenerId = Editor::getInstance()->getCanvas()->getInspector()->getTransformListenerId();
+            if (m_listenerId != (uint64_t)-1) {
+                m_targetObject->getTransformChangedEvent().removeListener(m_listenerId);
+                m_listenerId = -1;
+            }
         }
         m_targetObject = obj;
 
         if (m_targetObject != nullptr)
         {
-            auto listenerId = m_targetObject->getTransformChangedEvent().addListener(CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
-            Editor::getInstance()->getCanvas()->getInspector()->setTransformListenerId(listenerId);
+            m_listenerId = m_targetObject->getTransformChangedEvent().addListener(CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
+            Editor::getInstance()->getCanvas()->getInspector()->setTransformListenerId(m_listenerId);
         }
     }
 }
@@ -78,29 +90,43 @@ void RectTransformEditorComponent::redraw()
     if (m_group == nullptr)
         return;
 
-    if (m_rectTransformGroup == nullptr) {
-        m_rectTransformGroup = m_group->createWidget<Group>("RectTransformGroup", false);
+    if (m_pivotGroup == nullptr) {
+        m_pivotGroup = m_group->createWidget<Group>("PivotGroup", false);
     }
 
-    if (m_rectTransformAnchorGroup == nullptr) {
-        m_rectTransformAnchorGroup = m_group->createWidget<Group>("RectTransformGroup", false);
+    if (m_anchorMinMaxGroup == nullptr) {
+        m_anchorMinMaxGroup = m_group->createWidget<Group>("RectTransformAnchorMinMaxGroup", false);
+    }
+
+    if (m_anchor_transform_ParentGroup == nullptr) {
+        m_anchor_transform_ParentGroup = m_group->createWidget<Group>("TransformAnchorParentGroup", false);
     }
 
     switch (m_dirtyFlagSupport) {
     case 0:
     default:
+        //! Draw All
         drawRectTransform();
         break;
     case 1:
+        //! Draw Anchor Btn & Position
         drawAnchor();
-        drawRectTransformAnchor();
+        drawRect();
+        drawAnchorMinMax();
         break;
     case 2:
-        drawRectTransformAnchor();
-        drawTransform();
+        //! Draw Position & Pivot
+        drawRect();
+        drawPivot();
         break;
     case 3:
-        drawRectTransformAnchor();
+        //! Draw Only Position
+        drawRect();
+        break;
+    case 4:
+        //! Draw Anchor Btn & Position
+        drawAnchor();
+        drawRect();
         break;
     }
     
@@ -114,39 +140,38 @@ void RectTransformEditorComponent::onInspectorUpdate()
         return;
     m_group->removeAllWidgets();
 
-    if (m_rectTransformAnchorGroup == nullptr) {
-        m_rectTransformAnchorGroup = m_group->createWidget<Group>("RectTransformAnchorGroup", false);
-    }
+    if (m_anchor_transform_ParentGroup == nullptr) 
+        m_anchor_transform_ParentGroup = m_group->createWidget<Group>("TransformAnchorParentGroup", false);
 
-    if (m_rectTransformGroup == nullptr) {
-        m_rectTransformGroup = m_group->createWidget<Group>("RectTransformGroup", false);
-    }
+    if (m_anchorMinMaxGroup == nullptr) 
+        m_anchorMinMaxGroup = m_group->createWidget<Group>("AnchorMinMaxGroup", false);
 
+    if (m_pivotGroup == nullptr) 
+        m_pivotGroup = m_group->createWidget<Group>("PivotGroup", false);
     
 
     drawRectTransform();
 }
 
 void RectTransformEditorComponent::drawRectTransform() {
-    if (m_rectTransformGroup == nullptr || m_rectTransformAnchorGroup == nullptr) return;
+    if (m_pivotGroup == nullptr || m_anchor_transform_ParentGroup == nullptr || m_anchorMinMaxGroup == nullptr) return;
 
     if (m_anchorGroup) {
         m_anchorGroup->removeAllWidgets();
         m_anchorGroup->removeAllPlugins();
+        m_anchorGroup = nullptr;
     }
-    m_anchorGroup = nullptr;
-
-    if (m_anchorTransformGroup) {
-        m_anchorTransformGroup->removeAllWidgets();
-        m_anchorTransformGroup->removeAllPlugins();
+    
+    if (m_rectGroup) {
+        m_rectGroup->removeAllWidgets();
+        m_rectGroup->removeAllPlugins();
+        m_rectGroup = nullptr;
     }
-    m_anchorTransformGroup = nullptr;
 
+    m_anchor_transform_ParentGroup->removeAllPlugins();
+    m_anchor_transform_ParentGroup->removeAllWidgets();
 
-    m_rectTransformAnchorGroup->removeAllPlugins();
-    m_rectTransformAnchorGroup->removeAllWidgets();
-
-    m_rectTransformAnchorGroup->createWidget<AnchorPresets>("AnchorPresets")->getOnClickEvent().addListener([this](const auto& widget) {
+    m_anchor_transform_ParentGroup->createWidget<AnchorPresets>("AnchorPresets")->getOnClickEvent().addListener([this](const auto& widget) {
         auto rectTransform = dynamic_cast<RectTransform*>(m_component);
         auto anchor = rectTransform->getAnchor();
         auto anchorWidget = (AnchorWidget*)widget;
@@ -159,17 +184,20 @@ void RectTransformEditorComponent::drawRectTransform() {
         dirty();
         });
     
-    auto anchorColumn = m_rectTransformAnchorGroup->createWidget<Columns<2>>();
+    auto anchorColumn = m_anchor_transform_ParentGroup->createWidget<Columns<2>>();
     anchorColumn->setColumnWidth(0, 52.f);
     m_anchorGroup = anchorColumn->createWidget<Group>("AnchorGroup", false);
-    m_anchorTransformGroup = anchorColumn->createWidget<Group>("AnchorTransformGroup", false);
+    m_rectGroup = anchorColumn->createWidget<Group>("RectGroup", false);
+    
 
     //! Draw Pivot Button
     drawAnchor();
     //! Draw Position, Size
-    drawRectTransformAnchor();
+    drawRect();
+    //! Draw Anchor Min, Max
+    drawAnchorMinMax();
     //! Draw Pivot, Rotation, Scale
-    drawTransform();
+    drawPivot();
 }
 
 void RectTransformEditorComponent::drawAnchor() {
@@ -191,241 +219,178 @@ void RectTransformEditorComponent::drawAnchor() {
         });
 }
 
-void RectTransformEditorComponent::drawRectTransformAnchor() {
+void RectTransformEditorComponent::drawRect() {
     auto rectTransform = dynamic_cast<RectTransform*>(m_component);
     if (rectTransform == nullptr)
         return;
 
-    if (m_anchorTransformGroup == nullptr)
+    if (m_rectGroup == nullptr)
         return;
 
-    m_anchorTransformGroup->removeAllWidgets();
-    m_anchorTransformGroup->removeAllPlugins();
+    m_rectGroup->removeAllWidgets();
+    m_rectGroup->removeAllPlugins();
 
     auto anchor = rectTransform->getAnchor();
     auto offset = rectTransform->getOffset();
 
-    auto anchorGroupColums = m_anchorTransformGroup->createWidget<Columns<3>>(-1.f, true, 52.f);
+    auto anchorGroupColums = m_rectGroup->createWidget<Columns<3>>(-1.f, true, 52.f);
 
-    if ((anchor[0] == 0.f && anchor[2] == 1.f) && (anchor[1] == 0.f && anchor[3] == 1.f))
-    {
-        std::array left = { offset[0] };
-        anchorGroupColums->createWidget<Drag<float>>("L", ImGuiDataType_Float, left, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
-            auto rectTransform = dynamic_cast<RectTransform*>(m_component);
+    bool showPosX = (anchor[0] == anchor[2]);
+    bool showPosY = (anchor[1] == anchor[3]);
+
+    //! Pos X or Left
+    float a = showPosX ? rectTransform->getAnchoredPosition().X() : offset[0];
+    //! Pos Y or Top
+    float b = showPosY ? rectTransform->getAnchoredPosition().Y() : -offset[3];
+    //! Width or Right 
+    float c = showPosX ? rectTransform->getSize().X() : -offset[2];
+    //! Height or Bottom
+    float d = showPosY ? rectTransform->getSize().Y() : offset[1];
+
+    std::array A = { a };
+    anchorGroupColums->createWidget<Drag<float>>(showPosX ? "X" : "L", ImGuiDataType_Float, A, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
+        auto rectTransform = dynamic_cast<RectTransform*>(m_component);
+        auto anchor = rectTransform->getAnchor();
+        bool showPosX = (anchor[0] == anchor[2]);
+        if (showPosX)
+        {
+            auto position = rectTransform->getAnchoredPosition();
+            position.X(val[0]);
+            rectTransform->setAnchoredPosition(position);
+        }
+        else 
+        {
             auto offset = rectTransform->getOffset();
             offset[0] = val[0];
             rectTransform->setOffset(offset);
-            rectTransform->onUpdate(0.f);
-            });
+        }
+        rectTransform->onUpdate(0.f);
+        });
 
-        std::array top = { offset[1] };
-        anchorGroupColums->createWidget<Drag<float>>("T", ImGuiDataType_Float, top, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
-            auto rectTransform = dynamic_cast<RectTransform*>(m_component);
-            auto offset = rectTransform->getOffset();
-            offset[1] = val[0];
-            rectTransform->setOffset(offset);
-            rectTransform->onUpdate(0.f);
-            });
-
-        std::array posZ = { rectTransform->getPosition().Z() };
-        anchorGroupColums->createWidget<Drag<float>>("Z", ImGuiDataType_Float, posZ, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
-            auto rectTransform = dynamic_cast<RectTransform*>(m_component);
-            auto position = rectTransform->getPosition();
-            position.Z(val[0]);
-            rectTransform->setPosition(position);
-            rectTransform->onUpdate(0.f);
-            });
-
-        std::array right = { offset[2] };
-        anchorGroupColums->createWidget<Drag<float>>("R", ImGuiDataType_Float, right, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
-            auto rectTransform = dynamic_cast<RectTransform*>(m_component);
-            auto offset = rectTransform->getOffset();
-            offset[2] = val[0];
-            rectTransform->setOffset(offset);
-            rectTransform->onUpdate(0.f);
-            });
-
-        std::array bottom = { offset[3] };
-        anchorGroupColums->createWidget<Drag<float>>("B", ImGuiDataType_Float, bottom, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
-            auto rectTransform = dynamic_cast<RectTransform*>(m_component);
-            auto offset = rectTransform->getOffset();
-            offset[3] = val[0];
-            rectTransform->setOffset(offset);
-            rectTransform->onUpdate(0.f);
-            });
-    }
-    else if (anchor[0] == 0.f && anchor[2] == 1.f)
-    {
-        std::array left = { offset[0] };
-        anchorGroupColums->createWidget<Drag<float>>("L", ImGuiDataType_Float, left, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
-            auto rectTransform = dynamic_cast<RectTransform*>(m_component);
-            auto offset = rectTransform->getOffset();
-            offset[0] = val[0];
-            rectTransform->setOffset(offset);
-            rectTransform->onUpdate(0.f);
-            });
-        std::array posY = { rectTransform->getPosition().Y() };
-        anchorGroupColums->createWidget<Drag<float>>("Y", ImGuiDataType_Float, posY, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
-            auto rectTransform = dynamic_cast<RectTransform*>(m_component);
-            auto position = rectTransform->getPosition();
+    std::array B = { b };
+    anchorGroupColums->createWidget<Drag<float>>(showPosY ? "Y" : "T", ImGuiDataType_Float, B, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
+        auto rectTransform = dynamic_cast<RectTransform*>(m_component);
+        auto anchor = rectTransform->getAnchor();
+        bool showPosY = (anchor[1] == anchor[3]);
+        if (showPosY) 
+        {
+            auto position = rectTransform->getAnchoredPosition();
             position.Y(val[0]);
-            rectTransform->setPosition(position);
-            rectTransform->onUpdate(0.f);
-            });
-        std::array posZ = { rectTransform->getPosition().Z() };
-        anchorGroupColums->createWidget<Drag<float>>("Z", ImGuiDataType_Float, posZ, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
-            auto rectTransform = dynamic_cast<RectTransform*>(m_component);
-            auto position = rectTransform->getPosition();
-            position.Z(val[0]);
-            rectTransform->setPosition(position);
-            rectTransform->onUpdate(0.f);
-            });
-
-        std::array right = { offset[2] };
-        anchorGroupColums->createWidget<Drag<float>>("R", ImGuiDataType_Float, right, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
-            auto rectTransform = dynamic_cast<RectTransform*>(m_component);
+            rectTransform->setAnchoredPosition(position);
+        }
+        else
+        {
             auto offset = rectTransform->getOffset();
-            offset[2] = val[0];
+            offset[3] = -val[0];
             rectTransform->setOffset(offset);
-            rectTransform->onUpdate(0.f);
-            });
+        }
+        rectTransform->onUpdate(0.f);
+        });
 
-        std::array height = { rectTransform->getSize().Y() };
-        anchorGroupColums->createWidget<Drag<float>>("H", ImGuiDataType_Float, height, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
-            auto rectTransform = dynamic_cast<RectTransform*>(m_component);
-            auto size = rectTransform->getSize();
-            size.Y(val[0]);
-            rectTransform->setSize(size);
-            rectTransform->onUpdate(0.f);
-            });
-    }
-    else if (anchor[1] == 0.f && anchor[3] == 1.f)
-    {
-        std::array posX = { rectTransform->getPosition().X() };
-        anchorGroupColums->createWidget<Drag<float>>("X", ImGuiDataType_Float, posX, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
-            auto rectTransform = dynamic_cast<RectTransform*>(m_component);
-            auto position = rectTransform->getPosition();
-            position.X(val[0]);
-            rectTransform->setPosition(position);
-            rectTransform->onUpdate(0.f);
-            });
+    std::array posZ = { rectTransform->getPosition().Z() };
+    anchorGroupColums->createWidget<Drag<float>>("Z", ImGuiDataType_Float, posZ, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
+        auto rectTransform = dynamic_cast<RectTransform*>(m_component);
+        auto position = rectTransform->getPosition();
+        position.Z(val[0]);
+        rectTransform->setPosition(position);
+        rectTransform->onUpdate(0.f);
+        });
 
-        std::array top = { offset[1] };
-        anchorGroupColums->createWidget<Drag<float>>("T", ImGuiDataType_Float, top, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
-            auto rectTransform = dynamic_cast<RectTransform*>(m_component);
-            auto offset = rectTransform->getOffset();
-            offset[1] = val[0];
-            rectTransform->setOffset(offset);
-            rectTransform->onUpdate(0.f);
-            });
-
-        std::array posZ = { rectTransform->getPosition().Z() };
-        anchorGroupColums->createWidget<Drag<float>>("Z", ImGuiDataType_Float, posZ, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
-            auto rectTransform = dynamic_cast<RectTransform*>(m_component);
-            auto position = rectTransform->getPosition();
-            position.Z(val[0]);
-            rectTransform->setPosition(position);
-            rectTransform->onUpdate(0.f);
-            });
-
-        std::array width = { rectTransform->getSize().X() };
-        anchorGroupColums->createWidget<Drag<float>>("W", ImGuiDataType_Float, width, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
-            auto rectTransform = dynamic_cast<RectTransform*>(m_component);
+    std::array C = { c };
+    anchorGroupColums->createWidget<Drag<float>>(showPosX ? "W" : "R", ImGuiDataType_Float, C, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
+        auto rectTransform = dynamic_cast<RectTransform*>(m_component);
+        auto anchor = rectTransform->getAnchor();
+        bool showPosX = (anchor[0] == anchor[2]);
+        if (showPosX)
+        {
             auto size = rectTransform->getSize();
             size.X(val[0]);
             rectTransform->setSize(size);
-            rectTransform->onUpdate(0.f);
-            });
-
-        std::array bottom = { offset[3] };
-        anchorGroupColums->createWidget<Drag<float>>("B", ImGuiDataType_Float, bottom, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
-            auto rectTransform = dynamic_cast<RectTransform*>(m_component);
+        }
+        else
+        {
             auto offset = rectTransform->getOffset();
-            offset[3] = val[0];
+            offset[2] = -val[0];
             rectTransform->setOffset(offset);
-            rectTransform->onUpdate(0.f);
-            });
-    }
-    else
-    {
-        std::array posX = { rectTransform->getPosition().X() };
-        anchorGroupColums->createWidget<Drag<float>>("X", ImGuiDataType_Float, posX, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
-            auto rectTransform = dynamic_cast<RectTransform*>(m_component);
-            auto position = rectTransform->getPosition();
-            position.X(val[0]);
-            rectTransform->setPosition(position);
-            rectTransform->onUpdate(0.f);
-            });
+        }
+        rectTransform->onUpdate(0.f);
+        });
 
-        std::array posY = { rectTransform->getPosition().Y() };
-        anchorGroupColums->createWidget<Drag<float>>("Y", ImGuiDataType_Float, posY, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
-            auto rectTransform = dynamic_cast<RectTransform*>(m_component);
-            auto position = rectTransform->getPosition();
-            position.Y(val[0]);
-            rectTransform->setPosition(position);
-            rectTransform->onUpdate(0.f);
-            });
-
-        std::array posZ = { rectTransform->getPosition().Z() };
-        anchorGroupColums->createWidget<Drag<float>>("Z", ImGuiDataType_Float, posZ, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
-            auto rectTransform = dynamic_cast<RectTransform*>(m_component);
-            auto position = rectTransform->getPosition();
-            position.Z(val[0]);
-            rectTransform->setPosition(position);
-            rectTransform->onUpdate(0.f);
-            });
-
-        std::array width = { rectTransform->getSize().X() };
-        anchorGroupColums->createWidget<Drag<float>>("W", ImGuiDataType_Float, width, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
-            auto rectTransform = dynamic_cast<RectTransform*>(m_component);
-            auto size = rectTransform->getSize();
-            size.X(val[0]);
-            rectTransform->setSize(size);
-            rectTransform->onUpdate(0.f);
-            });
-
-        std::array height = { rectTransform->getSize().Y() };
-        anchorGroupColums->createWidget<Drag<float>>("H", ImGuiDataType_Float, height, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
-            auto rectTransform = dynamic_cast<RectTransform*>(m_component);
+    std::array D = { d };
+    anchorGroupColums->createWidget<Drag<float>>(showPosY ? "H" : "B", ImGuiDataType_Float, D, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
+        auto rectTransform = dynamic_cast<RectTransform*>(m_component);
+        auto anchor = rectTransform->getAnchor();
+        bool showPosY = (anchor[1] == anchor[3]);
+        if (showPosY)
+        {
             auto size = rectTransform->getSize();
             size.Y(val[0]);
             rectTransform->setSize(size);
-            rectTransform->onUpdate(0.f);
-            });
-    }
+        }
+        else
+        {
+            auto offset = rectTransform->getOffset();
+            offset[1] = val[0];
+            rectTransform->setOffset(offset);
+        }
+        rectTransform->onUpdate(0.f);
+        });
+
 }
 
-void RectTransformEditorComponent::drawTransform() {
-    if (m_rectTransformGroup == nullptr) return;
-    m_rectTransformGroup->removeAllPlugins();
-    m_rectTransformGroup->removeAllWidgets();
+void RectTransformEditorComponent::drawAnchorMinMax()
+{
+    auto rectTransform = dynamic_cast<RectTransform*>(m_component);
+    if (rectTransform == nullptr)
+        return;
+
+    if (m_anchorMinMaxGroup == nullptr)
+        return;
+    m_anchorMinMaxGroup->removeAllWidgets();
+    m_anchorMinMaxGroup->removeAllPlugins();
+
+    auto anchor = rectTransform->getAnchor();
+
+    std::array anchorMin = { anchor[0], anchor[1] };
+    m_anchorMinMaxGroup->createWidget<Drag<float, 2>>("Anchor Min", ImGuiDataType_Float, anchorMin, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
+        auto rectTransform = dynamic_cast<RectTransform*>(m_component);
+        auto anchor = rectTransform->getAnchor();
+        anchor[0] = val[0];
+        anchor[1] = val[1];
+        rectTransform->setAnchor(anchor);
+        m_dirtyFlagSupport = 4;
+        dirty();
+        });
+    std::array anchorMax = { anchor[2], anchor[3] };
+    m_anchorMinMaxGroup->createWidget<Drag<float, 2>>("Anchor Max", ImGuiDataType_Float, anchorMax, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
+        auto rectTransform = dynamic_cast<RectTransform*>(m_component);
+        auto anchor = rectTransform->getAnchor();
+        anchor[2] = val[0];
+        anchor[3] = val[1];
+        rectTransform->setAnchor(anchor);
+        m_dirtyFlagSupport = 4;
+        dirty();
+        });
+}
+
+void RectTransformEditorComponent::drawPivot() {
+    if (m_pivotGroup == nullptr) return;
+    m_pivotGroup->removeAllPlugins();
+    m_pivotGroup->removeAllWidgets();
 
     auto rectTransform = dynamic_cast<RectTransform*>(m_component);
     if (rectTransform == nullptr)
         return;
 
     std::array pivot = { rectTransform->getPivot().X(), rectTransform->getPivot().Y() };
-    m_rectTransformGroup->createWidget<Drag<float, 2>>("Pivot", ImGuiDataType_Float, pivot, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+    m_pivotGroup->createWidget<Drag<float, 2>>("Pivot", ImGuiDataType_Float, pivot, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
         IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
         auto rectTransform = dynamic_cast<RectTransform*>(m_component);
         rectTransform->setPivot({ val[0], val[1] });
@@ -437,7 +402,7 @@ void RectTransformEditorComponent::drawTransform() {
     Vec3 euler;
     vmath_quatToEuler(rectTransform->getRotation().P(), euler.P());
     std::array rot = { RADIANS_TO_DEGREES(euler.X()), RADIANS_TO_DEGREES(euler.Y()), RADIANS_TO_DEGREES(euler.Z()) };
-    m_rectTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot)->getOnDataChangedEvent().addListener([this](auto val) {
+    m_pivotGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot)->getOnDataChangedEvent().addListener([this](auto val) {
         IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
         auto rectTransform = dynamic_cast<RectTransform*>(m_component);
         Quat quat;
@@ -450,7 +415,7 @@ void RectTransformEditorComponent::drawTransform() {
         });
 
     std::array scale = { rectTransform->getScale().X(), rectTransform->getScale().Y(), rectTransform->getScale().Z() };
-    m_rectTransformGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scale)->getOnDataChangedEvent().addListener([this](auto val) {
+    m_pivotGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scale)->getOnDataChangedEvent().addListener([this](auto val) {
         IgnoreTransformEventScope scope(m_targetObject, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
         auto rectTransform = dynamic_cast<RectTransform*>(m_component);
         rectTransform->setScale({ val[0], val[1], val[2] });
@@ -466,8 +431,10 @@ void RectTransformEditorComponent::onTransformChanged(SceneObject& sceneObject)
     TaskManager::getInstance()->addTask([this]() {
         if (m_targetObject != nullptr)
         {
-            m_dirtyFlagSupport = 2;
-            dirty();
+            if (m_dirtyFlagSupport != 1 && m_dirtyFlagSupport != 4) {
+                m_dirtyFlagSupport = 2;
+                dirty();
+            }
         }
     });
 }

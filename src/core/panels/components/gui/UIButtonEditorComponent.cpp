@@ -126,7 +126,6 @@ void UIButtonEditorComponent::drawUIButton()
             });
 
         //! Disable Color
-        auto color = uiButton->getColor();
         m_uiButtonGroup->createWidget<Color>("Disable Color", uiButton->getDisabledColor())->getOnDataChangedEvent().addListener([this](auto val) {
             auto uiButton = dynamic_cast<UIButton*>(m_component);
             uiButton->setDisabledColor(val[0], val[1], val[2], val[3]);
@@ -247,5 +246,41 @@ void UIButtonEditorComponent::drawUIButton()
             uiButton->setColor(val[0], val[1], val[2], val[3]);
             });
     }
+
+    auto spriteType = uiButton->getSpriteType();
+    auto m_spriteTypeCombo = m_uiButtonGroup->createWidget<ComboBox>((int)spriteType);
+    m_spriteTypeCombo->getOnDataChangedEvent().addListener([this](auto val) {
+        auto uiButton = dynamic_cast<UIButton*>(m_component);
+        uiButton->setSpriteType(val);
+        dirty();
+        });
+    m_spriteTypeCombo->setEndOfLine(false);
+    m_spriteTypeCombo->addChoice((int)SpriteType::Simple, "Simple");
+    m_spriteTypeCombo->addChoice((int)SpriteType::Sliced, "Sliced");
+    m_spriteTypeCombo->setEndOfLine(true);
+
+    if (spriteType == SpriteType::Sliced) {
+        std::array borderLeft = { uiButton->getBorderLeft() };
+        m_uiButtonGroup->createWidget<Drag<float, 1>>("Border Left", ImGuiDataType_Float, borderLeft, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto uiButton = dynamic_cast<UIButton*>(m_component);
+            uiButton->setBorderLeft(val[0]);
+            });
+        std::array borderRight = { uiButton->getBorderRight() };
+        m_uiButtonGroup->createWidget<Drag<float, 1>>("Border Right", ImGuiDataType_Float, borderRight, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto uiButton = dynamic_cast<UIButton*>(m_component);
+            uiButton->setBorderRight(val[0]);
+            });
+        std::array borderTop = { uiButton->getBorderTop() };
+        m_uiButtonGroup->createWidget<Drag<float, 1>>("Border Top", ImGuiDataType_Float, borderTop, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto uiButton = dynamic_cast<UIButton*>(m_component);
+            uiButton->setBorderTop(val[0]);
+            });
+        std::array borderBottom = { uiButton->getBorderBottom() };
+        m_uiButtonGroup->createWidget<Drag<float, 1>>("Border Bottom", ImGuiDataType_Float, borderBottom, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto uiButton = dynamic_cast<UIButton*>(m_component);
+            uiButton->setBorderBottom(val[0]);
+            });
+    }
+
 }
 NS_IGE_END

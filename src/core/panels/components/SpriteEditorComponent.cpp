@@ -106,31 +106,68 @@ void SpriteEditorComponent::drawSpriteComponent()
         spriteComp->setBillboard(val);
         });
 
-    std::array tiling = { spriteComp->getTiling().X(), spriteComp->getTiling().Y() };
-    m_spriteCompGroup->createWidget<Drag<float, 2>>("Tiling", ImGuiDataType_Float, tiling, 0.01f, -16384.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto spriteType = spriteComp->getSpriteType();
+    auto m_spriteTypeCombo = m_spriteCompGroup->createWidget<ComboBox>((int)spriteType);
+    m_spriteTypeCombo->getOnDataChangedEvent().addListener([this](auto val) {
         auto spriteComp = dynamic_cast<SpriteComponent*>(m_component);
-        spriteComp->setTiling({ val[0], val[1] });
-        });
-
-    std::array offset = { spriteComp->getOffset().X(), spriteComp->getOffset().Y() };
-    m_spriteCompGroup->createWidget<Drag<float, 2>>("Offset", ImGuiDataType_Float, offset, 0.01f, -16384.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto spriteComp = dynamic_cast<SpriteComponent*>(m_component);
-        spriteComp->setOffset({ val[0], val[1] });
-        });
-        
-    auto m_compCombo = m_spriteCompGroup->createWidget<ComboBox>((int)spriteComp->getWrapMode());
-    m_compCombo->getOnDataChangedEvent().addListener([this](auto val) {
-        auto spriteComp = dynamic_cast<SpriteComponent*>(m_component);
-        spriteComp->setWrapMode(val);
+        spriteComp->setSpriteType(val);
         dirty();
         });
-    m_compCombo->setEndOfLine(false);
-    m_compCombo->addChoice((int)SamplerState::WrapMode::WRAP, "Wrap");
-    m_compCombo->addChoice((int)SamplerState::WrapMode::MIRROR, "Mirror");
-    m_compCombo->addChoice((int)SamplerState::WrapMode::CLAMP, "Clamp");
-    m_compCombo->addChoice((int)SamplerState::WrapMode::BORDER, "Border");
-    m_compCombo->setEndOfLine(true);
-    
+    m_spriteTypeCombo->setEndOfLine(false);
+    m_spriteTypeCombo->addChoice((int)SpriteType::Simple, "Simple");
+    m_spriteTypeCombo->addChoice((int)SpriteType::Sliced, "Sliced");
+    m_spriteTypeCombo->setEndOfLine(true);
+
+    if (spriteType == SpriteType::Sliced) {
+        std::array borderLeft = { spriteComp->getBorderLeft() };
+        m_spriteCompGroup->createWidget<Drag<float, 1>>("Border Left", ImGuiDataType_Float, borderLeft, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto spriteComp = dynamic_cast<SpriteComponent*>(m_component);
+            spriteComp->setBorderLeft(val[0]);
+            });
+        std::array borderRight = { spriteComp->getBorderRight() };
+        m_spriteCompGroup->createWidget<Drag<float, 1>>("Border Right", ImGuiDataType_Float, borderRight, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto spriteComp = dynamic_cast<SpriteComponent*>(m_component);
+            spriteComp->setBorderRight(val[0]);
+            });
+        std::array borderTop = { spriteComp->getBorderTop() };
+        m_spriteCompGroup->createWidget<Drag<float, 1>>("Border Top", ImGuiDataType_Float, borderTop, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto spriteComp = dynamic_cast<SpriteComponent*>(m_component);
+            spriteComp->setBorderTop(val[0]);
+            });
+        std::array borderBottom = { spriteComp->getBorderBottom() };
+        m_spriteCompGroup->createWidget<Drag<float, 1>>("Border Bottom", ImGuiDataType_Float, borderBottom, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto spriteComp = dynamic_cast<SpriteComponent*>(m_component);
+            spriteComp->setBorderBottom(val[0]);
+            });
+    }
+    else {
+
+        std::array tiling = { spriteComp->getTiling().X(), spriteComp->getTiling().Y() };
+        m_spriteCompGroup->createWidget<Drag<float, 2>>("Tiling", ImGuiDataType_Float, tiling, 0.01f, -16384.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto spriteComp = dynamic_cast<SpriteComponent*>(m_component);
+            spriteComp->setTiling({ val[0], val[1] });
+            });
+
+        std::array offset = { spriteComp->getOffset().X(), spriteComp->getOffset().Y() };
+        m_spriteCompGroup->createWidget<Drag<float, 2>>("Offset", ImGuiDataType_Float, offset, 0.01f, -16384.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto spriteComp = dynamic_cast<SpriteComponent*>(m_component);
+            spriteComp->setOffset({ val[0], val[1] });
+            });
+
+        auto m_compCombo = m_spriteCompGroup->createWidget<ComboBox>((int)spriteComp->getWrapMode());
+        m_compCombo->getOnDataChangedEvent().addListener([this](auto val) {
+            auto spriteComp = dynamic_cast<SpriteComponent*>(m_component);
+            spriteComp->setWrapMode(val);
+            dirty();
+            });
+        m_compCombo->setEndOfLine(false);
+        m_compCombo->addChoice((int)SamplerState::WrapMode::WRAP, "Wrap");
+        m_compCombo->addChoice((int)SamplerState::WrapMode::MIRROR, "Mirror");
+        m_compCombo->addChoice((int)SamplerState::WrapMode::CLAMP, "Clamp");
+        m_compCombo->addChoice((int)SamplerState::WrapMode::BORDER, "Border");
+        m_compCombo->setEndOfLine(true);
+
+    }
     m_spriteCompGroup->createWidget<CheckBox>("Alpha Blend", spriteComp->isAlphaBlendingEnable())->getOnDataChangedEvent().addListener([this](bool val) {
         auto spriteComp = dynamic_cast<SpriteComponent*>(m_component);
         spriteComp->setAlphaBlendingEnable(val);
