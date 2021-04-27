@@ -11,7 +11,7 @@
 
 using namespace ige::creator;
 
-extern std::shared_ptr<Application> gApp = nullptr;
+extern std::shared_ptr<Application> gApp;
 
 #ifdef _DEBUG
 void CreateConsole(void) {

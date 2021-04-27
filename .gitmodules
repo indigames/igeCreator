@@ -10,3 +10,7 @@
 	path = 3rd-party/imgui
 	url = https://github.com/indigames/imgui
 	branch = docking
+[submodule "libs/igeScene"]
+	path = libs/igeScene
+	url = https://github.com/indigames/igeScene
+	branch = ige-dev

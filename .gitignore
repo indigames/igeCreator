@@ -6,3 +6,4 @@ app/imgui.ini
 /.env
 /release
 /app/release
+/_ige_build
