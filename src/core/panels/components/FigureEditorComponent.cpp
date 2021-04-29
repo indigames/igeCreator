@@ -130,7 +130,7 @@ void FigureEditorComponent::drawFigureComponent()
     {
         if (figure->NumMeshes() > 0)
         {
-            auto meshGroup = m_figureCompGroup->createWidget<Group>("Mesh");
+            auto meshGroup = m_figureCompGroup->createWidget<Group>("Mesh", true, false, Group::E_Align::LEFT, false);
             auto meshColumn = meshGroup->createWidget<Columns<3>>();
             for (int i = 0; i < figure->NumMeshes(); i++)
             {
@@ -144,7 +144,7 @@ void FigureEditorComponent::drawFigureComponent()
 
         if (figure->NumJoints() > 0)
         {
-            auto joinGroup = m_figureCompGroup->createWidget<Group>("Joint");
+            auto joinGroup = m_figureCompGroup->createWidget<Group>("Joint", true, false, Group::E_Align::LEFT, false);
             for (int i = 0; i < figure->NumJoints(); i++)
             {
                 joinGroup->createWidget<TextField>("", figure->GetJointName(i), true);
@@ -153,7 +153,7 @@ void FigureEditorComponent::drawFigureComponent()
 
         if (figure->NumMaterials() > 0)
         {
-            auto materialGroup = m_figureCompGroup->createWidget<Group>("Material");
+            auto materialGroup = m_figureCompGroup->createWidget<Group>("Material", true, false, Group::E_Align::LEFT, false);
             for (int i = 0; i < figure->NumMaterials(); i++)
             {
                 const char* matName = figure->GetMaterialName(i);

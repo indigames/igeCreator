@@ -423,9 +423,6 @@ namespace ige::creator
             return;
         }
 
-        //! Update Panel
-        Panel::update(dt);
-
         // Update keyboard
         updateKeyboard();
 
@@ -457,6 +454,9 @@ namespace ige::creator
 
             renderContext->EndScene();
         }
+
+        //! Update Panel
+        Panel::update(dt);
     }
 
     void EditorScene::_drawImpl()

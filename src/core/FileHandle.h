@@ -23,6 +23,19 @@ enum class E_FileExts
     Particle
 };
 
+// Useful when iterate though all supported file types
+const auto AllFileExts = 
+{
+    E_FileExts::Sprite,
+    E_FileExts::Figure,
+    E_FileExts::Script,
+    E_FileExts::Font,
+    E_FileExts::Audio,
+    E_FileExts::Prefab,
+    E_FileExts::Scene,
+    E_FileExts::Particle
+};
+
 inline const std::vector<std::string> &GetFileExtensionSuported(E_FileExts fileExt)
 {
     static std::vector<std::string> formats = {};

@@ -42,13 +42,9 @@ namespace ige::creator
             if (widget != nullptr) {
                 widget.get()->getOnClickEvent().addListener([this](Widget*) {
                     m_focusEvent.invoke();
-                    });
+                });
             }
         }
-
-        getOnFocusEvent().addListener([]() {
-            Editor::getInstance()->setSelectedObject(-1);
-            });
     }
 
     void AssetBrowser::_drawImpl()

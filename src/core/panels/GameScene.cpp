@@ -38,10 +38,7 @@ namespace ige::creator
         if (SceneManager::getInstance()->getCurrentScene())
         {
             auto name = SceneManager::getInstance()->getCurrentScene()->getName();
-            auto fsPath = fs::path(name + "_tmp");
-            auto ext = fsPath.extension();
-            if (ext.string() != ".scene")
-                fsPath = fsPath.replace_extension(".scene");
+            auto fsPath = fs::path(name + ".scene.tmp");
             fs::remove(fsPath);
         }        
     }
@@ -170,7 +167,7 @@ namespace ige::creator
 
             if (SceneManager::getInstance()->getCurrentScene())
             {
-                auto path = SceneManager::getInstance()->getCurrentScene()->getName() + "_tmp";
+                auto path = SceneManager::getInstance()->getCurrentScene()->getName() + ".scene.tmp";
                 auto& selectedObj = Editor::getInstance()->getSelectedObject();
                 m_lastObjectId = selectedObj ? selectedObj->getId() : -1;
                 Editor::getCanvas()->getEditorScene()->setTargetObject(nullptr);

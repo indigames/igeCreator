@@ -23,7 +23,7 @@ protected:
 	void drawScriptComponent();
 protected:
 	std::shared_ptr<Group> m_scriptCompGroup = nullptr;
-
+	std::uint64_t m_watchId = 0;
 	
 };
 

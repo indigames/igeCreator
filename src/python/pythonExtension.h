@@ -6,6 +6,7 @@
 extern PyObject *PyInit__igeCore(void);
 extern PyObject *PyInit__igeTools(void);
 extern PyObject *PyInit_igeVmath(void);
+extern PyObject* PyInit_igeScene();
 #endif
 
 #ifdef USE_PYIMGUI

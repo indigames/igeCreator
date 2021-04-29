@@ -29,7 +29,6 @@ namespace ige::creator
         settings.collapsable = true;
         settings.dockable = true;
 
-        createPanel<Inspector>("Inspector", settings);
         createPanel<Hierarchy>("Hierarchy", settings);
         createPanel<AssetBrowser>("Assets", settings);
         createPanel<Console>("Console", settings);
@@ -37,6 +36,7 @@ namespace ige::creator
         createPanel<EditorScene>("Scene", settings);
         createPanel<GameScene>("Game", settings);
         createPanel<Profiler>("Profiler", settings);
+        createPanel<Inspector>("Inspector", settings);
     }
 
     Canvas::~Canvas()
