@@ -245,6 +245,21 @@ namespace ige::creator
         getCanvas()->getEditorScene()->refresh();
     }
 
+    bool Editor::convertAssets()
+    {
+        auto buildCmd = [](void*)
+        {
+            pyxie_printf("Converting assets...");
+            system("python.exe convert.py");
+            pyxie_printf("Converting assets DONE!");
+            return 1;
+        };
+
+        auto buildThread = SDL_CreateThreadWithStackSize(buildCmd, "Build_Thread", 32 * 1024 * 1024, (void*)nullptr);
+        SDL_DetachThread(buildThread);
+        return true;
+    }
+
     bool Editor::buildRom()
     {
         auto buildCmd = [](void*)

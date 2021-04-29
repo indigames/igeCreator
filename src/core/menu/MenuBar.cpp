@@ -106,6 +106,11 @@ namespace ige::creator
         });
 
         auto buildMenu = createWidget<Menu>("Build");
+        buildMenu->createWidget<MenuItem>("Convert Assets")->getOnClickEvent().addListener([](auto widget) {
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->convertAssets();
+            });
+        });
         buildMenu->createWidget<MenuItem>("ROM")->getOnClickEvent().addListener([](auto widget) {
             TaskManager::getInstance()->addTask([]() {
                 Editor::getInstance()->buildRom();
