@@ -379,6 +379,7 @@ namespace ige::creator
             none,
             clicked,
             double_clicked,
+            explored,
             renamed,
             deleted
         };
@@ -453,6 +454,16 @@ namespace ige::creator
             if (ImGui::MenuItem("Open", "Ctrl + O"))
             {
                 action = entry_action::double_clicked;
+                ImGui::CloseCurrentPopup();
+            }
+
+#ifdef WIN32
+            if (ImGui::MenuItem("Explore", "Ctrl + E"))
+#else
+            if (ImGui::MenuItem("Reveal In Finder", "Ctrl + E"))
+#endif
+            {
+                action = entry_action::explored;
                 ImGui::CloseCurrentPopup();
             }
 
@@ -540,12 +551,26 @@ namespace ige::creator
             }
         }
         break;
+
         case entry_action::deleted:
         {
             if (on_delete)
             {
                 on_delete();
             }
+        }
+        break;
+
+        case entry_action::explored:
+        {
+#ifdef WIN32
+            if(fs::is_directory(absolute_path))
+                ShellExecute(NULL, "explore", absolute_path.string().c_str(), NULL, NULL, SW_SHOWNORMAL);
+            else if(fs::exists(absolute_path))
+                ShellExecute(NULL, "explore", absolute_path.parent_path().string().c_str(), NULL, NULL, SW_SHOWNORMAL);
+#else
+            // TODO: macOS
+#endif
         }
         break;
 
