@@ -916,6 +916,8 @@ namespace ige::creator
 
             auto mouseOffset = offset * m_cameraRotationSpeed;
             m_cameraRotationEuler[1] -= mouseOffset.X();
+            m_cameraRotationEuler[1] = clampEulerAngle(m_cameraRotationEuler[1]);
+
             m_cameraRotationEuler[0] += mouseOffset.Y();
             m_cameraRotationEuler[0] = clampEulerAngle(m_cameraRotationEuler[0]);
 
@@ -970,7 +972,7 @@ namespace ige::creator
         if (Editor::getInstance()->is3DCamera()) {
             auto offset = Vec2(offsetX, offsetY);
             auto mouseOffset = offset * m_cameraRotationSpeed;
-            m_cameraRotationEuler[1] += mouseOffset.X();
+            m_cameraRotationEuler[1] -= mouseOffset.X();
             m_cameraRotationEuler[0] += mouseOffset.Y();
 
             Quat rot;
