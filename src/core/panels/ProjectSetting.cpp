@@ -10,6 +10,7 @@
 #include "core/widgets/Button.h"
 #include "core/widgets/Drag.h"
 #include "core/plugin/DragDropPlugin.h"
+#include "core/Editor.h"
 
 #include <utils/Serialize.h>
 
@@ -22,14 +23,35 @@ namespace ige::creator
         : Panel(name, settings)
     {
         json settingsJson;
-        auto fsPath = fs::path("settings.json");
 
-        std::ifstream file(fsPath);
+        auto prjPath = fs::path(Editor::getInstance()->getProjectPath());
+        auto prjName = prjPath.stem().string();
+        auto prjFile = prjPath.append(prjName + ".igeproj");
+
+        if (!fs::exists(prjFile))
+        {
+            json settingsJson = json{
+                {"startScene", "scenes/main.scene"},
+            };
+
+            std::ofstream file(prjFile.string());
+            file << settingsJson;
+            file.close();
+        }
+
+        std::ifstream file(prjFile);
         if (file.is_open())
         {
             file >> settingsJson;
-            setStartScene(settingsJson.value("startScene", "scene/main.scene"));
+            file.close();
+            setStartScene(settingsJson.value("startScene", "scenes/main.scene"));
         }
+
+        if (!settingsJson.is_null())
+        {
+            setStartScene(settingsJson.value("startScene", "scenes/main.scene"));
+        }
+            
     }
 
     ProjectSetting::~ProjectSetting()
@@ -89,8 +111,12 @@ namespace ige::creator
             {"globalVolume", getGlobalVolume()},
         };
 
-        auto fsPath = fs::path("settings.json");
-        std::ofstream file(fsPath.string());
+        auto prjPath = fs::path(Editor::getInstance()->getProjectPath());
+        auto prjName = prjPath.stem().string();
+        auto prjFile = prjPath.append(prjName + ".igeproj");
+
+        std::ofstream file(prjFile);
         file << settingsJson;
+        file.close();
     }
 }

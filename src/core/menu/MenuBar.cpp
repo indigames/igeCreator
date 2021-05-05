@@ -58,7 +58,7 @@ namespace ige::creator
             if (!path.empty())
             {
                 TaskManager::getInstance()->addTask([path]() {
-                    Editor::getInstance()->createProject(path);
+                    Editor::getInstance()->openProject(path);
                 });
             }
         });

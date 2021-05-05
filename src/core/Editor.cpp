@@ -10,6 +10,7 @@
 #include "core/panels/EditorScene.h"
 #include "core/task/TaskManager.h"
 #include "core/dialog/MsgBox.h"
+#include "core/dialog/OpenFileDialog.h"
 #include "core/dialog/SaveFileDialog.h"
 #include "core/AutoReleasePool.h"
 #include "core/shortcut/ShortcutController.h"
@@ -51,6 +52,12 @@ namespace ige::creator
         // Set engine path to the runtime path
         setEnginePath(fs::current_path().string());
 
+        //! Get project location
+        auto path = OpenFolderDialog("Open Project", ".", OpenFileDialog::Option::force_path).result();
+        if (path.empty())
+            path = fs::path(getEnginePath());
+        setProjectPath(path);
+
         // Init ImGUI
         initImGUI();
 
@@ -64,10 +71,12 @@ namespace ige::creator
         //! Init Shortcut
         m_shortcutController = std::make_shared<ShortcutController>();
         m_shortcutController->retain();
+
         //! init default shortcut
         ShortcutDictionary::initShortcuts();
 
-
+        //! Open project
+        Editor::getInstance()->openProject(getProjectPath());
     }
 
     void Editor::handleEvent(const void* event)
@@ -88,19 +97,6 @@ namespace ige::creator
 
         // Update shortcut
         m_shortcutController->update(dt);
-        // Load scene
-        if (SceneManager::getInstance()->getCurrentScene() == nullptr)
-        {
-            // Load the start scene
-            auto scene = SceneManager::getInstance()->loadScene(m_canvas->getProjectSetting()->getStartScene());
-
-            // If no scene loaded, create empty scene
-            if (scene == nullptr)
-                scene = SceneManager::getInstance()->createScene();
-
-            // Set current scene to new loaded/created scene
-            Editor::setCurrentScene(scene);
-        }
     }
 
     void Editor::render()
@@ -192,16 +188,46 @@ namespace ige::creator
         return m_selectedObject;
     }
 
-    bool Editor::createProject(const std::string& path)
+    bool Editor::openProject(const std::string& path)
     {
-        if (!fs::is_empty(fs::path(path)))
+        setProjectPath(path);
+
+        auto prjPath = fs::path(path);
+        auto prjName = prjPath.stem().string();
+        auto prjFile = prjPath.append(prjName + ".igeproj");
+        auto loaded = false;
+
+        if (fs::exists(prjFile))
         {
-            auto btn = MsgBox("Warning", "Folder is not empty.\nDo you want to create project anyway?", MsgBox::EBtnLayout::yes_no, MsgBox::EMsgType::info).result();
-            if (btn == MsgBox::EButton::no)
-                return false;
+            std::ifstream file(prjFile.string());
+            if (file.is_open())
+            {
+                json settingsJson;
+                file >> settingsJson;
+                file.close();
+                auto scenePath = fs::path(getProjectPath()).append(settingsJson.value("startScene", "scenes/main.scene"));
+                if (fs::exists(scenePath))
+                    loaded = loadScene(scenePath.string());
+            }
         }
         
-        return true;
+        if(!loaded)
+        {
+            auto scene = SceneManager::getInstance()->createScene();
+            SceneManager::getInstance()->setCurrentScene(scene);
+            SceneManager::getInstance()->saveScene(prjFile.parent_path().append("scenes").append("main.scene"));
+
+            json settingsJson = json{
+                {"startScene", "scenes/main.scene"},
+            };
+
+            std::ofstream file(prjFile.string());
+            file << settingsJson;
+            file.close();
+            loaded = true;
+        }
+
+        return loaded;
     }
 
     bool Editor::createScene()
@@ -216,10 +242,14 @@ namespace ige::creator
     {
         refreshScene();
         SceneManager::getInstance()->unloadScene(SceneManager::getInstance()->getCurrentScene());
-        getCanvas()->getHierarchy()->clear();
-        getCanvas()->getEditorScene()->clear();
-        getCanvas()->getHierarchy()->initialize();
-        setCurrentScene(SceneManager::getInstance()->loadScene(path));
+        if (getCanvas())
+        {
+            getCanvas()->getHierarchy()->clear();
+            getCanvas()->getEditorScene()->clear();
+            getCanvas()->getHierarchy()->initialize();
+        }        
+        auto scene = SceneManager::getInstance()->loadScene(path);
+        setCurrentScene(scene);
         return true;
     }
 
@@ -242,7 +272,7 @@ namespace ige::creator
 
     void Editor::refreshScene() {
         setSelectedObject(-1);
-        getCanvas()->getEditorScene()->refresh();
+        if(getCanvas()) getCanvas()->getEditorScene()->refresh();
     }
 
     bool Editor::convertAssets()

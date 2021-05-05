@@ -70,35 +70,27 @@ namespace ige::creator
         }
         m_currShowcase = nullptr;
 
-        m_grid2D->DecReference();
+        if(m_grid2D) m_grid2D->DecReference();
         m_grid2D = nullptr;
-        m_grid3D->DecReference();
+
+        if(m_grid3D) m_grid3D->DecReference();
         m_grid3D = nullptr;
 
         m_currCamera = nullptr;
-
-        if (m_2dCamera)
-            m_2dCamera->DecReference();
+        if (m_2dCamera) m_2dCamera->DecReference();
         m_2dCamera = nullptr;
 
-        if (m_3dCamera)
-            m_3dCamera->DecReference();
+        if (m_3dCamera) m_3dCamera->DecReference();
         m_3dCamera = nullptr;
 
         getOnSizeChangedEvent().removeAllListeners();
         removeAllWidgets();
 
-        if (m_rtTexture)
-        {
-            m_rtTexture->DecReference();
-            m_rtTexture = nullptr;
-        }
+        if (m_rtTexture) m_rtTexture->DecReference();
+        m_rtTexture = nullptr;        
 
-        if (m_fbo)
-        {
-            m_fbo->DecReference();
-            m_fbo = nullptr;
-        }
+        if (m_fbo) m_fbo->DecReference();
+        m_fbo = nullptr;        
     }
 
     void EditorScene::initialize()
