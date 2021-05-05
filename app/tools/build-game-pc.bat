@@ -29,7 +29,7 @@ git submodule update --init --remote
 
 xcopy /q /y %ROM% %GAME_BUILDER%
 
-call scripts\build-pc.bat
+call scripts\build-windows.bat
 
 if not exist %PROJECT_DIR%\release (
     mkdir %PROJECT_DIR%\release

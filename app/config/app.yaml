@@ -9,9 +9,7 @@ Platforms: # Platforms config
     android:
         RomDir: rom/android
         ConfigDir: config/android # Android 'res' folder
-        armeabi-v7a: true
         arm64-v8a: true
-        x86: false
         x86_64: false
         MinSdkVersion: 21
         TargetSdkVersion: 29
@@ -21,14 +19,16 @@ Platforms: # Platforms config
             - android.permission.ACCESS_NETWORK_STATE # Access network state
             - android.permission.ACCESS_WIFI_STATE # Access WIFI state
             - android.permission.WRITE_EXTERNAL_STORAGE # R/W access to external storage
-            # - android.permission.CAMERA # Camera permission
+            - android.permission.CAMERA # Camera permission
             - android.permission.VIBRATE # Vibration permission
             # - android.permission.BLUETOOTH # Bluetooth permission
+            # - add more here
         Features:
             android.hardware.touchscreen: true # Use touch screen, required
             # android.hardware.camera: true # Use camera, required
             # android.hardware.camera.autofocus: false # Use camera auto focus, not required
-    pc:
+            # - add more here
+    windows:
         RomDir: rom/pc
         ConfigDir: ''
         x64: true
@@ -46,29 +46,43 @@ Platforms: # Platforms config
         ConfigDir: ''
         x64: true
 
-Modules: # Modules config
-    igeAds: true
-    igeAdjust: true
-    igeAppsFlyer: false
-    igeAutoTest: false
-    igeBullet: true
-    igeCamera: false
-    igeDlibExt: false
-    igeEffekseer: true
-    igeFirebase: true
-    igeFirebaseMLKit: false
-    igeGameAnalytics: true
-    igeGamesServices: true
-    igeInAppPurchase: false
-    igeNanoGUI: false
-    igeNavigation: true
-    igeNotify: true
-    igePAL: true
-    igeSocial: true
-    igeSound: true
-    igeWebview: true
-    Box2D: false
-    Dlib: false
-    IMGUI: true
-    OpenCV: false
+Requires: # Modules config
+    - SDL/2.0.11@ige/test
+    - stb/1.0.0@ige/test
+    - numpy/1.19.5@ige/test
+    - taskflow/3.1.0@ige/test
+    - tracy/0.6.6@ige/test
+    - pyxCore/0.4.91@ige/test
+    - igeCore/0.4.91@ige/test
+    - igeVmath/0.6.2@ige/test
+    - bullet/3.0.8@ige/test
+    - igeBullet/0.4.61@ige/test 
+    - stb/1.0.0@ige/test
+    - openssl/1.1.1c@ige/test
+    - Python/3.7.6@ige/test
+    - pyimgui/1.2.0@ige/test
+    - dlib/19.19.99@ige/test
+    - igeDlibExt/0.0.1@ige/test
+    - opencv/4.1.2@ige/test
+    - pybox2d/2.3.8@ige/test    
+    - pillow/8.2.0@ige/test
+    - tensorflow/2.5.0@ige/test
+    - igeAdjust/0.0.5@ige/test
+    - igeAds/0.0.3@ige/test
+    - igeAppsFlyer/0.0.2@ige/test
+    - igeAutoTest/0.0.4@ige/test
+    - igeCamera/0.0.1@ige/test
+    - igeEffekseer/0.0.18@ige/test
+    - igeFirebase/0.0.33@ige/test
+    - igeGameAnalytics/0.0.3@ige/test
+    - igeGamesServices/0.0.1@ige/test
+    - igeInAppPurchase/0.0.2@ige/test
+    - igeNanoGUI/0.0.1@ige/test
+    - igeNavigation/0.0.1@ige/test
+    - igeNotify/0.0.1@ige/test
+    - igePAL/0.0.5@ige/test
+    - igeScene/0.0.5@ige/test
+    - igeSocial/0.0.5@ige/test
+    - igeSound/0.1.0@ige/test
+    - igeWebview/0.0.3@ige/test
 
