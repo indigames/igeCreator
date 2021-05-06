@@ -8,7 +8,7 @@ import os.path
 import sys
 import getopt
 
-def copyFile(src, dst):	
+def copyFile(src, dst):
 	apputil.makeDirectories(dst)
 	shutil.copy(src, dst)
 
@@ -16,18 +16,18 @@ def build(platform, projectDir, outputDir, compress):
 	tmp = '.tmp/' + apputil.platformName(platform)
 	devtool.compilePrograms(projectDir, tmp)
 	devtool.convertAssets(projectDir, tmp, platform, 1.0)
-	devtool.copyFiles(projectDir, tmp, ['.plist', '.pem', '.json', '.pickle', '.zip', '.txt', '.db', '.ttf', '.otf', '.ogg', '.wav', '.dat', '.ini', '.sqlite', '.pyxd', '.scene', '.prefab', '.efk', '.efkproj'])
+	devtool.copyFiles(projectDir, tmp, ['.plist', '.pem', '.json', '.pickle', '.zip', '.txt', '.db', '.ttf', '.otf', '.ogg', '.wav', '.mp3', '.mp4', '.dat', '.ini', '.sqlite', '.pyxd', '.scene', '.prefab', '.efk', '.efkproj'])
 	if compress:
 		devtool.packFolders(tmp)
-		
+
 	dist = outputDir
 	if os.path.isdir(dist):
 		shutil.rmtree(dist)
-	apputil.makeDirectories(dist)	
+	apputil.makeDirectories(dist)
 
 	for root, dirs, files in os.walk(tmp):
 		if root.find('\.') != -1: continue
-		for fname in files:			
+		for fname in files:
 			name, ext = os.path.splitext(fname)
 			if compress:
 				if ext == '.pyxd' or ext == '.py' or ext =='.ini':
@@ -36,13 +36,13 @@ def build(platform, projectDir, outputDir, compress):
 			else:
 				fpath = os.path.relpath(root, start = tmp)
 				copyFile(os.path.join(root, fname), os.path.join(os.path.join(dist, fpath), fname))
-	
+
 def main(argv):
 	platform = core.TARGET_PLATFORM_PC
 	project_dir = '../project'
 	output_dir = '../dist'
 	compress = True
-	
+
 	try:
 		opts, args = getopt.getopt(argv, "p:i:o:c:")
 	except getopt.GetoptError:
@@ -52,7 +52,7 @@ def main(argv):
 	for opt, arg in opts:
 		if opt in ("-p"):
 			platform = int(arg)
-		elif opt in ("-i"):			
+		elif opt in ("-i"):
 			project_dir = arg
 		elif opt in ("-o"):
 			output_dir = arg

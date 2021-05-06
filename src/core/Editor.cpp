@@ -322,6 +322,9 @@ namespace ige::creator
         {
             pyxie_printf("Building ROM...");
             system("cmd.exe /c tools\\build-rom.bat");
+            auto scriptPath = fs::path(Editor::getInstance()->getEnginePath()).append("tools").append("build-rom.bat");
+            auto projectDir = Editor::getInstance()->getProjectPath();
+            system((std::string("cmd.exe /c ") + scriptPath.string() + " " + projectDir).c_str());
             pyxie_printf("Building ROM: DONE!");
             return 1;
         };
