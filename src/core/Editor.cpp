@@ -60,6 +60,8 @@ namespace ige::creator
             const auto copyOptions = fs::copy_options::overwrite_existing | fs::copy_options::recursive;
             fs::copy(GetEnginePath("project_template"), path, copyOptions);
         }
+
+        SceneManager::getInstance()->setProjectPath(m_projectPath);
     }
 
     void Editor::initialize()
@@ -467,8 +469,10 @@ class %s(Script):\n\
 
     std::string GetEnginePath(const std::string& path)
     {
-        if (Editor::getInstance()->getEnginePath().compare(Editor::getInstance()->getProjectPath()))
+        if (Editor::getInstance()->getEnginePath().compare(Editor::getInstance()->getProjectPath()) == 0)
             return path;
-        return (fs::path(Editor::getInstance()->getEnginePath()).append(path)).string();
+        auto retPath = (fs::path(Editor::getInstance()->getEnginePath()).append(path)).string();
+        std::replace(retPath.begin(), retPath.end(), '\\', '/');
+        return retPath;
     }
 }
