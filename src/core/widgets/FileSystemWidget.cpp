@@ -216,6 +216,13 @@ namespace ige::creator
     {
         if (m_isDirty)
         {
+            const auto root_path = fs::current_path();
+            std::error_code err;
+            if (m_root != root_path || !fs::exists(m_cache.get_path(), err))
+            {
+                m_root = root_path;
+                m_cache.set_path(m_root);
+            }
             m_hierarchy.clear();
             m_hierarchy = fs::split_until(m_cache.get_path(), m_root);
             m_isDirty = false;

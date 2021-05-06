@@ -41,7 +41,6 @@ namespace ige::creator
         bool openAbout();
 
         bool openProject(const std::string& path);
-        bool createScene();
         bool loadScene(const std::string& path);
         bool unloadScene();
         bool saveScene();

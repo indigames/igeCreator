@@ -63,12 +63,6 @@ namespace ige::creator
             }
         });
 
-        fileMenu->createWidget<MenuItem>("New Scene", "CTRL + N")->getOnClickEvent().addListener([this](auto widget) {
-            TaskManager::getInstance()->addTask([](){
-                Editor::getInstance()->createScene();
-            });
-        });
-
         fileMenu->createWidget<MenuItem>("Open Scene", "CTRL + O")->getOnClickEvent().addListener([this](auto widget){
             auto selectedFiles = OpenFileDialog("Open", ".", { "scene", "*.scene" }).result();
             if (!selectedFiles.empty() && !selectedFiles[0].empty())

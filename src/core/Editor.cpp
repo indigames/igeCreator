@@ -237,22 +237,32 @@ namespace ige::creator
             loaded = true;
         }
 
-        return loaded;
-    }
+        // Refresh asset browser
+        if (getCanvas() && getCanvas()->getAssetBrowser())
+        {
+            getCanvas()->getAssetBrowser()->setDirty();
+        }
 
-    bool Editor::createScene()
-    {
-        refreshScene();
-        SceneManager::getInstance()->unloadScene(SceneManager::getInstance()->getCurrentScene());
-        setCurrentScene(SceneManager::getInstance()->createScene());
-        return true;
+
+        return loaded;
     }
 
     bool Editor::loadScene(const std::string& path)
     {
         unloadScene();
-        auto scene = SceneManager::getInstance()->loadScene(path);
-        setCurrentScene(scene);
+        auto scenePath = fs::path(path);
+        if (fs::exists(scenePath))
+        {
+            auto scene = SceneManager::getInstance()->loadScene(path);
+            setCurrentScene(scene);
+        }
+        else
+        {
+            auto scene = SceneManager::getInstance()->createScene();
+            scene->setPath(path);
+            setCurrentScene(scene);
+            saveScene();
+        }
         return true;
     }
 
@@ -457,6 +467,8 @@ class %s(Script):\n\
 
     std::string GetEnginePath(const std::string& path)
     {
+        if (Editor::getInstance()->getEnginePath().compare(Editor::getInstance()->getProjectPath()))
+            return path;
         return (fs::path(Editor::getInstance()->getEnginePath()).append(path)).string();
     }
 }

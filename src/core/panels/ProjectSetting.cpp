@@ -28,17 +28,6 @@ namespace ige::creator
         auto prjName = prjPath.stem().string();
         auto prjFile = prjPath.append(prjName + ".igeproj");
 
-        if (!fs::exists(prjFile))
-        {
-            json settingsJson = json{
-                {"startScene", "scenes/main.scene"},
-            };
-
-            std::ofstream file(prjFile.string());
-            file << settingsJson;
-            file.close();
-        }
-
         std::ifstream file(prjFile);
         if (file.is_open())
         {
