@@ -67,11 +67,6 @@ namespace ige::creator
         // Set engine path to the runtime path
         setEnginePath(fs::current_path().string());
 
-        // Get project location
-        auto path = OpenFolderDialog("Open Project", ".", OpenFileDialog::Option::force_path).result();
-        if (path.empty()) path = fs::path(getEnginePath());
-        setProjectPath(path);
-
         // Pass engine path to Scene for debug purpose
         SceneManager::getInstance()->setEditorPath(getEnginePath());
 
@@ -91,9 +86,6 @@ namespace ige::creator
 
         //! init default shortcut
         ShortcutDictionary::initShortcuts();
-
-        //! Open project
-        Editor::getInstance()->openProject(getProjectPath());
     }
 
     void Editor::handleEvent(const void* event)
@@ -207,6 +199,7 @@ namespace ige::creator
 
     bool Editor::openProject(const std::string& path)
     {
+        unloadScene();
         setProjectPath(path);
 
         auto prjPath = fs::path(path);
@@ -321,7 +314,6 @@ namespace ige::creator
         auto buildCmd = [](void*)
         {
             pyxie_printf("Building ROM...");
-            system("cmd.exe /c tools\\build-rom.bat");
             auto scriptPath = fs::path(Editor::getInstance()->getEnginePath()).append("tools").append("build-rom.bat");
             auto projectDir = Editor::getInstance()->getProjectPath();
             system((std::string("cmd.exe /c ") + scriptPath.string() + " " + projectDir).c_str());
@@ -339,7 +331,9 @@ namespace ige::creator
         auto buildCmd = [](void*)
         {
             pyxie_printf("Building Windows Desktop...");
-            system("cmd.exe /c tools\\build-game-pc.bat");
+            auto scriptPath = fs::path(Editor::getInstance()->getEnginePath()).append("tools").append("build-windows.bat");
+            auto projectDir = Editor::getInstance()->getProjectPath();
+            system((std::string("cmd.exe /c ") + scriptPath.string() + " " + projectDir).c_str());
             pyxie_printf("Building Windows Desktop: DONE!");
             return 1;
         };
@@ -354,7 +348,9 @@ namespace ige::creator
         auto buildCmd = [](void*)
         {
             pyxie_printf("Building Android...");
-            system("cmd.exe /c tools\\build-game-android.bat");
+            auto scriptPath = fs::path(Editor::getInstance()->getEnginePath()).append("tools").append("build-android.bat");
+            auto projectDir = Editor::getInstance()->getProjectPath();
+            system((std::string("cmd.exe /c ") + scriptPath.string() + " " + projectDir).c_str());
             pyxie_printf("Building Android: DONE!");
             return 1;
         };

@@ -1,10 +1,15 @@
 @echo off
+setlocal enabledelayedexpansion
 
 set CURR_DIR=%CD%
-set PROJECT_DIR=%~dp0..
-set ROM=%PROJECT_DIR%\release\ROM.zip
+SET PROJECT_DIR=%1
 
-call %~dp0\build-rom.bat
+if [%PROJECT_DIR%]==[] (
+    SET PROJECT_DIR=%~dp0\..
+)
+
+call %~dp0\build-rom.bat !PROJECT_DIR!
+set ROM=!PROJECT_DIR!\release\ROM.zip
 
 SET GAME_BUILDER=%APPDATA%\indigames\igeGameBuilder
 
@@ -31,11 +36,11 @@ xcopy /q /y %ROM% %GAME_BUILDER%
 
 call scripts\build-android.bat
 
-if not exist %PROJECT_DIR%\release (
-    mkdir %PROJECT_DIR%\release
+if not exist !PROJECT_DIR!\release (
+    mkdir !PROJECT_DIR!\release
 )
-xcopy /q /y %GAME_BUILDER%\release\*.apk %PROJECT_DIR%\release
-xcopy /q /y %GAME_BUILDER%\release\*.aab %PROJECT_DIR%\release
+xcopy /q /y %GAME_BUILDER%\release\*.apk !PROJECT_DIR!\release
+xcopy /q /y %GAME_BUILDER%\release\*.aab !PROJECT_DIR!\release
 
 %CURR_DIR:~0,2%
 cd %CURR_DIR%

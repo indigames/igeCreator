@@ -53,7 +53,7 @@ namespace ige::creator
     void MenuBar::createFileMenu()
     {
         auto fileMenu = createWidget<Menu>("File");
-        fileMenu->createWidget<MenuItem>("New Project", "CTRL + Shift + N")->getOnClickEvent().addListener([this](auto widget) {
+        fileMenu->createWidget<MenuItem>("Open Project", "CTRL + Shift + O")->getOnClickEvent().addListener([this](auto widget) {
             auto path = OpenFolderDialog("Path", ".", OpenFileDialog::Option::force_path).result();
             if (!path.empty())
             {

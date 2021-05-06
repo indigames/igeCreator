@@ -35,9 +35,15 @@ mkdir %ROM_PATH%
 cd !PROJECT_DIR!
 python %~dp0\build.py -p %PLATFORM_PC% -i . -o %ROM_PATH%\pc -c False
 if %ERRORLEVEL% NEQ 0 goto ERROR
+if exist "%ROM_PATH%\pc\config" (
+    rmdir /s /q  "%ROM_PATH%\pc\config"
+)
 
 python %~dp0\build.py -p %PLATFORM_ANDROID% -i . -o %ROM_PATH%\android -c False
 if %ERRORLEVEL% NEQ 0 goto ERROR
+if exist "%ROM_PATH%\android\config" (
+    rmdir /s /q  "%ROM_PATH%\android\config"
+)
 
 echo Compressing the result...
 cd !PROJECT_DIR!
@@ -50,6 +56,7 @@ if exist %DST_PATH%\ROM.zip (
 %TOOLS_DIR%\7z.exe a %DST_PATH%\ROM.zip %ROM_PATH%
 if exist "!PROJECT_DIR!\config" (
     %TOOLS_DIR%\7z.exe a %DST_PATH%\ROM.zip !PROJECT_DIR!\config
+    %TOOLS_DIR%\7z.exe a %DST_PATH%\ROM.zip !PROJECT_DIR!\config\app.yaml
 )
 if %ERRORLEVEL% NEQ 0 goto ERROR
 

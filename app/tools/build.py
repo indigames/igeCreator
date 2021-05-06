@@ -16,7 +16,7 @@ def build(platform, projectDir, outputDir, compress):
 	tmp = '.tmp/' + apputil.platformName(platform)
 	devtool.compilePrograms(projectDir, tmp)
 	devtool.convertAssets(projectDir, tmp, platform, 1.0)
-	devtool.copyFiles(projectDir, tmp, ['.plist', '.pem', '.json', '.pickle', '.zip', '.txt', '.db', '.ttf', '.otf', '.ogg', '.wav', '.mp3', '.mp4', '.dat', '.ini', '.sqlite', '.pyxd', '.scene', '.prefab', '.efk', '.efkproj'])
+	devtool.copyFiles(projectDir, tmp, ['.plist', '.pem', '.json', '.pickle', '.zip', '.txt', '.db', '.ttf', '.otf', '.ogg', '.wav', '.mp3', '.mp4', '.dat', '.ini', '.sqlite', '.pyxd', '.scene', '.igeproj', '.prefab', '.efk', '.efkproj'])
 	if compress:
 		devtool.packFolders(tmp)
 

@@ -1,14 +1,22 @@
 @echo off
+setlocal enabledelayedexpansion
 
 set CURR_DIR=%CD%
-set PROJECT_DIR=%~dp0..
-set ROM=%PROJECT_DIR%\release\ROM.zip
+SET PROJECT_DIR=%1
 
-call %~dp0\build-rom.bat
+if [%PROJECT_DIR%]==[] (
+    SET PROJECT_DIR=%~dp0\..
+)
+
+call %~dp0\build-rom.bat !PROJECT_DIR!
+set ROM=!PROJECT_DIR!\release\ROM.zip
 
 SET GAME_BUILDER=%APPDATA%\indigames\igeGameBuilder
+set GAME_BUILDER_DRIVE=%GAME_BUILDER:~0,2%
 
-C:
+echo %GAME_BUILDER%
+
+%GAME_BUILDER_DRIVE%
 if not exist "%GAME_BUILDER%" (
     if not exist "%APPDATA%\indigames" (
         md "%APPDATA%\indigames"
@@ -27,14 +35,17 @@ git pull
 git submodule sync
 git submodule update --init --remote
 
+echo %GAME_BUILDER_DRIVE%
+
 xcopy /q /y %ROM% %GAME_BUILDER%
 
 call scripts\build-windows.bat
 
-if not exist %PROJECT_DIR%\release (
-    mkdir %PROJECT_DIR%\release
+if not exist !PROJECT_DIR!\release (
+    mkdir !PROJECT_DIR!\release
 )
-xcopy /q /y %GAME_BUILDER%\release\*.zip %PROJECT_DIR%\release
+xcopy /q /y %GAME_BUILDER%\release\*.zip !PROJECT_DIR!\release
 
-%CURR_DIR:~0,2%
+set CURR_DRIVE=%CURR_DIR:~0,2%
+%CURR_DRIVE%
 cd %CURR_DIR%
