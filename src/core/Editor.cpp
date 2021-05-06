@@ -15,7 +15,6 @@
 #include "core/AutoReleasePool.h"
 #include "core/shortcut/ShortcutController.h"
 
-
 #include <scene/SceneManager.h>
 #include <scene/Scene.h>
 using namespace ige::scene;
@@ -47,16 +46,34 @@ namespace ige::creator
         ImGui::DestroyContext();
     }
 
+    void Editor::setProjectPath(const std::string& path)
+    { 
+        m_projectPath = path;
+        fs::current_path(m_projectPath);
+
+        auto prjPath = fs::path(path);
+        auto prjName = prjPath.stem().string();
+        auto prjFile = prjPath.append(prjName + ".igeproj");
+
+        if (!fs::exists(prjFile) && path.compare(getEnginePath()) != 0)
+        {
+            const auto copyOptions = fs::copy_options::overwrite_existing | fs::copy_options::recursive;
+            fs::copy(GetEnginePath("project_template"), path, copyOptions);
+        }
+    }
+
     void Editor::initialize()
     {
         // Set engine path to the runtime path
         setEnginePath(fs::current_path().string());
 
-        //! Get project location
+        // Get project location
         auto path = OpenFolderDialog("Open Project", ".", OpenFileDialog::Option::force_path).result();
-        if (path.empty())
-            path = fs::path(getEnginePath());
+        if (path.empty()) path = fs::path(getEnginePath());
         setProjectPath(path);
+
+        // Pass engine path to Scene for debug purpose
+        SceneManager::getInstance()->setEditorPath(getEnginePath());
 
         // Init ImGUI
         initImGUI();
@@ -129,13 +146,13 @@ namespace ige::creator
     {
         ImGuiIO& io = ImGui::GetIO();
         ImFontConfig config;
-        io.Fonts->AddFontFromFileTTF("fonts/Manjari-Regular.ttf", 14.0f, &config);
+        io.Fonts->AddFontFromFileTTF(GetEnginePath("fonts/Manjari-Regular.ttf").c_str(), 14.0f, &config);
         ImGui::StyleColorsDark();
     }
 
     void Editor::resetLayout()
     {
-        ImGui::LoadIniSettingsFromDisk("layout.ini");
+        ImGui::LoadIniSettingsFromDisk(GetEnginePath("layout.ini").c_str());
     }
 
     void Editor::toggleFullScreen()
@@ -240,16 +257,25 @@ namespace ige::creator
 
     bool Editor::loadScene(const std::string& path)
     {
+        unloadScene();
+        auto scene = SceneManager::getInstance()->loadScene(path);
+        setCurrentScene(scene);
+        return true;
+    }
+
+    bool Editor::unloadScene()
+    {
         refreshScene();
-        SceneManager::getInstance()->unloadScene(SceneManager::getInstance()->getCurrentScene());
+
+        auto scene = SceneManager::getInstance()->getCurrentScene();
+        if(scene) SceneManager::getInstance()->unloadScene(scene);
+
         if (getCanvas())
         {
             getCanvas()->getHierarchy()->clear();
             getCanvas()->getEditorScene()->clear();
             getCanvas()->getHierarchy()->initialize();
-        }        
-        auto scene = SceneManager::getInstance()->loadScene(path);
-        setCurrentScene(scene);
+        }
         return true;
     }
 
@@ -280,7 +306,7 @@ namespace ige::creator
         auto buildCmd = [](void*)
         {
             pyxie_printf("Converting assets...");
-            system("python.exe convert.py");
+            system((std::string("python.exe ") + GetEnginePath("convert.py")).c_str());
             pyxie_printf("Converting assets DONE!");
             return 1;
         };
@@ -389,5 +415,49 @@ namespace ige::creator
         if (SceneManager::getInstance()->getCurrentScene())
             return SceneManager::getInstance()->getCurrentScene()->loadPrefab(parentId, file);
         return false;
+    }
+
+    const auto script_template =
+        "from igeScene import Script\n\
+\n\
+class %s(Script):\n\
+    def __init__(self, owner):\n\
+        super().__init__(owner)\n\
+        print(f'Hello {self.owner.name}')\n\
+    \n\
+    def onAwake(self):\n\
+        print('onAwake() called!')\n\
+    \n\
+    def onStart(self):\n\
+        print('onStart() called!')\n\
+    \n\
+    def onUpdate(self, dt):\n\
+        pass\n\
+    \n\
+    def onClick(self):\n\
+        print(f'onClick(): {self.owner.name}!')\n\
+    \n\
+    def onDestroy(self):\n\
+        print('onDestroy called!')\n\
+    \n";
+
+    std::string CreateScript(const std::string& name)
+    {
+        char script[512] = { 0 };
+        sprintf(script, script_template, name.c_str());
+
+        auto fileName = name;
+        std::transform(fileName.begin(), fileName.end(), fileName.begin(),
+            [](unsigned char c) { return std::tolower(c); });
+        fs::path path{ "scripts/" + fileName + ".py" };
+        std::ofstream ofs(path);
+        ofs << script;
+        ofs.close();
+        return fileName;
+    }
+
+    std::string GetEnginePath(const std::string& path)
+    {
+        return (fs::path(Editor::getInstance()->getEnginePath()).append(path)).string();
     }
 }

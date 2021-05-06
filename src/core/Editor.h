@@ -43,6 +43,7 @@ namespace ige::creator
         bool openProject(const std::string& path);
         bool createScene();
         bool loadScene(const std::string& path);
+        bool unloadScene();
         bool saveScene();
         void refreshScene();
 
@@ -79,7 +80,7 @@ namespace ige::creator
 
         //! Project path
         const std::string& getProjectPath() const { return m_projectPath; }
-        void setProjectPath(const std::string& path) { m_projectPath = path; }
+        void setProjectPath(const std::string& path);
 
     protected:
         virtual void initImGUI();
@@ -103,4 +104,7 @@ namespace ige::creator
         //! Toggle 3D/2D camera
         bool m_bIs3DCamera = true;
     };
+
+    std::string CreateScript(const std::string& name);
+    std::string GetEnginePath(const std::string& path);
 }

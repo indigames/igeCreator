@@ -172,13 +172,13 @@ namespace ige::creator
     FileSystemWidget::FileSystemWidget()
         : m_isDirty(true)
     {
-        m_iconTextures["folder"] = ResourceCreator::Instance().NewTexture("icon/folder");
-        m_iconTextures["image"] = ResourceCreator::Instance().NewTexture("icon/file_image");
-        m_iconTextures["file"] = ResourceCreator::Instance().NewTexture("icon/file_undefined");
-        m_iconTextures["prefab"] = ResourceCreator::Instance().NewTexture("icon/file_prefab");
-        m_iconTextures["python"] = ResourceCreator::Instance().NewTexture("icon/file_python");
-        m_iconTextures["model"] = ResourceCreator::Instance().NewTexture("icon/file_model");
-        m_iconTextures["font"] = ResourceCreator::Instance().NewTexture("icon/file_font");
+        m_iconTextures["folder"] = ResourceCreator::Instance().NewTexture(GetEnginePath("icons/folder").c_str());
+        m_iconTextures["image"] = ResourceCreator::Instance().NewTexture(GetEnginePath("icons/file_image").c_str());
+        m_iconTextures["file"] = ResourceCreator::Instance().NewTexture(GetEnginePath("icons/file_undefined").c_str());
+        m_iconTextures["prefab"] = ResourceCreator::Instance().NewTexture(GetEnginePath("icons/file_prefab").c_str());
+        m_iconTextures["python"] = ResourceCreator::Instance().NewTexture(GetEnginePath("icons/file_python").c_str());
+        m_iconTextures["model"] = ResourceCreator::Instance().NewTexture(GetEnginePath("icons/file_model").c_str());
+        m_iconTextures["font"] = ResourceCreator::Instance().NewTexture(GetEnginePath("icons/file_font").c_str());
 
         const auto root_path = fs::current_path(); // fs::absolute("");
 

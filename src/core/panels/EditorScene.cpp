@@ -129,10 +129,10 @@ namespace ige::creator
                         });
                     });
 
-                m_grid2D = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, "sprite/grid");
+                m_grid2D = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, GetEnginePath("sprites/grid"));
                 m_grid2D->SetPosition(Vec3(0.f, 0.f, 0.f));
 
-                m_grid3D = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, "sprite/grid");
+                m_grid3D = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, GetEnginePath("sprites/grid"));
                 m_grid3D->SetPosition(Vec3(0.f, 0.f, 0.f));
                 m_grid3D->SetRotation(Quat::RotationX(PI / 2.f));
 
