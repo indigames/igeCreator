@@ -14,3 +14,11 @@
 	path = libs/igeScene
 	url = https://github.com/indigames/igeScene
 	branch = ige-dev
+[submodule "libs/pyxCore"]
+	path = libs/pyxCore
+	url = https://github.com/indigames/pyxCore
+	branch = ige-dev
+[submodule "libs/igeVMath"]
+	path = libs/igeVMath
+	url = https://github.com/indigames/igeVMath
+	branch = ige-dev

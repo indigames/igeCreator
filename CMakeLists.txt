@@ -12,8 +12,11 @@ add_compile_options(/MP /std:c++17)
 # [IGE]: conan build config
 if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    set(CONAN_INCLUDE_DIRS_PYXCORE "")
+    set(CONAN_LIBS_PYXCORE "")
+    set(CONAN_INCLUDE_DIRS_IGEVMATH "")
+    set(CONAN_LIBS_IGEVMATH "")
     conan_basic_setup()
-    list(GET CONAN_INCLUDE_DIRS_PYXCORE 0 PYXCORE_INCLUDE_DIRS)
 endif()
 # [/IGE]
 
@@ -33,6 +36,7 @@ ENDIF (USE_MSVC_RELEASE_RUNTIME_ALWAYS)
 
 add_compile_definitions(EDITOR_MODE=1)
 add_subdirectory(libs/igeScene ${CMAKE_BINARY_DIR}/igeScene)
+add_subdirectory(libs/pyxCore/pyxcore ${CMAKE_BINARY_DIR}/pyxCore)
 
 # Source files
 file(GLOB_RECURSE SRC_FILES
@@ -76,6 +80,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT") # D
 
 target_link_libraries(${TARGET_NAME} 
     igeScene-static
+    pyxCore-static
     ${CONAN_LIBS}
     Crypt32
     opengl32
@@ -97,6 +102,7 @@ target_link_libraries(${TARGET_NAME}
     ws2_32
     Psapi
     Kernel32
+    doboz edgeanim simplecpp tokenizer GLEW
 )
 
 target_include_directories(${TARGET_NAME} PUBLIC
@@ -106,9 +112,18 @@ target_include_directories(${TARGET_NAME} PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/ImGuizmo"
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/pyxcore"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/GLEW"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/edge/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/vectormath/scalar/cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/doboz"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/simplecpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/tokenizer"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/spdlog/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/spdlog/include/spdlog"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeVMath/"
     "${CONAN_INCLUDE_DIRS}"
-    "${PYXCORE_INCLUDE_DIRS}/pyxcore"
-    "${PYXCORE_INCLUDE_DIRS}/ThirdParty/GLEW"
 )
 
 target_compile_definitions(${TARGET_NAME} PUBLIC ${CONAN_DEFINES} Py_NO_ENABLE_SHARED)
