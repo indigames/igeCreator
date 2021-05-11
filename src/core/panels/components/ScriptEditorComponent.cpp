@@ -9,6 +9,7 @@
 
 #include <components/ScriptComponent.h>
 #include <scene/Scene.h>
+#include <scene/SceneManager.h>
 
 NS_IGE_BEGIN
 
@@ -122,7 +123,9 @@ void ScriptEditorComponent::drawScriptComponent()
             case Value::Type::NONE:
             default:
             {
-                auto txtField = m_scriptCompGroup->createWidget<TextField>(key, value.asString());
+                auto sceneObject = SceneManager::getInstance()->getCurrentScene()->findObjectByUUID(value.asString());
+                auto txtField = m_scriptCompGroup->createWidget<TextField>(key, sceneObject ? sceneObject->getName() : value.asString());
+
                 txtField->addPlugin<DDTargetPlugin<uint64_t>>(EDragDropID::OBJECT)->getOnDataReceivedEvent().addListener([key, this](auto val) {
                     auto obj = m_targetObject->getScene()->findObjectById(val);
                     if (obj)
