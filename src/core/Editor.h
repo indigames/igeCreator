@@ -45,6 +45,7 @@ namespace ige::creator
         bool loadScene(const std::string& path);
         bool unloadScene();
         bool saveScene();
+        bool saveSceneAs();
         void refreshScene();
 
         bool cloneObject();

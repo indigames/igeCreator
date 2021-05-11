@@ -80,6 +80,12 @@ namespace ige::creator
             });
         });
 
+        fileMenu->createWidget<MenuItem>("Save Scene As", "CTRL + SHIFT + S")->getOnClickEvent().addListener([this](auto widget) {
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->saveSceneAs();
+            });
+        });
+
         fileMenu->createWidget<MenuItem>("Exit", "ALT + F4")->getOnClickEvent().addListener([](auto widget) {
             TaskManager::getInstance()->addTask([]() {
                 Editor::getApp()->quit();

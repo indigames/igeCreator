@@ -291,7 +291,7 @@ namespace ige::creator
 
         if (SceneManager::getInstance()->getCurrentScene()->getPath().empty())
         {
-            auto selectedFile = SaveFileDialog("Save", ".", { "scene", "*.scene" }).result();
+            auto selectedFile = SaveFileDialog("Save Scene", ".", { "scene", "*.scene" }).result();
             if (!selectedFile.empty())
             {
                 SceneManager::getInstance()->saveScene(selectedFile);
@@ -301,6 +301,20 @@ namespace ige::creator
         {
             SceneManager::getInstance()->saveScene();
         }
+        return true;
+    }
+
+    bool Editor::saveSceneAs()
+    {
+        if (SceneManager::getInstance()->getCurrentScene() == nullptr)
+            return false;
+
+        auto selectedFile = SaveFileDialog("Save Scene As", ".", { "scene", "*.scene" }).result();
+        if (!selectedFile.empty())
+        {
+            SceneManager::getInstance()->saveScene(selectedFile);
+        }
+ 
         return true;
     }
 

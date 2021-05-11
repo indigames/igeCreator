@@ -18,6 +18,7 @@ const char* ShortcutDictionary::DELETE_SCENE_OBJECT_SELECTED = "Edit/Delete Obje
 const char* ShortcutDictionary::COPY_SCENE_OBJECT_SELECTED = "Edit/Copy Object Selected";
 const char* ShortcutDictionary::PASTE_SCENE_OBJECT_SELECTED = "Edit/Paste Object Selected";
 const char* ShortcutDictionary::SAVE_SCENE_SELECTED = "Edit/Save Scene";
+const char* ShortcutDictionary::SAVE_SCENE_AS_SELECTED = "Edit/Save Scene As";
 
 
 void ShortcutDictionary::initShortcuts() {

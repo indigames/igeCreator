@@ -195,6 +195,9 @@ namespace ige::creator
 
         ASSIGN_COMMAND_TO_DICT(ShortcutDictionary::SAVE_SCENE_SELECTED, CALLBACK_0(Editor::saveScene, Editor::getInstance().get()));
         ASSIGN_KEY_TO_COMMAND(ShortcutDictionary::SAVE_SCENE_SELECTED, KeyCode::KEY_S, false, true, false);
+
+        ASSIGN_COMMAND_TO_DICT(ShortcutDictionary::SAVE_SCENE_AS_SELECTED, CALLBACK_0(Editor::saveSceneAs, Editor::getInstance().get()));
+        ASSIGN_KEY_TO_COMMAND(ShortcutDictionary::SAVE_SCENE_AS_SELECTED, KeyCode::KEY_S, false, true, true);
     }
 
     void EditorScene::unregisterShortcut() {
@@ -202,6 +205,8 @@ namespace ige::creator
         REMOVE_COMMAND(ShortcutDictionary::DELETE_SCENE_OBJECT_SELECTED);
         REMOVE_COMMAND(ShortcutDictionary::COPY_SCENE_OBJECT_SELECTED);
         REMOVE_COMMAND(ShortcutDictionary::PASTE_SCENE_OBJECT_SELECTED);
+        REMOVE_COMMAND(ShortcutDictionary::SAVE_SCENE_SELECTED);
+        REMOVE_COMMAND(ShortcutDictionary::SAVE_SCENE_AS_SELECTED);
     }
 
     void EditorScene::initDragDrop()
