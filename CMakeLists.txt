@@ -146,7 +146,7 @@ target_include_directories(${TARGET_NAME} PUBLIC
     "${CONAN_INCLUDE_DIRS}"
 )
 
-target_compile_definitions(${TARGET_NAME} PUBLIC ${CONAN_DEFINES} Py_NO_ENABLE_SHARED)
+target_compile_definitions(${TARGET_NAME} PUBLIC ${CONAN_DEFINES} Py_NO_ENABLE_SHARED USE_PYXCORE USE_IGECORE USE_IGESCENE USE_IGEVMATH)
 
 set_target_properties(
     ${TARGET_NAME} PROPERTIES

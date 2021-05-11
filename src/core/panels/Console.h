@@ -12,16 +12,22 @@ namespace ige::creator
         virtual ~Console();
 
         void onLogged(const char* message);
-
-        virtual void clear();
+        void clearAllLogs();
+        
+        //! Auto clear on start
+        bool isAutoClearOnStart() { return m_bAutoClearOnStart; }
+        void setAutoClearOnStart(bool autoClear = true) { m_bAutoClearOnStart = autoClear; }
 
     protected:
         virtual void initialize() override;
+        virtual void clear();
         virtual void _drawImpl() override;
 
     protected:
+        std::shared_ptr<Group> m_topGroup = nullptr;
         std::shared_ptr<Group> m_logGroup = nullptr;
 
         int _scrollToBottom = 0;
+        bool m_bAutoClearOnStart = true;
     };
 }

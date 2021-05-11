@@ -163,6 +163,9 @@ namespace ige::creator
     {
         if (!m_bIsPlaying)
         {
+            if (Editor::getCanvas()->getConsole()->isAutoClearOnStart())
+                Editor::getCanvas()->getConsole()->clearAllLogs();
+
             SceneManager::getInstance()->setIsEditor(false);
 
             if (SceneManager::getInstance()->getCurrentScene())
