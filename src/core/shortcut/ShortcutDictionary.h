@@ -23,6 +23,8 @@ public:
 	//! Edit
 	const static char* EDIT_SCENE_OBJECT_SELECTED;
 	const static char* DELETE_SCENE_OBJECT_SELECTED;
+	const static char* COPY_SCENE_OBJECT_SELECTED;
+	const static char* PASTE_SCENE_OBJECT_SELECTED;
 
 	static void initShortcuts();
 protected:

@@ -395,6 +395,52 @@ namespace ige::creator
         return true;
     }
 
+    bool Editor::cloneObject()
+    {
+        copyObject();
+        pasteObject();
+        return true;
+    }
+
+    bool Editor::deleteObject()
+    {
+        auto currentObject = Editor::getInstance()->getSelectedObject();
+        if (currentObject)
+        {
+            if (currentObject->getParent())
+                currentObject->getParent()->setSelected(true);
+            else
+                Editor::getInstance()->setSelectedObject(-1);
+            Editor::getCurrentScene()->removeObjectById(currentObject->getId());
+            return true;
+        }
+        return false;
+    }
+
+    void Editor::copyObject() 
+    {
+        auto currentObject = Editor::getInstance()->getSelectedObject();
+        if (currentObject)
+            currentObject->to_json(m_selectedJson);
+        else
+            m_selectedJson = json{};
+    }
+
+    void Editor::pasteObject() 
+    {
+        if (m_selectedJson.is_null())
+            return;
+
+        auto objName = m_selectedJson.value("name", "");
+        auto newObject = Editor::getCurrentScene()->createObject(objName + "_cp");
+        auto uuid = newObject->getUUID();
+        newObject->from_json(m_selectedJson);
+        newObject->setUUID(uuid);
+        newObject->setName(objName + "_cp");
+        newObject->setParent(getSelectedObject() && getSelectedObject()->getParent() ? getSelectedObject()->getParent() : nullptr);
+        newObject->setSelected(true);
+    }
+
     void Editor::toggleLocalGizmo()
     {
         m_bIsLocalGizmo = !m_bIsLocalGizmo;

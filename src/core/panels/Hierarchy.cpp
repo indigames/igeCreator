@@ -93,31 +93,24 @@ namespace ige::creator
 
         auto ctxMenu = node->addPlugin<ContextMenu>(sceneObject.getName() + "_Context");
         addCreationContextMenu(ctxMenu);
-
-        ctxMenu->createWidget<MenuItem>("Clone")->getOnClickEvent().addListener([objId](auto widget) {
-            TaskManager::getInstance()->addTask([objId]() {
-                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                if (currentObject)
-                {
-                    json jObj;
-                    currentObject->to_json(jObj);
-                    auto newObject = Editor::getCurrentScene()->createObject(currentObject->getName() + "_");
-                    auto uuid = newObject->getUUID();
-                    newObject->from_json(jObj);
-                    newObject->setUUID(uuid);
-                    newObject->setName(currentObject->getName() + "_");
-                    newObject->setParent(currentObject->getParent());
-                    newObject->setSelected(true);
-                }
+        ctxMenu->createWidget<MenuItem>("Copy")->getOnClickEvent().addListener([objId](auto widget) {
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->copyObject();
             });
         });
-
-        ctxMenu->createWidget<MenuItem>("Delete")->getOnClickEvent().addListener([objId](auto widget) {
-            TaskManager::getInstance()->addTask([objId](){
-                auto currentObject = Editor::getCurrentScene()->findObjectById(objId);
-                if (currentObject && currentObject->getParent()) currentObject->getParent()->setSelected(true);
-                Editor::getInstance()->setSelectedObject(-1);
-                Editor::getCurrentScene()->removeObjectById(objId);
+        ctxMenu->createWidget<MenuItem>("Paste")->getOnClickEvent().addListener([objId](auto widget) {
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->pasteObject();
+            });
+        });
+        ctxMenu->createWidget<MenuItem>("Duplicate")->getOnClickEvent().addListener([](auto widget) {
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->cloneObject();
+            });
+        });
+        ctxMenu->createWidget<MenuItem>("Delete")->getOnClickEvent().addListener([](auto widget) {
+            TaskManager::getInstance()->addTask([](){
+                Editor::getInstance()->deleteObject();
             });
         });
         m_objectNodeMap[objId] = node;
