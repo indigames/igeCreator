@@ -15,6 +15,8 @@ const char* ShortcutDictionary::TOOL_PIVOT_ORIENTATION = "Tools/Toggle Pivot Ori
 
 const char* ShortcutDictionary::EDIT_SCENE_OBJECT_SELECTED = "Edit/Scene Object Selected";
 const char* ShortcutDictionary::DELETE_SCENE_OBJECT_SELECTED = "Edit/Delete Object Selected";
+const char* ShortcutDictionary::COPY_SCENE_OBJECT_SELECTED = "Edit/Copy Object Selected";
+const char* ShortcutDictionary::PASTE_SCENE_OBJECT_SELECTED = "Edit/Paste Object Selected";
 
 
 void ShortcutDictionary::initShortcuts() {

@@ -5,6 +5,12 @@
 #include "core/Canvas.h"
 #include "core/Editor.h"
 #include "core/widgets/Label.h"
+#include "core/widgets/Button.h"
+#include "core/task/TaskManager.h"
+#include "core/menu/ContextMenu.h"
+#include "core/menu/MenuItem.h"
+#include "core/widgets/Button.h"
+#include "core/widgets/CheckBox.h"
 
 #include <utils/GraphicsHelper.h>
 using namespace ige::scene;
@@ -37,12 +43,30 @@ namespace ige::creator
     
     Console::~Console()
     {
-
+        clear();
     }
 
     void Console::initialize()
     {
         clear();
+
+        m_topGroup = createWidget<Group>("Console Top", false, false);
+        m_topGroup->createWidget<Button>("Clear", ImVec2(40.f, 20.f), true, false)->getOnClickEvent().addListener([this](auto widget) {
+            TaskManager::getInstance()->addTask([this]() {
+                initialize();
+            });
+        });
+        m_topGroup->createWidget<CheckBox>("Auto", m_bAutoClearOnStart)->getOnDataChangedEvent().addListener([this](bool val) {
+            m_bAutoClearOnStart = val;
+        });
+
+        m_logGroup = createWidget<Group>("Console Log", false, false);
+        auto ctxMenu = m_logGroup->addPlugin<WindowContextMenu>("Console_Context");
+        ctxMenu->createWidget<MenuItem>("Clear")->getOnClickEvent().addListener([this](auto widget) {
+            TaskManager::getInstance()->addTask([this]() {
+                initialize();
+            });
+        });
     }
 
     void Console::_drawImpl()
@@ -96,15 +120,20 @@ namespace ige::creator
                     m_size = newSize;
                 }
 
-                drawWidgets();
-
-                if (_scrollToBottom == 1)
-                    _scrollToBottom++;
-                else if (_scrollToBottom > 1) {
-                    auto pos = ImGui::GetScrollMaxY();
-                    ImGui::SetScrollY(pos);
-                    _scrollToBottom = 0;
-                }
+                // draw top group
+                m_topGroup->draw();
+                
+                // draw scrollable group
+                ImGui::BeginChild("log_group_child");
+                    m_logGroup->draw();
+                    if (_scrollToBottom == 1)
+                        _scrollToBottom++;
+                    else if (_scrollToBottom > 1) {
+                        auto pos = ImGui::GetScrollMaxY();
+                        ImGui::SetScrollY(pos);
+                        _scrollToBottom = 0;
+                    }
+                ImGui::EndChild();
             }
             ImGui::End();
         }
@@ -123,9 +152,9 @@ namespace ige::creator
 
     void Console::onLogged(const char* message)
     {
-        if(m_logGroup == nullptr)
-            m_logGroup = createWidget<Group>("Console Log", false, false);
-        
+        if (m_logGroup == nullptr)
+            initialize();
+
         time_t rawtime;
         time(&rawtime);
         auto timeinfo = localtime(&rawtime);
@@ -136,5 +165,10 @@ namespace ige::creator
 
         m_logGroup->createWidget<Label>(msg);
         _scrollToBottom = 1;
+    }
+
+    void Console::clearAllLogs()
+    {
+        initialize();
     }
 }

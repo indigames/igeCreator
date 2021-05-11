@@ -1,1 +1,0 @@
-{"active":true,"childs":[],"comps":[["TransformComponent",{"pos":[0.0,0.0,0.0],"rot":[0.0,0.0,0.0,1.0],"scale":[1.0,1.0,1.0]}],["FigureComponent",{"path":"figure/cube.pyxf"}]],"gui":false,"name":"Cube"}

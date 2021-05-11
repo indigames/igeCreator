@@ -193,7 +193,7 @@ namespace ige::creator
                 case (int)ComponentType::Camera:
                     m_targetObject->addComponent<CameraComponent>("camera");
                     if (!m_targetObject->getComponent<FigureComponent>())
-                        m_targetObject->addComponent<FigureComponent>("figure/camera.pyxf")->setSkipSerialize(true);
+                        m_targetObject->addComponent<FigureComponent>(GetEnginePath("figures/camera.pyxf"))->setSkipSerialize(true);
                     break;
                 case (int)ComponentType::Environment:
                     m_targetObject->addComponent<EnvironmentComponent>();
@@ -207,17 +207,17 @@ namespace ige::creator
                 case (int)ComponentType::DirectionalLight:
                     m_targetObject->addComponent<DirectionalLight>();
                     if (!m_targetObject->getComponent<FigureComponent>() && !m_targetObject->getComponent<SpriteComponent>())
-                        m_targetObject->addComponent<SpriteComponent>("sprite/sun", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
+                        m_targetObject->addComponent<SpriteComponent>(GetEnginePath("sprites/direct-light"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
                     break;
                 case (int)ComponentType::PointLight:
                     m_targetObject->addComponent<PointLight>();
                     if (!m_targetObject->getComponent<FigureComponent>() && !m_targetObject->getComponent<SpriteComponent>())
-                        m_targetObject->addComponent<SpriteComponent>("sprite/light", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
+                        m_targetObject->addComponent<SpriteComponent>(GetEnginePath("sprites/point-light"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
                     break;
                 case (int)ComponentType::SpotLight:
                     m_targetObject->addComponent<SpotLight>();
                     if (!m_targetObject->getComponent<FigureComponent>() && !m_targetObject->getComponent<SpriteComponent>())
-                        m_targetObject->addComponent<SpriteComponent>("sprite/spot-light", Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
+                        m_targetObject->addComponent<SpriteComponent>(GetEnginePath("sprites/spot-light"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
                     break;
                 case (int)ComponentType::Figure:
                     m_targetObject->addComponent<FigureComponent>();

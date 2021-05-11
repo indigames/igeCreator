@@ -77,7 +77,7 @@ void UITextEditorComponent::drawUIText()
         auto uiText = m_targetObject->getComponent<UIText>();
         uiText->setFontPath(txt);
         });
-    //txtFontPath->setEndOfLine(false);
+
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Font))
     {
         txtFontPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
@@ -87,19 +87,6 @@ void UITextEditorComponent::drawUIText()
             });
     }
     
-    //! Browse font
-    /*m_uiTextGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
-        auto currentPath = fs::current_path().string();
-        pyxie_printf("%s\n", currentPath.c_str());
-        auto files = OpenFileDialog("Select Font", currentPath.c_str(), { "Font (*.OTF, *.TTF)", "*.OTF", "*.TFF" }, OpenFileDialog::Option::force_path).result();
-        if (files.size() > 0)
-        {
-            auto uiText = m_targetObject->getComponent<UIText>();
-            uiText->setFontPath(files[0]);
-            dirty();
-        }
-        });*/
-
     std::array size = { (int)uiText->getFontSize() };
     m_uiTextGroup->createWidget<Drag<int>>("Size", ImGuiDataType_S32, size, 1, 4, 128)->getOnDataChangedEvent().addListener([this](auto& val) {
         auto uiText = m_targetObject->getComponent<UIText>();

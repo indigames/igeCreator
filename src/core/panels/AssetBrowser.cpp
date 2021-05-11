@@ -31,13 +31,14 @@ namespace ige::creator
     
     AssetBrowser::~AssetBrowser()
     {
+        m_fileSystemWidget = nullptr;
         removeAllWidgets();
         getOnFocusEvent().removeAllListeners();
     }
 
     void AssetBrowser::initialize()
     {
-        createWidget<FileSystemWidget>();
+        m_fileSystemWidget = createWidget<FileSystemWidget>();
         for (const auto& widget : m_widgets) {
             if (widget != nullptr) {
                 widget.get()->getOnClickEvent().addListener([this](Widget*) {
@@ -50,5 +51,10 @@ namespace ige::creator
     void AssetBrowser::_drawImpl()
     {
         Panel::_drawImpl();
+    }
+    
+    void AssetBrowser::setDirty()
+    {
+        std::static_pointer_cast<FileSystemWidget>(m_fileSystemWidget)->setDirty();
     }
 }

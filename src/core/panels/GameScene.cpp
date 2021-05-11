@@ -163,6 +163,9 @@ namespace ige::creator
     {
         if (!m_bIsPlaying)
         {
+            if (Editor::getCanvas()->getConsole()->isAutoClearOnStart())
+                Editor::getCanvas()->getConsole()->clearAllLogs();
+
             SceneManager::getInstance()->setIsEditor(false);
 
             if (SceneManager::getInstance()->getCurrentScene())
@@ -208,16 +211,13 @@ namespace ige::creator
                     scene = nullptr;
                 }
 
-                scene = SceneManager::getInstance()->loadScene(name + "_tmp");
+                scene = SceneManager::getInstance()->loadScene(name + ".scene.tmp");
                 SceneManager::getInstance()->setCurrentScene(scene);
 
                 Editor::getInstance()->setSelectedObject(m_lastObjectId);
                 m_lastObjectId = -1;
 
-                auto fsPath = fs::path(name + "_tmp");
-                auto ext = fsPath.extension();
-                if (ext.string() != ".scene")
-                    fsPath = fsPath.replace_extension(".scene");
+                auto fsPath = fs::path(name + ".scene.tmp");
                 fs::remove(fsPath);
             }
 

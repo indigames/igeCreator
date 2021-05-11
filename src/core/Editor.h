@@ -6,6 +6,7 @@
 
 #include <utils/PyxieHeaders.h>
 #include <utils/Singleton.h>
+#include <utils/Serialize.h>
 #include <scene/SceneManager.h>
 #include "core/Macros.h"
 
@@ -40,11 +41,16 @@ namespace ige::creator
         bool openDocument();
         bool openAbout();
 
-        bool createProject(const std::string& path);
-        bool createScene();
+        bool openProject(const std::string& path);
         bool loadScene(const std::string& path);
+        bool unloadScene();
         bool saveScene();
         void refreshScene();
+
+        bool cloneObject();
+        void copyObject();
+        void pasteObject();
+        bool deleteObject();
 
         void registerApp(std::shared_ptr<Application> app) { m_app = app; }
 
@@ -79,7 +85,7 @@ namespace ige::creator
 
         //! Project path
         const std::string& getProjectPath() const { return m_projectPath; }
-        void setProjectPath(const std::string& path) { m_projectPath = path; }
+        void setProjectPath(const std::string& path);
 
     protected:
         virtual void initImGUI();
@@ -102,5 +108,11 @@ namespace ige::creator
 
         //! Toggle 3D/2D camera
         bool m_bIs3DCamera = true;
+
+        //! Selected object json
+        json m_selectedJson = json{};
     };
+
+    std::string CreateScript(const std::string& name);
+    std::string GetEnginePath(const std::string& path);
 }

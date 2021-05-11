@@ -70,35 +70,27 @@ namespace ige::creator
         }
         m_currShowcase = nullptr;
 
-        m_grid2D->DecReference();
+        if(m_grid2D) m_grid2D->DecReference();
         m_grid2D = nullptr;
-        m_grid3D->DecReference();
+
+        if(m_grid3D) m_grid3D->DecReference();
         m_grid3D = nullptr;
 
         m_currCamera = nullptr;
-
-        if (m_2dCamera)
-            m_2dCamera->DecReference();
+        if (m_2dCamera) m_2dCamera->DecReference();
         m_2dCamera = nullptr;
 
-        if (m_3dCamera)
-            m_3dCamera->DecReference();
+        if (m_3dCamera) m_3dCamera->DecReference();
         m_3dCamera = nullptr;
 
         getOnSizeChangedEvent().removeAllListeners();
         removeAllWidgets();
 
-        if (m_rtTexture)
-        {
-            m_rtTexture->DecReference();
-            m_rtTexture = nullptr;
-        }
+        if (m_rtTexture) m_rtTexture->DecReference();
+        m_rtTexture = nullptr;        
 
-        if (m_fbo)
-        {
-            m_fbo->DecReference();
-            m_fbo = nullptr;
-        }
+        if (m_fbo) m_fbo->DecReference();
+        m_fbo = nullptr;        
     }
 
     void EditorScene::initialize()
@@ -137,10 +129,10 @@ namespace ige::creator
                         });
                     });
 
-                m_grid2D = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, "sprite/grid");
+                m_grid2D = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, GetEnginePath("sprites/grid"));
                 m_grid2D->SetPosition(Vec3(0.f, 0.f, 0.f));
 
-                m_grid3D = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, "sprite/grid");
+                m_grid3D = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, GetEnginePath("sprites/grid"));
                 m_grid3D->SetPosition(Vec3(0.f, 0.f, 0.f));
                 m_grid3D->SetRotation(Quat::RotationX(PI / 2.f));
 
@@ -194,12 +186,19 @@ namespace ige::creator
 
         ASSIGN_COMMAND_TO_DICT(ShortcutDictionary::DELETE_SCENE_OBJECT_SELECTED, CALLBACK_0(EditorScene::deleteSelectedObject, this));
         ASSIGN_KEY_TO_COMMAND(ShortcutDictionary::DELETE_SCENE_OBJECT_SELECTED, KeyCode::KEY_DEL, false, false, false);
+
+        ASSIGN_COMMAND_TO_DICT(ShortcutDictionary::COPY_SCENE_OBJECT_SELECTED, CALLBACK_0(Editor::copyObject, Editor::getInstance().get()));
+        ASSIGN_KEY_TO_COMMAND(ShortcutDictionary::COPY_SCENE_OBJECT_SELECTED, KeyCode::KEY_C, false, true, false);
+
+        ASSIGN_COMMAND_TO_DICT(ShortcutDictionary::PASTE_SCENE_OBJECT_SELECTED, CALLBACK_0(Editor::pasteObject, Editor::getInstance().get()));
+        ASSIGN_KEY_TO_COMMAND(ShortcutDictionary::PASTE_SCENE_OBJECT_SELECTED, KeyCode::KEY_V, false, true, false);
     }
 
     void EditorScene::unregisterShortcut() {
         REMOVE_COMMAND(ShortcutDictionary::EDIT_SCENE_OBJECT_SELECTED);
-
         REMOVE_COMMAND(ShortcutDictionary::DELETE_SCENE_OBJECT_SELECTED);
+        REMOVE_COMMAND(ShortcutDictionary::COPY_SCENE_OBJECT_SELECTED);
+        REMOVE_COMMAND(ShortcutDictionary::PASTE_SCENE_OBJECT_SELECTED);
     }
 
     void EditorScene::initDragDrop()

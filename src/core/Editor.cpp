@@ -10,10 +10,10 @@
 #include "core/panels/EditorScene.h"
 #include "core/task/TaskManager.h"
 #include "core/dialog/MsgBox.h"
+#include "core/dialog/OpenFileDialog.h"
 #include "core/dialog/SaveFileDialog.h"
 #include "core/AutoReleasePool.h"
 #include "core/shortcut/ShortcutController.h"
-
 
 #include <scene/SceneManager.h>
 #include <scene/Scene.h>
@@ -46,10 +46,31 @@ namespace ige::creator
         ImGui::DestroyContext();
     }
 
+    void Editor::setProjectPath(const std::string& path)
+    { 
+        m_projectPath = path;
+        fs::current_path(m_projectPath);
+
+        auto prjPath = fs::path(path);
+        auto prjName = prjPath.stem().string();
+        auto prjFile = prjPath.append(prjName + ".igeproj");
+
+        if (!fs::exists(prjFile) && path.compare(getEnginePath()) != 0)
+        {
+            const auto copyOptions = fs::copy_options::overwrite_existing | fs::copy_options::recursive;
+            fs::copy(GetEnginePath("project_template"), path, copyOptions);
+        }
+
+        SceneManager::getInstance()->setProjectPath(m_projectPath);
+    }
+
     void Editor::initialize()
     {
         // Set engine path to the runtime path
         setEnginePath(fs::current_path().string());
+
+        // Pass engine path to Scene for debug purpose
+        SceneManager::getInstance()->setEditorPath(getEnginePath());
 
         // Init ImGUI
         initImGUI();
@@ -64,10 +85,9 @@ namespace ige::creator
         //! Init Shortcut
         m_shortcutController = std::make_shared<ShortcutController>();
         m_shortcutController->retain();
+
         //! init default shortcut
         ShortcutDictionary::initShortcuts();
-
-
     }
 
     void Editor::handleEvent(const void* event)
@@ -88,19 +108,6 @@ namespace ige::creator
 
         // Update shortcut
         m_shortcutController->update(dt);
-        // Load scene
-        if (SceneManager::getInstance()->getCurrentScene() == nullptr)
-        {
-            // Load the start scene
-            auto scene = SceneManager::getInstance()->loadScene(m_canvas->getProjectSetting()->getStartScene());
-
-            // If no scene loaded, create empty scene
-            if (scene == nullptr)
-                scene = SceneManager::getInstance()->createScene();
-
-            // Set current scene to new loaded/created scene
-            Editor::setCurrentScene(scene);
-        }
     }
 
     void Editor::render()
@@ -133,13 +140,13 @@ namespace ige::creator
     {
         ImGuiIO& io = ImGui::GetIO();
         ImFontConfig config;
-        io.Fonts->AddFontFromFileTTF("fonts/Manjari-Regular.ttf", 14.0f, &config);
+        io.Fonts->AddFontFromFileTTF(GetEnginePath("fonts/Manjari-Regular.ttf").c_str(), 14.0f, &config);
         ImGui::StyleColorsDark();
     }
 
     void Editor::resetLayout()
     {
-        ImGui::LoadIniSettingsFromDisk("layout.ini");
+        ImGui::LoadIniSettingsFromDisk(GetEnginePath("layout.ini").c_str());
     }
 
     void Editor::toggleFullScreen()
@@ -192,34 +199,88 @@ namespace ige::creator
         return m_selectedObject;
     }
 
-    bool Editor::createProject(const std::string& path)
+    bool Editor::openProject(const std::string& path)
     {
-        if (!fs::is_empty(fs::path(path)))
+        unloadScene();
+        setProjectPath(path);
+
+        auto prjPath = fs::path(path);
+        auto prjName = prjPath.stem().string();
+        auto prjFile = prjPath.append(prjName + ".igeproj");
+        auto loaded = false;
+
+        if (fs::exists(prjFile))
         {
-            auto btn = MsgBox("Warning", "Folder is not empty.\nDo you want to create project anyway?", MsgBox::EBtnLayout::yes_no, MsgBox::EMsgType::info).result();
-            if (btn == MsgBox::EButton::no)
-                return false;
+            std::ifstream file(prjFile.string());
+            if (file.is_open())
+            {
+                json settingsJson;
+                file >> settingsJson;
+                file.close();
+                auto scenePath = fs::path(getProjectPath()).append(settingsJson.value("startScene", "scenes/main.scene"));
+                if (fs::exists(scenePath))
+                    loaded = loadScene(scenePath.string());
+            }
         }
         
-        return true;
-    }
+        if(!loaded)
+        {
+            auto scene = SceneManager::getInstance()->createScene();
+            SceneManager::getInstance()->setCurrentScene(scene);
+            SceneManager::getInstance()->saveScene(prjFile.parent_path().append("scenes").append("main.scene"));
 
-    bool Editor::createScene()
-    {
-        refreshScene();
-        SceneManager::getInstance()->unloadScene(SceneManager::getInstance()->getCurrentScene());
-        setCurrentScene(SceneManager::getInstance()->createScene());
-        return true;
+            json settingsJson = json{
+                {"startScene", "scenes/main.scene"},
+            };
+
+            std::ofstream file(prjFile.string());
+            file << settingsJson;
+            file.close();
+            loaded = true;
+        }
+
+        // Refresh asset browser
+        if (getCanvas() && getCanvas()->getAssetBrowser())
+        {
+            getCanvas()->getAssetBrowser()->setDirty();
+        }
+
+
+        return loaded;
     }
 
     bool Editor::loadScene(const std::string& path)
     {
+        unloadScene();
+        auto scenePath = fs::path(path);
+        if (fs::exists(scenePath))
+        {
+            auto scene = SceneManager::getInstance()->loadScene(path);
+            setCurrentScene(scene);
+        }
+        else
+        {
+            auto scene = SceneManager::getInstance()->createScene();
+            scene->setPath(path);
+            setCurrentScene(scene);
+            saveScene();
+        }
+        return true;
+    }
+
+    bool Editor::unloadScene()
+    {
         refreshScene();
-        SceneManager::getInstance()->unloadScene(SceneManager::getInstance()->getCurrentScene());
-        getCanvas()->getHierarchy()->clear();
-        getCanvas()->getEditorScene()->clear();
-        getCanvas()->getHierarchy()->initialize();
-        setCurrentScene(SceneManager::getInstance()->loadScene(path));
+
+        auto scene = SceneManager::getInstance()->getCurrentScene();
+        if(scene) SceneManager::getInstance()->unloadScene(scene);
+
+        if (getCanvas())
+        {
+            getCanvas()->getHierarchy()->clear();
+            getCanvas()->getEditorScene()->clear();
+            getCanvas()->getHierarchy()->initialize();
+        }
         return true;
     }
 
@@ -242,7 +303,7 @@ namespace ige::creator
 
     void Editor::refreshScene() {
         setSelectedObject(-1);
-        getCanvas()->getEditorScene()->refresh();
+        if(getCanvas()) getCanvas()->getEditorScene()->refresh();
     }
 
     bool Editor::convertAssets()
@@ -250,7 +311,7 @@ namespace ige::creator
         auto buildCmd = [](void*)
         {
             pyxie_printf("Converting assets...");
-            system("python.exe convert.py");
+            system((std::string("python.exe ") + GetEnginePath("convert.py")).c_str());
             pyxie_printf("Converting assets DONE!");
             return 1;
         };
@@ -265,7 +326,9 @@ namespace ige::creator
         auto buildCmd = [](void*)
         {
             pyxie_printf("Building ROM...");
-            system("cmd.exe /c tools\\build-rom.bat");
+            auto scriptPath = fs::path(Editor::getInstance()->getEnginePath()).append("tools").append("build-rom.bat");
+            auto projectDir = Editor::getInstance()->getProjectPath();
+            system((std::string("cmd.exe /c ") + scriptPath.string() + " " + projectDir).c_str());
             pyxie_printf("Building ROM: DONE!");
             return 1;
         };
@@ -280,7 +343,9 @@ namespace ige::creator
         auto buildCmd = [](void*)
         {
             pyxie_printf("Building Windows Desktop...");
-            system("cmd.exe /c tools\\build-game-pc.bat");
+            auto scriptPath = fs::path(Editor::getInstance()->getEnginePath()).append("tools").append("build-windows.bat");
+            auto projectDir = Editor::getInstance()->getProjectPath();
+            system((std::string("cmd.exe /c ") + scriptPath.string() + " " + projectDir).c_str());
             pyxie_printf("Building Windows Desktop: DONE!");
             return 1;
         };
@@ -295,7 +360,9 @@ namespace ige::creator
         auto buildCmd = [](void*)
         {
             pyxie_printf("Building Android...");
-            system("cmd.exe /c tools\\build-game-android.bat");
+            auto scriptPath = fs::path(Editor::getInstance()->getEnginePath()).append("tools").append("build-android.bat");
+            auto projectDir = Editor::getInstance()->getProjectPath();
+            system((std::string("cmd.exe /c ") + scriptPath.string() + " " + projectDir).c_str());
             pyxie_printf("Building Android: DONE!");
             return 1;
         };
@@ -326,6 +393,52 @@ namespace ige::creator
         auto msgBox = MsgBox("About", "igeCreator \n Version: " + std::string(VERSION) + "\n Indi Games © 2020", MsgBox::EBtnLayout::ok, MsgBox::EMsgType::info);
         while (!msgBox.ready(1000));
         return true;
+    }
+
+    bool Editor::cloneObject()
+    {
+        copyObject();
+        pasteObject();
+        return true;
+    }
+
+    bool Editor::deleteObject()
+    {
+        auto currentObject = Editor::getInstance()->getSelectedObject();
+        if (currentObject)
+        {
+            if (currentObject->getParent())
+                currentObject->getParent()->setSelected(true);
+            else
+                Editor::getInstance()->setSelectedObject(-1);
+            Editor::getCurrentScene()->removeObjectById(currentObject->getId());
+            return true;
+        }
+        return false;
+    }
+
+    void Editor::copyObject() 
+    {
+        auto currentObject = Editor::getInstance()->getSelectedObject();
+        if (currentObject)
+            currentObject->to_json(m_selectedJson);
+        else
+            m_selectedJson = json{};
+    }
+
+    void Editor::pasteObject() 
+    {
+        if (m_selectedJson.is_null())
+            return;
+
+        auto objName = m_selectedJson.value("name", "");
+        auto newObject = Editor::getCurrentScene()->createObject(objName + "_cp");
+        auto uuid = newObject->getUUID();
+        newObject->from_json(m_selectedJson);
+        newObject->setUUID(uuid);
+        newObject->setName(objName + "_cp");
+        newObject->setParent(getSelectedObject() && getSelectedObject()->getParent() ? getSelectedObject()->getParent() : nullptr);
+        newObject->setSelected(true);
     }
 
     void Editor::toggleLocalGizmo()
@@ -359,5 +472,53 @@ namespace ige::creator
         if (SceneManager::getInstance()->getCurrentScene())
             return SceneManager::getInstance()->getCurrentScene()->loadPrefab(parentId, file);
         return false;
+    }
+
+    const auto script_template =
+        "from igeScene import Script\n\
+\n\
+class %s(Script):\n\
+    def __init__(self, owner):\n\
+        super().__init__(owner)\n\
+        print(f'Hello {self.owner.name}')\n\
+    \n\
+    def onAwake(self):\n\
+        print('onAwake() called!')\n\
+    \n\
+    def onStart(self):\n\
+        print('onStart() called!')\n\
+    \n\
+    def onUpdate(self, dt):\n\
+        pass\n\
+    \n\
+    def onClick(self):\n\
+        print(f'onClick(): {self.owner.name}!')\n\
+    \n\
+    def onDestroy(self):\n\
+        print('onDestroy called!')\n\
+    \n";
+
+    std::string CreateScript(const std::string& name)
+    {
+        char script[512] = { 0 };
+        sprintf(script, script_template, name.c_str());
+
+        auto fileName = name;
+        std::transform(fileName.begin(), fileName.end(), fileName.begin(),
+            [](unsigned char c) { return std::tolower(c); });
+        fs::path path{ "scripts/" + fileName + ".py" };
+        std::ofstream ofs(path);
+        ofs << script;
+        ofs.close();
+        return fileName;
+    }
+
+    std::string GetEnginePath(const std::string& path)
+    {
+        if (Editor::getInstance()->getEnginePath().compare(Editor::getInstance()->getProjectPath()) == 0)
+            return path;
+        auto retPath = (fs::path(Editor::getInstance()->getEnginePath()).append(path)).string();
+        std::replace(retPath.begin(), retPath.end(), '\\', '/');
+        return retPath;
     }
 }
