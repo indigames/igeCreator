@@ -25,6 +25,7 @@ public:
 	const static char* DELETE_SCENE_OBJECT_SELECTED;
 	const static char* COPY_SCENE_OBJECT_SELECTED;
 	const static char* PASTE_SCENE_OBJECT_SELECTED;
+	const static char* SAVE_SCENE_SELECTED;
 
 	static void initShortcuts();
 protected:

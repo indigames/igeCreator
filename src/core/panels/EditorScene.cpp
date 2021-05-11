@@ -192,6 +192,9 @@ namespace ige::creator
 
         ASSIGN_COMMAND_TO_DICT(ShortcutDictionary::PASTE_SCENE_OBJECT_SELECTED, CALLBACK_0(Editor::pasteObject, Editor::getInstance().get()));
         ASSIGN_KEY_TO_COMMAND(ShortcutDictionary::PASTE_SCENE_OBJECT_SELECTED, KeyCode::KEY_V, false, true, false);
+
+        ASSIGN_COMMAND_TO_DICT(ShortcutDictionary::SAVE_SCENE_SELECTED, CALLBACK_0(Editor::saveScene, Editor::getInstance().get()));
+        ASSIGN_KEY_TO_COMMAND(ShortcutDictionary::SAVE_SCENE_SELECTED, KeyCode::KEY_S, false, true, false);
     }
 
     void EditorScene::unregisterShortcut() {
