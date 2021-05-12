@@ -52,6 +52,8 @@ namespace ige::creator
 
     void EditorScene::clear()
     {
+        resetShowcase();
+
         m_bIsInitialized = false;
 
         if (m_imageWidget) m_imageWidget.reset();
@@ -60,15 +62,6 @@ namespace ige::creator
         m_currentScene = nullptr;
         if (m_gizmo) m_gizmo.reset();
         m_gizmo = nullptr;
-
-        if (m_currShowcase)
-        {
-            if (m_currCamera == m_2dCamera)
-                m_currShowcase->Remove(m_grid2D);
-            else
-                m_currShowcase->Remove(m_grid3D);
-        }
-        m_currShowcase = nullptr;
 
         if(m_grid2D) m_grid2D->DecReference();
         m_grid2D = nullptr;
@@ -192,6 +185,9 @@ namespace ige::creator
 
         ASSIGN_COMMAND_TO_DICT(ShortcutDictionary::PASTE_SCENE_OBJECT_SELECTED, CALLBACK_0(Editor::pasteObject, Editor::getInstance().get()));
         ASSIGN_KEY_TO_COMMAND(ShortcutDictionary::PASTE_SCENE_OBJECT_SELECTED, KeyCode::KEY_V, false, true, false);
+
+        ASSIGN_COMMAND_TO_DICT(ShortcutDictionary::DUPLICATE_SCENE_OBJECT_SELECTED, CALLBACK_0(Editor::cloneObject, Editor::getInstance().get()));
+        ASSIGN_KEY_TO_COMMAND(ShortcutDictionary::DUPLICATE_SCENE_OBJECT_SELECTED, KeyCode::KEY_D, false, true, false);
 
         ASSIGN_COMMAND_TO_DICT(ShortcutDictionary::SAVE_SCENE_SELECTED, CALLBACK_0(Editor::saveScene, Editor::getInstance().get()));
         ASSIGN_KEY_TO_COMMAND(ShortcutDictionary::SAVE_SCENE_SELECTED, KeyCode::KEY_S, false, true, false);
@@ -341,12 +337,11 @@ namespace ige::creator
 
     void EditorScene::setTargetObject(const std::shared_ptr<SceneObject>& obj)
     {
+        if (obj == nullptr)
+            return;
+
         if (!isOpened() || !m_bIsInitialized)
             return;
-        if (obj == nullptr)
-        {
-            return;
-        }
 
         if (obj->getScene()->getShowcase() == nullptr) return;
         if (!SceneManager::getInstance()->isEditor()) return;
@@ -392,7 +387,7 @@ namespace ige::creator
         {
             if (m_currCamera == m_2dCamera)
                 m_currShowcase->Remove(m_grid2D);
-            else
+            else if (m_currCamera == m_3dCamera)
                 m_currShowcase->Remove(m_grid3D);
         }
         m_currShowcase = nullptr;

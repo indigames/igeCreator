@@ -2,6 +2,7 @@
 #include "core/plugin/DragDropPlugin.h"
 #include "core/FileHandle.h"
 #include "core/Editor.h"
+#include "core/task/TaskManager.h"
 
 #include "core/widgets/FileSystemWidget.h"
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
@@ -315,11 +316,20 @@ namespace ige::creator
                 }
 
                 const auto on_double_click = [&]() {
-#ifdef WIN32
-                    PVOID OldValue = nullptr;
-                    Wow64DisableWow64FsRedirection(&OldValue);
-                    ShellExecuteA(NULL, "open", absolute_path.string().c_str(), NULL, NULL, SW_RESTORE);
-#endif
+                    if (IsFormat(E_FileExts::Scene, file_ext))
+                    {
+                        TaskManager::getInstance()->addTask([&]() {
+                            Editor::getInstance()->loadScene(absolute_path.string());
+                        });
+                    }
+                    else
+                    {
+                    #ifdef WIN32
+                        PVOID OldValue = nullptr;
+                        Wow64DisableWow64FsRedirection(&OldValue);
+                        ShellExecuteA(NULL, "open", absolute_path.string().c_str(), NULL, NULL, SW_RESTORE);
+                    #endif
+                    }
                 };
 
                 DrawEntry(icon, false, filename, absolute_path, is_selected(absolute_path),

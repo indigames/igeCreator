@@ -114,8 +114,11 @@ namespace ige::creator
             });
         });
         m_objectNodeMap[objId] = node;
-
         m_NodeCollapseMap[objId] = true;
+
+        TaskManager::getInstance()->addTask([&]() {
+            Editor::getInstance()->setSelectedObject(sceneObject.getId());
+        });
     }
 
     void Hierarchy::onSceneObjectDeleted(SceneObject& sceneObject)
@@ -158,12 +161,15 @@ namespace ige::creator
         {
             if (sceneObject.getParent() && sceneObject.getParent()->getChildren().size() == 0)
             {
-                auto parentWidget = m_objectNodeMap.at(sceneObject.getParent()->getId());
-                parentWidget->setIsLeaf(true);
+                if (m_objectNodeMap.count(sceneObject.getParent()->getId()) > 0)
+                {
+                    auto parentWidget = m_objectNodeMap.at(sceneObject.getParent()->getId());
+                    parentWidget->setIsLeaf(true);
 
-                auto widget = nodePair->second;
-                if (widget->hasContainer())
-                    widget->getContainer()->removeWidget(widget);
+                    auto widget = nodePair->second;
+                    if (widget->hasContainer())
+                        widget->getContainer()->removeWidget(widget);
+                }
             }
         }
     }

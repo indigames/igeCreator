@@ -48,20 +48,15 @@ namespace ige::creator
 
     void Editor::setProjectPath(const std::string& path)
     { 
-        m_projectPath = path;
-        fs::current_path(m_projectPath);
-
-        auto prjPath = fs::path(path);
-        auto prjName = prjPath.stem().string();
-        auto prjFile = prjPath.append(prjName + ".igeproj");
-
-        if (!fs::exists(prjFile) && path.compare(getEnginePath()) != 0)
+        if (m_projectPath.compare(path) != 0)
         {
-            const auto copyOptions = fs::copy_options::overwrite_existing | fs::copy_options::recursive;
-            fs::copy(GetEnginePath("project_template"), path, copyOptions);
+            unloadScene();
+            m_projectPath = path;
+            fs::current_path(m_projectPath);
+            SceneManager::getInstance()->setProjectPath(m_projectPath);
+            if (getCanvas() && getCanvas()->getAssetBrowser())
+                getCanvas()->getAssetBrowser()->setDirty();
         }
-
-        SceneManager::getInstance()->setProjectPath(m_projectPath);
     }
 
     void Editor::initialize()
@@ -171,7 +166,9 @@ namespace ige::creator
     {
         if (objId == (uint64_t)-1 || !SceneManager::getInstance()->getCurrentScene())
         {
-            setSelectedObject(nullptr);
+            m_selectedObject = nullptr;
+            if (m_canvas != nullptr)
+                m_canvas->setTargetObject(nullptr);
             return;
         }
         auto obj = SceneManager::getInstance()->getCurrentScene()->findObjectById(objId);
@@ -183,14 +180,19 @@ namespace ige::creator
         if (m_selectedObject != obj)
         {
             // Set previous object as not selected
-            if(m_selectedObject) m_selectedObject->setSelected(false);
+            if(m_selectedObject != nullptr)
+                m_selectedObject->setSelected(false);
 
             // Notify the views
-            if (obj) obj->setSelected(true);
-            if (m_canvas) m_canvas->setTargetObject(obj);
+            if (obj != nullptr)
+                obj->setSelected(true);
 
             // Set current one as selected
             m_selectedObject = obj;
+
+            // Notify the views
+            if (m_canvas != nullptr)
+                m_canvas->setTargetObject(m_selectedObject);
         }
     }
 
@@ -199,11 +201,8 @@ namespace ige::creator
         return m_selectedObject;
     }
 
-    bool Editor::openProject(const std::string& path)
+    bool Editor::createProject(const std::string& path)
     {
-        unloadScene();
-        setProjectPath(path);
-
         auto prjPath = fs::path(path);
         auto prjName = prjPath.stem().string();
         auto prjFile = prjPath.append(prjName + ".igeproj");
@@ -211,6 +210,43 @@ namespace ige::creator
 
         if (fs::exists(prjFile))
         {
+            auto btn = MsgBox("Project Exist", "Do you want to overwrite?", MsgBox::EBtnLayout::ok_cancel, MsgBox::EMsgType::question).result();
+            if (btn == MsgBox::EButton::cancel)
+            {
+                return false;
+            }
+        }
+
+        if (path.compare(getEnginePath()) != 0)
+        {
+            fs::remove_all(path);
+            const auto copyOptions = fs::copy_options::overwrite_existing | fs::copy_options::recursive;
+            fs::copy(GetEnginePath("project_template"), path, copyOptions);
+        }
+
+        setProjectPath(path);
+        createScene();
+        SceneManager::getInstance()->saveScene(prjFile.parent_path().append("scenes").append("main.scene"));
+                json settingsJson = json{
+            {"startScene", "scenes/main.scene"},
+        };
+        std::ofstream file(prjFile.string());
+        file << settingsJson;
+        file.close();
+        return true;
+    }
+    
+    bool Editor::openProject(const std::string& path)
+    {
+        auto prjPath = fs::path(path);
+        auto prjName = prjPath.stem().string();
+        auto prjFile = prjPath.append(prjName + ".igeproj");
+        auto loaded = false;
+
+        if (fs::exists(prjFile))
+        {
+            setProjectPath(path);
+
             std::ifstream file(prjFile.string());
             if (file.is_open())
             {
@@ -219,34 +255,37 @@ namespace ige::creator
                 file.close();
                 auto scenePath = fs::path(getProjectPath()).append(settingsJson.value("startScene", "scenes/main.scene"));
                 if (fs::exists(scenePath))
+                {
                     loaded = loadScene(scenePath.string());
+                }
             }
         }
-        
-        if(!loaded)
+        else
         {
-            auto scene = SceneManager::getInstance()->createScene();
-            SceneManager::getInstance()->setCurrentScene(scene);
-            SceneManager::getInstance()->saveScene(prjFile.parent_path().append("scenes").append("main.scene"));
-
-            json settingsJson = json{
-                {"startScene", "scenes/main.scene"},
-            };
-
-            std::ofstream file(prjFile.string());
-            file << settingsJson;
-            file.close();
-            loaded = true;
+            auto btn = MsgBox("Project Does Not Exist", "Do you want to create?", MsgBox::EBtnLayout::ok_cancel, MsgBox::EMsgType::question).result();
+            if (btn == MsgBox::EButton::ok)
+            {
+                auto fsPath = fs::path(path);
+                fs::remove_all(fsPath);
+                return createProject(path);
+            }
         }
-
-        // Refresh asset browser
-        if (getCanvas() && getCanvas()->getAssetBrowser())
-        {
-            getCanvas()->getAssetBrowser()->setDirty();
-        }
-
 
         return loaded;
+    }
+
+    bool Editor::createScene()
+    {
+        unloadScene();
+        if (getCanvas()) getCanvas()->getHierarchy()->initialize();
+        auto scene = SceneManager::getInstance()->createScene();
+        setCurrentScene(scene);
+        if (getCanvas())
+        {
+            if (getCanvas()->getMenuBar()) getCanvas()->getMenuBar()->initialize();
+            if (getCanvas()->getProjectSetting()) getCanvas()->getProjectSetting()->initialize();
+        }
+        return true;
     }
 
     bool Editor::loadScene(const std::string& path)
@@ -255,15 +294,14 @@ namespace ige::creator
         auto scenePath = fs::path(path);
         if (fs::exists(scenePath))
         {
+            if (getCanvas()) getCanvas()->getHierarchy()->initialize();
             auto scene = SceneManager::getInstance()->loadScene(path);
             setCurrentScene(scene);
-        }
-        else
-        {
-            auto scene = SceneManager::getInstance()->createScene();
-            scene->setPath(path);
-            setCurrentScene(scene);
-            saveScene();
+            if (getCanvas())
+            {
+                if(getCanvas()->getMenuBar()) getCanvas()->getMenuBar()->initialize();
+                if(getCanvas()->getProjectSetting()) getCanvas()->getProjectSetting()->initialize();
+            }                
         }
         return true;
     }
@@ -271,16 +309,8 @@ namespace ige::creator
     bool Editor::unloadScene()
     {
         refreshScene();
-
         auto scene = SceneManager::getInstance()->getCurrentScene();
         if(scene) SceneManager::getInstance()->unloadScene(scene);
-
-        if (getCanvas())
-        {
-            getCanvas()->getHierarchy()->clear();
-            getCanvas()->getEditorScene()->clear();
-            getCanvas()->getHierarchy()->initialize();
-        }
         return true;
     }
 
@@ -319,8 +349,12 @@ namespace ige::creator
     }
 
     void Editor::refreshScene() {
+        if (getCanvas())
+        {
+            getCanvas()->getHierarchy()->clear();
+            getCanvas()->getEditorScene()->clear();
+        }
         setSelectedObject(-1);
-        if(getCanvas()) getCanvas()->getEditorScene()->refresh();
     }
 
     bool Editor::convertAssets()

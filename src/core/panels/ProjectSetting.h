@@ -13,6 +13,7 @@ namespace ige::creator
         virtual ~ProjectSetting();
 
         virtual void clear();
+        virtual void initialize() override;
 
         const std::string& getStartScene() const { return m_startScene;  }
         void setStartScene(const std::string& scene);
@@ -24,7 +25,6 @@ namespace ige::creator
         void setGlobalVolume(float vol) { m_globalVolume = vol; }
 
     protected:
-        virtual void initialize() override;
         virtual void _drawImpl() override;
 
         //! Save settings
