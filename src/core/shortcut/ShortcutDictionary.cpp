@@ -18,9 +18,12 @@ const char* ShortcutDictionary::DELETE_SCENE_OBJECT_SELECTED = "Edit/Delete Obje
 const char* ShortcutDictionary::COPY_SCENE_OBJECT_SELECTED = "Edit/Copy Object Selected";
 const char* ShortcutDictionary::PASTE_SCENE_OBJECT_SELECTED = "Edit/Paste Object Selected";
 const char* ShortcutDictionary::DUPLICATE_SCENE_OBJECT_SELECTED = "Edit/Duplicate Object Selected";
-const char* ShortcutDictionary::SAVE_SCENE_SELECTED = "Edit/Save Scene";
-const char* ShortcutDictionary::SAVE_SCENE_AS_SELECTED = "Edit/Save Scene As";
 
+const char* ShortcutDictionary::FILE_NEW_PROJECT_SELECTED = "File/New Project";
+const char* ShortcutDictionary::FILE_OPEN_PROJECT_SELECTED = "File/Open Project";
+const char* ShortcutDictionary::FILE_NEW_SCENE_SELECTED = "File/New Scene";
+const char* ShortcutDictionary::FILE_SAVE_SCENE_SELECTED = "File/Save Scene";
+const char* ShortcutDictionary::FILE_SAVE_SCENE_AS_SELECTED = "File/Save Scene As";
 
 void ShortcutDictionary::initShortcuts() {
 	initDefaultShortcutCommand();

@@ -201,7 +201,19 @@ namespace ige::creator
         return m_selectedObject;
     }
 
-    bool Editor::createProject(const std::string& path)
+    bool Editor::createProject()
+    {
+        auto path = OpenFolderDialog("New Project").result();
+        if (!path.empty())
+        {
+            TaskManager::getInstance()->addTask([path]() {
+                Editor::getInstance()->createProjectInternal(path);
+            });
+        }
+        return true;
+    }
+
+    bool Editor::createProjectInternal(const std::string& path)
     {
         auto prjPath = fs::path(path);
         auto prjName = prjPath.stem().string();
@@ -236,7 +248,19 @@ namespace ige::creator
         return true;
     }
     
-    bool Editor::openProject(const std::string& path)
+    bool Editor::openProject()
+    {
+        auto path = OpenFolderDialog("Open Project", ".", OpenFileDialog::Option::force_path).result();
+        if (!path.empty())
+        {
+            TaskManager::getInstance()->addTask([path]() {
+                Editor::getInstance()->openProjectInternal(path);
+            });
+        }
+        return true;
+    }
+
+    bool Editor::openProjectInternal(const std::string& path)
     {
         auto prjPath = fs::path(path);
         auto prjName = prjPath.stem().string();
@@ -267,7 +291,7 @@ namespace ige::creator
             {
                 auto fsPath = fs::path(path);
                 fs::remove_all(fsPath);
-                return createProject(path);
+                return createProjectInternal(path);
             }
         }
 
@@ -321,7 +345,7 @@ namespace ige::creator
 
         if (SceneManager::getInstance()->getCurrentScene()->getPath().empty())
         {
-            auto selectedFile = SaveFileDialog("Save Scene", ".", { "scene", "*.scene" }).result();
+            auto selectedFile = SaveFileDialog("Save Scene", "scenes", { "scene", "*.scene" }).result();
             if (!selectedFile.empty())
             {
                 SceneManager::getInstance()->saveScene(selectedFile);
@@ -339,7 +363,7 @@ namespace ige::creator
         if (SceneManager::getInstance()->getCurrentScene() == nullptr)
             return false;
 
-        auto selectedFile = SaveFileDialog("Save Scene As", ".", { "scene", "*.scene" }).result();
+        auto selectedFile = SaveFileDialog("Save Scene As", "scenes", { "scene", "*.scene" }).result();
         if (!selectedFile.empty())
         {
             SceneManager::getInstance()->saveScene(selectedFile);

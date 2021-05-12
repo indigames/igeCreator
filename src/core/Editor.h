@@ -41,8 +41,11 @@ namespace ige::creator
         bool openDocument();
         bool openAbout();
 
-        bool createProject(const std::string& path);
-        bool openProject(const std::string& path);
+        bool createProject();
+        bool openProject();
+
+        bool createProjectInternal(const std::string& path);
+        bool openProjectInternal(const std::string& path);
 
         bool createScene();
         bool loadScene(const std::string& path);

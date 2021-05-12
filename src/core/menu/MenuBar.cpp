@@ -49,23 +49,15 @@ namespace ige::creator
     {
         auto projectOpened = (Editor::getInstance()->getProjectPath().length() > 0);
         auto fileMenu = createWidget<Menu>("File");
-        fileMenu->createWidget<MenuItem>("New Project", "CTRL + Shift + N")->getOnClickEvent().addListener([this](auto widget) {
-            auto path = OpenFolderDialog("New Project").result();
-            if (!path.empty())
-            {
-                TaskManager::getInstance()->addTask([path]() {
-                    Editor::getInstance()->createProject(path);
-                });
-            }
+        fileMenu->createWidget<MenuItem>("New Project", "CTRL + SHIFT + N")->getOnClickEvent().addListener([this](auto widget) {
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->createProject();
+            });
         });
-        fileMenu->createWidget<MenuItem>("Open Project", "CTRL + Shift + O")->getOnClickEvent().addListener([this](auto widget) {
-            auto path = OpenFolderDialog("Open Project", ".", OpenFileDialog::Option::force_path).result();
-            if (!path.empty())
-            {
-                TaskManager::getInstance()->addTask([path]() {
-                    Editor::getInstance()->openProject(path);
-                });
-            }
+        fileMenu->createWidget<MenuItem>("Open Project", "CTRL + SHIFT + O")->getOnClickEvent().addListener([this](auto widget) {
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->openProject();
+            });
         });
         fileMenu->createWidget<MenuItem>("New Scene", "CTRL + ALT + N", projectOpened)->getOnClickEvent().addListener([this](auto widget) {
             TaskManager::getInstance()->addTask([](){

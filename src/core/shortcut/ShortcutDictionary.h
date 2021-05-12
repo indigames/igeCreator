@@ -26,8 +26,13 @@ public:
 	const static char* COPY_SCENE_OBJECT_SELECTED;
 	const static char* PASTE_SCENE_OBJECT_SELECTED;
 	const static char* DUPLICATE_SCENE_OBJECT_SELECTED;
-	const static char* SAVE_SCENE_SELECTED;
-	const static char* SAVE_SCENE_AS_SELECTED;
+
+	//! File
+	const static char* FILE_NEW_PROJECT_SELECTED;
+	const static char* FILE_OPEN_PROJECT_SELECTED;
+	const static char* FILE_NEW_SCENE_SELECTED;
+	const static char* FILE_SAVE_SCENE_SELECTED;
+	const static char* FILE_SAVE_SCENE_AS_SELECTED;
 
 	static void initShortcuts();
 protected:
