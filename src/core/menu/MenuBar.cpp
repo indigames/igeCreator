@@ -17,27 +17,22 @@ namespace ige::creator
     MenuBar::MenuBar(const std::string& name, bool enable)
         : Widget(enable), m_name(name)
     {
+        initialize();
     }
 
     MenuBar::~MenuBar()
     {
-
     }
 
     void MenuBar::initialize()
     {
+        removeAllPlugins();
+        removeAllWidgets();
         createFileMenu();
     }
 
     void MenuBar::_drawImpl()
     {
-        static bool initialized = false;
-        if (!initialized)
-        {
-            initialize();
-            initialized = true;
-        }
-
         if (m_widgets.empty()) return;
 
         if(ImGui::BeginMainMenuBar())
@@ -52,34 +47,33 @@ namespace ige::creator
 
     void MenuBar::createFileMenu()
     {
+        auto projectOpened = (Editor::getInstance()->getProjectPath().length() > 0);
         auto fileMenu = createWidget<Menu>("File");
-        fileMenu->createWidget<MenuItem>("Open Project", "CTRL + Shift + O")->getOnClickEvent().addListener([this](auto widget) {
-            auto path = OpenFolderDialog("Path", ".", OpenFileDialog::Option::force_path).result();
-            if (!path.empty())
-            {
-                TaskManager::getInstance()->addTask([path]() {
-                    Editor::getInstance()->openProject(path);
-                });
-            }
+        fileMenu->createWidget<MenuItem>("New Project", "CTRL + SHIFT + N")->getOnClickEvent().addListener([this](auto widget) {
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->createProject();
+            });
         });
-
-        fileMenu->createWidget<MenuItem>("Open Scene", "CTRL + O")->getOnClickEvent().addListener([this](auto widget){
-            auto selectedFiles = OpenFileDialog("Open", ".", { "scene", "*.scene" }).result();
-            if (!selectedFiles.empty() && !selectedFiles[0].empty())
-            {
-                auto sceneFile = selectedFiles[0];
-                TaskManager::getInstance()->addTask([sceneFile](){
-                    Editor::getInstance()->loadScene(sceneFile);
-                });
-            }
+        fileMenu->createWidget<MenuItem>("Open Project", "CTRL + SHIFT + O")->getOnClickEvent().addListener([this](auto widget) {
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->openProject();
+            });
         });
-
-        fileMenu->createWidget<MenuItem>("Save Scene", "CTRL + S")->getOnClickEvent().addListener([this](auto widget) {
+        fileMenu->createWidget<MenuItem>("New Scene", "CTRL + ALT + N", projectOpened)->getOnClickEvent().addListener([this](auto widget) {
+            TaskManager::getInstance()->addTask([](){
+                Editor::getInstance()->createScene();
+            });
+        });
+        fileMenu->createWidget<MenuItem>("Save Scene", "CTRL + S", projectOpened)->getOnClickEvent().addListener([this](auto widget) {
             TaskManager::getInstance()->addTask([]() {
                 Editor::getInstance()->saveScene();
             });
         });
-
+        fileMenu->createWidget<MenuItem>("Save Scene As", "CTRL + SHIFT + S", projectOpened)->getOnClickEvent().addListener([this](auto widget) {
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->saveSceneAs();
+            });
+        });
         fileMenu->createWidget<MenuItem>("Exit", "ALT + F4")->getOnClickEvent().addListener([](auto widget) {
             TaskManager::getInstance()->addTask([]() {
                 Editor::getApp()->quit();
@@ -92,7 +86,6 @@ namespace ige::creator
                 Editor::getInstance()->toggleFullScreen();
             });
         });
-
         viewMenu->createWidget<MenuItem>("Reset")->getOnClickEvent().addListener([](auto widget) {
             TaskManager::getInstance()->addTask([]() {
                 Editor::getInstance()->resetLayout();

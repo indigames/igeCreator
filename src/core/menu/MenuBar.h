@@ -11,10 +11,10 @@ namespace ige::creator
     {
     public:
         MenuBar(const std::string& name = "", bool enable = true);
-        virtual ~MenuBar();        
+        virtual ~MenuBar();
+        virtual void initialize();
 
     protected:
-        virtual void initialize();
         virtual void _drawImpl();
     
     private:

@@ -121,7 +121,6 @@ protected:
     //! Showcase
     Showcase* m_currShowcase = nullptr;
 
-
     //! Gizmo
     std::shared_ptr<Gizmo> m_gizmo = nullptr;
 

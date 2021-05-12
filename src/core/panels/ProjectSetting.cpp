@@ -22,6 +22,17 @@ namespace ige::creator
     ProjectSetting::ProjectSetting(const std::string& name, const Panel::Settings& settings)
         : Panel(name, settings)
     {
+    }
+
+    ProjectSetting::~ProjectSetting()
+    {
+        clear();
+    }
+
+    void ProjectSetting::initialize()
+    {
+        clear();
+
         json settingsJson;
 
         auto prjPath = fs::path(Editor::getInstance()->getProjectPath());
@@ -40,29 +51,13 @@ namespace ige::creator
         {
             setStartScene(settingsJson.value("startScene", "scenes/main.scene"));
         }
-            
-    }
 
-    ProjectSetting::~ProjectSetting()
-    {
-        clear();
-    }
-
-    void ProjectSetting::initialize()
-    {
-        clear();
-        
         auto sceneGroup = createWidget<Group>("Scene Manager");
         auto startScene = sceneGroup->createWidget<TextField>("Start scene", getStartScene().c_str(), true);
         startScene->addPlugin<DDTargetPlugin<std::string>>(".scene")->getOnDataReceivedEvent().addListener([this](auto val) {
             setStartScene(val);
-            redraw();
-        });
-
-        createWidget<Separator>();
-        auto saveBtn = createWidget<Button>("Save", ImVec2(64.f, 0.f));
-        saveBtn->getOnClickEvent().addListener([this](auto widget) {
             saveSettings();
+            redraw();
         });
     }
 
