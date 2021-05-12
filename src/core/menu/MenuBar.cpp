@@ -49,15 +49,11 @@ namespace ige::creator
     {
         auto projectOpened = (Editor::getInstance()->getProjectPath().length() > 0);
         auto fileMenu = createWidget<Menu>("File");
-        fileMenu->createWidget<MenuItem>("New Project", "CTRL + SHIFT + N")->getOnClickEvent().addListener([this](auto widget) {
-            TaskManager::getInstance()->addTask([]() {
-                Editor::getInstance()->createProject();
-            });
+        fileMenu->createWidget<MenuItem>("New Project", "CTRL + SHIFT + N")->getOnClickEvent().addListener([this](auto widget) {            
+            Editor::getInstance()->createProject();
         });
-        fileMenu->createWidget<MenuItem>("Open Project", "CTRL + SHIFT + O")->getOnClickEvent().addListener([this](auto widget) {
-            TaskManager::getInstance()->addTask([]() {
-                Editor::getInstance()->openProject();
-            });
+        fileMenu->createWidget<MenuItem>("Open Project", "CTRL + SHIFT + O")->getOnClickEvent().addListener([this](auto widget) {            
+            Editor::getInstance()->openProject();
         });
         fileMenu->createWidget<MenuItem>("New Scene", "CTRL + ALT + N", projectOpened)->getOnClickEvent().addListener([this](auto widget) {
             TaskManager::getInstance()->addTask([](){
