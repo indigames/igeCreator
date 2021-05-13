@@ -376,25 +376,10 @@ namespace ige::creator
                 m_currShowcase->Add(m_grid3D);
             }
         }
-
-        /*auto canvas = obj->getCanvas();
-        if (canvas)
-        {
-            auto canvasSize = canvas->getDesignCanvasSize();
-            if (m_currCamera == m_2dCamera)
-            {
-                m_currCamera->SetOrthoHeight(canvasSize.Y() * 0.5f);
-                m_grid2D->SetScale({ canvasSize.Y() * 0.125f , canvasSize.Y() * 0.125f, 1.f });
-            }
-
-            auto transformToViewport = Mat4::Translate(Vec3(-canvasSize.X() * 0.5f, -canvasSize.Y() * 0.5f, 0.f));
-            canvas->setCanvasToViewportMatrix(transformToViewport);
-        }*/
-
-        //set2DMode(canvas != nullptr);
     }
 
-    void EditorScene::resetShowcase() {
+    void EditorScene::resetShowcase() 
+    {
         if (m_currShowcase)
         {
             if (m_currCamera == m_2dCamera)

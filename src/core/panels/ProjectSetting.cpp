@@ -91,8 +91,6 @@ namespace ige::creator
     {
         json settingsJson = json{
             {"startScene", getStartScene()},
-            {"gravity", getGravity()},
-            {"globalVolume", getGlobalVolume()},
         };
 
         auto prjPath = fs::path(Editor::getInstance()->getProjectPath());
