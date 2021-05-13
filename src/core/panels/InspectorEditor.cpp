@@ -8,6 +8,7 @@
 #include "core/panels/components/SpriteEditorComponent.h"
 #include "core/panels/components/ScriptEditorComponent.h"
 #include "core/panels/components/TransformEditorComponent.h"
+#include "core/panels/components/BoneTransformEditorComponent.h"
 
 #include "core/panels/components/light/AmbientLightEditorComponent.h"
 #include "core/panels/components/light/DirectionalLightEditorComponent.h"
@@ -122,6 +123,11 @@ std::shared_ptr<EditorComponent> InspectorEditor::addComponent(int type, Compone
 	case ComponentType::Figure:
 	{
 		view = std::make_shared<FigureEditorComponent>();
+	}
+	break;	
+	case ComponentType::BoneTransform:
+	{
+		view = std::make_shared<BoneTransformEditorComponent>();
 	}
 	break;
 	case ComponentType::Sprite:

@@ -115,10 +115,6 @@ namespace ige::creator
         });
         m_objectNodeMap[objId] = node;
         m_NodeCollapseMap[objId] = true;
-
-        TaskManager::getInstance()->addTask([&]() {
-            Editor::getInstance()->setSelectedObject(sceneObject.getId());
-        });
     }
 
     void Hierarchy::onSceneObjectDeleted(SceneObject& sceneObject)
@@ -253,6 +249,7 @@ namespace ige::creator
             auto newObject = Editor::getCurrentScene()->createObject("Camera", currentObject);
             newObject->addComponent<CameraComponent>("camera");
             newObject->addComponent<FigureComponent>(GetEnginePath("figures/camera.pyxf"))->setSkipSerialize(true);
+            newObject->setSelected(true);
         });
 
         // Primitives
@@ -262,36 +259,42 @@ namespace ige::creator
                 auto currentObject = Editor::getInstance()->getSelectedObject();
                 auto newObject = Editor::getCurrentScene()->createObject("Cube", currentObject);
                 newObject->addComponent<FigureComponent>("figures/cube.pyxf");
+                newObject->setSelected(true);
             });
 
             shapeMenu->createWidget<MenuItem>("Plane")->getOnClickEvent().addListener([](auto widget) {
                 auto currentObject = Editor::getInstance()->getSelectedObject();
                 auto newObject = Editor::getCurrentScene()->createObject("Plane", currentObject);
                 newObject->addComponent<FigureComponent>("figures/plane.pyxf");
+                newObject->setSelected(true);
             });
 
             shapeMenu->createWidget<MenuItem>("Sphere")->getOnClickEvent().addListener([](auto widget) {
                 auto currentObject = Editor::getInstance()->getSelectedObject();
                 auto newObject = Editor::getCurrentScene()->createObject("Sphere", currentObject);
                 newObject->addComponent<FigureComponent>("figures/sphere.pyxf");
+                newObject->setSelected(true);
             });
 
             shapeMenu->createWidget<MenuItem>("Cone")->getOnClickEvent().addListener([](auto widget) {
                 auto currentObject = Editor::getInstance()->getSelectedObject();
                 auto newObject = Editor::getCurrentScene()->createObject("Cone", currentObject);
                 newObject->addComponent<FigureComponent>("figures/cone.pyxf");
+                newObject->setSelected(true);
             });
 
             shapeMenu->createWidget<MenuItem>("Cylinder")->getOnClickEvent().addListener([](auto widget) {
                 auto currentObject = Editor::getInstance()->getSelectedObject();
                 auto newObject = Editor::getCurrentScene()->createObject("Cylinder", currentObject);
                 newObject->addComponent<FigureComponent>("figures/cylinder.pyxf");
+                newObject->setSelected(true);
             });
 
             shapeMenu->createWidget<MenuItem>("Torus")->getOnClickEvent().addListener([](auto widget) {
                 auto currentObject = Editor::getInstance()->getSelectedObject();
                 auto newObject = Editor::getCurrentScene()->createObject("Torus", currentObject);
                 newObject->addComponent<FigureComponent>("figures/torus.pyxf");
+                newObject->setSelected(true);
             });
         }
 
@@ -311,6 +314,7 @@ namespace ige::creator
                 newObject->getTransform()->setPosition({ 0.f, 5.f, 0.f });
                 newObject->getTransform()->setRotation({ DEGREES_TO_RADIANS(90.f), 0.f, .0f });
                 newObject->addComponent<SpriteComponent>(GetEnginePath("sprites/direct-light"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
+                newObject->setSelected(true);
             });
 
             lightMenu->createWidget<MenuItem>("Point Light")->getOnClickEvent().addListener([](auto widget) {
@@ -324,6 +328,7 @@ namespace ige::creator
                 auto newObject = Editor::getCurrentScene()->createObject("Point Light", currentObject);
                 newObject->addComponent<PointLight>();
                 newObject->addComponent<SpriteComponent>(GetEnginePath("sprites/point-light"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
+                newObject->setSelected(true);
             });
 
             lightMenu->createWidget<MenuItem>("Spot Light")->getOnClickEvent().addListener([](auto widget) {
@@ -337,6 +342,7 @@ namespace ige::creator
                 auto newObject = Editor::getCurrentScene()->createObject("Spot Light", currentObject);
                 newObject->addComponent<SpotLight>();
                 newObject->addComponent<SpriteComponent>(GetEnginePath("sprites/spot-light"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
+                newObject->setSelected(true);
             });
         }
 
@@ -347,12 +353,14 @@ namespace ige::creator
                 auto currentObject = Editor::getInstance()->getSelectedObject();
                 auto newObject = Editor::getCurrentScene()->createObject("Audio Source", currentObject, true);
                 newObject->addComponent<AudioSource>();
+                newObject->setSelected(true);
             });
 
             audioMenu->createWidget<MenuItem>("Audio Listener")->getOnClickEvent().addListener([](auto widget) {
                 auto currentObject = Editor::getInstance()->getSelectedObject();
                 auto newObject = Editor::getCurrentScene()->createObject("Audio Listener", currentObject, true);
                 newObject->addComponent<AudioListener>();
+                newObject->setSelected(true);
             });
         }
 
@@ -363,6 +371,7 @@ namespace ige::creator
                 auto currentObject = Editor::getInstance()->getSelectedObject();
                 auto newObject = Editor::getCurrentScene()->createObject("Particle", currentObject, true);
                 newObject->addComponent<Particle>();
+                newObject->setSelected(true);
             });
         }
 
@@ -375,6 +384,7 @@ namespace ige::creator
                 auto newObject = Editor::getCurrentScene()->createObject("UIImage", currentObject, true);
                 auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
                 newObject->addComponent<UIImage>("sprites/rect", rect->getSize());
+                newObject->setSelected(true);
             });
 
             guiMenu->createWidget<MenuItem>("UIText")->getOnClickEvent().addListener([](auto widget) {
@@ -382,6 +392,7 @@ namespace ige::creator
                 auto newObject = Editor::getCurrentScene()->createObject("UIText", currentObject, true);
                 auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
                 newObject->addComponent<UIText>("Text");
+                newObject->setSelected(true);
             });
 
             guiMenu->createWidget<MenuItem>("UITextField")->getOnClickEvent().addListener([](auto widget) {
@@ -401,6 +412,7 @@ namespace ige::creator
                         }
                     }
                 });
+                newObject->setSelected(true);
             });
 
             guiMenu->createWidget<MenuItem>("UIButton")->getOnClickEvent().addListener([](auto widget) {
@@ -412,6 +424,7 @@ namespace ige::creator
                 // Create Label
                 auto newBtnLabel = Editor::getCurrentScene()->createObject("Label", newBtn, true, Vec2());
                 newBtnLabel->addComponent<UIText>("Button");
+                newBtn->setSelected(true);
             });
 
             guiMenu->createWidget<MenuItem>("UISlider")->getOnClickEvent().addListener([](auto widget) {
@@ -464,7 +477,8 @@ namespace ige::creator
                 newHandle->setIsRaycastTarget(false);
                 sliderComp->setFillObject(newFill);
                 sliderComp->setHandleObject(newHandle);
-                });
+                newSlider->setSelected(true);
+            });
         }
     }
 

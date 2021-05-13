@@ -166,9 +166,7 @@ namespace ige::creator
     {
         if (objId == (uint64_t)-1 || !SceneManager::getInstance()->getCurrentScene())
         {
-            m_selectedObject = nullptr;
-            if (m_canvas != nullptr)
-                m_canvas->setTargetObject(nullptr);
+            setSelectedObject(nullptr);
             return;
         }
         auto obj = SceneManager::getInstance()->getCurrentScene()->findObjectById(objId);

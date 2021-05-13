@@ -24,6 +24,7 @@
 #include <components/TransformComponent.h>
 #include <components/EnvironmentComponent.h>
 #include <components/FigureComponent.h>
+#include <components/BoneTransform.h>
 #include <components/SpriteComponent.h>
 #include <components/ScriptComponent.h>
 #include <components/light/AmbientLight.h>
@@ -105,8 +106,6 @@ namespace ige::creator
 
     void Inspector::initialize()
     {
-        clear();
-
         if (m_targetObject == nullptr)
             return;
 
@@ -142,6 +141,7 @@ namespace ige::creator
         {
             m_createCompCombo->addChoice((int)ComponentType::Figure, "Figure");
             m_createCompCombo->addChoice((int)ComponentType::Sprite, "Sprite");
+            m_createCompCombo->addChoice((int)ComponentType::BoneTransform, "BoneTransform");
 
             if (m_targetObject->getComponent<PhysicObject>() == nullptr && m_targetObject->getComponent<PhysicSoftBody>() == nullptr)
             {
@@ -225,6 +225,9 @@ namespace ige::creator
                 case (int)ComponentType::Sprite:
                     m_targetObject->addComponent<SpriteComponent>();
                     break;
+                case (int)ComponentType::BoneTransform:
+                    m_targetObject->addComponent<BoneTransform>()->initialize();
+                    break;
                 case (int)ComponentType::UIImage:
                     m_targetObject->addComponent<UIImage>();
                     break;
@@ -306,6 +309,10 @@ namespace ige::creator
             if (component->getName() == "TransformComponent")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::Transform, component.get(), header);
+            }
+            else if (component->getName() == "BoneTransform")
+            {
+                m_inspectorEditor->addComponent((int)ComponentType::BoneTransform, component.get(), header);
             }
             else if (component->getName() == "CameraComponent")
             {
@@ -502,10 +509,11 @@ namespace ige::creator
         {
             if (m_targetObject && m_transformListenerId != (uint64_t)-1)
                 m_targetObject->getTransformChangedEvent().removeListener(m_transformListenerId);
-            m_targetObject = obj;
 
             clear();
             m_inspectorEditor->clear();
+
+            m_targetObject = obj;            
             m_inspectorEditor->setTargetObject(m_targetObject);
             if (m_targetObject != nullptr)
             {

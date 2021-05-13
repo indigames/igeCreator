@@ -35,6 +35,7 @@ enum class ComponentType
     Environment,
     Figure,
     Sprite,
+    BoneTransform,
     Script,
     AmbientLight,
     DirectionalLight,
