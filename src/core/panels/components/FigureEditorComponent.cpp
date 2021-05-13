@@ -142,15 +142,6 @@ void FigureEditorComponent::drawFigureComponent()
             }
         }
 
-        if (figure->NumJoints() > 0)
-        {
-            auto joinGroup = m_figureCompGroup->createWidget<Group>("Joint", true, false, Group::E_Align::LEFT, false);
-            for (int i = 0; i < figure->NumJoints(); i++)
-            {
-                joinGroup->createWidget<TextField>("", figure->GetJointName(i), true);
-            }
-        }
-
         if (figure->NumMaterials() > 0)
         {
             auto materialGroup = m_figureCompGroup->createWidget<Group>("Material", true, false, Group::E_Align::LEFT, false);

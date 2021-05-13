@@ -13,7 +13,8 @@
 
 NS_IGE_BEGIN
 
-RectTransformEditorComponent::RectTransformEditorComponent() {
+RectTransformEditorComponent::RectTransformEditorComponent() 
+{
     m_anchor_transform_ParentGroup = nullptr;
     m_pivotGroup = nullptr;
     m_anchorGroup = nullptr;
