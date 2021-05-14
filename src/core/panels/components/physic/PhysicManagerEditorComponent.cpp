@@ -95,7 +95,7 @@ void PhysicManagerEditorComponent::drawPhysicManager()
         });
 
     std::array gravity = { physicComp->getGravity().x(), physicComp->getGravity().y(), physicComp->getGravity().z() };
-    m_physicManagerGroup->createWidget<Drag<float, 3>>("Gravity", ImGuiDataType_Float, gravity, 0.001f, 0.001f)->getOnDataChangedEvent().addListener([this](auto& val) {
+    m_physicManagerGroup->createWidget<Drag<float, 3>>("Gravity", ImGuiDataType_Float, gravity, 0.001f)->getOnDataChangedEvent().addListener([this](auto& val) {
         auto physicComp = m_targetObject->getComponent<PhysicManager>();
         physicComp->setGravity({ val[0], val[1], val[2] });
         });
