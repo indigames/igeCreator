@@ -39,14 +39,14 @@ public:
 
 	void clear();
 	void setParentGroup(std::shared_ptr<Group> componentGroup);
-	void setTargetObject(const std::shared_ptr<SceneObject>& obj);
+	void setTargetObject(SceneObject* obj);
 
 	void makeDirty(uint64_t componentInstanceId);
 	void makeDirty(Component* component);
 	void addWatcherValue(uint64_t componentInstanceId, std::type_index _typeId, void* address, std::any value);
 protected:
 	std::shared_ptr<Group> m_componentGroup = nullptr;
-	std::shared_ptr<SceneObject> m_targetObject = nullptr;
+	SceneObject* m_targetObject = nullptr;
 
 	std::map<uint64_t, std::shared_ptr<EditorComponent>> m_components;
 	std::map<uint64_t, std::shared_ptr<Group>> m_groups;

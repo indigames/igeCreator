@@ -37,7 +37,7 @@ void EditorComponent::redraw() {
 	m_bisDirty = false;
 }
 
-void EditorComponent::setTargetObject(const std::shared_ptr<SceneObject>& obj) {
+void EditorComponent::setTargetObject(SceneObject* obj) {
 	if (m_targetObject != obj)
 	{
 		m_targetObject = obj;

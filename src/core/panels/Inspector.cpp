@@ -72,18 +72,24 @@ using namespace pyxie;
 
 namespace ige::creator
 {
-    IgnoreTransformEventScope::IgnoreTransformEventScope(std::shared_ptr<SceneObject> obj, const std::function<void(SceneObject&)>& task)
+    IgnoreTransformEventScope::IgnoreTransformEventScope(SceneObject* obj, const std::function<void(SceneObject&)>& task)
         : m_object(obj), m_task(task)
     {
-        auto listenerId = Editor::getInstance()->getCanvas()->getInspector()->getTransformListenerId();
-        if (listenerId != (uint64_t)-1)
-            m_object->getTransformChangedEvent().removeListener(listenerId);
+        if (m_object)
+        {
+            auto listenerId = Editor::getInstance()->getCanvas()->getInspector()->getTransformListenerId();
+            if (listenerId != (uint64_t)-1)
+                m_object->getTransformChangedEvent().removeListener(listenerId);
+        }
     }
 
     IgnoreTransformEventScope::~IgnoreTransformEventScope()
     {
-        auto listenerId = m_object->getTransformChangedEvent().addListener(m_task);
-        Editor::getInstance()->getCanvas()->getInspector()->setTransformListenerId(listenerId);
+        if (m_object)
+        {
+            auto listenerId = m_object->getTransformChangedEvent().addListener(m_task);
+            Editor::getInstance()->getCanvas()->getInspector()->setTransformListenerId(listenerId);
+        }        
         m_object = nullptr;
         m_task = nullptr;
     }
@@ -503,7 +509,7 @@ namespace ige::creator
         m_targetObject = nullptr;
     }
 
-    void Inspector::setTargetObject(const std::shared_ptr<SceneObject> &obj)
+    void Inspector::setTargetObject(SceneObject* obj)
     {
         if (m_targetObject != obj)
         {

@@ -5,22 +5,22 @@
 
 NS_IGE_BEGIN
 
-void EditorUtils::Tools_View() {
+void EditorUtils::Tools_View() 
+{
     bool focused = Editor::getCanvas()->getHierarchy()->isFocused() || Editor::getCanvas()->getEditorScene()->isFocused();
-    auto target = Editor::getInstance()->getSelectedObject();
-    if (target && focused) {
+    auto targets = Editor::getCurrentScene()->getTargets();
+    if (!targets.empty() && focused) {
         auto gizmo = Editor::getCanvas()->getEditorScene()->getGizmo();
-        if (gizmo)
-        {
-            gizmo->setVisible(false);
-        }
+        if (gizmo) gizmo->setVisible(false);
     }
 }
 
-void EditorUtils::Tools_Move() {
+void EditorUtils::Tools_Move()
+{
     bool focused = Editor::getCanvas()->getHierarchy()->isFocused() || Editor::getCanvas()->getEditorScene()->isFocused();
-    auto target = Editor::getInstance()->getSelectedObject();
-    if (target && focused) {
+    auto targets = Editor::getCurrentScene()->getTargets();
+    if (!targets.empty() && focused)
+    {
         auto gizmo = Editor::getCanvas()->getEditorScene()->getGizmo();
         if (gizmo)
         {
@@ -30,10 +30,12 @@ void EditorUtils::Tools_Move() {
     }
 }
 
-void EditorUtils::Tools_Rotate() {
+void EditorUtils::Tools_Rotate() 
+{
     bool focused = Editor::getCanvas()->getHierarchy()->isFocused() || Editor::getCanvas()->getEditorScene()->isFocused();
-    auto target = Editor::getInstance()->getSelectedObject();
-    if (target && focused) {
+    auto targets = Editor::getCurrentScene()->getTargets();
+    if (!targets.empty() && focused)
+    {
         auto gizmo = Editor::getCanvas()->getEditorScene()->getGizmo();
         if (gizmo)
         {
@@ -43,10 +45,12 @@ void EditorUtils::Tools_Rotate() {
     }
 }
 
-void EditorUtils::Tools_Scale() {
+void EditorUtils::Tools_Scale()
+{
     bool focused = Editor::getCanvas()->getHierarchy()->isFocused() || Editor::getCanvas()->getEditorScene()->isFocused();
-    auto target = Editor::getInstance()->getSelectedObject();
-    if (target && focused) {
+    auto targets = Editor::getCurrentScene()->getTargets();
+    if (!targets.empty() && focused)
+    {
         auto gizmo = Editor::getCanvas()->getEditorScene()->getGizmo();
         if (gizmo)
         {
@@ -56,11 +60,13 @@ void EditorUtils::Tools_Scale() {
     }
 }
 
-void EditorUtils::Tools_TogglePivotPosition() {
+void EditorUtils::Tools_TogglePivotPosition() 
+{
 
 }
 
-void EditorUtils::Tools_TogglePivotOrientation() {
+void EditorUtils::Tools_TogglePivotOrientation()
+{
     Editor::getInstance()->toggleLocalGizmo();
 }
 

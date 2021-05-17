@@ -49,7 +49,7 @@ namespace ige::creator
         m_panels.clear();
     }
 
-    void Canvas::setTargetObject(const std::shared_ptr<SceneObject>& obj)
+    void Canvas::setTargetObject(SceneObject* obj)
     {
         getInspector()->setTargetObject(obj);
         getEditorScene()->setTargetObject(obj);

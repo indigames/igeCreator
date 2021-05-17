@@ -9,6 +9,7 @@
 #include <scene/SceneObject.h>
 #include "core/panels/Hierarchy.h"
 #include "core/Editor.h"
+#include "core/Canvas.h"
 #include "core/menu/ContextMenu.h"
 #include "core/menu/MenuItem.h"
 #include "core/task/TaskManager.h"
@@ -41,9 +42,10 @@ namespace ige::creator
         SceneObject::getCreatedEvent().addListener(std::bind(&Hierarchy::onSceneObjectCreated, this, std::placeholders::_1));
         SceneObject::getDestroyedEvent().addListener(std::bind(&Hierarchy::onSceneObjectDeleted, this, std::placeholders::_1));
         SceneObject::getAttachedEvent().addListener(std::bind(&Hierarchy::onSceneObjectAttached, this, std::placeholders::_1));
-        SceneObject::getDetachedEvent().addListener(std::bind(&Hierarchy::onSceneObjectDetached, this, std::placeholders::_1));
-        SceneObject::getSelectedEvent().addListener(std::bind(&Hierarchy::onSceneObjectSelected, this, std::placeholders::_1));
-        SceneObject::getDeselectedEvent().addListener(std::bind(&Hierarchy::onSceneObjectDeselected, this, std::placeholders::_1));
+        SceneObject::getDetachedEvent().addListener(std::bind(&Hierarchy::onSceneObjectDetached, this, std::placeholders::_1));        
+        Scene::getTargetAddedEvent().addListener(std::bind(&Hierarchy::onTargetAdded, this, std::placeholders::_1));
+        Scene::getTargetRemovedEvent().addListener(std::bind(&Hierarchy::onTargetRemoved, this, std::placeholders::_1));
+        Scene::getTargetClearedEvent().addListener(std::bind(&Hierarchy::onTargetCleared, this));
     }
 
     Hierarchy::~Hierarchy()
@@ -52,8 +54,9 @@ namespace ige::creator
         SceneObject::getDestroyedEvent().removeAllListeners();
         SceneObject::getAttachedEvent().removeAllListeners();
         SceneObject::getDetachedEvent().removeAllListeners();
-        SceneObject::getSelectedEvent().removeAllListeners();
-        SceneObject::getDeselectedEvent().removeAllListeners();
+        Scene::getTargetAddedEvent().removeAllListeners();
+        Scene::getTargetRemovedEvent().removeAllListeners();
+        Scene::getTargetClearedEvent().removeAllListeners();
         clear();
         m_groupLayout = nullptr;
     }
@@ -66,21 +69,39 @@ namespace ige::creator
         auto node = createWidget<TreeNode>(sceneObject.getName(), false, sceneObject.getChildren().size() == 0);
         node->getOnClickEvent().addListener([objId, this](auto widget) {
             auto object = Editor::getCurrentScene()->findObjectById(objId);
-            if (object) object->setSelected(true);
-            else pyxie_printf("Cant find Id %ld \n", objId);
+            if (object)
+            {
+                auto keyboard = Editor::getApp()->getInputHandler()->getKeyboard();
+                if (keyboard->isKeyDown(KeyCode::KEY_LCTRL) || keyboard->isKeyDown(KeyCode::KEY_RCTRL)
+                    || keyboard->isKeyHold(KeyCode::KEY_LCTRL) || keyboard->isKeyHold(KeyCode::KEY_RCTRL))
+                {
+                    if (Editor::getCurrentScene()->getTargets().size() > 1 && object->isSelected())
+                        Editor::getCurrentScene()->removeTarget(object.get());
+                    else
+                        Editor::getCurrentScene()->addTarget(object.get(), false);
+                }
+                else
+                {
+                    Editor::getCurrentScene()->addTarget(object.get(), true);
+                }
+            }
         });
 
         //! Update List Content Size 
         node->getOnClosedEvent().addListener([objId, this]() {
             auto object = Editor::getCurrentScene()->findObjectById(objId);
-            this->onSceneObjectCollapse(object, true);
-
+            for (auto child : object->getChildren()) {
+                auto objId = child->getId();
+                m_NodeCollapseMap[objId] = false;
+            }
         });
         node->getOnOpenedEvent().addListener([objId, this]() {
             auto object = Editor::getCurrentScene()->findObjectById(objId);
-            this->onSceneObjectCollapse(object, false);
+            for (auto child : object->getChildren()) {
+                auto objId = child->getId();
+                m_NodeCollapseMap[objId] = true;
+            }
         });
-
         node->addPlugin<DDTargetPlugin<uint64_t>>(EDragDropID::OBJECT)->getOnDataReceivedEvent().addListener([this, objId](auto txt) {
             auto currentObject = Editor::getCurrentScene()->findObjectById(txt);
             auto obj = Editor::getCurrentScene()->findObjectById(objId);
@@ -177,24 +198,18 @@ namespace ige::creator
             nodePair->second->setName(sceneObject.getName());
     }
 
-    void Hierarchy::onSceneObjectSelected(SceneObject& sceneObject)
+    void Hierarchy::onTargetAdded(SceneObject* object)
     {
-        // Set previous selected to false
-        auto nodePair = m_objectNodeMap.find(m_selectedNodeId);
-        if (nodePair != m_objectNodeMap.end())
-        {
-            nodePair->second->setIsSelected(false);
-        }
+        if (!object) return;
 
         // Update current selected id
-        nodePair = m_objectNodeMap.find(sceneObject.getId());
+        auto nodePair = m_objectNodeMap.find(object->getId());
         if (nodePair != m_objectNodeMap.end())
         {
-            m_selectedNodeId = sceneObject.getId();
             nodePair->second->setIsSelected(true);
 
             // Recursive open parent nodes
-            auto parent = sceneObject.getParent();
+            auto parent = object->getParent();
             while (parent != nullptr)
             {
                 auto parentWidget = m_objectNodeMap.at(parent->getId());
@@ -206,30 +221,52 @@ namespace ige::creator
 
             // Set this node open as well
             nodePair->second->open();
+            object->getNameChangedEvent().addListener(std::bind(&Hierarchy::onSceneObjectChangedName, this, std::placeholders::_1));
+        }
 
-            auto oldObject = Editor::getInstance()->getSelectedObject();
-            if (oldObject)
-            {
-                oldObject->getNameChangedEvent().removeAllListeners();
-            }
-            sceneObject.getNameChangedEvent().addListener(std::bind(&Hierarchy::onSceneObjectChangedName, this, std::placeholders::_1));
-
-            Editor::getInstance()->setSelectedObject(sceneObject.getId());
+        if (Editor::getCanvas())
+        {
+            Editor::getCanvas()->setTargetObject(object);
         }
     }
 
-    void Hierarchy::onSceneObjectDeselected(SceneObject& sceneObject)
+    void Hierarchy::onTargetRemoved(SceneObject* object)
     {
-        // Update current selected id
-        auto nodePair = m_objectNodeMap.find(sceneObject.getId());
+        if (!object) return;
+        auto nodePair = m_objectNodeMap.find(object->getId());
         if (nodePair != m_objectNodeMap.end())
         {
-            m_selectedNodeId = sceneObject.getId();
             nodePair->second->setIsSelected(false);
-            sceneObject.getNameChangedEvent().removeAllListeners();
-            Editor::getInstance()->setSelectedObject(-1);
+            object->getNameChangedEvent().removeAllListeners();
+        }
+
+        if (Editor::getCanvas())
+        {
+            auto targets = Editor::getCurrentScene()->getTargets();
+            if (!targets.empty() && targets[0])
+                Editor::getCanvas()->setTargetObject(object);
+            else
+                Editor::getCanvas()->setTargetObject(nullptr);
         }
     }
+
+    void Hierarchy::onTargetCleared()
+    {
+        if (Editor::getCurrentScene() == nullptr)
+        {
+            clear();
+            return;
+        }
+
+        std::shared_ptr<SceneObject> object = nullptr;
+        for (auto& pair : m_objectNodeMap)
+        {
+            pair.second->setIsSelected(false);
+            object = Editor::getCurrentScene()->findObjectById(pair.first);
+            if(object) object->getNameChangedEvent().removeAllListeners();
+        }
+    }
+
 
     void Hierarchy::addCreationContextMenu(std::shared_ptr<ContextMenu>& ctxMenu)
     {
@@ -238,63 +275,71 @@ namespace ige::creator
 
         auto createMenu = ctxMenu->createWidget<Menu>("Create");
         createMenu->createWidget<MenuItem>("New Object")->getOnClickEvent().addListener([](auto widget) {
-            auto currentObject = Editor::getInstance()->getSelectedObject();
+            auto targets = Editor::getCurrentScene()->getTargets();
+            auto currentObject = (!targets.empty() && targets[0]) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
             auto newObject = Editor::getCurrentScene()->createObject("New Object", currentObject);
-            newObject->setSelected(true);
+            Editor::getCurrentScene()->addTarget(newObject.get(), true);
         });
 
         // Camera
         createMenu->createWidget<MenuItem>("Camera")->getOnClickEvent().addListener([](auto widget) {
-            auto currentObject = Editor::getInstance()->getSelectedObject();
+            auto targets = Editor::getCurrentScene()->getTargets();
+            auto currentObject = (!targets.empty() && targets[0]) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
             auto newObject = Editor::getCurrentScene()->createObject("Camera", currentObject);
             newObject->addComponent<CameraComponent>("camera");
             newObject->addComponent<FigureComponent>(GetEnginePath("figures/camera.pyxf"))->setSkipSerialize(true);
-            newObject->setSelected(true);
+            Editor::getCurrentScene()->addTarget(newObject.get(), true);
         });
 
         // Primitives
         {
             auto shapeMenu = createMenu->createWidget<Menu>("Primitive");
             shapeMenu->createWidget<MenuItem>("Cube")->getOnClickEvent().addListener([](auto widget) {
-                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto targets = Editor::getCurrentScene()->getTargets();
+                auto currentObject = (!targets.empty() && targets[0]) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
                 auto newObject = Editor::getCurrentScene()->createObject("Cube", currentObject);
                 newObject->addComponent<FigureComponent>("figures/cube.pyxf");
-                newObject->setSelected(true);
+                Editor::getCurrentScene()->addTarget(newObject.get(), true);
             });
 
             shapeMenu->createWidget<MenuItem>("Plane")->getOnClickEvent().addListener([](auto widget) {
-                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto targets = Editor::getCurrentScene()->getTargets();
+                auto currentObject = (!targets.empty() && targets[0]) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
                 auto newObject = Editor::getCurrentScene()->createObject("Plane", currentObject);
                 newObject->addComponent<FigureComponent>("figures/plane.pyxf");
-                newObject->setSelected(true);
+                Editor::getCurrentScene()->addTarget(newObject.get(), true);
             });
 
             shapeMenu->createWidget<MenuItem>("Sphere")->getOnClickEvent().addListener([](auto widget) {
-                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto targets = Editor::getCurrentScene()->getTargets();
+                auto currentObject = (!targets.empty() && targets[0]) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
                 auto newObject = Editor::getCurrentScene()->createObject("Sphere", currentObject);
                 newObject->addComponent<FigureComponent>("figures/sphere.pyxf");
-                newObject->setSelected(true);
+                Editor::getCurrentScene()->addTarget(newObject.get(), true);
             });
 
             shapeMenu->createWidget<MenuItem>("Cone")->getOnClickEvent().addListener([](auto widget) {
-                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto targets = Editor::getCurrentScene()->getTargets();
+                auto currentObject = (!targets.empty() && targets[0]) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
                 auto newObject = Editor::getCurrentScene()->createObject("Cone", currentObject);
                 newObject->addComponent<FigureComponent>("figures/cone.pyxf");
-                newObject->setSelected(true);
+                Editor::getCurrentScene()->addTarget(newObject.get(), true);
             });
 
             shapeMenu->createWidget<MenuItem>("Cylinder")->getOnClickEvent().addListener([](auto widget) {
-                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto targets = Editor::getCurrentScene()->getTargets();
+                auto currentObject = (!targets.empty() && targets[0]) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
                 auto newObject = Editor::getCurrentScene()->createObject("Cylinder", currentObject);
                 newObject->addComponent<FigureComponent>("figures/cylinder.pyxf");
-                newObject->setSelected(true);
+                Editor::getCurrentScene()->addTarget(newObject.get(), true);
             });
 
             shapeMenu->createWidget<MenuItem>("Torus")->getOnClickEvent().addListener([](auto widget) {
-                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto targets = Editor::getCurrentScene()->getTargets();
+                auto currentObject = (!targets.empty() && targets[0]) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
                 auto newObject = Editor::getCurrentScene()->createObject("Torus", currentObject);
                 newObject->addComponent<FigureComponent>("figures/torus.pyxf");
-                newObject->setSelected(true);
+                Editor::getCurrentScene()->addTarget(newObject.get(), true);
             });
         }
 
@@ -308,13 +353,14 @@ namespace ige::creator
                     while (!msgBox.ready(1000));
                     return;
                 }
-                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto targets = Editor::getCurrentScene()->getTargets();
+                auto currentObject = (!targets.empty() && targets[0]) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
                 auto newObject = Editor::getCurrentScene()->createObject("Directional Light", currentObject);
                 newObject->addComponent<DirectionalLight>();
                 newObject->getTransform()->setPosition({ 0.f, 5.f, 0.f });
                 newObject->getTransform()->setRotation({ DEGREES_TO_RADIANS(90.f), 0.f, .0f });
                 newObject->addComponent<SpriteComponent>(GetEnginePath("sprites/direct-light"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
-                newObject->setSelected(true);
+                Editor::getCurrentScene()->addTarget(newObject.get(), true);
             });
 
             lightMenu->createWidget<MenuItem>("Point Light")->getOnClickEvent().addListener([](auto widget) {
@@ -324,11 +370,12 @@ namespace ige::creator
                     while (!msgBox.ready(1000));
                     return;
                 }
-                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto targets = Editor::getCurrentScene()->getTargets();
+                auto currentObject = (!targets.empty() && targets[0]) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
                 auto newObject = Editor::getCurrentScene()->createObject("Point Light", currentObject);
                 newObject->addComponent<PointLight>();
                 newObject->addComponent<SpriteComponent>(GetEnginePath("sprites/point-light"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
-                newObject->setSelected(true);
+                Editor::getCurrentScene()->addTarget(newObject.get(), true);
             });
 
             lightMenu->createWidget<MenuItem>("Spot Light")->getOnClickEvent().addListener([](auto widget) {
@@ -338,11 +385,12 @@ namespace ige::creator
                     while (!msgBox.ready(1000));
                     return;
                 }
-                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto targets = Editor::getCurrentScene()->getTargets();
+                auto currentObject = (!targets.empty() && targets[0]) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
                 auto newObject = Editor::getCurrentScene()->createObject("Spot Light", currentObject);
                 newObject->addComponent<SpotLight>();
                 newObject->addComponent<SpriteComponent>(GetEnginePath("sprites/spot-light"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
-                newObject->setSelected(true);
+                Editor::getCurrentScene()->addTarget(newObject.get(), true);
             });
         }
 
@@ -350,17 +398,19 @@ namespace ige::creator
         {
             auto audioMenu = createMenu->createWidget<Menu>("Audio");
             audioMenu->createWidget<MenuItem>("Audio Source")->getOnClickEvent().addListener([](auto widget) {
-                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto targets = Editor::getCurrentScene()->getTargets();
+                auto currentObject = (!targets.empty() && targets[0]) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
                 auto newObject = Editor::getCurrentScene()->createObject("Audio Source", currentObject, true);
                 newObject->addComponent<AudioSource>();
-                newObject->setSelected(true);
+                Editor::getCurrentScene()->addTarget(newObject.get(), true);
             });
 
             audioMenu->createWidget<MenuItem>("Audio Listener")->getOnClickEvent().addListener([](auto widget) {
-                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto targets = Editor::getCurrentScene()->getTargets();
+                auto currentObject = (!targets.empty() && targets[0]) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
                 auto newObject = Editor::getCurrentScene()->createObject("Audio Listener", currentObject, true);
                 newObject->addComponent<AudioListener>();
-                newObject->setSelected(true);
+                Editor::getCurrentScene()->addTarget(newObject.get(), true);
             });
         }
 
@@ -368,10 +418,11 @@ namespace ige::creator
         {
             auto effectMenu = createMenu->createWidget<Menu>("Effect");
             effectMenu->createWidget<MenuItem>("Particle")->getOnClickEvent().addListener([](auto widget) {
-                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto targets = Editor::getCurrentScene()->getTargets();
+                auto currentObject = (!targets.empty() && targets[0]) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
                 auto newObject = Editor::getCurrentScene()->createObject("Particle", currentObject, true);
                 newObject->addComponent<Particle>();
-                newObject->setSelected(true);
+                Editor::getCurrentScene()->addTarget(newObject.get(), true);
             });
         }
 
@@ -380,60 +431,52 @@ namespace ige::creator
             auto guiMenu = createMenu->createWidget<Menu>("GUI");
 
             guiMenu->createWidget<MenuItem>("UIImage")->getOnClickEvent().addListener([](auto widget) {
-                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto targets = Editor::getCurrentScene()->getTargets();
+                auto currentObject = (!targets.empty() && targets[0]) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
                 auto newObject = Editor::getCurrentScene()->createObject("UIImage", currentObject, true);
                 auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
                 newObject->addComponent<UIImage>("sprites/rect", rect->getSize());
-                newObject->setSelected(true);
+                Editor::getCurrentScene()->addTarget(newObject.get(), true);
             });
 
             guiMenu->createWidget<MenuItem>("UIText")->getOnClickEvent().addListener([](auto widget) {
-                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto targets = Editor::getCurrentScene()->getTargets();
+                auto currentObject = (!targets.empty() && targets[0]) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
                 auto newObject = Editor::getCurrentScene()->createObject("UIText", currentObject, true);
                 auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
                 newObject->addComponent<UIText>("Text");
-                newObject->setSelected(true);
+                Editor::getCurrentScene()->addTarget(newObject.get(), true);
             });
 
             guiMenu->createWidget<MenuItem>("UITextField")->getOnClickEvent().addListener([](auto widget) {
-                auto currentObject = Editor::getInstance()->getSelectedObject();
+                auto targets = Editor::getCurrentScene()->getTargets();
+                auto currentObject = (!targets.empty() && targets[0]) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
                 auto newObject = Editor::getCurrentScene()->createObject("UITextField", currentObject, true);
                 auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
                 newObject->addComponent<UIImage>("sprites/rect", rect->getSize());
                 auto newLabel = Editor::getCurrentScene()->createObject("Label", newObject, true, Vec2());
-                newLabel->addComponent<UITextField>("TextField");
-                auto id = newLabel->getId();
-                newObject->getSelectedEvent().addListener([id](SceneObject& obj) {
-                    auto label = Editor::getCurrentScene()->findObjectById(id);
-                    if (label) {
-                        auto txtField = label->getComponent<UITextField>();
-                        if (txtField) {
-                            txtField->onClick();
-                        }
-                    }
-                });
-                newObject->setSelected(true);
+                newLabel->addComponent<UITextField>("TextField");                
+                Editor::getCurrentScene()->addTarget(newObject.get(), true);
             });
 
             guiMenu->createWidget<MenuItem>("UIButton")->getOnClickEvent().addListener([](auto widget) {
-                auto currentObject = Editor::getInstance()->getSelectedObject();
-                auto newBtn = Editor::getCurrentScene()->createObject("UIButton", currentObject, true);
-                auto rect = std::dynamic_pointer_cast<RectTransform>(newBtn->getTransform());
-                // Create Btn
-                newBtn->addComponent<UIButton>("sprites/rect", rect->getSize());
-                // Create Label
-                auto newBtnLabel = Editor::getCurrentScene()->createObject("Label", newBtn, true, Vec2());
-                newBtnLabel->addComponent<UIText>("Button");
-                newBtn->setSelected(true);
+                auto targets = Editor::getCurrentScene()->getTargets();
+                auto currentObject = (!targets.empty() && targets[0]) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
+                auto newObject = Editor::getCurrentScene()->createObject("UIButton", currentObject, true);
+                auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
+                newObject->addComponent<UIButton>("sprites/rect", rect->getSize());
+                Editor::getCurrentScene()->createObject("Label", newObject, true, Vec2())->addComponent<UIText>("Button");
+                Editor::getCurrentScene()->addTarget(newObject.get(), true);
             });
 
             guiMenu->createWidget<MenuItem>("UISlider")->getOnClickEvent().addListener([](auto widget) {
-                auto currentObject = Editor::getInstance()->getSelectedObject();
-                auto newSlider = Editor::getCurrentScene()->createObject("UISlider", currentObject, true, Vec2(160.f, 40.f));
+                auto targets = Editor::getCurrentScene()->getTargets();
+                auto currentObject = (!targets.empty() && targets[0]) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
+                auto newObject = Editor::getCurrentScene()->createObject("UISlider", currentObject, true, Vec2(160.f, 40.f));
                 // Create Slider
-                auto sliderComp = newSlider->addComponent<UISlider>();
+                auto sliderComp = newObject->addComponent<UISlider>();
                 // Create Background
-                auto newBG = Editor::getCurrentScene()->createObject("background", newSlider, true, Vec2(160.f, 16.f));
+                auto newBG = Editor::getCurrentScene()->createObject("background", newObject, true, Vec2(160.f, 16.f));
                 auto rectBG = std::dynamic_pointer_cast<RectTransform>(newBG->getTransform());
                 auto imgBG = newBG->addComponent<UIImage>("sprites/rect", rectBG->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
                 imgBG->setColor(0.84f, 0.84f, 0.84f, 1);
@@ -443,7 +486,7 @@ namespace ige::creator
                     rectBG->setAnchoredPosition(Vec2(0, 0));
                 }
                 // Create Fill
-                auto newFillArea = Editor::getCurrentScene()->createObject("fillArea", newSlider, true, Vec2(158.f, 14.f));
+                auto newFillArea = Editor::getCurrentScene()->createObject("fillArea", newObject, true, Vec2(158.f, 14.f));
                 newFillArea->setIsRaycastTarget(false);
                 auto rectFillArea = std::dynamic_pointer_cast<RectTransform>(newFillArea->getTransform());
                 if (rectFillArea) {
@@ -459,7 +502,7 @@ namespace ige::creator
                 auto imgFill = newFill->addComponent<UIImage>("sprites/rect", rectFill->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
                 newFill->setIsRaycastTarget(false);
                 // Create Handle
-                auto newHandleArea = Editor::getCurrentScene()->createObject("handleArea", newSlider, true, Vec2(140.f, 30.f));
+                auto newHandleArea = Editor::getCurrentScene()->createObject("handleArea", newObject, true, Vec2(140.f, 30.f));
                 newHandleArea->setIsRaycastTarget(false);
                 auto rectHandleArea = std::dynamic_pointer_cast<RectTransform>(newHandleArea->getTransform());
                 if (rectHandleArea) {
@@ -477,7 +520,7 @@ namespace ige::creator
                 newHandle->setIsRaycastTarget(false);
                 sliderComp->setFillObject(newFill);
                 sliderComp->setHandleObject(newHandle);
-                newSlider->setSelected(true);
+                Editor::getCurrentScene()->addTarget(newObject.get(), true);
             });
         }
     }
@@ -488,8 +531,7 @@ namespace ige::creator
         {
             m_groupLayout = createWidget<Group>("Hierarchy_Group", false, false);
             auto ctxMenu = m_groupLayout->addPlugin<WindowContextMenu>("Hierarchy_Context");
-            addCreationContextMenu(std::dynamic_pointer_cast<ContextMenu>(ctxMenu));            
-
+            addCreationContextMenu(std::dynamic_pointer_cast<ContextMenu>(ctxMenu));
             m_bInitialized = true;
         }
     }
@@ -519,7 +561,7 @@ namespace ige::creator
 
             if (ImGui::GetMousePos().x >= vMin.x && ImGui::GetMousePos().x <= vMax.x
                 && ImGui::GetMousePos().y >= vMin.y && ImGui::GetMousePos().y <= vMax.y) {
-                Editor::getInstance()->setSelectedObject(-1);
+                Editor::getCurrentScene()->clearTargets();
             }
         }
     }
@@ -535,13 +577,5 @@ namespace ige::creator
         removeAllWidgets();
         m_objectNodeMap.clear();
         m_bInitialized = false;
-    }
-
-    void Hierarchy::onSceneObjectCollapse(std::shared_ptr<SceneObject> sceneObject, bool IsCollapse) {
-        if (sceneObject == nullptr) return;
-        for (auto child : sceneObject->getChildren()) {
-            auto objId = child->getId();
-            m_NodeCollapseMap[objId] = !IsCollapse;
-        }
     }
 }

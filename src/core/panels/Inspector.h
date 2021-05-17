@@ -18,11 +18,11 @@ namespace ige::creator
     class IgnoreTransformEventScope
     {
     public:
-        IgnoreTransformEventScope(std::shared_ptr<SceneObject> obj, const std::function<void(SceneObject&)>& task);
+        IgnoreTransformEventScope(SceneObject* obj, const std::function<void(SceneObject&)>& task);
         ~IgnoreTransformEventScope();
 
     protected:
-        std::shared_ptr<SceneObject> m_object;
+        SceneObject* m_object;
         std::function<void(SceneObject&)> m_task;
     };
 
@@ -33,7 +33,7 @@ namespace ige::creator
         virtual ~Inspector();
         virtual void clear();
 
-        void setTargetObject(const std::shared_ptr<SceneObject>& obj);
+        void setTargetObject(SceneObject* obj);
         void updateMaterial(int index, const char* infoName, std::string txt);
 
         virtual void update(float dt) override;
@@ -55,7 +55,7 @@ namespace ige::creator
 
     protected:
         //! Inspected scene object
-        std::shared_ptr<SceneObject> m_targetObject = nullptr;
+        SceneObject* m_targetObject = nullptr;
 
         //! Groups of default components
         std::shared_ptr<Group> m_headerGroup = nullptr;

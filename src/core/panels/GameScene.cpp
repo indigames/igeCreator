@@ -35,9 +35,9 @@ namespace ige::creator
         clear();
 
         // Clear the temp scene file if exist
-        if (SceneManager::getInstance()->getCurrentScene())
+        if (Editor::getCurrentScene())
         {
-            auto name = SceneManager::getInstance()->getCurrentScene()->getName();
+            auto name = Editor::getCurrentScene()->getName();
             auto fsPath = fs::path(name + ".scene.tmp");
             fs::remove(fsPath);
         }        
@@ -81,8 +81,8 @@ namespace ige::creator
                 // Position changed event
                 getOnPositionChangedEvent().addListener([this](auto pos) {
                     TaskManager::getInstance()->addTask([this]() {
-                        if (SceneManager::getInstance()->getCurrentScene())
-                            SceneManager::getInstance()->getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y + 25.f }); // Title bar size
+                        if (Editor::getCurrentScene())
+                            Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y + 25.f }); // Title bar size
                     });
                 });
 
@@ -94,26 +94,26 @@ namespace ige::creator
                         m_imageWidget->setSize(size);
 
                         // Adjust camera aspect ratio
-                        if (SceneManager::getInstance()->getCurrentScene() 
-                            && SceneManager::getInstance()->getCurrentScene()->getActiveCamera())                        
-                            SceneManager::getInstance()->getCurrentScene()->getActiveCamera()->setAspectRatio(size.x / size.y);                        
+                        if (Editor::getCurrentScene() 
+                            && Editor::getCurrentScene()->getActiveCamera())                        
+                            Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(size.x / size.y);                        
 
-                        if (SceneManager::getInstance()->getCurrentScene())
-                            SceneManager::getInstance()->getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
+                        if (Editor::getCurrentScene())
+                            Editor::getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
                     });
                 });
 
                 // Adjust camera aspect ratio
-                if (SceneManager::getInstance()->getCurrentScene() && SceneManager::getInstance()->getCurrentScene()->getActiveCamera())
+                if (Editor::getCurrentScene() && Editor::getCurrentScene()->getActiveCamera())
                 {
-                    SceneManager::getInstance()->getCurrentScene()->getActiveCamera()->setAspectRatio(size.x / size.y);
+                    Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(size.x / size.y);
                 }
 
                 // Initialize window pos and size
-                if (SceneManager::getInstance()->getCurrentScene())
+                if (Editor::getCurrentScene())
                 {
-                    SceneManager::getInstance()->getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y + 25.f }); // Title bar size
-                    SceneManager::getInstance()->getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
+                    Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y + 25.f }); // Title bar size
+                    Editor::getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
                 }
 
                 m_bInitialized = true;
@@ -168,11 +168,9 @@ namespace ige::creator
 
             SceneManager::getInstance()->setIsEditor(false);
 
-            if (SceneManager::getInstance()->getCurrentScene())
+            if (Editor::getCurrentScene())
             {
-                auto path = SceneManager::getInstance()->getCurrentScene()->getName() + ".scene.tmp";
-                auto& selectedObj = Editor::getInstance()->getSelectedObject();
-                m_lastObjectId = selectedObj ? selectedObj->getId() : -1;
+                auto path = Editor::getCurrentScene()->getName() + ".scene.tmp";
                 Editor::getCanvas()->getEditorScene()->setTargetObject(nullptr);
                 SceneManager::getInstance()->saveScene(path);
             }
@@ -197,9 +195,9 @@ namespace ige::creator
 
             SceneManager::getInstance()->setIsEditor(true);
 
-            if (SceneManager::getInstance()->getCurrentScene())
+            if (Editor::getCurrentScene())
             {
-                auto name = SceneManager::getInstance()->getCurrentScene()->getName();
+                auto name = Editor::getCurrentScene()->getName();
                 Editor::getInstance()->refreshScene();
                 Editor::getCanvas()->getHierarchy()->clear();
                 Editor::getCanvas()->getHierarchy()->initialize();
@@ -212,14 +210,9 @@ namespace ige::creator
 
                 scene = SceneManager::getInstance()->loadScene(name + ".scene.tmp");
                 SceneManager::getInstance()->setCurrentScene(scene);
-
-                Editor::getInstance()->setSelectedObject(m_lastObjectId);
-                m_lastObjectId = -1;
-
                 auto fsPath = fs::path(name + ".scene.tmp");
                 fs::remove(fsPath);
             }
-
             m_bIsPausing = false;
             m_bIsPlaying = false;
         }
@@ -228,7 +221,6 @@ namespace ige::creator
 
     void GameScene::updateKeyboard()
     {
-
     }
 
     void GameScene::updateTouch()
@@ -256,19 +248,6 @@ namespace ige::creator
         {
             float touchX, touchY;
             touch->getFingerPosition(0, touchX, touchY);
-
-            /*auto hit = SceneManager::getInstance()->getCurrentScene()->raycastUI(Vec2(touchX, touchY));
-            if (hit.first)
-            {
-                pyxie_printf("Hit Object %s\n", hit.first->getName().c_str());
-                if (hit.first->getComponentsCount() > 0) {
-                    auto components = hit.first->getComponents();
-                    for (auto component : components) {
-                        component->onClick();
-                    }
-                }
-
-            }*/
             m_inputProcessor->touchUp(0, touchX, touchY);
             
         }

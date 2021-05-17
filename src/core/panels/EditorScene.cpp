@@ -100,8 +100,8 @@ namespace ige::creator
                 // Position changed event
                 getOnPositionChangedEvent().addListener([this](auto pos) {
                     TaskManager::getInstance()->addTask([this]() {
-                        if (SceneManager::getInstance()->getCurrentScene())
-                            SceneManager::getInstance()->getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y + 25.f }); // Title bar size
+                        if (Editor::getCurrentScene())
+                            Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y + 25.f }); // Title bar size
                         });
                     });
 
@@ -117,8 +117,8 @@ namespace ige::creator
                             m_currCamera->SetAspectRate(size.x / size.y);
 
                         // Update window pos and size
-                        if (SceneManager::getInstance()->getCurrentScene())
-                            SceneManager::getInstance()->getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
+                        if (Editor::getCurrentScene())
+                            Editor::getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
                         });
                     });
 
@@ -150,10 +150,10 @@ namespace ige::creator
                 initDragDrop();
 
                 // Initialize window pos and size
-                if (SceneManager::getInstance()->getCurrentScene())
+                if (Editor::getCurrentScene())
                 {
-                    SceneManager::getInstance()->getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y + 25.f }); // Title bar size
-                    SceneManager::getInstance()->getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
+                    Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y + 25.f }); // Title bar size
+                    Editor::getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
                 }
 
                 //viet.nv : create dummy object to focus
@@ -166,8 +166,11 @@ namespace ige::creator
                 m_canvasRatio = SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH();
 
                 m_HandleCameraTouchId = -1;
-
                 m_bIsInitialized = true;
+
+                // Target the root node at launch
+                if (Editor::getCurrentScene() && Editor::getCurrentScene()->getTargets().size() > 0)
+                    setTargetObject(Editor::getCurrentScene()->getTargets().at(0));
             }
         }
     }
@@ -177,7 +180,7 @@ namespace ige::creator
         ASSIGN_COMMAND_TO_DICT(ShortcutDictionary::EDIT_SCENE_OBJECT_SELECTED, CALLBACK_0(EditorScene::lookSelectedObject, this));
         ASSIGN_KEY_TO_COMMAND(ShortcutDictionary::EDIT_SCENE_OBJECT_SELECTED, KeyCode::KEY_F, false, false, false);
 
-        ASSIGN_COMMAND_TO_DICT(ShortcutDictionary::DELETE_SCENE_OBJECT_SELECTED, CALLBACK_0(EditorScene::deleteSelectedObject, this));
+        ASSIGN_COMMAND_TO_DICT(ShortcutDictionary::DELETE_SCENE_OBJECT_SELECTED, CALLBACK_0(Editor::deleteObject, Editor::getInstance().get()));
         ASSIGN_KEY_TO_COMMAND(ShortcutDictionary::DELETE_SCENE_OBJECT_SELECTED, KeyCode::KEY_DEL, false, false, false);
 
         ASSIGN_COMMAND_TO_DICT(ShortcutDictionary::COPY_SCENE_OBJECT_SELECTED, CALLBACK_0(Editor::copyObject, Editor::getInstance().get()));
@@ -224,8 +227,6 @@ namespace ige::creator
         {
             m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto path) {
                 if (!path.empty()) {
-                    Editor::getInstance()->setSelectedObject(-1);
-
                     auto& scene = Editor::getCurrentScene();
                     if (scene) SceneManager::getInstance()->unloadScene(scene);
                     scene = nullptr;
@@ -241,9 +242,10 @@ namespace ige::creator
         for (const auto& type : GetFileExtensionSuported(E_FileExts::Figure))
         {
             m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto path) {
-                if (Editor::getInstance()->getCurrentScene() && !path.empty()) {
-                    const auto& currentObject = Editor::getInstance()->getSelectedObject();
-                    Editor::getInstance()->getCurrentScene()->createObject(fs::path(path).stem(), currentObject)->addComponent<FigureComponent>(path);
+                if (Editor::getCurrentScene() && !path.empty()) {
+                    auto targets = Editor::getCurrentScene()->getTargets();
+                    const auto& currentObject = (!targets.empty() && targets[0] != nullptr) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
+                    Editor::getCurrentScene()->createObject(fs::path(path).stem(), currentObject)->addComponent<FigureComponent>(path);
                 }
             });
         }
@@ -252,9 +254,10 @@ namespace ige::creator
         for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
         {
             m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto path) {
-                if (Editor::getInstance()->getCurrentScene() && !path.empty()) {
-                    const auto& currentObject = Editor::getInstance()->getSelectedObject();
-                    Editor::getInstance()->getCurrentScene()->createObject(fs::path(path).stem(), currentObject)->addComponent<SpriteComponent>(path);
+                if (Editor::getCurrentScene() && !path.empty()) {
+                    auto targets = Editor::getCurrentScene()->getTargets();
+                    const auto& currentObject = (!targets.empty() && targets[0] != nullptr) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
+                    Editor::getCurrentScene()->createObject(fs::path(path).stem(), currentObject)->addComponent<SpriteComponent>(path);
                 }
             });
         }
@@ -263,9 +266,10 @@ namespace ige::creator
         for (const auto& type : GetFileExtensionSuported(E_FileExts::Audio))
         {
             m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto path) {
-                if (Editor::getInstance()->getCurrentScene() && !path.empty()) {
-                    const auto& currentObject = Editor::getInstance()->getSelectedObject();
-                    Editor::getInstance()->getCurrentScene()->createObject(fs::path(path).stem(), currentObject)->addComponent<AudioSource>(path);
+                if (Editor::getCurrentScene() && !path.empty()) {
+                    auto targets = Editor::getCurrentScene()->getTargets();
+                    const auto& currentObject = (!targets.empty() && targets[0] != nullptr) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
+                    Editor::getCurrentScene()->createObject(fs::path(path).stem(), currentObject)->addComponent<AudioSource>(path);
                 }
             });
         }
@@ -274,9 +278,10 @@ namespace ige::creator
         for (const auto& type : GetFileExtensionSuported(E_FileExts::Prefab))
         {
             m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto path) {
-                if (Editor::getInstance()->getCurrentScene() && !path.empty()) {
-                    const auto& currentObject = Editor::getInstance()->getSelectedObject();
-                    Editor::getInstance()->getCurrentScene()->loadPrefab(currentObject->getId(), path);
+                if (Editor::getCurrentScene() && !path.empty()) {
+                    auto targets = Editor::getCurrentScene()->getTargets();
+                    const auto& currentObject = (!targets.empty() && targets[0] != nullptr) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
+                    Editor::getCurrentScene()->loadPrefab(currentObject->getId(), path);
                 }
             });
         }
@@ -285,9 +290,10 @@ namespace ige::creator
         for (const auto& type : GetFileExtensionSuported(E_FileExts::Particle))
         {
             m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto path) {
-                if (Editor::getInstance()->getCurrentScene() && !path.empty()) {
-                    const auto& currentObject = Editor::getInstance()->getSelectedObject();
-                    Editor::getInstance()->getCurrentScene()->createObject(fs::path(path).stem(), currentObject)->addComponent<Particle>(path);
+                if (Editor::getCurrentScene() && !path.empty()) {
+                    auto targets = Editor::getCurrentScene()->getTargets();
+                    const auto& currentObject = (!targets.empty() && targets[0] != nullptr) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
+                    Editor::getCurrentScene()->createObject(fs::path(path).stem(), currentObject)->addComponent<Particle>(path);
                 }
             });
         }
@@ -300,9 +306,11 @@ namespace ige::creator
             // Switch to 2D camera
             m_currCamera = m_2dCamera;
 
-            if (Editor::getInstance()->getSelectedObject())
+            auto targets = Editor::getCurrentScene()->getTargets();
+            const auto& currentObject = (!targets.empty() && targets[0] != nullptr) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
+            if (currentObject)
             {
-                auto canvas = Editor::getInstance()->getSelectedObject()->getCanvas();
+                auto canvas = currentObject->getCanvas();
                 if (canvas)
                 {
                     auto canvasSize = canvas->getDesignCanvasSize();
@@ -347,7 +355,7 @@ namespace ige::creator
     }
 
 
-    void EditorScene::setTargetObject(const std::shared_ptr<SceneObject>& obj)
+    void EditorScene::setTargetObject(SceneObject* obj)
     {
         if (obj == nullptr)
             return;
@@ -442,11 +450,11 @@ namespace ige::creator
             m_currCamera->Render();
 
             // Render scene
-            SceneManager::getInstance()->getCurrentScene()->getShowcase()->ZSort(m_currCamera);
+            Editor::getCurrentScene()->getShowcase()->ZSort(m_currCamera);
             SceneManager::getInstance()->render();
 
             // Render bounding box
-            renderBoundingBox();
+            renderBoundingBoxes();
 
             // Render camera frustum
             renderCameraFrustum();
@@ -629,15 +637,33 @@ namespace ige::creator
         {
             float touchX, touchY;
             touch->getFingerPosition(0, touchX, touchY);
-            auto hit = SceneManager::getInstance()->getCurrentScene()->raycast(Vec2(touchX, touchY), m_currCamera, 10000.f);
+            auto hit = Editor::getCurrentScene()->raycast(Vec2(touchX, touchY), m_currCamera, 10000.f);
             if (hit.first)
-                hit.first->setSelected(true);
+            {
+                if (m_fnKeyPressed & SYSTEM_KEYCODE_CTRL_MASK)
+                {
+                    if (Editor::getCurrentScene()->getTargets().size() > 1 && hit.first->isSelected())
+                        Editor::getCurrentScene()->removeTarget(hit.first);
+                    else
+                        Editor::getCurrentScene()->addTarget(hit.first, !(m_fnKeyPressed & SYSTEM_KEYCODE_CTRL_MASK));
+                }
+                else
+                {
+                    Editor::getCurrentScene()->addTarget(hit.first, true);
+                }
+            }                
         }
     }
 
-    void EditorScene::renderBoundingBox()
+    void EditorScene::renderBoundingBoxes()
     {
-        auto target = Editor::getInstance()->getSelectedObject();
+        auto targets = Editor::getCurrentScene()->getTargets();
+        for (const auto& target : targets)
+            renderBoundingBox(target);
+    }
+
+    void EditorScene::renderBoundingBox(SceneObject* target)
+    {        
         if (target == nullptr)
             return;
         
@@ -727,7 +753,8 @@ namespace ige::creator
         if (!isOpened())
             return;
 
-        auto target = Editor::getInstance()->getSelectedObject();
+        auto targets = Editor::getCurrentScene()->getTargets();
+        const auto& target = (!targets.empty() && targets[0] != nullptr) ? targets[0] : nullptr;
         if (target == nullptr)
             return;
 
@@ -830,11 +857,10 @@ namespace ige::creator
     }
 
     void EditorScene::lookSelectedObject() {
-        auto target = Editor::getInstance()->getSelectedObject();
+        auto targets = Editor::getCurrentScene()->getTargets();
+        const auto& target = (!targets.empty() && targets[0] != nullptr) ? targets[0] : nullptr;
         if (target && m_currCamera)
-        {
-            lookAtObject(target.get());
-        }
+            lookAtObject(target);
     }
 
     void EditorScene::lookAtObject(SceneObject* object) {
@@ -887,21 +913,6 @@ namespace ige::creator
                 }
 
             } 
-        }
-    }
-
-
-    void EditorScene::deleteSelectedObject() {
-        auto target = Editor::getInstance()->getSelectedObject();
-        if (target && m_currCamera)
-        {
-            TaskManager::getInstance()->addTask([this]() {
-                auto currentObject = Editor::getInstance()->getSelectedObject();
-                if (currentObject && currentObject->getParent()) currentObject->getParent()->setSelected(true);
-                Editor::getInstance()->setSelectedObject(-1);
-                auto objId = currentObject->getId();
-                Editor::getCurrentScene()->removeObjectById(objId);
-                });
         }
     }
 

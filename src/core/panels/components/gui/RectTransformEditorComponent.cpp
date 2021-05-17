@@ -59,7 +59,7 @@ RectTransformEditorComponent::~RectTransformEditorComponent()
     }
 }
 
-void RectTransformEditorComponent::setTargetObject(const std::shared_ptr<SceneObject>& obj)
+void RectTransformEditorComponent::setTargetObject(SceneObject* obj)
 {
     if (m_targetObject != obj)
     {

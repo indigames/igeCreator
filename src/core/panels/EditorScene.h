@@ -24,7 +24,7 @@ public:
     virtual ~EditorScene();
 
     //! Set target object
-    void setTargetObject(const std::shared_ptr<SceneObject>& obj);
+    void setTargetObject(SceneObject* obj);
 
     virtual void clear();
     virtual void update(float dt);
@@ -40,7 +40,6 @@ public:
     std::shared_ptr<Gizmo>& getGizmo() { return m_gizmo; }
     
     void lookSelectedObject();
-    void deleteSelectedObject();
 
 protected:
     enum ViewTool
@@ -63,7 +62,8 @@ protected:
     void initDragDrop();
 
     //! Render bouding box
-    void renderBoundingBox();
+    void renderBoundingBoxes();
+    void renderBoundingBox(SceneObject* object);
 
     //! Render camera frustum
     void renderCameraFrustum();

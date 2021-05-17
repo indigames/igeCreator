@@ -3,6 +3,7 @@
 #include "core/layout/Group.h"
 #include "core/widgets/Widgets.h"
 #include "core/FileHandle.h"
+#include "core/Editor.h"
 #include "core/plugin/DragDropPlugin.h"
 #include "core/dialog/OpenFileDialog.h"
 #include "core/filesystem/FileSystemWatcher.h"
@@ -123,7 +124,7 @@ void ScriptEditorComponent::drawScriptComponent()
             case Value::Type::NONE:
             default:
             {
-                auto sceneObject = SceneManager::getInstance()->getCurrentScene()->findObjectByUUID(value.asString());
+                auto sceneObject = Editor::getCurrentScene()->findObjectByUUID(value.asString());
                 auto txtField = m_scriptCompGroup->createWidget<TextField>(key, sceneObject ? sceneObject->getName() : value.asString());
 
                 txtField->addPlugin<DDTargetPlugin<uint64_t>>(EDragDropID::OBJECT)->getOnDataReceivedEvent().addListener([key, this](auto val) {
