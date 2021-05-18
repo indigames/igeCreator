@@ -270,7 +270,7 @@ namespace ige::creator
 
     void Hierarchy::addCreationContextMenu(std::shared_ptr<ContextMenu>& ctxMenu)
     {
-        if (ctxMenu == nullptr)
+        if (ctxMenu == nullptr || Editor::getCurrentScene() == nullptr)
             return;
 
         auto createMenu = ctxMenu->createWidget<Menu>("Create");
@@ -561,7 +561,8 @@ namespace ige::creator
 
             if (ImGui::GetMousePos().x >= vMin.x && ImGui::GetMousePos().x <= vMax.x
                 && ImGui::GetMousePos().y >= vMin.y && ImGui::GetMousePos().y <= vMax.y) {
-                Editor::getCurrentScene()->clearTargets();
+                if(Editor::getCurrentScene())
+                    Editor::getCurrentScene()->clearTargets();
             }
         }
     }

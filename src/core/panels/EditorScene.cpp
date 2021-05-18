@@ -358,7 +358,10 @@ namespace ige::creator
     void EditorScene::setTargetObject(SceneObject* obj)
     {
         if (obj == nullptr)
+        {
+            clear();
             return;
+        }
 
         if (!isOpened() || !m_bIsInitialized)
             return;
@@ -366,6 +369,13 @@ namespace ige::creator
         if (obj->getScene()->getShowcase() == nullptr) return;
         if (!SceneManager::getInstance()->isEditor()) return;
         
+        // Auto toggle camera based on object types
+        if (Editor::getInstance()->is3DCamera() && obj->isGUIObject()
+            || !Editor::getInstance()->is3DCamera() && !obj->isGUIObject())
+        {
+            Editor::getInstance()->toggle3DCamera();
+        }
+
         auto lastShowcase = m_currShowcase;
         m_currShowcase = m_currCamera == m_2dCamera ? obj->getScene()->getUIShowcase() : obj->getScene()->getShowcase();
         
@@ -503,11 +513,11 @@ namespace ige::creator
         auto isHover = isHovered();
         if (touch->isFingerScrolled(0) && isHover)
         {
-            float scrollX, scrollY;
+            auto scroll = Vec2();
             float targetSize;
             bool isInverse;
-            touch->getFingerScrolledData(0, scrollX, scrollY, isInverse);
-            handleCameraZoom(scrollX, scrollY);
+            touch->getFingerScrolledData(0, scroll[0], scroll[1], isInverse);
+            handleCameraScroll(scroll);
         }
 
         if (touch->isFingerMoved(0))
@@ -561,7 +571,6 @@ namespace ige::creator
                 }
             }
         }
-
     }
 
     void EditorScene::updateViewTool(int touchID) 
@@ -825,33 +834,33 @@ namespace ige::creator
     {
         if (m_bIsFirstTouch)
         {
-            m_lastMousePosX = touchX;
-            m_lastMousePosY = touchY;
+            m_firstMousePosX = m_lastMousePosX = touchX;
+            m_firstMousePosY = m_lastMousePosY = touchY;
             m_bIsFirstTouch = false;
             auto cameraRotation = m_currCamera->GetRotation();
             vmath_quatToEuler(cameraRotation.P(), m_cameraRotationEuler.P());
             return;
         }
-        Vec2 offset = { touchX - m_lastMousePosX, touchY - m_lastMousePosY };
+
+        auto offset = Vec2(touchX - m_lastMousePosX, touchY - m_lastMousePosY);
         m_lastMousePosX = touchX;
         m_lastMousePosY = touchY;
 
         switch (m_viewTool) {
         case ViewTool::Pan:
-            handleCameraPan(offset.X(), offset.Y());
+            handleCameraPan(offset);
             break;
         case ViewTool::Orbit:
-            handleCameraOrbit(offset.X(), offset.Y());
+            handleCameraOrbit(offset);
             break;
         case ViewTool::FPS:
-            handleCameraFPS(offset.X(), offset.Y());
+            handleCameraFPS(offset);
             break;
         case ViewTool::Zoom:
-            float s_Len = Vec2::Length(offset);
-            bool inverse = abs(offset.X()) > abs(offset.Y()) ? offset.X() < 0 : offset.Y() >= 0;
-            if(inverse) s_Len = -s_Len;
-            s_Len = s_Len / k_zoomFocusOffsetRate;
-            handleCameraZoomFocus(0, s_Len);
+            handleCameraZoom(offset);
+            break;
+        default:
+            handleCameraSelect(offset);
             break;
         }
     }
@@ -917,9 +926,10 @@ namespace ige::creator
     }
 
     //! Handle Camera View
-    void EditorScene::handleCameraOrbit(float offsetX, float offsetY) {
-        if (Editor::getInstance()->is3DCamera()) {
-            auto offset = Vec2(offsetX, offsetY);
+    void EditorScene::handleCameraOrbit(const Vec2& offset) 
+    {
+        if (Editor::getInstance()->is3DCamera()) 
+        {
             auto cameraPosition = m_currCamera->GetPosition();
             auto cameraRotation = m_currCamera->GetRotation();
             m_cameraDistance = Vec3::Length(cameraPosition - m_focusPosition);
@@ -945,11 +955,11 @@ namespace ige::creator
         }
     }
 
-    void EditorScene::handleCameraPan(float offsetX, float offsetY)
+    void EditorScene::handleCameraPan(const Vec2& offset)
     {
         float panDelta = m_fnKeyPressed & SYSTEM_KEYCODE_SHIFT_MASK ? 3 : 1;
-        if (Editor::getInstance()->is3DCamera()) {
-            auto offset = Vec2(offsetX, offsetY);
+        if (Editor::getInstance()->is3DCamera()) 
+        {
             auto pos = m_currCamera->GetPosition();
             auto mouseOffset = offset * std::abs(std::max(0.0025f, pos.Length() / (m_currCamera->GetFarPlane() * 0.5f))) * panDelta;
             auto cameraPosition = m_currCamera->GetPosition();
@@ -962,8 +972,8 @@ namespace ige::creator
 
             m_resetFocus = true;
         }
-        else {
-            auto offset = Vec2(offsetX, offsetY);
+        else 
+        {
             // Scale with Zoom Offset
             auto zoomOffset = m_currentCanvasHeight / SystemInfo::Instance().GetGameH();
             auto mouseOffset = offset * zoomOffset * panDelta;
@@ -977,10 +987,10 @@ namespace ige::creator
         }
     }
     
-    void EditorScene::handleCameraFPS(float offsetX, float offsetY) 
+    void EditorScene::handleCameraFPS(const Vec2& offset)
     {
-        if (Editor::getInstance()->is3DCamera()) {
-            auto offset = Vec2(offsetX, offsetY);
+        if (Editor::getInstance()->is3DCamera())
+        {
             auto mouseOffset = offset * m_cameraRotationSpeed;
             m_cameraRotationEuler[1] -= mouseOffset.X();
             m_cameraRotationEuler[0] += mouseOffset.Y();
@@ -993,14 +1003,11 @@ namespace ige::creator
         }
     }
     
-    void EditorScene::handleCameraZoom(float offsetX, float offsetY) {
+    void EditorScene::handleCameraScroll(const Vec2& offset) {
         float zoomDelta = m_fnKeyPressed & SYSTEM_KEYCODE_SHIFT_MASK ? 3 : 1;
         if (Editor::getInstance()->is3DCamera()) {
             float targetSize;
-
-            Vec2 offset = { offsetX, offsetY };
             auto mouseOffset = offset * m_cameraDragSpeed * zoomDelta;
-
             auto cameraPosition = m_currCamera->GetPosition();
             auto cameraRotation = m_currCamera->GetRotation();
 
@@ -1011,18 +1018,20 @@ namespace ige::creator
             m_currCamera->SetPosition(cameraPosition);
 
             auto currentDist = Vec3::Length(m_focusPosition - cameraPosition);
-            if (currentDist - mouseOffset.Y() <= 0) {
+            if (currentDist - mouseOffset.Y() <= 0) 
+            {
                 m_viewSize = k_defaultViewSize / 2;
                 updateFocusPoint(true, true);
             }
-            else {
+            else 
+            {
                 targetSize = clampViewSize(m_viewSize - mouseOffset.Y());
                 m_viewSize = targetSize;
                 updateFocusPoint(false, false);
             }
         }
-        else {
-            Vec2 offset = { offsetX, offsetY };
+        else 
+        {
             auto mouseOffset = offset * m_cameraDragSpeed * zoomDelta * 100;
             m_currentCanvasHeight -= mouseOffset.Y();
             m_currentCanvasHeight = m_currentCanvasHeight < 0 ? 0.001f : m_currentCanvasHeight;
@@ -1030,13 +1039,19 @@ namespace ige::creator
         }
     }
 
-    void EditorScene::handleCameraZoomFocus(float offsetX, float offsetY) {
+    void EditorScene::handleCameraZoom(const Vec2& offset) 
+    {
+        float zoomLen = Vec2::Length(offset);
+        bool inverse = abs(offset.X()) > abs(offset.Y()) ? offset.X() < 0 : offset.Y() >= 0;
+        if (inverse)
+            zoomLen = -zoomLen;
+        zoomLen = zoomLen / k_zoomFocusOffsetRate;
+        auto zoomOffset = Vec2(0.f, zoomLen);
         float zoomDelta = m_fnKeyPressed & SYSTEM_KEYCODE_SHIFT_MASK ? 3 : 1;
         
-        if (Editor::getInstance()->is3DCamera()) {
-            Vec2 offset = { offsetX, offsetY };
-            auto mouseOffset = offset * m_cameraDragSpeed * zoomDelta;
-
+        if (Editor::getInstance()->is3DCamera())
+        {
+            auto mouseOffset = zoomOffset * m_cameraDragSpeed * zoomDelta;
             auto cameraPosition = m_currCamera->GetPosition();
             auto cameraRotation = m_currCamera->GetRotation();
             auto currentDist = Vec3::Length(m_focusPosition - cameraPosition);
@@ -1055,13 +1070,18 @@ namespace ige::creator
             m_viewSize = clampViewSize(m_viewSize - mouseOffset.Y());
             updateFocusPoint(false, false);
         }
-        else {
-            Vec2 offset = { offsetX, offsetY };
-            auto mouseOffset = offset * m_cameraDragSpeed * zoomDelta * 100;
+        else
+        {
+            auto mouseOffset = zoomOffset * m_cameraDragSpeed * zoomDelta * 100;
             m_currentCanvasHeight -= mouseOffset.Y();
             m_currentCanvasHeight = m_currentCanvasHeight < 0 ? 0.001f : m_currentCanvasHeight;
             m_currCamera->SetOrthoHeight(m_currentCanvasHeight * 0.5f);
         }
+    }
+
+    void EditorScene::handleCameraSelect(const Vec2& offset)
+    {
+        ShapeDrawer::drawRect({ m_firstMousePosX, m_firstMousePosY }, { m_lastMousePosX, m_lastMousePosY }, { 0.f, 0.f, 1.f });
     }
 
     //Camera Helper function
