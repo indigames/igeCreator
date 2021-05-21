@@ -19,7 +19,8 @@ namespace ige::creator
 
         void draw() override;
         
-        std::string getId() const { return m_id; }
+        std::string getIdAString() const { return "##" + std::to_string(m_id); }
+        uint64_t getId() const { return m_id; }
 
         //! Enable/disable widget
         void setEnable(bool enable) { m_bEnabled = enable; }
@@ -39,7 +40,7 @@ namespace ige::creator
         virtual void _drawImpl() = 0;
 
     protected:
-        std::string m_id = "";
+        uint64_t m_id;
         Container* m_container;
         bool m_bEnabled;
         bool m_bEOL = true;

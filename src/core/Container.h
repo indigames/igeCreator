@@ -28,6 +28,8 @@ namespace ige::creator
 
         virtual void removeWidgetById(const std::string& widgetId);
 
+        virtual void removeWidgetById(uint64_t widgetId);
+
         virtual void removeAllWidgets();
 
         virtual void drawWidgets();

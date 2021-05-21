@@ -50,9 +50,9 @@ namespace ige::creator
     template <size_t N>
     void Columns<N>::_drawImpl()
     {
-        if (m_bIsChild) ImGui::BeginChild(("##" + m_id).c_str(), ImVec2(0.f, m_childTotalHeight));
+        if (m_bIsChild) ImGui::BeginChild(("##" + getIdAString()).c_str(), ImVec2(0.f, m_childTotalHeight));
         {
-            ImGui::Columns(static_cast<int>(N), ("##" + m_id).c_str(), false);
+            ImGui::Columns(static_cast<int>(N), ("##" + getIdAString()).c_str(), false);
 
             int counter = 0;
             int offset = 0;

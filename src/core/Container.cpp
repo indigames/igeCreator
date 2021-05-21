@@ -37,6 +37,20 @@ namespace ige::creator
     {
         auto found = std::find_if(m_widgets.begin(), m_widgets.end(), [&](std::shared_ptr<Widget> itr)
         {
+            return itr->getIdAString() == widgetId;
+        });
+
+        if (found != m_widgets.end())
+        {
+            (*found)->setContainer(nullptr);
+            m_widgets.erase(found);
+        }
+    }
+
+    void Container::removeWidgetById(uint64_t widgetId)
+    {
+        auto found = std::find_if(m_widgets.begin(), m_widgets.end(), [&](std::shared_ptr<Widget> itr)
+        {
             return itr->getId() == widgetId;
         });
 

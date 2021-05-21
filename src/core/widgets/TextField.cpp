@@ -24,7 +24,7 @@ namespace ige::creator
             flag |= ImGuiInputTextFlags_ReadOnly;
         }
 
-        bool enterPressed = ImGui::InputText((m_label + m_id).c_str(), m_content.data(), MAX_TEXT_LENGHT, flag);
+        bool enterPressed = ImGui::InputText((m_label + getIdAString()).c_str(), m_content.data(), MAX_TEXT_LENGHT, flag);
 
         if (enterPressed)
         {

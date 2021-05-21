@@ -30,11 +30,11 @@ namespace ige::creator
         {
             getOnClickEvent().invoke(this);
         }
-        else if (m_color.x >= 0.f && ImGui::ColorButton((m_label + m_id).c_str(), m_color, 0, m_size))
+        else if (m_color.x >= 0.f && ImGui::ColorButton((m_label + getIdAString()).c_str(), m_color, 0, m_size))
         {
             getOnClickEvent().invoke(this);
         }
-        else if (m_label != "" && ImGui::ButtonEx((m_label + m_id).c_str(), m_size, !m_bEnabled ? ImGuiButtonFlags_Disabled : 0))
+        else if (m_label != "" && ImGui::ButtonEx((m_label + getIdAString()).c_str(), m_size, !m_bEnabled ? ImGuiButtonFlags_Disabled : 0))
         {
             getOnClickEvent().invoke(this);
         }

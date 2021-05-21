@@ -59,7 +59,7 @@ namespace ige::creator
         if (m_bIsSelected)      flags |= ImGuiTreeNodeFlags_Selected;
         if (m_bIsLeaf)          flags |= ImGuiTreeNodeFlags_Leaf;
 
-        bool opened = ImGui::TreeNodeEx((m_name + m_id).c_str(), flags);
+        bool opened = ImGui::TreeNodeEx((m_name + getIdAString()).c_str(), flags);
 
         executePlugins();
 

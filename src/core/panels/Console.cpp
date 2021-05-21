@@ -6,6 +6,7 @@
 #include "core/Editor.h"
 #include "core/widgets/Label.h"
 #include "core/widgets/Button.h"
+#include "core/widgets/Drag.h"
 #include "core/task/TaskManager.h"
 #include "core/menu/ContextMenu.h"
 #include "core/menu/MenuItem.h"
@@ -51,13 +52,30 @@ namespace ige::creator
         clear();
 
         m_topGroup = createWidget<Group>("Console Top", false, false);
-        m_topGroup->createWidget<Button>("Clear", ImVec2(40.f, 20.f), true, false)->getOnClickEvent().addListener([this](auto widget) {
+
+        auto columns = m_topGroup->createWidget<Columns<10>>(128.f);
+
+        columns->createWidget<Button>("Clear", ImVec2(64.f, 20.f), true, false)->getOnClickEvent().addListener([this](auto widget) {
             TaskManager::getInstance()->addTask([this]() {
                 initialize();
             });
         });
-        m_topGroup->createWidget<CheckBox>("Auto", m_bAutoClearOnStart)->getOnDataChangedEvent().addListener([this](bool val) {
+
+        auto clearChk = columns->createWidget<CheckBox>("AutoClear", m_bAutoClearOnStart);
+        clearChk->setEndOfLine(false);
+        clearChk->getOnDataChangedEvent().addListener([this](bool val) {
             m_bAutoClearOnStart = val;
+        });
+
+        auto scrollChk = columns->createWidget<CheckBox>("AutoScroll", m_bAutoScroll);
+        scrollChk->setEndOfLine(false);
+        scrollChk->getOnDataChangedEvent().addListener([this](bool val) {
+            m_bAutoScroll = val;
+        });
+
+        std::array maxLines = { m_maxLines };
+        columns->createWidget<Drag<int>>("Rows", ImGuiDataType_S32, maxLines, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+            m_maxLines = val[0];
         });
 
         m_logGroup = createWidget<Group>("Console Log", false, false);
@@ -71,7 +89,6 @@ namespace ige::creator
 
     void Console::_drawImpl()
     {
-        //Panel::_drawImpl();
         if (isOpened())
         {
             int windowFlags = ImGuiWindowFlags_None;
@@ -126,9 +143,7 @@ namespace ige::creator
                 // draw scrollable group
                 ImGui::BeginChild("log_group_child");
                     m_logGroup->draw();
-                    if (_scrollToBottom == 1)
-                        _scrollToBottom++;
-                    else if (_scrollToBottom > 1) {
+                    if (m_bAutoScroll && _scrollToBottom > 1) {
                         auto pos = ImGui::GetScrollMaxY();
                         ImGui::SetScrollY(pos);
                         _scrollToBottom = 0;
@@ -163,8 +178,16 @@ namespace ige::creator
         strftime(buffer, sizeof(buffer), "%d-%m-%Y %H:%M:%S", timeinfo);
         auto msg = std::string(buffer) + "\t" + std::string(message);
 
-        m_logGroup->createWidget<Label>(msg);
-        _scrollToBottom = 1;
+        while (m_logIds.size() > m_maxLines)
+        {
+            auto id = m_logIds.front();
+            m_logIds.pop_front();
+            m_logGroup->removeWidgetById(id);
+        }
+
+        m_logIds.push_back(m_logGroup->createWidget<Label>(msg)->getId());
+
+        _scrollToBottom++;
     }
 
     void Console::clearAllLogs()
