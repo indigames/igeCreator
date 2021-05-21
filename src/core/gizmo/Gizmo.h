@@ -62,9 +62,16 @@ namespace ige::creator
         void onTargetRemoved(SceneObject* object);
         void onTargetCleared();
 
+        //! Check if using gizmo
+        bool isUsing() const { return m_bIsUsing; }
+
     protected:
         virtual void _drawImpl() override;
         
+        //! Update targets
+        void updateTargets();
+        void removeAllChildren(SceneObject* obj);
+
         //! Translate
         void translate(const Vec3& trans);
 
@@ -92,5 +99,8 @@ namespace ige::creator
         uint64_t m_targetAddedEventId;
         uint64_t m_targetRemovedEventId;
         uint64_t m_targetClearedEventId;
+
+        //! Targeted objects
+        std::vector<SceneObject*> m_targets = {};
     };
 }

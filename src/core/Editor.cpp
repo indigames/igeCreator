@@ -138,6 +138,8 @@ namespace ige::creator
         ImFontConfig config;
         io.Fonts->AddFontFromFileTTF(GetEnginePath("fonts/Manjari-Regular.ttf").c_str(), 14.0f, &config);
         ImGui::StyleColorsDark();
+        ImGuiStyle& style = ImGui::GetStyle();
+        style.WindowPadding = { 2.f, 2.f };
     }
 
     void Editor::resetLayout()

@@ -71,14 +71,52 @@ namespace ige::creator
             auto object = Editor::getCurrentScene()->findObjectById(objId);
             if (object)
             {
-                auto keyboard = Editor::getApp()->getInputHandler()->getKeyboard();
-                if (keyboard->isKeyDown(KeyCode::KEY_LCTRL) || keyboard->isKeyDown(KeyCode::KEY_RCTRL)
-                    || keyboard->isKeyHold(KeyCode::KEY_LCTRL) || keyboard->isKeyHold(KeyCode::KEY_RCTRL))
+                auto keyModifier = Editor::getApp()->getInputHandler()->getKeyboard()->getKeyModifier();
+                if (keyModifier & (int)KeyModifier::KEY_MOD_CTRL)
                 {
-                    if (Editor::getCurrentScene()->getTargets().size() > 1 && object->isSelected())
+                    if (object->isSelected())
                         Editor::getCurrentScene()->removeTarget(object.get());
                     else
                         Editor::getCurrentScene()->addTarget(object.get(), false);
+                }
+                else if (keyModifier & (int)KeyModifier::KEY_MOD_SHIFT)
+                {
+                    auto firstTarget = Editor::getCurrentScene()->getFirstTarget();
+                    if (firstTarget == nullptr)
+                    {
+                        Editor::getCurrentScene()->addTarget(object.get(), false);
+                    }
+                    else
+                    {
+                        auto fistIdxPair = m_objectNodeMap.find(firstTarget->getId());
+                        if (fistIdxPair != m_objectNodeMap.end())
+                        {
+                            auto currIdxPair = m_objectNodeMap.find(object->getId());
+                            if (std::distance(m_objectNodeMap.begin(), fistIdxPair) > std::distance(m_objectNodeMap.begin(), currIdxPair))
+                            {
+                                auto tmp = fistIdxPair;
+                                fistIdxPair = currIdxPair;
+                                currIdxPair = tmp;
+                            }
+                            for (auto it = m_objectNodeMap.begin(); it != fistIdxPair; ++it)
+                            {
+                                auto obj = Editor::getCurrentScene()->findObjectById(it->first);
+                                if (obj) Editor::getCurrentScene()->removeTarget(obj.get());
+                            }
+                            for (auto it = fistIdxPair; it != m_objectNodeMap.end(); ++it)
+                            {
+                                auto obj = Editor::getCurrentScene()->findObjectById(it->first);
+                                if (obj) Editor::getCurrentScene()->addTarget(obj.get(), false);
+                                if (it == currIdxPair) break;
+                            }
+                            for (auto it = currIdxPair; it != m_objectNodeMap.end(); ++it)
+                            {
+                                if (it == currIdxPair) continue;
+                                auto obj = Editor::getCurrentScene()->findObjectById(it->first);
+                                if (obj) Editor::getCurrentScene()->removeTarget(obj.get());
+                            }
+                        }
+                    }
                 }
                 else
                 {

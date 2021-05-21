@@ -22,6 +22,7 @@ namespace ige::creator
 
     Gizmo::~Gizmo()
     {
+        m_targets.clear();
         m_camera = nullptr;
         onTargetCleared();
         Scene::getTargetAddedEvent().removeListener(m_targetAddedEventId);
@@ -92,11 +93,14 @@ namespace ige::creator
         float delta[16] = { 0.f };
         gizmo::Manipulate(&view[0], &proj[0], m_operation, m_mode, &model[0], &delta[0]);
         
+        bool isManipulating = false;
+
         // Show view manipulation in 3D mode only
         if (!m_camera->IsOrthographicProjection())
         {
             ImVec4 newEye, newTarget;
-            if (gizmo::ViewManipulate(&view[0], 8.f, ImVec2(ImGui::GetWindowPos().x + ImGui::GetWindowWidth() - 128, ImGui::GetWindowPos().y), ImVec2(128, 128), 0x10101010, newEye, newTarget))
+            isManipulating = gizmo::ViewManipulate(&view[0], 8.f, ImVec2(ImGui::GetWindowPos().x + ImGui::GetWindowWidth() - 128, ImGui::GetWindowPos().y), ImVec2(128, 128), 0x10101010, newEye, newTarget);
+            if (isManipulating)
             {
                 m_camera->SetCameraPosition({ newEye.x, newEye.y, newEye.z });
                 m_camera->SetTarget({ newTarget.x, newTarget.y, newTarget.z });
@@ -106,8 +110,8 @@ namespace ige::creator
         if(m_bIsUsing && !gizmo::IsUsing())
             updateTargetNode();
 
-        m_bIsUsing = gizmo::IsUsing();
-        if (!m_bIsUsing)
+        m_bIsUsing = gizmo::IsUsing() || isManipulating;
+        if (!gizmo::IsUsing())
         {
             ImGui::PopStyleColor();
             return;
@@ -175,8 +179,9 @@ namespace ige::creator
         m_initScales.clear();
         m_initPositions.clear();
 
-        auto targets = Editor::getCurrentScene()->getTargets();
-        for (auto& target : targets)
+        updateTargets();
+
+        for (auto& target : m_targets)
         {
             if (target)
             {
@@ -186,13 +191,57 @@ namespace ige::creator
                 m_initPositions[target->getId()] = transform->getWorldPosition();
             }
         }
-        m_position /= targets.size();
+        m_position /= m_targets.size();
         
-        if(targets.size() == 1)
+        if(m_targets.size() == 1)
         {
-            auto target = targets.at(0);
+            auto target = m_targets.at(0);
             auto transform = target->getTransform();
             m_rotation = transform->getWorldRotation();
+        }
+    }
+
+    void Gizmo::updateTargets()
+    {
+        m_targets.clear();
+        m_targets = Editor::getCurrentScene()->getTargets();
+
+        auto it = m_targets.begin();
+        while (it != m_targets.end())
+        {
+            if (*it != nullptr)
+            {
+                auto parent = (*it)->getParent();
+                if (parent != nullptr)
+                {
+                    auto itr = std::find(m_targets.begin(), m_targets.end(), parent);
+                    if (itr != m_targets.end())
+                    {
+                        removeAllChildren(*itr);
+                    }
+                }
+                else
+                {
+                    removeAllChildren(*it);
+                }
+            }
+            if (it != m_targets.end()) it++;
+        }
+    }
+
+    void Gizmo::removeAllChildren(SceneObject* obj)
+    {
+        if (obj != nullptr)
+        {
+            for (const auto& child : obj->getChildren())
+            {
+                auto itr = std::find(m_targets.begin(), m_targets.end(), child);
+                if (itr != m_targets.end())
+                {
+                    m_targets.erase(itr);
+                    removeAllChildren(*itr);
+                }
+            }
         }
     }
 
@@ -218,8 +267,7 @@ namespace ige::creator
     //! Translate
     void Gizmo::translate(const Vec3& trans)
     {
-        auto targets = Editor::getCurrentScene()->getTargets();
-        for (auto& target : targets)
+        for (auto& target : m_targets)
             if (target) target->getTransform()->worldTranslate(trans);
         updateTargetNode();
     }
@@ -227,8 +275,7 @@ namespace ige::creator
     //! Rotate
     void Gizmo::rotate(const Quat& rot)
     {
-        auto targets = Editor::getCurrentScene()->getTargets();
-        for (auto& target : targets)
+        for (auto& target : m_targets)
             if (target) target->getTransform()->worldRotate(rot);
     }
 
@@ -264,15 +311,14 @@ namespace ige::creator
     //! Scale
     void Gizmo::scale(const Vec3& scale)
     {
-        auto targets = Editor::getCurrentScene()->getTargets();
-        for (auto& target : targets)
+        for (auto& target : m_targets)
         {
             if (target)
             {
                 auto transform = target->getTransform();
                 transform->setWorldScale(Vec3_Mul(scale, m_initScales[target->getId()]));
 
-                if (targets.size() > 1)
+                if (m_targets.size() > 1)
                 {
                     auto deltaPos = m_initPositions[target->getId()] - m_position;
                     deltaPos = Quat_Inverse(m_rotation) * Vec3_Mul(scale - Vec3(1.f, 1.f, 1.f), deltaPos);

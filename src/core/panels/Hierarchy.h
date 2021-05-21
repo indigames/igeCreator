@@ -21,7 +21,7 @@ namespace ige::creator
         virtual void initialize() override;
 
     protected:
-        virtual void drawWidgets() override;       
+        virtual void drawWidgets() override;
         void addCreationContextMenu(std::shared_ptr<ContextMenu>& ctxMenu);
 
         //! Object created/deleted
@@ -41,7 +41,7 @@ namespace ige::creator
         void onTargetCleared();
 
         //! Tree node objects
-        std::unordered_map<uint64_t, std::shared_ptr<TreeNode>> m_objectNodeMap;
+        std::map<uint64_t, std::shared_ptr<TreeNode>> m_objectNodeMap;
 
         //! Group layout to add WindowContextMenu
         std::shared_ptr<Group> m_groupLayout;

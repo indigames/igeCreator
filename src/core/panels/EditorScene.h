@@ -42,7 +42,7 @@ public:
     void lookSelectedObject();
 
 protected:
-    enum ViewTool
+    enum class ViewTool
     {
         None                = -1,
         Pan                 = 0,
@@ -67,6 +67,9 @@ protected:
 
     //! Render camera frustum
     void renderCameraFrustum();
+
+    //! Render object select rect
+    void renderCameraSelect();
 
     //! Camera movement with mouse
     void updateCameraPosition(float touchX, float touchY);

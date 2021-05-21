@@ -357,24 +357,11 @@ namespace ige::creator
 
     void EditorScene::setTargetObject(SceneObject* obj)
     {
-        if (obj == nullptr)
-        {
-            clear();
-            return;
-        }
-
-        if (!isOpened() || !m_bIsInitialized)
+        if (!obj || !isOpened() || !m_bIsInitialized)
             return;
 
         if (obj->getScene()->getShowcase() == nullptr) return;
         if (!SceneManager::getInstance()->isEditor()) return;
-        
-        // Auto toggle camera based on object types
-        if (Editor::getInstance()->is3DCamera() && obj->isGUIObject()
-            || !Editor::getInstance()->is3DCamera() && !obj->isGUIObject())
-        {
-            Editor::getInstance()->toggle3DCamera();
-        }
 
         auto lastShowcase = m_currShowcase;
         m_currShowcase = m_currCamera == m_2dCamera ? obj->getScene()->getUIShowcase() : obj->getScene()->getShowcase();
@@ -469,6 +456,9 @@ namespace ige::creator
             // Render camera frustum
             renderCameraFrustum();
 
+            // Render object select rect
+            renderCameraSelect();
+
             renderContext->EndScene();
         }
 
@@ -505,7 +495,7 @@ namespace ige::creator
 
     void EditorScene::updateTouch() 
     {
-        if (!isOpened() || m_currCamera == nullptr)
+        if (!isOpened() || m_gizmo->isUsing() || m_currCamera == nullptr)
             return;
 
         auto touch = Editor::getApp()->getInputHandler()->getTouchDevice();
@@ -547,7 +537,12 @@ namespace ige::creator
         {
             auto finger = touch->getFinger(0);
             if (finger->getFingerId() == m_HandleCameraTouchId || m_HandleCameraTouchId == -1)
+            {
+                m_lastMousePosX = m_lastMousePosY = -1.f;
+                m_firstMousePosX = m_firstMousePosY = -1.f;
                 m_bIsDragging = false;
+            }
+
             if (!m_bIsDraggingCam) {
                 //Perform Click
                 if (isFocus) updateObjectSelection();
@@ -582,34 +577,18 @@ namespace ige::creator
                 //! Important => because this is bit shift, so we can compile multi function key
                 //! in this case, only 1 key will be access, so Shift < Ctrl < Alt
                 //! Incase nothing press, active Select ViewTool
-                m_viewTool = ViewTool::MultiDeSelectArea;
+                m_viewTool = ViewTool::MultiSelectArea;
                 if (m_fnKeyPressed & SYSTEM_KEYCODE_ALT_MASK)
                 {
                     m_viewTool = ViewTool::Orbit;
                 }
-                else if (m_fnKeyPressed & SYSTEM_KEYCODE_CTRL_MASK)
-                {
-                    m_viewTool = ViewTool::MultiDeSelectArea;
-                }
-                else if (m_fnKeyPressed & SYSTEM_KEYCODE_SHIFT_MASK)
-                {
-                    m_viewTool = ViewTool::MultiSelectArea;
-                }
             }
             else {
                 //! In 2D mode, rotate camera will be locked, only Select Obj & pan available
-                m_viewTool = ViewTool::MultiDeSelectArea;
+                m_viewTool = ViewTool::MultiSelectArea;
                 if (m_fnKeyPressed & SYSTEM_KEYCODE_ALT_MASK)
                 {
                     m_viewTool = ViewTool::Pan;
-                }
-                else if (m_fnKeyPressed & SYSTEM_KEYCODE_CTRL_MASK)
-                {
-                    m_viewTool = ViewTool::MultiDeSelectArea;
-                }
-                else if (m_fnKeyPressed & SYSTEM_KEYCODE_SHIFT_MASK)
-                {
-                    m_viewTool = ViewTool::MultiSelectArea;
                 }
             }
             break;
@@ -642,6 +621,7 @@ namespace ige::creator
     {
         // If left button release, check selected object
         auto touch = Editor::getApp()->getInputHandler()->getTouchDevice();
+        auto keyModifier = Editor::getApp()->getInputHandler()->getKeyboard()->getKeyModifier();
         if (isFocused() && isHovered() && touch->isFingerReleased(0) && touch->getFinger(0)->getFingerId() == 0)
         {
             float touchX, touchY;
@@ -649,18 +629,18 @@ namespace ige::creator
             auto hit = Editor::getCurrentScene()->raycast(Vec2(touchX, touchY), m_currCamera, 10000.f);
             if (hit.first)
             {
-                if (m_fnKeyPressed & SYSTEM_KEYCODE_CTRL_MASK)
+                if (keyModifier & (int)KeyModifier::KEY_MOD_CTRL || keyModifier & (int)KeyModifier::KEY_MOD_SHIFT)
                 {
-                    if (Editor::getCurrentScene()->getTargets().size() > 1 && hit.first->isSelected())
+                    if (hit.first->isSelected())
                         Editor::getCurrentScene()->removeTarget(hit.first);
                     else
-                        Editor::getCurrentScene()->addTarget(hit.first, !(m_fnKeyPressed & SYSTEM_KEYCODE_CTRL_MASK));
+                        Editor::getCurrentScene()->addTarget(hit.first, false);
                 }
                 else
                 {
                     Editor::getCurrentScene()->addTarget(hit.first, true);
                 }
-            }                
+            }
         }
     }
 
@@ -1078,10 +1058,66 @@ namespace ige::creator
             m_currCamera->SetOrthoHeight(m_currentCanvasHeight * 0.5f);
         }
     }
+    
+    void EditorScene::renderCameraSelect()
+    {
+        if (m_bIsDragging && m_viewTool == ViewTool::MultiSelectArea)
+        {
+            auto mouseStart = Editor::getCurrentScene()->screenToClient(Vec2(m_firstMousePosX, m_firstMousePosY));
+            auto mouseEnd = Editor::getCurrentScene()->screenToClient(Vec2(m_lastMousePosX, m_lastMousePosY));
+            auto windowSize = Editor::getCurrentScene()->getWindowSize();
+
+            Mat4 view;
+            m_2dCamera->GetViewInverseMatrix(view);
+            view = view.Inverse();
+
+            Mat4 screen;
+            m_2dCamera->GetScreenMatrix(screen);
+
+            Mat4 proj;
+            m_2dCamera->GetProjectionMatrix(proj);
+            proj = screen * proj;
+
+            ShapeDrawer::setViewProjectionMatrix2D(proj * view);
+            ShapeDrawer::drawRect2D(ScreenToWorld(mouseStart, windowSize, m_2dCamera), ScreenToWorld(mouseEnd, windowSize, m_2dCamera));
+        }
+    }
 
     void EditorScene::handleCameraSelect(const Vec2& offset)
     {
-        ShapeDrawer::drawRect({ m_firstMousePosX, m_firstMousePosY }, { m_lastMousePosX, m_lastMousePosY }, { 0.f, 0.f, 1.f });
+        if (m_currCamera == nullptr) return;
+
+        auto keyModifier = Editor::getApp()->getInputHandler()->getKeyboard()->getKeyModifier();
+        if (!(keyModifier & (int)KeyModifier::KEY_MOD_CTRL) && !(keyModifier & (int)KeyModifier::KEY_MOD_SHIFT))
+            Editor::getCurrentScene()->clearTargets();
+
+        auto scene = Editor::getCurrentScene();
+        if (scene)
+        {
+            auto mouseStart = scene->screenToClient(Vec2(m_firstMousePosX, m_firstMousePosY));
+            auto mouseEnd = scene->screenToClient(Vec2(m_lastMousePosX, m_lastMousePosY));
+            auto windowSize = Editor::getCurrentScene()->getWindowSize();
+
+            auto minX = std::min(mouseStart[0], mouseEnd[0]);
+            auto minY = std::min(mouseStart[1], mouseEnd[1]);
+            auto maxX = std::max(mouseStart[0], mouseEnd[0]);
+            auto maxY = std::max(mouseStart[1], mouseEnd[1]);
+            auto selectRect = Vec4(minX, minY, maxX, maxY);
+
+            for (const auto& obj : scene->getObjects())
+            {
+                auto objRect = AabbToScreenRect(obj->getWorldAABB(), windowSize, m_currCamera);
+                objRect = Vec4(objRect[0], objRect[1], objRect[2], objRect[3]);
+                if (RectInside(selectRect, objRect))
+                {
+                    if(keyModifier & (int)KeyModifier::KEY_MOD_CTRL)
+                        Editor::getCurrentScene()->removeTarget(obj.get());
+                    else
+                        if (obj->getAABB().getVolume() > 0.f)
+                            Editor::getCurrentScene()->addTarget(obj.get());
+                }
+            }
+        }
     }
 
     //Camera Helper function
