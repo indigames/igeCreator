@@ -31,7 +31,7 @@ namespace ige::creator
         virtual void update(float dt);
         virtual void draw() override;
 
-        void setTargetObject(const std::shared_ptr<SceneObject>& obj);
+        void setTargetObject(SceneObject* obj);
 
         template<typename T, typename... Args>
         std::shared_ptr<T> createPanel(const std::string& id, Args&&... args)

@@ -33,7 +33,7 @@ TransformEditorComponent::~TransformEditorComponent()
     }
 }
 
-void TransformEditorComponent::setTargetObject(const std::shared_ptr<SceneObject>& obj )
+void TransformEditorComponent::setTargetObject(SceneObject* obj )
 {
     if (m_targetObject != obj)
     {

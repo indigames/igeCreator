@@ -13,7 +13,7 @@ public:
 	TransformEditorComponent();
 	~TransformEditorComponent();
 
-	virtual void setTargetObject(const std::shared_ptr<SceneObject>& obj) override;
+	virtual void setTargetObject(SceneObject* obj) override;
 	virtual void redraw() override;
 protected:
 	virtual bool isSafe(Component* comp) override;

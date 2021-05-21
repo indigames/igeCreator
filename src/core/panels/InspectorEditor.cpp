@@ -91,7 +91,7 @@ void InspectorEditor::setParentGroup(std::shared_ptr<Group> componentGroup)
 	}
 }
 
-void InspectorEditor::setTargetObject(const std::shared_ptr<SceneObject>& obj)
+void InspectorEditor::setTargetObject(SceneObject* obj)
 {
 	if (m_targetObject != obj) {
 		m_targetObject = obj;

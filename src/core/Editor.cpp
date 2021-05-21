@@ -31,6 +31,7 @@ namespace ige::creator
     {
         m_selectedObject = nullptr;
         m_canvas = nullptr;
+        m_selectedJsons.clear();
 
         if (m_shortcutController != nullptr) {
             m_shortcutController->release();
@@ -137,6 +138,8 @@ namespace ige::creator
         ImFontConfig config;
         io.Fonts->AddFontFromFileTTF(GetEnginePath("fonts/Manjari-Regular.ttf").c_str(), 14.0f, &config);
         ImGui::StyleColorsDark();
+        ImGuiStyle& style = ImGui::GetStyle();
+        style.WindowPadding = { 2.f, 2.f };
     }
 
     void Editor::resetLayout()
@@ -159,44 +162,6 @@ namespace ige::creator
     void Editor::renderImGUI()
     {
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    }
-
-    //! Set current selected object by its Id
-    void Editor::setSelectedObject(uint64_t objId)
-    {
-        if (objId == (uint64_t)-1 || !SceneManager::getInstance()->getCurrentScene())
-        {
-            setSelectedObject(nullptr);
-            return;
-        }
-        auto obj = SceneManager::getInstance()->getCurrentScene()->findObjectById(objId);
-        setSelectedObject(obj);
-    }
-
-    void Editor::setSelectedObject(std::shared_ptr<SceneObject> obj)
-    {
-        if (m_selectedObject != obj)
-        {
-            // Set previous object as not selected
-            if(m_selectedObject != nullptr)
-                m_selectedObject->setSelected(false);
-
-            // Notify the views
-            if (obj != nullptr)
-                obj->setSelected(true);
-
-            // Set current one as selected
-            m_selectedObject = obj;
-
-            // Notify the views
-            if (m_canvas != nullptr)
-                m_canvas->setTargetObject(m_selectedObject);
-        }
-    }
-
-    std::shared_ptr<SceneObject>& Editor::getSelectedObject()
-    {
-        return m_selectedObject;
     }
 
     bool Editor::createProject()
@@ -331,17 +296,17 @@ namespace ige::creator
     bool Editor::unloadScene()
     {
         refreshScene();
-        auto scene = SceneManager::getInstance()->getCurrentScene();
+        auto scene = Editor::getCurrentScene();
         if(scene) SceneManager::getInstance()->unloadScene(scene);
         return true;
     }
 
     bool Editor::saveScene()
     {
-        if (SceneManager::getInstance()->getCurrentScene() == nullptr)
+        if (Editor::getCurrentScene() == nullptr)
             return false;
 
-        if (SceneManager::getInstance()->getCurrentScene()->getPath().empty())
+        if (Editor::getCurrentScene()->getPath().empty())
         {
             auto selectedFile = SaveFileDialog("Save Scene", "scenes", { "scene", "*.scene" }).result();
             if (!selectedFile.empty())
@@ -358,7 +323,7 @@ namespace ige::creator
 
     bool Editor::saveSceneAs()
     {
-        if (SceneManager::getInstance()->getCurrentScene() == nullptr)
+        if (Editor::getCurrentScene() == nullptr)
             return false;
 
         auto selectedFile = SaveFileDialog("Save Scene As", "scenes", { "scene", "*.scene" }).result();
@@ -373,10 +338,10 @@ namespace ige::creator
     void Editor::refreshScene() {
         if (getCanvas())
         {
+            getCanvas()->setTargetObject(nullptr);
             getCanvas()->getHierarchy()->clear();
             getCanvas()->getEditorScene()->clear();
         }
-        setSelectedObject(-1);
     }
 
     bool Editor::convertAssets()
@@ -477,41 +442,62 @@ namespace ige::creator
 
     bool Editor::deleteObject()
     {
-        auto currentObject = Editor::getInstance()->getSelectedObject();
-        if (currentObject)
+        auto targets = Editor::getCurrentScene()->getTargets();
+        if (targets.size() == 1)
         {
-            if (currentObject->getParent())
-                currentObject->getParent()->setSelected(true);
-            else
-                Editor::getInstance()->setSelectedObject(-1);
-            Editor::getCurrentScene()->removeObjectById(currentObject->getId());
-            return true;
+            if (targets[0])
+            {
+                auto parent = targets[0]->getParent();
+                Editor::getCurrentScene()->removeObjectById(targets[0]->getId());
+                Editor::getCurrentScene()->clearTargets();
+                if (parent) Editor::getCurrentScene()->addTarget(parent);
+            }
         }
-        return false;
+        else
+        {
+            for (auto target : targets)
+            {
+                if (target)
+                    Editor::getCurrentScene()->removeObjectById(target->getId());
+            }
+            Editor::getCurrentScene()->clearTargets();
+        }        
+        targets.clear();
+        return true;
     }
 
     void Editor::copyObject() 
     {
-        auto currentObject = Editor::getInstance()->getSelectedObject();
-        if (currentObject)
-            currentObject->to_json(m_selectedJson);
-        else
-            m_selectedJson = json{};
+        m_selectedJsons.clear();
+        auto targets = Editor::getCurrentScene()->getTargets();
+        for (auto target : targets)
+        {
+            if (target)
+            {
+                json jTarget;
+                target->to_json(jTarget);
+                if(!jTarget.is_null()) m_selectedJsons.push_back(jTarget);
+            }
+        }
     }
 
     void Editor::pasteObject() 
     {
-        if (m_selectedJson.is_null())
-            return;
+        if (m_selectedJsons.empty()) return;
 
-        auto objName = m_selectedJson.value("name", "");
-        auto newObject = Editor::getCurrentScene()->createObject(objName + "_cp");
-        auto uuid = newObject->getUUID();
-        newObject->from_json(m_selectedJson);
-        newObject->setUUID(uuid);
-        newObject->setName(objName + "_cp");
-        newObject->setParent(getSelectedObject() && getSelectedObject()->getParent() ? getSelectedObject()->getParent() : nullptr);
-        newObject->setSelected(true);
+        for (auto jTarget : m_selectedJsons)
+        {
+            auto objName = jTarget.value("name", "");
+            auto newObject = Editor::getCurrentScene()->createObject(objName + "_cp");
+            auto uuid = newObject->getUUID();
+            newObject->from_json(jTarget);
+            newObject->setUUID(uuid);
+            newObject->setName(objName + "_cp");
+            auto targets = Editor::getCurrentScene()->getTargets();
+            auto parent = (!targets.empty() && targets[0]) ? targets[0] : nullptr;
+            newObject->setParent(parent);
+            Editor::getCurrentScene()->addTarget(newObject.get(), true);
+        }
     }
 
     void Editor::toggleLocalGizmo()
@@ -535,15 +521,15 @@ namespace ige::creator
     //! Prefab save/load
     bool Editor::savePrefab(uint64_t objectId, const std::string& file)
     {
-        if (SceneManager::getInstance()->getCurrentScene())
-            return SceneManager::getInstance()->getCurrentScene()->savePrefab(objectId, file);
+        if (Editor::getCurrentScene())
+            return Editor::getCurrentScene()->savePrefab(objectId, file);
         return false;
     }
 
     bool Editor::loadPrefab(uint64_t parentId, const std::string& file)
     {
-        if (SceneManager::getInstance()->getCurrentScene())
-            return SceneManager::getInstance()->getCurrentScene()->loadPrefab(parentId, file);
+        if (Editor::getCurrentScene())
+            return Editor::getCurrentScene()->loadPrefab(parentId, file);
         return false;
     }
 

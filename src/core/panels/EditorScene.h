@@ -17,14 +17,14 @@ NS_IGE_BEGIN
 
 class Image;
 
-class EditorScene: public Panel, IShortcut
+class EditorScene : public Panel, IShortcut
 {
 public:
     EditorScene(const std::string& name = "", const Panel::Settings& settings = {});
     virtual ~EditorScene();
 
     //! Set target object
-    void setTargetObject(const std::shared_ptr<SceneObject>& obj);
+    void setTargetObject(SceneObject* obj);
 
     virtual void clear();
     virtual void update(float dt);
@@ -38,21 +38,20 @@ public:
     bool is2DMode() const;
 
     std::shared_ptr<Gizmo>& getGizmo() { return m_gizmo; }
-    
+
     void lookSelectedObject();
-    void deleteSelectedObject();
 
 protected:
-    enum ViewTool
-        {
-            None                = -1,
-            Pan                 = 0,
-            Orbit               = 1,
-            FPS                 = 2,
-            Zoom                = 3,
-            MultiSelectArea     = 4,
-            MultiDeSelectArea   = 5,
-        };
+    enum class ViewTool
+    {
+        None                = -1,
+        Pan                 = 0,
+        Orbit               = 1,
+        FPS                 = 2,
+        Zoom                = 3,
+        MultiSelectArea     = 4,
+        MultiDeSelectArea   = 5,
+    };
 
 
 protected:
@@ -63,10 +62,14 @@ protected:
     void initDragDrop();
 
     //! Render bouding box
-    void renderBoundingBox();
+    void renderBoundingBoxes();
+    void renderBoundingBox(SceneObject* object);
 
     //! Render camera frustum
     void renderCameraFrustum();
+
+    //! Render object select rect
+    void renderCameraSelect();
 
     //! Camera movement with mouse
     void updateCameraPosition(float touchX, float touchY);
@@ -87,11 +90,12 @@ protected:
 
     //! camera Look
     void lookAtObject(SceneObject* object);
-    void handleCameraOrbit(float offsetX, float offsetY);
-    void handleCameraPan(float offsetX, float offsetY);
-    void handleCameraFPS(float offsetX, float offsetY);
-    void handleCameraZoom(float offsetX, float offsetY);
-    void handleCameraZoomFocus(float offsetX, float offsetY);
+    void handleCameraOrbit(const Vec2& offset);
+    void handleCameraPan(const Vec2& offset);
+    void handleCameraFPS(const Vec2& offset);
+    void handleCameraScroll(const Vec2& offset);
+    void handleCameraZoom(const Vec2& offset);
+    void handleCameraSelect(const Vec2& offset);
 
     //! camera helper functions
     float clampEulerAngle(float angle);
@@ -102,7 +106,6 @@ protected:
     static float getPerspectiveCameraViewDistance(float size, float fov);
     static AABBox getRenderableAABBox(SceneObject* object);
 
-    
 protected:
     //! Scene FBO
     std::shared_ptr<Image> m_imageWidget = nullptr;
@@ -111,7 +114,7 @@ protected:
 
     //! Grids
     EditableFigure* m_grid2D = nullptr;
-    EditableFigure* m_grid3D = nullptr; 
+    EditableFigure* m_grid3D = nullptr;
 
     //! Camera
     Camera* m_2dCamera = nullptr;
@@ -145,6 +148,8 @@ protected:
     int m_HandleCameraTouchId = -1;
     float m_cameraDragSpeed = 0.5f;
     float m_cameraRotationSpeed = 0.0033f;
+    float m_firstMousePosX = 0.f;
+    float m_firstMousePosY = 0.f;
     float m_lastMousePosX = 0.f;
     float m_lastMousePosY = 0.f;
     Vec3 m_cameraRotationEuler = {};

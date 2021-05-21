@@ -22,7 +22,7 @@ public:
 	EditorComponent();
 	~EditorComponent();
 
-	virtual void setTargetObject(const std::shared_ptr<SceneObject>& obj);
+	virtual void setTargetObject(SceneObject* obj);
 	virtual bool setComponent(Component* component);
 	virtual Component* getComponent();
 	virtual void draw(std::shared_ptr<Group> group);
@@ -38,7 +38,7 @@ protected:
 protected:
 	Component* m_component = nullptr;
 	std::shared_ptr<Group> m_group = nullptr;
-	std::shared_ptr<SceneObject> m_targetObject = nullptr;
+	SceneObject* m_targetObject = nullptr;
 	bool m_bisDirty;
 };
 

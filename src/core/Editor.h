@@ -69,11 +69,6 @@ namespace ige::creator
         static std::shared_ptr<Scene> getCurrentScene() { return SceneManager::getInstance()->getCurrentScene(); }
         static void setCurrentScene(const std::shared_ptr<Scene>& scene) { SceneManager::getInstance()->setCurrentScene(scene); }
 
-        //! Set current selected object by its id
-        void setSelectedObject(uint64_t objId);
-        void setSelectedObject(std::shared_ptr<SceneObject> obj);
-        std::shared_ptr<SceneObject>& getSelectedObject();
-
         //! Toggle local/global gizmo
         bool isLocalGizmo() { return m_bIsLocalGizmo; }
         void toggleLocalGizmo();
@@ -116,8 +111,8 @@ namespace ige::creator
         //! Toggle 3D/2D camera
         bool m_bIs3DCamera = true;
 
-        //! Selected object json
-        json m_selectedJson = json{};
+        //! Selected objects json data
+        json m_selectedJsons = json::array();
     };
 
     std::string CreateScript(const std::string& name);

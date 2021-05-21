@@ -3,6 +3,8 @@
 
 #include <components/TransformComponent.h>
 #include <components/gui/RectTransform.h>
+#include <scene/Scene.h>
+#include <scene/SceneObject.h>
 
 namespace ige::creator
 {
@@ -12,11 +14,20 @@ namespace ige::creator
         m_operation = gizmo::OPERATION::TRANSLATE;
         m_mode = gizmo::MODE::LOCAL;
         m_visible = true;
+
+        m_targetAddedEventId = Scene::getTargetAddedEvent().addListener(std::bind(&Gizmo::onTargetAdded, this, std::placeholders::_1));
+        m_targetRemovedEventId = Scene::getTargetRemovedEvent().addListener(std::bind(&Gizmo::onTargetRemoved, this, std::placeholders::_1));
+        m_targetClearedEventId = Scene::getTargetClearedEvent().addListener(std::bind(&Gizmo::onTargetCleared, this));
     }
 
     Gizmo::~Gizmo()
     {
+        m_targets.clear();
         m_camera = nullptr;
+        onTargetCleared();
+        Scene::getTargetAddedEvent().removeListener(m_targetAddedEventId);
+        Scene::getTargetRemovedEvent().removeListener(m_targetRemovedEventId);
+        Scene::getTargetClearedEvent().removeListener(m_targetClearedEventId);
     }
 
     void Gizmo::setCamera(Camera* cam)
@@ -51,13 +62,12 @@ namespace ige::creator
 
     void Gizmo::_drawImpl()
     {
-        if(!m_bEnabled || m_camera == nullptr || !m_visible) return;
+        if(!m_bEnabled || m_camera == nullptr || !m_visible || Editor::getCurrentScene() == nullptr)
+            return;
 
-        auto target = Editor::getInstance()->getSelectedObject();
-        if(!target) return;
-
-        auto transform = target->getTransform();
-        if (!transform) return;
+        auto targets = Editor::getCurrentScene()->getTargets();
+        if (targets.empty())
+            return;
         
         // Detect ortho projection
         gizmo::SetOrthographic(m_camera->IsOrthographicProjection());
@@ -68,7 +78,9 @@ namespace ige::creator
         Mat4 projMat;
         auto proj = m_camera->GetProjectionMatrix(projMat).P();
 
-        Mat4 modelMat = transform->getWorldMatrix();
+        auto modelMat = Mat4::IdentityMat();
+        vmath_mat4_from_rottrans(m_rotation.P(), m_position.P(), modelMat.P());
+        vmath_mat_appendScale(modelMat.P(), m_scale.P(), 4, 4, modelMat.P());
         auto model = modelMat.P();
 
         ImGui::PushStyleColor(ImGuiCol_Border, 0);
@@ -77,24 +89,29 @@ namespace ige::creator
 
         ImGuizmo::SetDrawlist();
         ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y + 25.f, ImGui::GetWindowWidth(), ImGui::GetWindowHeight() - 25.f);
-        ImGuizmo::SetID(target->getId());
 
         float delta[16] = { 0.f };
         gizmo::Manipulate(&view[0], &proj[0], m_operation, m_mode, &model[0], &delta[0]);
         
+        bool isManipulating = false;
+
         // Show view manipulation in 3D mode only
         if (!m_camera->IsOrthographicProjection())
         {
             ImVec4 newEye, newTarget;
-            if (gizmo::ViewManipulate(&view[0], 8.f, ImVec2(ImGui::GetWindowPos().x + ImGui::GetWindowWidth() - 128, ImGui::GetWindowPos().y), ImVec2(128, 128), 0x10101010, newEye, newTarget))
+            isManipulating = gizmo::ViewManipulate(&view[0], 8.f, ImVec2(ImGui::GetWindowPos().x + ImGui::GetWindowWidth() - 128, ImGui::GetWindowPos().y), ImVec2(128, 128), 0x10101010, newEye, newTarget);
+            if (isManipulating)
             {
                 m_camera->SetCameraPosition({ newEye.x, newEye.y, newEye.z });
                 m_camera->SetTarget({ newTarget.x, newTarget.y, newTarget.z });
             }
         }
 
-        m_bIsUsing = gizmo::IsUsing();
-        if (!m_bIsUsing)
+        if(m_bIsUsing && !gizmo::IsUsing())
+            updateTargetNode();
+
+        m_bIsUsing = gizmo::IsUsing() || isManipulating;
+        if (!gizmo::IsUsing())
         {
             ImGui::PopStyleColor();
             return;
@@ -105,24 +122,210 @@ namespace ige::creator
             float deltaTranslation[3], deltaRotation[3], deltaScale[3];
             gizmo::DecomposeMatrixToComponents(delta, deltaTranslation, deltaRotation, deltaScale);
             if (isnan(deltaTranslation[0]) || isnan(deltaTranslation[1]) || isnan(deltaTranslation[2])) return;
-            transform->worldTranslate(Vec3(deltaTranslation[0], deltaTranslation[1], deltaTranslation[2]));
+            translate(Vec3(deltaTranslation[0], deltaTranslation[1], deltaTranslation[2]));
         }
         else if(m_operation == gizmo::ROTATE)
-        {            
+        {
             Vec3 col0(delta[0], delta[4], delta[8]);
             Vec3 col1(delta[1], delta[5], delta[9]);
             Vec3 col2(delta[2], delta[6], delta[10]);
             Vec3 scale(col0.Length(), col1.Length(), col2.Length());
             Mat3 rotmat(col0 / scale.X(), col1 / scale.Y(), col2 / scale.Z());
-            transform->worldRotate(Quat(rotmat));
+            m_rotation = Quat(rotmat);
+            rotate(m_rotation);
         }
         else if (m_operation == gizmo::SCALE)
         {
             float deltaTranslation[3], deltaRotation[3], deltaScale[3];
             gizmo::DecomposeMatrixToComponents(delta, deltaTranslation, deltaRotation, deltaScale);
             if (isnan(deltaScale[0]) || isnan(deltaScale[1]) || isnan(deltaScale[2])) return;
-            transform->worldScale(Vec3(deltaScale[0], deltaScale[1], deltaScale[2]));
+            scale(Vec3(deltaScale[0], deltaScale[1], deltaScale[2]));
         }
         ImGui::PopStyleColor();
+    }
+
+    //! Target events
+    void Gizmo::onTargetAdded(SceneObject* object)
+    {
+        updateTargetNode();
+    }
+
+    void Gizmo::onTargetRemoved(SceneObject* object)
+    {
+        updateTargetNode();
+    }
+
+    void Gizmo::onTargetCleared()
+    {
+        m_position = { 0.f, 0.f, 0.f };
+        m_scale = { 1.f, 1.f, 1.f };
+        m_rotation = {};
+        m_initScales.clear();
+        m_initPositions.clear();
+    }
+
+    // Update targets
+    void Gizmo::updateTargetNode(bool reset)
+    {
+        if (Editor::getCurrentScene() == nullptr) return;
+
+        if (reset)
+        {
+            m_position = { 0.f, 0.f, 0.f };
+            m_scale = { 1.f, 1.f, 1.f };
+            m_rotation = {};
+        }
+
+        m_initScales.clear();
+        m_initPositions.clear();
+
+        updateTargets();
+
+        for (auto& target : m_targets)
+        {
+            if (target)
+            {
+                auto transform = target->getTransform();
+                m_position += transform->getWorldPosition();
+                m_initScales[target->getId()] = transform->getWorldScale();
+                m_initPositions[target->getId()] = transform->getWorldPosition();
+            }
+        }
+        m_position /= m_targets.size();
+        
+        if(m_targets.size() == 1)
+        {
+            auto target = m_targets.at(0);
+            auto transform = target->getTransform();
+            m_rotation = transform->getWorldRotation();
+        }
+    }
+
+    void Gizmo::updateTargets()
+    {
+        m_targets.clear();
+        m_targets = Editor::getCurrentScene()->getTargets();
+
+        auto it = m_targets.begin();
+        while (it != m_targets.end())
+        {
+            if (*it != nullptr)
+            {
+                auto parent = (*it)->getParent();
+                if (parent != nullptr)
+                {
+                    auto itr = std::find(m_targets.begin(), m_targets.end(), parent);
+                    if (itr != m_targets.end())
+                    {
+                        removeAllChildren(*itr);
+                    }
+                }
+                else
+                {
+                    removeAllChildren(*it);
+                }
+            }
+            if (it != m_targets.end()) it++;
+        }
+    }
+
+    void Gizmo::removeAllChildren(SceneObject* obj)
+    {
+        if (obj != nullptr)
+        {
+            for (const auto& child : obj->getChildren())
+            {
+                auto itr = std::find(m_targets.begin(), m_targets.end(), child);
+                if (itr != m_targets.end())
+                {
+                    m_targets.erase(itr);
+                    removeAllChildren(*itr);
+                }
+            }
+        }
+    }
+
+    //! Get position
+    const Vec3& Gizmo::getPosition() const
+    {
+        return m_position;
+    }
+
+
+    //! Get scale
+    const Vec3& Gizmo::getScale() const
+    {
+        return m_scale;
+    }
+
+    //! Get rotation
+    const Quat& Gizmo::getRotation() const
+    {
+        return m_rotation;
+    }
+
+    //! Translate
+    void Gizmo::translate(const Vec3& trans)
+    {
+        for (auto& target : m_targets)
+            if (target) target->getTransform()->worldTranslate(trans);
+        updateTargetNode();
+    }
+
+    //! Rotate
+    void Gizmo::rotate(const Quat& rot)
+    {
+        for (auto& target : m_targets)
+            if (target) target->getTransform()->worldRotate(rot);
+    }
+
+    float Quat_Norm(const Quat& rotation)
+    {
+        return std::sqrt(rotation.X() * rotation.X() +
+            rotation.Y() * rotation.Y() +
+            rotation.Z() * rotation.Z() +
+            rotation.W() * rotation.W());
+    }
+
+    Quat Quat_Conjugate(const Quat& rotation)
+    {
+        return Quat(-rotation.X(), -rotation.Y(), -rotation.Z(), rotation.W());
+    }
+
+    Quat Quat_Inverse(const Quat& rotation)
+    {
+        float n = Quat_Norm(rotation);
+        auto invQuat = Quat_Conjugate(rotation);
+        invQuat.X(invQuat.X() / (n * n));
+        invQuat.Y(invQuat.Y() / (n * n));
+        invQuat.Z(invQuat.Z() / (n * n));
+        invQuat.W(invQuat.W() / (n * n));
+        return invQuat;
+    }
+
+    Vec3 Vec3_Mul(const Vec3& v1, const Vec3& v2)
+    {
+        return Vec3(v1.X() * v2.X(), v1.Y() * v2.Y(), v1.Z() * v2.Z());
+    }
+
+    //! Scale
+    void Gizmo::scale(const Vec3& scale)
+    {
+        for (auto& target : m_targets)
+        {
+            if (target)
+            {
+                auto transform = target->getTransform();
+                transform->setWorldScale(Vec3_Mul(scale, m_initScales[target->getId()]));
+
+                if (m_targets.size() > 1)
+                {
+                    auto deltaPos = m_initPositions[target->getId()] - m_position;
+                    deltaPos = Quat_Inverse(m_rotation) * Vec3_Mul(scale - Vec3(1.f, 1.f, 1.f), deltaPos);
+                    auto newPosition = m_initPositions[target->getId()] + deltaPos;
+                    transform->setWorldPosition(newPosition);
+                }
+            }
+        }
     }
 }
