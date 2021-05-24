@@ -11,6 +11,8 @@
 #include "core/widgets/Slider.h"
 #include "core/widgets/Color.h"
 #include "core/widgets/AnchorWidget.h"
+#include "core/menu/Menu.h"
+#include "core/menu/MenuItem.h"
 #include "core/panels/Inspector.h"
 #include "core/Editor.h"
 #include "core/Canvas.h"
@@ -114,8 +116,8 @@ namespace ige::creator
     {
         if (m_targetObject == nullptr)
             return;
-
         m_headerGroup = createWidget<Group>("Inspector_Header", false);
+
         // Object info
         auto columns = m_headerGroup->createWidget<Columns<2>>();
         columns->createWidget<TextField>("ID", std::to_string(m_targetObject->getId()).c_str(), true);
@@ -123,6 +125,7 @@ namespace ige::creator
             if (m_targetObject)
                 m_targetObject->setActive(active);
         });
+        m_headerGroup->createWidget<TextField>("UUID", m_targetObject->getUUID().c_str(), true);
         m_headerGroup->createWidget<TextField>("Name", m_targetObject->getName().c_str())->getOnDataChangedEvent().addListener([this](auto name) {
             if (m_targetObject)
                 m_targetObject->setName(name);
@@ -147,7 +150,9 @@ namespace ige::creator
         {
             m_createCompCombo->addChoice((int)ComponentType::Figure, "Figure");
             m_createCompCombo->addChoice((int)ComponentType::Sprite, "Sprite");
-            m_createCompCombo->addChoice((int)ComponentType::BoneTransform, "BoneTransform");
+
+            if (!m_targetObject->hasComponent<BoneTransform>())
+                m_createCompCombo->addChoice((int)ComponentType::BoneTransform, "BoneTransform");
 
             if (m_targetObject->getComponent<PhysicObject>() == nullptr && m_targetObject->getComponent<PhysicSoftBody>() == nullptr)
             {
@@ -168,7 +173,7 @@ namespace ige::creator
         }
 
         // Script component
-        m_createCompCombo->addChoice((int)ComponentType::Script, "Script Component");
+        m_createCompCombo->addChoice((int)ComponentType::Script, "Script");
 
         // Audio source
         m_createCompCombo->addChoice((int)ComponentType::AudioSource, "Audio Source");

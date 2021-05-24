@@ -47,7 +47,6 @@ namespace ige::creator
         std::shared_ptr<Group> m_groupLayout;
 
         //! Use for catch click
-        std::unordered_map<uint64_t, bool> m_NodeCollapseMap;
         const float k_nodeDefaultHeight = 17;
     };
 }
