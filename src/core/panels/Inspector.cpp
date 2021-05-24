@@ -104,9 +104,9 @@ namespace ige::creator
 
     Inspector::~Inspector()
     {
-        m_targetObject = nullptr;
-
         clear();
+
+        m_targetObject = nullptr;
 
         m_inspectorEditor->clear();
         m_inspectorEditor = nullptr;
@@ -114,6 +114,8 @@ namespace ige::creator
 
     void Inspector::initialize()
     {
+        clear();
+
         if (m_targetObject == nullptr)
             return;
         m_headerGroup = createWidget<Group>("Inspector_Header", false);
@@ -510,8 +512,6 @@ namespace ige::creator
         }
                 
         removeAllWidgets();
-
-        m_targetObject = nullptr;
     }
 
     void Inspector::setTargetObject(SceneObject* obj)
