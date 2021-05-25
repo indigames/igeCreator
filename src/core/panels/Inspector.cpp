@@ -311,7 +311,7 @@ namespace ige::creator
         m_componentGroup = createWidget<Group>("Inspector_Components", false);
         m_inspectorEditor->setParentGroup(m_componentGroup);
         std::for_each(m_targetObject->getComponents().begin(), m_targetObject->getComponents().end(), [this](auto &component) {
-            auto closable = (component->getName() != "TransformComponent" && component->getName() != "RectTransform");
+            auto closable = (component->getName() != "Transform" && component->getName() != "RectTransform");
             auto header = m_componentGroup->createWidget<Group>(component->getName(), true, closable);
             header->getOnClosedEvent().addListener([this, &component]() {
                 m_inspectorEditor->removeComponent(component->getInstanceId());
@@ -319,7 +319,7 @@ namespace ige::creator
                 redraw();
             });
 
-            if (component->getName() == "TransformComponent")
+            if (component->getName() == "Transform")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::Transform, component.get(), header);
             }
@@ -327,23 +327,23 @@ namespace ige::creator
             {
                 m_inspectorEditor->addComponent((int)ComponentType::BoneTransform, component.get(), header);
             }
-            else if (component->getName() == "CameraComponent")
+            else if (component->getName() == "Camera")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::Camera, component.get(), header);
             }
-            else if (component->getName() == "EnvironmentComponent")
+            else if (component->getName() == "Environment")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::Environment, component.get(), header);
             }
-            else if (component->getName() == "FigureComponent")
+            else if (component->getName() == "Figure")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::Figure, component.get(), header);
             }
-            else if (component->getName() == "SpriteComponent")
+            else if (component->getName() == "Sprite")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::Sprite, component.get(), header);
             }
-            else if (component->getName() == "ScriptComponent")
+            else if (component->getName() == "Script")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::Script, component.get(), header);
             }
