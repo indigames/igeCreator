@@ -26,6 +26,9 @@ namespace ige::creator
         void close();
         bool isOpened() { return m_opened; }
 
+        bool isHighlighted() const { return m_bIsHighlighted; }
+        void setHighlighted(bool highlight = true, long duration = 1000) { m_bIsHighlighted = highlight; }
+
     protected:
         virtual void _drawImpl() override;
 
@@ -39,5 +42,6 @@ namespace ige::creator
         bool m_bIsLeaf = false;
         bool m_shouldOpen = false;
         bool m_shouldClose = false;
+        bool m_bIsHighlighted = false;
     };
 }

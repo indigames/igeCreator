@@ -43,7 +43,7 @@ namespace ige::creator
 
             for (auto it = m_plugins.begin(); it != m_plugins.end(); ++it)
             {
-                auto result = dynamic_pointer_cast<T>(*it);
+                auto result = std::dynamic_pointer_cast<T>(*it);
                 if (result) return result;
             }
 

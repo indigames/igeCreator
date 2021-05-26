@@ -9,6 +9,7 @@ namespace ige::creator
         : m_bEnabled(enable), m_bEOL(eol), m_container(nullptr)
     {
         m_id = s_idCounter++;
+        m_bHovered = false;
     }
 
     Widget::~Widget()
@@ -22,6 +23,17 @@ namespace ige::creator
         if(isEnable())
         {
             _drawImpl();
+
+            if (!m_bHovered && ImGui::IsItemHovered())
+            {
+                m_bHovered = true;
+                getOnHoveredEvent().invoke(this);
+            }
+            else if (m_bHovered && !ImGui::IsItemHovered())
+            {
+                m_bHovered = false;
+                getOnHoveredEvent().invoke(this);
+            }
 
             // execute plugins
             executePlugins();

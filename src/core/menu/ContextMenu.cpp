@@ -19,13 +19,18 @@ namespace ige::creator
 
     void ContextMenu::execute()
     {
-        if (ImGui::BeginPopupContextItem())
+        if (ImGui::BeginPopupContextItem(m_name.c_str()))
         {
             drawWidgets();
             ImGui::EndPopup();
         }
     }
 
+    void ContextMenu::open()
+    {
+        ImGui::OpenPopup(m_name.c_str());
+    }
+    
     void ContextMenu::close()
     {
         ImGui::CloseCurrentPopup();
@@ -39,7 +44,7 @@ namespace ige::creator
 
     void WindowContextMenu::execute()
     {
-        if (ImGui::BeginPopupContextWindow())
+        if (ImGui::BeginPopupContextWindow(m_name.c_str()))
         {
             drawWidgets();
             ImGui::EndPopup();

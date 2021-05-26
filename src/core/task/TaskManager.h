@@ -17,7 +17,8 @@ namespace ige::creator
             functors.push_back(task);
         }
         
-        void update() {
+        void update()
+        {
             for (auto fun: functors) fun();
             functors.clear();
         }

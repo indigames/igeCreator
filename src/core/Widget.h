@@ -22,6 +22,9 @@ namespace ige::creator
         std::string getIdAString() const { return "##" + std::to_string(m_id); }
         uint64_t getId() const { return m_id; }
 
+        //! Hover status
+        bool isHovered() const { return m_bHovered; }
+
         //! Enable/disable widget
         void setEnable(bool enable) { m_bEnabled = enable; }
         bool isEnable() const { return m_bEnabled; }
@@ -35,6 +38,7 @@ namespace ige::creator
         Container* getContainer() const { return m_container; }
 
         ige::scene::Event<Widget*>& getOnClickEvent() { return m_onClickEvent; }
+        ige::scene::Event<Widget*>& getOnHoveredEvent() { return m_onHoveredEvent; }
 
     protected:
         virtual void _drawImpl() = 0;
@@ -44,7 +48,9 @@ namespace ige::creator
         Container* m_container;
         bool m_bEnabled;
         bool m_bEOL = true;
+        bool m_bHovered = false;
         ige::scene::Event<Widget*> m_onClickEvent;
+        ige::scene::Event<Widget*> m_onHoveredEvent;
 
     private:
         static uint64_t s_idCounter;

@@ -11,6 +11,7 @@ namespace ige::creator
         virtual ~ContextMenu();
 
         virtual void execute();
+        void open();
         void close();
 
     protected:

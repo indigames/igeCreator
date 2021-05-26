@@ -11,6 +11,8 @@
 #include "core/widgets/Slider.h"
 #include "core/widgets/Color.h"
 #include "core/widgets/AnchorWidget.h"
+#include "core/menu/Menu.h"
+#include "core/menu/MenuItem.h"
 #include "core/panels/Inspector.h"
 #include "core/Editor.h"
 #include "core/Canvas.h"
@@ -102,9 +104,9 @@ namespace ige::creator
 
     Inspector::~Inspector()
     {
-        m_targetObject = nullptr;
-
         clear();
+
+        m_targetObject = nullptr;
 
         m_inspectorEditor->clear();
         m_inspectorEditor = nullptr;
@@ -112,10 +114,12 @@ namespace ige::creator
 
     void Inspector::initialize()
     {
+        clear();
+
         if (m_targetObject == nullptr)
             return;
-
         m_headerGroup = createWidget<Group>("Inspector_Header", false);
+
         // Object info
         auto columns = m_headerGroup->createWidget<Columns<2>>();
         columns->createWidget<TextField>("ID", std::to_string(m_targetObject->getId()).c_str(), true);
@@ -123,6 +127,7 @@ namespace ige::creator
             if (m_targetObject)
                 m_targetObject->setActive(active);
         });
+        m_headerGroup->createWidget<TextField>("UUID", m_targetObject->getUUID().c_str(), true);
         m_headerGroup->createWidget<TextField>("Name", m_targetObject->getName().c_str())->getOnDataChangedEvent().addListener([this](auto name) {
             if (m_targetObject)
                 m_targetObject->setName(name);
@@ -147,7 +152,9 @@ namespace ige::creator
         {
             m_createCompCombo->addChoice((int)ComponentType::Figure, "Figure");
             m_createCompCombo->addChoice((int)ComponentType::Sprite, "Sprite");
-            m_createCompCombo->addChoice((int)ComponentType::BoneTransform, "BoneTransform");
+
+            if (!m_targetObject->hasComponent<BoneTransform>())
+                m_createCompCombo->addChoice((int)ComponentType::BoneTransform, "BoneTransform");
 
             if (m_targetObject->getComponent<PhysicObject>() == nullptr && m_targetObject->getComponent<PhysicSoftBody>() == nullptr)
             {
@@ -168,7 +175,7 @@ namespace ige::creator
         }
 
         // Script component
-        m_createCompCombo->addChoice((int)ComponentType::Script, "Script Component");
+        m_createCompCombo->addChoice((int)ComponentType::Script, "Script");
 
         // Audio source
         m_createCompCombo->addChoice((int)ComponentType::AudioSource, "Audio Source");
@@ -304,7 +311,7 @@ namespace ige::creator
         m_componentGroup = createWidget<Group>("Inspector_Components", false);
         m_inspectorEditor->setParentGroup(m_componentGroup);
         std::for_each(m_targetObject->getComponents().begin(), m_targetObject->getComponents().end(), [this](auto &component) {
-            auto closable = (component->getName() != "TransformComponent" && component->getName() != "RectTransform");
+            auto closable = (component->getName() != "Transform" && component->getName() != "RectTransform");
             auto header = m_componentGroup->createWidget<Group>(component->getName(), true, closable);
             header->getOnClosedEvent().addListener([this, &component]() {
                 m_inspectorEditor->removeComponent(component->getInstanceId());
@@ -312,7 +319,7 @@ namespace ige::creator
                 redraw();
             });
 
-            if (component->getName() == "TransformComponent")
+            if (component->getName() == "Transform")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::Transform, component.get(), header);
             }
@@ -320,23 +327,23 @@ namespace ige::creator
             {
                 m_inspectorEditor->addComponent((int)ComponentType::BoneTransform, component.get(), header);
             }
-            else if (component->getName() == "CameraComponent")
+            else if (component->getName() == "Camera")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::Camera, component.get(), header);
             }
-            else if (component->getName() == "EnvironmentComponent")
+            else if (component->getName() == "Environment")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::Environment, component.get(), header);
             }
-            else if (component->getName() == "FigureComponent")
+            else if (component->getName() == "Figure")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::Figure, component.get(), header);
             }
-            else if (component->getName() == "SpriteComponent")
+            else if (component->getName() == "Sprite")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::Sprite, component.get(), header);
             }
-            else if (component->getName() == "ScriptComponent")
+            else if (component->getName() == "Script")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::Script, component.get(), header);
             }
@@ -505,8 +512,6 @@ namespace ige::creator
         }
                 
         removeAllWidgets();
-
-        m_targetObject = nullptr;
     }
 
     void Inspector::setTargetObject(SceneObject* obj)

@@ -435,33 +435,47 @@ namespace ige::creator
 
     bool Editor::cloneObject()
     {
-        copyObject();
-        pasteObject();
-        return true;
+        json clonedJson;
+        auto targets = Editor::getCurrentScene()->getTargets();
+        if (targets.size() > 0 && targets[0] != nullptr)
+        {
+            for (auto target : targets)
+            {
+                if (target)
+                {
+                    json jTarget;
+                    target->to_json(jTarget);
+                    if (!jTarget.is_null())
+                        clonedJson.push_back(jTarget);
+                }
+            }
+            for (auto jTarget : clonedJson)
+            {
+                auto objName = jTarget.value("name", "");
+                auto newObject = Editor::getCurrentScene()->createObject(objName + "_cp");
+                auto uuid = newObject->getUUID();
+                newObject->from_json(jTarget);
+                newObject->setUUID(uuid);
+                newObject->setName(objName + "_cp");
+                newObject->setParent(targets[0]->getParent());
+                Editor::getCurrentScene()->addTarget(newObject.get(), true);
+            }
+            return true;
+        }        
+        return false;
     }
 
     bool Editor::deleteObject()
     {
         auto targets = Editor::getCurrentScene()->getTargets();
-        if (targets.size() == 1)
+        if (targets.size() > 0)
         {
-            if (targets[0])
-            {
-                auto parent = targets[0]->getParent();
-                Editor::getCurrentScene()->removeObjectById(targets[0]->getId());
-                Editor::getCurrentScene()->clearTargets();
-                if (parent) Editor::getCurrentScene()->addTarget(parent);
-            }
-        }
-        else
-        {
+            auto parent = targets[0] ? targets[0]->getParent() : nullptr;
             for (auto target : targets)
-            {
-                if (target)
-                    Editor::getCurrentScene()->removeObjectById(target->getId());
-            }
+                if (target) Editor::getCurrentScene()->removeObjectById(target->getId());
             Editor::getCurrentScene()->clearTargets();
-        }        
+            Editor::getCurrentScene()->addTarget(parent);
+        }
         targets.clear();
         return true;
     }
@@ -481,7 +495,7 @@ namespace ige::creator
         }
     }
 
-    void Editor::pasteObject() 
+    void Editor::pasteObject()
     {
         if (m_selectedJsons.empty()) return;
 

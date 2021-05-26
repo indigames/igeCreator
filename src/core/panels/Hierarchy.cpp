@@ -4,7 +4,6 @@
 #include "core/filesystem/FileSystem.h"
 #include "core/FileHandle.h"
 #include "core/dialog/MsgBox.h"
-
 #include <scene/Scene.h>
 #include <scene/SceneObject.h>
 #include "core/panels/Hierarchy.h"
@@ -124,26 +123,29 @@ namespace ige::creator
                 }
             }
         });
-
-        //! Update List Content Size 
-        node->getOnClosedEvent().addListener([objId, this]() {
-            auto object = Editor::getCurrentScene()->findObjectById(objId);
-            for (auto child : object->getChildren()) {
-                auto objId = child->getId();
-                m_NodeCollapseMap[objId] = false;
+        node->addPlugin<DDTargetPlugin<uint64_t>>(EDragDropID::OBJECT)->getOnDataReceivedEvent().addListener([this, objId](auto txt) {           
+            auto parent = Editor::getCurrentScene()->findObjectById(objId);
+            auto loop = false;
+            for (auto& target : Editor::getCurrentScene()->getTargets())
+            {
+                if (target && parent->isRelative(target->getId()))
+                {
+                    loop = true; break;
+                }
             }
-        });
-        node->getOnOpenedEvent().addListener([objId, this]() {
-            auto object = Editor::getCurrentScene()->findObjectById(objId);
-            for (auto child : object->getChildren()) {
-                auto objId = child->getId();
-                m_NodeCollapseMap[objId] = true;
+            if (!loop)
+            {
+                std::vector<SceneObject*> movingObjects = {};
+                for (auto& target : Editor::getCurrentScene()->getTargets())
+                {
+                    if (target && target->getParent()->isSelected() == false)
+                        movingObjects.push_back(target);
+                }
+                for (auto& target : movingObjects)
+                {
+                    target->setParent(parent.get());
+                }
             }
-        });
-        node->addPlugin<DDTargetPlugin<uint64_t>>(EDragDropID::OBJECT)->getOnDataReceivedEvent().addListener([this, objId](auto txt) {
-            auto currentObject = Editor::getCurrentScene()->findObjectById(txt);
-            auto obj = Editor::getCurrentScene()->findObjectById(objId);
-            currentObject->setParent(obj.get());
         });
         node->addPlugin<DDTargetPlugin<std::string>>(GetFileExtensionSuported(E_FileExts::Prefab)[0])->getOnDataReceivedEvent().addListener([this, objId](auto path) {
             Editor::getCurrentScene()->loadPrefab(objId, path);
@@ -152,28 +154,8 @@ namespace ige::creator
 
         auto ctxMenu = node->addPlugin<ContextMenu>(sceneObject.getName() + "_Context");
         addCreationContextMenu(ctxMenu);
-        ctxMenu->createWidget<MenuItem>("Copy")->getOnClickEvent().addListener([objId](auto widget) {
-            TaskManager::getInstance()->addTask([]() {
-                Editor::getInstance()->copyObject();
-            });
-        });
-        ctxMenu->createWidget<MenuItem>("Paste")->getOnClickEvent().addListener([objId](auto widget) {
-            TaskManager::getInstance()->addTask([]() {
-                Editor::getInstance()->pasteObject();
-            });
-        });
-        ctxMenu->createWidget<MenuItem>("Duplicate")->getOnClickEvent().addListener([](auto widget) {
-            TaskManager::getInstance()->addTask([]() {
-                Editor::getInstance()->cloneObject();
-            });
-        });
-        ctxMenu->createWidget<MenuItem>("Delete")->getOnClickEvent().addListener([](auto widget) {
-            TaskManager::getInstance()->addTask([](){
-                Editor::getInstance()->deleteObject();
-            });
-        });
+
         m_objectNodeMap[objId] = node;
-        m_NodeCollapseMap[objId] = true;
     }
 
     void Hierarchy::onSceneObjectDeleted(SceneObject& sceneObject)
@@ -185,7 +167,6 @@ namespace ige::creator
                 nodePair->second->getContainer()->removeWidget(nodePair->second);
             m_objectNodeMap.erase(nodePair);
         }
-        m_NodeCollapseMap.erase(sceneObject.getId());
     }
 
     void Hierarchy::onSceneObjectAttached(SceneObject& sceneObject)
@@ -288,6 +269,20 @@ namespace ige::creator
         }
     }
 
+    void Hierarchy::setNodeHighlight(uint64_t nodeId, bool highlight)
+    {
+        auto nodePair = m_objectNodeMap.find(nodeId);
+        if (nodePair != m_objectNodeMap.end())
+        {
+            nodePair->second->setHighlighted(highlight);
+
+            if (highlight)
+            {
+                m_highlightTimer.setTimeOut<uint64_t, bool>(1000, std::bind(&Hierarchy::setNodeHighlight, this, std::placeholders::_1, std::placeholders::_2), nodeId, false);
+            }
+        }
+    }
+
     void Hierarchy::onTargetCleared()
     {
         if (Editor::getCurrentScene() == nullptr)
@@ -304,7 +299,6 @@ namespace ige::creator
             if(object) object->getNameChangedEvent().removeAllListeners();
         }
     }
-
 
     void Hierarchy::addCreationContextMenu(std::shared_ptr<ContextMenu>& ctxMenu)
     {
@@ -561,6 +555,26 @@ namespace ige::creator
                 Editor::getCurrentScene()->addTarget(newObject.get(), true);
             });
         }
+        ctxMenu->createWidget<MenuItem>("Copy")->getOnClickEvent().addListener([](auto widget) {
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->copyObject();
+            });
+        });
+        ctxMenu->createWidget<MenuItem>("Paste")->getOnClickEvent().addListener([](auto widget) {
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->pasteObject();
+            });
+        });
+        ctxMenu->createWidget<MenuItem>("Duplicate")->getOnClickEvent().addListener([](auto widget) {
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->cloneObject();
+            });
+        });
+        ctxMenu->createWidget<MenuItem>("Delete")->getOnClickEvent().addListener([](auto widget) {
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->deleteObject();
+            });
+        });
     }
 
     void Hierarchy::initialize()
@@ -590,12 +604,12 @@ namespace ige::creator
             vMax.x += ImGui::GetWindowPos().x;
             vMax.y += ImGui::GetWindowPos().y;
 
-            float m_nodeMapHeight = 0;
-            for (auto item : m_NodeCollapseMap) {
-                if (item.second)
-                    m_nodeMapHeight += k_nodeDefaultHeight;
+            float nodeMapHeight = k_nodeDefaultHeight;
+            for (auto item : m_objectNodeMap) {
+                if (item.second && item.second->isOpened())
+                    nodeMapHeight += k_nodeDefaultHeight;
             }
-            vMin.y += m_nodeMapHeight;
+            vMin.y += nodeMapHeight;
 
             if (ImGui::GetMousePos().x >= vMin.x && ImGui::GetMousePos().x <= vMax.x
                 && ImGui::GetMousePos().y >= vMin.y && ImGui::GetMousePos().y <= vMax.y) {
