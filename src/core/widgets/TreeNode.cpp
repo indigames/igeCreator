@@ -58,6 +58,7 @@ namespace ige::creator
         if (m_bIsDefaultOpened) flags |= ImGuiTreeNodeFlags_DefaultOpen;
         if (m_bIsSelected)      flags |= ImGuiTreeNodeFlags_Selected;
         if (m_bIsLeaf)          flags |= ImGuiTreeNodeFlags_Leaf;
+        if (m_bIsHighlighted)   flags |= ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_Bullet;
 
         bool opened = ImGui::TreeNodeEx((m_name + getIdAString()).c_str(), flags);
 

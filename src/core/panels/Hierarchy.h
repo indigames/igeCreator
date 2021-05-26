@@ -8,6 +8,7 @@ using namespace ige::scene;
 #include "core/widgets/TreeNode.h"
 #include "core/menu/ContextMenu.h"
 #include "core/layout/Group.h"
+#include "core/task/Timer.h"
 
 namespace ige::creator
 {
@@ -19,6 +20,9 @@ namespace ige::creator
 
         virtual void clear();
         virtual void initialize() override;
+
+        //! Highlight node
+        void setNodeHighlight(uint64_t nodeId, bool highlight = true);
 
     protected:
         virtual void drawWidgets() override;
@@ -48,5 +52,8 @@ namespace ige::creator
 
         //! Use for catch click
         const float k_nodeDefaultHeight = 17;
+
+        //! Highlight timer
+        Timer m_highlightTimer;
     };
 }

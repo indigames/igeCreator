@@ -4,7 +4,6 @@
 #include "core/filesystem/FileSystem.h"
 #include "core/FileHandle.h"
 #include "core/dialog/MsgBox.h"
-
 #include <scene/Scene.h>
 #include <scene/SceneObject.h>
 #include "core/panels/Hierarchy.h"
@@ -270,6 +269,20 @@ namespace ige::creator
         }
     }
 
+    void Hierarchy::setNodeHighlight(uint64_t nodeId, bool highlight)
+    {
+        auto nodePair = m_objectNodeMap.find(nodeId);
+        if (nodePair != m_objectNodeMap.end())
+        {
+            nodePair->second->setHighlighted(highlight);
+
+            if (highlight)
+            {
+                m_highlightTimer.setTimeOut<uint64_t, bool>(1000, std::bind(&Hierarchy::setNodeHighlight, this, std::placeholders::_1, std::placeholders::_2), nodeId, false);
+            }
+        }
+    }
+
     void Hierarchy::onTargetCleared()
     {
         if (Editor::getCurrentScene() == nullptr)
@@ -286,7 +299,6 @@ namespace ige::creator
             if(object) object->getNameChangedEvent().removeAllListeners();
         }
     }
-
 
     void Hierarchy::addCreationContextMenu(std::shared_ptr<ContextMenu>& ctxMenu)
     {
