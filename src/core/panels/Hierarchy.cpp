@@ -715,14 +715,10 @@ namespace ige::creator
             });
         });
         ctxMenu->createWidget<MenuItem>("Duplicate")->getOnClickEvent().addListener([](auto widget) {
-            TaskManager::getInstance()->addTask([]() {
-                Editor::getInstance()->cloneObject();
-            });
+            Editor::getInstance()->cloneObject();
         });
         ctxMenu->createWidget<MenuItem>("Delete")->getOnClickEvent().addListener([](auto widget) {
-            TaskManager::getInstance()->addTask([]() {
-                Editor::getInstance()->deleteObject();
-            });
+            Editor::getInstance()->deleteObject();
         });
     }
 
