@@ -301,6 +301,11 @@ namespace ige::creator
             object = Editor::getCurrentScene()->findObjectById(pair.first);
             if(object) object->getNameChangedEvent().removeAllListeners();
         }
+
+        if (Editor::getInstance()->getCanvas())
+        {
+            Editor::getInstance()->getCanvas()->setTargetObject(nullptr);
+        }
     }
 
     void Hierarchy::addCreationContextMenu(std::shared_ptr<ContextMenu>& ctxMenu)
@@ -703,21 +708,33 @@ namespace ige::creator
                 Editor::getCurrentScene()->addTarget(newMask.get(), true);
             });
         }
-        ctxMenu->createWidget<MenuItem>("Copy")->getOnClickEvent().addListener([](auto widget) {
-            TaskManager::getInstance()->addTask([]() {
+        ctxMenu->createWidget<MenuItem>("Copy")->getOnClickEvent().addListener([this](auto widget) {
+            m_bSkipDeselect = true;
+            TaskManager::getInstance()->addTask([&]() {
                 Editor::getInstance()->copyObject();
+                m_bSkipDeselect = false;
             });
         });
-        ctxMenu->createWidget<MenuItem>("Paste")->getOnClickEvent().addListener([](auto widget) {
-            TaskManager::getInstance()->addTask([]() {
+        ctxMenu->createWidget<MenuItem>("Paste")->getOnClickEvent().addListener([this](auto widget) {
+            m_bSkipDeselect = true;
+            TaskManager::getInstance()->addTask([&]() {
                 Editor::getInstance()->pasteObject();
+                m_bSkipDeselect = false;
             });
         });
-        ctxMenu->createWidget<MenuItem>("Duplicate")->getOnClickEvent().addListener([](auto widget) {
-            Editor::getInstance()->cloneObject();
+        ctxMenu->createWidget<MenuItem>("Duplicate")->getOnClickEvent().addListener([this](auto widget) {
+            m_bSkipDeselect = true;
+            TaskManager::getInstance()->addTask([&]() {
+                Editor::getInstance()->cloneObject();
+                m_bSkipDeselect = false;
+            });
         });
-        ctxMenu->createWidget<MenuItem>("Delete")->getOnClickEvent().addListener([](auto widget) {
-            Editor::getInstance()->deleteObject();
+        ctxMenu->createWidget<MenuItem>("Delete")->getOnClickEvent().addListener([this](auto widget) {
+            m_bSkipDeselect = true;
+            TaskManager::getInstance()->addTask([&]() {
+                Editor::getInstance()->deleteObject();
+                m_bSkipDeselect = false;
+            });
         });
     }
 
@@ -735,7 +752,7 @@ namespace ige::creator
         // Draw widgets
         Panel::drawWidgets();
 
-        if (m_bIsOpened && ImGui::IsWindowFocused() && ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+        if (m_bIsOpened && !m_bSkipDeselect && ImGui::IsWindowFocused() && ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
             auto vMin = ImGui::GetWindowContentRegionMin();
             auto vMax = ImGui::GetWindowContentRegionMax();
             

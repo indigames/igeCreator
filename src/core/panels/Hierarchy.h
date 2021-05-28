@@ -55,5 +55,8 @@ namespace ige::creator
 
         //! Highlight timer
         Timer m_highlightTimer;
+
+        //! Skip deselect once contex menu item enqueue task
+        bool m_bSkipDeselect = false;
     };
 }
