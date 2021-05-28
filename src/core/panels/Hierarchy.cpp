@@ -470,7 +470,7 @@ namespace ige::creator
                 auto currentObject = (!targets.empty() && targets[0]) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
                 auto newObject = Editor::getCurrentScene()->createObject("UIImage", currentObject, true);
                 auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
-                newObject->addComponent<UIImage>("sprites/rect", rect->getSize());
+                newObject->addComponent<UIImage>("sprites/background", rect->getSize());
                 Editor::getCurrentScene()->addTarget(newObject.get(), true);
             });
 
@@ -488,7 +488,7 @@ namespace ige::creator
                 auto currentObject = (!targets.empty() && targets[0]) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
                 auto newObject = Editor::getCurrentScene()->createObject("UITextField", currentObject, true);
                 auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
-                newObject->addComponent<UIImage>("sprites/rect", rect->getSize());
+                newObject->addComponent<UIImage>("sprites/background", rect->getSize());
                 auto newLabel = Editor::getCurrentScene()->createObject("Label", newObject, true, Vec2());
                 newLabel->addComponent<UITextField>("TextField");                
                 Editor::getCurrentScene()->addTarget(newObject.get(), true);
@@ -499,7 +499,7 @@ namespace ige::creator
                 auto currentObject = (!targets.empty() && targets[0]) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
                 auto newObject = Editor::getCurrentScene()->createObject("UIButton", currentObject, true);
                 auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
-                newObject->addComponent<UIButton>("sprites/rect", rect->getSize());
+                newObject->addComponent<UIButton>("sprites/background", rect->getSize());
                 Editor::getCurrentScene()->createObject("Label", newObject, true, Vec2())->addComponent<UIText>("Button");
                 Editor::getCurrentScene()->addTarget(newObject.get(), true);
             });
@@ -513,7 +513,7 @@ namespace ige::creator
                 // Create Background
                 auto newBG = Editor::getCurrentScene()->createObject("background", newObject, true, Vec2(160.f, 16.f));
                 auto rectBG = std::dynamic_pointer_cast<RectTransform>(newBG->getTransform());
-                auto imgBG = newBG->addComponent<UIImage>("sprites/rect", rectBG->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
+                auto imgBG = newBG->addComponent<UIImage>("sprites/background", rectBG->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
                 imgBG->setColor(0.84f, 0.84f, 0.84f, 1);
                 newBG->setIsRaycastTarget(false);
                 if (rectBG) {
@@ -534,7 +534,7 @@ namespace ige::creator
                     rectFill->setAnchor(Vec4(0.f, 0.f, 0.f, 1.f));
                     rectFill->setAnchoredPosition(Vec2(0, 0));
                 }
-                auto imgFill = newFill->addComponent<UIImage>("sprites/rect", rectFill->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
+                auto imgFill = newFill->addComponent<UIImage>("sprites/background", rectFill->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
                 newFill->setIsRaycastTarget(false);
                 // Create Handle
                 auto newHandleArea = Editor::getCurrentScene()->createObject("handleArea", newObject, true, Vec2(140.f, 30.f));
@@ -551,7 +551,7 @@ namespace ige::creator
                     rectHandle->setAnchor(Vec4(0.f, 0.f, 0.f, 1.f));
                     rectHandle->setAnchoredPosition(Vec2(0, 0));
                 }
-                newHandle->addComponent<UIImage>("sprites/rect", rectHandle->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
+                newHandle->addComponent<UIImage>("sprites/background", rectHandle->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
                 newHandle->setIsRaycastTarget(false);
                 sliderComp->setFillObject(newFill);
                 sliderComp->setHandleObject(newHandle);
@@ -566,7 +566,7 @@ namespace ige::creator
                 rect->setSize(Vec2(200, 200));
 
                 // Create ScrollView
-                auto uiScrollView = newScrollView->addComponent<UIScrollView>("sprite/background", rect->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
+                auto uiScrollView = newScrollView->addComponent<UIScrollView>("sprites/background", rect->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
                 if (uiScrollView) {
                     uiScrollView->setAlpha(0.4f);
                 }
@@ -589,7 +589,7 @@ namespace ige::creator
                     anchoredPosH[1] = 0;
                     rectHorizontalBar->setAnchoredPosition(anchoredPosH);
                 }
-                auto uiHorizontalBar = newHorizontalBar->addComponent<UIScrollBar>("sprite/background", rectHorizontalBar->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
+                auto uiHorizontalBar = newHorizontalBar->addComponent<UIScrollBar>("sprites/background", rectHorizontalBar->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
                 if (uiHorizontalBar)
                 {
                     uiHorizontalBar->setDirection(UIScrollBar::Direction::LeftToRight, false);
@@ -610,7 +610,7 @@ namespace ige::creator
                     rectHorizontalHandle->setAnchor(Vec4(0, 0, 1, 1));
                     rectHorizontalHandle->setOffset(Vec4(-10, -10, -10, -10));
                 }
-                auto horizontalImg = newHorizontalHandle->addComponent<UIImage>("sprite/background", rectHorizontalHandle->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
+                auto horizontalImg = newHorizontalHandle->addComponent<UIImage>("sprites/background", rectHorizontalHandle->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
                 uiHorizontalBar->setHandle(newHorizontalHandle);
 
                 // Create Vertical ScrollBar
@@ -631,7 +631,7 @@ namespace ige::creator
                     anchoredPosV[0] = 0;
                     rectVerticalBar->setAnchoredPosition(anchoredPosV);
                 }
-                auto uiVerticalBar = newVerticalBar->addComponent<UIScrollBar>("sprite/background", rectVerticalBar->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
+                auto uiVerticalBar = newVerticalBar->addComponent<UIScrollBar>("sprites/background", rectVerticalBar->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
                 if (uiVerticalBar)
                 {
                     uiVerticalBar->setDirection(UIScrollBar::Direction::BottomToTop, false);
@@ -653,7 +653,7 @@ namespace ige::creator
                     rectVerticalHandle->setOffset(Vec4(-10, -10, -10, -10));
                     //rectVerticalHandle->setPivot(Vec2(1, 1));
                 }
-                auto verticalImg = newVerticalHandle->addComponent<UIImage>("sprite/background", rectVerticalHandle->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
+                auto verticalImg = newVerticalHandle->addComponent<UIImage>("sprites/background", rectVerticalHandle->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
                 
                 uiVerticalBar->setHandle(newVerticalHandle);
 
@@ -666,7 +666,7 @@ namespace ige::creator
                     rectMask->setAnchor(Vec4(0, 0, 1, 1));
                     rectMask->setOffset(Vec4(0, 20, 20, 0));
                 }
-                auto uiMask = newMask->addComponent<UIMask>("sprite/background", rectMask->getSize());
+                auto uiMask = newMask->addComponent<UIMask>("sprites/background", rectMask->getSize());
                 uiMask->setAlpha(0);
 
                 // // Create Content
@@ -698,7 +698,7 @@ namespace ige::creator
                 auto rect = std::dynamic_pointer_cast<RectTransform>(newMask->getTransform());
 
                 // Create Mask
-                auto uiMask = newMask->addComponent<UIMask>("sprite/background", rect->getSize());
+                auto uiMask = newMask->addComponent<UIMask>("sprites/background", rect->getSize());
                 uiMask->setAlpha(0);
                 
                 Editor::getCurrentScene()->addTarget(newMask.get(), true);
