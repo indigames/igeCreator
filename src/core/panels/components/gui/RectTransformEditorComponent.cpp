@@ -241,9 +241,9 @@ void RectTransformEditorComponent::drawRect() {
     //! Pos X or Left
     float a = showPosX ? rectTransform->getAnchoredPosition().X() : offset[0];
     //! Pos Y or Top
-    float b = showPosY ? rectTransform->getAnchoredPosition().Y() : -offset[3];
+    float b = showPosY ? rectTransform->getAnchoredPosition().Y() : offset[3];
     //! Width or Right 
-    float c = showPosX ? rectTransform->getSize().X() : -offset[2];
+    float c = showPosX ? rectTransform->getSize().X() : offset[2];
     //! Height or Bottom
     float d = showPosY ? rectTransform->getSize().Y() : offset[1];
 
@@ -283,7 +283,7 @@ void RectTransformEditorComponent::drawRect() {
         else
         {
             auto offset = rectTransform->getOffset();
-            offset[3] = -val[0];
+            offset[3] = val[0];
             rectTransform->setOffset(offset);
         }
         rectTransform->onUpdate(0.f);
@@ -314,7 +314,7 @@ void RectTransformEditorComponent::drawRect() {
         else
         {
             auto offset = rectTransform->getOffset();
-            offset[2] = -val[0];
+            offset[2] = val[0];
             rectTransform->setOffset(offset);
         }
         rectTransform->onUpdate(0.f);
