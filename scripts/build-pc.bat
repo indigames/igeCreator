@@ -7,6 +7,9 @@ set CURR_DRIVE=!CALL_DIR:~0,2!
 
 python -m pip install conan
 
+set CONAN_REVISIONS_ENABLED=1
+conan remote add ige-center http://10.1.0.222:8081/artifactory/api/conan/conan
+
 if "%IGE_BUILDER%"=="" (
     set IGE_BUILDER=%APPDATA%\indigames\igeBuilder
 )
