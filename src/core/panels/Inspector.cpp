@@ -40,6 +40,9 @@
 #include <components/gui/UITextField.h>
 #include <components/gui/UIButton.h>
 #include <components/gui/UISlider.h>
+#include <components/gui/UIScrollView.h>
+#include <components/gui/UIScrollBar.h>
+#include <components/gui/UIMask.h>
 #include <components/physic/PhysicManager.h>
 #include <components/physic/PhysicBox.h>
 #include <components/physic/PhysicSphere.h>
@@ -172,6 +175,10 @@ namespace ige::creator
             m_createCompCombo->addChoice((int)ComponentType::UIText, "UIText");
             m_createCompCombo->addChoice((int)ComponentType::UITextField, "UITextField");
             m_createCompCombo->addChoice((int)ComponentType::UIButton, "UIButton");
+            m_createCompCombo->addChoice((int)ComponentType::UIButton, "UISlider");
+            m_createCompCombo->addChoice((int)ComponentType::UIButton, "UIScrollView");
+            m_createCompCombo->addChoice((int)ComponentType::UIButton, "UIScrollBar");
+            m_createCompCombo->addChoice((int)ComponentType::UIButton, "UIMask");
         }
 
         // Script component
@@ -255,6 +262,15 @@ namespace ige::creator
                     break;
                 case (int)ComponentType::UISlider:
                     m_targetObject->addComponent<UISlider>();
+                    break;
+                case (int)ComponentType::UIScrollView:
+                    m_targetObject->addComponent<UIScrollView>();
+                    break;
+                case (int)ComponentType::UIScrollBar:
+                    m_targetObject->addComponent<UIScrollBar>();
+                    break;
+                case (int)ComponentType::UIMask:
+                    m_targetObject->addComponent<UIMask>();
                     break;
                 case (int)ComponentType::PhysicBox:
                     m_targetObject->addComponent<PhysicBox>();
@@ -374,6 +390,18 @@ namespace ige::creator
             else if (component->getName() == "UISlider")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::UISlider, component.get(), header);
+            }
+            else if (component->getName() == "UIScrollView")
+            {
+                m_inspectorEditor->addComponent((int)ComponentType::UIScrollView, component.get(), header);
+            }
+            else if (component->getName() == "UIScrollBar")
+            {
+                m_inspectorEditor->addComponent((int)ComponentType::UIScrollBar, component.get(), header);
+            }
+            else if (component->getName() == "UIMask")
+            {
+                m_inspectorEditor->addComponent((int)ComponentType::UIMask, component.get(), header);
             }
             else if (component->getName() == "PhysicManager")
             {

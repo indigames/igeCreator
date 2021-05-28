@@ -26,6 +26,9 @@
 #include "components/gui/UITextField.h"
 #include "components/gui/UIButton.h"
 #include "components/gui/UISlider.h"
+#include "components/gui/UIScrollView.h"
+#include "components/gui/UIScrollBar.h"
+#include "components/gui/UIMask.h"
 #include "components/audio/AudioSource.h"
 #include "components/audio/AudioListener.h"
 #include "components/particle/Particle.h"
@@ -553,6 +556,152 @@ namespace ige::creator
                 sliderComp->setFillObject(newFill);
                 sliderComp->setHandleObject(newHandle);
                 Editor::getCurrentScene()->addTarget(newObject.get(), true);
+            });
+
+            guiMenu->createWidget<MenuItem>("UIScrollView")->getOnClickEvent().addListener([](auto widget) {
+                auto targets = Editor::getCurrentScene()->getTargets();
+                auto currentObject = (!targets.empty() && targets[0]) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
+                auto newScrollView = Editor::getCurrentScene()->createObject("UIScrollView", currentObject, true);
+                auto rect = std::dynamic_pointer_cast<RectTransform>(newScrollView->getTransform());
+                rect->setSize(Vec2(200, 200));
+
+                // Create ScrollView
+                auto uiScrollView = newScrollView->addComponent<UIScrollView>("sprite/background", rect->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
+                if (uiScrollView) {
+                    uiScrollView->setAlpha(0.4f);
+                }
+
+                // Create Horizontal ScrollBar
+                auto newHorizontalBar = Editor::getCurrentScene()->createObject("Scrollbar Horizontal", newScrollView, true, rect->getSize());
+                auto rectHorizontalBar = std::dynamic_pointer_cast<RectTransform>(newHorizontalBar->getTransform());
+                if (rectHorizontalBar)
+                {
+                    rectHorizontalBar->setAnchor(Vec4(0, 0, 1, 0));
+                    auto offsetH = rectHorizontalBar->getOffset();
+                    offsetH[0] = 0;
+                    offsetH[2] = 17;
+                    rectHorizontalBar->setOffset(offsetH);
+                    auto sizeH = rectHorizontalBar->getSize();
+                    sizeH[1] = 20;
+                    rectHorizontalBar->setSize(sizeH);
+                    rectHorizontalBar->setPivot(Vec2(0, 0));
+                    auto anchoredPosH = rectHorizontalBar->getAnchoredPosition();
+                    anchoredPosH[1] = 0;
+                    rectHorizontalBar->setAnchoredPosition(anchoredPosH);
+                }
+                auto uiHorizontalBar = newHorizontalBar->addComponent<UIScrollBar>("sprite/background", rectHorizontalBar->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
+                if (uiHorizontalBar)
+                {
+                    uiHorizontalBar->setDirection(UIScrollBar::Direction::LeftToRight, false);
+                    uiHorizontalBar->setColor(Vec4(0.8392158f, 0.8392158f, 0.8392158f, 1.f));
+                }
+
+                // Create Horizontal Sliding Area
+                auto newHorizontalSliding = Editor::getCurrentScene()->createObject("Sliding Area", newHorizontalBar, true, rectHorizontalBar->getSize());
+                auto rectHorizontalSliding = std::dynamic_pointer_cast<RectTransform>(newHorizontalSliding->getTransform());
+                rectHorizontalSliding->setAnchor(Vec4(0, 0, 1, 1));
+                rectHorizontalSliding->setOffset(Vec4(10,10,10,10));
+                
+                // Create Horizontal Handle
+                auto newHorizontalHandle = Editor::getCurrentScene()->createObject("Handle", newHorizontalSliding, true, rectHorizontalSliding->getSize());
+                auto rectHorizontalHandle = std::dynamic_pointer_cast<RectTransform>(newHorizontalHandle->getTransform());
+                if (rectHorizontalHandle)
+                {
+                    rectHorizontalHandle->setAnchor(Vec4(0, 0, 1, 1));
+                    rectHorizontalHandle->setOffset(Vec4(-10, -10, -10, -10));
+                }
+                auto horizontalImg = newHorizontalHandle->addComponent<UIImage>("sprite/background", rectHorizontalHandle->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
+                uiHorizontalBar->setHandle(newHorizontalHandle);
+
+                // Create Vertical ScrollBar
+                auto newVerticalBar = Editor::getCurrentScene()->createObject("Scrollbar Vertical", newScrollView, true, rect->getSize());
+                auto rectVerticalBar = std::dynamic_pointer_cast<RectTransform>(newVerticalBar->getTransform());
+                if (rectVerticalBar)
+                {
+                    rectVerticalBar->setAnchor(Vec4(1, 0, 1, 1));
+                    auto offsetV = rectVerticalBar->getOffset();
+                    offsetV[1] = 17;
+                    offsetV[3] = 0;
+                    rectVerticalBar->setOffset(offsetV);
+                    auto sizeV = rectVerticalBar->getSize();
+                    sizeV[0] = 20;
+                    rectVerticalBar->setSize(sizeV);
+                    rectVerticalBar->setPivot(Vec2(1, 1));
+                    auto anchoredPosV = rectVerticalBar->getAnchoredPosition();
+                    anchoredPosV[0] = 0;
+                    rectVerticalBar->setAnchoredPosition(anchoredPosV);
+                }
+                auto uiVerticalBar = newVerticalBar->addComponent<UIScrollBar>("sprite/background", rectVerticalBar->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
+                if (uiVerticalBar)
+                {
+                    uiVerticalBar->setDirection(UIScrollBar::Direction::BottomToTop, false);
+                    uiVerticalBar->setColor(Vec4(0.8392158f, 0.8392158f, 0.8392158f, 1.f));
+                }
+
+                // Create Vertical Sliding Area
+                auto newVerticalSliding = Editor::getCurrentScene()->createObject("Sliding Area", newVerticalBar, true, rectVerticalBar->getSize());
+                auto rectVerticalSliding = std::dynamic_pointer_cast<RectTransform>(newVerticalSliding->getTransform());
+                rectVerticalSliding->setAnchor(Vec4(0, 0, 1, 1));
+                rectVerticalSliding->setOffset(Vec4(10, 10, 10, 10));
+                
+                // Create Vertical Handle
+                auto newVerticalHandle = Editor::getCurrentScene()->createObject("Handle", newVerticalSliding, true, rectVerticalSliding->getSize());
+                auto rectVerticalHandle = std::dynamic_pointer_cast<RectTransform>(newVerticalHandle->getTransform());
+                if (rectVerticalHandle)
+                {
+                    rectVerticalHandle->setAnchor(Vec4(0, 0, 1, 1));
+                    rectVerticalHandle->setOffset(Vec4(-10, -10, -10, -10));
+                    //rectVerticalHandle->setPivot(Vec2(1, 1));
+                }
+                auto verticalImg = newVerticalHandle->addComponent<UIImage>("sprite/background", rectVerticalHandle->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
+                
+                uiVerticalBar->setHandle(newVerticalHandle);
+
+                //!!! Mask must be created last => to prevent bug from stencil render
+                // Create Background
+                auto newMask = Editor::getCurrentScene()->createObject("UIMask", newScrollView, true, rect->getSize());
+                auto rectMask = std::dynamic_pointer_cast<RectTransform>(newMask->getTransform());
+                if (rectMask)
+                {
+                    rectMask->setAnchor(Vec4(0, 0, 1, 1));
+                    rectMask->setOffset(Vec4(0, 20, 20, 0));
+                }
+                auto uiMask = newMask->addComponent<UIMask>("sprite/background", rectMask->getSize());
+                uiMask->setAlpha(0);
+
+                // // Create Content
+                auto newContent = Editor::getCurrentScene()->createObject("Content", newMask, true, rectMask->getSize());
+                auto rectContent = std::dynamic_pointer_cast<RectTransform>(newContent->getTransform());
+                if (rectContent)
+                {
+                    rectContent->setAnchor(Vec4(0, 1, 1, 1));
+                    rectContent->setPivot(Vec2(0, 1));
+                    auto size = rectContent->getSize();
+                    size[1] = 300;
+                    rectContent->setSize(size);
+                }
+
+                uiScrollView->setContent(newContent);
+                uiScrollView->setViewport(newMask);
+                uiScrollView->setHorizontalScrollBar(uiHorizontalBar);
+                uiScrollView->setVerticalScrollBar(uiVerticalBar);
+                
+                uiVerticalBar->setValue(0.0f);
+
+                Editor::getCurrentScene()->addTarget(newScrollView.get(), true);
+            });
+
+            guiMenu->createWidget<MenuItem>("UIMask")->getOnClickEvent().addListener([](auto widget) {
+                auto targets = Editor::getCurrentScene()->getTargets();
+                auto currentObject = (!targets.empty() && targets[0]) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
+                auto newMask = Editor::getCurrentScene()->createObject("UIMask", currentObject, true);
+                auto rect = std::dynamic_pointer_cast<RectTransform>(newMask->getTransform());
+
+                // Create Mask
+                auto uiMask = newMask->addComponent<UIMask>("sprite/background", rect->getSize());
+                uiMask->setAlpha(0);
+                
+                Editor::getCurrentScene()->addTarget(newMask.get(), true);
             });
         }
         ctxMenu->createWidget<MenuItem>("Copy")->getOnClickEvent().addListener([](auto widget) {

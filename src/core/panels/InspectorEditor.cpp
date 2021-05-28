@@ -22,6 +22,9 @@
 #include "core/panels/components/gui/UITextFieldEditorComponent.h"
 #include "core/panels/components/gui/UIButtonEditorComponent.h"
 #include "core/panels/components/gui/UISliderEditorComponent.h"
+#include "core/panels/components/gui/UIScrollViewEditorComponent.h"
+#include "core/panels/components/gui/UIScrollBarEditorComponent.h"
+#include "core/panels/components/gui/UIMaskEditorComponent.h"
 
 #include "core/panels/components/physic/PhysicManagerEditorComponent.h"
 #include "core/panels/components/physic/PhysicBoxEditorComponent.h"
@@ -188,6 +191,21 @@ std::shared_ptr<EditorComponent> InspectorEditor::addComponent(int type, Compone
 	case ComponentType::UISlider:
 	{
 		view = std::make_shared<UISliderEditorComponent>();
+	}
+	break;
+	case ComponentType::UIScrollView:
+	{
+		view = std::make_shared<UIScrollViewEditorComponent>();
+	}
+	break;
+	case ComponentType::UIMask:
+	{
+		view = std::make_shared<UIMaskEditorComponent>();
+	}
+	break;
+	case ComponentType::UIScrollBar:
+	{
+		view = std::make_shared<UIScrollBarEditorComponent>();
 	}
 	break;
 	case ComponentType::PhysicManager:

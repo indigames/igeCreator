@@ -5,6 +5,8 @@ setlocal enabledelayedexpansion
 set CALL_DIR=%CD%
 set CURR_DRIVE=!CALL_DIR:~0,2!
 
+python -m pip install conan
+
 if "%IGE_BUILDER%"=="" (
     set IGE_BUILDER=%APPDATA%\indigames\igeBuilder
 )
