@@ -162,7 +162,7 @@ namespace ige::creator
     //! Set current selected object by its Id
     void Editor::setSelectedObject(uint64_t objId)
     {
-        if (objId == (uint64_t)-1 || !SceneManager::getInstance()->getCurrentScene())
+        if (objId == (uint64_t)-1 || SceneManager::getInstance() == nullptr || !SceneManager::getInstance()->getCurrentScene())
         {
             setSelectedObject(nullptr);
             return;

@@ -195,11 +195,6 @@ void UIImageEditorComponent::drawUIImage()
             }
         }
     }
-    /*std::array alpha = { uiImage->getAlpha() };
-    m_uiImageGroup->createWidget<Drag<float, 1>>("Alpha", ImGuiDataType_Float, alpha, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiImage = dynamic_cast<UIImage*>(m_component);
-        uiImage->setAlpha(val[0]);
-        });*/
 
     auto color = uiImage->getColor();
     m_uiImageGroup->createWidget<Color>("Color", color)->getOnDataChangedEvent().addListener([this](auto val) {
