@@ -305,8 +305,7 @@ namespace ige::creator
 
     void Hierarchy::addCreationContextMenu(std::shared_ptr<ContextMenu>& ctxMenu)
     {
-        if (ctxMenu == nullptr || Editor::getCurrentScene() == nullptr)
-            return;
+        if (ctxMenu == nullptr) return;
 
         auto createMenu = ctxMenu->createWidget<Menu>("Create");
         createMenu->createWidget<MenuItem>("New Object")->getOnClickEvent().addListener([](auto widget) {
@@ -727,8 +726,6 @@ namespace ige::creator
         if (!m_bInitialized)
         {
             m_groupLayout = createWidget<Group>("Hierarchy_Group", false, false);
-            auto ctxMenu = m_groupLayout->addPlugin<WindowContextMenu>("Hierarchy_Context");
-            addCreationContextMenu(std::dynamic_pointer_cast<ContextMenu>(ctxMenu));
             m_bInitialized = true;
         }
     }
