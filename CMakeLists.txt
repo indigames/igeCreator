@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.15.0)
 
 set(TARGET_NAME igeCreator)
 
@@ -7,7 +7,41 @@ project(${TARGET_NAME})
 set(USE_MSVC_RELEASE_RUNTIME_ALWAYS TRUE)
 
 set(CMAKE_CXX_STANDARD 17)
-add_compile_options(/MP /std:c++17)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+
+# Modules and install path (required by conan)
+set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
+set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR} ${CMAKE_MODULE_PATH})
+set(CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR} ${CMAKE_PREFIX_PATH})
+
+if(DEFINED ANDROID_PLATFORM)
+    set (ANDROID 1)
+    if(ANDROID_ABI STREQUAL "armeabi-v7a")
+        add_compile_options(-marm -march=armv7-a -mtune=cortex-a15 -mfpu=neon-fp16 -mfloat-abi=softfp)
+    elseif(ANDROID_ABI STREQUAL "x86")
+        add_compile_options(-march=atom -m32 -msse -msse2 -msse3 -mssse3 -mfpmath=sse -mstackrealign)
+    elseif(ANDROID_ABI STREQUAL "arm64-v8a")
+        add_compile_options(-march=armv8-a+simd+sve -mtune=cortex-a53 -D__ARM_NEON -D__ARM_NEON__)
+    elseif(ANDROID_ABI STREQUAL "x86_64")
+        add_compile_options(-march=atom -m64 -msse -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mfpmath=sse)
+    endif()
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        add_compile_options(-g0 -Ofast)
+    else(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        add_compile_options(-Og)
+    endif()
+elseif(MSVC)
+    if(${APP_STYLE} MATCHES "SHARED")
+        set(CMAKE_CXX_FLAGS "/MD ${CMAKE_CXX_FLAGS}")
+        set(CMAKE_CXX_FLAGS_RELEASE "/MD /O2 /Ob2 /Zc:inline")
+        set(CMAKE_CXX_FLAGS_DEBUG "/MD /JMC  /ZI /Od")
+    endif()
+    add_compile_options(/MP /std:c++17)
+elseif(IOS)
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        add_compile_options(-g0 -Ofast)
+    endif()
+endif()
 
 IF (USE_MSVC_RELEASE_RUNTIME_ALWAYS)
     FOREACH(flag_var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO )
@@ -23,6 +57,27 @@ IF (USE_MSVC_RELEASE_RUNTIME_ALWAYS)
     ENDFOREACH(flag_var)
 ENDIF (USE_MSVC_RELEASE_RUNTIME_ALWAYS)
 
+if(${APP_STYLE} MATCHES "SHARED")
+    find_package (Python3 ${PYTHON_VERSION} EXACT REQUIRED COMPONENTS Development)
+else()
+    find_package(Python REQUIRED)
+    set (Python3_INCLUDE_DIRS ${Python_INCLUDE_DIRS})
+    set (Python3_LIBRARIES ${Python_LIBRARIES})
+endif()
+
+find_package(numpy REQUIRED)
+find_package(stb REQUIRED)
+find_package(SDL REQUIRED)
+find_package(openssl REQUIRED)
+find_package(taskflow REQUIRED)
+find_package(tracy REQUIRED)
+find_package(igeBullet REQUIRED)
+find_package(bullet REQUIRED)
+find_package(igeSound REQUIRED)
+find_package(igeEffekseer REQUIRED)
+find_package(igeNavigation REQUIRED)
+find_package(zlib)
+
 include_directories(
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/pyxcore"
@@ -36,7 +91,28 @@ include_directories(
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/spdlog/include/spdlog"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeCore"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeVMath"
+    "${zlib_INCLUDE_DIRS}"
+    "${Python3_INCLUDE_DIRS}"
+    "${numpy_INCLUDE_DIRS}"
+    "${stb_INCLUDE_DIRS}"
+    "${SDL_INCLUDE_DIRS}"
+    "${openssl_INCLUDE_DIRS}"
+    "${taskflow_INCLUDE_DIRS}"
+    "${tracy_INCLUDE_DIRS}"
+    "${igeBullet_INCLUDE_DIRS}"
+    "${bullet_INCLUDE_DIRS}"
+    "${igeSound_INCLUDE_DIRS}"
+    "${igeSound_INCLUDE_DIRS}/ThirdParty/soloud/include"
+    "${igeEffekseer_INCLUDE_DIRS}"
+    "${igeEffekseer_INCLUDE_DIRS}/ThirdParty/Effekseer/Dev/Cpp"
+    "${igeEffekseer_INCLUDE_DIRS}/ThirdParty/Effekseer/Dev/Cpp/Effekseer"
+    "${igeNavigation_INCLUDE_DIRS}"
+    "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/Detour/Include"
+    "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/DetourCrowd/Include"
+    "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/DetourTileCache/Include"
+    "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/Recast/Include"
 )
+
 
 add_compile_definitions(EDITOR_MODE=1)
 add_subdirectory(libs/pyxCore/pyxcore ${CMAKE_BINARY_DIR}/pyxCore)
@@ -44,26 +120,6 @@ add_subdirectory(libs/igeCore ${CMAKE_BINARY_DIR}/igeCore)
 add_subdirectory(libs/igeVMath ${CMAKE_BINARY_DIR}/igeVMath)
 add_subdirectory(libs/igeScene ${CMAKE_BINARY_DIR}/igeScene)
 
-# [IGE]: conan build config
-if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-    set(CONAN_PYXCORE_ROOT "")
-    set(CONAN_BUILD_DIRS_PYXCORE "")
-    set(CONAN_INCLUDE_DIRS_PYXCORE "")
-    set(CONAN_PKG_LIBS_PYXCORE "")
-    set(CONAN_LIBS_PYXCORE "")
-    set(CONAN_LIB_DIRS_PYXCORE "")
-
-    set(CONAN_IGEVMATH_ROOT "")
-    set(CONAN_BUILD_DIRS_IGEVMATH "")
-    set(CONAN_INCLUDE_DIRS_IGEVMATH "")
-    set(CONAN_LIBS_IGEVMATH "")
-    set(CONAN_PKG_LIBS_IGEVMATH "")
-    set(CONAN_LIBS_DIRS_IGEVMATH "")
-
-    conan_basic_setup(TARGETS)
-endif()
-# [/IGE]
 
 # Source files
 file(GLOB_RECURSE SRC_FILES
@@ -105,14 +161,22 @@ add_executable(${TARGET_NAME} WIN32 ${SRC_FILES})
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ignore:4099 /ignore:4286 /ignore:4127") # Disable linker warning
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT") # Disable LIBCMT, avoid conflict definition
 
-target_link_directories(${TARGET_NAME} PUBLIC ${CONAN_LIB_DIRS})
-
 target_link_libraries(${TARGET_NAME} 
     igeScene-static
     pyxcore-static
     igeCore-static
     igeVMath-static
-    ${CONAN_LIBS}
+    ${Python3_LIBRARIES}
+    ${numpy_LIBRARIES}
+    ${tracy_LIBRARIES}
+    ${bullet_LIBRARIES}
+    ${igeBullet_LIBRARIES}
+    ${stb_LIBRARIES}
+    ${SDL_LIBRARIES}
+    ${openssl_LIBRARIES}
+    ${igeSound_LIBRARIES}
+    ${igeEffekseer_LIBRARIES}
+    ${igeNavigation_LIBRARIES}
     Crypt32
     opengl32
     glu32
@@ -133,7 +197,11 @@ target_link_libraries(${TARGET_NAME}
     ws2_32
     Psapi
     Kernel32
-    doboz edgeanim simplecpp tokenizer GLEW
+    doboz
+    edgeanim
+    simplecpp
+    tokenizer
+    GLEW
 )
 
 target_include_directories(${TARGET_NAME} PUBLIC
@@ -143,10 +211,36 @@ target_include_directories(${TARGET_NAME} PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/ImGuizmo"
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene"
-    "${CONAN_INCLUDE_DIRS}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/pyxcore"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/GLEW"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/edge/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/vectormath/scalar/cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/doboz"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/simplecpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/tokenizer"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/spdlog/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/spdlog/include/spdlog"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeCore"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeVMath"
 )
 
-target_compile_definitions(${TARGET_NAME} PUBLIC ${CONAN_DEFINES} Py_NO_ENABLE_SHARED USE_PYXCORE USE_IGECORE USE_IGESCENE USE_IGEVMATH)
+set(COMPILE_DEFINITIONS
+    ${Python3_COMPILE_DEFINITIONS}
+    ${numpy_COMPILE_DEFINITIONS}
+    ${tracy_COMPILE_DEFINITIONS}
+    ${bullet_COMPILE_DEFINITIONS}
+    ${igeBullet_COMPILE_DEFINITIONS}
+    ${stb_COMPILE_DEFINITIONS}
+    ${SDL_COMPILE_DEFINITIONS}
+    ${openssl_COMPILE_DEFINITIONS}
+    ${igeSound_COMPILE_DEFINITIONS}
+    ${igeEffekseer_COMPILE_DEFINITIONS}
+    ${igeNavigation_COMPILE_DEFINITIONS}
+    ${igeNavigation_COMPILE_DEFINITIONS}
+)
+
+target_compile_definitions(${TARGET_NAME} PUBLIC ${COMPILE_DEFINITIONS} Py_NO_ENABLE_SHARED USE_PYXCORE USE_IGECORE USE_IGESCENE USE_IGEVMATH)
 
 set_target_properties(
     ${TARGET_NAME} PROPERTIES
@@ -157,3 +251,21 @@ set_target_properties(
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/app/$<0:>")
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${TARGET_NAME})
+
+
+# Install Targets
+install(TARGETS
+    ${TARGET_NAME}
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    PUBLIC_HEADER DESTINATION include
+)
+
+file(GLOB_RECURSE PUBLIC_INCLUDE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/*.h*")
+foreach(HEADER ${PUBLIC_INCLUDE_FILES})
+    file(RELATIVE_PATH HEADER_RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/" "${HEADER}")
+    get_filename_component(DIR ${HEADER_RELATIVE} DIRECTORY)
+    install(FILES ${HEADER} DESTINATION include/${DIR})
+endforeach()
+
