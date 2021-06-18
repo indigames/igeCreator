@@ -7,7 +7,7 @@ App: # Application config
 
 Platforms: # Platforms config
     android:
-        RomDir: rom/android
+        RomDir: rom/mobile
         ConfigDir: config/android # Android 'res' folder
         arm64-v8a: true
         x86_64: false
@@ -33,7 +33,7 @@ Platforms: # Platforms config
         ConfigDir: ''
         x64: true
     ios:
-        RomDir: rom/android
+        RomDir: rom/mobile
         ConfigDir: config/ios # iOS's 'Assets' folder
         arm64: true
         DeploymentTarget: '11.0'
@@ -61,12 +61,12 @@ Requires: # Modules config
     - openssl/1.1.1c@ige/test
     - Python/3.7.6@ige/test
     - pyimgui/1.2.0@ige/test
-    - dlib/19.19.99@ige/test
-    - igeDlibExt/0.0.1@ige/test
-    - opencv/4.1.2@ige/test
-    - pybox2d/2.3.8@ige/test    
-    - pillow/8.2.0@ige/test
-    - tensorflow/2.5.0@ige/test
+#    - dlib/19.19.99@ige/test
+#    - igeDlibExt/0.0.1@ige/test
+#    - opencv/4.1.2@ige/test
+    - pybox2d/2.3.8@ige/test
+#    - pillow/8.2.0@ige/test
+#    - tensorflow/2.5.0@ige/test
     - igeAdjust/0.0.5@ige/test
     - igeAds/0.0.3@ige/test
     - igeAppsFlyer/0.0.2@ige/test
