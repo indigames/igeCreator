@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.15.0)
+cmake_policy(SET CMP0091 NEW)
 
 set(TARGET_NAME igeCreator)
 
 project(${TARGET_NAME})
 
-set(USE_MSVC_RELEASE_RUNTIME_ALWAYS TRUE)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
 
 # Modules and install path (required by conan)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
@@ -31,31 +31,12 @@ if(DEFINED ANDROID_PLATFORM)
         add_compile_options(-Og)
     endif()
 elseif(MSVC)
-    if(${APP_STYLE} MATCHES "SHARED")
-        set(CMAKE_CXX_FLAGS "/MD ${CMAKE_CXX_FLAGS}")
-        set(CMAKE_CXX_FLAGS_RELEASE "/MD /O2 /Ob2 /Zc:inline")
-        set(CMAKE_CXX_FLAGS_DEBUG "/MD /JMC  /ZI /Od")
-    endif()
     add_compile_options(/MP /std:c++17)
 elseif(IOS)
     if(CMAKE_BUILD_TYPE STREQUAL "Release")
         add_compile_options(-g0 -Ofast)
     endif()
 endif()
-
-IF (USE_MSVC_RELEASE_RUNTIME_ALWAYS)
-    FOREACH(flag_var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO )
-        IF(${flag_var} MATCHES "/MDd")
-            STRING(REGEX REPLACE "/MDd" "/MD" ${flag_var} "${${flag_var}}")
-        ENDIF(${flag_var} MATCHES "/MDd")
-        IF(${flag_var} MATCHES "/MTd")
-            STRING(REGEX REPLACE "/MTd" "/MT" ${flag_var} "${${flag_var}}")
-        ENDIF(${flag_var} MATCHES "/MTd")
-        IF(${flag_var} MATCHES "-D_DEBUG")
-            STRING(REGEX REPLACE "-D_DEBUG" "" ${flag_var} "${${flag_var}}")
-        ENDIF(${flag_var} MATCHES "-D_DEBUG")
-    ENDFOREACH(flag_var)
-ENDIF (USE_MSVC_RELEASE_RUNTIME_ALWAYS)
 
 if(${APP_STYLE} MATCHES "SHARED")
     find_package (Python3 ${PYTHON_VERSION} EXACT REQUIRED COMPONENTS Development)
@@ -113,13 +94,11 @@ include_directories(
     "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/Recast/Include"
 )
 
-
 add_compile_definitions(EDITOR_MODE=1)
 add_subdirectory(libs/pyxCore/pyxcore ${CMAKE_BINARY_DIR}/pyxCore)
 add_subdirectory(libs/igeCore ${CMAKE_BINARY_DIR}/igeCore)
 add_subdirectory(libs/igeVMath ${CMAKE_BINARY_DIR}/igeVMath)
 add_subdirectory(libs/igeScene ${CMAKE_BINARY_DIR}/igeScene)
-
 
 # Source files
 file(GLOB_RECURSE SRC_FILES
