@@ -10,7 +10,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:763602659410:android:f90cb9649fcfc32fd2578b",
         "android_client_info": {
-          "package_name": "net.indigames.igelauncher"
+          "package_name": "net.indigames.igesample"
         }
       },
       "oauth_client": [
@@ -35,7 +35,7 @@
               "client_id": "763602659410-ftu38se6npoei58egejvh1pjfb2tc6ic.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "net.indigames.igelauncher"
+                "bundle_id": "net.indigames.igesample"
               }
             }
           ]

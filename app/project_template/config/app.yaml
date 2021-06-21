@@ -1,9 +1,9 @@
 App: # Application config
-    Name: igeLauncher # App Name: must not contains space
-    Label: IGE Launcher # App Label: Icon label, can contains space
+    Name: igeSample # App Name: must not contains space
+    Label: Sample # App Label: Icon label, can contains space
     VersionName: '0.0.1' # Version Name (major.minor.build + a-z)
     VersionCode: 100 # Version Code ([1][0][0][00] <=> [Major][Minor][Build][0 - 24])
-    BundleId: net.indigames.igelauncher # BundleID (iOS/MacOS), Package Name (Android)
+    BundleId: net.indigames.igesample # BundleID (iOS/MacOS), Package Name (Android)
 
 Platforms: # Platforms config
     android:
@@ -40,7 +40,7 @@ Platforms: # Platforms config
         DeviveFamily: 1,2
         DevelopmentTeamID: R2TWY42MN5
         CodeSignIdentity: iPhone Distribution
-        ProvisioningProfile: Automatic # use 'Automatic' for development
+        ProvisioningProfile: igeSample-Adhoc-IOS # use 'Automatic' for development
     macos:
         RomDir: rom/pc
         ConfigDir: ''

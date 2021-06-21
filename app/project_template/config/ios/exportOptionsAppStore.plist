@@ -8,8 +8,12 @@
 	<string>R2TWY42MN5</string>
 	<key>provisioningProfiles</key>
 	<dict>
-		<key>net.indigames.crash</key>
-		<string>Crash-AppStore-IOS</string>
+		<key>net.indigames.igesample</key>
+		<string>igeSample-AppStore-IOS</string>
 	</dict>
+	<key>uploadBitcode</key>
+	<false/>
+	<key>uploadSymbols</key>
+	<false/>
 </dict>
 </plist>

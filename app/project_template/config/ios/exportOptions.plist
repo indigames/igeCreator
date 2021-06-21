@@ -10,8 +10,8 @@
 	<false/>
 	<key>provisioningProfiles</key>
 	<dict>
-		<key>net.indigames.crash</key>
-		<string>Crash-Adhoc-IOS</string>
+		<key>net.indigames.igesample</key>
+		<string>igeSample-Adhoc-IOS</string>
 	</dict>
 </dict>
 </plist>
