@@ -18,12 +18,13 @@ namespace ige::creator
     class IgnoreTransformEventScope
     {
     public:
-        IgnoreTransformEventScope(SceneObject* obj, const std::function<void(SceneObject&)>& task);
+        IgnoreTransformEventScope(SceneObject* obj, uint64_t& eventId, const std::function<void(SceneObject&)>& task);
         ~IgnoreTransformEventScope();
 
     protected:
         SceneObject* m_object;
         std::function<void(SceneObject&)> m_task;
+        uint64_t& m_eventId;
     };
 
     class Inspector: public Panel
@@ -49,10 +50,6 @@ namespace ige::creator
     public:
         std::shared_ptr<InspectorEditor> getInspectorEditor() { return m_inspectorEditor; }
 
-        //! Transform listener
-        inline uint64_t getTransformListenerId() const { return m_transformListenerId; }
-        inline void setTransformListenerId(uint64_t id) { m_transformListenerId = id; }
-
     protected:
         //! Inspected scene object
         SceneObject* m_targetObject = nullptr;
@@ -65,8 +62,5 @@ namespace ige::creator
         //! Flags for redrawing component in main thread
         bool m_bNeedRedraw = false;
         std::shared_ptr<InspectorEditor> m_inspectorEditor = nullptr;
-
-        //! Transform listener id
-        uint64_t m_transformListenerId = (uint64_t)-1;
     };
 }

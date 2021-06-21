@@ -227,13 +227,7 @@ namespace ige::creator
         {
             m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto path) {
                 if (!path.empty()) {
-                    auto& scene = Editor::getCurrentScene();
-                    if (scene) SceneManager::getInstance()->unloadScene(scene);
-                    scene = nullptr;
-
-                    Editor::getCanvas()->getHierarchy()->clear();
-                    Editor::getCanvas()->getHierarchy()->initialize();
-                    SceneManager::getInstance()->loadScene(path);
+                    Editor::getInstance()->loadScene(path);
                 }
             });
         }
@@ -245,7 +239,9 @@ namespace ige::creator
                 if (Editor::getCurrentScene() && !path.empty()) {
                     auto targets = Editor::getCurrentScene()->getTargets();
                     const auto& currentObject = (!targets.empty() && targets[0] != nullptr) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
-                    Editor::getCurrentScene()->createObject(fs::path(path).stem(), currentObject)->addComponent<FigureComponent>(path);
+                    auto newObj = Editor::getCurrentScene()->createObject(fs::path(path).stem(), currentObject);
+                    newObj->addComponent<FigureComponent>(path);
+                    Editor::getCurrentScene()->addTarget(newObj.get(), true);
                 }
             });
         }
@@ -257,7 +253,9 @@ namespace ige::creator
                 if (Editor::getCurrentScene() && !path.empty()) {
                     auto targets = Editor::getCurrentScene()->getTargets();
                     const auto& currentObject = (!targets.empty() && targets[0] != nullptr) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
-                    Editor::getCurrentScene()->createObject(fs::path(path).stem(), currentObject)->addComponent<SpriteComponent>(path);
+                    auto newObj = Editor::getCurrentScene()->createObject(fs::path(path).stem(), currentObject);
+                    newObj->addComponent<SpriteComponent>(path);
+                    Editor::getCurrentScene()->addTarget(newObj.get(), true);
                 }
             });
         }
@@ -269,7 +267,9 @@ namespace ige::creator
                 if (Editor::getCurrentScene() && !path.empty()) {
                     auto targets = Editor::getCurrentScene()->getTargets();
                     const auto& currentObject = (!targets.empty() && targets[0] != nullptr) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
-                    Editor::getCurrentScene()->createObject(fs::path(path).stem(), currentObject)->addComponent<AudioSource>(path);
+                    auto newObj = Editor::getCurrentScene()->createObject(fs::path(path).stem(), currentObject);
+                    newObj->addComponent<AudioSource>(path);
+                    Editor::getCurrentScene()->addTarget(newObj.get(), true);
                 }
             });
         }
@@ -293,7 +293,9 @@ namespace ige::creator
                 if (Editor::getCurrentScene() && !path.empty()) {
                     auto targets = Editor::getCurrentScene()->getTargets();
                     const auto& currentObject = (!targets.empty() && targets[0] != nullptr) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
-                    Editor::getCurrentScene()->createObject(fs::path(path).stem(), currentObject)->addComponent<Particle>(path);
+                    auto newObj = Editor::getCurrentScene()->createObject(fs::path(path).stem(), currentObject);
+                    newObj->addComponent<Particle>(path);
+                    Editor::getCurrentScene()->addTarget(newObj.get(), true);
                 }
             });
         }

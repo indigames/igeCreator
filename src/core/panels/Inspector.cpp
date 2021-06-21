@@ -77,14 +77,13 @@ using namespace pyxie;
 
 namespace ige::creator
 {
-    IgnoreTransformEventScope::IgnoreTransformEventScope(SceneObject* obj, const std::function<void(SceneObject&)>& task)
-        : m_object(obj), m_task(task)
+    IgnoreTransformEventScope::IgnoreTransformEventScope(SceneObject* obj, uint64_t& eventId, const std::function<void(SceneObject&)>& task)
+        : m_object(obj), m_eventId(eventId), m_task(task)
     {
         if (m_object)
         {
-            auto listenerId = Editor::getInstance()->getCanvas()->getInspector()->getTransformListenerId();
-            if (listenerId != (uint64_t)-1)
-                m_object->getTransformChangedEvent().removeListener(listenerId);
+            if (m_eventId != (uint64_t)-1)
+                m_object->getTransformChangedEvent().removeListener(m_eventId);
         }
     }
 
@@ -92,9 +91,8 @@ namespace ige::creator
     {
         if (m_object)
         {
-            auto listenerId = m_object->getTransformChangedEvent().addListener(m_task);
-            Editor::getInstance()->getCanvas()->getInspector()->setTransformListenerId(listenerId);
-        }        
+            m_eventId = m_object->getTransformChangedEvent().addListener(m_task);
+        }
         m_object = nullptr;
         m_task = nullptr;
     }
@@ -538,7 +536,7 @@ namespace ige::creator
             m_componentGroup->removeAllPlugins();
             m_componentGroup = nullptr;
         }
-                
+
         removeAllWidgets();
     }
 
@@ -546,13 +544,11 @@ namespace ige::creator
     {
         if (m_targetObject != obj)
         {
-            if (m_targetObject && m_transformListenerId != (uint64_t)-1)
-                m_targetObject->getTransformChangedEvent().removeListener(m_transformListenerId);
 
             clear();
             m_inspectorEditor->clear();
 
-            m_targetObject = obj;            
+            m_targetObject = obj;
             m_inspectorEditor->setTargetObject(m_targetObject);
             if (m_targetObject != nullptr)
             {
