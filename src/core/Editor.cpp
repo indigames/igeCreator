@@ -202,13 +202,14 @@ namespace ige::creator
         setProjectPath(path);
         createScene();
         SceneManager::getInstance()->saveScene(prjFile.parent_path().append("scenes").append("main.scene"));
-                json settingsJson = json{
+        json settingsJson = json{
             {"startScene", "scenes/main.scene"},
         };
         std::ofstream file(prjFile.string());
         file << settingsJson;
         file.close();
-        return true;
+
+        return loadScene("scenes/main.scene");        
     }
     
     bool Editor::openProject()
