@@ -74,7 +74,7 @@ namespace ige::creator
 
     void Container::drawWidgets()
     {
-        for(const auto& widget: m_widgets) {
+        for(auto widget: m_widgets) {
             if(widget != nullptr) widget->draw();
         }
     }

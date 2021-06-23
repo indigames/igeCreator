@@ -5,6 +5,7 @@
 #include <components/gui/RectTransform.h>
 #include <scene/Scene.h>
 #include <scene/SceneObject.h>
+#include <scene/TargetObject.h>
 
 namespace ige::creator
 {
@@ -65,8 +66,8 @@ namespace ige::creator
         if(!m_bEnabled || m_camera == nullptr || !m_visible || Editor::getCurrentScene() == nullptr)
             return;
 
-        auto targets = Editor::getCurrentScene()->getTargets();
-        if (targets.empty())
+        auto target = Editor::getCurrentScene()->getTarget();
+        if (target->empty())
             return;
         
         // Detect ortho projection
@@ -204,7 +205,7 @@ namespace ige::creator
     void Gizmo::updateTargets()
     {
         m_targets.clear();
-        m_targets = Editor::getCurrentScene()->getTargets();
+        m_targets = Editor::getCurrentScene()->getTarget()->getAllTargets();
 
         auto it = m_targets.begin();
         while (it != m_targets.end())

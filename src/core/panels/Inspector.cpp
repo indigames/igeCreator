@@ -70,6 +70,7 @@
 #include "core/panels/InspectorEditor.h"
 
 #include <scene/Scene.h>
+#include <scene/TargetObject.h>
 using namespace ige::scene;
 
 #include <pyxieUtilities.h>
@@ -107,8 +108,6 @@ namespace ige::creator
     {
         clear();
 
-        m_targetObject = nullptr;
-
         m_inspectorEditor->clear();
         m_inspectorEditor = nullptr;
     }
@@ -117,8 +116,12 @@ namespace ige::creator
     {
         clear();
 
-        if (m_targetObject == nullptr)
+        if (Editor::getCurrentScene() == nullptr)
             return;
+
+        m_targetObject = Editor::getCurrentScene()->getTarget().get();
+        m_inspectorEditor->setTargetObject(m_targetObject);
+
         m_headerGroup = createWidget<Group>("Inspector_Header", false);
 
         // Object info
@@ -201,7 +204,6 @@ namespace ige::creator
         m_createCompCombo->addChoice((int)ComponentType::NavAgent, "NavAgent");
         m_createCompCombo->addChoice((int)ComponentType::NavObstacle, "NavObstacle");
         m_createCompCombo->addChoice((int)ComponentType::OffMeshLink, "OffMeshLink");
-
 
         auto createCompButton = m_headerGroup->createWidget<Button>("Add", ImVec2(64.f, 0.f));
         createCompButton->getOnClickEvent().addListener([this](auto widget) {
@@ -538,39 +540,11 @@ namespace ige::creator
         }
 
         removeAllWidgets();
+
+        m_targetObject = nullptr;
+
+        m_inspectorEditor->setTargetObject(nullptr);
+        m_inspectorEditor->clear();
     }
 
-    void Inspector::setTargetObject(SceneObject* obj)
-    {
-        if (m_targetObject != obj)
-        {
-
-            clear();
-            m_inspectorEditor->clear();
-
-            m_targetObject = obj;
-            m_inspectorEditor->setTargetObject(m_targetObject);
-            if (m_targetObject != nullptr)
-            {
-                initialize();
-            }
-        }
-    }
-
-    void Inspector::updateMaterial(int index, const char *infoName, std::string txt)
-    {
-        auto figureComp = m_targetObject->getComponent<FigureComponent>();
-        auto figure = figureComp->getFigure();
-        if (figure)
-        {
-            Sampler sampler;
-            auto tex = ResourceCreator::Instance().NewTexture(txt.c_str());
-            sampler.tex = tex;
-            sampler.samplerSlotNo = 0;
-            if (tex)
-            {
-                figure->SetMaterialParam(index, infoName, &sampler);
-            }
-        }
-    }
 } // namespace ige::creator

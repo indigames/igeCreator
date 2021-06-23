@@ -110,8 +110,8 @@ void CameraEditorComponent::drawCameraComponent()
     // Target
     auto drawCameraLockTarget = [this]() {
         m_cameraLockTargetGroup->removeAllWidgets();
-
         auto camera = m_targetObject->getComponent<CameraComponent>();
+        if (camera == nullptr) return;
         if (camera->getLockOn())
         {
             std::array target = { camera->getTarget().X(), camera->getTarget().Y(), camera->getTarget().Z() };
@@ -119,10 +119,8 @@ void CameraEditorComponent::drawCameraComponent()
             targetGroup->getOnDataChangedEvent().addListener([this](auto val) {
                 auto camera = m_targetObject->getComponent<CameraComponent>();
                 camera->setTarget({ val[0], val[1], val[2] });
-                /*drawLocalTransformComponent();
-                drawWorldTransformComponent();*/
                 onTransformChanged();
-                });
+            });
         }
         else
         {
@@ -132,31 +130,26 @@ void CameraEditorComponent::drawCameraComponent()
             columns->createWidget<Drag<float>>("Pan", ImGuiDataType_Float, pan)->getOnDataChangedEvent().addListener([this](auto val) {
                 auto camera = m_targetObject->getComponent<CameraComponent>();
                 camera->setPan(DEGREES_TO_RADIANS(val[0]));
-                /*drawLocalTransformComponent();
-                drawWorldTransformComponent();*/
                 onTransformChanged();
-                });
+            });
             std::array tilt = { RADIANS_TO_DEGREES(camera->getTilt()) };
             columns->createWidget<Drag<float>>("Tilt", ImGuiDataType_Float, tilt)->getOnDataChangedEvent().addListener([this](auto val) {
                 auto camera = m_targetObject->getComponent<CameraComponent>();
                 camera->setTilt(DEGREES_TO_RADIANS(val[0]));
-                /*drawLocalTransformComponent();
-                drawWorldTransformComponent();*/
                 onTransformChanged();
-                });
+            });
             std::array roll = { RADIANS_TO_DEGREES(camera->getRoll()) };
             columns->createWidget<Drag<float>>("Roll", ImGuiDataType_Float, roll)->getOnDataChangedEvent().addListener([this](auto val) {
                 auto camera = m_targetObject->getComponent<CameraComponent>();
                 camera->setRoll(DEGREES_TO_RADIANS(val[0]));
-                /*drawLocalTransformComponent();
-                drawWorldTransformComponent();*/
                 onTransformChanged();
-                });
+            });
         }
     };
 
     m_cameraCompGroup->createWidget<CheckBox>("LockTarget", camera->getLockOn())->getOnDataChangedEvent().addListener([drawCameraLockTarget, this](auto locked) {
         auto camera = m_targetObject->getComponent<CameraComponent>();
+        if (camera == nullptr) return;
         if (!locked)
         {
             auto transform = m_targetObject->getTransform();
@@ -169,8 +162,6 @@ void CameraEditorComponent::drawCameraComponent()
             camera->setRoll(0.f);
         }
         camera->lockOnTarget(locked);
-        /*drawLocalTransformComponent();
-        drawWorldTransformComponent();*/
         onTransformChanged();
         drawCameraLockTarget();
         });
@@ -183,16 +174,14 @@ void CameraEditorComponent::drawCameraComponent()
     widthBasedColumns->createWidget<CheckBox>("WidthBased", camera->isWidthBase())->getOnDataChangedEvent().addListener([this](auto val) {
         auto camera = m_targetObject->getComponent<CameraComponent>();
         camera->setWidthBase(val);
-        });
+    });
 
     // Aspect Ratio
     std::array ratio = { camera->getAspectRatio() };
     widthBasedColumns->createWidget<Drag<float>>("Ratio", ImGuiDataType_Float, ratio)->getOnDataChangedEvent().addListener([this](auto val) {
         auto camera = m_targetObject->getComponent<CameraComponent>();
         camera->setAspectRatio(val[0]);
-        });
-
-    
+    });
 }
 
 void CameraEditorComponent::onTransformChanged()

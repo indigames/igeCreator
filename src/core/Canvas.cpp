@@ -49,12 +49,6 @@ namespace ige::creator
         m_panels.clear();
     }
 
-    void Canvas::setTargetObject(SceneObject* obj)
-    {
-        getInspector()->setTargetObject(obj);
-        getEditorScene()->setTargetObject(obj);
-    }
-
     void Canvas::update(float dt)
     {
         for (auto panel : m_panels)

@@ -32,15 +32,13 @@ namespace ige::creator
     public:
         Inspector(const std::string& name = "", const Panel::Settings& settings = {});
         virtual ~Inspector();
-        virtual void clear();
 
-        void setTargetObject(SceneObject* obj);
-        void updateMaterial(int index, const char* infoName, std::string txt);
+        virtual void clear();
+        virtual void initialize() override;
 
         virtual void update(float dt) override;
 
     protected:
-        virtual void initialize() override;
         virtual void _drawImpl() override;
 
         //! Redraw

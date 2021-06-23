@@ -171,7 +171,6 @@ namespace ige::creator
             if (Editor::getCurrentScene())
             {
                 auto path = Editor::getCurrentScene()->getName() + ".scene.tmp";
-                Editor::getCanvas()->getEditorScene()->setTargetObject(nullptr);
                 SceneManager::getInstance()->saveScene(path);
             }
             m_bIsPlaying = true;

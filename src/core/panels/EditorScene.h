@@ -23,9 +23,6 @@ public:
     EditorScene(const std::string& name = "", const Panel::Settings& settings = {});
     virtual ~EditorScene();
 
-    //! Set target object
-    void setTargetObject(SceneObject* obj);
-
     virtual void clear();
     virtual void update(float dt);
     virtual void refresh();

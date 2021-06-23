@@ -17,6 +17,7 @@
 
 #include <scene/SceneManager.h>
 #include <scene/Scene.h>
+#include <scene/TargetObject.h>
 using namespace ige::scene;
 
 #include "utils/filesystem.h"
@@ -194,7 +195,12 @@ namespace ige::creator
 
         if (path.compare(getEnginePath()) != 0)
         {
-            fs::remove_all(path);
+            try
+            {
+                fs::remove_all(path);
+            }
+            catch (std::exception& ex) {}
+
             const auto copyOptions = fs::copy_options::overwrite_existing | fs::copy_options::recursive;
             fs::copy(GetEnginePath("project_template"), path, copyOptions);
         }
@@ -339,7 +345,6 @@ namespace ige::creator
     void Editor::refreshScene() {
         if (getCanvas())
         {
-            getCanvas()->setTargetObject(nullptr);
             getCanvas()->getHierarchy()->clear();
             getCanvas()->getEditorScene()->clear();
         }
@@ -437,7 +442,7 @@ namespace ige::creator
     bool Editor::cloneObject()
     {
         json clonedJson;
-        auto targets = Editor::getCurrentScene()->getTargets();
+        auto targets = Editor::getCurrentScene()->getTarget()->getAllTargets();
         if (targets.size() > 0 && targets[0] != nullptr)
         {
             for (auto target : targets)
@@ -468,7 +473,7 @@ namespace ige::creator
 
     bool Editor::deleteObject()
     {
-        auto targets = Editor::getCurrentScene()->getTargets();
+        auto targets = Editor::getCurrentScene()->getTarget()->getAllTargets();
         if (targets.size() > 0)
         {
             auto parent = targets[0] ? targets[0]->getParent() : nullptr;
@@ -484,7 +489,7 @@ namespace ige::creator
     void Editor::copyObject() 
     {
         m_selectedJsons.clear();
-        auto targets = Editor::getCurrentScene()->getTargets();
+        auto targets = Editor::getCurrentScene()->getTarget()->getAllTargets();
         for (auto target : targets)
         {
             if (target)
@@ -508,8 +513,7 @@ namespace ige::creator
             newObject->from_json(jTarget);
             newObject->setUUID(uuid);
             newObject->setName(objName + "_cp");
-            auto targets = Editor::getCurrentScene()->getTargets();
-            auto parent = (!targets.empty() && targets[0]) ? targets[0] : nullptr;
+            auto parent = Editor::getCurrentScene()->getTarget()->getFirstTarget();
             newObject->setParent(parent);
             Editor::getCurrentScene()->addTarget(newObject.get(), true);
         }
