@@ -41,7 +41,7 @@ void BoneTransformEditorComponent ::drawComponent()
         return;
     m_compGroup->removeAllWidgets();
 
-    auto comp = m_targetObject->getComponent<BoneTransform>();
+    auto comp = dynamic_cast<BoneTransform*>(getComponent());
     if (comp == nullptr)
         return;
 
@@ -53,7 +53,7 @@ void BoneTransformEditorComponent ::drawComponent()
         {
             auto name = obj.first;
             joinGroup->createWidget<CheckBox>(name, obj.second != nullptr)->getOnDataChangedEvent().addListener([name, this](bool val) {
-                auto comp = m_targetObject->getComponent<BoneTransform>();
+                auto comp = dynamic_cast<BoneTransform*>(getComponent());
                 comp->onJointObjectSelected(name, val);
                 redraw();
             });

@@ -52,7 +52,7 @@ void PhysicSphereEditorComponent::onInspectorUpdate()
 
 void PhysicSphereEditorComponent::drawPhysicSphere()
 {
-    auto physicComp = m_targetObject->getComponent<PhysicSphere>();
+    auto physicComp = dynamic_cast<PhysicSphere*>(getComponent());
     if (physicComp == nullptr)
         return;
 
@@ -61,7 +61,7 @@ void PhysicSphereEditorComponent::drawPhysicSphere()
     m_physicGroup->createWidget<Separator>();
     std::array radius = { physicComp->getRadius() };
     m_physicGroup->createWidget<Drag<float>>("Radius", ImGuiDataType_Float, radius, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
-        auto physicComp = m_targetObject->getComponent<PhysicSphere>();
+        auto physicComp = dynamic_cast<PhysicSphere*>(getComponent());
         physicComp->setRadius(val[0]);
         });
 

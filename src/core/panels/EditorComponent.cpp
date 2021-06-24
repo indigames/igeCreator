@@ -8,19 +8,14 @@
 NS_IGE_BEGIN
 
 EditorComponent::EditorComponent() 
-	: m_targetObject(nullptr),
-	m_component(nullptr),
+	: m_component(nullptr),
 	m_group(nullptr),
 	m_bisDirty(false)
-{
-	
+{	
 }
 
 EditorComponent::~EditorComponent() {
-	m_targetObject = nullptr;
-
 	m_component = nullptr;
-
 	m_group = nullptr;
 }
 
@@ -35,13 +30,6 @@ void EditorComponent::draw(std::shared_ptr<Group> group) {
 
 void EditorComponent::redraw() {
 	m_bisDirty = false;
-}
-
-void EditorComponent::setTargetObject(SceneObject* obj) {
-	if (m_targetObject != obj)
-	{
-		m_targetObject = obj;
-	}
 }
 
 bool EditorComponent::setComponent(Component* component) 

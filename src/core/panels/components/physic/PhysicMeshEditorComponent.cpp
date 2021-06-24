@@ -58,7 +58,7 @@ void PhysicMeshEditorComponent::drawPhysicMesh()
 {
     drawPhysicObject();
 
-    auto physicComp = m_targetObject->getComponent<PhysicMesh>();
+    auto physicComp = dynamic_cast<PhysicMesh*>(getComponent());
     if (physicComp == nullptr)
         return;
 
@@ -70,14 +70,14 @@ void PhysicMeshEditorComponent::drawPhysicMesh()
 
     auto concaveChk = m_physicGroup->createWidget<CheckBox>("Triangle Mesh", !convex);
     convexChk->getOnDataChangedEvent().addListener([this, convexChk, concaveChk](bool convex) {
-        auto physicComp = m_targetObject->getComponent<PhysicMesh>();
+        auto physicComp = dynamic_cast<PhysicMesh*>(getComponent());
         physicComp->setConvex(convex);
         convexChk->setSelected(physicComp->isConvex());
         concaveChk->setSelected(!physicComp->isConvex());
         });
 
     concaveChk->getOnDataChangedEvent().addListener([this, convexChk, concaveChk](bool concave) {
-        auto physicComp = m_targetObject->getComponent<PhysicMesh>();
+        auto physicComp = dynamic_cast<PhysicMesh*>(getComponent());
         physicComp->setConvex(!concave);
         convexChk->setSelected(physicComp->isConvex());
         concaveChk->setSelected(!physicComp->isConvex());
@@ -86,11 +86,11 @@ void PhysicMeshEditorComponent::drawPhysicMesh()
     std::array meshIdx = { physicComp->getMeshIndex() };
     auto meshIdxWg = m_physicGroup->createWidget<Drag<int>>("Mesh Index", ImGuiDataType_S32, meshIdx, 1, 0);
     meshIdxWg->getOnDataChangedEvent().addListener([this](auto& val) {
-        auto physicComp = m_targetObject->getComponent<PhysicMesh>();
+        auto physicComp = dynamic_cast<PhysicMesh*>(getComponent());
         physicComp->setMeshIndex(val[0]);
         });
     meshIdxWg->addPlugin<DDTargetPlugin<int>>(EDragDropID::MESH)->getOnDataReceivedEvent().addListener([this](auto val) {
-        auto physicComp = m_targetObject->getComponent<PhysicMesh>();
+        auto physicComp = dynamic_cast<PhysicMesh*>(getComponent());
         physicComp->setMeshIndex(val);
         dirty();
         });
@@ -99,13 +99,13 @@ void PhysicMeshEditorComponent::drawPhysicMesh()
     //! Mark Not End OF line for browse btn
     txtPath->setEndOfLine(false);
     txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
-        auto physicComp = m_targetObject->getComponent<PhysicMesh>();
+        auto physicComp = dynamic_cast<PhysicMesh*>(getComponent());
         physicComp->setPath(txt);
         });
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Figure))
     {
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-            auto physicComp = m_targetObject->getComponent<PhysicMesh>();
+            auto physicComp = dynamic_cast<PhysicMesh*>(getComponent());
             physicComp->setPath(txt);
             dirty();
             });
@@ -114,7 +114,7 @@ void PhysicMeshEditorComponent::drawPhysicMesh()
         auto files = OpenFileDialog("Import Assets", "", { "Figure (*.pyxf)", "*.pyxf" }).result();
         if (files.size() > 0)
         {
-            auto physicComp = m_targetObject->getComponent<PhysicMesh>();
+            auto physicComp = dynamic_cast<PhysicMesh*>(getComponent());
             physicComp->setPath(files[0]);
             dirty();
         }

@@ -55,31 +55,31 @@ void SpotLightEditorComponent::drawSpotLight()
         return;
     m_spotLightGroup->removeAllWidgets();
 
-    auto light = m_targetObject->getComponent<SpotLight>();
+    auto light = dynamic_cast<SpotLight*>(getComponent());
     if (light == nullptr)
         return;
 
     auto color = Vec4(light->getColor(), 1.f);
     m_spotLightGroup->createWidget<Color>("Color", color)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto light = m_targetObject->getComponent<SpotLight>();
+        auto light = dynamic_cast<SpotLight*>(getComponent());
         light->setColor({ val[0], val[1], val[2] });
         });
 
     std::array intensity = { light->getIntensity() };
     m_spotLightGroup->createWidget<Drag<float>>("Intensity", ImGuiDataType_Float, intensity, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto light = m_targetObject->getComponent<SpotLight>();
+        auto light = dynamic_cast<SpotLight*>(getComponent());
         light->setIntensity(val[0]);
         });
 
     std::array range = { light->getRange() };
     m_spotLightGroup->createWidget<Drag<float>>("Range", ImGuiDataType_Float, range, 0.01f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto light = m_targetObject->getComponent<SpotLight>();
+        auto light = dynamic_cast<SpotLight*>(getComponent());
         light->setRange(val[0]);
         });
 
     std::array angle = { light->getAngle() };
     m_spotLightGroup->createWidget<Drag<float>>("Angle", ImGuiDataType_Float, angle, 0.01f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto light = m_targetObject->getComponent<SpotLight>();
+        auto light = dynamic_cast<SpotLight*>(getComponent());
         light->setAngle(val[0]);
         });
 }

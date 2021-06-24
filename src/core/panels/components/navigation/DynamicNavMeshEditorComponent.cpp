@@ -56,19 +56,19 @@ void DynamicNavMeshEditorComponent::drawDynamicNavMesh()
         return;
     drawNavMesh();
 
-    auto navMesh = m_targetObject->getComponent<DynamicNavMesh>();
+    auto navMesh = dynamic_cast<DynamicNavMesh*>(getComponent());
     if (navMesh == nullptr)
         return;
 
     std::array maxObstacles = { (int)navMesh->getMaxObstacles() };
     m_navMeshGroup->createWidget<Drag<int>>("Max Obstacles", ImGuiDataType_S32, maxObstacles, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto navMesh = m_targetObject->getComponent<DynamicNavMesh>();
+        auto navMesh = dynamic_cast<DynamicNavMesh*>(getComponent());
         navMesh->setMaxObstacles(val[0]);
         });
 
     std::array maxLayers = { (int)navMesh->getMaxLayers() };
     m_navMeshGroup->createWidget<Drag<int>>("Max Layers", ImGuiDataType_S32, maxLayers, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto navMesh = m_targetObject->getComponent<DynamicNavMesh>();
+        auto navMesh = dynamic_cast<DynamicNavMesh*>(getComponent());
         navMesh->setMaxLayers(val[0]);
         });
 }

@@ -82,7 +82,7 @@ void UIImageEditorComponent::drawUIImage()
         auto files = OpenFileDialog("Import Assets", "", { "Texture (*.pyxi)", "*.pyxi" }).result();
         if (files.size() > 0)
         {
-            auto uiImage = m_targetObject->getComponent<UIImage>();
+            auto uiImage = dynamic_cast<UIImage*>(getComponent());
             uiImage->setPath(files[0]);
             dirty();
         }

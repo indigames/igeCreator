@@ -22,6 +22,7 @@
 #include "core/plugin/DragDropPlugin.h"
 #include "core/dialog/OpenFileDialog.h"
 
+#include <components/CompoundComponent.h>
 #include <components/CameraComponent.h>
 #include <components/TransformComponent.h>
 #include <components/EnvironmentComponent.h>
@@ -78,23 +79,23 @@ using namespace pyxie;
 
 namespace ige::creator
 {
-    IgnoreTransformEventScope::IgnoreTransformEventScope(SceneObject* obj, uint64_t& eventId, const std::function<void(SceneObject&)>& task)
-        : m_object(obj), m_eventId(eventId), m_task(task)
+    IgnoreTransformEventScope::IgnoreTransformEventScope(Component* comp, uint64_t& eventId, const std::function<void(SceneObject&)>& task)
+        : m_comp(comp), m_eventId(eventId), m_task(task)
     {
-        if (m_object)
+        if (m_comp)
         {
             if (m_eventId != (uint64_t)-1)
-                m_object->getTransformChangedEvent().removeListener(m_eventId);
+                m_comp->getOwner()->getTransformChangedEvent().removeListener(m_eventId);
         }
     }
 
     IgnoreTransformEventScope::~IgnoreTransformEventScope()
     {
-        if (m_object)
+        if (m_comp)
         {
-            m_eventId = m_object->getTransformChangedEvent().addListener(m_task);
+            m_eventId = m_comp->getOwner()->getTransformChangedEvent().addListener(m_task);
         }
-        m_object = nullptr;
+        m_comp = nullptr;
         m_task = nullptr;
     }
 
@@ -120,8 +121,6 @@ namespace ige::creator
             return;
 
         m_targetObject = Editor::getCurrentScene()->getTarget().get();
-        m_inspectorEditor->setTargetObject(m_targetObject);
-
         m_headerGroup = createWidget<Group>("Inspector_Header", false);
 
         // Object info
@@ -326,7 +325,8 @@ namespace ige::creator
         m_headerGroup->createWidget<Separator>();
         m_componentGroup = createWidget<Group>("Inspector_Components", false);
         m_inspectorEditor->setParentGroup(m_componentGroup);
-        std::for_each(m_targetObject->getComponents().begin(), m_targetObject->getComponents().end(), [this](auto &component) {
+        std::for_each(m_targetObject->getComponents().begin(), m_targetObject->getComponents().end(), [this](auto & comp) {
+            auto component = comp->getName().compare("CompoundComponent") == 0 ? std::dynamic_pointer_cast<CompoundComponent>(comp)->getComponents()[0] : comp;
             auto closable = (component->getName() != "Transform" && component->getName() != "RectTransform");
             auto header = m_componentGroup->createWidget<Group>(component->getName(), true, closable);
             header->getOnClosedEvent().addListener([this, &component]() {
@@ -542,8 +542,6 @@ namespace ige::creator
         removeAllWidgets();
 
         m_targetObject = nullptr;
-
-        m_inspectorEditor->setTargetObject(nullptr);
         m_inspectorEditor->clear();
     }
 

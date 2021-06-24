@@ -54,7 +54,6 @@ NS_IGE_BEGIN
 
 InspectorEditor::InspectorEditor() {
 	m_componentGroup = nullptr;
-	m_targetObject = nullptr;
 	m_deltaTime = 0;
 }
 
@@ -91,18 +90,6 @@ void InspectorEditor::setParentGroup(std::shared_ptr<Group> componentGroup)
 			m_componentGroup->removeAllPlugins();
 		}
 		m_componentGroup = componentGroup;
-	}
-}
-
-void InspectorEditor::setTargetObject(SceneObject* obj)
-{
-	if (m_targetObject != obj) {
-		m_targetObject = obj;
-
-		for (auto& comp : m_components) {
-			if(comp.second != nullptr)
-				comp.second->setTargetObject(obj);
-		}
 	}
 }
 
@@ -320,8 +307,6 @@ std::shared_ptr<EditorComponent> InspectorEditor::addComponent(int type, Compone
 	if (view == nullptr) return nullptr;
 
 	view->setComponent(comp);
-	view->setTargetObject(m_targetObject);
-
 	m_groups[comp->getInstanceId()] = header;
 	m_components[comp->getInstanceId()] = view;
 	view->draw(header);

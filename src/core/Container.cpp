@@ -65,10 +65,12 @@ namespace ige::creator
     {
         for (auto& widget : m_widgets)
         {
-            widget->setContainer(nullptr);
-            widget = nullptr;
+            if (widget != nullptr)
+            {
+                widget->setContainer(nullptr);
+                widget = nullptr;
+            }
         }
-            
         m_widgets.clear();
     }
 

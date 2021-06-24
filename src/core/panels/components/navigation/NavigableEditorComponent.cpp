@@ -56,17 +56,17 @@ void NavigableEditorComponent::drawNavigable()
         return;
     m_navigableGroup->removeAllWidgets();
 
-    auto navigable = m_targetObject->getComponent<Navigable>();
+    auto navigable = dynamic_cast<Navigable*>(getComponent());
     if (navigable == nullptr)
         return;
 
     auto column = m_navigableGroup->createWidget<Columns<3>>();
     column->createWidget<CheckBox>("Enable", navigable->isEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto navigable = m_targetObject->getComponent<Navigable>();
+        auto navigable = dynamic_cast<Navigable*>(getComponent());
         navigable->setEnabled(val);
         });
     column->createWidget<CheckBox>("Recursive", navigable->isRecursive())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto navigable = m_targetObject->getComponent<Navigable>();
+        auto navigable = dynamic_cast<Navigable*>(getComponent());
         navigable->setRecursive(val);
         });
 }

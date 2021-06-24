@@ -58,21 +58,21 @@ void FigureEditorComponent::drawFigureComponent()
         return;
     m_figureCompGroup->removeAllWidgets();
 
-    auto figureComp = m_targetObject->getComponent<FigureComponent>();
+    auto figureComp = dynamic_cast<FigureComponent*>(getComponent());
     if (figureComp == nullptr)
         return;
 
     auto txtPath = m_figureCompGroup->createWidget<TextField>("Path", figureComp->getPath());
     txtPath->setEndOfLine(false);
     txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
-        auto figureComp = m_targetObject->getComponent<FigureComponent>();
+        auto figureComp = dynamic_cast<FigureComponent*>(getComponent());
         figureComp->setPath(txt);
         });
 
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Figure))
     {
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-            auto figureComp = m_targetObject->getComponent<FigureComponent>();
+            auto figureComp = dynamic_cast<FigureComponent*>(getComponent());
             figureComp->setPath(txt);
             dirty();
             });
@@ -82,7 +82,7 @@ void FigureEditorComponent::drawFigureComponent()
         auto files = OpenFileDialog("Import Assets", "", { "Figure (*.pyxf)", "*.pyxf" }).result();
         if (files.size() > 0)
         {
-            auto figureComp = m_targetObject->getComponent<FigureComponent>();
+            auto figureComp = dynamic_cast<FigureComponent*>(getComponent());
             figureComp->setPath(files[0]);
             dirty();
         }
@@ -91,27 +91,27 @@ void FigureEditorComponent::drawFigureComponent()
     auto figColumn = m_figureCompGroup->createWidget<Columns<2>>();
 
     figColumn->createWidget<CheckBox>("Fog", figureComp->isFogEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto figureComp = m_targetObject->getComponent<FigureComponent>();
+        auto figureComp = dynamic_cast<FigureComponent*>(getComponent());
         figureComp->setFogEnabled(val);
         });
 
     figColumn->createWidget<CheckBox>("CullFace", figureComp->isCullFaceEnable())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto figureComp = m_targetObject->getComponent<FigureComponent>();
+        auto figureComp = dynamic_cast<FigureComponent*>(getComponent());
         figureComp->setCullFaceEnable(val);
         });
 
     figColumn->createWidget<CheckBox>("Z-Test", figureComp->isDepthTestEnable())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto figureComp = m_targetObject->getComponent<FigureComponent>();
+        auto figureComp = dynamic_cast<FigureComponent*>(getComponent());
         figureComp->setDepthTestEnable(val);
         });
 
     figColumn->createWidget<CheckBox>("Z-Write", figureComp->isDepthWriteEnable())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto figureComp = m_targetObject->getComponent<FigureComponent>();
+        auto figureComp = dynamic_cast<FigureComponent*>(getComponent());
         figureComp->setDepthWriteEnable(val);
         });
 
     figColumn->createWidget<CheckBox>("AlphaBlend", figureComp->isAlphaBlendingEnable())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto figureComp = m_targetObject->getComponent<FigureComponent>();
+        auto figureComp = dynamic_cast<FigureComponent*>(getComponent());
         figureComp->setAlphaBlendingEnable(val);
         dirty();
         });
@@ -120,7 +120,7 @@ void FigureEditorComponent::drawFigureComponent()
     {
         std::array val = { figureComp->getAlphaBlendingOp() };
         m_figureCompGroup->createWidget<Drag<int>>("AlphaBlendOp", ImGuiDataType_S32, val, 1, 0, 3)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto figureComp = m_targetObject->getComponent<FigureComponent>();
+            auto figureComp = dynamic_cast<FigureComponent*>(getComponent());
             figureComp->setAlphaBlendingOp(val[0]);
             });
     }

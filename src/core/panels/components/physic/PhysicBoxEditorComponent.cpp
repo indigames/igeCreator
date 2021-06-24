@@ -52,7 +52,7 @@ void PhysicBoxEditorComponent::onInspectorUpdate()
 
 void PhysicBoxEditorComponent::drawPhysicBox()
 {
-    auto physicComp = m_targetObject->getComponent<PhysicBox>();
+    auto physicComp = dynamic_cast<PhysicBox*>(getComponent());
     if (physicComp == nullptr)
         return;
 
@@ -61,7 +61,7 @@ void PhysicBoxEditorComponent::drawPhysicBox()
     m_physicGroup->createWidget<Separator>();
     std::array size = { physicComp->getSize().X(), physicComp->getSize().Y(), physicComp->getSize().Z() };
     m_physicGroup->createWidget<Drag<float, 3>>("Size", ImGuiDataType_Float, size, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
-        auto physicComp = m_targetObject->getComponent<PhysicBox>();
+        auto physicComp = dynamic_cast<PhysicBox*>(getComponent());
         physicComp->setSize({ val[0], val[1], val[2] });
         });
 

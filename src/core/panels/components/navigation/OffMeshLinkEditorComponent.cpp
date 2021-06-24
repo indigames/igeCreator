@@ -63,29 +63,29 @@ void OffMeshLinkEditorComponent::drawOffMeshLink()
         return;
     m_offMeshLinkGroup->removeAllWidgets();
 
-    auto offMeshLink = m_targetObject->getComponent<OffMeshLink>();
+    auto offMeshLink = dynamic_cast<OffMeshLink*>(getComponent());
     if (offMeshLink == nullptr)
         return;
 
     auto column = m_offMeshLinkGroup->createWidget<Columns<3>>();
     column->createWidget<CheckBox>("Enable", offMeshLink->isEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto offMeshLink = m_targetObject->getComponent<OffMeshLink>();
+        auto offMeshLink = dynamic_cast<OffMeshLink*>(getComponent());
         offMeshLink->setEnabled(val);
         });
     column->createWidget<CheckBox>("Bidirectional", offMeshLink->isBidirectional())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto offMeshLink = m_targetObject->getComponent<OffMeshLink>();
+        auto offMeshLink = dynamic_cast<OffMeshLink*>(getComponent());
         offMeshLink->setBidirectional(val);
         });
 
     // Endpoint
     auto endPointTxt = m_offMeshLinkGroup->createWidget<TextField>("Endpoint", offMeshLink->getEndPoint() ? offMeshLink->getEndPoint()->getName() : std::string());
     endPointTxt->getOnDataChangedEvent().addListener([&](const auto& val) {
-        auto offMeshLink = m_targetObject->getComponent<OffMeshLink>();
+        auto offMeshLink = dynamic_cast<OffMeshLink*>(getComponent());
         auto obj = Editor::getCurrentScene()->findObjectByName(val);
         offMeshLink->setEndPoint(obj.get());
         });
     endPointTxt->addPlugin<DDTargetPlugin<int>>(EDragDropID::OBJECT)->getOnDataReceivedEvent().addListener([&](auto val) {
-        auto offMeshLink = m_targetObject->getComponent<OffMeshLink>();
+        auto offMeshLink = dynamic_cast<OffMeshLink*>(getComponent());
         auto obj = Editor::getCurrentScene()->findObjectById(val);
         offMeshLink->setEndPoint(obj.get());
         redraw();
@@ -93,19 +93,19 @@ void OffMeshLinkEditorComponent::drawOffMeshLink()
 
     std::array radius = { offMeshLink->getRadius() };
     m_offMeshLinkGroup->createWidget<Drag<float>>("Radius", ImGuiDataType_Float, radius, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto offMeshLink = m_targetObject->getComponent<OffMeshLink>();
+        auto offMeshLink = dynamic_cast<OffMeshLink*>(getComponent());
         offMeshLink->setRadius(val[0]);
         });
 
     std::array mask = { (int)offMeshLink->getMask() };
     m_offMeshLinkGroup->createWidget<Drag<int>>("Mask", ImGuiDataType_S32, mask, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto offMeshLink = m_targetObject->getComponent<OffMeshLink>();
+        auto offMeshLink = dynamic_cast<OffMeshLink*>(getComponent());
         offMeshLink->setMask(val[0]);
         });
 
     std::array areaId = { (int)offMeshLink->getAreaId() };
     m_offMeshLinkGroup->createWidget<Drag<int>>("Area ID", ImGuiDataType_S32, areaId, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto offMeshLink = m_targetObject->getComponent<OffMeshLink>();
+        auto offMeshLink = dynamic_cast<OffMeshLink*>(getComponent());
         offMeshLink->setAreaId(val[0]);
         });
 }

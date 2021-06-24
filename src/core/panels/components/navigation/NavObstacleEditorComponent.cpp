@@ -56,25 +56,25 @@ void NavObstacleEditorComponent::drawNavObstacle()
         return;
     m_navObstacleGroup->removeAllWidgets();
 
-    auto obstacle = m_targetObject->getComponent<NavObstacle>();
+    auto obstacle = dynamic_cast<NavObstacle*>(getComponent());
     if (obstacle == nullptr)
         return;
 
     auto column = m_navObstacleGroup->createWidget<Columns<3>>();
     column->createWidget<CheckBox>("Enable", obstacle->isEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto obstacle = m_targetObject->getComponent<NavObstacle>();
+        auto obstacle = dynamic_cast<NavObstacle*>(getComponent());
         obstacle->setEnabled(val);
         });
 
     std::array radius = { obstacle->getRadius() };
     m_navObstacleGroup->createWidget<Drag<float>>("Radius", ImGuiDataType_Float, radius, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto obstacle = m_targetObject->getComponent<NavObstacle>();
+        auto obstacle = dynamic_cast<NavObstacle*>(getComponent());
         obstacle->setRadius(val[0]);
         });
 
     std::array height = { obstacle->getHeight() };
     m_navObstacleGroup->createWidget<Drag<float>>("Height", ImGuiDataType_Float, height, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto obstacle = m_targetObject->getComponent<NavObstacle>();
+        auto obstacle = dynamic_cast<NavObstacle*>(getComponent());
         obstacle->setHeight(val[0]);
         });
 }

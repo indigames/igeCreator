@@ -57,13 +57,13 @@ void ParticleManagerEditorComponent::drawParticleManager()
         return;
     m_particleManagerGroup->removeAllWidgets();
 
-    auto particleManager = m_targetObject->getComponent<ParticleManager>();
+    auto particleManager = dynamic_cast<ParticleManager*>(getComponent());
     if (particleManager == nullptr)
         return;
 
     auto column = m_particleManagerGroup->createWidget<Columns<2>>();
     column->createWidget<CheckBox>("Culling", particleManager->isCullingEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto particleManager = m_targetObject->getComponent<ParticleManager>();
+        auto particleManager = dynamic_cast<ParticleManager*>(getComponent());
         particleManager->setCullingEnabled(val);
         dirty();
         });
@@ -72,26 +72,26 @@ void ParticleManagerEditorComponent::drawParticleManager()
     {
         std::array cullingWorld = { particleManager->getCullingWorldSize().X(), particleManager->getCullingWorldSize().Y(), particleManager->getCullingWorldSize().Z() };
         m_particleManagerGroup->createWidget<Drag<float, 3>>("Culling World Size", ImGuiDataType_Float, cullingWorld, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto particleManager = m_targetObject->getComponent<ParticleManager>();
+            auto particleManager = dynamic_cast<ParticleManager*>(getComponent());
             particleManager->setCullingWorldSize({ val[0], val[1], val[2] });
             });
 
         std::array numLayer = { particleManager->getCullingLayerNumber() };
         m_particleManagerGroup->createWidget<Drag<int>>("Number Layers", ImGuiDataType_S32, numLayer, 1, 1, 8)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto particleManager = m_targetObject->getComponent<ParticleManager>();
+            auto particleManager = dynamic_cast<ParticleManager*>(getComponent());
             particleManager->setCullingLayerNumber(val[0]);
             });
     }
 
     std::array maxParticles = { particleManager->getMaxParticleNumber() };
     m_particleManagerGroup->createWidget<Drag<int>>("Max Parcicles", ImGuiDataType_S32, maxParticles, 1, 1)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto particleManager = m_targetObject->getComponent<ParticleManager>();
+        auto particleManager = dynamic_cast<ParticleManager*>(getComponent());
         particleManager->setMaxParticleNumber(val[0]);
         });
 
     std::array threadNum = { particleManager->getNumberOfThreads() };
     m_particleManagerGroup->createWidget<Drag<int>>("Number Threads", ImGuiDataType_S32, threadNum, 1, 1, 4)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto particleManager = m_targetObject->getComponent<ParticleManager>();
+        auto particleManager = dynamic_cast<ParticleManager*>(getComponent());
         particleManager->setNumberOfThreads(val[0]);
         });
 }

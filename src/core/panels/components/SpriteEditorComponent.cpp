@@ -59,7 +59,7 @@ void SpriteEditorComponent::drawSpriteComponent()
         return;
     m_spriteCompGroup->removeAllWidgets();
 
-    auto spriteComp = m_targetObject->getComponent<SpriteComponent>();
+    auto spriteComp = dynamic_cast<SpriteComponent*>(getComponent());
     if (spriteComp == nullptr)
         return;
 
@@ -73,7 +73,7 @@ void SpriteEditorComponent::drawSpriteComponent()
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
     {
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-            auto spriteComp = m_targetObject->getComponent<SpriteComponent>();
+            auto spriteComp = dynamic_cast<SpriteComponent*>(getComponent());
             spriteComp->setPath(txt);
             dirty();
             });

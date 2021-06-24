@@ -55,13 +55,12 @@ void AudioListenerEditorComponent::drawAudioListener()
         return;
     m_audioListenerGroup->removeAllWidgets();
 
-    auto audioListenerComp = m_targetObject->getComponent<AudioListener>();
-    if (audioListenerComp == nullptr)
-        return;
+    auto audioListenerComp = dynamic_cast<AudioListener*>(getComponent());
+    if (audioListenerComp == nullptr) return;
 
     m_audioListenerGroup->createWidget<CheckBox>("Enable", audioListenerComp->isEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto audioListenerComp = m_targetObject->getComponent<AudioListener>();
+        auto audioListenerComp = dynamic_cast<AudioListener*>(getComponent());
         audioListenerComp->setEnabled(val);
-        });
+    });
 }
 NS_IGE_END

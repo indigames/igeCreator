@@ -56,13 +56,13 @@ void NavAreaEditorComponent::drawNavArea()
         return;
     m_navAreaGroup->removeAllWidgets();
 
-    auto navArea = m_targetObject->getComponent<NavArea>();
+    auto navArea = dynamic_cast<NavArea*>(getComponent());
     if (navArea == nullptr)
         return;
 
     std::array cost = { navArea->getAreaCost() };
     m_navAreaGroup->createWidget<Drag<float>>("Cost", ImGuiDataType_Float, cost, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto navArea = m_targetObject->getComponent<NavArea>();
+        auto navArea = dynamic_cast<NavArea*>(getComponent());
         navArea->setAreaCost(val[0]);
         });
 }

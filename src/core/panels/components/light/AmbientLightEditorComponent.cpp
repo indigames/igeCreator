@@ -55,25 +55,25 @@ void AmbientLightEditorComponent::drawAmbientLight()
         return;
     m_ambientLightGroup->removeAllWidgets();
 
-    auto ambientLight = m_targetObject->getComponent<AmbientLight>();
+    auto ambientLight = dynamic_cast<AmbientLight*>(getComponent());
     if (ambientLight == nullptr)
         return;
 
     auto color = Vec4(ambientLight->getSkyColor(), 1.f);
     m_ambientLightGroup->createWidget<Color>("SkyColor", color)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto ambientLight = m_targetObject->getComponent<AmbientLight>();
+        auto ambientLight = dynamic_cast<AmbientLight*>(getComponent());
         ambientLight->setSkyColor({ val[0], val[1], val[2] });
         });
 
     color = Vec4(ambientLight->getGroundColor(), 1.f);
     m_ambientLightGroup->createWidget<Color>("GroundColor", color)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto ambientLight = m_targetObject->getComponent<AmbientLight>();
+        auto ambientLight = dynamic_cast<AmbientLight*>(getComponent());
         ambientLight->setGroundColor({ val[0], val[1], val[2] });
         });
 
     std::array direction = { ambientLight->getDirection().X(), ambientLight->getDirection().Y(), ambientLight->getDirection().Z() };
     m_ambientLightGroup->createWidget<Drag<float, 3>>("Direction", ImGuiDataType_Float, direction)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto ambientLight = m_targetObject->getComponent<AmbientLight>();
+        auto ambientLight = dynamic_cast<AmbientLight*>(getComponent());
         ambientLight->setDirection({ val[0], val[1], val[2] });
         });
 }

@@ -55,15 +55,15 @@ void AudioManagerEditorComponent::drawAudioManager()
         return;
     m_audioManagerGroup->removeAllWidgets();
 
-    auto audioMngComp = m_targetObject->getComponent<AudioManager>();
+    auto audioMngComp = dynamic_cast<AudioManager*>(getComponent());
     if (audioMngComp == nullptr)
         return;
 
     std::array volume = { audioMngComp->getGlobalVolume() };
     m_audioManagerGroup->createWidget<Drag<float>>("Global Volume", ImGuiDataType_Float, volume, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto& val) {
-        auto audioMngComp = m_targetObject->getComponent<AudioManager>();
+        auto audioMngComp = dynamic_cast<AudioManager*>(getComponent());
         audioMngComp->setGlobalVolume(val[0]);
-        });
+    });
 }
 
 NS_IGE_END
