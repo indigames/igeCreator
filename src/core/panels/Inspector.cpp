@@ -325,173 +325,175 @@ namespace ige::creator
         m_headerGroup->createWidget<Separator>();
         m_componentGroup = createWidget<Group>("Inspector_Components", false);
         m_inspectorEditor->setParentGroup(m_componentGroup);
-        std::for_each(m_targetObject->getComponents().begin(), m_targetObject->getComponents().end(), [this](auto & comp) {
-            auto component = comp->getName().compare("CompoundComponent") == 0 ? std::dynamic_pointer_cast<CompoundComponent>(comp)->getComponents()[0] : comp;
-            auto closable = (component->getName() != "Transform" && component->getName() != "RectTransform");
-            auto header = m_componentGroup->createWidget<Group>(component->getName(), true, closable);
-            header->getOnClosedEvent().addListener([this, &component]() {
-                m_inspectorEditor->removeComponent(component->getInstanceId());
-                m_targetObject->removeComponent(component);
+        std::for_each(m_targetObject->getComponents().begin(), m_targetObject->getComponents().end(), [this](auto comp) {
+            auto component = std::dynamic_pointer_cast<CompoundComponent>(comp)->getComponents()[0];
+            auto componentName = comp->getName();
+            auto componentId = component->getInstanceId();
+            auto closable = (componentName != "Transform" && componentName != "RectTransform");
+            auto header = m_componentGroup->createWidget<Group>(componentName, true, closable);
+            header->getOnClosedEvent().addListener([this, componentName, componentId]() {
+                m_inspectorEditor->removeComponent(componentId);
+                m_targetObject->removeComponent(componentName);
                 redraw();
             });
 
-            if (component->getName() == "Transform")
+            if (componentName == "Transform")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::Transform, component.get(), header);
             }
-            else if (component->getName() == "BoneTransform")
+            else if (componentName == "BoneTransform")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::BoneTransform, component.get(), header);
             }
-            else if (component->getName() == "Camera")
+            else if (componentName == "Camera")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::Camera, component.get(), header);
             }
-            else if (component->getName() == "Environment")
+            else if (componentName == "Environment")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::Environment, component.get(), header);
             }
-            else if (component->getName() == "Figure")
+            else if (componentName == "Figure")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::Figure, component.get(), header);
             }
-            else if (component->getName() == "Sprite")
+            else if (componentName == "Sprite")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::Sprite, component.get(), header);
             }
-            else if (component->getName() == "Script")
+            else if (componentName == "Script")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::Script, component.get(), header);
             }
-            else if (component->getName() == "RectTransform")
+            else if (componentName == "RectTransform")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::RectTransform, component.get(), header);
             }
-            else if (component->getName() == "Canvas")
+            else if (componentName == "Canvas")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::Canvas, component.get(), header);
             }
-            else if (component->getName() == "UIImage")
+            else if (componentName == "UIImage")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::UIImage, component.get(), header);
             }
-            else if (component->getName() == "UIText" )
+            else if (componentName == "UIText" )
             {
                 m_inspectorEditor->addComponent((int)ComponentType::UIText, component.get(), header);
             }
-            else if (component->getName() == "UITextField")
+            else if (componentName == "UITextField")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::UITextField, component.get(), header);
             }
-            else if (component->getName() == "UIButton")
+            else if (componentName == "UIButton")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::UIButton, component.get(), header);
             }
-            else if (component->getName() == "UISlider")
+            else if (componentName == "UISlider")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::UISlider, component.get(), header);
             }
-            else if (component->getName() == "UIScrollView")
+            else if (componentName == "UIScrollView")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::UIScrollView, component.get(), header);
             }
-            else if (component->getName() == "UIScrollBar")
+            else if (componentName == "UIScrollBar")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::UIScrollBar, component.get(), header);
             }
-            else if (component->getName() == "UIMask")
+            else if (componentName == "UIMask")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::UIMask, component.get(), header);
             }
-            else if (component->getName() == "PhysicManager")
+            else if (componentName == "PhysicManager")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::PhysicManager, component.get(), header);
             }
-            else if (component->getName() == "PhysicBox")
+            else if (componentName == "PhysicBox")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::PhysicBox, component.get(), header);
             }
-            else if (component->getName() == "PhysicSphere")
+            else if (componentName == "PhysicSphere")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::PhysicSphere, component.get(), header);
             }
-            else if (component->getName() == "PhysicCapsule")
+            else if (componentName == "PhysicCapsule")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::PhysicCapsule, component.get(), header);
             }
-            else if (component->getName() == "PhysicMesh")
+            else if (componentName == "PhysicMesh")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::PhysicMesh, component.get(), header);
             }
-            else if (component->getName() == "PhysicSoftBody")
+            else if (componentName == "PhysicSoftBody")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::PhysicSoftBody, component.get(), header);
             }
-            else if (component->getName() == "AudioManager")
+            else if (componentName == "AudioManager")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::AudioManager, component.get(), header);
             }
-            else if (component->getName() == "AudioSource")
+            else if (componentName == "AudioSource")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::AudioSource, component.get(), header);
             }
-            else if (component->getName() == "AudioListener")
+            else if (componentName == "AudioListener")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::AudioListener, component.get(), header);
             }
-            else if (component->getName() == "AmbientLight")
+            else if (componentName == "AmbientLight")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::AmbientLight, component.get(), header);
             }
-            else if (component->getName() == "DirectionalLight")
+            else if (componentName == "DirectionalLight")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::DirectionalLight, component.get(), header);
             }
-            else if (component->getName() == "PointLight")
+            else if (componentName == "PointLight")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::PointLight, component.get(), header);
             }
-            else if (component->getName() == "SpotLight")
+            else if (componentName == "SpotLight")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::SpotLight, component.get(), header);
             }
-            else if (component->getName() == "ParticleManager")
+            else if (componentName == "ParticleManager")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::ParticleManager, component.get(), header);
             }
-            else if (component->getName() == "Particle")
+            else if (componentName == "Particle")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::Particle, component.get(), header);
             }
-            else if (component->getName() == "Navigable")
+            else if (componentName == "Navigable")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::Navigable, component.get(), header);
             }
-            else if (component->getName() == "NavMesh")
+            else if (componentName == "NavMesh")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::NavMesh, component.get(), header);
             }
-            else if (component->getName() == "NavAgent")
+            else if (componentName == "NavAgent")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::NavAgent, component.get(), header);
             }
-            else if (component->getName() == "NavAgentManager")
+            else if (componentName == "NavAgentManager")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::NavAgentManager, component.get(), header);
             }        
-            else if (component->getName() == "DynamicNavMesh")
+            else if (componentName == "DynamicNavMesh")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::DynamicNavMesh, component.get(), header);
             }        
-            else if (component->getName() == "NavObstacle")
+            else if (componentName == "NavObstacle")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::NavObstacle, component.get(), header);
             }  
-            else if (component->getName() == "NavArea")
+            else if (componentName == "NavArea")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::NavArea, component.get(), header);
             }
-            else if (component->getName() == "OffMeshLink")
+            else if (componentName == "OffMeshLink")
             {
                 m_inspectorEditor->addComponent((int)ComponentType::OffMeshLink, component.get(), header);
             }
@@ -519,9 +521,10 @@ namespace ige::creator
 
     void Inspector::clear()
     {
+        removeAllWidgets();
+
         if (m_headerGroup)
         {
-            m_headerGroup->removeAllWidgets();
             m_headerGroup->removeAllPlugins();
             m_headerGroup = nullptr;
         }
@@ -534,12 +537,9 @@ namespace ige::creator
 
         if (m_componentGroup)
         {
-            m_componentGroup->removeAllWidgets();
             m_componentGroup->removeAllPlugins();
             m_componentGroup = nullptr;
         }
-
-        removeAllWidgets();
 
         m_targetObject = nullptr;
         m_inspectorEditor->clear();

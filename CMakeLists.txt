@@ -135,6 +135,7 @@ set(SRC_FILES ${SRC_FILES}
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui/examples/imgui_impl_sdl.cpp"
 )
 
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SRC_FILES})
 add_executable(${TARGET_NAME} WIN32 ${SRC_FILES})
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ignore:4099 /ignore:4286 /ignore:4127") # Disable linker warning
