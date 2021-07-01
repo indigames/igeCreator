@@ -13,11 +13,11 @@ class NavAgentEditorComponent : public EditorComponent
 {
 public:
 	NavAgentEditorComponent();
-	~NavAgentEditorComponent();
+	virtual ~NavAgentEditorComponent();
 
 	virtual void redraw() override;
 protected:
-	virtual bool isSafe(Component* comp) override;
+	
 	virtual void onInspectorUpdate() override;
 
 	void drawNavAgent();

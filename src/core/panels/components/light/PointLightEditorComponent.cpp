@@ -13,16 +13,7 @@ PointLightEditorComponent::PointLightEditorComponent() {
 
 PointLightEditorComponent::~PointLightEditorComponent()
 {
-    if (m_pointLightGroup) {
-        m_pointLightGroup->removeAllWidgets();
-        m_pointLightGroup->removeAllPlugins();
-    }
     m_pointLightGroup = nullptr;
-}
-
-bool PointLightEditorComponent::isSafe(Component* comp)
-{
-    return dynamic_cast<PointLight*>(comp);
 }
 
 void PointLightEditorComponent::redraw()
@@ -55,25 +46,25 @@ void PointLightEditorComponent::drawPointLight()
         return;
     m_pointLightGroup->removeAllWidgets();
 
-    auto pointLight = dynamic_cast<PointLight*>(getComponent());
+    auto pointLight = getComponent<PointLight>();
     if (pointLight == nullptr)
         return;
 
     auto color = Vec4(pointLight->getColor(), 1.f);
     m_pointLightGroup->createWidget<Color>("Color", color)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto pointLight = dynamic_cast<PointLight*>(getComponent());
+        auto pointLight = getComponent<PointLight>();
         pointLight->setColor({ val[0], val[1], val[2] });
         });
 
     std::array intensity = { pointLight->getIntensity() };
     m_pointLightGroup->createWidget<Drag<float>>("Intensity", ImGuiDataType_Float, intensity, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto pointLight = dynamic_cast<PointLight*>(getComponent());
+        auto pointLight = getComponent<PointLight>();
         pointLight->setIntensity(val[0]);
         });
 
     std::array range = { pointLight->getRange() };
     m_pointLightGroup->createWidget<Drag<float>>("Range", ImGuiDataType_Float, range, 0.01f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto pointLight = dynamic_cast<PointLight*>(getComponent());
+        auto pointLight = getComponent<PointLight>();
         pointLight->setRange(val[0]);
         });
 }

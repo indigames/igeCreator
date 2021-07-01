@@ -13,11 +13,11 @@ class NavMeshEditorComponent : public EditorComponent
 {
 public:
 	NavMeshEditorComponent();
-	~NavMeshEditorComponent();
+	virtual ~NavMeshEditorComponent();
 
 	virtual void redraw() override;
 protected:
-	virtual bool isSafe(Component* comp) override;
+	
 	virtual void onInspectorUpdate() override;
 
 	void drawNavMesh();

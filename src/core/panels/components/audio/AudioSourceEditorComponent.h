@@ -13,11 +13,11 @@ class AudioSourceEditorComponent : public EditorComponent
 {
 public:
 	AudioSourceEditorComponent();
-	~AudioSourceEditorComponent();
+	virtual ~AudioSourceEditorComponent();
 
 	virtual void redraw() override;
 protected:
-	virtual bool isSafe(Component* comp) override;
+	
 	virtual void onInspectorUpdate() override;
 
 	void drawAudioSource();

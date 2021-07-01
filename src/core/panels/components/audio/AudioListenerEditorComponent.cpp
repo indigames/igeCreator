@@ -13,16 +13,7 @@ AudioListenerEditorComponent::AudioListenerEditorComponent() {
 
 AudioListenerEditorComponent::~AudioListenerEditorComponent()
 {
-    if (m_audioListenerGroup) {
-        m_audioListenerGroup->removeAllWidgets();
-        m_audioListenerGroup->removeAllPlugins();
-    }
     m_audioListenerGroup = nullptr;
-}
-
-bool AudioListenerEditorComponent::isSafe(Component* comp)
-{
-    return dynamic_cast<AudioListener*>(comp);
 }
 
 void AudioListenerEditorComponent::redraw()
@@ -54,12 +45,11 @@ void AudioListenerEditorComponent::drawAudioListener()
     if (m_audioListenerGroup == nullptr)
         return;
     m_audioListenerGroup->removeAllWidgets();
-
-    auto audioListenerComp = dynamic_cast<AudioListener*>(getComponent());
+    auto audioListenerComp = getComponent<AudioListener>();
     if (audioListenerComp == nullptr) return;
 
     m_audioListenerGroup->createWidget<CheckBox>("Enable", audioListenerComp->isEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto audioListenerComp = dynamic_cast<AudioListener*>(getComponent());
+        auto audioListenerComp = getComponent<AudioListener>();
         audioListenerComp->setEnabled(val);
     });
 }

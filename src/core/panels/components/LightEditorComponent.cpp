@@ -14,9 +14,4 @@ LightEditorComponent::~LightEditorComponent()
 {
 }
 
-bool LightEditorComponent::isSafe(Component* comp)
-{
-    return dynamic_cast<LightComponent*>(comp);
-}
-
 NS_IGE_END

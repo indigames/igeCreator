@@ -17,11 +17,6 @@ BoneTransformEditorComponent ::BoneTransformEditorComponent ()
 
 BoneTransformEditorComponent ::~BoneTransformEditorComponent ()
 {
-    if (m_compGroup)
-    {
-        m_compGroup->removeAllWidgets();
-        m_compGroup->removeAllPlugins();
-    }
     m_compGroup = nullptr;
 }
 
@@ -41,7 +36,7 @@ void BoneTransformEditorComponent ::drawComponent()
         return;
     m_compGroup->removeAllWidgets();
 
-    auto comp = dynamic_cast<BoneTransform*>(getComponent());
+    auto comp = getComponent<BoneTransform>();
     if (comp == nullptr)
         return;
 
@@ -53,7 +48,7 @@ void BoneTransformEditorComponent ::drawComponent()
         {
             auto name = obj.first;
             joinGroup->createWidget<CheckBox>(name, obj.second != nullptr)->getOnDataChangedEvent().addListener([name, this](bool val) {
-                auto comp = dynamic_cast<BoneTransform*>(getComponent());
+                auto comp = getComponent<BoneTransform>();
                 comp->onJointObjectSelected(name, val);
                 redraw();
             });

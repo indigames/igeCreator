@@ -16,16 +16,7 @@ UIImageEditorComponent::UIImageEditorComponent() {
 
 UIImageEditorComponent::~UIImageEditorComponent()
 {
-    if (m_uiImageGroup) {
-        m_uiImageGroup->removeAllWidgets();
-        m_uiImageGroup->removeAllPlugins();
-    }
     m_uiImageGroup = nullptr;
-}
-
-bool UIImageEditorComponent::isSafe(Component* comp)
-{
-    return dynamic_cast<UIImage*>(comp);
 }
 
 void UIImageEditorComponent::redraw()
@@ -58,21 +49,21 @@ void UIImageEditorComponent::drawUIImage()
         return;
     m_uiImageGroup->removeAllWidgets();
 
-    auto uiImage = dynamic_cast<UIImage*>(m_component);
+    auto uiImage = getComponent<UIImage>();
     if (uiImage == nullptr)
         return;
 
     auto txtPath = m_uiImageGroup->createWidget<TextField>("Path", uiImage->getPath());
     txtPath->setEndOfLine(false);
     txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
-        auto uiImage = dynamic_cast<UIImage*>(m_component);
+        auto uiImage = getComponent<UIImage>();
         uiImage->setPath(txt);
         });
 
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
     {
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-            auto uiImage = dynamic_cast<UIImage*>(m_component);
+            auto uiImage = getComponent<UIImage>();
             uiImage->setPath(txt);
             dirty();
             });
@@ -82,21 +73,21 @@ void UIImageEditorComponent::drawUIImage()
         auto files = OpenFileDialog("Import Assets", "", { "Texture (*.pyxi)", "*.pyxi" }).result();
         if (files.size() > 0)
         {
-            auto uiImage = dynamic_cast<UIImage*>(getComponent());
+            auto uiImage = getComponent<UIImage>();
             uiImage->setPath(files[0]);
             dirty();
         }
         });
 
     auto m_interactable = m_uiImageGroup->createWidget<CheckBox>("Interactable", uiImage->isInteractable())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto uiImage = dynamic_cast<UIImage*>(m_component);
+        auto uiImage = getComponent<UIImage>();
         uiImage->setInteractable(val);
         });
 
     auto spriteType = uiImage->getSpriteType();
     auto m_spriteTypeCombo = m_uiImageGroup->createWidget<ComboBox>((int)spriteType);
     m_spriteTypeCombo->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiImage = dynamic_cast<UIImage*>(m_component);
+        auto uiImage = getComponent<UIImage>();
         uiImage->setSpriteType(val);
         dirty();
         });
@@ -109,22 +100,22 @@ void UIImageEditorComponent::drawUIImage()
     if (spriteType == SpriteType::Sliced) {
         std::array borderLeft = { uiImage->getBorderLeft() };
         m_uiImageGroup->createWidget<Drag<float, 1>>("Border Left", ImGuiDataType_Float, borderLeft, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiImage = dynamic_cast<UIImage*>(m_component);
+            auto uiImage = getComponent<UIImage>();
             uiImage->setBorderLeft(val[0]);
             });
         std::array borderRight = { uiImage->getBorderRight() };
         m_uiImageGroup->createWidget<Drag<float, 1>>("Border Right", ImGuiDataType_Float, borderRight, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiImage = dynamic_cast<UIImage*>(m_component);
+            auto uiImage = getComponent<UIImage>();
             uiImage->setBorderRight(val[0]);
             });
         std::array borderTop = { uiImage->getBorderTop() };
         m_uiImageGroup->createWidget<Drag<float, 1>>("Border Top", ImGuiDataType_Float, borderTop, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiImage = dynamic_cast<UIImage*>(m_component);
+            auto uiImage = getComponent<UIImage>();
             uiImage->setBorderTop(val[0]);
             });
         std::array borderBottom = { uiImage->getBorderBottom() };
         m_uiImageGroup->createWidget<Drag<float, 1>>("Border Bottom", ImGuiDataType_Float, borderBottom, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiImage = dynamic_cast<UIImage*>(m_component);
+            auto uiImage = getComponent<UIImage>();
             uiImage->setBorderBottom(val[0]);
             });
     }
@@ -133,7 +124,7 @@ void UIImageEditorComponent::drawUIImage()
         auto fillMethod = uiImage->getFillMethod();
         auto m_compComboFillMethod = m_uiImageGroup->createWidget<ComboBox>((int)fillMethod);
         m_compComboFillMethod->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiImage = dynamic_cast<UIImage*>(m_component);
+            auto uiImage = getComponent<UIImage>();
             uiImage->setFillMethod(val);
             dirty();
             });
@@ -150,7 +141,7 @@ void UIImageEditorComponent::drawUIImage()
 
             auto m_compComboFillOrigin = m_uiImageGroup->createWidget<ComboBox>((int)uiImage->getFillOrigin());
             m_compComboFillOrigin->getOnDataChangedEvent().addListener([this](auto val) {
-                auto uiImage = dynamic_cast<UIImage*>(m_component);
+                auto uiImage = getComponent<UIImage>();
                 uiImage->setFillOrigin(val);
                 dirty();
                 });
@@ -183,13 +174,13 @@ void UIImageEditorComponent::drawUIImage()
 
             std::array fillAmount = { uiImage->getFillAmount() };
             m_uiImageGroup->createWidget<Drag<float, 1>>("Fill Amount", ImGuiDataType_Float, fillAmount, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-                auto uiImage = dynamic_cast<UIImage*>(m_component);
+                auto uiImage = getComponent<UIImage>();
                 uiImage->setFillAmount(val[0]);
                 });
 
             if (fillMethod == FillMethod::Radial90 || fillMethod == FillMethod::Radial180 || fillMethod == FillMethod::Radial360) {
                 m_uiImageGroup->createWidget<CheckBox>("Clockwise", uiImage->getClockwise())->getOnDataChangedEvent().addListener([this](bool val) {
-                    auto uiImage = dynamic_cast<UIImage*>(m_component);
+                    auto uiImage = getComponent<UIImage>();
                     uiImage->setClockwise(val);
                     });
             }
@@ -198,7 +189,7 @@ void UIImageEditorComponent::drawUIImage()
 
     auto color = uiImage->getColor();
     m_uiImageGroup->createWidget<Color>("Color", color)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiImage = dynamic_cast<UIImage*>(m_component);
+        auto uiImage = getComponent<UIImage>();
         uiImage->setColor(val[0], val[1], val[2], val[3]);
         });
 }

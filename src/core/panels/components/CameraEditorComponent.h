@@ -10,11 +10,11 @@ class CameraEditorComponent : public EditorComponent
 {
 public:
 	CameraEditorComponent();
-	~CameraEditorComponent();
+	virtual ~CameraEditorComponent();
 
 	virtual void redraw() override;
 protected:
-	virtual bool isSafe(Component* comp) override;
+	
 	virtual void onInspectorUpdate() override;
 
 	virtual void drawCameraComponent();

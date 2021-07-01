@@ -13,11 +13,11 @@ class UIScrollViewEditorComponent : public EditorComponent
 {
 public:
 	UIScrollViewEditorComponent();
-	~UIScrollViewEditorComponent();
+	virtual ~UIScrollViewEditorComponent();
 
 	virtual void redraw() override;
 protected:
-	virtual bool isSafe(Component* comp) override;
+	
 	virtual void onInspectorUpdate() override;
 
 	void drawUIScrollView();

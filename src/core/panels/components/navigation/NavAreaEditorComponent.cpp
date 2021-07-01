@@ -14,16 +14,7 @@ NavAreaEditorComponent::NavAreaEditorComponent() {
 
 NavAreaEditorComponent::~NavAreaEditorComponent()
 {
-    if (m_navAreaGroup) {
-        m_navAreaGroup->removeAllWidgets();
-        m_navAreaGroup->removeAllPlugins();
-    }
     m_navAreaGroup = nullptr;
-}
-
-bool NavAreaEditorComponent::isSafe(Component* comp)
-{
-    return dynamic_cast<NavArea*>(comp);
 }
 
 void NavAreaEditorComponent::redraw()
@@ -56,13 +47,13 @@ void NavAreaEditorComponent::drawNavArea()
         return;
     m_navAreaGroup->removeAllWidgets();
 
-    auto navArea = dynamic_cast<NavArea*>(getComponent());
+    auto navArea = getComponent<NavArea>();
     if (navArea == nullptr)
         return;
 
     std::array cost = { navArea->getAreaCost() };
     m_navAreaGroup->createWidget<Drag<float>>("Cost", ImGuiDataType_Float, cost, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto navArea = dynamic_cast<NavArea*>(getComponent());
+        auto navArea = getComponent<NavArea>();
         navArea->setAreaCost(val[0]);
         });
 }

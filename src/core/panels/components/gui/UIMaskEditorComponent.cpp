@@ -17,16 +17,7 @@ UIMaskEditorComponent::UIMaskEditorComponent()
 
 UIMaskEditorComponent::~UIMaskEditorComponent()
 {
-    if (m_uiMaskGroup) {
-        m_uiMaskGroup->removeAllWidgets();
-        m_uiMaskGroup->removeAllPlugins();
-        m_uiMaskGroup = nullptr;
-    }
-}
-
-bool UIMaskEditorComponent::isSafe(Component* comp)
-{
-    return dynamic_cast<UIMask*>(comp);
+    m_uiMaskGroup = nullptr;
 }
 
 void UIMaskEditorComponent::redraw()
@@ -59,21 +50,21 @@ void UIMaskEditorComponent::drawUIMask()
         return;
     m_uiMaskGroup->removeAllWidgets();
 
-    auto uiMask = dynamic_cast<UIMask*>(m_component);
+    auto uiMask = getComponent<UIMask>();
     if (uiMask == nullptr)
         return;
 
     auto txtPath = m_uiMaskGroup->createWidget<TextField>("Path", uiMask->getPath());
     txtPath->setEndOfLine(false);
     txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
-        auto uiImage = dynamic_cast<UIMask*>(m_component);
+        auto uiImage = getComponent<UIMask>();
         uiImage->setPath(txt);
         });
 
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
     {
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-            auto uiMask = dynamic_cast<UIMask*>(m_component);
+            auto uiMask = getComponent<UIMask>();
             uiMask->setPath(txt);
             dirty();
             });
@@ -83,26 +74,26 @@ void UIMaskEditorComponent::drawUIMask()
         auto files = OpenFileDialog("Import Assets", "", { "Texture (*.pyxi)", "*.pyxi" }).result();
         if (files.size() > 0)
         {
-            auto uiMask = dynamic_cast<UIMask*>(m_component);
+            auto uiMask = getComponent<UIMask>();
             uiMask->setPath(files[0]);
             dirty();
         }
         });
 
     auto m_useMask = m_uiMaskGroup->createWidget<CheckBox>("Use Mask", uiMask->isUseMask())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto uiMask = dynamic_cast<UIMask*>(m_component);
+        auto uiMask = getComponent<UIMask>();
         uiMask->setUseMask(val);
         });
 
     auto m_interactable = m_uiMaskGroup->createWidget<CheckBox>("Interactable", uiMask->isInteractable())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto uiMask = dynamic_cast<UIMask*>(m_component);
+        auto uiMask = getComponent<UIMask>();
         uiMask->setInteractable(val);
         });
 
     auto spriteType = uiMask->getSpriteType();
     auto m_spriteTypeCombo = m_uiMaskGroup->createWidget<ComboBox>((int)spriteType);
     m_spriteTypeCombo->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiMask = dynamic_cast<UIMask*>(m_component);
+        auto uiMask = getComponent<UIMask>();
         uiMask->setSpriteType(val);
         dirty();
         });
@@ -115,22 +106,22 @@ void UIMaskEditorComponent::drawUIMask()
     if (spriteType == SpriteType::Sliced) {
         std::array borderLeft = { uiMask->getBorderLeft() };
         m_uiMaskGroup->createWidget<Drag<float, 1>>("Border Left", ImGuiDataType_Float, borderLeft, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiMask = dynamic_cast<UIMask*>(m_component);
+            auto uiMask = getComponent<UIMask>();
             uiMask->setBorderLeft(val[0]);
             });
         std::array borderRight = { uiMask->getBorderRight() };
         m_uiMaskGroup->createWidget<Drag<float, 1>>("Border Right", ImGuiDataType_Float, borderRight, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiMask = dynamic_cast<UIMask*>(m_component);
+            auto uiMask = getComponent<UIMask>();
             uiMask->setBorderRight(val[0]);
             });
         std::array borderTop = { uiMask->getBorderTop() };
         m_uiMaskGroup->createWidget<Drag<float, 1>>("Border Top", ImGuiDataType_Float, borderTop, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiMask = dynamic_cast<UIMask*>(m_component);
+            auto uiMask = getComponent<UIMask>();
             uiMask->setBorderTop(val[0]);
             });
         std::array borderBottom = { uiMask->getBorderBottom() };
         m_uiMaskGroup->createWidget<Drag<float, 1>>("Border Bottom", ImGuiDataType_Float, borderBottom, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiMask = dynamic_cast<UIMask*>(m_component);
+            auto uiMask = getComponent<UIMask>();
             uiMask->setBorderBottom(val[0]);
             });
     }
@@ -139,7 +130,7 @@ void UIMaskEditorComponent::drawUIMask()
         auto fillMethod = uiMask->getFillMethod();
         auto m_compComboFillMethod = m_uiMaskGroup->createWidget<ComboBox>((int)fillMethod);
         m_compComboFillMethod->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiMask = dynamic_cast<UIMask*>(m_component);
+            auto uiMask = getComponent<UIMask>();
             uiMask->setFillMethod(val);
             dirty();
             });
@@ -156,7 +147,7 @@ void UIMaskEditorComponent::drawUIMask()
 
             auto m_compComboFillOrigin = m_uiMaskGroup->createWidget<ComboBox>((int)uiMask->getFillOrigin());
             m_compComboFillOrigin->getOnDataChangedEvent().addListener([this](auto val) {
-                auto uiMask = dynamic_cast<UIMask*>(m_component);
+                auto uiMask = getComponent<UIMask>();
                 uiMask->setFillOrigin(val);
                 dirty();
                 });
@@ -189,13 +180,13 @@ void UIMaskEditorComponent::drawUIMask()
 
             std::array fillAmount = { uiMask->getFillAmount() };
             m_uiMaskGroup->createWidget<Drag<float, 1>>("Fill Amount", ImGuiDataType_Float, fillAmount, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-                auto uiMask = dynamic_cast<UIMask*>(m_component);
+                auto uiMask = getComponent<UIMask>();
                 uiMask->setFillAmount(val[0]);
                 });
 
             if (fillMethod == FillMethod::Radial90 || fillMethod == FillMethod::Radial180 || fillMethod == FillMethod::Radial360) {
                 m_uiMaskGroup->createWidget<CheckBox>("Clockwise", uiMask->getClockwise())->getOnDataChangedEvent().addListener([this](bool val) {
-                    auto uiMask = dynamic_cast<UIMask*>(m_component);
+                    auto uiMask = getComponent<UIMask>();
                     uiMask->setClockwise(val);
                     });
             }
@@ -204,7 +195,7 @@ void UIMaskEditorComponent::drawUIMask()
 
     auto color = uiMask->getColor();
     m_uiMaskGroup->createWidget<Color>("Color", color)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiMask = dynamic_cast<UIMask*>(m_component);
+        auto uiMask = getComponent<UIMask>();
         uiMask->setColor(val[0], val[1], val[2], val[3]);
         });
 }

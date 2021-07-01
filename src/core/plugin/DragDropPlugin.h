@@ -23,7 +23,10 @@ namespace ige::creator
     public:
         DDSourcePlugin(EDragDropID id, const std::string& tooltip, const T& data);
         DDSourcePlugin(std::string id, const std::string& tooltip, const T& data);
-        virtual ~DDSourcePlugin() {}
+        virtual ~DDSourcePlugin() {
+            m_onStartDragEvent.removeAllListeners();
+            m_onStopDragEvent.removeAllListeners();
+        }
 
         virtual void execute();
 
@@ -55,16 +58,20 @@ namespace ige::creator
     public:
         DDTargetPlugin(EDragDropID id);
         DDTargetPlugin(std::string id);
-        virtual ~DDTargetPlugin() {}
+
+        virtual ~DDTargetPlugin() {
+            m_onStartHoverEvent.removeAllListeners();
+            m_onStopHoverEvent.removeAllListeners();
+            m_onDataReceivedEvent.removeAllListeners();
+        }
 
         virtual void execute();
 
         ige::scene::Event<>& getOnStartHoverEvent() { return m_onStartHoverEvent; }
         ige::scene::Event<>& getOnStopHoverEvent() { return m_onStopHoverEvent; }
-        ige::scene::Event<T&>& getOnDataReceivedEvent() { return m_onDataReceivedEvent; }
+        ige::scene::Event<T>& getOnDataReceivedEvent() { return m_onDataReceivedEvent; }
 
-        bool isHovered() const
-        {
+        bool isHovered() const {
             return m_isHovered;
         }
         
@@ -75,7 +82,7 @@ namespace ige::creator
        
         ige::scene::Event<> m_onStartHoverEvent;
         ige::scene::Event<> m_onStopHoverEvent;
-        ige::scene::Event<T&> m_onDataReceivedEvent;
+        ige::scene::Event<T> m_onDataReceivedEvent;
 
         bool m_isHovered = false;
     };
@@ -152,7 +159,7 @@ namespace ige::creator
             m_isHovered = true;
 
             ImGuiDragDropFlags flags = 0;
-            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(getId().c_str(), flags))
+            if (auto payload = ImGui::AcceptDragDropPayload(getId().c_str(), flags))
             {
                 T data = *(T*)payload->Data;
                 m_onDataReceivedEvent.invoke(data);

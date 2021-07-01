@@ -13,11 +13,11 @@ class EnvironmentEditorComponent : public EditorComponent
 {
 public:
 	EnvironmentEditorComponent();
-	~EnvironmentEditorComponent();
+	virtual ~EnvironmentEditorComponent();
 
 	virtual void redraw() override;
 protected:
-	virtual bool isSafe(Component* comp) override;
+	
 	virtual void onInspectorUpdate() override;
 
 	void drawEnvironmentComponent();

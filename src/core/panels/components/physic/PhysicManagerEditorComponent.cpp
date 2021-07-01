@@ -14,16 +14,7 @@ PhysicManagerEditorComponent::PhysicManagerEditorComponent() {
 
 PhysicManagerEditorComponent::~PhysicManagerEditorComponent()
 {
-    if (m_physicManagerGroup) {
-        m_physicManagerGroup->removeAllWidgets();
-        m_physicManagerGroup->removeAllPlugins();
-    }
     m_physicManagerGroup = nullptr;
-}
-
-bool PhysicManagerEditorComponent::isSafe(Component* comp)
-{
-    return dynamic_cast<PhysicManager*>(comp);
 }
 
 void PhysicManagerEditorComponent::redraw()
@@ -56,47 +47,47 @@ void PhysicManagerEditorComponent::drawPhysicManager()
         return;
     m_physicManagerGroup->removeAllWidgets();
 
-    auto physicComp = dynamic_cast<PhysicManager*>(getComponent());
+    auto physicComp = getComponent<PhysicManager>();
     if (physicComp == nullptr)
         return;
 
     auto columns = m_physicManagerGroup->createWidget<Columns<2>>();
     columns->createWidget<CheckBox>("Deformable", physicComp->isDeformable())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto physicComp = dynamic_cast<PhysicManager*>(getComponent());
+        auto physicComp = getComponent<PhysicManager>();
         physicComp->setDeformable(val);
         });
     columns->createWidget<CheckBox>("Debug", physicComp->isShowDebug())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto physicComp = dynamic_cast<PhysicManager*>(getComponent());
+        auto physicComp = getComponent<PhysicManager>();
         physicComp->setShowDebug(val);
         });
 
     std::array numItr = { physicComp->getNumIteration() };
     m_physicManagerGroup->createWidget<Drag<int>>("Iterations Number", ImGuiDataType_S32, numItr, 1, 1, 32)->getOnDataChangedEvent().addListener([this](auto& val) {
-        auto physicComp = dynamic_cast<PhysicManager*>(getComponent());
+        auto physicComp = getComponent<PhysicManager>();
         physicComp->setNumIteration(val[0]);
         });
 
     std::array subSteps = { physicComp->getFrameMaxSubStep() };
     m_physicManagerGroup->createWidget<Drag<int>>("Max Substeps Number", ImGuiDataType_S32, subSteps, 1, 1, 32)->getOnDataChangedEvent().addListener([this](auto& val) {
-        auto physicComp = dynamic_cast<PhysicManager*>(getComponent());
+        auto physicComp = getComponent<PhysicManager>();
         physicComp->setFrameMaxSubStep(val[0]);
         });
 
     std::array timeStep = { physicComp->getFixedTimeStep() };
     m_physicManagerGroup->createWidget<Drag<float>>("Time Step", ImGuiDataType_Float, timeStep, 0.001f, 0.001f)->getOnDataChangedEvent().addListener([this](auto& val) {
-        auto physicComp = dynamic_cast<PhysicManager*>(getComponent());
+        auto physicComp = getComponent<PhysicManager>();
         physicComp->setFixedTimeStep(val[0]);
         });
 
     std::array frameRatio = { physicComp->getFrameUpdateRatio() };
     m_physicManagerGroup->createWidget<Drag<float>>("Update Ratio", ImGuiDataType_Float, frameRatio, 0.001f, 0.001f)->getOnDataChangedEvent().addListener([this](auto& val) {
-        auto physicComp = dynamic_cast<PhysicManager*>(getComponent());
+        auto physicComp = getComponent<PhysicManager>();
         physicComp->setFrameUpdateRatio(val[0]);
         });
 
     std::array gravity = { physicComp->getGravity().x(), physicComp->getGravity().y(), physicComp->getGravity().z() };
     m_physicManagerGroup->createWidget<Drag<float, 3>>("Gravity", ImGuiDataType_Float, gravity, 0.001f)->getOnDataChangedEvent().addListener([this](auto& val) {
-        auto physicComp = dynamic_cast<PhysicManager*>(getComponent());
+        auto physicComp = getComponent<PhysicManager>();
         physicComp->setGravity({ val[0], val[1], val[2] });
         });
 }

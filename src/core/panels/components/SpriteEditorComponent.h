@@ -13,11 +13,11 @@ class SpriteEditorComponent : public EditorComponent
 {
 public:
 	SpriteEditorComponent();
-	~SpriteEditorComponent();
+	virtual ~SpriteEditorComponent();
 
 	virtual void redraw() override;
 protected:
-	virtual bool isSafe(Component* comp) override;
+	
 	virtual void onInspectorUpdate() override;
 
 	void drawSpriteComponent();

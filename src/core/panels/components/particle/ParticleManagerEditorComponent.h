@@ -13,11 +13,11 @@ class ParticleManagerEditorComponent : public EditorComponent
 {
 public:
 	ParticleManagerEditorComponent();
-	~ParticleManagerEditorComponent();
+	virtual ~ParticleManagerEditorComponent();
 
 	virtual void redraw() override;
 protected:
-	virtual bool isSafe(Component* comp) override;
+	
 	virtual void onInspectorUpdate() override;
 
 	void drawParticleManager();

@@ -16,16 +16,7 @@ FigureEditorComponent::FigureEditorComponent() {
 
 FigureEditorComponent::~FigureEditorComponent()
 {
-    if (m_figureCompGroup) {
-        m_figureCompGroup->removeAllWidgets();
-        m_figureCompGroup->removeAllPlugins();
-    }
     m_figureCompGroup = nullptr;
-}
-
-bool FigureEditorComponent::isSafe(Component* comp)
-{
-    return dynamic_cast<FigureComponent*>(comp);
 }
 
 void FigureEditorComponent::redraw()
@@ -58,21 +49,21 @@ void FigureEditorComponent::drawFigureComponent()
         return;
     m_figureCompGroup->removeAllWidgets();
 
-    auto figureComp = dynamic_cast<FigureComponent*>(getComponent());
+    auto figureComp = getComponent<FigureComponent>();
     if (figureComp == nullptr)
         return;
 
     auto txtPath = m_figureCompGroup->createWidget<TextField>("Path", figureComp->getPath());
     txtPath->setEndOfLine(false);
     txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
-        auto figureComp = dynamic_cast<FigureComponent*>(getComponent());
+        auto figureComp = getComponent<FigureComponent>();
         figureComp->setPath(txt);
         });
 
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Figure))
     {
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-            auto figureComp = dynamic_cast<FigureComponent*>(getComponent());
+            auto figureComp = getComponent<FigureComponent>();
             figureComp->setPath(txt);
             dirty();
             });
@@ -82,7 +73,7 @@ void FigureEditorComponent::drawFigureComponent()
         auto files = OpenFileDialog("Import Assets", "", { "Figure (*.pyxf)", "*.pyxf" }).result();
         if (files.size() > 0)
         {
-            auto figureComp = dynamic_cast<FigureComponent*>(getComponent());
+            auto figureComp = getComponent<FigureComponent>();
             figureComp->setPath(files[0]);
             dirty();
         }
@@ -91,27 +82,27 @@ void FigureEditorComponent::drawFigureComponent()
     auto figColumn = m_figureCompGroup->createWidget<Columns<2>>();
 
     figColumn->createWidget<CheckBox>("Fog", figureComp->isFogEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto figureComp = dynamic_cast<FigureComponent*>(getComponent());
+        auto figureComp = getComponent<FigureComponent>();
         figureComp->setFogEnabled(val);
         });
 
     figColumn->createWidget<CheckBox>("CullFace", figureComp->isCullFaceEnable())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto figureComp = dynamic_cast<FigureComponent*>(getComponent());
+        auto figureComp = getComponent<FigureComponent>();
         figureComp->setCullFaceEnable(val);
         });
 
     figColumn->createWidget<CheckBox>("Z-Test", figureComp->isDepthTestEnable())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto figureComp = dynamic_cast<FigureComponent*>(getComponent());
+        auto figureComp = getComponent<FigureComponent>();
         figureComp->setDepthTestEnable(val);
         });
 
     figColumn->createWidget<CheckBox>("Z-Write", figureComp->isDepthWriteEnable())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto figureComp = dynamic_cast<FigureComponent*>(getComponent());
+        auto figureComp = getComponent<FigureComponent>();
         figureComp->setDepthWriteEnable(val);
         });
 
     figColumn->createWidget<CheckBox>("AlphaBlend", figureComp->isAlphaBlendingEnable())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto figureComp = dynamic_cast<FigureComponent*>(getComponent());
+        auto figureComp = getComponent<FigureComponent>();
         figureComp->setAlphaBlendingEnable(val);
         dirty();
         });
@@ -120,7 +111,7 @@ void FigureEditorComponent::drawFigureComponent()
     {
         std::array val = { figureComp->getAlphaBlendingOp() };
         m_figureCompGroup->createWidget<Drag<int>>("AlphaBlendOp", ImGuiDataType_S32, val, 1, 0, 3)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto figureComp = dynamic_cast<FigureComponent*>(getComponent());
+            auto figureComp = getComponent<FigureComponent>();
             figureComp->setAlphaBlendingOp(val[0]);
             });
     }

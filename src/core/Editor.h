@@ -67,7 +67,7 @@ namespace ige::creator
 
         //! Short-cut access to current scene
         static std::shared_ptr<Scene> getCurrentScene() { return SceneManager::getInstance()->getCurrentScene(); }
-        static void setCurrentScene(const std::shared_ptr<Scene>& scene) { SceneManager::getInstance()->setCurrentScene(scene); }
+        static void setCurrentScene(std::shared_ptr<Scene> scene) { SceneManager::getInstance()->setCurrentScene(scene); }
 
         //! Toggle local/global gizmo
         bool isLocalGizmo() { return m_bIsLocalGizmo; }

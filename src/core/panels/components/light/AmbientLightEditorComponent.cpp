@@ -13,16 +13,7 @@ AmbientLightEditorComponent::AmbientLightEditorComponent() {
 
 AmbientLightEditorComponent::~AmbientLightEditorComponent()
 {
-    if (m_ambientLightGroup) {
-        m_ambientLightGroup->removeAllWidgets();
-        m_ambientLightGroup->removeAllPlugins();
-    }
     m_ambientLightGroup = nullptr;
-}
-
-bool AmbientLightEditorComponent::isSafe(Component* comp)
-{
-    return dynamic_cast<AmbientLight*>(comp);
 }
 
 void AmbientLightEditorComponent::redraw()
@@ -55,25 +46,25 @@ void AmbientLightEditorComponent::drawAmbientLight()
         return;
     m_ambientLightGroup->removeAllWidgets();
 
-    auto ambientLight = dynamic_cast<AmbientLight*>(getComponent());
+    auto ambientLight = getComponent<AmbientLight>();
     if (ambientLight == nullptr)
         return;
 
     auto color = Vec4(ambientLight->getSkyColor(), 1.f);
     m_ambientLightGroup->createWidget<Color>("SkyColor", color)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto ambientLight = dynamic_cast<AmbientLight*>(getComponent());
+        auto ambientLight = getComponent<AmbientLight>();
         ambientLight->setSkyColor({ val[0], val[1], val[2] });
         });
 
     color = Vec4(ambientLight->getGroundColor(), 1.f);
     m_ambientLightGroup->createWidget<Color>("GroundColor", color)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto ambientLight = dynamic_cast<AmbientLight*>(getComponent());
+        auto ambientLight = getComponent<AmbientLight>();
         ambientLight->setGroundColor({ val[0], val[1], val[2] });
         });
 
     std::array direction = { ambientLight->getDirection().X(), ambientLight->getDirection().Y(), ambientLight->getDirection().Z() };
     m_ambientLightGroup->createWidget<Drag<float, 3>>("Direction", ImGuiDataType_Float, direction)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto ambientLight = dynamic_cast<AmbientLight*>(getComponent());
+        auto ambientLight = getComponent<AmbientLight>();
         ambientLight->setDirection({ val[0], val[1], val[2] });
         });
 }

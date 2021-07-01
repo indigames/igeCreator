@@ -79,7 +79,7 @@ using namespace pyxie;
 
 namespace ige::creator
 {
-    IgnoreTransformEventScope::IgnoreTransformEventScope(Component* comp, uint64_t& eventId, const std::function<void(SceneObject&)>& task)
+    IgnoreTransformEventScope::IgnoreTransformEventScope(std::shared_ptr<Component> comp, uint64_t& eventId, const std::function<void(SceneObject&)>& task)
         : m_comp(comp), m_eventId(eventId), m_task(task)
     {
         if (m_comp)
@@ -102,15 +102,11 @@ namespace ige::creator
     Inspector::Inspector(const std::string &name, const Panel::Settings &settings)
         : Panel(name, settings)
     {
-        m_inspectorEditor = std::make_shared<InspectorEditor>();
     }
 
     Inspector::~Inspector()
     {
         clear();
-
-        m_inspectorEditor->clear();
-        m_inspectorEditor = nullptr;
     }
 
     void Inspector::initialize()
@@ -120,6 +116,7 @@ namespace ige::creator
         if (Editor::getCurrentScene() == nullptr)
             return;
 
+        m_inspectorEditor = std::make_shared<InspectorEditor>();
         m_targetObject = Editor::getCurrentScene()->getTarget().get();
         m_headerGroup = createWidget<Group>("Inspector_Header", false);
 
@@ -322,12 +319,11 @@ namespace ige::creator
         });
 
         // Component
-        m_headerGroup->createWidget<Separator>();
+        createWidget<Separator>();
         m_componentGroup = createWidget<Group>("Inspector_Components", false);
-        m_inspectorEditor->setParentGroup(m_componentGroup);
-        std::for_each(m_targetObject->getComponents().begin(), m_targetObject->getComponents().end(), [this](auto comp) {
+        for(auto comp: m_targetObject->getComponents()) {
             auto component = std::dynamic_pointer_cast<CompoundComponent>(comp)->getComponents()[0];
-            auto componentName = comp->getName();
+            auto componentName = component->getName();
             auto componentId = component->getInstanceId();
             auto closable = (componentName != "Transform" && componentName != "RectTransform");
             auto header = m_componentGroup->createWidget<Group>(componentName, true, closable);
@@ -339,165 +335,165 @@ namespace ige::creator
 
             if (componentName == "Transform")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::Transform, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::Transform, component, header);
             }
             else if (componentName == "BoneTransform")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::BoneTransform, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::BoneTransform, component, header);
             }
             else if (componentName == "Camera")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::Camera, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::Camera, component, header);
             }
             else if (componentName == "Environment")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::Environment, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::Environment, component, header);
             }
             else if (componentName == "Figure")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::Figure, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::Figure, component, header);
             }
             else if (componentName == "Sprite")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::Sprite, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::Sprite, component, header);
             }
             else if (componentName == "Script")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::Script, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::Script, component, header);
             }
             else if (componentName == "RectTransform")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::RectTransform, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::RectTransform, component, header);
             }
             else if (componentName == "Canvas")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::Canvas, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::Canvas, component, header);
             }
             else if (componentName == "UIImage")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::UIImage, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::UIImage, component, header);
             }
             else if (componentName == "UIText" )
             {
-                m_inspectorEditor->addComponent((int)ComponentType::UIText, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::UIText, component, header);
             }
             else if (componentName == "UITextField")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::UITextField, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::UITextField, component, header);
             }
             else if (componentName == "UIButton")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::UIButton, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::UIButton, component, header);
             }
             else if (componentName == "UISlider")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::UISlider, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::UISlider, component, header);
             }
             else if (componentName == "UIScrollView")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::UIScrollView, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::UIScrollView, component, header);
             }
             else if (componentName == "UIScrollBar")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::UIScrollBar, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::UIScrollBar, component, header);
             }
             else if (componentName == "UIMask")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::UIMask, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::UIMask, component, header);
             }
             else if (componentName == "PhysicManager")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::PhysicManager, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::PhysicManager, component, header);
             }
             else if (componentName == "PhysicBox")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::PhysicBox, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::PhysicBox, component, header);
             }
             else if (componentName == "PhysicSphere")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::PhysicSphere, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::PhysicSphere, component, header);
             }
             else if (componentName == "PhysicCapsule")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::PhysicCapsule, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::PhysicCapsule, component, header);
             }
             else if (componentName == "PhysicMesh")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::PhysicMesh, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::PhysicMesh, component, header);
             }
             else if (componentName == "PhysicSoftBody")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::PhysicSoftBody, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::PhysicSoftBody, component, header);
             }
             else if (componentName == "AudioManager")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::AudioManager, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::AudioManager, component, header);
             }
             else if (componentName == "AudioSource")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::AudioSource, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::AudioSource, component, header);
             }
             else if (componentName == "AudioListener")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::AudioListener, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::AudioListener, component, header);
             }
             else if (componentName == "AmbientLight")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::AmbientLight, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::AmbientLight, component, header);
             }
             else if (componentName == "DirectionalLight")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::DirectionalLight, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::DirectionalLight, component, header);
             }
             else if (componentName == "PointLight")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::PointLight, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::PointLight, component, header);
             }
             else if (componentName == "SpotLight")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::SpotLight, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::SpotLight, component, header);
             }
             else if (componentName == "ParticleManager")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::ParticleManager, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::ParticleManager, component, header);
             }
             else if (componentName == "Particle")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::Particle, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::Particle, component, header);
             }
             else if (componentName == "Navigable")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::Navigable, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::Navigable, component, header);
             }
             else if (componentName == "NavMesh")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::NavMesh, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::NavMesh, component, header);
             }
             else if (componentName == "NavAgent")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::NavAgent, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::NavAgent, component, header);
             }
             else if (componentName == "NavAgentManager")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::NavAgentManager, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::NavAgentManager, component, header);
             }        
             else if (componentName == "DynamicNavMesh")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::DynamicNavMesh, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::DynamicNavMesh, component, header);
             }        
             else if (componentName == "NavObstacle")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::NavObstacle, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::NavObstacle, component, header);
             }  
             else if (componentName == "NavArea")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::NavArea, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::NavArea, component, header);
             }
             else if (componentName == "OffMeshLink")
             {
-                m_inspectorEditor->addComponent((int)ComponentType::OffMeshLink, component.get(), header);
+                m_inspectorEditor->addComponent((int)ComponentType::OffMeshLink, component, header);
             }
-        });
+        }
     }
 
     void Inspector::update(float dt)
@@ -521,28 +517,14 @@ namespace ige::creator
 
     void Inspector::clear()
     {
-        removeAllWidgets();
-
-        if (m_headerGroup)
-        {
-            m_headerGroup->removeAllPlugins();
-            m_headerGroup = nullptr;
-        }
-
-        if (m_createCompCombo)
-        {
-            m_createCompCombo->removeAllPlugins();
-            m_createCompCombo = nullptr;
-        }
-
-        if (m_componentGroup)
-        {
-            m_componentGroup->removeAllPlugins();
-            m_componentGroup = nullptr;
-        }
-
         m_targetObject = nullptr;
-        m_inspectorEditor->clear();
+        m_inspectorEditor = nullptr;
+
+        m_createCompCombo = nullptr;
+        m_headerGroup = nullptr;
+        m_componentGroup = nullptr;
+
+        removeAllWidgets();
     }
 
 } // namespace ige::creator

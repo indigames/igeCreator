@@ -26,7 +26,7 @@ namespace ige::creator
 
     protected:
         virtual void drawWidgets() override;
-        void addCreationContextMenu(std::shared_ptr<ContextMenu>& ctxMenu);
+        void addCreationContextMenu(std::shared_ptr<ContextMenu> ctxMenu);
 
         //! Object created/deleted
         void onSceneObjectCreated(SceneObject& sceneObject);

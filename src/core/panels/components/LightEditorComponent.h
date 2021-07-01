@@ -13,10 +13,10 @@ class LightEditorComponent : public EditorComponent
 {
 public:
 	LightEditorComponent();
-	~LightEditorComponent();
+	virtual ~LightEditorComponent();
 
 protected:
-	virtual bool isSafe(Component* comp) override;
+	
 
 };
 

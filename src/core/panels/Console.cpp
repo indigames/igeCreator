@@ -159,7 +159,6 @@ namespace ige::creator
         if (m_logGroup)
         {
             m_logGroup->removeAllWidgets();
-            m_logGroup->removeAllPlugins();
         }
         m_logGroup = nullptr;
         removeAllWidgets();

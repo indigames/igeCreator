@@ -13,11 +13,11 @@ class PhysicManagerEditorComponent : public EditorComponent
 {
 public:
 	PhysicManagerEditorComponent();
-	~PhysicManagerEditorComponent();
+	virtual ~PhysicManagerEditorComponent();
 
 	virtual void redraw() override;
 protected:
-	virtual bool isSafe(Component* comp) override;
+	
 	virtual void onInspectorUpdate() override;
 
 	void drawPhysicManager();

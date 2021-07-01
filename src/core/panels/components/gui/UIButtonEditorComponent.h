@@ -13,11 +13,11 @@ class UIButtonEditorComponent : public EditorComponent
 {
 public:
 	UIButtonEditorComponent();
-	~UIButtonEditorComponent();
+	virtual ~UIButtonEditorComponent();
 
 	virtual void redraw() override;
 protected:
-	virtual bool isSafe(Component* comp) override;
+	
 	virtual void onInspectorUpdate() override;
 
 	void drawUIButton();

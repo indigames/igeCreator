@@ -14,16 +14,7 @@ CanvasEditorComponent::CanvasEditorComponent() {
 
 CanvasEditorComponent::~CanvasEditorComponent()
 {
-    if (m_canvasGroup) {
-        m_canvasGroup->removeAllWidgets();
-        m_canvasGroup->removeAllPlugins();
-    }
     m_canvasGroup = nullptr;
-}
-
-bool CanvasEditorComponent::isSafe(Component* comp)
-{
-    return dynamic_cast<Canvas*>(comp);
 }
 
 void CanvasEditorComponent::redraw()
@@ -54,13 +45,13 @@ void CanvasEditorComponent::drawCanvas()
         return;
     m_canvasGroup->removeAllWidgets();
 
-    auto canvas = dynamic_cast<Canvas*>(getComponent());
+    auto canvas = getComponent<Canvas>();
     if (canvas == nullptr)
         return;
 
     std::array size = { canvas->getDesignCanvasSize().X(), canvas->getDesignCanvasSize().Y() };
     m_canvasGroup->createWidget<Drag<float, 2>>("Design Size", ImGuiDataType_Float, size)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto canvas = dynamic_cast<Canvas*>(getComponent());
+        auto canvas = getComponent<Canvas>();
         canvas->setDesignCanvasSize({ val[0], val[1] });
         auto transformToViewport = Mat4::Translate(Vec3(-val[0] * 0.5f, -val[1] * 0.5f, 0.f));
         canvas->setCanvasToViewportMatrix(transformToViewport);
@@ -68,7 +59,7 @@ void CanvasEditorComponent::drawCanvas()
 
     std::array targetSize = { canvas->getTargetCanvasSize().X(), canvas->getTargetCanvasSize().Y() };
     m_canvasGroup->createWidget<Drag<float, 2>>("Target Size", ImGuiDataType_Float, targetSize)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto canvas = dynamic_cast<Canvas*>(getComponent());
+        auto canvas = getComponent<Canvas>();
         canvas->setTargetCanvasSize({ val[0], val[1] });
     });
 }

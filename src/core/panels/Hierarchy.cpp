@@ -127,7 +127,7 @@ namespace ige::creator
                 }
             }
         });
-        node->addPlugin<DDTargetPlugin<uint64_t>>(EDragDropID::OBJECT)->getOnDataReceivedEvent().addListener([this, objId](auto txt) {           
+        node->addPlugin<DDTargetPlugin<uint64_t>>(EDragDropID::OBJECT)->getOnDataReceivedEvent().addListener([objId](auto txt) {           
             auto parent = Editor::getCurrentScene()->findObjectById(objId);
             auto loop = false;
             for (auto& target : Editor::getCurrentScene()->getTarget()->getAllTargets())
@@ -151,7 +151,7 @@ namespace ige::creator
                 }
             }
         });
-        node->addPlugin<DDTargetPlugin<std::string>>(GetFileExtensionSuported(E_FileExts::Prefab)[0])->getOnDataReceivedEvent().addListener([this, objId](auto path) {
+        node->addPlugin<DDTargetPlugin<std::string>>(GetFileExtensionSuported(E_FileExts::Prefab)[0])->getOnDataReceivedEvent().addListener([objId](auto path) {
             Editor::getCurrentScene()->loadPrefab(objId, path);
         });
         node->addPlugin<DDSourcePlugin<uint64_t>>(EDragDropID::OBJECT, sceneObject.getName(), objId);
@@ -169,6 +169,7 @@ namespace ige::creator
         {
             if(nodePair->second->hasContainer())
                 nodePair->second->getContainer()->removeWidget(nodePair->second);
+            nodePair->second = nullptr;
             m_objectNodeMap.erase(nodePair);
         }
     }
@@ -299,7 +300,7 @@ namespace ige::creator
         Editor::getCanvas()->getInspector()->initialize();
     }
 
-    void Hierarchy::addCreationContextMenu(std::shared_ptr<ContextMenu>& ctxMenu)
+    void Hierarchy::addCreationContextMenu(std::shared_ptr<ContextMenu> ctxMenu)
     {
         if (ctxMenu == nullptr) return;
 
@@ -771,14 +772,13 @@ namespace ige::creator
 
     void Hierarchy::clear()
     {
-        if (m_groupLayout)
-        {
-            m_groupLayout->removeAllWidgets();
-            m_groupLayout->removeAllPlugins();
+        for (auto& [key, value] : m_objectNodeMap) {
+            value = nullptr;
         }
-        m_groupLayout = nullptr;
-        removeAllWidgets();
         m_objectNodeMap.clear();
+        m_groupLayout = nullptr;     
+        removeAllWidgets();
+        
         m_bInitialized = false;
     }
 }

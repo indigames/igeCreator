@@ -2,6 +2,7 @@
 
 #include "core/Container.h"
 #include "core/Widget.h"
+#include "layout/Group.h"
 
 namespace ige::creator
 {
@@ -12,23 +13,26 @@ namespace ige::creator
         removeAllWidgets();
     }
 
-    void Container::addWidget(const std::shared_ptr<Widget>& widget)
+    void Container::addWidget(std::shared_ptr<Widget> widget)
     {
-        widget->setContainer(this);
-        m_widgets.push_back(widget);
+        auto found = std::find(m_widgets.begin(), m_widgets.end(), widget);
+        if (found == m_widgets.end())
+        {
+            auto thisWidget = dynamic_cast<Widget*>(this);
+            if (!thisWidget || thisWidget != widget.get())
+            {
+                widget->setContainer(this);
+                m_widgets.push_back(widget);
+            }
+        }
     }
 
-    void Container::removeWidget(const std::shared_ptr<Widget>& widget)
+    void Container::removeWidget(std::shared_ptr<Widget> widget)
     {
-        widget->setContainer(nullptr);
-
-        auto found = std::find_if(m_widgets.begin(), m_widgets.end(), [&](auto itr)
-        { 
-            return itr == widget;
-        });
-
+        auto found = std::find(m_widgets.begin(), m_widgets.end(), widget);
         if (found != m_widgets.end())
         {
+            widget->setContainer(nullptr);
             m_widgets.erase(found);
         }
     }
@@ -65,19 +69,23 @@ namespace ige::creator
     {
         for (auto& widget : m_widgets)
         {
-            if (widget != nullptr)
+            if (widget)
             {
                 widget->setContainer(nullptr);
+                widget->removeAllPlugins();
+                auto& group = std::dynamic_pointer_cast<Group>(widget);
+                if (group) group->removeAllWidgets();
                 widget = nullptr;
             }
         }
         m_widgets.clear();
     }
-
+    
     void Container::drawWidgets()
     {
-        for(const auto& widget: m_widgets) {
-            if(widget != nullptr) widget->draw();
+        for(const auto& widget: m_widgets)
+        {
+            widget->draw();
         }
     }
 }

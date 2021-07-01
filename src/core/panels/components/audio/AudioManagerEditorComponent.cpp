@@ -13,16 +13,7 @@ AudioManagerEditorComponent::AudioManagerEditorComponent() {
 
 AudioManagerEditorComponent::~AudioManagerEditorComponent()
 {
-    if (m_audioManagerGroup) {
-        m_audioManagerGroup->removeAllWidgets();
-        m_audioManagerGroup->removeAllPlugins();
-    }
     m_audioManagerGroup = nullptr;
-}
-
-bool AudioManagerEditorComponent::isSafe(Component* comp)
-{
-    return dynamic_cast<AudioListener*>(comp);
 }
 
 void AudioManagerEditorComponent::redraw()
@@ -55,13 +46,13 @@ void AudioManagerEditorComponent::drawAudioManager()
         return;
     m_audioManagerGroup->removeAllWidgets();
 
-    auto audioMngComp = dynamic_cast<AudioManager*>(getComponent());
+    auto audioMngComp = getComponent<AudioManager>();
     if (audioMngComp == nullptr)
         return;
 
     std::array volume = { audioMngComp->getGlobalVolume() };
     m_audioManagerGroup->createWidget<Drag<float>>("Global Volume", ImGuiDataType_Float, volume, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto& val) {
-        auto audioMngComp = dynamic_cast<AudioManager*>(getComponent());
+        auto audioMngComp = getComponent<AudioManager>();
         audioMngComp->setGlobalVolume(val[0]);
     });
 }

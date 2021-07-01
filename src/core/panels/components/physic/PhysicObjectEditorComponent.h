@@ -21,22 +21,22 @@ class PhysicObjectEditorComponent : public EditorComponent
 {
 public:
 	PhysicObjectEditorComponent();
-	~PhysicObjectEditorComponent();
+	virtual ~PhysicObjectEditorComponent();
 
 	virtual void redraw() override;
 protected:
-	virtual bool isSafe(Component* comp) override;
+	
 	virtual void onInspectorUpdate() override;
 
 	void drawPhysicObject();
 	void drawPhysicConstraints();
 
-	void drawPhysicConstraint(const std::shared_ptr<PhysicConstraint>& constraint, std::shared_ptr<Group> constraintGroup);
-	void drawFixedConstraint(const std::shared_ptr<PhysicConstraint>& constraint);
-	void drawHingeConstraint(const std::shared_ptr<PhysicConstraint>& constraint);
-	void drawSliderConstraint(const std::shared_ptr<PhysicConstraint>& constraint);
-	void drawSpringConstraint(const std::shared_ptr<PhysicConstraint>& constraint);
-	void drawDof6SpringConstraint(const std::shared_ptr<PhysicConstraint>& constraint);
+	void drawPhysicConstraint(std::shared_ptr<PhysicConstraint> constraint, std::shared_ptr<Group> constraintGroup);
+	void drawFixedConstraint(std::shared_ptr<PhysicConstraint> constraint);
+	void drawHingeConstraint(std::shared_ptr<PhysicConstraint> constraint);
+	void drawSliderConstraint(std::shared_ptr<PhysicConstraint> constraint);
+	void drawSpringConstraint(std::shared_ptr<PhysicConstraint> constraint);
+	void drawDof6SpringConstraint(std::shared_ptr<PhysicConstraint> constraint);
 protected:
 	std::shared_ptr<Group> m_physicGroup = nullptr;
 	std::shared_ptr<Group> m_constraintGroup = nullptr;

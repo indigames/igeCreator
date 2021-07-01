@@ -20,23 +20,8 @@ PhysicObjectEditorComponent::PhysicObjectEditorComponent() {
 
 PhysicObjectEditorComponent::~PhysicObjectEditorComponent()
 {
-    if (m_constraintGroup)
-    {
-        m_constraintGroup->removeAllWidgets();
-        m_constraintGroup->removeAllPlugins();
-        m_constraintGroup = nullptr;
-    }
-
-    if (m_physicGroup) {
-        m_physicGroup->removeAllWidgets();
-        m_physicGroup->removeAllPlugins();
-    }
+    m_constraintGroup = nullptr;
     m_physicGroup = nullptr;
-}
-
-bool PhysicObjectEditorComponent::isSafe(Component* comp)
-{
-    return dynamic_cast<PhysicObject*>(comp);
 }
 
 void PhysicObjectEditorComponent::redraw()
@@ -69,102 +54,96 @@ void PhysicObjectEditorComponent::drawPhysicObject()
         return;
     m_physicGroup->removeAllWidgets();
 
-    auto physicComp = dynamic_cast<PhysicObject*>(getComponent());
+    auto physicComp = getComponent<PhysicObject>();
     if (physicComp == nullptr)
         return;
 
     auto columns = m_physicGroup->createWidget<Columns<2>>();
     columns->createWidget<CheckBox>("Enable", physicComp->isEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto physicComp = dynamic_cast<PhysicObject*>(getComponent());
+        auto physicComp = getComponent<PhysicObject>();
         physicComp->setEnabled(val);
         });
 
     columns->createWidget<CheckBox>("Continous", physicComp->isCCD())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto physicComp = dynamic_cast<PhysicObject*>(getComponent());
+        auto physicComp = getComponent<PhysicObject>();
         physicComp->setCCD(val);
         });
 
     columns->createWidget<CheckBox>("Kinematic", physicComp->isKinematic())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto physicComp = dynamic_cast<PhysicObject*>(getComponent());
+        auto physicComp = getComponent<PhysicObject>();
         physicComp->setIsKinematic(val);
         dirty();
         });
 
     columns->createWidget<CheckBox>("Trigger", physicComp->isTrigger())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto physicComp = dynamic_cast<PhysicObject*>(getComponent());
+        auto physicComp = getComponent<PhysicObject>();
         physicComp->setIsTrigger(val);
         });
 
     std::array filterGroup = { physicComp->getCollisionFilterGroup() };
     m_physicGroup->createWidget<Drag<int>>("Collision Group", ImGuiDataType_S32, filterGroup, 1, -1)->getOnDataChangedEvent().addListener([this](auto& val) {
-        auto physicComp = dynamic_cast<PhysicObject*>(getComponent());
+        auto physicComp = getComponent<PhysicObject>();
         physicComp->setCollisionFilterGroup(val[0]);
         });
 
     std::array filterMask = { physicComp->getCollisionFilterMask() };
     m_physicGroup->createWidget<Drag<int>>("Collision Mask", ImGuiDataType_S32, filterMask, 1, -1)->getOnDataChangedEvent().addListener([this](auto& val) {
-        auto physicComp = dynamic_cast<PhysicObject*>(getComponent());
+        auto physicComp = getComponent<PhysicObject>();
         physicComp->setCollisionFilterMask(val[0]);
         });
 
     std::array mass = { physicComp->getMass() };
     m_physicGroup->createWidget<Drag<float>>("Mass", ImGuiDataType_Float, mass, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
-        auto physicComp = dynamic_cast<PhysicObject*>(getComponent());
+        auto physicComp = getComponent<PhysicObject>();
         physicComp->setMass(val[0]);
         });
 
     std::array friction = { physicComp->getFriction() };
     m_physicGroup->createWidget<Drag<float>>("Friction", ImGuiDataType_Float, friction, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
-        auto physicComp = dynamic_cast<PhysicObject*>(getComponent());
+        auto physicComp = getComponent<PhysicObject>();
         physicComp->setFriction(val[0]);
         });
 
     std::array restitution = { physicComp->getRestitution() };
     m_physicGroup->createWidget<Drag<float>>("Restitution", ImGuiDataType_Float, restitution, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
-        auto physicComp = dynamic_cast<PhysicObject*>(getComponent());
+        auto physicComp = getComponent<PhysicObject>();
         physicComp->setRestitution(val[0]);
         });
 
     std::array linearVelocity = { physicComp->getLinearVelocity().x(), physicComp->getLinearVelocity().y(), physicComp->getLinearVelocity().z() };
     m_physicGroup->createWidget<Drag<float, 3>>("Linear Velocity", ImGuiDataType_Float, linearVelocity)->getOnDataChangedEvent().addListener([this](auto& val) {
-        auto physicComp = dynamic_cast<PhysicObject*>(getComponent());
+        auto physicComp = getComponent<PhysicObject>();
         physicComp->setLinearVelocity({ val[0], val[1], val[2] });
         });
 
     std::array angularVelocity = { physicComp->getAngularVelocity().x(), physicComp->getAngularVelocity().y(), physicComp->getAngularVelocity().z() };
     m_physicGroup->createWidget<Drag<float, 3>>("Angular Velocity", ImGuiDataType_Float, angularVelocity)->getOnDataChangedEvent().addListener([this](auto& val) {
-        auto physicComp = dynamic_cast<PhysicObject*>(getComponent());
+        auto physicComp = getComponent<PhysicObject>();
         physicComp->setAngularVelocity({ val[0], val[1], val[2] });
         });
 
     std::array linearFactor = { physicComp->getLinearFactor().x(), physicComp->getLinearFactor().y(), physicComp->getLinearFactor().z() };
     m_physicGroup->createWidget<Drag<float, 3>>("Linear Factor", ImGuiDataType_Float, linearFactor)->getOnDataChangedEvent().addListener([this](auto& val) {
-        auto physicComp = dynamic_cast<PhysicObject*>(getComponent());
+        auto physicComp = getComponent<PhysicObject>();
         physicComp->setLinearFactor({ val[0], val[1], val[2] });
         });
 
     std::array angularFactor = { physicComp->getAngularFactor().x(), physicComp->getAngularFactor().y(), physicComp->getAngularFactor().z() };
     m_physicGroup->createWidget<Drag<float, 3>>("Angular Factor", ImGuiDataType_Float, angularFactor)->getOnDataChangedEvent().addListener([this](auto& val) {
-        auto physicComp = dynamic_cast<PhysicObject*>(getComponent());
+        auto physicComp = getComponent<PhysicObject>();
         physicComp->setAngularFactor({ val[0], val[1], val[2] });
         });
 
     std::array margin = { physicComp->getCollisionMargin() };
     m_physicGroup->createWidget<Drag<float>>("Margin", ImGuiDataType_Float, margin, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
-        auto physicComp = dynamic_cast<PhysicObject*>(getComponent());
+        auto physicComp = getComponent<PhysicObject>();
         physicComp->setCollisionMargin(val[0]);
         });
 }
 
 void PhysicObjectEditorComponent::drawPhysicConstraints()
 {
-    if (m_constraintGroup)
-    {
-        m_constraintGroup->removeAllWidgets();
-        m_constraintGroup->removeAllPlugins();
-        m_constraintGroup = nullptr;
-    }
-
+    m_constraintGroup = nullptr;
     m_constraintGroup = m_physicGroup->createWidget<Group>("ConstraintGroup");
 
     // Create constraint selection
@@ -181,26 +160,26 @@ void PhysicObjectEditorComponent::drawPhysicConstraints()
         switch (m_constraintCreateCombo->getSelectedIndex())
         {
         case (int)PhysicConstraint::ConstraintType::Fixed:
-            dynamic_cast<PhysicObject*>(getComponent())->addConstraint<FixedConstraint>();
+            getComponent<PhysicObject>()->addConstraint<FixedConstraint>();
             break;
         case (int)PhysicConstraint::ConstraintType::Hinge:
-            dynamic_cast<PhysicObject*>(getComponent())->addConstraint<HingeConstraint>();
+            getComponent<PhysicObject>()->addConstraint<HingeConstraint>();
             break;
         case (int)PhysicConstraint::ConstraintType::Slider:
-            dynamic_cast<PhysicObject*>(getComponent())->addConstraint<SliderConstraint>();
+            getComponent<PhysicObject>()->addConstraint<SliderConstraint>();
             break;
         case (int)PhysicConstraint::ConstraintType::Spring:
-            dynamic_cast<PhysicObject*>(getComponent())->addConstraint<SpringConstraint>();
+            getComponent<PhysicObject>()->addConstraint<SpringConstraint>();
             break;
         case (int)PhysicConstraint::ConstraintType::Dof6Spring:
-            dynamic_cast<PhysicObject*>(getComponent())->addConstraint<Dof6SpringConstraint>();
+            getComponent<PhysicObject>()->addConstraint<Dof6SpringConstraint>();
             break;
         }
         dirty();
         });
     m_constraintGroup->createWidget<Separator>();
 
-    const auto& constraints = dynamic_cast<PhysicObject*>(getComponent())->getContraints();
+    const auto& constraints = getComponent<PhysicObject>()->getContraints();
     for (const auto& constraint : constraints)
     {
         if (constraint->getType() == PhysicConstraint::ConstraintType::Fixed)
@@ -227,7 +206,7 @@ void PhysicObjectEditorComponent::drawPhysicConstraints()
 }
 
 //! Draw Physic Constraint
-void PhysicObjectEditorComponent::drawPhysicConstraint(const std::shared_ptr<PhysicConstraint>& constraint, std::shared_ptr<Group> constraintGroup)
+void PhysicObjectEditorComponent::drawPhysicConstraint(std::shared_ptr<PhysicConstraint> constraint, std::shared_ptr<Group> constraintGroup)
 {
     auto columns = constraintGroup->createWidget<Columns<2>>();
 
@@ -261,11 +240,11 @@ void PhysicObjectEditorComponent::drawPhysicConstraint(const std::shared_ptr<Phy
 }
 
 //! Draw Fixed Constraint
-void PhysicObjectEditorComponent::drawFixedConstraint(const std::shared_ptr<PhysicConstraint>& constraint)
+void PhysicObjectEditorComponent::drawFixedConstraint(std::shared_ptr<PhysicConstraint> constraint)
 {
     auto constraintGroup = m_constraintGroup->createWidget<Group>("FixedConstraint", true, true);
     constraintGroup->getOnClosedEvent().addListener([&, this]() {
-        dynamic_cast<PhysicObject*>(getComponent())->removeConstraint(constraint);
+        getComponent<PhysicObject>()->removeConstraint(constraint);
         dirty();
         });
 
@@ -274,11 +253,11 @@ void PhysicObjectEditorComponent::drawFixedConstraint(const std::shared_ptr<Phys
 }
 
 //! draw Hinge Constraint
-void PhysicObjectEditorComponent::drawHingeConstraint(const std::shared_ptr<PhysicConstraint>& constraint)
+void PhysicObjectEditorComponent::drawHingeConstraint(std::shared_ptr<PhysicConstraint> constraint)
 {
     auto constraintGroup = m_constraintGroup->createWidget<Group>("HingeConstraint", true, true);
     constraintGroup->getOnClosedEvent().addListener([&, this]() {
-        dynamic_cast<PhysicObject*>(getComponent())->removeConstraint(constraint);
+        getComponent<PhysicObject>()->removeConstraint(constraint);
         dirty();
         });
 
@@ -324,11 +303,11 @@ void PhysicObjectEditorComponent::drawHingeConstraint(const std::shared_ptr<Phys
 }
 
 //! draw Slider Constraint
-void PhysicObjectEditorComponent::drawSliderConstraint(const std::shared_ptr<PhysicConstraint>& constraint)
+void PhysicObjectEditorComponent::drawSliderConstraint(std::shared_ptr<PhysicConstraint> constraint)
 {
     auto constraintGroup = m_constraintGroup->createWidget<Group>("SliderConstraint", true, true);
     constraintGroup->getOnClosedEvent().addListener([&, this]() {
-        dynamic_cast<PhysicObject*>(getComponent())->removeConstraint(constraint);
+        getComponent<PhysicObject>()->removeConstraint(constraint);
         dirty();
         });
 
@@ -355,11 +334,11 @@ void PhysicObjectEditorComponent::drawSliderConstraint(const std::shared_ptr<Phy
 }
 
 //! draw Spring Constraint
-void PhysicObjectEditorComponent::drawSpringConstraint(const std::shared_ptr<PhysicConstraint>& constraint)
+void PhysicObjectEditorComponent::drawSpringConstraint(std::shared_ptr<PhysicConstraint> constraint)
 {
     auto constraintGroup = m_constraintGroup->createWidget<Group>("SpringConstraint", true, true);
     constraintGroup->getOnClosedEvent().addListener([&, this]() {
-        dynamic_cast<PhysicObject*>(getComponent())->removeConstraint(constraint);
+        getComponent<PhysicObject>()->removeConstraint(constraint);
         dirty();
         });
 
@@ -404,11 +383,11 @@ void PhysicObjectEditorComponent::drawSpringConstraint(const std::shared_ptr<Phy
 }
 
 //! draw Dof6 Spring Constraint
-void PhysicObjectEditorComponent::drawDof6SpringConstraint(const std::shared_ptr<PhysicConstraint>& constraint)
+void PhysicObjectEditorComponent::drawDof6SpringConstraint(std::shared_ptr<PhysicConstraint> constraint)
 {
     auto constraintGroup = m_constraintGroup->createWidget<Group>("Dof6Constraint", true, true);
     constraintGroup->getOnClosedEvent().addListener([&, this]() {
-        dynamic_cast<PhysicObject*>(getComponent())->removeConstraint(constraint);
+        getComponent<PhysicObject>()->removeConstraint(constraint);
         dirty();
         });
 

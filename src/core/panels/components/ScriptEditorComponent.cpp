@@ -30,16 +30,7 @@ ScriptEditorComponent::~ScriptEditorComponent()
         m_watchId = 0;
     }
 
-    if (m_scriptCompGroup) {
-        m_scriptCompGroup->removeAllWidgets();
-        m_scriptCompGroup->removeAllPlugins();
-    }
     m_scriptCompGroup = nullptr;
-}
-
-bool ScriptEditorComponent::isSafe(Component* comp)
-{
-    return dynamic_cast<ScriptComponent*>(comp);
 }
 
 void ScriptEditorComponent::redraw()
@@ -72,21 +63,21 @@ void ScriptEditorComponent::drawScriptComponent()
         return;
     m_scriptCompGroup->removeAllWidgets();
 
-    auto scriptComp = dynamic_cast<ScriptComponent*>(getComponent());
+    auto scriptComp = getComponent<ScriptComponent>();
     if (scriptComp == nullptr)
         return;
 
     auto txtPath = m_scriptCompGroup->createWidget<TextField>("Path", scriptComp->getPath());
     txtPath->setEndOfLine(false);
     txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
-        auto scriptComp = dynamic_cast<ScriptComponent*>(getComponent());
+        auto scriptComp = getComponent<ScriptComponent>();
         scriptComp->setPath(txt);
         });
 
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Script))
     {
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-            auto scriptComp = dynamic_cast<ScriptComponent*>(getComponent());
+            auto scriptComp = getComponent<ScriptComponent>();
             scriptComp->setPath(txt);
             dirty();
         });
@@ -96,7 +87,7 @@ void ScriptEditorComponent::drawScriptComponent()
         auto files = OpenFileDialog("Import Assets", "", { "Script (*.py)", "*.py" }).result();
         if (files.size() > 0)
         {
-            auto scriptComp = dynamic_cast<ScriptComponent*>(getComponent());
+            auto scriptComp = getComponent<ScriptComponent>();
             scriptComp->setPath(files[0]);
             dirty();
         }
@@ -111,7 +102,7 @@ void ScriptEditorComponent::drawScriptComponent()
     if (scriptComp->getPath().length() > 0)
     {
         m_watchId = fs::watcher::watch(fs::path(scriptComp->getPath()), false, false, std::chrono::milliseconds(1000), [this](const auto&, bool) {
-            auto scriptComp = dynamic_cast<ScriptComponent*>(getComponent());
+            auto scriptComp = getComponent<ScriptComponent>();
             scriptComp->setPath(scriptComp->getPath(), true);
             dirty();
          });
@@ -129,7 +120,7 @@ void ScriptEditorComponent::drawScriptComponent()
             {
                 std::array val = { value.asInt() };
                 m_scriptCompGroup->createWidget<Drag<int>>(key, ImGuiDataType_S32, val)->getOnDataChangedEvent().addListener([key, this](auto& val) {                    
-                    auto scriptComp = dynamic_cast<ScriptComponent*>(getComponent());
+                    auto scriptComp = getComponent<ScriptComponent>();
                     scriptComp->onMemberValueChanged(key, Value(val[0]));
                 });
             }
@@ -140,7 +131,7 @@ void ScriptEditorComponent::drawScriptComponent()
             {
                 std::array val = { value.asFloat() };
                 m_scriptCompGroup->createWidget<Drag<float>>(key, ImGuiDataType_Float, val)->getOnDataChangedEvent().addListener([key, this](auto& val) {                   
-                    auto scriptComp = dynamic_cast<ScriptComponent*>(getComponent());
+                    auto scriptComp = getComponent<ScriptComponent>();
                     scriptComp->onMemberValueChanged(key, Value(val[0]));
                 });
             }
@@ -149,7 +140,7 @@ void ScriptEditorComponent::drawScriptComponent()
             case Value::Type::BOOLEAN:
             {
                 m_scriptCompGroup->createWidget<CheckBox>(key, value.asBool())->getOnDataChangedEvent().addListener([key, this](bool val) {
-                    auto scriptComp = dynamic_cast<ScriptComponent*>(getComponent());
+                    auto scriptComp = getComponent<ScriptComponent>();
                     scriptComp->onMemberValueChanged(key, Value(val));
                 });
             }
@@ -178,7 +169,7 @@ void ScriptEditorComponent::drawScriptComponent()
                         createMenu = m_scriptCompGroup->addPlugin<ContextMenu>("Component_Select_Menu");
 
                     createMenu->createWidget<MenuItem>("SceneObject")->getOnClickEvent().addListener([key, objUUID, this](auto widget) {
-                        auto scriptComp = dynamic_cast<ScriptComponent*>(getComponent());
+                        auto scriptComp = getComponent<ScriptComponent>();
                         json jVal = json{
                                 {"uuid", objUUID},
                                 {"comp", std::string()},
@@ -193,7 +184,7 @@ void ScriptEditorComponent::drawScriptComponent()
                         {
                             auto compName = comp->getName();
                             createMenu->createWidget<MenuItem>(comp->getName())->getOnClickEvent().addListener([key, objUUID, compName, this](auto widget) {
-                                auto scriptComp = dynamic_cast<ScriptComponent*>(getComponent());
+                                auto scriptComp = getComponent<ScriptComponent>();
                                 json jVal = json{
                                         {"uuid", objUUID},
                                         {"comp", compName},
@@ -216,7 +207,7 @@ void ScriptEditorComponent::drawScriptComponent()
                         else 
                             createMenu = m_scriptCompGroup->addPlugin<ContextMenu>("Component_Select_Menu");
                         createMenu->createWidget<MenuItem>("SceneObject")->getOnClickEvent().addListener([key, objUUID, this](auto widget) {
-                            auto scriptComp = dynamic_cast<ScriptComponent*>(getComponent());
+                            auto scriptComp = getComponent<ScriptComponent>();
                             json jVal = json{
                                     {"uuid", objUUID},
                                     {"comp", std::string()},
@@ -231,7 +222,7 @@ void ScriptEditorComponent::drawScriptComponent()
                             {
                                 auto compName = comp->getName();
                                 createMenu->createWidget<MenuItem>(comp->getName())->getOnClickEvent().addListener([key, objUUID, compName, this](auto widget) {
-                                    auto scriptComp = dynamic_cast<ScriptComponent*>(getComponent());
+                                    auto scriptComp = getComponent<ScriptComponent>();
                                     json jVal = json{
                                             {"uuid", objUUID},
                                             {"comp", compName},
@@ -246,7 +237,7 @@ void ScriptEditorComponent::drawScriptComponent()
                 });
                
                 txtField->addPlugin<DDTargetPlugin<std::string>>(EDragDropID::FILE)->getOnDataReceivedEvent().addListener([key, this](auto val) {
-                    auto scriptComp = dynamic_cast<ScriptComponent*>(getComponent());
+                    auto scriptComp = getComponent<ScriptComponent>();
                     scriptComp->onMemberValueChanged(key, Value(val));
                     dirty();
                 });
@@ -256,7 +247,7 @@ void ScriptEditorComponent::drawScriptComponent()
                     for (const auto& type : GetFileExtensionSuported(ext))
                     {
                         txtField->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([key, this](auto val) {
-                            auto scriptComp = dynamic_cast<ScriptComponent*>(getComponent());
+                            auto scriptComp = getComponent<ScriptComponent>();
                             scriptComp->onMemberValueChanged(key, Value(val));
                             dirty();
                         });

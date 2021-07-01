@@ -20,25 +20,48 @@ class EditorComponent
 {
 public:
 	EditorComponent();
-	~EditorComponent();
+	virtual ~EditorComponent();
 
-	virtual bool setComponent(Component* component);
-	virtual Component* getComponent();
+	virtual bool setComponent(std::shared_ptr<Component> component);
 	virtual void draw(std::shared_ptr<Group> group);
 	virtual void redraw();
 
 	void dirty() { m_bisDirty = true; }
 	bool isDirty() { return m_bisDirty; }
 	void setDirty(bool value) { m_bisDirty = value; }
+
+	std::shared_ptr<Component>& getComponent() { return m_component; }
+
+	//! Check if component type is safe to cast
+	template <typename T>
+	inline bool isSafe(const std::shared_ptr<Component>& component);
+
+	//! Get component by type
+	template <typename T>
+	inline std::shared_ptr<T> getComponent();
+
 protected:
-	virtual bool isSafe(Component* comp);
 	virtual void onInspectorUpdate() = 0;
 
 protected:
-	Component* m_component = nullptr;
+	std::shared_ptr<Component> m_component = nullptr;
 	std::shared_ptr<Group> m_group = nullptr;
 	bool m_bisDirty;
 };
+
+//! Check if component type is safe to cast
+template <typename T>
+inline bool EditorComponent::isSafe(const std::shared_ptr<Component>& component)
+{
+	return std::dynamic_pointer_cast<T>(component) != nullptr;
+}
+
+//! Get component by type
+template <typename T>
+inline std::shared_ptr<T> EditorComponent::getComponent()
+{
+	return std::dynamic_pointer_cast<T>(m_component);
+}
 
 #define INSPECTOR_WATCH(COMPONENT, TYPE, VALUE) \
 do { \

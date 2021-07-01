@@ -16,17 +16,7 @@ UIScrollBarEditorComponent::UIScrollBarEditorComponent() {
 
 UIScrollBarEditorComponent::~UIScrollBarEditorComponent()
 {
-    if (m_uiScrollBarGroup) {
-        m_uiScrollBarGroup->removeAllWidgets();
-        m_uiScrollBarGroup->removeAllPlugins();
-        m_uiScrollBarGroup = nullptr;
-    }
-    
-}
-
-bool UIScrollBarEditorComponent::isSafe(Component* comp)
-{
-    return dynamic_cast<UIScrollBar*>(comp);
+    m_uiScrollBarGroup = nullptr;
 }
 
 void UIScrollBarEditorComponent::redraw()
@@ -59,21 +49,21 @@ void UIScrollBarEditorComponent::drawUIScrollBar()
         return;
     m_uiScrollBarGroup->removeAllWidgets();
 
-    auto uiScrollBar = dynamic_cast<UIScrollBar*>(m_component);
+    auto uiScrollBar = getComponent<UIScrollBar>();
     if (uiScrollBar == nullptr)
         return;
 
     auto txtPath = m_uiScrollBarGroup->createWidget<TextField>("Path", uiScrollBar->getPath());
     txtPath->setEndOfLine(false);
     txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
-        auto uiImage = dynamic_cast<UIImage*>(m_component);
+        auto uiImage = getComponent<UIScrollBar>();
         uiImage->setPath(txt);
         });
 
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
     {
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-            auto uiScrollBar = dynamic_cast<UIScrollBar*>(m_component);
+            auto uiScrollBar = getComponent<UIScrollBar>();
             uiScrollBar->setPath(txt);
             dirty();
             });
@@ -83,21 +73,21 @@ void UIScrollBarEditorComponent::drawUIScrollBar()
         auto files = OpenFileDialog("Import Assets", "", { "Texture (*.pyxi)", "*.pyxi" }).result();
         if (files.size() > 0)
         {
-            auto uiScrollBar = dynamic_cast<UIScrollBar*>(m_component);
+            auto uiScrollBar =getComponent<UIScrollBar>();
             uiScrollBar->setPath(files[0]);
             dirty();
         }
         });
 
     auto m_interactable = m_uiScrollBarGroup->createWidget<CheckBox>("Interactable", uiScrollBar->isInteractable())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto uiScrollBar = dynamic_cast<UIScrollBar*>(m_component);
+        auto uiScrollBar =getComponent<UIScrollBar>();
         uiScrollBar->setInteractable(val);
         });
 
     auto spriteType = uiScrollBar->getSpriteType();
     auto m_spriteTypeCombo = m_uiScrollBarGroup->createWidget<ComboBox>((int)spriteType);
     m_spriteTypeCombo->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiScrollBar = dynamic_cast<UIScrollBar*>(m_component);
+        auto uiScrollBar =getComponent<UIScrollBar>();
         uiScrollBar->setSpriteType(val);
         dirty();
         });
@@ -110,22 +100,22 @@ void UIScrollBarEditorComponent::drawUIScrollBar()
     if (spriteType == SpriteType::Sliced) {
         std::array borderLeft = { uiScrollBar->getBorderLeft() };
         m_uiScrollBarGroup->createWidget<Drag<float, 1>>("Border Left", ImGuiDataType_Float, borderLeft, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiScrollBar = dynamic_cast<UIScrollBar*>(m_component);
+            auto uiScrollBar =getComponent<UIScrollBar>();
             uiScrollBar->setBorderLeft(val[0]);
             });
         std::array borderRight = { uiScrollBar->getBorderRight() };
         m_uiScrollBarGroup->createWidget<Drag<float, 1>>("Border Right", ImGuiDataType_Float, borderRight, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiScrollBar = dynamic_cast<UIScrollBar*>(m_component);
+            auto uiScrollBar =getComponent<UIScrollBar>();
             uiScrollBar->setBorderRight(val[0]);
             });
         std::array borderTop = { uiScrollBar->getBorderTop() };
         m_uiScrollBarGroup->createWidget<Drag<float, 1>>("Border Top", ImGuiDataType_Float, borderTop, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiScrollBar = dynamic_cast<UIScrollBar*>(m_component);
+            auto uiScrollBar =getComponent<UIScrollBar>();
             uiScrollBar->setBorderTop(val[0]);
             });
         std::array borderBottom = { uiScrollBar->getBorderBottom() };
         m_uiScrollBarGroup->createWidget<Drag<float, 1>>("Border Bottom", ImGuiDataType_Float, borderBottom, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiScrollBar = dynamic_cast<UIScrollBar*>(m_component);
+            auto uiScrollBar =getComponent<UIScrollBar>();
             uiScrollBar->setBorderBottom(val[0]);
             });
     }
@@ -134,7 +124,7 @@ void UIScrollBarEditorComponent::drawUIScrollBar()
         auto fillMethod = uiScrollBar->getFillMethod();
         auto m_compComboFillMethod = m_uiScrollBarGroup->createWidget<ComboBox>((int)fillMethod);
         m_compComboFillMethod->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiScrollBar = dynamic_cast<UIScrollBar*>(m_component);
+            auto uiScrollBar =getComponent<UIScrollBar>();
             uiScrollBar->setFillMethod(val);
             dirty();
             });
@@ -151,7 +141,7 @@ void UIScrollBarEditorComponent::drawUIScrollBar()
 
             auto m_compComboFillOrigin = m_uiScrollBarGroup->createWidget<ComboBox>((int)uiScrollBar->getFillOrigin());
             m_compComboFillOrigin->getOnDataChangedEvent().addListener([this](auto val) {
-                auto uiScrollBar = dynamic_cast<UIScrollBar*>(m_component);
+                auto uiScrollBar =getComponent<UIScrollBar>();
                 uiScrollBar->setFillOrigin(val);
                 dirty();
                 });
@@ -184,13 +174,13 @@ void UIScrollBarEditorComponent::drawUIScrollBar()
 
             std::array fillAmount = { uiScrollBar->getFillAmount() };
             m_uiScrollBarGroup->createWidget<Drag<float, 1>>("Fill Amount", ImGuiDataType_Float, fillAmount, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-                auto uiScrollBar = dynamic_cast<UIScrollBar*>(m_component);
+                auto uiScrollBar =getComponent<UIScrollBar>();
                 uiScrollBar->setFillAmount(val[0]);
                 });
 
             if (fillMethod == FillMethod::Radial90 || fillMethod == FillMethod::Radial180 || fillMethod == FillMethod::Radial360) {
                 m_uiScrollBarGroup->createWidget<CheckBox>("Clockwise", uiScrollBar->getClockwise())->getOnDataChangedEvent().addListener([this](bool val) {
-                    auto uiScrollBar = dynamic_cast<UIScrollBar*>(m_component);
+                    auto uiScrollBar =getComponent<UIScrollBar>();
                     uiScrollBar->setClockwise(val);
                     });
             }
@@ -199,32 +189,32 @@ void UIScrollBarEditorComponent::drawUIScrollBar()
 
     auto color = uiScrollBar->getColor();
     m_uiScrollBarGroup->createWidget<Color>("Color", color)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiScrollBar = dynamic_cast<UIScrollBar*>(m_component);
+        auto uiScrollBar =getComponent<UIScrollBar>();
         uiScrollBar->setColor(val[0], val[1], val[2], val[3]);
         });
 
     //! Normal Color
     m_uiScrollBarGroup->createWidget<Color>("Normal Color", uiScrollBar->getNormalColor())->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiScrollBar = dynamic_cast<UIScrollBar*>(m_component);
+        auto uiScrollBar =getComponent<UIScrollBar>();
         uiScrollBar->setNormalColor(val[0], val[1], val[2], val[3]);
         });
 
     //! Pressed Color
     m_uiScrollBarGroup->createWidget<Color>("Pressed Color", uiScrollBar->getPressedColor())->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiScrollBar = dynamic_cast<UIScrollBar*>(m_component);
+        auto uiScrollBar =getComponent<UIScrollBar>();
         uiScrollBar->setPressedColor(val[0], val[1], val[2], val[3]);
         });
 
     //! Disable Color
     m_uiScrollBarGroup->createWidget<Color>("Disable Color", uiScrollBar->getDisabledColor())->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiScrollBar = dynamic_cast<UIScrollBar*>(m_component);
+        auto uiScrollBar =getComponent<UIScrollBar>();
         uiScrollBar->setDisabledColor(val[0], val[1], val[2], val[3]);
         });
 
     //! Fade Duration
     std::array fadeDuration = { uiScrollBar->getFadeDuration() };
     m_uiScrollBarGroup->createWidget<Drag<float>>("Fade Duration", ImGuiDataType_Float, fadeDuration, 0.01f, 0.0f, 60.0f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiScrollBar = dynamic_cast<UIScrollBar*>(m_component);
+        auto uiScrollBar =getComponent<UIScrollBar>();
         uiScrollBar->setFadeDuration(val[0]);
         });
 
@@ -232,7 +222,7 @@ void UIScrollBarEditorComponent::drawUIScrollBar()
     auto direction = uiScrollBar->getDirection();
     auto m_compComboDirection = m_uiScrollBarGroup->createWidget<ComboBox>((int)direction);
     m_compComboDirection->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiScrollBar = dynamic_cast<UIScrollBar*>(m_component);
+        auto uiScrollBar =getComponent<UIScrollBar>();
         uiScrollBar->setDirection(val);
         dirty();
         });
@@ -246,17 +236,17 @@ void UIScrollBarEditorComponent::drawUIScrollBar()
 
     std::array value = { uiScrollBar->getValue () };
     m_uiScrollBarGroup->createWidget<Drag<float>>("Value", ImGuiDataType_Float, value, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiScrollBar = dynamic_cast<UIScrollBar*>(m_component);
+        auto uiScrollBar =getComponent<UIScrollBar>();
         uiScrollBar->setValue(val[0]);
         });
     std::array size = { uiScrollBar->getSize() };
     m_uiScrollBarGroup->createWidget<Drag<float>>("Size", ImGuiDataType_Float, size, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiScrollBar = dynamic_cast<UIScrollBar*>(m_component);
+        auto uiScrollBar =getComponent<UIScrollBar>();
         uiScrollBar->setSize(val[0]);
         });
     /*std::array step = { uiScrollBar->getStep() };
     m_uiScrollBarGroup->createWidget<Drag<float>>("Deceleration Rate", ImGuiDataType_Float, value, 0.01f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiScrollBar = dynamic_cast<UIScrollBar*>(m_component);
+        auto uiScrollBar =getComponent<UIScrollBar>();
         uiScrollBar->setValue(val[0]);
         });*/
 }

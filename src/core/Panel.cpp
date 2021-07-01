@@ -111,7 +111,10 @@ namespace ige::creator
                     m_size = newSize;
                 }
 
-                drawWidgets();
+                if(m_bInitialized)
+                {
+                    drawWidgets();
+                }
             }
             ImGui::End();
         }

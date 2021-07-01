@@ -13,11 +13,11 @@ class UIImageEditorComponent : public EditorComponent
 {
 public:
 	UIImageEditorComponent();
-	~UIImageEditorComponent();
+	virtual ~UIImageEditorComponent();
 
 	virtual void redraw() override;
 protected:
-	virtual bool isSafe(Component* comp) override;
+	
 	virtual void onInspectorUpdate() override;
 
 	void drawUIImage();

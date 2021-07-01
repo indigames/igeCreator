@@ -13,11 +13,11 @@ class UIMaskEditorComponent : public EditorComponent
 {
 public:
 	UIMaskEditorComponent();
-	~UIMaskEditorComponent();
+	virtual ~UIMaskEditorComponent();
 
 	virtual void redraw() override;
 protected:
-	virtual bool isSafe(Component* comp) override;
+	
 	virtual void onInspectorUpdate() override;
 
 	void drawUIMask();

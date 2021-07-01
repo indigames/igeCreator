@@ -55,7 +55,7 @@ namespace ige::creator
         */
         void executePlugins()
         {
-            for (auto& plugin : m_plugins)
+            for (const auto& plugin : m_plugins)
                 plugin->execute();
         }
 
@@ -66,11 +66,10 @@ namespace ige::creator
         {
             for (auto& plugin : m_plugins)
                 plugin = nullptr;
-
             m_plugins.clear();
         }
 
-    private:
-        std::vector<std::shared_ptr<IPlugin>> m_plugins;
+    protected:
+        std::vector<std::shared_ptr<IPlugin>> m_plugins = {};
     };
 }

@@ -17,35 +17,10 @@ UISliderEditorComponent::UISliderEditorComponent() {
 
 UISliderEditorComponent::~UISliderEditorComponent()
 {
-    if (m_uiSliderMinGroup) {
-        m_uiSliderMinGroup->removeAllWidgets();
-        m_uiSliderMinGroup->removeAllPlugins();
-        m_uiSliderMinGroup = nullptr;
-    }
-
-    if (m_uiSliderMaxGroup) {
-        m_uiSliderMaxGroup->removeAllWidgets();
-        m_uiSliderMaxGroup->removeAllPlugins();
-        m_uiSliderMaxGroup = nullptr;
-    }
-
-
-    if (m_uiSliderValueGroup) {
-        m_uiSliderValueGroup->removeAllWidgets();
-        m_uiSliderValueGroup->removeAllPlugins();
-        m_uiSliderValueGroup = nullptr;
-    }
-
-    if (m_uiSliderGroup) {
-        m_uiSliderGroup->removeAllWidgets();
-        m_uiSliderGroup->removeAllPlugins();
-        m_uiSliderGroup = nullptr;
-    }
-}
-
-bool UISliderEditorComponent::isSafe(Component* comp)
-{
-    return dynamic_cast<UISlider*>(comp);
+    m_uiSliderMinGroup = nullptr;
+    m_uiSliderMaxGroup = nullptr;
+    m_uiSliderValueGroup = nullptr;
+    m_uiSliderGroup = nullptr;
 }
 
 void UISliderEditorComponent::redraw()
@@ -91,62 +66,48 @@ void UISliderEditorComponent::drawUISlider()
         return;
     m_uiSliderGroup->removeAllWidgets();
 
-    auto uiSlider = dynamic_cast<UISlider*>(m_component);
+    auto uiSlider = getComponent<UISlider>();
     if (uiSlider == nullptr)
         return;
 
-    if (m_uiSliderMinGroup) {
-        m_uiSliderMinGroup->removeAllWidgets();
-        m_uiSliderMinGroup->removeAllPlugins();
-        m_uiSliderMinGroup = nullptr;
-    }
-
-    if (m_uiSliderMaxGroup) {
-        m_uiSliderMaxGroup->removeAllWidgets();
-        m_uiSliderMaxGroup->removeAllPlugins();
-        m_uiSliderMaxGroup = nullptr;
-    }
-
-    if (m_uiSliderValueGroup) {
-        m_uiSliderValueGroup->removeAllWidgets();
-        m_uiSliderValueGroup->removeAllPlugins();
-        m_uiSliderValueGroup = nullptr;
-    }
+    m_uiSliderMinGroup = nullptr;
+    m_uiSliderMaxGroup = nullptr;
+    m_uiSliderValueGroup = nullptr;
 
     auto m_interactable = m_uiSliderGroup->createWidget<CheckBox>("Interactable", uiSlider->isInteractable())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto uiSlider = dynamic_cast<UISlider*>(m_component);
+        auto uiSlider = getComponent<UISlider>();
         uiSlider->setInteractable(val);
         });
 
     //! Normal Color
     m_uiSliderGroup->createWidget<Color>("Normal Color", uiSlider->getColor())->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiSlider = dynamic_cast<UISlider*>(m_component);
+        auto uiSlider = getComponent<UISlider>();
         uiSlider->setColor(val[0], val[1], val[2], val[3]);
         });
 
     //! Pressed Color
     m_uiSliderGroup->createWidget<Color>("Pressed Color", uiSlider->getPressedColor())->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiSlider = dynamic_cast<UISlider*>(m_component);
+        auto uiSlider = getComponent<UISlider>();
         uiSlider->setPressedColor(val[0], val[1], val[2], val[3]);
         });
 
     //! Disable Color
     m_uiSliderGroup->createWidget<Color>("Disable Color", uiSlider->getDisabledColor())->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiSlider = dynamic_cast<UISlider*>(m_component);
+        auto uiSlider = getComponent<UISlider>();
         uiSlider->setDisabledColor(val[0], val[1], val[2], val[3]);
         });
 
     //! Fade Duration
     std::array fadeDuration = { uiSlider->getFadeDuration() };
     m_uiSliderGroup->createWidget<Drag<float>>("Fade Duration", ImGuiDataType_Float, fadeDuration, 0.01f, 0.0f, 60.0f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiSlider = dynamic_cast<UISlider*>(m_component);
+        auto uiSlider = getComponent<UISlider>();
         uiSlider->setFadeDuration(val[0]);
         });
 
     auto direction = uiSlider->getDirection();
     auto m_directionCombo = m_uiSliderGroup->createWidget<ComboBox>((int)direction);
     m_directionCombo->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiSlider = dynamic_cast<UISlider*>(m_component);
+        auto uiSlider = getComponent<UISlider>();
         uiSlider->setDirection(val);
         dirty();
         });
@@ -168,7 +129,7 @@ void UISliderEditorComponent::drawUISlider()
     drawValue();
 
     m_uiSliderGroup->createWidget<CheckBox>("Whole Numbers", uiSlider->getWholeNumbers())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto uiSlider = dynamic_cast<UISlider*>(m_component);
+        auto uiSlider = getComponent<UISlider>();
         uiSlider->setWholeNumbers(val);
         });
 }
@@ -179,7 +140,7 @@ void UISliderEditorComponent::drawMin()
         return;
     m_uiSliderMinGroup->removeAllWidgets();
 
-    auto uiSlider = dynamic_cast<UISlider*>(m_component);
+    auto uiSlider = getComponent<UISlider>();
     if (uiSlider == nullptr)
         return;
 
@@ -189,7 +150,7 @@ void UISliderEditorComponent::drawMin()
 
     std::array min = { uiSlider->getMin() };
     m_uiSliderMinGroup->createWidget<Drag<float>>("Min ", ImGuiDataType_Float, min, 0.01f, 0.0f, m_max)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiSlider = dynamic_cast<UISlider*>(m_component);
+        auto uiSlider = getComponent<UISlider>();
         auto max = uiSlider->getMax();
         if (val[0] < max) {
             uiSlider->setMin(val[0]);
@@ -205,7 +166,7 @@ void UISliderEditorComponent::drawMax()
         return;
     m_uiSliderMaxGroup->removeAllWidgets();
 
-    auto uiSlider = dynamic_cast<UISlider*>(m_component);
+    auto uiSlider = getComponent<UISlider>();
     if (uiSlider == nullptr)
         return;
 
@@ -215,7 +176,7 @@ void UISliderEditorComponent::drawMax()
 
     std::array max = { uiSlider->getMax() };
     m_uiSliderMaxGroup->createWidget<Drag<float>>("Max ", ImGuiDataType_Float, max, 0.01f, m_min, 100.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiSlider = dynamic_cast<UISlider*>(m_component);
+        auto uiSlider = getComponent<UISlider>();
         auto min = uiSlider->getMin();
         if (val[0] > min) {
             uiSlider->setMax(val[0]);
@@ -231,7 +192,7 @@ void UISliderEditorComponent::drawValue()
         return;
     m_uiSliderValueGroup->removeAllWidgets();
 
-    auto uiSlider = dynamic_cast<UISlider*>(m_component);
+    auto uiSlider = getComponent<UISlider>();
     if (uiSlider == nullptr)
         return;
 
@@ -241,7 +202,7 @@ void UISliderEditorComponent::drawValue()
 
     std::array value = { uiSlider->getValue() };
     m_uiSliderValueGroup->createWidget<Drag<float>>("Value ", ImGuiDataType_Float, value, 0.01f, m_min, m_max)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiSlider = dynamic_cast<UISlider*>(m_component);
+        auto uiSlider = getComponent<UISlider>();
         auto min = uiSlider->getMin();
         auto max = uiSlider->getMax();
         if (val[0] >= min && val[0] <= max)

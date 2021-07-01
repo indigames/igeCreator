@@ -15,12 +15,8 @@ EditorComponent::EditorComponent()
 }
 
 EditorComponent::~EditorComponent() {
-	m_component = nullptr;
 	m_group = nullptr;
-}
-
-bool EditorComponent::isSafe(Component* comp) {
-	return false;
+	m_component = nullptr;	
 }
 
 void EditorComponent::draw(std::shared_ptr<Group> group) {
@@ -32,18 +28,13 @@ void EditorComponent::redraw() {
 	m_bisDirty = false;
 }
 
-bool EditorComponent::setComponent(Component* component) 
+bool EditorComponent::setComponent(std::shared_ptr<Component> component)
 {
-	if (isSafe(component)) {
+	if (isSafe<Component>(component)) {
 		m_component = component;
 		return true;
 	}
 	return false;
-}
-
-Component* EditorComponent::getComponent()
-{
-	return m_component;
 }
 
 NS_IGE_END

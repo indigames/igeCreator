@@ -13,7 +13,7 @@ class BoneTransformEditorComponent  : public EditorComponent
 {
 public:
 	BoneTransformEditorComponent ();
-	~BoneTransformEditorComponent ();
+	virtual ~BoneTransformEditorComponent ();
 
 protected:
 	virtual void onInspectorUpdate() override;

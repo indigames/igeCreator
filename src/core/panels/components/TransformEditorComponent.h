@@ -11,12 +11,12 @@ class TransformEditorComponent : public EditorComponent
 {
 public:
     TransformEditorComponent();
-    ~TransformEditorComponent();
+    virtual ~TransformEditorComponent();
 
-    virtual bool setComponent(Component* component) override;
+    virtual bool setComponent(std::shared_ptr<Component> component) override;
     virtual void redraw() override;
 protected:
-    virtual bool isSafe(Component* comp) override;
+    
     virtual void onInspectorUpdate() override;
 
     void drawLocalTransformComponent();

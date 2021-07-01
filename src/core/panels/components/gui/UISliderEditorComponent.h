@@ -13,11 +13,11 @@ class UISliderEditorComponent : public EditorComponent
 {
 public:
 	UISliderEditorComponent();
-	~UISliderEditorComponent();
+	virtual ~UISliderEditorComponent();
 
 	virtual void redraw() override;
 protected:
-	virtual bool isSafe(Component* comp) override;
+	
 	virtual void onInspectorUpdate() override;
 
 	void drawUISlider();

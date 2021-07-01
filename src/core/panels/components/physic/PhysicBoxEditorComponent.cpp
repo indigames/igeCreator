@@ -14,16 +14,7 @@ PhysicBoxEditorComponent::PhysicBoxEditorComponent() {
 
 PhysicBoxEditorComponent::~PhysicBoxEditorComponent()
 {
-    if (m_physicGroup) {
-        m_physicGroup->removeAllWidgets();
-        m_physicGroup->removeAllPlugins();
-    }
     m_physicGroup = nullptr;
-}
-
-bool PhysicBoxEditorComponent::isSafe(Component* comp)
-{
-    return dynamic_cast<PhysicBox*>(comp);
 }
 
 void PhysicBoxEditorComponent::redraw()
@@ -52,7 +43,7 @@ void PhysicBoxEditorComponent::onInspectorUpdate()
 
 void PhysicBoxEditorComponent::drawPhysicBox()
 {
-    auto physicComp = dynamic_cast<PhysicBox*>(getComponent());
+    auto physicComp = getComponent<PhysicBox>();
     if (physicComp == nullptr)
         return;
 
@@ -61,7 +52,7 @@ void PhysicBoxEditorComponent::drawPhysicBox()
     m_physicGroup->createWidget<Separator>();
     std::array size = { physicComp->getSize().X(), physicComp->getSize().Y(), physicComp->getSize().Z() };
     m_physicGroup->createWidget<Drag<float, 3>>("Size", ImGuiDataType_Float, size, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
-        auto physicComp = dynamic_cast<PhysicBox*>(getComponent());
+        auto physicComp = getComponent<PhysicBox>();
         physicComp->setSize({ val[0], val[1], val[2] });
         });
 

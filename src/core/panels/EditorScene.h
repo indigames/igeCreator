@@ -25,7 +25,6 @@ public:
 
     virtual void clear();
     virtual void update(float dt);
-    virtual void refresh();
 
     void registerShortcut() override;
     void unregisterShortcut() override;
@@ -54,7 +53,6 @@ protected:
 protected:
 
     virtual void initialize() override;
-    virtual void _drawImpl() override;
 
     void initDragDrop();
 
@@ -126,9 +124,6 @@ protected:
 
     //! Cache current scene
     std::shared_ptr<Scene> m_currentScene = nullptr;
-
-    //! Initialize states
-    bool m_bIsInitialized = false;
 
     //keyboard helper
     unsigned short m_fnKeyPressed = 1;

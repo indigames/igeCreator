@@ -182,7 +182,7 @@ namespace ige::creator
 
         updateTargets();
 
-        for (auto& target : m_targets)
+        for (const auto& target : m_targets)
         {
             if (target)
             {
@@ -268,7 +268,7 @@ namespace ige::creator
     //! Translate
     void Gizmo::translate(const Vec3& trans)
     {
-        for (auto& target : m_targets)
+        for (auto target : m_targets)
             if (target) target->getTransform()->worldTranslate(trans);
         updateTargetNode();
     }

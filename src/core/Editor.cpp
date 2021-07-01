@@ -345,8 +345,9 @@ namespace ige::creator
     void Editor::refreshScene() {
         if (getCanvas())
         {
-            getCanvas()->getHierarchy()->clear();
             getCanvas()->getEditorScene()->clear();
+            getCanvas()->getHierarchy()->clear();
+            getCanvas()->getInspector()->clear();
         }
     }
 
@@ -445,7 +446,7 @@ namespace ige::creator
         auto targets = Editor::getCurrentScene()->getTarget()->getAllTargets();
         if (targets.size() > 0 && targets[0] != nullptr)
         {
-            for (auto target : targets)
+            for (const auto& target : targets)
             {
                 if (target)
                 {
@@ -455,7 +456,7 @@ namespace ige::creator
                         clonedJson.push_back(jTarget);
                 }
             }
-            for (auto jTarget : clonedJson)
+            for (const auto& jTarget : clonedJson)
             {
                 auto objName = jTarget.value("name", "");
                 auto newObject = Editor::getCurrentScene()->createObject(objName + "_cp");
@@ -476,13 +477,13 @@ namespace ige::creator
         auto targets = Editor::getCurrentScene()->getTarget()->getAllTargets();
         if (targets.size() > 0)
         {
-            auto parent = targets[0] ? targets[0]->getParent() : nullptr;
-            for (auto target : targets)
-                if (target) Editor::getCurrentScene()->removeObjectById(target->getId());
             Editor::getCurrentScene()->clearTargets();
+            auto parent = targets[0] ? targets[0]->getParent() : nullptr;
+            for(auto target: targets)
+                Editor::getCurrentScene()->removeObjectById(target->getId());
             Editor::getCurrentScene()->addTarget(parent);
+            targets.clear();
         }
-        targets.clear();
         return true;
     }
 
@@ -490,14 +491,12 @@ namespace ige::creator
     {
         m_selectedJsons.clear();
         auto targets = Editor::getCurrentScene()->getTarget()->getAllTargets();
-        for (auto target : targets)
+        for (const auto& target : targets)
         {
-            if (target)
-            {
-                json jTarget;
-                target->to_json(jTarget);
-                if(!jTarget.is_null()) m_selectedJsons.push_back(jTarget);
-            }
+            json jTarget;
+            target->to_json(jTarget);
+            if(!jTarget.is_null())
+                m_selectedJsons.push_back(jTarget);
         }
     }
 
@@ -505,7 +504,7 @@ namespace ige::creator
     {
         if (m_selectedJsons.empty()) return;
 
-        for (auto jTarget : m_selectedJsons)
+        for (const auto& jTarget : m_selectedJsons)
         {
             auto objName = jTarget.value("name", "");
             auto newObject = Editor::getCurrentScene()->createObject(objName + "_cp");

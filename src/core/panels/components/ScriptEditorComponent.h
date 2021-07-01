@@ -13,11 +13,11 @@ class ScriptEditorComponent : public EditorComponent
 {
 public:
 	ScriptEditorComponent();
-	~ScriptEditorComponent();
+	virtual ~ScriptEditorComponent();
 
 	virtual void redraw() override;
 protected:
-	virtual bool isSafe(Component* comp) override;
+	
 	virtual void onInspectorUpdate() override;
 
 	void drawScriptComponent();

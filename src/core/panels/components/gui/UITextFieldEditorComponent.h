@@ -13,11 +13,11 @@ class UITextFieldEditorComponent : public EditorComponent
 {
 public:
 	UITextFieldEditorComponent();
-	~UITextFieldEditorComponent();
+	virtual ~UITextFieldEditorComponent();
 
 	virtual void redraw() override;
 protected:
-	virtual bool isSafe(Component* comp) override;
+	
 	virtual void onInspectorUpdate() override;
 
 	void drawUITextField();

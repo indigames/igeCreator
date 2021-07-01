@@ -53,47 +53,26 @@
 NS_IGE_BEGIN
 
 InspectorEditor::InspectorEditor() {
-	m_componentGroup = nullptr;
 	m_deltaTime = 0;
 }
 
 InspectorEditor::~InspectorEditor() {
 	clear();
-
-	if (m_componentGroup)
-	{
-		m_componentGroup->removeAllWidgets();
-		m_componentGroup->removeAllPlugins();
-		m_componentGroup = nullptr;
-	}
 }
 
 void InspectorEditor::clear() {
-	std::map<uint64_t, std::shared_ptr<Group>> releasings;
-	releasings.swap(m_groups);
-	for (const auto& obj : releasings)
-	{
-		if (obj.second != nullptr) {
-			obj.second->removeAllWidgets();
-			obj.second->removeAllPlugins();
-		}
+	for (auto& [key, value] : m_groups) {
+		value = nullptr;
 	}
+	m_groups.clear();
 
+	for (auto& [key, value] : m_components) {
+		value = nullptr;
+	}
 	m_components.clear();
 }
-	
-void InspectorEditor::setParentGroup(std::shared_ptr<Group> componentGroup)
-{
-	if (m_componentGroup != componentGroup) {
-		if (m_componentGroup) {
-			m_componentGroup->removeAllWidgets();
-			m_componentGroup->removeAllPlugins();
-		}
-		m_componentGroup = componentGroup;
-	}
-}
 
-std::shared_ptr<EditorComponent> InspectorEditor::addComponent(int type, Component* comp, std::shared_ptr<Group> header) {
+std::shared_ptr<EditorComponent> InspectorEditor::addComponent(int type, std::shared_ptr<Component> comp, std::shared_ptr<Group> header) {
 	if (comp == nullptr) return nullptr;
 
 	ComponentType m_type = (ComponentType)type;
@@ -325,17 +304,12 @@ void InspectorEditor::update(float dt) {
 	if (m_deltaTime < INSPECTOR_EDITOR_DELTA_LIMIT) return;
 	m_deltaTime = 0;
 	
-	try {
-		for (auto const& component : m_components) {
-			if (component.second != nullptr && component.second->isDirty()) {
-				component.second->redraw();
-			}
+	for(const auto& component: m_components) {
+		if (component.second != nullptr && component.second->isDirty()) {
+			component.second->redraw();
 		}
 	}
-	catch(...)
-	{
-		pyxie_printf("ERROR !!!");
-	}
+
 
 	/*for (auto& watch : m_watcher) {
 		for (auto& _obj : watch.second) {
@@ -348,18 +322,6 @@ void InspectorEditor::update(float dt) {
 			
 		}
 	}*/
-}
-
-void InspectorEditor::makeDirty(Component* comp) {
-	std::shared_ptr<EditorComponent> view = nullptr;
-	for (auto obj : m_components) {
-		if (obj.second != nullptr && obj.second->getComponent() == comp) {
-			view = obj.second;
-			break;
-		}
-	}
-	if (view == nullptr) return;
-	view->setDirty(true);
 }
 
 void InspectorEditor::makeDirty(uint64_t componentInstanceId) {

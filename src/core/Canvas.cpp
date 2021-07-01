@@ -44,15 +44,15 @@ namespace ige::creator
         m_menuBar = nullptr;
         m_toolBar = nullptr;
 
-        for (auto panel : m_panels)
-            panel.second = nullptr;
+        for (auto& [key, value] : m_panels)
+            value = nullptr;
         m_panels.clear();
     }
 
     void Canvas::update(float dt)
     {
-        for (auto panel : m_panels)
-            panel.second->update(dt);
+        for (const auto& [key, value] : m_panels)
+            value->update(dt);
     }
 
     void Canvas::draw()
@@ -104,10 +104,8 @@ namespace ige::creator
                 ImGui::DockSpace(dockspace_id, {0, 0}, ImGuiDockNodeFlags_NoCloseButton | ImGuiDockNodeFlags_NoWindowMenuButton);
             }
 
-            for (auto panel : m_panels)
-            {
-                panel.second->draw();
-            }
+            for (const auto& [key, value] : m_panels)
+                value->draw();
         }
 
         static bool firstFrame = true;
