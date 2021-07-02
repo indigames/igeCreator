@@ -1,4 +1,5 @@
 #include "core/scene/components/TransformEditorComponent.h"
+#include "core/scene/CompoundComponent.h"
 
 #include "components/TransformComponent.h"
 #include <core/layout/Group.h>
@@ -86,10 +87,6 @@ void TransformEditorComponent::onInspectorUpdate()
         return;
     m_group->removeAllWidgets();
 
-    auto transform = getComponent<TransformComponent>();
-    if (transform == nullptr)
-        return;
-
     m_localTransformGroup = m_group->createWidget<Group>("LocalTransformGroup", false);
     drawLocalTransformComponent();
 
@@ -106,22 +103,38 @@ void TransformEditorComponent::drawLocalTransformComponent() {
 
     m_localTransformGroup->removeAllWidgets();
 
+    m_localTransformGroup->createWidget<Label>("Local");
+
+    auto comp = getComponent<CompoundComponent>();
+    auto position = comp->getJson<Vec3>("pos", Vec3(NAN, NAN, NAN));
+
+    std::array pos = { position.X(), position.Y(), position.Z() };
+    m_localTransformGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos)->getOnDataChangedEvent().addListener([this](auto val) {
+        m_dirtyFlag = 2;
+        if (std::isnan(val[0]) || std::isnan(val[1]) || std::isnan(val[2]))
+        {
+            m_dirtyFlag = 0;
+            val[0] = val[1] = val[2] = 0.f;
+        }            
+
+        auto ccomp = getComponent<CompoundComponent>();
+        auto position = Vec3(val[0], val[1], val[2]);
+        ccomp->setJson("pos", position);
+
+        IgnoreTransformEventScope scope(getComponent(), m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
+        for (auto comp : ccomp->getComponents())
+        {
+            auto transform = std::dynamic_pointer_cast<TransformComponent>(comp);
+            transform->setPosition(position);
+            transform->onUpdate(0.f);
+        }       
+        
+        dirty();
+    });
+
     auto transform = getComponent<TransformComponent>();
     if (transform == nullptr)
         return;
-
-    m_localTransformGroup->createWidget<Label>("Local");
-
-    std::array pos = { transform->getPosition().X(), transform->getPosition().Y(), transform->getPosition().Z() };
-    m_localTransformGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos)->getOnDataChangedEvent().addListener([this](auto val) {
-        IgnoreTransformEventScope scope(getComponent(), m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
-        auto transform = getComponent<TransformComponent>();
-        transform->setPosition({ val[0], val[1], val[2] });
-        transform->onUpdate(0.f);
-        m_dirtyFlag = 2;
-        dirty();
-        });
-
     Vec3 euler;
     vmath_quatToEuler(transform->getRotation().P(), euler.P());
     std::array rot = { RADIANS_TO_DEGREES(euler.X()), RADIANS_TO_DEGREES(euler.Y()), RADIANS_TO_DEGREES(euler.Z()) };

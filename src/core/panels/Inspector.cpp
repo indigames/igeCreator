@@ -320,8 +320,7 @@ namespace ige::creator
         // Component
         createWidget<Separator>();
         m_componentGroup = createWidget<Group>("Inspector_Components", false);
-        for(auto comp: m_targetObject->getComponents()) {
-            auto component = std::dynamic_pointer_cast<CompoundComponent>(comp)->getComponents()[0];
+        for(auto component : m_targetObject->getComponents()) {
             auto componentName = component->getName();
             auto componentId = component->getInstanceId();
             auto closable = (componentName != "Transform" && componentName != "RectTransform");

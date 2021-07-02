@@ -7,7 +7,7 @@ namespace ige::scene
 {    
     //! Constructor
     TargetObject::TargetObject(Scene* scene)
-        : SceneObject::SceneObject(scene, (uint64_t)-1)
+        : SceneObject::SceneObject(scene, 0)
     {       
     }
 
@@ -22,7 +22,7 @@ namespace ige::scene
     {
         if(m_objects.size() == 1)
             return m_objects[0]->getId();
-        return (uint64_t)-1;
+        return 0;
     }
 
     //! Get UUID
@@ -30,7 +30,7 @@ namespace ige::scene
     {
         if(m_objects.size() == 1)
             return m_objects[0]->getUUID();
-        return "FFFFFFFFFFFFFFFF";
+        return "Multiple Values";
     }
 
     //! Get Name
@@ -81,7 +81,7 @@ namespace ige::scene
     {
         auto found = std::find_if(m_components.begin(), m_components.end(), [&component](auto element) {
             auto compoundComponent = std::dynamic_pointer_cast<CompoundComponent>(element);
-            return compoundComponent && component->getName().compare(compoundComponent->getContainName()) == 0;
+            return compoundComponent && component->getName().compare(compoundComponent->getName()) == 0;
         });
 
         if (found != m_components.end())
@@ -101,7 +101,7 @@ namespace ige::scene
     {
         auto found = std::find_if(m_components.begin(), m_components.end(), [&name](auto element) {
             auto compoundComponent = std::dynamic_pointer_cast<CompoundComponent>(element);
-            return compoundComponent && name.compare(compoundComponent->getContainName()) == 0;
+            return compoundComponent && name.compare(compoundComponent->getName()) == 0;
         });
 
         if (found != m_components.end())
