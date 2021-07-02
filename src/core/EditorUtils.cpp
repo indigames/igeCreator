@@ -2,14 +2,14 @@
 #include "core/gizmo/Gizmo.h"
 #include "core/Editor.h"
 #include "core/Canvas.h"
-#include "scene/TargetObject.h"
+#include "core/scene/TargetObject.h"
 
 NS_IGE_BEGIN
 
 void EditorUtils::Tools_View() 
 {
     bool focused = Editor::getCanvas()->getHierarchy()->isFocused() || Editor::getCanvas()->getEditorScene()->isFocused();
-    auto target = Editor::getCurrentScene()->getTarget();
+    auto target = Editor::getInstance()->getTarget();
     if (!target->empty() && focused) {
         auto gizmo = Editor::getCanvas()->getEditorScene()->getGizmo();
         if (gizmo) gizmo->setVisible(false);
@@ -19,7 +19,7 @@ void EditorUtils::Tools_View()
 void EditorUtils::Tools_Move()
 {
     bool focused = Editor::getCanvas()->getHierarchy()->isFocused() || Editor::getCanvas()->getEditorScene()->isFocused();
-    auto targets = Editor::getCurrentScene()->getTarget();
+    auto targets = Editor::getInstance()->getTarget();
     if (!targets->empty() && focused)
     {
         auto gizmo = Editor::getCanvas()->getEditorScene()->getGizmo();
@@ -34,7 +34,7 @@ void EditorUtils::Tools_Move()
 void EditorUtils::Tools_Rotate() 
 {
     bool focused = Editor::getCanvas()->getHierarchy()->isFocused() || Editor::getCanvas()->getEditorScene()->isFocused();
-    auto targets = Editor::getCurrentScene()->getTarget();
+    auto targets = Editor::getInstance()->getTarget();
     if (!targets->empty() && focused)
     {
         auto gizmo = Editor::getCanvas()->getEditorScene()->getGizmo();
@@ -49,7 +49,7 @@ void EditorUtils::Tools_Rotate()
 void EditorUtils::Tools_Scale()
 {
     bool focused = Editor::getCanvas()->getHierarchy()->isFocused() || Editor::getCanvas()->getEditorScene()->isFocused();
-    auto targets = Editor::getCurrentScene()->getTarget();
+    auto targets = Editor::getInstance()->getTarget();
     if (!targets->empty() && focused)
     {
         auto gizmo = Editor::getCanvas()->getEditorScene()->getGizmo();

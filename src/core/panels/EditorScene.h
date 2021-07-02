@@ -7,9 +7,8 @@
 #include "core/gizmo/Gizmo.h"
 #include "core/shortcut/IShortcut.h"
 
-#include "components/gui/RectTransform.h"
-#include "scene/Scene.h"
-
+#include <components/gui/RectTransform.h>
+#include <scene/Scene.h>
 
 USING_NS_PYXIE
 USING_NS_IGE_CREATOR

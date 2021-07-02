@@ -1,11 +1,11 @@
 #include "core/gizmo/Gizmo.h"
 #include "core/Editor.h"
+#include "core/scene/TargetObject.h"
 
 #include <components/TransformComponent.h>
 #include <components/gui/RectTransform.h>
 #include <scene/Scene.h>
 #include <scene/SceneObject.h>
-#include <scene/TargetObject.h>
 
 namespace ige::creator
 {
@@ -16,9 +16,9 @@ namespace ige::creator
         m_mode = gizmo::MODE::LOCAL;
         m_visible = true;
 
-        m_targetAddedEventId = Scene::getTargetAddedEvent().addListener(std::bind(&Gizmo::onTargetAdded, this, std::placeholders::_1));
-        m_targetRemovedEventId = Scene::getTargetRemovedEvent().addListener(std::bind(&Gizmo::onTargetRemoved, this, std::placeholders::_1));
-        m_targetClearedEventId = Scene::getTargetClearedEvent().addListener(std::bind(&Gizmo::onTargetCleared, this));
+        m_targetAddedEventId = Editor::getTargetAddedEvent().addListener(std::bind(&Gizmo::onTargetAdded, this, std::placeholders::_1));
+        m_targetRemovedEventId = Editor::getTargetRemovedEvent().addListener(std::bind(&Gizmo::onTargetRemoved, this, std::placeholders::_1));
+        m_targetClearedEventId = Editor::getTargetClearedEvent().addListener(std::bind(&Gizmo::onTargetCleared, this));
     }
 
     Gizmo::~Gizmo()
@@ -26,9 +26,10 @@ namespace ige::creator
         m_targets.clear();
         m_camera = nullptr;
         onTargetCleared();
-        Scene::getTargetAddedEvent().removeListener(m_targetAddedEventId);
-        Scene::getTargetRemovedEvent().removeListener(m_targetRemovedEventId);
-        Scene::getTargetClearedEvent().removeListener(m_targetClearedEventId);
+
+        Editor::getTargetAddedEvent().removeListener(m_targetAddedEventId);
+        Editor::getTargetRemovedEvent().removeListener(m_targetRemovedEventId);
+        Editor::getTargetClearedEvent().removeListener(m_targetClearedEventId);
     }
 
     void Gizmo::setCamera(Camera* cam)
@@ -66,7 +67,7 @@ namespace ige::creator
         if(!m_bEnabled || m_camera == nullptr || !m_visible || Editor::getCurrentScene() == nullptr)
             return;
 
-        auto target = Editor::getCurrentScene()->getTarget();
+        auto target = Editor::getInstance()->getTarget();
         if (target->empty())
             return;
         
@@ -205,7 +206,7 @@ namespace ige::creator
     void Gizmo::updateTargets()
     {
         m_targets.clear();
-        m_targets = Editor::getCurrentScene()->getTarget()->getAllTargets();
+        m_targets = Editor::getInstance()->getTarget()->getAllTargets();
 
         auto it = m_targets.begin();
         while (it != m_targets.end())

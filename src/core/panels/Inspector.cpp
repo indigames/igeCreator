@@ -18,11 +18,13 @@
 #include "core/Canvas.h"
 #include "core/FileHandle.h"
 #include "core/task/TaskManager.h"
+#include "core/scene/CompoundComponent.h"
+#include "core/scene/TargetObject.h"
 
 #include "core/plugin/DragDropPlugin.h"
 #include "core/dialog/OpenFileDialog.h"
+#include "core/panels/InspectorEditor.h"
 
-#include <components/CompoundComponent.h>
 #include <components/CameraComponent.h>
 #include <components/TransformComponent.h>
 #include <components/EnvironmentComponent.h>
@@ -68,10 +70,7 @@
 #include <components/navigation/NavObstacle.h>
 #include <components/navigation/OffMeshLink.h>
 
-#include "core/panels/InspectorEditor.h"
-
 #include <scene/Scene.h>
-#include <scene/TargetObject.h>
 using namespace ige::scene;
 
 #include <pyxieUtilities.h>
@@ -117,7 +116,7 @@ namespace ige::creator
             return;
 
         m_inspectorEditor = std::make_shared<InspectorEditor>();
-        m_targetObject = Editor::getCurrentScene()->getTarget().get();
+        m_targetObject = Editor::getInstance()->getTarget().get();
         m_headerGroup = createWidget<Group>("Inspector_Header", false);
 
         // Object info

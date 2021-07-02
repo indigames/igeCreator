@@ -8,7 +8,7 @@
 #include "scene/SceneObject.h"
 #include <core/layout/Group.h>
 #include "components/Component.h"
-#include "core/panels/EditorComponent.h"
+#include "core/scene/components/EditorComponent.h"
 
 USING_NS_IGE_SCENE
 NS_IGE_BEGIN
