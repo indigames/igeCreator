@@ -15,16 +15,12 @@ public:
 	FigureEditorComponent();
 	virtual ~FigureEditorComponent();
 
-	virtual void redraw() override;
-protected:
-	
+protected:	
 	virtual void onInspectorUpdate() override;
-
 	void drawFigureComponent();
+
 protected:
 	std::shared_ptr<Group> m_figureCompGroup = nullptr;
-
-
 };
 
 NS_IGE_END

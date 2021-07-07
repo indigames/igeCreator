@@ -133,7 +133,7 @@ namespace ige::creator
         });
 
         // Create component selection
-        m_createCompCombo = m_headerGroup->createWidget<ComboBox>();
+        m_createCompCombo = m_headerGroup->createWidget<ComboBox>("");
         m_createCompCombo->setEndOfLine(false);
         m_createCompCombo->addChoice((int)ComponentType::Camera, "Camera");
 

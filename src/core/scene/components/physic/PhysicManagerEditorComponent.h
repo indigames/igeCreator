@@ -15,16 +15,12 @@ public:
 	PhysicManagerEditorComponent();
 	virtual ~PhysicManagerEditorComponent();
 
-	virtual void redraw() override;
-protected:
-	
+protected:	
 	virtual void onInspectorUpdate() override;
-
 	void drawPhysicManager();
+
 protected:
 	std::shared_ptr<Group> m_physicManagerGroup = nullptr;
-
-
 };
 
 NS_IGE_END

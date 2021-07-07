@@ -65,7 +65,7 @@ void UIScrollViewEditorComponent::drawUIScrollView()
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
             auto uiScrollView = getComponent<UIScrollView>(); 
             uiScrollView->setPath(txt);
-            dirty();
+            setDirty();
             });
     }
 
@@ -75,7 +75,7 @@ void UIScrollViewEditorComponent::drawUIScrollView()
         {
             auto uiScrollView = getComponent<UIScrollView>(); 
             uiScrollView->setPath(files[0]);
-            dirty();
+            setDirty();
         }
         });
 
@@ -85,11 +85,11 @@ void UIScrollViewEditorComponent::drawUIScrollView()
         });
 
     auto spriteType = uiScrollView->getSpriteType();
-    auto m_spriteTypeCombo = m_uiScrollViewGroup->createWidget<ComboBox>((int)spriteType);
+    auto m_spriteTypeCombo = m_uiScrollViewGroup->createWidget<ComboBox>("", (int)spriteType);
     m_spriteTypeCombo->getOnDataChangedEvent().addListener([this](auto val) {
         auto uiScrollView = getComponent<UIScrollView>(); 
         uiScrollView->setSpriteType(val);
-        dirty();
+        setDirty();
         });
     m_spriteTypeCombo->setEndOfLine(false);
     m_spriteTypeCombo->addChoice((int)SpriteType::Simple, "Simple");
@@ -122,11 +122,11 @@ void UIScrollViewEditorComponent::drawUIScrollView()
     else
     {
         auto fillMethod = uiScrollView->getFillMethod();
-        auto m_compComboFillMethod = m_uiScrollViewGroup->createWidget<ComboBox>((int)fillMethod);
+        auto m_compComboFillMethod = m_uiScrollViewGroup->createWidget<ComboBox>("", (int)fillMethod);
         m_compComboFillMethod->getOnDataChangedEvent().addListener([this](auto val) {
             auto uiScrollView = getComponent<UIScrollView>(); 
             uiScrollView->setFillMethod(val);
-            dirty();
+            setDirty();
             });
         m_compComboFillMethod->setEndOfLine(false);
         m_compComboFillMethod->addChoice((int)FillMethod::None, "None");
@@ -139,11 +139,11 @@ void UIScrollViewEditorComponent::drawUIScrollView()
 
         if (fillMethod != FillMethod::None) {
 
-            auto m_compComboFillOrigin = m_uiScrollViewGroup->createWidget<ComboBox>((int)uiScrollView->getFillOrigin());
+            auto m_compComboFillOrigin = m_uiScrollViewGroup->createWidget<ComboBox>("", (int)uiScrollView->getFillOrigin());
             m_compComboFillOrigin->getOnDataChangedEvent().addListener([this](auto val) {
                 auto uiScrollView = getComponent<UIScrollView>(); 
                 uiScrollView->setFillOrigin(val);
-                dirty();
+                setDirty();
                 });
             m_compComboFillOrigin->setEndOfLine(false);
             if (fillMethod == FillMethod::Horizontal)
@@ -203,11 +203,11 @@ void UIScrollViewEditorComponent::drawUIScrollView()
         });
 
     auto movementType = uiScrollView->getMovementType();
-    auto m_movememntTypeCombo = m_uiScrollViewGroup->createWidget<ComboBox>((int)movementType);
+    auto m_movememntTypeCombo = m_uiScrollViewGroup->createWidget<ComboBox>("", (int)movementType);
     m_movememntTypeCombo->getOnDataChangedEvent().addListener([this](auto val) {
         auto uiScrollView = getComponent<UIScrollView>(); 
         uiScrollView->setMovementType(val);
-        dirty();
+        setDirty();
         });
     m_movememntTypeCombo->setEndOfLine(false);
     m_movememntTypeCombo->addChoice((int)UIScrollView::MovementType::Elastic, "Elastic");
@@ -235,7 +235,7 @@ void UIScrollViewEditorComponent::drawUIScrollView()
     auto m_inertia = m_uiScrollViewGroup->createWidget<CheckBox>("Inertia", uiScrollView->isInertia())->getOnDataChangedEvent().addListener([this](bool val) {
         auto uiScrollView = getComponent<UIScrollView>(); 
         uiScrollView->setInertia(val);
-        dirty();
+        setDirty();
         });
 
     if (uiScrollView->isInertia()) 

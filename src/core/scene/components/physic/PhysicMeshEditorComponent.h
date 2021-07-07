@@ -17,13 +17,9 @@ public:
 	PhysicMeshEditorComponent();
 	~PhysicMeshEditorComponent();
 
-	virtual void redraw() override;
-protected:
-	
+protected:	
 	virtual void onInspectorUpdate() override;
-
 	void drawPhysicMesh();
-
 };
 
 NS_IGE_END

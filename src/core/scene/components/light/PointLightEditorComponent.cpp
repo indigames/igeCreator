@@ -1,4 +1,5 @@
 #include "core/scene/components/light/PointLightEditorComponent.h"
+#include "core/scene/CompoundComponent.h"
 
 #include <core/layout/Group.h>
 
@@ -11,61 +12,35 @@ PointLightEditorComponent::PointLightEditorComponent() {
     m_pointLightGroup = nullptr;
 }
 
-PointLightEditorComponent::~PointLightEditorComponent()
-{
+PointLightEditorComponent::~PointLightEditorComponent() {
     m_pointLightGroup = nullptr;
 }
 
-void PointLightEditorComponent::redraw()
-{
-    if (m_group == nullptr)
-        return;
-
-    if (m_pointLightGroup == nullptr) {
-        m_pointLightGroup = m_group->createWidget<Group>("PointLight", false);
-    }
-    drawPointLight();
-
-    EditorComponent::redraw();
-}
-
-void PointLightEditorComponent::onInspectorUpdate()
-{
-    if (m_group == nullptr)
-        return;
-    m_group->removeAllWidgets();
-
-    m_pointLightGroup = m_group->createWidget<Group>("PointLight", false);
-
+void PointLightEditorComponent::onInspectorUpdate() {
     drawPointLight();
 }
 
-void PointLightEditorComponent::drawPointLight()
-{
+void PointLightEditorComponent::drawPointLight() {
     if (m_pointLightGroup == nullptr)
-        return;
+        m_pointLightGroup = m_group->createWidget<Group>("PointLight", false);;
     m_pointLightGroup->removeAllWidgets();
 
-    auto pointLight = getComponent<PointLight>();
-    if (pointLight == nullptr)
-        return;
+    auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
 
-    auto color = Vec4(pointLight->getColor(), 1.f);
+    auto color = Vec4(comp->getProperty<Vec3>("col", {}), 1.f);
     m_pointLightGroup->createWidget<Color>("Color", color)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto pointLight = getComponent<PointLight>();
-        pointLight->setColor({ val[0], val[1], val[2] });
-        });
+        getComponent<CompoundComponent>()->setProperty("col", { val[0], val[1], val[2] });
+    });
 
-    std::array intensity = { pointLight->getIntensity() };
-    m_pointLightGroup->createWidget<Drag<float>>("Intensity", ImGuiDataType_Float, intensity, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto pointLight = getComponent<PointLight>();
-        pointLight->setIntensity(val[0]);
-        });
+    std::array its = { comp->getProperty<float>("its", 1.f) };
+    m_pointLightGroup->createWidget<Drag<float>>("Intensity", ImGuiDataType_Float, its)->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("its", val[0]);
+    });
 
-    std::array range = { pointLight->getRange() };
-    m_pointLightGroup->createWidget<Drag<float>>("Range", ImGuiDataType_Float, range, 0.01f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto pointLight = getComponent<PointLight>();
-        pointLight->setRange(val[0]);
-        });
+    std::array rng = { comp->getProperty<float>("rng", 1.f) };
+    m_pointLightGroup->createWidget<Drag<float>>("Range", ImGuiDataType_Float, rng)->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("rng", val[0]);
+    });
 }
 NS_IGE_END

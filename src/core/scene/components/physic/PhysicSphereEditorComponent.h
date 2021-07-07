@@ -17,13 +17,9 @@ public:
 	PhysicSphereEditorComponent();
 	~PhysicSphereEditorComponent();
 
-	virtual void redraw() override;
-protected:
-	
+protected:	
 	virtual void onInspectorUpdate() override;
-
 	void drawPhysicSphere();
-
 };
 
 NS_IGE_END

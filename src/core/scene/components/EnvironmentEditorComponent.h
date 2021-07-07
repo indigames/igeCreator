@@ -15,16 +15,12 @@ public:
 	EnvironmentEditorComponent();
 	virtual ~EnvironmentEditorComponent();
 
-	virtual void redraw() override;
 protected:
-	
 	virtual void onInspectorUpdate() override;
-
 	void drawEnvironmentComponent();
+
 protected:
 	std::shared_ptr<Group> m_environmentCompGroup = nullptr;
-
-
 };
 
 NS_IGE_END

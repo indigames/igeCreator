@@ -1,4 +1,5 @@
 #include "core/scene/components/navigation/NavObstacleEditorComponent.h"
+#include "core/scene/CompoundComponent.h"
 
 #include <core/layout/Group.h>
 
@@ -12,61 +13,31 @@ NavObstacleEditorComponent::NavObstacleEditorComponent() {
     m_navObstacleGroup = nullptr;
 }
 
-NavObstacleEditorComponent::~NavObstacleEditorComponent()
-{
+NavObstacleEditorComponent::~NavObstacleEditorComponent() {
     m_navObstacleGroup = nullptr;
 }
 
-void NavObstacleEditorComponent::redraw()
-{
-    if (m_group == nullptr)
-        return;
-
-    if (m_navObstacleGroup == nullptr) {
-        m_navObstacleGroup = m_group->createWidget<Group>("NavObstacle", false);
-    }
-    drawNavObstacle();
-
-    EditorComponent::redraw();
-}
-
-void NavObstacleEditorComponent::onInspectorUpdate()
-{
-    if (m_group == nullptr)
-        return;
-    m_group->removeAllWidgets();
-
-    m_navObstacleGroup = m_group->createWidget<Group>("NavObstacle", false);
-
+void NavObstacleEditorComponent::onInspectorUpdate() {   
     drawNavObstacle();
 }
 
 void NavObstacleEditorComponent::drawNavObstacle()
 {
     if (m_navObstacleGroup == nullptr)
-        return;
+        m_navObstacleGroup = m_group->createWidget<Group>("NavObstacle", false);;
     m_navObstacleGroup->removeAllWidgets();
 
-    auto obstacle = getComponent<NavObstacle>();
-    if (obstacle == nullptr)
-        return;
+    auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
 
-    auto column = m_navObstacleGroup->createWidget<Columns<3>>();
-    column->createWidget<CheckBox>("Enable", obstacle->isEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto obstacle = getComponent<NavObstacle>();
-        obstacle->setEnabled(val);
-        });
-
-    std::array radius = { obstacle->getRadius() };
+    std::array radius = { comp->getProperty<float>("radius", 0.3f) };
     m_navObstacleGroup->createWidget<Drag<float>>("Radius", ImGuiDataType_Float, radius, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto obstacle = getComponent<NavObstacle>();
-        obstacle->setRadius(val[0]);
-        });
-
-    std::array height = { obstacle->getHeight() };
+        getComponent<CompoundComponent>()->setProperty("radius", val[0]);
+    });
+    
+    std::array height = { comp->getProperty<float>("height", 0.3f) };
     m_navObstacleGroup->createWidget<Drag<float>>("Height", ImGuiDataType_Float, height, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto obstacle = getComponent<NavObstacle>();
-        obstacle->setHeight(val[0]);
-        });
+        getComponent<CompoundComponent>()->setProperty("height", val[0]);
+    });
 }
 NS_IGE_END

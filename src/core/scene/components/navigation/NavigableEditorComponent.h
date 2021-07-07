@@ -15,16 +15,12 @@ public:
 	NavigableEditorComponent();
 	virtual ~NavigableEditorComponent();
 
-	virtual void redraw() override;
-protected:
-	
+protected:	
 	virtual void onInspectorUpdate() override;
-
 	void drawNavigable();
-protected:
-	std::shared_ptr<Group> m_navigableGroup = nullptr;
 
-	
+protected:
+	std::shared_ptr<Group> m_navigableGroup = nullptr;	
 };
 
 NS_IGE_END

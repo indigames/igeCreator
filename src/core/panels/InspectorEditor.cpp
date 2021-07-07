@@ -310,7 +310,6 @@ void InspectorEditor::update(float dt) {
 		}
 	}
 
-
 	/*for (auto& watch : m_watcher) {
 		for (auto& _obj : watch.second) {
 			auto vec = (Vec3*)_obj.getAddress();

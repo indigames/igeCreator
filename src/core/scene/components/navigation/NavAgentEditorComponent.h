@@ -15,16 +15,12 @@ public:
 	NavAgentEditorComponent();
 	virtual ~NavAgentEditorComponent();
 
-	virtual void redraw() override;
-protected:
-	
+protected:	
 	virtual void onInspectorUpdate() override;
-
 	void drawNavAgent();
-protected:
-	std::shared_ptr<Group> m_navAgentGroup = nullptr;
 
-	
+protected:
+	std::shared_ptr<Group> m_navAgentGroup = nullptr;	
 };
 
 NS_IGE_END

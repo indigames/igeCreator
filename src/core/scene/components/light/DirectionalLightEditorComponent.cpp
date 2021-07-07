@@ -1,4 +1,5 @@
 #include "core/scene/components/light/DirectionalLightEditorComponent.h"
+#include "core/scene/CompoundComponent.h"
 
 #include <core/layout/Group.h>
 
@@ -11,55 +12,30 @@ DirectionalLightEditorComponent::DirectionalLightEditorComponent() {
     m_directionalLightGroup = nullptr;
 }
 
-DirectionalLightEditorComponent::~DirectionalLightEditorComponent()
-{
+DirectionalLightEditorComponent::~DirectionalLightEditorComponent() {
     m_directionalLightGroup = nullptr;
 }
 
-void DirectionalLightEditorComponent::redraw()
-{
-    if (m_group == nullptr)
-        return;
-
-    if (m_directionalLightGroup == nullptr) {
-        m_directionalLightGroup = m_group->createWidget<Group>("DirectionalLight", false);
-    }
-    drawDirectionalLight();
-
-    EditorComponent::redraw();
-}
-
-void DirectionalLightEditorComponent::onInspectorUpdate()
-{
-    if (m_group == nullptr)
-        return;
-    m_group->removeAllWidgets();
-
-    m_directionalLightGroup = m_group->createWidget<Group>("DirectionalLight", false);
-
+void DirectionalLightEditorComponent::onInspectorUpdate() {
     drawDirectionalLight();
 }
 
-void DirectionalLightEditorComponent::drawDirectionalLight()
-{
+void DirectionalLightEditorComponent::drawDirectionalLight() {
     if (m_directionalLightGroup == nullptr)
-        return;
+        m_directionalLightGroup = m_group->createWidget<Group>("DirectionalLight", false);;
     m_directionalLightGroup->removeAllWidgets();
 
-    auto directionalLight = getComponent<DirectionalLight>();
-    if (directionalLight == nullptr)
-        return;
+    auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
 
-    auto color = Vec4(directionalLight->getColor(), 1.f);
+    auto color = Vec4(comp->getProperty<Vec3>("col", {}), 1.f);
     m_directionalLightGroup->createWidget<Color>("Color", color)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto directionalLight = getComponent<DirectionalLight>();
-        directionalLight->setColor({ val[0], val[1], val[2] });
-        });
+        getComponent<CompoundComponent>()->setProperty("col", { val[0], val[1], val[2] });
+    });
 
-    std::array intensity = { directionalLight->getIntensity() };
-    m_directionalLightGroup->createWidget<Drag<float>>("Intensity", ImGuiDataType_Float, intensity, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto directionalLight = getComponent<DirectionalLight>();
-        directionalLight->setIntensity(val[0]);
-        });
+    std::array its = { comp->getProperty<float>("its", 1.f) };
+    m_directionalLightGroup->createWidget<Drag<float>>("Intensity", ImGuiDataType_Float, its)->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("its", val[0]);
+    });
 }
 NS_IGE_END

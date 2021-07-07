@@ -23,9 +23,7 @@ public:
 	PhysicObjectEditorComponent();
 	virtual ~PhysicObjectEditorComponent();
 
-	virtual void redraw() override;
-protected:
-	
+protected:	
 	virtual void onInspectorUpdate() override;
 
 	void drawPhysicObject();
@@ -37,6 +35,7 @@ protected:
 	void drawSliderConstraint(std::shared_ptr<PhysicConstraint> constraint);
 	void drawSpringConstraint(std::shared_ptr<PhysicConstraint> constraint);
 	void drawDof6SpringConstraint(std::shared_ptr<PhysicConstraint> constraint);
+
 protected:
 	std::shared_ptr<Group> m_physicGroup = nullptr;
 	std::shared_ptr<Group> m_constraintGroup = nullptr;

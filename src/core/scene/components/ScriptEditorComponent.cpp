@@ -1,4 +1,5 @@
 #include "core/scene/components/ScriptEditorComponent.h"
+#include "core/scene/CompoundComponent.h"
 
 #include "core/layout/Group.h"
 #include "core/widgets/Widgets.h"
@@ -22,74 +23,51 @@ ScriptEditorComponent::ScriptEditorComponent() {
     m_scriptCompGroup = nullptr;
 }
 
-ScriptEditorComponent::~ScriptEditorComponent()
-{
-    if (m_watchId != 0)
-    {
+ScriptEditorComponent::~ScriptEditorComponent() {
+    if (m_watchId != 0) {
         fs::watcher::unwatch(m_watchId);
         m_watchId = 0;
     }
-
     m_scriptCompGroup = nullptr;
 }
 
-void ScriptEditorComponent::redraw()
-{
-    if (m_group == nullptr)
-        return;
+void ScriptEditorComponent::onInspectorUpdate() {
+    drawScriptComponent();
+}
 
+void ScriptEditorComponent::drawScriptComponent() {
     if (m_scriptCompGroup == nullptr) {
         m_scriptCompGroup = m_group->createWidget<Group>("ScriptGroup", false);
     }
-    drawScriptComponent();
-
-    EditorComponent::redraw();
-}
-
-void ScriptEditorComponent::onInspectorUpdate()
-{
-    if (m_group == nullptr)
-        return;
-    m_group->removeAllWidgets();
-
-    m_scriptCompGroup = m_group->createWidget<Group>("ScriptGroup", false);
-
-    drawScriptComponent();
-}
-
-void ScriptEditorComponent::drawScriptComponent()
-{
-    if (m_scriptCompGroup == nullptr)
-        return;
     m_scriptCompGroup->removeAllWidgets();
 
-    auto scriptComp = getComponent<ScriptComponent>();
-    if (scriptComp == nullptr)
-        return;
+    auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
 
-    auto txtPath = m_scriptCompGroup->createWidget<TextField>("Path", scriptComp->getPath());
+    auto txtPath = m_scriptCompGroup->createWidget<TextField>("Path", comp->getProperty<std::string>("path", ""));
     txtPath->setEndOfLine(false);
-    txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
-        auto scriptComp = getComponent<ScriptComponent>();
-        scriptComp->setPath(txt);
-        });
-
-    for (const auto& type : GetFileExtensionSuported(E_FileExts::Script))
-    {
+    txtPath->getOnDataChangedEvent().addListener([this](const auto& txt) {
+        auto comp = getComponent<CompoundComponent>();
+        comp->setProperty("path", txt);
+        comp->setDirty();
+        setDirty();
+    });
+    for (const auto& type : GetFileExtensionSuported(E_FileExts::Script)) {
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-            auto scriptComp = getComponent<ScriptComponent>();
-            scriptComp->setPath(txt);
-            dirty();
+            auto comp = getComponent<CompoundComponent>();
+            comp->setProperty("path", txt);
+            comp->setDirty();
+            setDirty();
         });
     }
-
     m_scriptCompGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
         auto files = OpenFileDialog("Import Assets", "", { "Script (*.py)", "*.py" }).result();
         if (files.size() > 0)
         {
-            auto scriptComp = getComponent<ScriptComponent>();
-            scriptComp->setPath(files[0]);
-            dirty();
+            auto comp = getComponent<CompoundComponent>();
+            comp->setProperty("path", files[0]);
+            comp->setDirty();
+            setDirty();
         }
     });
 
@@ -99,60 +77,74 @@ void ScriptEditorComponent::drawScriptComponent()
         m_watchId = 0;
     }
 
-    if (scriptComp->getPath().length() > 0)
+    auto path = comp->getProperty<std::string>("path", "");
+    if (path.length() > 0)
     {
-        m_watchId = fs::watcher::watch(fs::path(scriptComp->getPath()), false, false, std::chrono::milliseconds(1000), [this](const auto&, bool) {
-            auto scriptComp = getComponent<ScriptComponent>();
-            scriptComp->setPath(scriptComp->getPath(), true);
-            dirty();
-         });
+        m_watchId = fs::watcher::watch(fs::path(path), false, false, std::chrono::milliseconds(1000), [this](const auto&, bool) {
+            auto comp = getComponent<CompoundComponent>();
+            comp->setProperty("path", comp->getProperty<std::string>("path", ""));
+            comp->setDirty();
+            setDirty();
+        });
     }
 
-    for (const auto& pair : scriptComp->getMembers())
+    auto jMembers = comp->getProperty<json>("members", json{});
+    auto members = jMembers.get<std::unordered_map<std::string, json>>();
+
+    for (const auto& [k, value]: members)
     {
-        auto key = pair.first;
-        auto value = pair.second;
-        
-        switch (value.getType()) 
+        const auto& key = k;
+        switch (value.type())  
         {
-            case Value::Type::INTEGER:
-            case Value::Type::UNSIGNED:
+        case json::value_t::number_integer:
+        case json::value_t::number_unsigned:
             {
-                std::array val = { value.asInt() };
+                std::array val = { value.get<int>() };
                 m_scriptCompGroup->createWidget<Drag<int>>(key, ImGuiDataType_S32, val)->getOnDataChangedEvent().addListener([key, this](auto& val) {                    
-                    auto scriptComp = getComponent<ScriptComponent>();
-                    scriptComp->onMemberValueChanged(key, Value(val[0]));
+                    auto comp = getComponent<CompoundComponent>();
+                    auto members = comp->getProperty<json>("members", json::array());
+                    if (members.contains(key)) {
+                        members[key] = val[0];
+                        comp->setProperty("members", members);
+                    }
                 });
             }
             break;
 
-            case Value::Type::DOUBLE:
-            case Value::Type::FLOAT:
+            case json::value_t::number_float:
             {
-                std::array val = { value.asFloat() };
+                std::array val = { value.get<float>() };
                 m_scriptCompGroup->createWidget<Drag<float>>(key, ImGuiDataType_Float, val)->getOnDataChangedEvent().addListener([key, this](auto& val) {                   
-                    auto scriptComp = getComponent<ScriptComponent>();
-                    scriptComp->onMemberValueChanged(key, Value(val[0]));
+                    auto comp = getComponent<CompoundComponent>();
+                    auto members = comp->getProperty<json>("members", json::array());
+                    if (members.contains(key)) {
+                        members[key] = val[0];
+                        comp->setProperty("members", members);
+                    }
                 });
             }
             break;
 
-            case Value::Type::BOOLEAN:
+            case json::value_t::boolean:
             {
-                m_scriptCompGroup->createWidget<CheckBox>(key, value.asBool())->getOnDataChangedEvent().addListener([key, this](bool val) {
-                    auto scriptComp = getComponent<ScriptComponent>();
-                    scriptComp->onMemberValueChanged(key, Value(val));
+                m_scriptCompGroup->createWidget<CheckBox>(key, value.get<bool>())->getOnDataChangedEvent().addListener([key, this](bool val) {
+                    auto comp = getComponent<CompoundComponent>();
+                    auto members = comp->getProperty<json>("members", json::array());
+                    if (members.contains(key)) {
+                        members[key] = val;
+                        comp->setProperty("members", members);
+                    }
                 });
             }
             break;
 
-            case Value::Type::STRING:
+            case json::value_t::string:
             {
-                json jVal = json::parse(value.asString(), 0, false);
+                auto jVal = json::parse(value.get<std::string>(), 0, false);
                 auto uuid = jVal.is_null() || jVal.is_discarded() ? "" : jVal.value("uuid", std::string());
                 auto compName = jVal.is_null() || jVal.is_discarded() ? "" : jVal.value("comp", std::string());
                 auto sceneObject = Editor::getCurrentScene()->findObjectByUUID(uuid);
-                auto txtField = m_scriptCompGroup->createWidget<TextField>(key, sceneObject ? (compName.empty() ? sceneObject->getName() : sceneObject->getName() + "/" + compName) : value.asString());
+                auto txtField = m_scriptCompGroup->createWidget<TextField>(key, sceneObject ? (compName.empty() ? sceneObject->getName() : sceneObject->getName() + "/" + compName) : value.get<std::string>());
 
                 if (sceneObject)
                 {
@@ -160,7 +152,6 @@ void ScriptEditorComponent::drawScriptComponent()
                     txtField->getOnHoveredEvent().addListener([id, this](auto widget) {
                         if(widget->isHovered()) Editor::getCanvas()->getHierarchy()->setNodeHighlight(id, true);
                     });
-
                     auto objUUID = sceneObject->getUUID();
                     auto createMenu = m_scriptCompGroup->getPlugin<ContextMenu>();
                     if (createMenu)
@@ -169,13 +160,17 @@ void ScriptEditorComponent::drawScriptComponent()
                         createMenu = m_scriptCompGroup->addPlugin<ContextMenu>("Component_Select_Menu");
 
                     createMenu->createWidget<MenuItem>("SceneObject")->getOnClickEvent().addListener([key, objUUID, this](auto widget) {
-                        auto scriptComp = getComponent<ScriptComponent>();
                         json jVal = json{
                                 {"uuid", objUUID},
                                 {"comp", std::string()},
                         };
-                        scriptComp->onMemberValueChanged(key, Value(jVal.dump()));
-                        dirty();
+                        auto comp = getComponent<CompoundComponent>();
+                        auto members = comp->getProperty<json>("members", json::array());
+                        if (members.contains(key)) {
+                            members[key] = jVal;
+                            comp->setProperty("members", members);
+                        }
+                        setDirty();
                     });
 
                     for (const auto& comp : sceneObject->getComponents())
@@ -184,13 +179,17 @@ void ScriptEditorComponent::drawScriptComponent()
                         {
                             auto compName = comp->getName();
                             createMenu->createWidget<MenuItem>(comp->getName())->getOnClickEvent().addListener([key, objUUID, compName, this](auto widget) {
-                                auto scriptComp = getComponent<ScriptComponent>();
                                 json jVal = json{
                                         {"uuid", objUUID},
                                         {"comp", compName},
                                 };
-                                scriptComp->onMemberValueChanged(key, Value(jVal.dump()));
-                                dirty();
+                                auto comp = getComponent<CompoundComponent>();
+                                auto members = comp->getProperty<json>("members", json::array());
+                                if (members.contains(key)) {
+                                    members[key] = jVal;
+                                    comp->setProperty("members", members);
+                                }
+                                setDirty();
                             });
                         }
                     }
@@ -207,13 +206,17 @@ void ScriptEditorComponent::drawScriptComponent()
                         else 
                             createMenu = m_scriptCompGroup->addPlugin<ContextMenu>("Component_Select_Menu");
                         createMenu->createWidget<MenuItem>("SceneObject")->getOnClickEvent().addListener([key, objUUID, this](auto widget) {
-                            auto scriptComp = getComponent<ScriptComponent>();
                             json jVal = json{
                                     {"uuid", objUUID},
                                     {"comp", std::string()},
                             };
-                            scriptComp->onMemberValueChanged(key, Value(jVal.dump()));
-                            dirty();
+                            auto comp = getComponent<CompoundComponent>();
+                            auto members = comp->getProperty<json>("members", json::array());
+                            if (members.contains(key)) {
+                                members[key] = jVal;
+                                comp->setProperty("members", members);
+                            }
+                            setDirty();
                         });
 
                         for (const auto& comp : obj->getComponents())
@@ -222,13 +225,17 @@ void ScriptEditorComponent::drawScriptComponent()
                             {
                                 auto compName = comp->getName();
                                 createMenu->createWidget<MenuItem>(comp->getName())->getOnClickEvent().addListener([key, objUUID, compName, this](auto widget) {
-                                    auto scriptComp = getComponent<ScriptComponent>();
                                     json jVal = json{
                                             {"uuid", objUUID},
                                             {"comp", compName},
                                     };
-                                    scriptComp->onMemberValueChanged(key, Value(jVal.dump()));
-                                    dirty();
+                                    auto comp = getComponent<CompoundComponent>();
+                                    auto members = comp->getProperty<json>("members", json::array());
+                                    if (members.contains(key)) {
+                                        members[key] = jVal;
+                                        comp->setProperty("members", members);
+                                    }
+                                    setDirty();
                                 });
                             }
                         }
@@ -237,9 +244,13 @@ void ScriptEditorComponent::drawScriptComponent()
                 });
                
                 txtField->addPlugin<DDTargetPlugin<std::string>>(EDragDropID::FILE)->getOnDataReceivedEvent().addListener([key, this](auto val) {
-                    auto scriptComp = getComponent<ScriptComponent>();
-                    scriptComp->onMemberValueChanged(key, Value(val));
-                    dirty();
+                    auto comp = getComponent<CompoundComponent>();
+                    auto members = comp->getProperty<json>("members", json::array());
+                    if (members.contains(key)) {
+                        members[key] = val;
+                        comp->setProperty("members", members);
+                    }
+                    setDirty();
                 });
 
                 for (auto ext : AllFileExts)
@@ -247,9 +258,13 @@ void ScriptEditorComponent::drawScriptComponent()
                     for (const auto& type : GetFileExtensionSuported(ext))
                     {
                         txtField->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([key, this](auto val) {
-                            auto scriptComp = getComponent<ScriptComponent>();
-                            scriptComp->onMemberValueChanged(key, Value(val));
-                            dirty();
+                            auto comp = getComponent<CompoundComponent>();
+                            auto members = comp->getProperty<json>("members", json::array());
+                            if (members.contains(key)) {
+                                members[key] = val;
+                                comp->setProperty("members", members);
+                            }
+                            setDirty();
                         });
                     }
                 }

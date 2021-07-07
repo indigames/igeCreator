@@ -15,16 +15,9 @@ public:
 	AudioListenerEditorComponent();
 	virtual ~AudioListenerEditorComponent();
 
-	virtual void redraw() override;
 protected:
-	
-	virtual void onInspectorUpdate() override;
-
-	void drawAudioListener();
-protected:
-	std::shared_ptr<Group> m_audioListenerGroup = nullptr;
-
-
+	//! Internal inspector update
+	void onInspectorUpdate() override {}
 };
 
 NS_IGE_END

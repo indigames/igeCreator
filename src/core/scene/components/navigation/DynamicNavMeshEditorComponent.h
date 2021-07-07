@@ -16,13 +16,9 @@ public:
 	DynamicNavMeshEditorComponent();
 	~DynamicNavMeshEditorComponent();
 
-	virtual void redraw() override;
-protected:
-	
+protected:	
 	virtual void onInspectorUpdate() override;
-
-	void drawDynamicNavMesh();
-	
+	void drawDynamicNavMesh();	
 };
 
 NS_IGE_END

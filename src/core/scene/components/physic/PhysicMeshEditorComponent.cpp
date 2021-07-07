@@ -1,4 +1,5 @@
 #include "core/scene/components/physic/PhysicMeshEditorComponent.h"
+#include "core/scene/CompoundComponent.h"
 
 #include <core/layout/Group.h>
 
@@ -16,100 +17,69 @@ PhysicMeshEditorComponent::PhysicMeshEditorComponent() {
     m_physicGroup = nullptr;
 }
 
-PhysicMeshEditorComponent::~PhysicMeshEditorComponent()
-{
+PhysicMeshEditorComponent::~PhysicMeshEditorComponent() {
     m_physicGroup = nullptr;
 }
 
-void PhysicMeshEditorComponent::redraw()
-{
-    if (m_group == nullptr)
-        return;
-
-    if (m_physicGroup == nullptr) {
-        m_physicGroup = m_group->createWidget<Group>("PhysicGroup", false);
-    }
-    drawPhysicMesh();
-
-    EditorComponent::redraw();
-}
-
-void PhysicMeshEditorComponent::onInspectorUpdate()
-{
-    if (m_group == nullptr)
-        return;
-    m_group->removeAllWidgets();
-
-    m_physicGroup = m_group->createWidget<Group>("PhysicGroup", false);
-
+void PhysicMeshEditorComponent::onInspectorUpdate() {
     drawPhysicMesh();
 }
 
 void PhysicMeshEditorComponent::drawPhysicMesh()
 {
+    // Draw common properties
     drawPhysicObject();
 
-    auto physicComp = getComponent<PhysicMesh>();
-    if (physicComp == nullptr)
-        return;
+    // Draw mesh component
+    auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
 
     m_physicGroup->createWidget<Separator>();
 
-    bool convex = physicComp->isConvex();
-    auto convexChk = m_physicGroup->createWidget<CheckBox>("Convex Hull", convex);
+    bool convex = comp->getProperty<bool>("convex", false);
+    auto convexChk = m_physicGroup->createWidget<CheckBox>("ConvexHull", convex);
     convexChk->setEndOfLine(false);
+    auto concaveChk = m_physicGroup->createWidget<CheckBox>("TriangleMesh", !convex);
 
-    auto concaveChk = m_physicGroup->createWidget<CheckBox>("Triangle Mesh", !convex);
     convexChk->getOnDataChangedEvent().addListener([this, convexChk, concaveChk](bool convex) {
-        auto physicComp = getComponent<PhysicMesh>();
-        physicComp->setConvex(convex);
-        convexChk->setSelected(physicComp->isConvex());
-        concaveChk->setSelected(!physicComp->isConvex());
-        });
-
+        getComponent<CompoundComponent>()->setProperty("convex", convex);
+        convexChk->setSelected(convex);
+        concaveChk->setSelected(!convex);
+    });
     concaveChk->getOnDataChangedEvent().addListener([this, convexChk, concaveChk](bool concave) {
-        auto physicComp = getComponent<PhysicMesh>();
-        physicComp->setConvex(!concave);
-        convexChk->setSelected(physicComp->isConvex());
-        concaveChk->setSelected(!physicComp->isConvex());
-        });
+        getComponent<CompoundComponent>()->setProperty("convex", !concave);
+        convexChk->setSelected(!concave);
+        concaveChk->setSelected(concave);
+    });
 
-    std::array meshIdx = { physicComp->getMeshIndex() };
-    auto meshIdxWg = m_physicGroup->createWidget<Drag<int>>("Mesh Index", ImGuiDataType_S32, meshIdx, 1, 0);
-    meshIdxWg->getOnDataChangedEvent().addListener([this](auto& val) {
-        auto physicComp = getComponent<PhysicMesh>();
-        physicComp->setMeshIndex(val[0]);
-        });
+    std::array meshIdx = { comp->getProperty<int>("meshIdx", 0) };
+    auto meshIdxWg = m_physicGroup->createWidget<Drag<int>>("MeshIndex", ImGuiDataType_S32, meshIdx, 1, 0);
+    meshIdxWg->getOnDataChangedEvent().addListener([this](const auto& val) {
+        getComponent<CompoundComponent>()->setProperty("meshIdx", val[0]);
+    });
     meshIdxWg->addPlugin<DDTargetPlugin<int>>(EDragDropID::MESH)->getOnDataReceivedEvent().addListener([this](auto val) {
-        auto physicComp = getComponent<PhysicMesh>();
-        physicComp->setMeshIndex(val);
-        dirty();
-        });
+        getComponent<CompoundComponent>()->setProperty("meshIdx", val);
+        setDirty();
+    });
 
-    auto txtPath = m_physicGroup->createWidget<TextField>("Path", physicComp->getPath());
-    //! Mark Not End OF line for browse btn
+    auto txtPath = m_physicGroup->createWidget<TextField>("Path", comp->getProperty<std::string>("path", ""));
     txtPath->setEndOfLine(false);
-    txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
-        auto physicComp = getComponent<PhysicMesh>();
-        physicComp->setPath(txt);
-        });
-    for (const auto& type : GetFileExtensionSuported(E_FileExts::Figure))
-    {
+    txtPath->getOnDataChangedEvent().addListener([this](const auto& txt) {
+        getComponent<CompoundComponent>()->setProperty("path", txt);
+    });
+    for (const auto& type : GetFileExtensionSuported(E_FileExts::Figure)) {
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-            auto physicComp = getComponent<PhysicMesh>();
-            physicComp->setPath(txt);
-            dirty();
-            });
+            getComponent<CompoundComponent>()->setProperty("path", txt);
+            setDirty();
+        });
     }
     m_physicGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
         auto files = OpenFileDialog("Import Assets", "", { "Figure (*.pyxf)", "*.pyxf" }).result();
-        if (files.size() > 0)
-        {
-            auto physicComp = getComponent<PhysicMesh>();
-            physicComp->setPath(files[0]);
-            dirty();
+        if (files.size() > 0) {
+            getComponent<CompoundComponent>()->setProperty("path", files[0]);
+            setDirty();
         }
-        });
+    });
 
     // Draw constraints
     drawPhysicConstraints();

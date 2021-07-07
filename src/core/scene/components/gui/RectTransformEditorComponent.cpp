@@ -155,7 +155,7 @@ void RectTransformEditorComponent::drawRectTransform() {
         anchor[3] = anchorWidget->getAnchorMax().y;
         rectTransform->setAnchor(anchor);
         m_dirtyFlagSupport = 1;
-        dirty();
+        setDirty();
     });
 
     auto anchorColumn = m_anchor_transform_ParentGroup->createWidget<Columns<2>>();
@@ -336,7 +336,7 @@ void RectTransformEditorComponent::drawAnchorMinMax()
         anchor[1] = val[1];
         rectTransform->setAnchor(anchor);
         m_dirtyFlagSupport = 4;
-        dirty();
+        setDirty();
     });
 
     std::array anchorMax = { anchor[2], anchor[3] };
@@ -348,7 +348,7 @@ void RectTransformEditorComponent::drawAnchorMinMax()
         anchor[3] = val[1];
         rectTransform->setAnchor(anchor);
         m_dirtyFlagSupport = 4;
-        dirty();
+        setDirty();
     });
 }
 
@@ -367,7 +367,7 @@ void RectTransformEditorComponent::drawPivot() {
         rectTransform->setPivot({ val[0], val[1] });
         rectTransform->onUpdate(0.f);
         m_dirtyFlagSupport = 3;
-        dirty();
+        setDirty();
     });
 
     Vec3 euler;
@@ -382,7 +382,7 @@ void RectTransformEditorComponent::drawPivot() {
         rectTransform->setRotation(quat);
         rectTransform->onUpdate(0.f);
         m_dirtyFlagSupport = 3;
-        dirty();
+        setDirty();
     });
 
     std::array scale = { rectTransform->getScale().X(), rectTransform->getScale().Y(), rectTransform->getScale().Z() };
@@ -392,7 +392,7 @@ void RectTransformEditorComponent::drawPivot() {
         rectTransform->setScale({ val[0], val[1], val[2] });
         rectTransform->onUpdate(0.f);
         m_dirtyFlagSupport = 3;
-        dirty();
+        setDirty();
     });
 }
 
@@ -404,7 +404,7 @@ void RectTransformEditorComponent::onTransformChanged(SceneObject& sceneObject)
         {
             if (m_dirtyFlagSupport != 1 && m_dirtyFlagSupport != 4) {
                 m_dirtyFlagSupport = 2;
-                dirty();
+                setDirty();
             }
         }
     });

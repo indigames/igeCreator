@@ -5,27 +5,22 @@
 
 #include "core/scene/components/EditorComponent.h"
 #include "components/Component.h"
-#include "core/scene/components/LightEditorComponent.h"
 
 USING_NS_IGE_SCENE
 NS_IGE_BEGIN
 
-class AmbientLightEditorComponent : public LightEditorComponent
+class AmbientLightEditorComponent : public EditorComponent
 {
 public:
 	AmbientLightEditorComponent();
 	~AmbientLightEditorComponent();
 
-	virtual void redraw() override;
-protected:
-	
+protected:	
 	virtual void onInspectorUpdate() override;
-
 	void drawAmbientLight();
+
 protected:
 	std::shared_ptr<Group> m_ambientLightGroup = nullptr;
-
-	
 };
 
 NS_IGE_END

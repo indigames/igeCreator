@@ -15,16 +15,13 @@ public:
 	ScriptEditorComponent();
 	virtual ~ScriptEditorComponent();
 
-	virtual void redraw() override;
-protected:
-	
+protected:	
 	virtual void onInspectorUpdate() override;
-
 	void drawScriptComponent();
+
 protected:
 	std::shared_ptr<Group> m_scriptCompGroup = nullptr;
-	std::uint64_t m_watchId = 0;
-	
+	std::uint64_t m_watchId = 0;	
 };
 
 NS_IGE_END

@@ -54,17 +54,10 @@ bool TransformEditorComponent::setComponent(std::shared_ptr<Component> component
     return EditorComponent::setComponent(component);
 }
 
-void TransformEditorComponent::redraw()
+void TransformEditorComponent::onInspectorUpdate()
 {
-    if (m_group == nullptr)
-        return;
-    
-    if(m_localTransformGroup == nullptr)
-        m_localTransformGroup = m_group->createWidget<Group>("LocalTransformGroup", false);
-    if(m_worldTransformGroup == nullptr)
-        m_worldTransformGroup = m_group->createWidget<Group>("WorldTransformGroup", false);
-    
-    switch (m_dirtyFlag) {
+    switch (m_dirtyFlag)
+    {
     case 0:
         drawLocalTransformComponent();
         drawWorldTransformComponent();
@@ -78,141 +71,119 @@ void TransformEditorComponent::redraw()
     default:
         break;
     }
-    EditorComponent::redraw();
 }
 
-void TransformEditorComponent::onInspectorUpdate()
+void TransformEditorComponent::drawLocalTransformComponent()
 {
-    if (m_group == nullptr)
-        return;
-    m_group->removeAllWidgets();
-
-    m_localTransformGroup = m_group->createWidget<Group>("LocalTransformGroup", false);
-    drawLocalTransformComponent();
-
-    m_worldTransformGroup = m_group->createWidget<Group>("WorldTransformGroup", false);
-    drawWorldTransformComponent();
-
-    
-}
-
-void TransformEditorComponent::drawLocalTransformComponent() {
-
-    if (m_localTransformGroup == nullptr)
-        return;
-
+    if (m_localTransformGroup == nullptr) {
+        m_localTransformGroup = m_group->createWidget<Group>("LocalTransformGroup", false);
+    }
     m_localTransformGroup->removeAllWidgets();
-
     m_localTransformGroup->createWidget<Label>("Local");
 
     auto comp = getComponent<CompoundComponent>();
-    auto position = comp->getJson<Vec3>("pos", Vec3(NAN, NAN, NAN));
-
+    auto position = comp->getProperty<Vec3>("pos", Vec3(NAN, NAN, NAN));
     std::array pos = { position.X(), position.Y(), position.Z() };
     m_localTransformGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos)->getOnDataChangedEvent().addListener([this](auto val) {
         m_dirtyFlag = 2;
-        if (std::isnan(val[0]) || std::isnan(val[1]) || std::isnan(val[2]))
-        {
+        if (std::isnan(val[0]) || std::isnan(val[1]) || std::isnan(val[2])) {
             m_dirtyFlag = 0;
             val[0] = val[1] = val[2] = 0.f;
-        }            
-
-        auto ccomp = getComponent<CompoundComponent>();
-        auto position = Vec3(val[0], val[1], val[2]);
-        ccomp->setJson("pos", position);
-
+        }
         IgnoreTransformEventScope scope(getComponent(), m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
-        for (auto comp : ccomp->getComponents())
-        {
-            auto transform = std::dynamic_pointer_cast<TransformComponent>(comp);
-            transform->setPosition(position);
-            transform->onUpdate(0.f);
-        }       
-        
-        dirty();
+        getComponent<CompoundComponent>()->setProperty("pos", Vec3(val[0], val[1], val[2]));
+        setDirty();
     });
 
-    auto transform = getComponent<TransformComponent>();
-    if (transform == nullptr)
-        return;
+    auto rot = comp->getProperty<Quat>("rot", Quat(NAN, NAN, NAN, NAN));
     Vec3 euler;
-    vmath_quatToEuler(transform->getRotation().P(), euler.P());
-    std::array rot = { RADIANS_TO_DEGREES(euler.X()), RADIANS_TO_DEGREES(euler.Y()), RADIANS_TO_DEGREES(euler.Z()) };
-    m_localTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot)->getOnDataChangedEvent().addListener([this](auto val) {
+    vmath_quatToEuler(rot.P(), euler.P());
+    std::array rotArr = { RADIANS_TO_DEGREES(euler.X()), RADIANS_TO_DEGREES(euler.Y()), RADIANS_TO_DEGREES(euler.Z()) };
+    m_localTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rotArr)->getOnDataChangedEvent().addListener([this](auto val) {
         IgnoreTransformEventScope scope(getComponent(), m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
-        auto transform = getComponent<TransformComponent>();
-        Quat quat;
-        float rad[3] = { DEGREES_TO_RADIANS(val[0]), DEGREES_TO_RADIANS(val[1]), DEGREES_TO_RADIANS(val[2]) };
-        vmath_eulerToQuat(rad, quat.P());
-        transform->setRotation(quat);
-        transform->onUpdate(0.f);
         m_dirtyFlag = 2;
-        dirty();
-        });
+        if (std::isnan(val[0]) || std::isnan(val[1]) || std::isnan(val[2])) {
+            m_dirtyFlag = 0;
+            val[0] = val[1] = val[2] = 0.f;
+        }        
+        float rot[3] = { DEGREES_TO_RADIANS(val[0]), DEGREES_TO_RADIANS(val[1]), DEGREES_TO_RADIANS(val[2]) };
+        Quat rotQuat;
+        vmath_eulerToQuat(rot, rotQuat.P());
+        getComponent<CompoundComponent>()->setProperty("rot", rotQuat);
+        setDirty();
+    });
 
-    std::array scale = { transform->getScale().X(), transform->getScale().Y(), transform->getScale().Z() };
-    m_localTransformGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scale)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto scale = comp->getProperty<Vec3>("scale", Vec3(NAN, NAN, NAN));
+    std::array scaleArr = { scale.X(), scale.Y(), scale.Z() };
+    m_localTransformGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scaleArr)->getOnDataChangedEvent().addListener([this](auto val) {
         IgnoreTransformEventScope scope(getComponent(), m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
-        auto transform = getComponent<TransformComponent>();
-        transform->setScale({ val[0], val[1], val[2] });
-        transform->onUpdate(0.f);
         m_dirtyFlag = 2;
-        dirty();
-        });
+        if (std::isnan(val[0]) || std::isnan(val[1]) || std::isnan(val[2])) {
+            m_dirtyFlag = 0;
+            val[0] = val[1] = val[2] = 0.f;
+        }
+        getComponent<CompoundComponent>()->setProperty("scale", Vec3(val[0], val[1], val[2]));
+        setDirty();
+    });
 }
 
 void TransformEditorComponent::drawWorldTransformComponent() {
-    if (m_worldTransformGroup == nullptr)
-        return;
-
+    if (m_worldTransformGroup == nullptr) {
+        m_worldTransformGroup = m_group->createWidget<Group>("WorldTransformGroup", false);
+    }
     m_worldTransformGroup->removeAllWidgets();
-    
-    auto transform = getComponent<TransformComponent>();
-    if (transform == nullptr)
-        return;
-
     m_worldTransformGroup->createWidget<Label>("World");
-    std::array pos = { transform->getWorldPosition().X(), transform->getWorldPosition().Y(), transform->getWorldPosition().Z() };
+
+    auto comp = getComponent<CompoundComponent>();
+    auto position = comp->getProperty<Vec3>("wpos", Vec3(NAN, NAN, NAN));
+    std::array pos = { position.X(), position.Y(), position.Z() };
     m_worldTransformGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos)->getOnDataChangedEvent().addListener([this](auto val) {
-        IgnoreTransformEventScope scope(getComponent(), m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
-        auto transform = getComponent<TransformComponent>();
-        transform->setWorldPosition({ val[0], val[1], val[2] });
-        transform->onUpdate(0.f);
         m_dirtyFlag = 1;
-        dirty();
+        if (std::isnan(val[0]) || std::isnan(val[1]) || std::isnan(val[2])) {
+            m_dirtyFlag = 0;
+            val[0] = val[1] = val[2] = 0.f;
+        }
+        IgnoreTransformEventScope scope(getComponent(), m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
+        getComponent<CompoundComponent>()->setProperty("wpos", Vec3(val[0], val[1], val[2]));
+        setDirty();
     });
 
+    auto rot = comp->getProperty<Quat>("wrot", Quat(NAN, NAN, NAN, NAN));
     Vec3 euler;
-    vmath_quatToEuler(transform->getWorldRotation().P(), euler.P());
-    std::array rot = { RADIANS_TO_DEGREES(euler.X()), RADIANS_TO_DEGREES(euler.Y()), RADIANS_TO_DEGREES(euler.Z()) };
-    m_worldTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot)->getOnDataChangedEvent().addListener([this](auto val) {
+    vmath_quatToEuler(rot.P(), euler.P());
+    std::array rotArr = { RADIANS_TO_DEGREES(euler.X()), RADIANS_TO_DEGREES(euler.Y()), RADIANS_TO_DEGREES(euler.Z()) };
+    m_worldTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rotArr)->getOnDataChangedEvent().addListener([this](auto val) {
         IgnoreTransformEventScope scope(getComponent(), m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
-        auto transform = getComponent<TransformComponent>();
-        Quat quat;
-        float rad[3] = { DEGREES_TO_RADIANS(val[0]), DEGREES_TO_RADIANS(val[1]), DEGREES_TO_RADIANS(val[2]) };
-        vmath_eulerToQuat(rad, quat.P());
-        transform->setWorldRotation(quat);
-        transform->onUpdate(0.f);
         m_dirtyFlag = 1;
-        dirty();
+        if (std::isnan(val[0]) || std::isnan(val[1]) || std::isnan(val[2])) {
+            m_dirtyFlag = 0;
+            val[0] = val[1] = val[2] = 0.f;
+        }
+        float rot[3] = { DEGREES_TO_RADIANS(val[0]), DEGREES_TO_RADIANS(val[1]), DEGREES_TO_RADIANS(val[2]) };
+        Quat rotQuat;
+        vmath_eulerToQuat(rot, rotQuat.P());
+        getComponent<CompoundComponent>()->setProperty("wrot", rotQuat);
+        setDirty();
     });
 
-    std::array scale = { transform->getWorldScale().X(), transform->getWorldScale().Y(), transform->getWorldScale().Z() };
-    m_worldTransformGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scale)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto scale = comp->getProperty<Vec3>("wscale", Vec3(NAN, NAN, NAN));
+    std::array scaleArr = { scale.X(), scale.Y(), scale.Z() };
+    m_worldTransformGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scaleArr)->getOnDataChangedEvent().addListener([this](auto val) {
         IgnoreTransformEventScope scope(getComponent(), m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
-        auto transform = getComponent<TransformComponent>();
-        transform->setWorldScale({ val[0], val[1], val[2] });
-        transform->onUpdate(0.f);
         m_dirtyFlag = 1;
-        dirty();
+        if (std::isnan(val[0]) || std::isnan(val[1]) || std::isnan(val[2])) {
+            m_dirtyFlag = 0;
+            val[0] = val[1] = val[2] = 0.f;
+        }
+        getComponent<CompoundComponent>()->setProperty("wscale", Vec3(val[0], val[1], val[2]));
+        setDirty();
     });
 }
 
 void TransformEditorComponent::onTransformChanged(SceneObject& sceneObject)
 {
     // Just redraw the transform in Inspector
-    TaskManager::getInstance()->addTask([this]() 
-    {
+    TaskManager::getInstance()->addTask([this]() {
         m_dirtyFlag = 0;
     });
 }

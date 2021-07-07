@@ -15,16 +15,12 @@ public:
 	NavObstacleEditorComponent();
 	virtual ~NavObstacleEditorComponent();
 
-	virtual void redraw() override;
-protected:
-	
+protected:	
 	virtual void onInspectorUpdate() override;
-
 	void drawNavObstacle();
-protected:
-	std::shared_ptr<Group> m_navObstacleGroup = nullptr;
 
-	
+protected:
+	std::shared_ptr<Group> m_navObstacleGroup = nullptr;	
 };
 
 NS_IGE_END

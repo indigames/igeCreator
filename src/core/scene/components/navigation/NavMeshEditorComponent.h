@@ -15,16 +15,12 @@ public:
 	NavMeshEditorComponent();
 	virtual ~NavMeshEditorComponent();
 
-	virtual void redraw() override;
-protected:
-	
+protected:	
 	virtual void onInspectorUpdate() override;
-
 	void drawNavMesh();
-protected:
-	std::shared_ptr<Group> m_navMeshGroup = nullptr;
 
-	
+protected:
+	std::shared_ptr<Group> m_navMeshGroup = nullptr;	
 };
 
 NS_IGE_END

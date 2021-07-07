@@ -74,7 +74,7 @@ void UITextFieldEditorComponent::drawUITextField()
         txtFontPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
             auto uiText = getComponent<UITextField>();
             uiText->setFontPath(txt);
-            dirty();
+            setDirty();
             });
     }
 

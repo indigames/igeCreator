@@ -1,4 +1,5 @@
 #include "core/scene/components/navigation/OffMeshLinkEditorComponent.h"
+#include "core/scene/CompoundComponent.h"
 
 #include <core/layout/Group.h>
 
@@ -19,85 +20,52 @@ OffMeshLinkEditorComponent::OffMeshLinkEditorComponent() {
     m_offMeshLinkGroup = nullptr;
 }
 
-OffMeshLinkEditorComponent::~OffMeshLinkEditorComponent()
-{
+OffMeshLinkEditorComponent::~OffMeshLinkEditorComponent() {
     m_offMeshLinkGroup = nullptr;
 }
 
-void OffMeshLinkEditorComponent::redraw()
-{
-    if (m_group == nullptr)
-        return;
-
-    if (m_offMeshLinkGroup == nullptr) {
-        m_offMeshLinkGroup = m_group->createWidget<Group>("OffMeshLink", false);
-    }
-    drawOffMeshLink();
-
-    EditorComponent::redraw();
-}
-
-void OffMeshLinkEditorComponent::onInspectorUpdate()
-{
-    if (m_group == nullptr)
-        return;
-    m_group->removeAllWidgets();
-
-    m_offMeshLinkGroup = m_group->createWidget<Group>("OffMeshLink", false);
-
+void OffMeshLinkEditorComponent::onInspectorUpdate() {
     drawOffMeshLink();
 }
 
 void OffMeshLinkEditorComponent::drawOffMeshLink()
 {
     if (m_offMeshLinkGroup == nullptr)
-        return;
+        m_offMeshLinkGroup = m_group->createWidget<Group>("OffMeshLink", false);;
     m_offMeshLinkGroup->removeAllWidgets();
 
-    auto offMeshLink =getComponent<OffMeshLink>();
-    if (offMeshLink == nullptr)
-        return;
+    auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
 
-    auto column = m_offMeshLinkGroup->createWidget<Columns<3>>();
-    column->createWidget<CheckBox>("Enable", offMeshLink->isEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto offMeshLink =getComponent<OffMeshLink>();
-        offMeshLink->setEnabled(val);
-        });
-    column->createWidget<CheckBox>("Bidirectional", offMeshLink->isBidirectional())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto offMeshLink =getComponent<OffMeshLink>();
-        offMeshLink->setBidirectional(val);
-        });
+    m_offMeshLinkGroup->createWidget<CheckBox>("Bidirectional", comp->getProperty<bool>("2way", true))->getOnDataChangedEvent().addListener([this](bool val) {
+        getComponent<CompoundComponent>()->setProperty("2way", val);
+    });
 
     // Endpoint
-    auto endPointTxt = m_offMeshLinkGroup->createWidget<TextField>("Endpoint", offMeshLink->getEndPoint() ? offMeshLink->getEndPoint()->getName() : std::string());
+    auto endPointObj = Editor::getCurrentScene()->findObjectByUUID(comp->getProperty<std::string>("endUuid", ""));
+    auto endPointTxt = m_offMeshLinkGroup->createWidget<TextField>("Endpoint", endPointObj ? endPointObj->getName() : "");
     endPointTxt->getOnDataChangedEvent().addListener([&](const auto& val) {
-        auto offMeshLink =getComponent<OffMeshLink>();
-        auto obj = Editor::getCurrentScene()->findObjectByName(val);
-        offMeshLink->setEndPoint(obj.get());
-        });
+        getComponent<CompoundComponent>()->setProperty("endUuid", val);
+        setDirty();
+    });
     endPointTxt->addPlugin<DDTargetPlugin<int>>(EDragDropID::OBJECT)->getOnDataReceivedEvent().addListener([&](auto val) {
-        auto offMeshLink =getComponent<OffMeshLink>();
-        auto obj = Editor::getCurrentScene()->findObjectById(val);
-        offMeshLink->setEndPoint(obj.get());
-        redraw();
-        });
+        getComponent<CompoundComponent>()->setProperty("endUuid", val);
+        setDirty();
+    });
 
-    std::array radius = { offMeshLink->getRadius() };
+    std::array radius = { comp->getProperty<float>("radius", 1.f) };
     m_offMeshLinkGroup->createWidget<Drag<float>>("Radius", ImGuiDataType_Float, radius, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto offMeshLink =getComponent<OffMeshLink>();
-        offMeshLink->setRadius(val[0]);
-        });
+        getComponent<CompoundComponent>()->setProperty("radius", val[0]);
+    });
 
-    std::array mask = { (int)offMeshLink->getMask() };
+    std::array mask = { comp->getProperty<int>("mask", 0) };
     m_offMeshLinkGroup->createWidget<Drag<int>>("Mask", ImGuiDataType_S32, mask, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto offMeshLink =getComponent<OffMeshLink>();
-        offMeshLink->setMask(val[0]);
-        });
+        getComponent<CompoundComponent>()->setProperty("mask", val[0]);
+    });
 
-    std::array areaId = { (int)offMeshLink->getAreaId() };
-    m_offMeshLinkGroup->createWidget<Drag<int>>("Area ID", ImGuiDataType_S32, areaId, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto offMeshLink =getComponent<OffMeshLink>();
-        offMeshLink->setAreaId(val[0]);
-        });
+    std::array areaId = { comp->getProperty<int>("areaId", 0) };
+    m_offMeshLinkGroup->createWidget<Drag<int>>("AreaID", ImGuiDataType_S32, areaId, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("areaId", val[0]);
+    });
 }
 NS_IGE_END

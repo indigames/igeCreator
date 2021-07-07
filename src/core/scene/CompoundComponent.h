@@ -37,23 +37,16 @@ namespace ige::scene
         //! Get the number of targets
         inline size_t size() const { return m_components.size(); }
 
-        //! Return json value
-        const json& getJson() const { return m_json; }
-
-        //! Update whole json
-        void setJson(const json& val);
-
-        //! Get json value by key
-        template <typename T>
-        T getJson(const std::string& key, const T& defaultVal);
-
         //! Update json value
-        void setJson(const std::string& key, const json& val);
+        virtual void setProperty(const std::string& key, const json& val) override;
+
+        //! Serialize
+        virtual void to_json(json& j) const override;
+
+        //! Set dirty to reload components
+        void setDirty() { collectSharedElements(); }
 
     protected:
-        //! Serialize
-        virtual void to_json(json &j) const override {}
-
         //! Deserialize
         virtual void from_json(const json &j) override {}
 
@@ -68,11 +61,4 @@ namespace ige::scene
         json m_json = {};
 
     };
-
-    //! Get json value by key
-    template <typename T>
-    T CompoundComponent::getJson(const std::string& key, const T& defaultVal)
-    {
-        return (m_json.contains(key) && !m_json.at(key).is_null()) ? m_json.value(key, defaultVal) : defaultVal;
-    }
 } // namespace ige::scene

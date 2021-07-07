@@ -15,16 +15,12 @@ public:
 	OffMeshLinkEditorComponent();
 	virtual ~OffMeshLinkEditorComponent();
 
-	virtual void redraw() override;
-protected:
-	
+protected:	
 	virtual void onInspectorUpdate() override;
-
 	void drawOffMeshLink();
-protected:
-	std::shared_ptr<Group> m_offMeshLinkGroup = nullptr;
 
-	
+protected:
+	std::shared_ptr<Group> m_offMeshLinkGroup = nullptr;	
 };
 
 NS_IGE_END

@@ -21,16 +21,18 @@ class EditorComponent
 public:
 	EditorComponent();
 	virtual ~EditorComponent();
-
-	virtual bool setComponent(std::shared_ptr<Component> component);
+		
+	//! Draw
 	virtual void draw(std::shared_ptr<Group> group);
 	virtual void redraw();
 
-	void dirty() { m_bisDirty = true; }
+	//! Dirty flag
 	bool isDirty() { return m_bisDirty; }
-	void setDirty(bool value) { m_bisDirty = value; }
+	void setDirty(bool value = true) { m_bisDirty = value; }
 
+	//! Get component
 	std::shared_ptr<Component>& getComponent() { return m_component; }
+	virtual bool setComponent(std::shared_ptr<Component> component);
 
 	//! Check if component type is safe to cast
 	template <typename T>
@@ -41,6 +43,7 @@ public:
 	inline std::shared_ptr<T> getComponent();
 
 protected:
+	//! Internal inspector update
 	virtual void onInspectorUpdate() = 0;
 
 protected:

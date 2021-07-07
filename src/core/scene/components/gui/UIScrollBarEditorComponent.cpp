@@ -65,7 +65,7 @@ void UIScrollBarEditorComponent::drawUIScrollBar()
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
             auto uiScrollBar = getComponent<UIScrollBar>();
             uiScrollBar->setPath(txt);
-            dirty();
+            setDirty();
             });
     }
 
@@ -75,7 +75,7 @@ void UIScrollBarEditorComponent::drawUIScrollBar()
         {
             auto uiScrollBar =getComponent<UIScrollBar>();
             uiScrollBar->setPath(files[0]);
-            dirty();
+            setDirty();
         }
         });
 
@@ -85,11 +85,11 @@ void UIScrollBarEditorComponent::drawUIScrollBar()
         });
 
     auto spriteType = uiScrollBar->getSpriteType();
-    auto m_spriteTypeCombo = m_uiScrollBarGroup->createWidget<ComboBox>((int)spriteType);
+    auto m_spriteTypeCombo = m_uiScrollBarGroup->createWidget<ComboBox>("", (int)spriteType);
     m_spriteTypeCombo->getOnDataChangedEvent().addListener([this](auto val) {
         auto uiScrollBar =getComponent<UIScrollBar>();
         uiScrollBar->setSpriteType(val);
-        dirty();
+        setDirty();
         });
     m_spriteTypeCombo->setEndOfLine(false);
     m_spriteTypeCombo->addChoice((int)SpriteType::Simple, "Simple");
@@ -122,11 +122,11 @@ void UIScrollBarEditorComponent::drawUIScrollBar()
     else
     {
         auto fillMethod = uiScrollBar->getFillMethod();
-        auto m_compComboFillMethod = m_uiScrollBarGroup->createWidget<ComboBox>((int)fillMethod);
+        auto m_compComboFillMethod = m_uiScrollBarGroup->createWidget<ComboBox>("", (int)fillMethod);
         m_compComboFillMethod->getOnDataChangedEvent().addListener([this](auto val) {
             auto uiScrollBar =getComponent<UIScrollBar>();
             uiScrollBar->setFillMethod(val);
-            dirty();
+            setDirty();
             });
         m_compComboFillMethod->setEndOfLine(false);
         m_compComboFillMethod->addChoice((int)FillMethod::None, "None");
@@ -139,11 +139,11 @@ void UIScrollBarEditorComponent::drawUIScrollBar()
 
         if (fillMethod != FillMethod::None) {
 
-            auto m_compComboFillOrigin = m_uiScrollBarGroup->createWidget<ComboBox>((int)uiScrollBar->getFillOrigin());
+            auto m_compComboFillOrigin = m_uiScrollBarGroup->createWidget<ComboBox>("", (int)uiScrollBar->getFillOrigin());
             m_compComboFillOrigin->getOnDataChangedEvent().addListener([this](auto val) {
                 auto uiScrollBar =getComponent<UIScrollBar>();
                 uiScrollBar->setFillOrigin(val);
-                dirty();
+                setDirty();
                 });
             m_compComboFillOrigin->setEndOfLine(false);
             if (fillMethod == FillMethod::Horizontal)
@@ -220,11 +220,11 @@ void UIScrollBarEditorComponent::drawUIScrollBar()
 
 
     auto direction = uiScrollBar->getDirection();
-    auto m_compComboDirection = m_uiScrollBarGroup->createWidget<ComboBox>((int)direction);
+    auto m_compComboDirection = m_uiScrollBarGroup->createWidget<ComboBox>("", (int)direction);
     m_compComboDirection->getOnDataChangedEvent().addListener([this](auto val) {
         auto uiScrollBar =getComponent<UIScrollBar>();
         uiScrollBar->setDirection(val);
-        dirty();
+        setDirty();
         });
 
     m_compComboDirection->setEndOfLine(false);

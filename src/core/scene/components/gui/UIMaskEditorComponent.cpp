@@ -66,7 +66,7 @@ void UIMaskEditorComponent::drawUIMask()
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
             auto uiMask = getComponent<UIMask>();
             uiMask->setPath(txt);
-            dirty();
+            setDirty();
             });
     }
 
@@ -76,7 +76,7 @@ void UIMaskEditorComponent::drawUIMask()
         {
             auto uiMask = getComponent<UIMask>();
             uiMask->setPath(files[0]);
-            dirty();
+            setDirty();
         }
         });
 
@@ -91,11 +91,11 @@ void UIMaskEditorComponent::drawUIMask()
         });
 
     auto spriteType = uiMask->getSpriteType();
-    auto m_spriteTypeCombo = m_uiMaskGroup->createWidget<ComboBox>((int)spriteType);
+    auto m_spriteTypeCombo = m_uiMaskGroup->createWidget<ComboBox>("", (int)spriteType);
     m_spriteTypeCombo->getOnDataChangedEvent().addListener([this](auto val) {
         auto uiMask = getComponent<UIMask>();
         uiMask->setSpriteType(val);
-        dirty();
+        setDirty();
         });
     m_spriteTypeCombo->setEndOfLine(false);
     m_spriteTypeCombo->addChoice((int)SpriteType::Simple, "Simple");
@@ -128,11 +128,11 @@ void UIMaskEditorComponent::drawUIMask()
     else
     {
         auto fillMethod = uiMask->getFillMethod();
-        auto m_compComboFillMethod = m_uiMaskGroup->createWidget<ComboBox>((int)fillMethod);
+        auto m_compComboFillMethod = m_uiMaskGroup->createWidget<ComboBox>("", (int)fillMethod);
         m_compComboFillMethod->getOnDataChangedEvent().addListener([this](auto val) {
             auto uiMask = getComponent<UIMask>();
             uiMask->setFillMethod(val);
-            dirty();
+            setDirty();
             });
         m_compComboFillMethod->setEndOfLine(false);
         m_compComboFillMethod->addChoice((int)FillMethod::None, "None");
@@ -145,11 +145,11 @@ void UIMaskEditorComponent::drawUIMask()
 
         if (fillMethod != FillMethod::None) {
 
-            auto m_compComboFillOrigin = m_uiMaskGroup->createWidget<ComboBox>((int)uiMask->getFillOrigin());
+            auto m_compComboFillOrigin = m_uiMaskGroup->createWidget<ComboBox>("", (int)uiMask->getFillOrigin());
             m_compComboFillOrigin->getOnDataChangedEvent().addListener([this](auto val) {
                 auto uiMask = getComponent<UIMask>();
                 uiMask->setFillOrigin(val);
-                dirty();
+                setDirty();
                 });
             m_compComboFillOrigin->setEndOfLine(false);
             if (fillMethod == FillMethod::Horizontal)

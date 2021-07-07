@@ -5,27 +5,22 @@
 
 #include "core/scene/components/EditorComponent.h"
 #include "components/Component.h"
-#include "core/scene/components/LightEditorComponent.h"
 
 USING_NS_IGE_SCENE
 NS_IGE_BEGIN
 
-class SpotLightEditorComponent : public LightEditorComponent
+class SpotLightEditorComponent : public EditorComponent
 {
 public:
 	SpotLightEditorComponent();
 	~SpotLightEditorComponent();
 
-	virtual void redraw() override;
-protected:
-	
+protected:	
 	virtual void onInspectorUpdate() override;
-
 	void drawSpotLight();
-protected:
-	std::shared_ptr<Group> m_spotLightGroup = nullptr;
 
-	
+protected:
+	std::shared_ptr<Group> m_spotLightGroup = nullptr;	
 };
 
 NS_IGE_END

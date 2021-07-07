@@ -105,11 +105,11 @@ void UISliderEditorComponent::drawUISlider()
         });
 
     auto direction = uiSlider->getDirection();
-    auto m_directionCombo = m_uiSliderGroup->createWidget<ComboBox>((int)direction);
+    auto m_directionCombo = m_uiSliderGroup->createWidget<ComboBox>("", (int)direction);
     m_directionCombo->getOnDataChangedEvent().addListener([this](auto val) {
         auto uiSlider = getComponent<UISlider>();
         uiSlider->setDirection(val);
-        dirty();
+        setDirty();
         });
     m_directionCombo->setEndOfLine(false);
     m_directionCombo->addChoice((int)UISlider::Direction::LEFT_TO_RIGHT, "Left To Right");
@@ -154,7 +154,7 @@ void UISliderEditorComponent::drawMin()
         auto max = uiSlider->getMax();
         if (val[0] < max) {
             uiSlider->setMin(val[0]);
-            dirty();
+            setDirty();
             m_dirtyFlag = 1;
         }
         });
@@ -180,7 +180,7 @@ void UISliderEditorComponent::drawMax()
         auto min = uiSlider->getMin();
         if (val[0] > min) {
             uiSlider->setMax(val[0]);
-            dirty();
+            setDirty();
             m_dirtyFlag = 2;
         }
         });

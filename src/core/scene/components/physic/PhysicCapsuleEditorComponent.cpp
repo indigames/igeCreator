@@ -1,4 +1,5 @@
 #include "core/scene/components/physic/PhysicCapsuleEditorComponent.h"
+#include "core/scene/CompoundComponent.h"
 
 #include <core/layout/Group.h>
 
@@ -12,54 +13,32 @@ PhysicCapsuleEditorComponent::PhysicCapsuleEditorComponent() {
     m_physicGroup = nullptr;
 }
 
-PhysicCapsuleEditorComponent::~PhysicCapsuleEditorComponent()
-{
+PhysicCapsuleEditorComponent::~PhysicCapsuleEditorComponent() {
     m_physicGroup = nullptr;
 }
 
-void PhysicCapsuleEditorComponent::redraw()
-{
-    if (m_group == nullptr)
-        return;
-
-    if (m_physicGroup == nullptr) {
-        m_physicGroup = m_group->createWidget<Group>("PhysicGroup", false);
-    }
-    drawPhysicCapsule();
-
-    EditorComponent::redraw();
-}
-
-void PhysicCapsuleEditorComponent::onInspectorUpdate()
-{
-    if (m_group == nullptr)
-        return;
-    m_group->removeAllWidgets();
-
-    m_physicGroup = m_group->createWidget<Group>("PhysicGroup", false);
-
+void PhysicCapsuleEditorComponent::onInspectorUpdate() {
     drawPhysicCapsule();
 }
 
-void PhysicCapsuleEditorComponent::drawPhysicCapsule()
-{
-    auto physicComp = getComponent<PhysicCapsule>();
-    if (physicComp == nullptr)
-        return;
-
+void PhysicCapsuleEditorComponent::drawPhysicCapsule() {
+    // Draw common properties
     drawPhysicObject();
 
+    // Draw physic box properties
     m_physicGroup->createWidget<Separator>();
-    std::array height = { physicComp->getHeight() };
+    auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
+
+    std::array height = { comp->getProperty<float>("height", 1.f) };
     m_physicGroup->createWidget<Drag<float>>("Height", ImGuiDataType_Float, height, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
-        auto physicComp = getComponent<PhysicCapsule>();
-        physicComp->setHeight(val[0]);
-        });
-    std::array radius = { physicComp->getRadius() };
+        getComponent<CompoundComponent>()->setProperty("height", val[0]);
+    });
+
+    std::array radius = { comp->getProperty<float>("radius", 1.f) };
     m_physicGroup->createWidget<Drag<float>>("Radius", ImGuiDataType_Float, radius, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
-        auto physicComp = getComponent<PhysicCapsule>();
-        physicComp->setRadius(val[0]);
-        });
+        getComponent<CompoundComponent>()->setProperty("radius", val[0]);
+    });
 
     // Draw constraints
     drawPhysicConstraints();

@@ -1,4 +1,5 @@
 #include "core/scene/components/navigation/DynamicNavMeshEditorComponent.h"
+#include "core/scene/CompoundComponent.h"
 
 #include <core/layout/Group.h>
 
@@ -12,55 +13,31 @@ DynamicNavMeshEditorComponent::DynamicNavMeshEditorComponent() {
     m_navMeshGroup = nullptr;
 }
 
-DynamicNavMeshEditorComponent::~DynamicNavMeshEditorComponent()
-{
+DynamicNavMeshEditorComponent::~DynamicNavMeshEditorComponent() {
     m_navMeshGroup = nullptr;
 }
 
-void DynamicNavMeshEditorComponent::redraw()
-{
-    if (m_group == nullptr)
-        return;
-
-    if (m_navMeshGroup == nullptr) {
-        m_navMeshGroup = m_group->createWidget<Group>("DynamicNavMesh", false);
-    }
-    drawDynamicNavMesh();
-
-    EditorComponent::redraw();
-}
-
-void DynamicNavMeshEditorComponent::onInspectorUpdate()
-{
-    if (m_group == nullptr)
-        return;
-    m_group->removeAllWidgets();
-
-    m_navMeshGroup = m_group->createWidget<Group>("DynamicNavMesh", false);
-
+void DynamicNavMeshEditorComponent::onInspectorUpdate() {
     drawDynamicNavMesh();
 }
 
-void DynamicNavMeshEditorComponent::drawDynamicNavMesh()
-{
-    if (m_navMeshGroup == nullptr)
-        return;
+void DynamicNavMeshEditorComponent::drawDynamicNavMesh() {
+    // Draw base NavMesh
     drawNavMesh();
 
-    auto navMesh = getComponent<DynamicNavMesh>();
-    if (navMesh == nullptr)
-        return;
+    auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
 
-    std::array maxObstacles = { (int)navMesh->getMaxObstacles() };
-    m_navMeshGroup->createWidget<Drag<int>>("Max Obstacles", ImGuiDataType_S32, maxObstacles, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto navMesh = getComponent<DynamicNavMesh>();
-        navMesh->setMaxObstacles(val[0]);
-        });
+    m_navMeshGroup->createWidget<Separator>();
 
-    std::array maxLayers = { (int)navMesh->getMaxLayers() };
-    m_navMeshGroup->createWidget<Drag<int>>("Max Layers", ImGuiDataType_S32, maxLayers, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto navMesh = getComponent<DynamicNavMesh>();
-        navMesh->setMaxLayers(val[0]);
-        });
+    std::array maxObs = { comp->getProperty<int>("maxObs", 1024) };
+    m_navMeshGroup->createWidget<Drag<int>>("MaxObstacle", ImGuiDataType_S32, maxObs, 1, 0)->getOnDataChangedEvent().addListener([this](auto& val) {
+        getComponent<CompoundComponent>()->setProperty("maxObs", val[0]);
+    });
+    
+    std::array maxLayers = { comp->getProperty<int>("maxLayers", 16) };
+    m_navMeshGroup->createWidget<Drag<int>>("MaxLayer", ImGuiDataType_S32, maxLayers, 1, 0)->getOnDataChangedEvent().addListener([this](auto& val) {
+        getComponent<CompoundComponent>()->setProperty("maxLayers", val[0]);
+    });
 }
 NS_IGE_END

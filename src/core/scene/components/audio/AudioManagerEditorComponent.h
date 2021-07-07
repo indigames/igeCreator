@@ -15,16 +15,12 @@ public:
 	AudioManagerEditorComponent();
 	virtual ~AudioManagerEditorComponent();
 
-	virtual void redraw() override;
-protected:
-	
+protected:	
 	virtual void onInspectorUpdate() override;
-
 	void drawAudioManager();
+
 protected:
 	std::shared_ptr<Group> m_audioManagerGroup = nullptr;
-
-
 };
 
 NS_IGE_END

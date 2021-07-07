@@ -15,15 +15,12 @@ public:
 	ParticleManagerEditorComponent();
 	virtual ~ParticleManagerEditorComponent();
 
-	virtual void redraw() override;
-protected:
-	
+protected:	
 	virtual void onInspectorUpdate() override;
-
 	void drawParticleManager();
+
 protected:
 	std::shared_ptr<Group> m_particleManagerGroup = nullptr;
-
 };
 
 NS_IGE_END

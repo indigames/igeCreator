@@ -144,7 +144,7 @@ namespace ige::scene
         {
             if (comp == nullptr) continue;
 
-            if(comp && comp->canMultiEdit())
+            if(comp && (m_objects.size() == 1 || comp->canMultiEdit()))
             {
                 auto compoundComp = std::make_shared<CompoundComponent>(*this);
                 compoundComp->add(comp);

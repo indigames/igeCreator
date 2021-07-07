@@ -17,13 +17,9 @@ public:
 	PhysicCapsuleEditorComponent();
 	~PhysicCapsuleEditorComponent();
 
-	virtual void redraw() override;
-protected:
-	
+protected:	
 	virtual void onInspectorUpdate() override;
-
 	void drawPhysicCapsule();
-
 };
 
 NS_IGE_END

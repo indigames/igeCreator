@@ -5,27 +5,22 @@
 
 #include "core/scene/components/EditorComponent.h"
 #include "components/Component.h"
-#include "core/scene/components/LightEditorComponent.h"
 
 USING_NS_IGE_SCENE
 NS_IGE_BEGIN
 
-class DirectionalLightEditorComponent : public LightEditorComponent
+class DirectionalLightEditorComponent : public EditorComponent
 {
 public:
 	DirectionalLightEditorComponent();
 	~DirectionalLightEditorComponent();
 
-	virtual void redraw() override;
-protected:
-	
+protected:	
 	virtual void onInspectorUpdate() override;
-
 	void drawDirectionalLight();
+
 protected:
 	std::shared_ptr<Group> m_directionalLightGroup = nullptr;
-
-	
 };
 
 NS_IGE_END

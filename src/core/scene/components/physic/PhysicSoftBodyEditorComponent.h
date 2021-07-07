@@ -17,13 +17,9 @@ public:
 	PhysicSoftBodyEditorComponent();
 	~PhysicSoftBodyEditorComponent();
 
-	virtual void redraw() override;
-protected:
-	
+protected:	
 	virtual void onInspectorUpdate() override;
-
 	void drawPhysicSoftBody();
-
 };
 
 NS_IGE_END

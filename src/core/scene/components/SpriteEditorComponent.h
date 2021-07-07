@@ -15,16 +15,12 @@ public:
 	SpriteEditorComponent();
 	virtual ~SpriteEditorComponent();
 
-	virtual void redraw() override;
 protected:
-	
 	virtual void onInspectorUpdate() override;
-
 	void drawSpriteComponent();
+
 protected:
 	std::shared_ptr<Group> m_spriteCompGroup = nullptr;
-
-
 };
 
 NS_IGE_END

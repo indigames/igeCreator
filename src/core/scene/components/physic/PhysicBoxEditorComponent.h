@@ -17,13 +17,9 @@ public:
 	PhysicBoxEditorComponent();
 	~PhysicBoxEditorComponent();
 
-	virtual void redraw() override;
-protected:
-	
+protected:	
 	virtual void onInspectorUpdate() override;
-
 	void drawPhysicBox();
-
 };
 
 NS_IGE_END

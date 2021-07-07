@@ -13,12 +13,14 @@ public:
     TransformEditorComponent();
     virtual ~TransformEditorComponent();
 
+    //! Override for transform changed event
     virtual bool setComponent(std::shared_ptr<Component> component) override;
-    virtual void redraw() override;
+
 protected:
-    
+    //! Internal inspector update
     virtual void onInspectorUpdate() override;
 
+    //! Draw local and world transform groups
     void drawLocalTransformComponent();
     void drawWorldTransformComponent();
 
@@ -29,6 +31,7 @@ protected:
     std::shared_ptr<Group> m_localTransformGroup = nullptr;
     std::shared_ptr<Group> m_worldTransformGroup = nullptr;
 
+    //! Dirty flags
     int m_dirtyFlag = 0;
 
     //! Transform listener id

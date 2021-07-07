@@ -1,4 +1,5 @@
 #include "core/scene/components/particle/ParticleEditorComponent.h"
+#include "core/scene/CompoundComponent.h"
 
 #include <core/layout/Group.h>
 
@@ -17,120 +18,78 @@ ParticleEditorComponent::ParticleEditorComponent() {
     m_particleGroup = nullptr;
 }
 
-ParticleEditorComponent::~ParticleEditorComponent()
-{
+ParticleEditorComponent::~ParticleEditorComponent() {
     m_particleGroup = nullptr;
 }
 
-void ParticleEditorComponent::redraw()
-{
-    if (m_group == nullptr)
-        return;
-
-    if (m_particleGroup == nullptr) {
-        m_particleGroup = m_group->createWidget<Group>("Particle", false);
-    }
-
-    drawParticle();
-
-    EditorComponent::redraw();
-}
-
-void ParticleEditorComponent::onInspectorUpdate()
-{
-    if (m_group == nullptr)
-        return;
-    m_group->removeAllWidgets();
-
-    m_particleGroup = m_group->createWidget<Group>("Particle", false);
-
+void ParticleEditorComponent::onInspectorUpdate() {
     drawParticle();
 }
 
-void ParticleEditorComponent::drawParticle()
-{
+void ParticleEditorComponent::drawParticle() {
     if (m_particleGroup == nullptr)
-        return;
+        m_particleGroup = m_group->createWidget<Group>("Particle", false);;
     m_particleGroup->removeAllWidgets();
 
-    auto particle = getComponent<Particle>();
-    if (particle == nullptr)
-        return;
+    auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
 
-    auto column = m_particleGroup->createWidget<Columns<3>>();
-    column->createWidget<CheckBox>("Enable", particle->isEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto particle = getComponent<Particle>();
-        particle->setEnabled(val);
-        });
-    column->createWidget<CheckBox>("Loop", particle->isLooped())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto particle = getComponent<Particle>();
-        particle->setLoop(val);
-        });
-    column->createWidget<CheckBox>("Auto Drawing", particle->isAutoDrawing())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto particle = getComponent<Particle>();
-        particle->setAutoDrawing(val);
-        });
+    auto column = m_particleGroup->createWidget<Columns<2>>();
+    column->createWidget<CheckBox>("Loop", comp->getProperty<bool>("loop", false))->getOnDataChangedEvent().addListener([this](bool val) {
+        getComponent<CompoundComponent>()->setProperty("loop", val);
+    });
+    column->createWidget<CheckBox>("AutoDraw", comp->getProperty<bool>("autoDraw", false))->getOnDataChangedEvent().addListener([this](bool val) {
+        getComponent<CompoundComponent>()->setProperty("autoDraw", val);
+    });
 
-    std::array layer = { particle->getLayer() };
+    std::array layer = { comp->getProperty<int>("layer", 0) };
     m_particleGroup->createWidget<Drag<int>>("Layer", ImGuiDataType_U32, layer, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto particle = getComponent<Particle>();
-        particle->setLayer(val[0]);
-        });
+        getComponent<CompoundComponent>()->setProperty("layer", val);
+    });
 
-    std::array mask = { particle->getGroupMask() };
-    m_particleGroup->createWidget<Drag<int>>("Group Mask", ImGuiDataType_U32, mask, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto particle = getComponent<Particle>();
-        particle->setGroupMask(val[0]);
-        });
+    std::array mask = { comp->getProperty<int>("mask", 0) };
+    m_particleGroup->createWidget<Drag<int>>("GroupMask", ImGuiDataType_U32, mask, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("mask", val);
+    });
 
-    std::array speed = { particle->getSpeed() };
+    std::array speed = { comp->getProperty<float>("speed", 0) };
     m_particleGroup->createWidget<Drag<float>>("Speed", ImGuiDataType_Float, speed, 0.01f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto particle = getComponent<Particle>();
-        particle->setSpeed(val[0]);
-        });
+        getComponent<CompoundComponent>()->setProperty("speed", val);
+    });
 
-    std::array timeScale = { particle->getTimeScale() };
-    m_particleGroup->createWidget<Drag<float>>("Time Scale", ImGuiDataType_Float, timeScale, 0.01f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto particle = getComponent<Particle>();
-        particle->setTimeScale(val[0]);
-        });
+    std::array timeScale = { comp->getProperty<float>("timeScale", 0) };
+    m_particleGroup->createWidget<Drag<float>>("TimeScale", ImGuiDataType_Float, timeScale, 0.01f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("timeScale", val);
+    });
 
-    std::array target = { particle->getTargetLocation().X(), particle->getTargetLocation().Y(), particle->getTargetLocation().Z() };
-    m_particleGroup->createWidget<Drag<float, 3>>("Target Location", ImGuiDataType_Float, target, 0.01f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto particle = getComponent<Particle>();
-        particle->setTargetLocation({ val[0], val[1], val[2] });
-        });
+    auto target = comp->getProperty<Vec3>("target", {});
+    std::array targetArr = { target.X(), target.Y(), target.Z() };
+    m_particleGroup->createWidget<Drag<float, 3>>("TargetPos", ImGuiDataType_Float, targetArr, 0.01f)->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("target", { val[0], val[1], val[2] });
+    });
 
-    std::array params = { particle->getDynamicInputParameter().X(), particle->getDynamicInputParameter().Y(), particle->getDynamicInputParameter().Z(), particle->getDynamicInputParameter().W() };
-    m_particleGroup->createWidget<Drag<float, 4>>("Dynamic Parameters", ImGuiDataType_Float, params, 0.01f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto particle = getComponent<Particle>();
-        particle->setDynamicInputParameter({ val[0], val[1], val[2], val[3] });
-        });
+    auto params = comp->getProperty<Vec4>("param", {});
+    std::array paramArr = { params.X(), params.Y(), params.Z(), params.W() };
+    m_particleGroup->createWidget<Drag<float, 4>>("Parameters", ImGuiDataType_Float, paramArr, 0.01f)->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("param", { val[0], val[1], val[2], val[3] });
+    });
 
-    std::array color = { particle->getColor().X(), particle->getColor().Y(), particle->getColor().Z(), particle->getColor().W() };
+    auto col = comp->getProperty<Vec4>("color", {});
+    std::array color = { col.X(), col.Y(), col.Z(), col.W() };
     m_particleGroup->createWidget<Drag<float, 4>>("Color", ImGuiDataType_Float, color, 0.001f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto particle = getComponent<Particle>();
-        particle->setColor({ val[0], val[1], val[2], val[3] });
-        });
+        getComponent<CompoundComponent>()->setProperty("color", { val[0], val[1], val[2], val[3] });
+    });
 
-    auto txtPath = m_particleGroup->createWidget<TextField>("Path", particle->getPath());
+    auto txtPath = m_particleGroup->createWidget<TextField>("Path", comp->getProperty<std::string>("path", ""));
     txtPath->getOnDataChangedEvent().addListener([this](auto val) {
-        TaskManager::getInstance()->addTask([val, this]() {
-            auto particle = getComponent<Particle>();
-            particle->setPath(val);
-            particle->play();
-            });
-        });
+        getComponent<CompoundComponent>()->setProperty("path", val);
+    });
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Particle))
     {
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto val) {
-            TaskManager::getInstance()->addTask([val, this]() {
-                auto particle = getComponent<Particle>();
-                particle->setPath(val);
-                particle->play();
-                dirty();
-                });
-            });
+            getComponent<CompoundComponent>()->setProperty("path", val);
+            setDirty();
+        });
     }
 }
 NS_IGE_END

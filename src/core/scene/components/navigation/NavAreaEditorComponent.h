@@ -1,5 +1,5 @@
-#ifndef __NAV_AGENT_EDITOR_COMPONENT_H_
-#define __NAV_AGENT_EDITOR_COMPONENT_H_
+#ifndef __NAV_AREA_EDITOR_COMPONENT_H_
+#define __NAV_AREA_EDITOR_COMPONENT_H_
 
 #include "core/Macros.h"
 
@@ -15,18 +15,14 @@ public:
 	NavAreaEditorComponent();
 	virtual ~NavAreaEditorComponent();
 
-	virtual void redraw() override;
-protected:
-	
+protected:	
 	virtual void onInspectorUpdate() override;
-
 	void drawNavArea();
+
 protected:
 	std::shared_ptr<Group> m_navAreaGroup = nullptr;
-
-	
 };
 
 NS_IGE_END
 
-#endif //__NAV_AGENT_EDITOR_COMPONENT_H_
+#endif //__NAV_AREA_EDITOR_COMPONENT_H_

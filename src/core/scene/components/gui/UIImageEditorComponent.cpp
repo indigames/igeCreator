@@ -65,7 +65,7 @@ void UIImageEditorComponent::drawUIImage()
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
             auto uiImage = getComponent<UIImage>();
             uiImage->setPath(txt);
-            dirty();
+            setDirty();
             });
     }
 
@@ -75,7 +75,7 @@ void UIImageEditorComponent::drawUIImage()
         {
             auto uiImage = getComponent<UIImage>();
             uiImage->setPath(files[0]);
-            dirty();
+            setDirty();
         }
         });
 
@@ -85,11 +85,11 @@ void UIImageEditorComponent::drawUIImage()
         });
 
     auto spriteType = uiImage->getSpriteType();
-    auto m_spriteTypeCombo = m_uiImageGroup->createWidget<ComboBox>((int)spriteType);
+    auto m_spriteTypeCombo = m_uiImageGroup->createWidget<ComboBox>("", (int)spriteType);
     m_spriteTypeCombo->getOnDataChangedEvent().addListener([this](auto val) {
         auto uiImage = getComponent<UIImage>();
         uiImage->setSpriteType(val);
-        dirty();
+        setDirty();
         });
     m_spriteTypeCombo->setEndOfLine(false);
     m_spriteTypeCombo->addChoice((int)SpriteType::Simple, "Simple");
@@ -122,11 +122,11 @@ void UIImageEditorComponent::drawUIImage()
     else
     {
         auto fillMethod = uiImage->getFillMethod();
-        auto m_compComboFillMethod = m_uiImageGroup->createWidget<ComboBox>((int)fillMethod);
+        auto m_compComboFillMethod = m_uiImageGroup->createWidget<ComboBox>("", (int)fillMethod);
         m_compComboFillMethod->getOnDataChangedEvent().addListener([this](auto val) {
             auto uiImage = getComponent<UIImage>();
             uiImage->setFillMethod(val);
-            dirty();
+            setDirty();
             });
         m_compComboFillMethod->setEndOfLine(false);
         m_compComboFillMethod->addChoice((int)FillMethod::None, "None");
@@ -139,11 +139,11 @@ void UIImageEditorComponent::drawUIImage()
 
         if (fillMethod != FillMethod::None) {
 
-            auto m_compComboFillOrigin = m_uiImageGroup->createWidget<ComboBox>((int)uiImage->getFillOrigin());
+            auto m_compComboFillOrigin = m_uiImageGroup->createWidget<ComboBox>("", (int)uiImage->getFillOrigin());
             m_compComboFillOrigin->getOnDataChangedEvent().addListener([this](auto val) {
                 auto uiImage = getComponent<UIImage>();
                 uiImage->setFillOrigin(val);
-                dirty();
+                setDirty();
                 });
             m_compComboFillOrigin->setEndOfLine(false);
             if (fillMethod == FillMethod::Horizontal)

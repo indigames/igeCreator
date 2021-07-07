@@ -12,18 +12,14 @@ public:
 	CameraEditorComponent();
 	virtual ~CameraEditorComponent();
 
-	virtual void redraw() override;
-protected:
-	
+protected:	
 	virtual void onInspectorUpdate() override;
-
 	virtual void drawCameraComponent();
 
 	void onTransformChanged();
-protected:
-	
+
+protected:	
 	std::shared_ptr<Group> m_cameraCompGroup = nullptr;
-	std::shared_ptr<Group> m_cameraLockTargetGroup = nullptr;
 };
 
 NS_IGE_END

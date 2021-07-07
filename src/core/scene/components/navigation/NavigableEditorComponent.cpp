@@ -1,4 +1,5 @@
 #include "core/scene/components/navigation/NavigableEditorComponent.h"
+#include "core/scene/CompoundComponent.h"
 
 #include <core/layout/Group.h>
 
@@ -12,53 +13,25 @@ NavigableEditorComponent::NavigableEditorComponent() {
     m_navigableGroup = nullptr;
 }
 
-NavigableEditorComponent::~NavigableEditorComponent()
-{
+NavigableEditorComponent::~NavigableEditorComponent() {
     m_navigableGroup = nullptr;
 }
 
-void NavigableEditorComponent::redraw()
-{
-    if (m_group == nullptr)
-        return;
-
-    if (m_navigableGroup == nullptr) {
-        m_navigableGroup = m_group->createWidget<Group>("Navigable", false);
-    }
-    drawNavigable();
-
-    EditorComponent::redraw();
-}
-
-void NavigableEditorComponent::onInspectorUpdate()
-{
-    if (m_group == nullptr)
-        return;
-    m_group->removeAllWidgets();
-
-    m_navigableGroup = m_group->createWidget<Group>("Navigable", false);
-
+void NavigableEditorComponent::onInspectorUpdate() {
     drawNavigable();
 }
 
 void NavigableEditorComponent::drawNavigable()
 {
     if (m_navigableGroup == nullptr)
-        return;
+        m_navigableGroup = m_group->createWidget<Group>("Navigable", false);;
     m_navigableGroup->removeAllWidgets();
 
-    auto navigable = getComponent<Navigable>();
-    if (navigable == nullptr)
-        return;
+    auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
 
-    auto column = m_navigableGroup->createWidget<Columns<3>>();
-    column->createWidget<CheckBox>("Enable", navigable->isEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto navigable = getComponent<Navigable>();
-        navigable->setEnabled(val);
-        });
-    column->createWidget<CheckBox>("Recursive", navigable->isRecursive())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto navigable = getComponent<Navigable>();
-        navigable->setRecursive(val);
-        });
+    m_navigableGroup->createWidget<CheckBox>("Recursive", comp->getProperty<bool>("recursive", false))->getOnDataChangedEvent().addListener([this](bool val) {
+        getComponent<CompoundComponent>()->setProperty("recursive", val);
+    });
 }
 NS_IGE_END

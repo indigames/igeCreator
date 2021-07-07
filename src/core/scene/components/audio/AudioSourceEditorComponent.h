@@ -15,16 +15,12 @@ public:
 	AudioSourceEditorComponent();
 	virtual ~AudioSourceEditorComponent();
 
-	virtual void redraw() override;
-protected:
-	
+protected:	
 	virtual void onInspectorUpdate() override;
-
 	void drawAudioSource();
+
 protected:
 	std::shared_ptr<Group> m_audioSourceGroup = nullptr;
-
-
 };
 
 NS_IGE_END

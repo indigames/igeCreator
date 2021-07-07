@@ -59,11 +59,11 @@ void UIButtonEditorComponent::drawUIButton()
         });
 
     auto transitionMode = uiButton->getTransitionMode();
-    auto m_compComboTransitionMethod = m_uiButtonGroup->createWidget<ComboBox>((int)transitionMode);
+    auto m_compComboTransitionMethod = m_uiButtonGroup->createWidget<ComboBox>("", (int)transitionMode);
     m_compComboTransitionMethod->getOnDataChangedEvent().addListener([this](auto val) {
         auto uiButton = getComponent<UIButton>();
         uiButton->setTransitionMode((TransitionMode)val);
-        dirty();
+        setDirty();
         });
     m_compComboTransitionMethod->setEndOfLine(false);
     m_compComboTransitionMethod->addChoice((int)TransitionMode::ColorTint, "Color Tint");
@@ -85,7 +85,7 @@ void UIButtonEditorComponent::drawUIButton()
             txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
                 auto uiButton = getComponent<UIButton>();
                 uiButton->setTexturePath(txt, ButtonState::NORMAL);
-                dirty();
+                setDirty();
                 });
         }
         m_uiButtonGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
@@ -94,7 +94,7 @@ void UIButtonEditorComponent::drawUIButton()
             {
                 auto uiButton = getComponent<UIButton>();
                 uiButton->setTexturePath(files[0], ButtonState::NORMAL);
-                dirty();
+                setDirty();
             }
             });
 
@@ -143,7 +143,7 @@ void UIButtonEditorComponent::drawUIButton()
             txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
                 auto uiButton = getComponent<UIButton>();
                 uiButton->setTexturePath(txt, ButtonState::NORMAL);
-                dirty();
+                setDirty();
                 });
         }
         m_uiButtonGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
@@ -152,7 +152,7 @@ void UIButtonEditorComponent::drawUIButton()
             {
                 auto uiButton = getComponent<UIButton>();
                 uiButton->setTexturePath(files[0], ButtonState::NORMAL);
-                dirty();
+                setDirty();
             }
             });
 
@@ -168,7 +168,7 @@ void UIButtonEditorComponent::drawUIButton()
             pressedPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
                 auto uiButton = getComponent<UIButton>();
                 uiButton->setTexturePath(txt, ButtonState::PRESSED);
-                dirty();
+                setDirty();
                 });
         }
         m_uiButtonGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
@@ -177,7 +177,7 @@ void UIButtonEditorComponent::drawUIButton()
             {
                 auto uiButton = getComponent<UIButton>();
                 uiButton->setTexturePath(files[0], ButtonState::PRESSED);
-                dirty();
+                setDirty();
             }
             });
 
@@ -193,7 +193,7 @@ void UIButtonEditorComponent::drawUIButton()
             selectedPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
                 auto uiButton = getComponent<UIButton>();
                 uiButton->setTexturePath(txt, ButtonState::SELECTED);
-                dirty();
+                setDirty();
                 });
         }
         m_uiButtonGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
@@ -202,7 +202,7 @@ void UIButtonEditorComponent::drawUIButton()
             {
                 auto uiButton = getComponent<UIButton>();
                 uiButton->setTexturePath(files[0], ButtonState::SELECTED);
-                dirty();
+                setDirty();
             }
             });
 
@@ -218,7 +218,7 @@ void UIButtonEditorComponent::drawUIButton()
             disabledPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
                 auto uiButton = getComponent<UIButton>();
                 uiButton->setTexturePath(txt, ButtonState::DISABLE);
-                dirty();
+                setDirty();
                 });
         }
         m_uiButtonGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
@@ -227,7 +227,7 @@ void UIButtonEditorComponent::drawUIButton()
             {
                 auto uiButton = getComponent<UIButton>();
                 uiButton->setTexturePath(files[0], ButtonState::DISABLE);
-                dirty();
+                setDirty();
             }
             });
 
@@ -239,11 +239,11 @@ void UIButtonEditorComponent::drawUIButton()
     }
 
     auto spriteType = uiButton->getSpriteType();
-    auto m_spriteTypeCombo = m_uiButtonGroup->createWidget<ComboBox>((int)spriteType);
+    auto m_spriteTypeCombo = m_uiButtonGroup->createWidget<ComboBox>("", (int)spriteType);
     m_spriteTypeCombo->getOnDataChangedEvent().addListener([this](auto val) {
         auto uiButton = getComponent<UIButton>();
         uiButton->setSpriteType(val);
-        dirty();
+        setDirty();
         });
     m_spriteTypeCombo->setEndOfLine(false);
     m_spriteTypeCombo->addChoice((int)SpriteType::Simple, "Simple");

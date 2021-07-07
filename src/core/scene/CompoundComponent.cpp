@@ -27,7 +27,7 @@ namespace ige::scene
         return "CompoundComponent";
     }
 
-    //! Add/remove/clear components
+    //! Add component
     void CompoundComponent::add(const std::shared_ptr<Component>& comp)
     {
         if(comp != nullptr)
@@ -41,6 +41,7 @@ namespace ige::scene
         }        
     }
 
+    //! Remove component
     bool CompoundComponent::remove(const std::shared_ptr<Component>& comp)
     {
         if (comp != nullptr)
@@ -56,6 +57,7 @@ namespace ige::scene
         return false;
     }
 
+    //! Remove component by ID
     bool CompoundComponent::remove(uint64_t compId)
     {
         auto itr = std::find_if(m_components.begin(), m_components.end(), [&compId](auto elem) {
@@ -70,22 +72,19 @@ namespace ige::scene
         return false;
     }
 
+    //! Clear components
     void CompoundComponent::clear()
     {
         m_json.clear();
         m_components.clear();
     }
 
-
     //! Utils to collect shared elements
     void CompoundComponent::collectSharedElements()
     {
         m_json.clear();
-        if (m_components.size() == 0)
-            return;
-
+        if (m_components.size() == 0) return;
         m_components[0]->to_json(m_json);
-
         json jComp;
         for (int i = 1; i < m_components.size(); ++i)
         {
@@ -103,29 +102,22 @@ namespace ige::scene
     }
 
     //! Update json value
-    void CompoundComponent::setJson(const json& val)
-    {
-        if (m_components.size() > 0)
-        {
-            for (auto& comp : m_components)
-            {
-                comp->from_json(val);
-            }
-            m_json = val;
-        }
-        else
-        {
-            m_json.clear();
-        }
-    }
-
-    //! Update json value
-    void CompoundComponent::setJson(const std::string& key, const json& val)
+    void CompoundComponent::setProperty(const std::string& key, const json& val)
     {
         if (m_json.contains(key))
         {
             m_json[key] = val;
+            for (auto& comp : m_components)
+            {
+                comp->setProperty(key, val);
+            }
         }
+    }
+
+    //! Serialize
+    void CompoundComponent::to_json(json& j) const
+    {
+        j = m_json;
     }
 
 } // namespace ige::scene

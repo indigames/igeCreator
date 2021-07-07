@@ -1,4 +1,5 @@
 #include "core/scene/components/navigation/NavAreaEditorComponent.h"
+#include "core/scene/CompoundComponent.h"
 
 #include <core/layout/Group.h>
 
@@ -12,49 +13,31 @@ NavAreaEditorComponent::NavAreaEditorComponent() {
     m_navAreaGroup = nullptr;
 }
 
-NavAreaEditorComponent::~NavAreaEditorComponent()
-{
+NavAreaEditorComponent::~NavAreaEditorComponent() {
     m_navAreaGroup = nullptr;
 }
 
-void NavAreaEditorComponent::redraw()
-{
-    if (m_group == nullptr)
-        return;
-
-    if (m_navAreaGroup == nullptr) {
-        m_navAreaGroup = m_group->createWidget<Group>("NavArea", false);
-    }
-    drawNavArea();
-
-    EditorComponent::redraw();
-}
-
-void NavAreaEditorComponent::onInspectorUpdate()
-{
-    if (m_group == nullptr)
-        return;
-    m_group->removeAllWidgets();
-
-    m_navAreaGroup = m_group->createWidget<Group>("NavArea", false);
-
-    drawNavArea();
+void NavAreaEditorComponent::onInspectorUpdate() {
+   drawNavArea();
 }
 
 void NavAreaEditorComponent::drawNavArea()
 {
     if (m_navAreaGroup == nullptr)
-        return;
+        m_navAreaGroup = m_group->createWidget<Group>("NavArea", false);;
     m_navAreaGroup->removeAllWidgets();
 
-    auto navArea = getComponent<NavArea>();
-    if (navArea == nullptr)
-        return;
+    auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
 
-    std::array cost = { navArea->getAreaCost() };
-    m_navAreaGroup->createWidget<Drag<float>>("Cost", ImGuiDataType_Float, cost, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto navArea = getComponent<NavArea>();
-        navArea->setAreaCost(val[0]);
-        });
+    std::array id = { comp->getProperty<int>("id", 0) };
+    m_navAreaGroup->createWidget<Drag<int>>("AreaID", ImGuiDataType_S32, id, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("id", val[0]);
+    });
+
+    std::array cost = { comp->getProperty<int>("cost", 0) };
+    m_navAreaGroup->createWidget<Drag<int>>("AreaCost", ImGuiDataType_S32, cost, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("cost", val[0]);
+    });
 }
 NS_IGE_END

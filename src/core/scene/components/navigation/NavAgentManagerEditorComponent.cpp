@@ -1,4 +1,5 @@
 #include "core/scene/components/navigation/NavAgentManagerEditorComponent.h"
+#include "core/scene/CompoundComponent.h"
 
 #include <core/layout/Group.h>
 
@@ -12,55 +13,37 @@ NavAgentManagerEditorComponent::NavAgentManagerEditorComponent() {
     m_navAgentManagerGroup = nullptr;
 }
 
-NavAgentManagerEditorComponent::~NavAgentManagerEditorComponent()
-{
+NavAgentManagerEditorComponent::~NavAgentManagerEditorComponent() {
     m_navAgentManagerGroup = nullptr;
 }
 
-void NavAgentManagerEditorComponent::redraw()
-{
-    if (m_group == nullptr)
-        return;
-
-    if (m_navAgentManagerGroup == nullptr) {
-        m_navAgentManagerGroup = m_group->createWidget<Group>("NavAgentManager", false);
-    }
-    drawNavAgentManager();
-
-    EditorComponent::redraw();
-}
-
-void NavAgentManagerEditorComponent::onInspectorUpdate()
-{
-    if (m_group == nullptr)
-        return;
-    m_group->removeAllWidgets();
-
-    m_navAgentManagerGroup = m_group->createWidget<Group>("NavAgentManager", false);
-
+void NavAgentManagerEditorComponent::onInspectorUpdate() {
     drawNavAgentManager();
 }
 
 void NavAgentManagerEditorComponent::drawNavAgentManager()
 {
     if (m_navAgentManagerGroup == nullptr)
-        return;
+        m_navAgentManagerGroup = m_group->createWidget<Group>("NavAgentManager", false);;
     m_navAgentManagerGroup->removeAllWidgets();
 
-    auto navAgentManager = getComponent<NavAgentManager>();
-    if (navAgentManager == nullptr)
-        return;
+    if (getComponent<CompoundComponent>() && getComponent<CompoundComponent>()->size() == 1)
+    {
+        auto navAgentManager = std::dynamic_pointer_cast<NavAgentManager>(getComponent<CompoundComponent>()->getComponents()[0]);
+        if (navAgentManager == nullptr)
+            return;
 
-    std::array maxAgents = { (int)navAgentManager->getMaxAgentNumber() };
-    m_navAgentManagerGroup->createWidget<Drag<int>>("Max Agents", ImGuiDataType_S32, maxAgents, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto navAgentManager = getComponent<NavAgentManager>();
-        navAgentManager->setMaxAgentNumber(val[0]);
+        std::array maxAgents = { (int)navAgentManager->getMaxAgentNumber() };
+        m_navAgentManagerGroup->createWidget<Drag<int>>("Max Agents", ImGuiDataType_S32, maxAgents, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto navAgentManager = std::dynamic_pointer_cast<NavAgentManager>(getComponent<CompoundComponent>()->getComponents()[0]);
+            navAgentManager->setMaxAgentNumber(val[0]);
         });
 
-    std::array maxRadius = { navAgentManager->getMaxAgentRadius() };
-    m_navAgentManagerGroup->createWidget<Drag<float>>("Max Agent Radius", ImGuiDataType_Float, maxRadius, 0.001f, 0)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto navAgentManager = getComponent<NavAgentManager>();
-        navAgentManager->setMaxAgentRadius(val[0]);
+        std::array maxRadius = { navAgentManager->getMaxAgentRadius() };
+        m_navAgentManagerGroup->createWidget<Drag<float>>("Max Agent Radius", ImGuiDataType_Float, maxRadius, 0.001f, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto navAgentManager = std::dynamic_pointer_cast<NavAgentManager>(getComponent<CompoundComponent>()->getComponents()[0]);
+            navAgentManager->setMaxAgentRadius(val[0]);
         });
+    }    
 }
 NS_IGE_END

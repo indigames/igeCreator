@@ -1,4 +1,5 @@
 #include "core/scene/components/navigation/NavAgentEditorComponent.h"
+#include "core/scene/CompoundComponent.h"
 
 #include <core/layout/Group.h>
 
@@ -12,107 +13,76 @@ NavAgentEditorComponent::NavAgentEditorComponent() {
     m_navAgentGroup = nullptr;
 }
 
-NavAgentEditorComponent::~NavAgentEditorComponent()
-{
+NavAgentEditorComponent::~NavAgentEditorComponent() {
     m_navAgentGroup = nullptr;
 }
 
-void NavAgentEditorComponent::redraw()
-{
-    if (m_group == nullptr)
-        return;
-
-    if (m_navAgentGroup == nullptr) {
-        m_navAgentGroup = m_group->createWidget<Group>("NavAgent", false);
-    }
-    drawNavAgent();
-
-    EditorComponent::redraw();
-}
-
-void NavAgentEditorComponent::onInspectorUpdate()
-{
-    if (m_group == nullptr)
-        return;
-    m_group->removeAllWidgets();
-
-    m_navAgentGroup = m_group->createWidget<Group>("NavAgent", false);
-
+void NavAgentEditorComponent::onInspectorUpdate() {    
     drawNavAgent();
 }
 
 void NavAgentEditorComponent::drawNavAgent()
 {
     if (m_navAgentGroup == nullptr)
-        return;
+        m_navAgentGroup = m_group->createWidget<Group>("NavAgent", false);;
     m_navAgentGroup->removeAllWidgets();
 
-    auto navAgent = getComponent<NavAgent>();
-    if (navAgent == nullptr)
-        return;
+    auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
 
-    auto column = m_navAgentGroup->createWidget<Columns<3>>();
-    column->createWidget<CheckBox>("Enable", navAgent->isEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto navAgent = getComponent<NavAgent>();
-        navAgent->setEnabled(val);
-        });
-    column->createWidget<CheckBox>("Sync Position", navAgent->isUpdateNodePosition())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto navAgent = getComponent<NavAgent>();
-        navAgent->setUpdateNodePosition(val);
-        });
+    m_navAgentGroup->createWidget<CheckBox>("SyncPosition", comp->getProperty<bool>("syncPos", true))->getOnDataChangedEvent().addListener([this](bool val) {
+        getComponent<CompoundComponent>()->setProperty("syncPos", val);
+    });
 
-    std::array radius = { navAgent->getRadius() };
+    std::array maxObs = { comp->getProperty<int>("maxObs", 1024) };
+    m_navAgentGroup->createWidget<Drag<int>>("MaxObstacle", ImGuiDataType_S32, maxObs, 1, 0)->getOnDataChangedEvent().addListener([this](auto& val) {
+        getComponent<CompoundComponent>()->setProperty("maxObs", val[0]);
+    });
+
+    std::array radius = { comp->getProperty<float>("radius", 1.f) };
     m_navAgentGroup->createWidget<Drag<float>>("Radius", ImGuiDataType_Float, radius, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto navAgent = getComponent<NavAgent>();
-        navAgent->setRadius(val[0]);
-        });
+        getComponent<CompoundComponent>()->setProperty("radius", val[0]);
+    });
 
-    std::array height = { navAgent->getHeight() };
+    std::array height = { comp->getProperty<float>("height", 1.f) };
     m_navAgentGroup->createWidget<Drag<float>>("Height", ImGuiDataType_Float, height, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto navAgent = getComponent<NavAgent>();
-        navAgent->setHeight(val[0]);
-        });
+        getComponent<CompoundComponent>()->setProperty("height", val[0]);
+    });
 
-    std::array maxAcceleration = { navAgent->getMaxAcceleration() };
-    m_navAgentGroup->createWidget<Drag<float>>("Max Acceleration", ImGuiDataType_Float, maxAcceleration, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto navAgent = getComponent<NavAgent>();
-        navAgent->setMaxAcceleration(val[0]);
-        });
+    std::array maxAcceleration = { comp->getProperty<float>("maxAcc", 1.f) };
+    m_navAgentGroup->createWidget<Drag<float>>("MaxAccel", ImGuiDataType_Float, maxAcceleration, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("maxAcc", val[0]);
+    });
 
-    std::array maxSpeed = { navAgent->getMaxSpeed() };
-    m_navAgentGroup->createWidget<Drag<float>>("Max Speed", ImGuiDataType_Float, maxSpeed, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto navAgent = getComponent<NavAgent>();
-        navAgent->setMaxSpeed(val[0]);
-        });
+    std::array maxSpeed = { comp->getProperty<float>("maxSpeed", 1.f) };
+    m_navAgentGroup->createWidget<Drag<float>>("MaxSpeed", ImGuiDataType_Float, maxSpeed, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("maxSpeed", val[0]);
+    });
 
-    std::array targetPosition = { navAgent->getTargetPosition().X(), navAgent->getTargetPosition().Y(), navAgent->getTargetPosition().Z() };
-    m_navAgentGroup->createWidget<Drag<float, 3>>("Target Position", ImGuiDataType_Float, targetPosition, 0.001f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto navAgent = getComponent<NavAgent>();
-        navAgent->setTargetPosition({ val[0], val[1], val[2] });
-        });
+    auto pos = comp->getProperty<Vec3>("targetPos", {});
+    std::array targetPosition = { pos.X(), pos.Y(), pos.Z() };
+    m_navAgentGroup->createWidget<Drag<float, 3>>("TargetPos", ImGuiDataType_Float, targetPosition, 0.001f)->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("targetPos", { val[0], val[1], val[2] });
+    });
 
-    std::array queryFilterType = { (int)navAgent->getQueryFilterType() };
-    m_navAgentGroup->createWidget<Drag<int>>("Query Filter Type", ImGuiDataType_S32, queryFilterType, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto navAgent = getComponent<NavAgent>();
-        navAgent->setQueryFilterType(val[0]);
-        });
+    std::array queryFilterType = { comp->getProperty<int>("filter", 0) };
+    m_navAgentGroup->createWidget<Drag<int>>("FilterType", ImGuiDataType_S32, queryFilterType, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("filter", val[0]);
+    });
 
-    std::array obstacleAvoidanceType = { (int)navAgent->getObstacleAvoidanceType() };
-    m_navAgentGroup->createWidget<Drag<int>>("Obstacle Avoidance Type", ImGuiDataType_S32, obstacleAvoidanceType, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto navAgent = getComponent<NavAgent>();
-        navAgent->setObstacleAvoidanceType(val[0]);
-        });
+    std::array obstacleAvoidanceType = { comp->getProperty<int>("obsAvoid", 0) };
+    m_navAgentGroup->createWidget<Drag<int>>("ObsAvoidType", ImGuiDataType_S32, obstacleAvoidanceType, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("obsAvoid", val[0]);
+    });
 
-    std::array navigationQuality = { (int)navAgent->getNavigationQuality() };
-    m_navAgentGroup->createWidget<Drag<int>>("Navigation Quality", ImGuiDataType_S32, navigationQuality, 1, (int)NavAgent::NavQuality::LOW, (int)NavAgent::NavQuality::HIGH)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto navAgent = getComponent<NavAgent>();
-        navAgent->setNavigationQuality((NavAgent::NavQuality)val[0]);
-        });
+    std::array navigationQuality = { comp->getProperty<int>("navQuality", 0) };
+    m_navAgentGroup->createWidget<Drag<int>>("NavQuality", ImGuiDataType_S32, navigationQuality, 1, (int)NavAgent::NavQuality::LOW, (int)NavAgent::NavQuality::HIGH)->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("navQuality", val[0]);
+    });
 
-    std::array navigationPushiness = { (int)navAgent->getNavigationPushiness() };
-    m_navAgentGroup->createWidget<Drag<int>>("Navigation Pushiness", ImGuiDataType_S32, navigationPushiness, 1, (int)NavAgent::NavPushiness::LOW, (int)NavAgent::NavPushiness::HIGH)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto navAgent = getComponent<NavAgent>();
-        navAgent->setNavigationPushiness((NavAgent::NavPushiness)val[0]);
-        });
+    std::array navigationPushiness = { comp->getProperty<int>("navPushiness", 0) };
+    m_navAgentGroup->createWidget<Drag<int>>("NavPushiness", ImGuiDataType_S32, navigationPushiness, 1, (int)NavAgent::NavPushiness::LOW, (int)NavAgent::NavPushiness::HIGH)->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("navPushiness", val[0]);
+    });
 }
 NS_IGE_END
