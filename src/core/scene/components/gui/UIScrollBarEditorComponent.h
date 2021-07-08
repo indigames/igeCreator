@@ -15,16 +15,12 @@ public:
 	UIScrollBarEditorComponent();
 	virtual ~UIScrollBarEditorComponent();
 
-	virtual void redraw() override;
 protected:
-	
 	virtual void onInspectorUpdate() override;
-
 	void drawUIScrollBar();
+
 protected:
 	std::shared_ptr<Group> m_uiScrollBarGroup = nullptr;
-
-
 };
 
 NS_IGE_END

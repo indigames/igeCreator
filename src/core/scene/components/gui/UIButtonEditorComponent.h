@@ -15,16 +15,12 @@ public:
 	UIButtonEditorComponent();
 	virtual ~UIButtonEditorComponent();
 
-	virtual void redraw() override;
 protected:
-	
 	virtual void onInspectorUpdate() override;
-
 	void drawUIButton();
+
 protected:
 	std::shared_ptr<Group> m_uiButtonGroup = nullptr;
-
-
 };
 
 NS_IGE_END

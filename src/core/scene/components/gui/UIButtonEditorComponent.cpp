@@ -1,4 +1,5 @@
 #include "core/scene/components/gui/UIButtonEditorComponent.h"
+#include "core/scene/CompoundComponent.h"
 
 #include <core/layout/Group.h>
 
@@ -14,264 +15,167 @@ UIButtonEditorComponent::UIButtonEditorComponent() {
     m_uiButtonGroup = nullptr;
 }
 
-UIButtonEditorComponent::~UIButtonEditorComponent()
-{
+UIButtonEditorComponent::~UIButtonEditorComponent() {
     m_uiButtonGroup = nullptr;
 }
 
-void UIButtonEditorComponent::redraw()
-{
-    if (m_group == nullptr)
-        return;
 
-    if (m_uiButtonGroup == nullptr) {
-        m_uiButtonGroup = m_group->createWidget<Group>("UIButtonGroup", false);
-    }
-    drawUIButton();
-
-    EditorComponent::redraw();
-}
-
-void UIButtonEditorComponent::onInspectorUpdate()
-{
-    if (m_group == nullptr)
-        return;
-    m_group->removeAllWidgets();
-
-    m_uiButtonGroup = m_group->createWidget<Group>("UIButtonGroup", false);
-
+void UIButtonEditorComponent::onInspectorUpdate() {
     drawUIButton();
 }
 
-void UIButtonEditorComponent::drawUIButton()
-{
+void UIButtonEditorComponent::drawUIButton() {
     if (m_uiButtonGroup == nullptr)
-        return;
+        m_uiButtonGroup = m_group->createWidget<Group>("UIButtonGroup", false);;
     m_uiButtonGroup->removeAllWidgets();
 
-    auto uiButton = getComponent<UIButton>();
-    if (uiButton == nullptr)
-        return;
+    auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
 
-    auto m_interactable = m_uiButtonGroup->createWidget<CheckBox>("Interactable", uiButton->isInteractable())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto uiButton = getComponent<UIButton>();
-        uiButton->setInteractable(val);
-        });
+    m_uiButtonGroup->createWidget<CheckBox>("Interactable", comp->getProperty<bool>("interactable", true))->getOnDataChangedEvent().addListener([this](bool val) {
+        getComponent<CompoundComponent>()->setProperty("interactable", val);
+    });
 
-    auto transitionMode = uiButton->getTransitionMode();
-    auto m_compComboTransitionMethod = m_uiButtonGroup->createWidget<ComboBox>("", (int)transitionMode);
-    m_compComboTransitionMethod->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiButton = getComponent<UIButton>();
-        uiButton->setTransitionMode((TransitionMode)val);
+    auto transitionMode = comp->getProperty<int>("transitionmode", 0);
+    auto transitionMethodCombo = m_uiButtonGroup->createWidget<ComboBox>("Transition Mode", transitionMode);
+    transitionMethodCombo->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("transitionmode", val);
         setDirty();
-        });
-    m_compComboTransitionMethod->setEndOfLine(false);
-    m_compComboTransitionMethod->addChoice((int)TransitionMode::ColorTint, "Color Tint");
-    m_compComboTransitionMethod->addChoice((int)TransitionMode::SpriteSwap, "Sprite Swap");
-    //m_compComboTransitionMethod->addChoice((int)TransitionMode::Custom, "Custom");
-    m_compComboTransitionMethod->setEndOfLine(true);
+    });
+    transitionMethodCombo->setEndOfLine(false);
+    transitionMethodCombo->addChoice((int)TransitionMode::ColorTint, "Color Tint");
+    transitionMethodCombo->addChoice((int)TransitionMode::SpriteSwap, "Sprite Swap");
+    transitionMethodCombo->setEndOfLine(true);
 
-    if (transitionMode == TransitionMode::ColorTint) 
-    {
+    if (transitionMode == (int)TransitionMode::ColorTint) {
         //Normal Path
-        auto txtPath = m_uiButtonGroup->createWidget<TextField>("Image", uiButton->getPath());
-        txtPath->setEndOfLine(false);
+        auto txtPath = m_uiButtonGroup->createWidget<TextField>("Image", comp->getProperty<std::string>("path", ""));
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
-            auto uiButton = getComponent<UIButton>();
-            uiButton->setTexturePath(txt, ButtonState::NORMAL);
-            });
-        for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
-        {
+            getComponent<CompoundComponent>()->setProperty("path", txt);
+        });
+        for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite)) {
             txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-                auto uiButton = getComponent<UIButton>();
-                uiButton->setTexturePath(txt, ButtonState::NORMAL);
+                getComponent<CompoundComponent>()->setProperty("path", txt);
                 setDirty();
-                });
-        }
-        m_uiButtonGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
-            auto files = OpenFileDialog("Import Assets", "", { "Texture (*.pyxi)", "*.pyxi" }).result();
-            if (files.size() > 0)
-            {
-                auto uiButton = getComponent<UIButton>();
-                uiButton->setTexturePath(files[0], ButtonState::NORMAL);
-                setDirty();
-            }
             });
+        }
 
         //! Normal Color
-        m_uiButtonGroup->createWidget<Color>("Normal Color", uiButton->getColor())->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiButton = getComponent<UIButton>();
-            uiButton->setColor(val[0], val[1], val[2], val[3]);
-            });
+        m_uiButtonGroup->createWidget<Color>("Normal", comp->getProperty<Vec4>("color", {}))->getOnDataChangedEvent().addListener([this](auto val) {
+            getComponent<CompoundComponent>()->setProperty("color", { val[0], val[1], val[2], val[3] });
+        });
 
         //! Pressed Color
-        m_uiButtonGroup->createWidget<Color>("Pressed Color", uiButton->getPressedColor())->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiButton = getComponent<UIButton>();
-            uiButton->setPressedColor(val[0], val[1], val[2], val[3]);
-            });
+        m_uiButtonGroup->createWidget<Color>("Pressed", comp->getProperty<Vec4>("pressedcolor", {}))->getOnDataChangedEvent().addListener([this](auto val) {
+            getComponent<CompoundComponent>()->setProperty("pressedcolor", { val[0], val[1], val[2], val[3] });
+        });
 
         //! Selected Color
-        m_uiButtonGroup->createWidget<Color>("Selected Color", uiButton->getSelectedColor())->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiButton = getComponent<UIButton>();
-            uiButton->setSelectedColor(val[0], val[1], val[2], val[3]);
-            });
+        m_uiButtonGroup->createWidget<Color>("Selected", comp->getProperty<Vec4>("selectedcolor", {}))->getOnDataChangedEvent().addListener([this](auto val) {
+            getComponent<CompoundComponent>()->setProperty("selectedcolor", { val[0], val[1], val[2], val[3] });
+        });
 
         //! Disable Color
-        m_uiButtonGroup->createWidget<Color>("Disable Color", uiButton->getDisabledColor())->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiButton = getComponent<UIButton>();
-            uiButton->setDisabledColor(val[0], val[1], val[2], val[3]);
-            });
+        m_uiButtonGroup->createWidget<Color>("Disabled", comp->getProperty<Vec4>("disabledcolor", {}))->getOnDataChangedEvent().addListener([this](auto val) {
+            getComponent<CompoundComponent>()->setProperty("disabledcolor", { val[0], val[1], val[2], val[3] });
+        });
 
         //! Fade Duration
-        std::array fadeDuration = { uiButton->getFadeDuration() };
+        std::array fadeDuration = { comp->getProperty<float>("fadeduration", 0.f) };
         m_uiButtonGroup->createWidget<Drag<float>>("Fade Duration", ImGuiDataType_Float, fadeDuration, 0.01f, 0.0f, 60.0f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiButton = getComponent<UIButton>();
-            uiButton->setFadeDuration(val[0]);
-            });
-    }
-    else if (transitionMode == TransitionMode::SpriteSwap)
-    {
+            getComponent<CompoundComponent>()->setProperty("fadeduration", val[0]);
+        });
+    } else if (transitionMode == (int)TransitionMode::SpriteSwap) {
         //Normal Path
-        auto txtPath = m_uiButtonGroup->createWidget<TextField>("Normal", uiButton->getPath());
-        txtPath->setEndOfLine(false);
+        auto txtPath = m_uiButtonGroup->createWidget<TextField>("Normal", comp->getProperty<std::string>("path", ""));
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
-            auto uiButton = getComponent<UIButton>();
-            uiButton->setTexturePath(txt, ButtonState::NORMAL);
-            });
-        for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
-        {
+            getComponent<CompoundComponent>()->setProperty("path", txt);
+        });
+        for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite)) {
             txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-                auto uiButton = getComponent<UIButton>();
-                uiButton->setTexturePath(txt, ButtonState::NORMAL);
+                getComponent<CompoundComponent>()->setProperty("path", txt);
                 setDirty();
-                });
-        }
-        m_uiButtonGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
-            auto files = OpenFileDialog("Import Assets", "", { "Texture (*.pyxi)", "*.pyxi" }).result();
-            if (files.size() > 0)
-            {
-                auto uiButton = getComponent<UIButton>();
-                uiButton->setTexturePath(files[0], ButtonState::NORMAL);
-                setDirty();
-            }
             });
+        }
 
         //Pressed Path
-        auto pressedPath = m_uiButtonGroup->createWidget<TextField>("Pressed", uiButton->getPressedPath());
-        pressedPath->setEndOfLine(false);
-        pressedPath->getOnDataChangedEvent().addListener([this](auto txt) {
-            auto uiButton = getComponent<UIButton>();
-            uiButton->setTexturePath(txt, ButtonState::PRESSED);
-            });
-        for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
-        {
-            pressedPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-                auto uiButton = getComponent<UIButton>();
-                uiButton->setTexturePath(txt, ButtonState::PRESSED);
+        txtPath = m_uiButtonGroup->createWidget<TextField>("Pressed", comp->getProperty<std::string>("pressedpath", ""));
+        txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
+            getComponent<CompoundComponent>()->setProperty("pressedpath", txt);
+        });
+        for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite)) {
+            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
+                getComponent<CompoundComponent>()->setProperty("pressedpath", txt);
                 setDirty();
-                });
+            });
         }
-        m_uiButtonGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
-            auto files = OpenFileDialog("Import Assets", "", { "Texture (*.pyxi)", "*.pyxi" }).result();
-            if (files.size() > 0)
-            {
-                auto uiButton = getComponent<UIButton>();
-                uiButton->setTexturePath(files[0], ButtonState::PRESSED);
-                setDirty();
-            }
-            });
 
         //Selected Path
-        auto selectedPath = m_uiButtonGroup->createWidget<TextField>("Selected", uiButton->getSelectedPath());
-        selectedPath->setEndOfLine(false);
-        selectedPath->getOnDataChangedEvent().addListener([this](auto txt) {
-            auto uiButton = getComponent<UIButton>();
-            uiButton->setTexturePath(txt, ButtonState::SELECTED);
-            });
-        for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
-        {
-            selectedPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-                auto uiButton = getComponent<UIButton>();
-                uiButton->setTexturePath(txt, ButtonState::SELECTED);
+        txtPath = m_uiButtonGroup->createWidget<TextField>("Selected", comp->getProperty<std::string>("seletecpath", ""));
+        txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
+            getComponent<CompoundComponent>()->setProperty("seletecpath", txt);
+        });
+        for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite)) {
+            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
+                getComponent<CompoundComponent>()->setProperty("seletecpath", txt);
                 setDirty();
-                });
+            });
         }
-        m_uiButtonGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
-            auto files = OpenFileDialog("Import Assets", "", { "Texture (*.pyxi)", "*.pyxi" }).result();
-            if (files.size() > 0)
-            {
-                auto uiButton = getComponent<UIButton>();
-                uiButton->setTexturePath(files[0], ButtonState::SELECTED);
-                setDirty();
-            }
-            });
 
         //Disabled Path
-        auto disabledPath = m_uiButtonGroup->createWidget<TextField>("Disabled", uiButton->getDisabledPath());
-        disabledPath->setEndOfLine(false);
-        disabledPath->getOnDataChangedEvent().addListener([this](auto txt) {
-            auto uiButton = getComponent<UIButton>();
-            uiButton->setTexturePath(txt, ButtonState::DISABLE);
-            });
-        for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
-        {
-            disabledPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-                auto uiButton = getComponent<UIButton>();
-                uiButton->setTexturePath(txt, ButtonState::DISABLE);
-                setDirty();
-                });
-        }
-        m_uiButtonGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
-            auto files = OpenFileDialog("Import Assets", "", { "Texture (*.pyxi)", "*.pyxi" }).result();
-            if (files.size() > 0)
-            {
-                auto uiButton = getComponent<UIButton>();
-                uiButton->setTexturePath(files[0], ButtonState::DISABLE);
-                setDirty();
-            }
-            });
-
-        auto color = uiButton->getColor();
-        m_uiButtonGroup->createWidget<Color>("Color", color)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiButton = getComponent<UIButton>();
-            uiButton->setColor(val[0], val[1], val[2], val[3]);
-            });
-    }
-
-    auto spriteType = uiButton->getSpriteType();
-    auto m_spriteTypeCombo = m_uiButtonGroup->createWidget<ComboBox>("", (int)spriteType);
-    m_spriteTypeCombo->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiButton = getComponent<UIButton>();
-        uiButton->setSpriteType(val);
-        setDirty();
+        txtPath = m_uiButtonGroup->createWidget<TextField>("Disabled", comp->getProperty<std::string>("disabledpath", ""));
+        txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
+            getComponent<CompoundComponent>()->setProperty("disabledpath", txt);
         });
-    m_spriteTypeCombo->setEndOfLine(false);
-    m_spriteTypeCombo->addChoice((int)SpriteType::Simple, "Simple");
-    m_spriteTypeCombo->addChoice((int)SpriteType::Sliced, "Sliced");
-    m_spriteTypeCombo->setEndOfLine(true);
+        for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite)) {
+            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
+                getComponent<CompoundComponent>()->setProperty("disabledpath", txt);
+                setDirty();
+            });
+        }
 
-    if (spriteType == SpriteType::Sliced) {
-        std::array borderLeft = { uiButton->getBorderLeft() };
-        m_uiButtonGroup->createWidget<Drag<float, 1>>("Border Left", ImGuiDataType_Float, borderLeft, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiButton = getComponent<UIButton>();
-            uiButton->setBorderLeft(val[0]);
-            });
-        std::array borderRight = { uiButton->getBorderRight() };
-        m_uiButtonGroup->createWidget<Drag<float, 1>>("Border Right", ImGuiDataType_Float, borderRight, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiButton = getComponent<UIButton>();
-            uiButton->setBorderRight(val[0]);
-            });
-        std::array borderTop = { uiButton->getBorderTop() };
-        m_uiButtonGroup->createWidget<Drag<float, 1>>("Border Top", ImGuiDataType_Float, borderTop, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiButton = getComponent<UIButton>();
-            uiButton->setBorderTop(val[0]);
-            });
-        std::array borderBottom = { uiButton->getBorderBottom() };
-        m_uiButtonGroup->createWidget<Drag<float, 1>>("Border Bottom", ImGuiDataType_Float, borderBottom, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiButton = getComponent<UIButton>();
-            uiButton->setBorderBottom(val[0]);
-            });
+        m_uiButtonGroup->createWidget<Color>("Color", comp->getProperty<Vec4>("color", {}))->getOnDataChangedEvent().addListener([this](auto val) {
+            getComponent<CompoundComponent>()->setProperty("color", { val[0], val[1], val[2], val[3] });
+        });
     }
 
+    auto spriteType = comp->getProperty<int>("spritetype", 0);
+    auto spriteTypeCombo = m_uiButtonGroup->createWidget<ComboBox>("Sprite Type", spriteType);
+    spriteTypeCombo->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("spritetype", val);
+        setDirty();
+    });
+    spriteTypeCombo->setEndOfLine(false);
+    spriteTypeCombo->addChoice((int)SpriteType::Simple, "Simple");
+    spriteTypeCombo->addChoice((int)SpriteType::Sliced, "Sliced");
+    spriteTypeCombo->setEndOfLine(true);
+
+    if (spriteType == (int)SpriteType::Sliced) {
+        auto border = comp->getProperty<Vec4>("border", {});
+        std::array borderLeft = { border.X() };
+        m_uiButtonGroup->createWidget<Drag<float, 1>>("Border Left", ImGuiDataType_Float, borderLeft, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", {});
+            border.X(val[0]);
+            getComponent<CompoundComponent>()->setProperty("border", val);
+        });
+        std::array borderRight = { border.Y() };
+        m_uiButtonGroup->createWidget<Drag<float, 1>>("Border Right", ImGuiDataType_Float, borderRight, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", {});
+            border.Y(val[0]);
+            getComponent<CompoundComponent>()->setProperty("border", val);
+        });
+        std::array borderTop = { border.Z() };
+        m_uiButtonGroup->createWidget<Drag<float, 1>>("Border Top", ImGuiDataType_Float, borderTop, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", {});
+            border.Z(val[0]);
+            getComponent<CompoundComponent>()->setProperty("border", val);
+        });
+        std::array borderBottom = { border.W() };
+        m_uiButtonGroup->createWidget<Drag<float, 1>>("Border Bottom", ImGuiDataType_Float, borderBottom, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", {});
+            border.W(val[0]);
+            getComponent<CompoundComponent>()->setProperty("border", val);
+        });
+    }
 }
 NS_IGE_END

@@ -15,16 +15,12 @@ public:
 	UIImageEditorComponent();
 	virtual ~UIImageEditorComponent();
 
-	virtual void redraw() override;
 protected:
-	
 	virtual void onInspectorUpdate() override;
-
 	void drawUIImage();
+
 protected:
 	std::shared_ptr<Group> m_uiImageGroup = nullptr;
-
-
 };
 
 NS_IGE_END

@@ -12,21 +12,17 @@ class RectTransformEditorComponent : public EditorComponent
 public:
 	RectTransformEditorComponent();
 	virtual ~RectTransformEditorComponent();
-	
 	virtual bool setComponent(std::shared_ptr<Component> component) override;
-	virtual void redraw() override;
-protected:
-	
-	virtual void onInspectorUpdate() override;
 
+protected:
+	virtual void onInspectorUpdate() override;
+	void onTransformChanged(SceneObject& sceneObject);
 	void drawRectTransform();
 
 	void drawAnchor();
 	void drawRect();
 	void drawAnchorMinMax();
 	void drawPivot();
-
-	void onTransformChanged(SceneObject& sceneObject);
 
 protected:
 	std::shared_ptr<Group> m_pivotGroup = nullptr;

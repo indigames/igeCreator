@@ -1,4 +1,5 @@
 #include "core/scene/components/gui/UITextFieldEditorComponent.h"
+#include "core/scene/CompoundComponent.h"
 
 #include <core/layout/Group.h>
 
@@ -18,76 +19,45 @@ UITextFieldEditorComponent::UITextFieldEditorComponent() {
     m_uiTextFieldGroup = nullptr;
 }
 
-UITextFieldEditorComponent::~UITextFieldEditorComponent()
-{
+UITextFieldEditorComponent::~UITextFieldEditorComponent() {
     m_uiTextFieldGroup = nullptr;
 }
 
-void UITextFieldEditorComponent::redraw()
-{
-    if (m_group == nullptr)
-        return;
-
-    if (m_uiTextFieldGroup == nullptr) {
-        m_uiTextFieldGroup = m_group->createWidget<Group>("UITextFieldGroup", false);
-    }
-    drawUITextField();
-
-    EditorComponent::redraw();
-}
-
-void UITextFieldEditorComponent::onInspectorUpdate()
-{
-    if (m_group == nullptr)
-        return;
-    m_group->removeAllWidgets();
-
-    m_uiTextFieldGroup = m_group->createWidget<Group>("UITextFieldGroup", false);
-
+void UITextFieldEditorComponent::onInspectorUpdate() {
     drawUITextField();
 }
 
-void UITextFieldEditorComponent::drawUITextField()
-{
+void UITextFieldEditorComponent::drawUITextField() {
     if (m_uiTextFieldGroup == nullptr)
-        return;
+        m_uiTextFieldGroup = m_group->createWidget<Group>("UITextFieldGroup", false);;
     m_uiTextFieldGroup->removeAllWidgets();
 
-    auto uiText = getComponent<UITextField>();
-    if (uiText == nullptr)
-        return;
+    auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
 
-    auto txtText = m_uiTextFieldGroup->createWidget<TextField>("Text", uiText->getText().c_str());
+    auto txtText = m_uiTextFieldGroup->createWidget<TextField>("Text", comp->getProperty<std::string>("text", ""));
     txtText->getOnDataChangedEvent().addListener([this](auto txt) {
-        auto uiText = getComponent<UITextField>();
-        uiText->setText(txt);
-        });
+        getComponent<CompoundComponent>()->setProperty("text", txt);
+    });
 
-    auto txtFontPath = m_uiTextFieldGroup->createWidget<TextField>("Font", uiText->getFontPath().c_str());
+    auto txtFontPath = m_uiTextFieldGroup->createWidget<TextField>("Font", comp->getProperty<std::string>("font", ""));
     txtFontPath->getOnDataChangedEvent().addListener([this](auto txt) {
-        auto uiText = getComponent<UITextField>();
-        uiText->setFontPath(txt);
-        });
-
-    for (const auto& type : GetFileExtensionSuported(E_FileExts::Font))
-    {
+        getComponent<CompoundComponent>()->setProperty("font", txt);
+    });
+    for (const auto& type : GetFileExtensionSuported(E_FileExts::Font)) {
         txtFontPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-            auto uiText = getComponent<UITextField>();
-            uiText->setFontPath(txt);
+            getComponent<CompoundComponent>()->setProperty("font", txt);
             setDirty();
-            });
+        });
     }
 
-    std::array size = { (int)uiText->getFontSize() };
-    m_uiTextFieldGroup->createWidget<Drag<int>>("Size", ImGuiDataType_S32, size, 1, 4, 128)->getOnDataChangedEvent().addListener([this](auto& val) {
-        auto uiText = getComponent<UITextField>();
-        uiText->setFontSize((int)val[0]);
-        });
+    std::array size = { comp->getProperty<int>("size", 12) };
+    m_uiTextFieldGroup->createWidget<Drag<int>>("Size", ImGuiDataType_S32, size, 1, 4, 1024)->getOnDataChangedEvent().addListener([this](auto& val) {
+        getComponent<CompoundComponent>()->setProperty("size", val[0]);
+    });
 
-    auto color = uiText->getColor();
-    m_uiTextFieldGroup->createWidget<Color>("Color", color)->getOnDataChangedEvent().addListener([this](auto& color) {
-        auto uiText = getComponent<UITextField>();
-        uiText->setColor({ color[0], color[1], color[2], color[3] });
-        });
+    m_uiTextFieldGroup->createWidget<Color>("Color", comp->getProperty<Vec4>("color", {}))->getOnDataChangedEvent().addListener([this](auto& color) {
+        getComponent<CompoundComponent>()->setProperty("color", { color[0], color[1], color[2], color[3] });
+    });
 }
 NS_IGE_END

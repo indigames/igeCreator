@@ -15,16 +15,14 @@ public:
 	UISliderEditorComponent();
 	virtual ~UISliderEditorComponent();
 
-	virtual void redraw() override;
 protected:
-	
 	virtual void onInspectorUpdate() override;
-
 	void drawUISlider();
 
 	void drawMin();
 	void drawMax();
 	void drawValue();
+
 protected:
 	std::shared_ptr<Group> m_uiSliderGroup = nullptr;
 	std::shared_ptr<Group> m_uiSliderMinGroup = nullptr;

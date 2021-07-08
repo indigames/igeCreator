@@ -71,7 +71,7 @@ void SpriteEditorComponent::drawSpriteComponent()
     });
 
     auto spriteType = comp->getProperty<int>("spritetype", 0);
-    auto m_spriteTypeCombo = m_spriteCompGroup->createWidget<ComboBox>("", (int)spriteType);
+    auto m_spriteTypeCombo = m_spriteCompGroup->createWidget<ComboBox>("Sprite Type", (int)spriteType);
     m_spriteTypeCombo->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("spritetype", val);
         setDirty();

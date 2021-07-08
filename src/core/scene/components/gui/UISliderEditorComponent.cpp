@@ -1,4 +1,5 @@
 #include "core/scene/components/gui/UISliderEditorComponent.h"
+#include "core/scene/CompoundComponent.h"
 
 #include <core/layout/Group.h>
 
@@ -15,28 +16,20 @@ UISliderEditorComponent::UISliderEditorComponent() {
     m_dirtyFlag = 0;
 }
 
-UISliderEditorComponent::~UISliderEditorComponent()
-{
+UISliderEditorComponent::~UISliderEditorComponent() {
     m_uiSliderMinGroup = nullptr;
     m_uiSliderMaxGroup = nullptr;
     m_uiSliderValueGroup = nullptr;
     m_uiSliderGroup = nullptr;
 }
 
-void UISliderEditorComponent::redraw()
-{
-    if (m_group == nullptr)
-        return;
-
-    if (m_uiSliderGroup == nullptr) {
-        m_uiSliderGroup = m_group->createWidget<Group>("UISliderGroup", false);
-    }
+void UISliderEditorComponent::onInspectorUpdate() {
     switch (m_dirtyFlag) {
-    case 1 :
+    case 1:
         drawMax();
         drawValue();
         break;
-    case 2 :
+    case 2:
         drawMin();
         drawValue();
         break;
@@ -45,168 +38,107 @@ void UISliderEditorComponent::redraw()
         break;
     }
     m_dirtyFlag = 0;
-
-    EditorComponent::redraw();
 }
 
-void UISliderEditorComponent::onInspectorUpdate()
-{
-    if (m_group == nullptr)
-        return;
-    m_group->removeAllWidgets();
-
-    m_uiSliderGroup = m_group->createWidget<Group>("UISliderGroup", false);
-
-    drawUISlider();
-}
-
-void UISliderEditorComponent::drawUISlider()
-{
+void UISliderEditorComponent::drawUISlider() {
     if (m_uiSliderGroup == nullptr)
-        return;
+        m_uiSliderGroup = m_group->createWidget<Group>("UISliderGroup", false);;
     m_uiSliderGroup->removeAllWidgets();
 
-    auto uiSlider = getComponent<UISlider>();
-    if (uiSlider == nullptr)
-        return;
+    auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
 
     m_uiSliderMinGroup = nullptr;
     m_uiSliderMaxGroup = nullptr;
     m_uiSliderValueGroup = nullptr;
 
-    auto m_interactable = m_uiSliderGroup->createWidget<CheckBox>("Interactable", uiSlider->isInteractable())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto uiSlider = getComponent<UISlider>();
-        uiSlider->setInteractable(val);
-        });
+    m_uiSliderGroup->createWidget<CheckBox>("Interactable", comp->getProperty<bool>("interactable", true))->getOnDataChangedEvent().addListener([this](bool val) {
+        getComponent<CompoundComponent>()->setProperty("interactable", val);
+    });
 
     //! Normal Color
-    m_uiSliderGroup->createWidget<Color>("Normal Color", uiSlider->getColor())->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiSlider = getComponent<UISlider>();
-        uiSlider->setColor(val[0], val[1], val[2], val[3]);
-        });
+    m_uiSliderGroup->createWidget<Color>("Normal Color", comp->getProperty<Vec4>("color", {}))->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("color", { val[0], val[1], val[2], val[3] });
+    });
 
     //! Pressed Color
-    m_uiSliderGroup->createWidget<Color>("Pressed Color", uiSlider->getPressedColor())->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiSlider = getComponent<UISlider>();
-        uiSlider->setPressedColor(val[0], val[1], val[2], val[3]);
-        });
+    m_uiSliderGroup->createWidget<Color>("Pressed Color", comp->getProperty<Vec4>("pressedcolor", {}))->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("pressedcolor", { val[0], val[1], val[2], val[3] });
+    });
 
     //! Disable Color
-    m_uiSliderGroup->createWidget<Color>("Disable Color", uiSlider->getDisabledColor())->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiSlider = getComponent<UISlider>();
-        uiSlider->setDisabledColor(val[0], val[1], val[2], val[3]);
-        });
+    m_uiSliderGroup->createWidget<Color>("Disabled Color", comp->getProperty<Vec4>("disabledcolor", {}))->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("disabledcolor", { val[0], val[1], val[2], val[3] });
+    });
 
     //! Fade Duration
-    std::array fadeDuration = { uiSlider->getFadeDuration() };
+    std::array fadeDuration = { comp->getProperty<float>("fadeduration", 0.f) };
     m_uiSliderGroup->createWidget<Drag<float>>("Fade Duration", ImGuiDataType_Float, fadeDuration, 0.01f, 0.0f, 60.0f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiSlider = getComponent<UISlider>();
-        uiSlider->setFadeDuration(val[0]);
-        });
+        getComponent<CompoundComponent>()->setProperty("fadeduration", val[0]);
+    });
 
-    auto direction = uiSlider->getDirection();
-    auto m_directionCombo = m_uiSliderGroup->createWidget<ComboBox>("", (int)direction);
-    m_directionCombo->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiSlider = getComponent<UISlider>();
-        uiSlider->setDirection(val);
+    auto direction = comp->getProperty<int>("directionbar", 0);
+    auto directionCombo = m_uiSliderGroup->createWidget<ComboBox>("Direction", (int)direction);
+    directionCombo->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("directionbar", val);
         setDirty();
-        });
-    m_directionCombo->setEndOfLine(false);
-    m_directionCombo->addChoice((int)UISlider::Direction::LEFT_TO_RIGHT, "Left To Right");
-    m_directionCombo->addChoice((int)UISlider::Direction::RIGHT_TO_LEFT, "Right To Left");
-    m_directionCombo->addChoice((int)UISlider::Direction::BOTTOM_TO_TOP, "Bottom To Top");
-    m_directionCombo->addChoice((int)UISlider::Direction::TOP_TO_BOTTOM, "Top To Bottom");
-    m_directionCombo->setEndOfLine(true);
-
-    m_uiSliderMinGroup = m_uiSliderGroup->createWidget<Group>("UISliderGroup", false);
-
-    m_uiSliderMaxGroup = m_uiSliderGroup->createWidget<Group>("UISliderGroup", false);
-
-    m_uiSliderValueGroup = m_uiSliderGroup->createWidget<Group>("UISliderGroup", false);
+    });
+    directionCombo->setEndOfLine(false);
+    directionCombo->addChoice((int)UISlider::Direction::LeftToRight, "Left To Right");
+    directionCombo->addChoice((int)UISlider::Direction::RightToLeft, "Right To Left");
+    directionCombo->addChoice((int)UISlider::Direction::BottomToTop, "Bottom To Top");
+    directionCombo->addChoice((int)UISlider::Direction::TopToBottom, "Top To Bottom");
+    directionCombo->setEndOfLine(true);
 
     drawMin();
     drawMax();
     drawValue();
 
-    m_uiSliderGroup->createWidget<CheckBox>("Whole Numbers", uiSlider->getWholeNumbers())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto uiSlider = getComponent<UISlider>();
-        uiSlider->setWholeNumbers(val);
-        });
+    m_uiSliderGroup->createWidget<CheckBox>("Whole Numbers", comp->getProperty<bool>("wholenumbers", false))->getOnDataChangedEvent().addListener([this](bool val) {
+        getComponent<CompoundComponent>()->setProperty("wholenumbers", val);
+    });
 }
 
-void UISliderEditorComponent::drawMin()
-{
+void UISliderEditorComponent::drawMin() {
     if (m_uiSliderMinGroup == nullptr)
-        return;
+        m_uiSliderMinGroup = m_uiSliderGroup->createWidget<Group>("UISliderMinGroup", false);;
     m_uiSliderMinGroup->removeAllWidgets();
 
-    auto uiSlider = getComponent<UISlider>();
-    if (uiSlider == nullptr)
-        return;
+    auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
 
-    auto m_min = uiSlider->getMin();
-    auto m_max = uiSlider->getMax();
-    auto m_value = uiSlider->getValue();
-
-    std::array min = { uiSlider->getMin() };
-    m_uiSliderMinGroup->createWidget<Drag<float>>("Min ", ImGuiDataType_Float, min, 0.01f, 0.0f, m_max)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiSlider = getComponent<UISlider>();
-        auto max = uiSlider->getMax();
-        if (val[0] < max) {
-            uiSlider->setMin(val[0]);
-            setDirty();
-            m_dirtyFlag = 1;
-        }
-        });
+    std::array min = { comp->getProperty<float>("min", 0.f) };
+    m_uiSliderMinGroup->createWidget<Drag<float>>("Min ", ImGuiDataType_Float, min, 0.01f, 0.0f, comp->getProperty<float>("max", 1.f))->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("min", val[0]); 
+        m_dirtyFlag = 1;
+    });
 }
 
-void UISliderEditorComponent::drawMax()
-{
+void UISliderEditorComponent::drawMax() {
     if (m_uiSliderMaxGroup == nullptr)
-        return;
+        m_uiSliderMaxGroup = m_uiSliderGroup->createWidget<Group>("UISliderMaxGroup", false);;
     m_uiSliderMaxGroup->removeAllWidgets();
 
-    auto uiSlider = getComponent<UISlider>();
-    if (uiSlider == nullptr)
-        return;
+    auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
 
-    auto m_min = uiSlider->getMin();
-    auto m_max = uiSlider->getMax();
-    auto m_value = uiSlider->getValue();
-
-    std::array max = { uiSlider->getMax() };
-    m_uiSliderMaxGroup->createWidget<Drag<float>>("Max ", ImGuiDataType_Float, max, 0.01f, m_min, 100.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiSlider = getComponent<UISlider>();
-        auto min = uiSlider->getMin();
-        if (val[0] > min) {
-            uiSlider->setMax(val[0]);
-            setDirty();
-            m_dirtyFlag = 2;
-        }
-        });
+    std::array max = { comp->getProperty<float>("max", 1.f) };
+    m_uiSliderMaxGroup->createWidget<Drag<float>>("Max ", ImGuiDataType_Float, max, 0.01f, comp->getProperty<float>("min", 0.f))->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("max", val[0]);
+    });
 }
 
-void UISliderEditorComponent::drawValue()
-{
+void UISliderEditorComponent::drawValue() {
     if (m_uiSliderValueGroup == nullptr)
-        return;
+        m_uiSliderValueGroup = m_uiSliderGroup->createWidget<Group>("UISliderValGroup", false);;
     m_uiSliderValueGroup->removeAllWidgets();
 
-    auto uiSlider = getComponent<UISlider>();
-    if (uiSlider == nullptr)
-        return;
+    auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
 
-    auto m_min = uiSlider->getMin();
-    auto m_max = uiSlider->getMax();
-    auto m_value = uiSlider->getValue();
-
-    std::array value = { uiSlider->getValue() };
-    m_uiSliderValueGroup->createWidget<Drag<float>>("Value ", ImGuiDataType_Float, value, 0.01f, m_min, m_max)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiSlider = getComponent<UISlider>();
-        auto min = uiSlider->getMin();
-        auto max = uiSlider->getMax();
-        if (val[0] >= min && val[0] <= max)
-            uiSlider->setValue(val[0]);
-        });
+    std::array value = { comp->getProperty<float>("value", 1.f) };
+    m_uiSliderValueGroup->createWidget<Drag<float>>("Value ", ImGuiDataType_Float, value, 0.01f, comp->getProperty<float>("min", 0.f), comp->getProperty<float>("max", 1.f))->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("value", val[0]);
+    });
 }
 NS_IGE_END

@@ -15,16 +15,12 @@ public:
 	UITextEditorComponent();
 	virtual ~UITextEditorComponent();
 
-	virtual void redraw() override;
 protected:
-	
 	virtual void onInspectorUpdate() override;
-
 	void drawUIText();
+
 protected:
 	std::shared_ptr<Group> m_uiTextGroup = nullptr;
-
-
 };
 
 NS_IGE_END

@@ -1,4 +1,5 @@
 #include "core/scene/components/gui/UIScrollViewEditorComponent.h"
+#include "core/scene/CompoundComponent.h"
 
 #include <core/layout/Group.h>
 
@@ -14,237 +15,178 @@ UIScrollViewEditorComponent::UIScrollViewEditorComponent() {
     m_uiScrollViewGroup = nullptr;
 }
 
-UIScrollViewEditorComponent::~UIScrollViewEditorComponent()
-{
+UIScrollViewEditorComponent::~UIScrollViewEditorComponent() {
     m_uiScrollViewGroup = nullptr;
 }
 
-void UIScrollViewEditorComponent::redraw()
-{
-    if (m_group == nullptr)
-        return;
-
-    if (m_uiScrollViewGroup == nullptr) {
-        m_uiScrollViewGroup = m_group->createWidget<Group>("UIScrollViewGroup", false);
-    }
-    drawUIScrollView();
-
-    EditorComponent::redraw();
-}
-
-void UIScrollViewEditorComponent::onInspectorUpdate()
-{
-    if (m_group == nullptr)
-        return;
-    m_group->removeAllWidgets();
-
-    m_uiScrollViewGroup = m_group->createWidget<Group>("UIScrollViewGroup", false);
-
+void UIScrollViewEditorComponent::onInspectorUpdate() {
     drawUIScrollView();
 }
 
-void UIScrollViewEditorComponent::drawUIScrollView()
-{
+void UIScrollViewEditorComponent::drawUIScrollView() {
     if (m_uiScrollViewGroup == nullptr)
-        return;
+        m_uiScrollViewGroup = m_group->createWidget<Group>("UIScrollViewGroup", false);;
     m_uiScrollViewGroup->removeAllWidgets();
 
-    auto uiScrollView = getComponent<UIScrollView>(); 
-    if (uiScrollView == nullptr)
-        return;
+    auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
 
-    auto txtPath = m_uiScrollViewGroup->createWidget<TextField>("Path", uiScrollView->getPath());
-    txtPath->setEndOfLine(false);
+    auto txtPath = m_uiScrollViewGroup->createWidget<TextField>("Path", comp->getProperty<std::string>("path", ""));
     txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
-        auto uiImage = getComponent<UIImage>(); 
-        uiImage->setPath(txt);
-        });
-
-    for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
-    {
+        getComponent<CompoundComponent>()->setProperty("path", txt);
+    });
+    for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite)) {
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-            auto uiScrollView = getComponent<UIScrollView>(); 
-            uiScrollView->setPath(txt);
+            getComponent<CompoundComponent>()->setProperty("path", txt);
             setDirty();
-            });
+        });
     }
 
-    m_uiScrollViewGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
-        auto files = OpenFileDialog("Import Assets", "", { "Texture (*.pyxi)", "*.pyxi" }).result();
-        if (files.size() > 0)
-        {
-            auto uiScrollView = getComponent<UIScrollView>(); 
-            uiScrollView->setPath(files[0]);
-            setDirty();
-        }
-        });
+    m_uiScrollViewGroup->createWidget<CheckBox>("Interactable", comp->getProperty<bool>("interactable", true))->getOnDataChangedEvent().addListener([this](bool val) {
+        getComponent<CompoundComponent>()->setProperty("interactable", val);
+    });
 
-    auto m_interactable = m_uiScrollViewGroup->createWidget<CheckBox>("Interactable", uiScrollView->isInteractable())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto uiScrollView = getComponent<UIScrollView>(); 
-        uiScrollView->setInteractable(val);
-        });
-
-    auto spriteType = uiScrollView->getSpriteType();
-    auto m_spriteTypeCombo = m_uiScrollViewGroup->createWidget<ComboBox>("", (int)spriteType);
-    m_spriteTypeCombo->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiScrollView = getComponent<UIScrollView>(); 
-        uiScrollView->setSpriteType(val);
+    auto spriteType = comp->getProperty<int>("spritetype", 0);
+    auto spriteTypeCombo = m_uiScrollViewGroup->createWidget<ComboBox>("Sprite Type", spriteType);
+    spriteTypeCombo->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("spritetype", val);
         setDirty();
-        });
-    m_spriteTypeCombo->setEndOfLine(false);
-    m_spriteTypeCombo->addChoice((int)SpriteType::Simple, "Simple");
-    m_spriteTypeCombo->addChoice((int)SpriteType::Sliced, "Sliced");
-    m_spriteTypeCombo->setEndOfLine(true);
+    });
+    spriteTypeCombo->setEndOfLine(false);
+    spriteTypeCombo->addChoice((int)SpriteType::Simple, "Simple");
+    spriteTypeCombo->addChoice((int)SpriteType::Sliced, "Sliced");
+    spriteTypeCombo->setEndOfLine(true);
 
-
-    if (spriteType == SpriteType::Sliced) {
-        std::array borderLeft = { uiScrollView->getBorderLeft() };
+    if (spriteType == (int)SpriteType::Sliced) {
+        auto border = comp->getProperty<Vec4>("border", {});
+        std::array borderLeft = { border.X() };
         m_uiScrollViewGroup->createWidget<Drag<float, 1>>("Border Left", ImGuiDataType_Float, borderLeft, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiScrollView = getComponent<UIScrollView>(); 
-            uiScrollView->setBorderLeft(val[0]);
-            });
-        std::array borderRight = { uiScrollView->getBorderRight() };
+            auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", {});
+            border.X(val[0]);
+            getComponent<CompoundComponent>()->setProperty("border", val);
+        });
+        std::array borderRight = { border.Y() };
         m_uiScrollViewGroup->createWidget<Drag<float, 1>>("Border Right", ImGuiDataType_Float, borderRight, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiScrollView = getComponent<UIScrollView>(); 
-            uiScrollView->setBorderRight(val[0]);
-            });
-        std::array borderTop = { uiScrollView->getBorderTop() };
+            auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", {});
+            border.Y(val[0]);
+            getComponent<CompoundComponent>()->setProperty("border", val);
+        });
+        std::array borderTop = { border.Z() };
         m_uiScrollViewGroup->createWidget<Drag<float, 1>>("Border Top", ImGuiDataType_Float, borderTop, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiScrollView = getComponent<UIScrollView>(); 
-            uiScrollView->setBorderTop(val[0]);
-            });
-        std::array borderBottom = { uiScrollView->getBorderBottom() };
+            auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", {});
+            border.Z(val[0]);
+            getComponent<CompoundComponent>()->setProperty("border", val);
+        });
+        std::array borderBottom = { border.W() };
         m_uiScrollViewGroup->createWidget<Drag<float, 1>>("Border Bottom", ImGuiDataType_Float, borderBottom, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiScrollView = getComponent<UIScrollView>(); 
-            uiScrollView->setBorderBottom(val[0]);
-            });
+            auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", {});
+            border.W(val[0]);
+            getComponent<CompoundComponent>()->setProperty("border", val);
+        });
     }
-    else
-    {
-        auto fillMethod = uiScrollView->getFillMethod();
-        auto m_compComboFillMethod = m_uiScrollViewGroup->createWidget<ComboBox>("", (int)fillMethod);
-        m_compComboFillMethod->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiScrollView = getComponent<UIScrollView>(); 
-            uiScrollView->setFillMethod(val);
+    else {
+        auto fillMethod = comp->getProperty<int>("fillmethod", 0);
+        auto fillMethodCombo = m_uiScrollViewGroup->createWidget<ComboBox>("Fill Method", (int)fillMethod);
+        fillMethodCombo->getOnDataChangedEvent().addListener([this](auto val) {
+            getComponent<CompoundComponent>()->setProperty("fillmethod", val);
             setDirty();
-            });
-        m_compComboFillMethod->setEndOfLine(false);
-        m_compComboFillMethod->addChoice((int)FillMethod::None, "None");
-        m_compComboFillMethod->addChoice((int)FillMethod::Horizontal, "Horizontal");
-        m_compComboFillMethod->addChoice((int)FillMethod::Vertical, "Vertical");
-        m_compComboFillMethod->addChoice((int)FillMethod::Radial90, "Radial 90");
-        m_compComboFillMethod->addChoice((int)FillMethod::Radial180, "Radial 180");
-        m_compComboFillMethod->addChoice((int)FillMethod::Radial360, "Radial 360");
-        m_compComboFillMethod->setEndOfLine(true);
+        });
+        fillMethodCombo->setEndOfLine(false);
+        fillMethodCombo->addChoice((int)FillMethod::None, "None");
+        fillMethodCombo->addChoice((int)FillMethod::Horizontal, "Horizontal");
+        fillMethodCombo->addChoice((int)FillMethod::Vertical, "Vertical");
+        fillMethodCombo->addChoice((int)FillMethod::Radial90, "Radial 90");
+        fillMethodCombo->addChoice((int)FillMethod::Radial180, "Radial 180");
+        fillMethodCombo->addChoice((int)FillMethod::Radial360, "Radial 360");
+        fillMethodCombo->setEndOfLine(true);
 
-        if (fillMethod != FillMethod::None) {
-
-            auto m_compComboFillOrigin = m_uiScrollViewGroup->createWidget<ComboBox>("", (int)uiScrollView->getFillOrigin());
-            m_compComboFillOrigin->getOnDataChangedEvent().addListener([this](auto val) {
-                auto uiScrollView = getComponent<UIScrollView>(); 
-                uiScrollView->setFillOrigin(val);
+        if (fillMethod != (int)FillMethod::None) {
+            auto fillOriginCombo = m_uiScrollViewGroup->createWidget<ComboBox>("Fill Origin", comp->getProperty<int>("fillorigin", 0));
+            fillOriginCombo->getOnDataChangedEvent().addListener([this](auto val) {
+                getComponent<CompoundComponent>()->setProperty("fillorigin", val);
                 setDirty();
-                });
-            m_compComboFillOrigin->setEndOfLine(false);
-            if (fillMethod == FillMethod::Horizontal)
-            {
-                m_compComboFillOrigin->addChoice((int)FillOrigin::Left, "Left");
-                m_compComboFillOrigin->addChoice((int)FillOrigin::Right, "Right");
+            });
+            fillOriginCombo->setEndOfLine(false);
+            if (fillMethod == (int)FillMethod::Horizontal) {
+                fillOriginCombo->addChoice((int)FillOrigin::Left, "Left");
+                fillOriginCombo->addChoice((int)FillOrigin::Right, "Right");
             }
-            else if (fillMethod == FillMethod::Vertical)
-            {
-                m_compComboFillOrigin->addChoice((int)FillOrigin::Top, "Top");
-                m_compComboFillOrigin->addChoice((int)FillOrigin::Bottom, "Bottom");
+            else if (fillMethod == (int)FillMethod::Vertical) {
+                fillOriginCombo->addChoice((int)FillOrigin::Top, "Top");
+                fillOriginCombo->addChoice((int)FillOrigin::Bottom, "Bottom");
             }
-            else if (fillMethod == FillMethod::Radial90)
-            {
-                m_compComboFillOrigin->addChoice((int)FillOrigin::BottomLeft, "Bottom Left");
-                m_compComboFillOrigin->addChoice((int)FillOrigin::TopLeft, "Top Left");
-                m_compComboFillOrigin->addChoice((int)FillOrigin::TopRight, "Top Right");
-                m_compComboFillOrigin->addChoice((int)FillOrigin::BottomRight, "Bottom Right");
+            else if (fillMethod == (int)FillMethod::Radial90) {
+                fillOriginCombo->addChoice((int)FillOrigin::BottomLeft, "Bottom Left");
+                fillOriginCombo->addChoice((int)FillOrigin::TopLeft, "Top Left");
+                fillOriginCombo->addChoice((int)FillOrigin::TopRight, "Top Right");
+                fillOriginCombo->addChoice((int)FillOrigin::BottomRight, "Bottom Right");
             }
-            else
-            {
-                m_compComboFillOrigin->addChoice((int)FillOrigin::Bottom, "Bottom");
-                m_compComboFillOrigin->addChoice((int)FillOrigin::Top, "Top");
-                m_compComboFillOrigin->addChoice((int)FillOrigin::Left, "Left");
-                m_compComboFillOrigin->addChoice((int)FillOrigin::Right, "Right");
+            else {
+                fillOriginCombo->addChoice((int)FillOrigin::Bottom, "Bottom");
+                fillOriginCombo->addChoice((int)FillOrigin::Top, "Top");
+                fillOriginCombo->addChoice((int)FillOrigin::Left, "Left");
+                fillOriginCombo->addChoice((int)FillOrigin::Right, "Right");
             }
-            m_compComboFillOrigin->setEndOfLine(true);
+            fillOriginCombo->setEndOfLine(true);
 
-            std::array fillAmount = { uiScrollView->getFillAmount() };
+            std::array fillAmount = { comp->getProperty<float>("fillamount", 0.f) };
             m_uiScrollViewGroup->createWidget<Drag<float, 1>>("Fill Amount", ImGuiDataType_Float, fillAmount, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-                auto uiScrollView = getComponent<UIScrollView>(); 
-                uiScrollView->setFillAmount(val[0]);
-                });
+                getComponent<CompoundComponent>()->setProperty("fillamount", val[0]);
+            });
 
-            if (fillMethod == FillMethod::Radial90 || fillMethod == FillMethod::Radial180 || fillMethod == FillMethod::Radial360) {
-                m_uiScrollViewGroup->createWidget<CheckBox>("Clockwise", uiScrollView->getClockwise())->getOnDataChangedEvent().addListener([this](bool val) {
-                    auto uiScrollView = getComponent<UIScrollView>(); 
-                    uiScrollView->setClockwise(val);
-                    });
+            if (fillMethod == (int)FillMethod::Radial90 || fillMethod == (int)FillMethod::Radial180 || fillMethod == (int)FillMethod::Radial360) {
+                m_uiScrollViewGroup->createWidget<CheckBox>("Clockwise", comp->getProperty<bool>("clockwise", false))->getOnDataChangedEvent().addListener([this](bool val) {
+                    getComponent<CompoundComponent>()->setProperty("clockwise", val);
+                });
             }
         }
     }
+    m_uiScrollViewGroup->createWidget<Color>("Color", comp->getProperty<Vec4>("color", {}))->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("color", { val[0], val[1], val[2], val[3] });
+    });
 
-    auto color = uiScrollView->getColor();
-    m_uiScrollViewGroup->createWidget<Color>("Color", color)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiScrollView = getComponent<UIScrollView>(); 
-        uiScrollView->setColor(val[0], val[1], val[2], val[3]);
-        });
+    m_uiScrollViewGroup->createWidget<CheckBox>("Horizontal", comp->getProperty<bool>("enablehorizontal", false))->getOnDataChangedEvent().addListener([this](bool val) {
+        getComponent<CompoundComponent>()->setProperty("enablehorizontal", val);
+    });
+    m_uiScrollViewGroup->createWidget<CheckBox>("Vertical", comp->getProperty<bool>("enablevertical", false))->getOnDataChangedEvent().addListener([this](bool val) {
+        getComponent<CompoundComponent>()->setProperty("enablevertical", val);
+    });
 
-    auto m_horizontal = m_uiScrollViewGroup->createWidget<CheckBox>("Horizontal", uiScrollView->enableHorizontal())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto uiScrollView = getComponent<UIScrollView>(); 
-        uiScrollView->setEnableHorizontal(val);
-        });
-    auto m_vertical = m_uiScrollViewGroup->createWidget<CheckBox>("Vertical", uiScrollView->enableVertical())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto uiScrollView = getComponent<UIScrollView>(); 
-        uiScrollView->setEnableVertical(val);
-        });
-
-    auto movementType = uiScrollView->getMovementType();
-    auto m_movememntTypeCombo = m_uiScrollViewGroup->createWidget<ComboBox>("", (int)movementType);
-    m_movememntTypeCombo->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiScrollView = getComponent<UIScrollView>(); 
-        uiScrollView->setMovementType(val);
+    auto movementType = comp->getProperty<int>("movementtype", 0);
+    auto moveTypeCombo = m_uiScrollViewGroup->createWidget<ComboBox>("Move Type", (int)movementType);
+    moveTypeCombo->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("movementtype", val);
         setDirty();
-        });
-    m_movememntTypeCombo->setEndOfLine(false);
-    m_movememntTypeCombo->addChoice((int)UIScrollView::MovementType::Elastic, "Elastic");
-    m_movememntTypeCombo->addChoice((int)UIScrollView::MovementType::Clamped, "Clamped");
-    m_movememntTypeCombo->setEndOfLine(true);
+    });
+    moveTypeCombo->setEndOfLine(false);
+    moveTypeCombo->addChoice((int)UIScrollView::MovementType::Elastic, "Elastic");
+    moveTypeCombo->addChoice((int)UIScrollView::MovementType::Clamped, "Clamped");
+    moveTypeCombo->setEndOfLine(true);
 
-    if (movementType == UIScrollView::MovementType::Elastic) 
+    if (movementType == (int)UIScrollView::MovementType::Elastic) 
     {
-        std::array elasticity = { uiScrollView->getElasticity() };
+        std::array elasticity = { comp->getProperty<float>("elasticity", 0.f) };
         m_uiScrollViewGroup->createWidget<Drag<float>>("Elasticity", ImGuiDataType_Float, elasticity, 0.01f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiScrollView = getComponent<UIScrollView>(); 
-            uiScrollView->setElasticity(val[0]);
-            });
+            getComponent<CompoundComponent>()->setProperty("elasticity", val[0]);
+        });
 
-        std::array elasticExtra = { uiScrollView->getElasticExtra()[0], uiScrollView->getElasticExtra()[1] };
-        m_uiScrollViewGroup->createWidget<Drag<float, 2>>("Elastic Extra", ImGuiDataType_Float, elasticExtra, 0.1f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiScrollView = getComponent<UIScrollView>(); 
-            auto elasticExtra = uiScrollView->getElasticExtra();
-            elasticExtra[0] = val[0];
-            elasticExtra[1] = val[1];
-            uiScrollView->setElasticExtra(elasticExtra);
-            });
+        auto elasticExtra = comp->getProperty<Vec2>("elasticextra", {});
+        std::array elasticExtraArr = { elasticExtra[0], elasticExtra[1] };
+        m_uiScrollViewGroup->createWidget<Drag<float, 2>>("Elastic Extra", ImGuiDataType_Float, elasticExtraArr, 0.1f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            getComponent<CompoundComponent>()->setProperty("elasticextra", {val[0], val[1]});
+        });
     }
 
-    auto m_inertia = m_uiScrollViewGroup->createWidget<CheckBox>("Inertia", uiScrollView->isInertia())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto uiScrollView = getComponent<UIScrollView>(); 
-        uiScrollView->setInertia(val);
+    auto isInertia = comp->getProperty<bool>("inertia", false);
+    auto m_inertia = m_uiScrollViewGroup->createWidget<CheckBox>("Inertia", isInertia)->getOnDataChangedEvent().addListener([this](bool val) {
+        getComponent<CompoundComponent>()->setProperty("inertia", val);
         setDirty();
-        });
-
-    if (uiScrollView->isInertia()) 
-    {
-        std::array deceleration = { uiScrollView->getDecelerationRate() };
+    });
+    if (isInertia) {
+        std::array deceleration = { comp->getProperty<float>("decelerationrate", 0.f) };
         m_uiScrollViewGroup->createWidget<Drag<float>>("Deceleration Rate", ImGuiDataType_Float, deceleration, 0.01f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiScrollView = getComponent<UIScrollView>(); 
-            uiScrollView->setDecelerationRate(val[0]);
-            });
+            getComponent<CompoundComponent>()->setProperty("decelerationrate", val[0]);
+        });
     }
 }
 NS_IGE_END

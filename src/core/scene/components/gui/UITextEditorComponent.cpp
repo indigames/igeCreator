@@ -1,4 +1,5 @@
 #include "core/scene/components/gui/UITextEditorComponent.h"
+#include "core/scene/CompoundComponent.h"
 
 #include <core/layout/Group.h>
 
@@ -18,76 +19,46 @@ UITextEditorComponent::UITextEditorComponent() {
     m_uiTextGroup = nullptr;
 }
 
-UITextEditorComponent::~UITextEditorComponent()
-{
+UITextEditorComponent::~UITextEditorComponent() {
     m_uiTextGroup = nullptr;
 }
 
-void UITextEditorComponent::redraw()
-{
-    if (m_group == nullptr)
-        return;
-
-    if (m_uiTextGroup == nullptr) {
-        m_uiTextGroup = m_group->createWidget<Group>("UITextGroup", false);
-    }
-    drawUIText();
-
-    EditorComponent::redraw();
-}
-
-void UITextEditorComponent::onInspectorUpdate()
-{
-    if (m_group == nullptr)
-        return;
-    m_group->removeAllWidgets();
-
-    m_uiTextGroup = m_group->createWidget<Group>("UITextGroup", false);
-
+void UITextEditorComponent::onInspectorUpdate() {
     drawUIText();
 }
 
 void UITextEditorComponent::drawUIText()
 {
     if (m_uiTextGroup == nullptr)
-        return;
+        m_uiTextGroup = m_group->createWidget<Group>("UITextGroup", false);;
     m_uiTextGroup->removeAllWidgets();
 
-    auto uiText = getComponent<UIText>();
-    if (uiText == nullptr)
-        return;
+    auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
 
-    auto txtText = m_uiTextGroup->createWidget<TextField>("Text", uiText->getText().c_str());
+    auto txtText = m_uiTextGroup->createWidget<TextField>("Text", comp->getProperty<std::string>("text", ""));
     txtText->getOnDataChangedEvent().addListener([this](auto txt) {
-        auto uiText = getComponent<UIText>();
-        uiText->setText(txt);
-        });
+        getComponent<CompoundComponent>()->setProperty("text", txt);
+    });
 
-    auto txtFontPath = m_uiTextGroup->createWidget<TextField>("Font", uiText->getFontPath().c_str());
+    auto txtFontPath = m_uiTextGroup->createWidget<TextField>("Font", comp->getProperty<std::string>("font", ""));
     txtFontPath->getOnDataChangedEvent().addListener([this](auto txt) {
-        auto uiText = getComponent<UIText>();
-        uiText->setFontPath(txt);
-        });
-
-    for (const auto& type : GetFileExtensionSuported(E_FileExts::Font))
-    {
+        getComponent<CompoundComponent>()->setProperty("font", txt);
+    });
+    for (const auto& type : GetFileExtensionSuported(E_FileExts::Font)) {
         txtFontPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-            auto uiText = getComponent<UIText>();
-            uiText->setFontPath(txt);
+            getComponent<CompoundComponent>()->setProperty("font", txt);
             setDirty();
-            });
+        });
     }
     
-    std::array size = { (int)uiText->getFontSize() };
-    m_uiTextGroup->createWidget<Drag<int>>("Size", ImGuiDataType_S32, size, 1, 4, 128)->getOnDataChangedEvent().addListener([this](auto& val) {
-        auto uiText = getComponent<UIText>();
-        uiText->setFontSize((int)val[0]);
-        });
+    std::array size = { comp->getProperty<int>("size", 12) };
+    m_uiTextGroup->createWidget<Drag<int>>("Size", ImGuiDataType_S32, size, 1, 4, 1024)->getOnDataChangedEvent().addListener([this](auto& val) {
+        getComponent<CompoundComponent>()->setProperty("size", val[0]);
+    });
 
-    auto color = uiText->getColor();
-    m_uiTextGroup->createWidget<Color>("Color", color)->getOnDataChangedEvent().addListener([this](auto& color) {
-        auto uiText = getComponent<UIText>();
-        uiText->setColor({ color[0], color[1], color[2], color[3] });
-        });
+    m_uiTextGroup->createWidget<Color>("Color", comp->getProperty<Vec4>("color", {}))->getOnDataChangedEvent().addListener([this](auto& color) {
+        getComponent<CompoundComponent>()->setProperty("color", { color[0], color[1], color[2], color[3] });
+    });
 }
 NS_IGE_END

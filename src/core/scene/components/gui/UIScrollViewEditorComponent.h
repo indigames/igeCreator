@@ -15,16 +15,12 @@ public:
 	UIScrollViewEditorComponent();
 	virtual ~UIScrollViewEditorComponent();
 
-	virtual void redraw() override;
 protected:
-	
 	virtual void onInspectorUpdate() override;
-
 	void drawUIScrollView();
+
 protected:
 	std::shared_ptr<Group> m_uiScrollViewGroup = nullptr;
-
-
 };
 
 NS_IGE_END

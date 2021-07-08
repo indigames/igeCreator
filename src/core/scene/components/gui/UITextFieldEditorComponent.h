@@ -15,16 +15,12 @@ public:
 	UITextFieldEditorComponent();
 	virtual ~UITextFieldEditorComponent();
 
-	virtual void redraw() override;
 protected:
-	
 	virtual void onInspectorUpdate() override;
-
 	void drawUITextField();
+
 protected:
 	std::shared_ptr<Group> m_uiTextFieldGroup = nullptr;
-
-
 };
 
 NS_IGE_END

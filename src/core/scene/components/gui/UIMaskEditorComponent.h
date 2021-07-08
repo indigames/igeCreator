@@ -15,16 +15,12 @@ public:
 	UIMaskEditorComponent();
 	virtual ~UIMaskEditorComponent();
 
-	virtual void redraw() override;
 protected:
-	
 	virtual void onInspectorUpdate() override;
-
 	void drawUIMask();
+
 protected:
 	std::shared_ptr<Group> m_uiMaskGroup = nullptr;
-
-
 };
 
 NS_IGE_END

@@ -1,4 +1,5 @@
 #include "core/scene/components/gui/UIMaskEditorComponent.h"
+#include "core/scene/CompoundComponent.h"
 
 #include <core/layout/Group.h>
 
@@ -10,193 +11,142 @@
 
 NS_IGE_BEGIN
 
-UIMaskEditorComponent::UIMaskEditorComponent() 
-{
+UIMaskEditorComponent::UIMaskEditorComponent() {
     m_uiMaskGroup = nullptr;
 }
 
-UIMaskEditorComponent::~UIMaskEditorComponent()
-{
+UIMaskEditorComponent::~UIMaskEditorComponent() {
     m_uiMaskGroup = nullptr;
 }
 
-void UIMaskEditorComponent::redraw()
-{
-    if (m_group == nullptr)
-        return;
-
-    if (m_uiMaskGroup == nullptr) {
-        m_uiMaskGroup = m_group->createWidget<Group>("UIMaskGroup", false);
-    }
-    drawUIMask();
-
-    EditorComponent::redraw();
-}
-
-void UIMaskEditorComponent::onInspectorUpdate()
-{
-    if (m_group == nullptr)
-        return;
-    m_group->removeAllWidgets();
-
-    m_uiMaskGroup = m_group->createWidget<Group>("UIMaskGroup", false);
-
+void UIMaskEditorComponent::onInspectorUpdate() {
     drawUIMask();
 }
 
-void UIMaskEditorComponent::drawUIMask()
-{
+void UIMaskEditorComponent::drawUIMask() {
     if (m_uiMaskGroup == nullptr)
-        return;
+        m_uiMaskGroup = m_group->createWidget<Group>("UIMaskGroup", false);;
     m_uiMaskGroup->removeAllWidgets();
 
-    auto uiMask = getComponent<UIMask>();
-    if (uiMask == nullptr)
-        return;
+    auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
 
-    auto txtPath = m_uiMaskGroup->createWidget<TextField>("Path", uiMask->getPath());
-    txtPath->setEndOfLine(false);
+    auto txtPath = m_uiMaskGroup->createWidget<TextField>("Path", comp->getProperty<std::string>("path", ""));
     txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
-        auto uiImage = getComponent<UIMask>();
-        uiImage->setPath(txt);
-        });
-
-    for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
-    {
+        getComponent<CompoundComponent>()->setProperty("path", txt);
+    });
+    for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite)) {
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-            auto uiMask = getComponent<UIMask>();
-            uiMask->setPath(txt);
+            getComponent<CompoundComponent>()->setProperty("path", txt);
             setDirty();
-            });
+        });
     }
 
-    m_uiMaskGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
-        auto files = OpenFileDialog("Import Assets", "", { "Texture (*.pyxi)", "*.pyxi" }).result();
-        if (files.size() > 0)
-        {
-            auto uiMask = getComponent<UIMask>();
-            uiMask->setPath(files[0]);
-            setDirty();
-        }
-        });
+    m_uiMaskGroup->createWidget<CheckBox>("Use Mask", comp->getProperty<bool>("usemask", false))->getOnDataChangedEvent().addListener([this](bool val) {
+        getComponent<CompoundComponent>()->setProperty("usemask", val);
+    });
 
-    auto m_useMask = m_uiMaskGroup->createWidget<CheckBox>("Use Mask", uiMask->isUseMask())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto uiMask = getComponent<UIMask>();
-        uiMask->setUseMask(val);
-        });
+    m_uiMaskGroup->createWidget<CheckBox>("Interactable", comp->getProperty<bool>("interactable", true))->getOnDataChangedEvent().addListener([this](bool val) {
+        getComponent<CompoundComponent>()->setProperty("interactable", val);
+    });
 
-    auto m_interactable = m_uiMaskGroup->createWidget<CheckBox>("Interactable", uiMask->isInteractable())->getOnDataChangedEvent().addListener([this](bool val) {
-        auto uiMask = getComponent<UIMask>();
-        uiMask->setInteractable(val);
-        });
-
-    auto spriteType = uiMask->getSpriteType();
-    auto m_spriteTypeCombo = m_uiMaskGroup->createWidget<ComboBox>("", (int)spriteType);
-    m_spriteTypeCombo->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiMask = getComponent<UIMask>();
-        uiMask->setSpriteType(val);
+    auto spriteType = comp->getProperty<int>("spritetype", 0);
+    auto spriteTypeCombo = m_uiMaskGroup->createWidget<ComboBox>("Sprite Type", spriteType);
+    spriteTypeCombo->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("spritetype", val);
         setDirty();
-        });
-    m_spriteTypeCombo->setEndOfLine(false);
-    m_spriteTypeCombo->addChoice((int)SpriteType::Simple, "Simple");
-    m_spriteTypeCombo->addChoice((int)SpriteType::Sliced, "Sliced");
-    m_spriteTypeCombo->setEndOfLine(true);
+    });
+    spriteTypeCombo->setEndOfLine(false);
+    spriteTypeCombo->addChoice((int)SpriteType::Simple, "Simple");
+    spriteTypeCombo->addChoice((int)SpriteType::Sliced, "Sliced");
+    spriteTypeCombo->setEndOfLine(true);
 
-
-    if (spriteType == SpriteType::Sliced) {
-        std::array borderLeft = { uiMask->getBorderLeft() };
+    if (spriteType == (int)SpriteType::Sliced) {
+        auto border = comp->getProperty<Vec4>("border", {});
+        std::array borderLeft = { border.X() };
         m_uiMaskGroup->createWidget<Drag<float, 1>>("Border Left", ImGuiDataType_Float, borderLeft, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiMask = getComponent<UIMask>();
-            uiMask->setBorderLeft(val[0]);
-            });
-        std::array borderRight = { uiMask->getBorderRight() };
+            auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", {});
+            border.X(val[0]);
+            getComponent<CompoundComponent>()->setProperty("border", val);
+        });
+        std::array borderRight = { border.Y() };
         m_uiMaskGroup->createWidget<Drag<float, 1>>("Border Right", ImGuiDataType_Float, borderRight, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiMask = getComponent<UIMask>();
-            uiMask->setBorderRight(val[0]);
-            });
-        std::array borderTop = { uiMask->getBorderTop() };
+            auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", {});
+            border.Y(val[0]);
+            getComponent<CompoundComponent>()->setProperty("border", val);
+        });
+        std::array borderTop = { border.Z() };
         m_uiMaskGroup->createWidget<Drag<float, 1>>("Border Top", ImGuiDataType_Float, borderTop, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiMask = getComponent<UIMask>();
-            uiMask->setBorderTop(val[0]);
-            });
-        std::array borderBottom = { uiMask->getBorderBottom() };
+            auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", {});
+            border.Z(val[0]);
+            getComponent<CompoundComponent>()->setProperty("border", val);
+        });
+        std::array borderBottom = { border.W() };
         m_uiMaskGroup->createWidget<Drag<float, 1>>("Border Bottom", ImGuiDataType_Float, borderBottom, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiMask = getComponent<UIMask>();
-            uiMask->setBorderBottom(val[0]);
-            });
+            auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", {});
+            border.W(val[0]);
+            getComponent<CompoundComponent>()->setProperty("border", val);
+        });
     }
-    else
-    {
-        auto fillMethod = uiMask->getFillMethod();
-        auto m_compComboFillMethod = m_uiMaskGroup->createWidget<ComboBox>("", (int)fillMethod);
-        m_compComboFillMethod->getOnDataChangedEvent().addListener([this](auto val) {
-            auto uiMask = getComponent<UIMask>();
-            uiMask->setFillMethod(val);
+    else {
+        auto fillMethod = comp->getProperty<int>("fillmethod", 0);
+        auto fillMethodCombo = m_uiMaskGroup->createWidget<ComboBox>("Fill Method", (int)fillMethod);
+        fillMethodCombo->getOnDataChangedEvent().addListener([this](auto val) {
+            getComponent<CompoundComponent>()->setProperty("fillmethod", val);
             setDirty();
-            });
-        m_compComboFillMethod->setEndOfLine(false);
-        m_compComboFillMethod->addChoice((int)FillMethod::None, "None");
-        m_compComboFillMethod->addChoice((int)FillMethod::Horizontal, "Horizontal");
-        m_compComboFillMethod->addChoice((int)FillMethod::Vertical, "Vertical");
-        m_compComboFillMethod->addChoice((int)FillMethod::Radial90, "Radial 90");
-        m_compComboFillMethod->addChoice((int)FillMethod::Radial180, "Radial 180");
-        m_compComboFillMethod->addChoice((int)FillMethod::Radial360, "Radial 360");
-        m_compComboFillMethod->setEndOfLine(true);
+        });
+        fillMethodCombo->setEndOfLine(false);
+        fillMethodCombo->addChoice((int)FillMethod::None, "None");
+        fillMethodCombo->addChoice((int)FillMethod::Horizontal, "Horizontal");
+        fillMethodCombo->addChoice((int)FillMethod::Vertical, "Vertical");
+        fillMethodCombo->addChoice((int)FillMethod::Radial90, "Radial 90");
+        fillMethodCombo->addChoice((int)FillMethod::Radial180, "Radial 180");
+        fillMethodCombo->addChoice((int)FillMethod::Radial360, "Radial 360");
+        fillMethodCombo->setEndOfLine(true);
 
-        if (fillMethod != FillMethod::None) {
-
-            auto m_compComboFillOrigin = m_uiMaskGroup->createWidget<ComboBox>("", (int)uiMask->getFillOrigin());
-            m_compComboFillOrigin->getOnDataChangedEvent().addListener([this](auto val) {
-                auto uiMask = getComponent<UIMask>();
-                uiMask->setFillOrigin(val);
+        if (fillMethod != (int)FillMethod::None) {
+            auto fillOriginCombo = m_uiMaskGroup->createWidget<ComboBox>("Fill Origin", comp->getProperty<int>("fillorigin", 0));
+            fillOriginCombo->getOnDataChangedEvent().addListener([this](auto val) {
+                getComponent<CompoundComponent>()->setProperty("fillorigin", val);
                 setDirty();
-                });
-            m_compComboFillOrigin->setEndOfLine(false);
-            if (fillMethod == FillMethod::Horizontal)
-            {
-                m_compComboFillOrigin->addChoice((int)FillOrigin::Left, "Left");
-                m_compComboFillOrigin->addChoice((int)FillOrigin::Right, "Right");
+            });
+            fillOriginCombo->setEndOfLine(false);
+            if (fillMethod == (int)FillMethod::Horizontal) {
+                fillOriginCombo->addChoice((int)FillOrigin::Left, "Left");
+                fillOriginCombo->addChoice((int)FillOrigin::Right, "Right");
             }
-            else if (fillMethod == FillMethod::Vertical)
-            {
-                m_compComboFillOrigin->addChoice((int)FillOrigin::Top, "Top");
-                m_compComboFillOrigin->addChoice((int)FillOrigin::Bottom, "Bottom");
+            else if (fillMethod == (int)FillMethod::Vertical) {
+                fillOriginCombo->addChoice((int)FillOrigin::Top, "Top");
+                fillOriginCombo->addChoice((int)FillOrigin::Bottom, "Bottom");
             }
-            else if (fillMethod == FillMethod::Radial90)
-            {
-                m_compComboFillOrigin->addChoice((int)FillOrigin::BottomLeft, "Bottom Left");
-                m_compComboFillOrigin->addChoice((int)FillOrigin::TopLeft, "Top Left");
-                m_compComboFillOrigin->addChoice((int)FillOrigin::TopRight, "Top Right");
-                m_compComboFillOrigin->addChoice((int)FillOrigin::BottomRight, "Bottom Right");
+            else if (fillMethod == (int)FillMethod::Radial90) {
+                fillOriginCombo->addChoice((int)FillOrigin::BottomLeft, "Bottom Left");
+                fillOriginCombo->addChoice((int)FillOrigin::TopLeft, "Top Left");
+                fillOriginCombo->addChoice((int)FillOrigin::TopRight, "Top Right");
+                fillOriginCombo->addChoice((int)FillOrigin::BottomRight, "Bottom Right");
             }
-            else
-            {
-                m_compComboFillOrigin->addChoice((int)FillOrigin::Bottom, "Bottom");
-                m_compComboFillOrigin->addChoice((int)FillOrigin::Top, "Top");
-                m_compComboFillOrigin->addChoice((int)FillOrigin::Left, "Left");
-                m_compComboFillOrigin->addChoice((int)FillOrigin::Right, "Right");
+            else {
+                fillOriginCombo->addChoice((int)FillOrigin::Bottom, "Bottom");
+                fillOriginCombo->addChoice((int)FillOrigin::Top, "Top");
+                fillOriginCombo->addChoice((int)FillOrigin::Left, "Left");
+                fillOriginCombo->addChoice((int)FillOrigin::Right, "Right");
             }
-            m_compComboFillOrigin->setEndOfLine(true);
+            fillOriginCombo->setEndOfLine(true);
 
-            std::array fillAmount = { uiMask->getFillAmount() };
+            std::array fillAmount = { comp->getProperty<float>("fillamount", 0.f) };
             m_uiMaskGroup->createWidget<Drag<float, 1>>("Fill Amount", ImGuiDataType_Float, fillAmount, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-                auto uiMask = getComponent<UIMask>();
-                uiMask->setFillAmount(val[0]);
-                });
+                getComponent<CompoundComponent>()->setProperty("fillamount", val[0]);
+            });
 
-            if (fillMethod == FillMethod::Radial90 || fillMethod == FillMethod::Radial180 || fillMethod == FillMethod::Radial360) {
-                m_uiMaskGroup->createWidget<CheckBox>("Clockwise", uiMask->getClockwise())->getOnDataChangedEvent().addListener([this](bool val) {
-                    auto uiMask = getComponent<UIMask>();
-                    uiMask->setClockwise(val);
-                    });
+            if (fillMethod == (int)FillMethod::Radial90 || fillMethod == (int)FillMethod::Radial180 || fillMethod == (int)FillMethod::Radial360) {
+                m_uiMaskGroup->createWidget<CheckBox>("Clockwise", comp->getProperty<bool>("clockwise", false))->getOnDataChangedEvent().addListener([this](bool val) {
+                    getComponent<CompoundComponent>()->setProperty("clockwise", val);
+                });
             }
         }
     }
-
-    auto color = uiMask->getColor();
-    m_uiMaskGroup->createWidget<Color>("Color", color)->getOnDataChangedEvent().addListener([this](auto val) {
-        auto uiMask = getComponent<UIMask>();
-        uiMask->setColor(val[0], val[1], val[2], val[3]);
-        });
+    m_uiMaskGroup->createWidget<Color>("Color", comp->getProperty<Vec4>("color", {}))->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("color", { val[0], val[1], val[2], val[3] });
+    });
 }
 NS_IGE_END

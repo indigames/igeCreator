@@ -15,16 +15,12 @@ public:
 	CanvasEditorComponent();
 	virtual ~CanvasEditorComponent();
 
-	virtual void redraw() override;
 protected:
-	
 	virtual void onInspectorUpdate() override;
-
 	void drawCanvas();
+
 protected:
 	std::shared_ptr<Group> m_canvasGroup = nullptr;
-
-
 };
 
 NS_IGE_END
