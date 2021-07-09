@@ -200,15 +200,7 @@ namespace ige::creator
                 Editor::getInstance()->refreshScene();
                 Editor::getCanvas()->getHierarchy()->clear();
                 Editor::getCanvas()->getHierarchy()->initialize();
-                auto& scene = Editor::getCurrentScene();
-                if (scene)
-                {
-                    SceneManager::getInstance()->unloadScene(scene);
-                    scene = nullptr;
-                }
-
-                scene = SceneManager::getInstance()->loadScene(name + ".scene.tmp");
-                SceneManager::getInstance()->setCurrentScene(scene);
+                Editor::getInstance()->loadScene(name + ".scene.tmp");
                 auto fsPath = fs::path(name + ".scene.tmp");
                 fs::remove(fsPath);
             }
