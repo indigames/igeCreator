@@ -5,26 +5,27 @@
 
 namespace ige::scene
 {
-
     //! Constructor
     CompoundComponent::CompoundComponent(SceneObject &owner)
         : Component(owner) 
-    {
-
-    }
+    { }
 
     //! Destructor
     CompoundComponent::~CompoundComponent()
-    {
-
-    }
+    { }
 
     //! Returns the name of the component
-    std::string CompoundComponent::getName() const
-    {
+    std::string CompoundComponent::getName() const {
         if (m_components.size() > 0)
             return m_components[0]->getName();
         return "CompoundComponent";
+    }
+
+    //! Returns the name of the component
+    Component::Type CompoundComponent::getType() const {
+        if (m_components.size() > 0)
+            return m_components[0]->getType();
+        return Component::Type::Compound;
     }
 
     //! Add component
@@ -118,6 +119,74 @@ namespace ige::scene
     void CompoundComponent::to_json(json& j) const
     {
         j = m_json;
+    }
+
+    //! Enable
+    void CompoundComponent::onEnable()
+    {
+        for (auto& comp : m_components)
+            comp->onEnable();
+    }
+
+    //! Disable
+    void CompoundComponent::onDisable()
+    {
+        for (auto& comp : m_components)
+            comp->onDisable();
+    }
+
+    //! Update functions
+    void CompoundComponent::onUpdate(float dt)
+    {
+        for (auto& comp : m_components)
+            comp->onUpdate(dt);
+    }
+
+    void CompoundComponent::onFixedUpdate(float dt)
+    {
+        for (auto& comp : m_components)
+            comp->onFixedUpdate(dt);
+    }
+
+    void CompoundComponent::onLateUpdate(float dt)
+    {
+        for (auto& comp : m_components)
+            comp->onLateUpdate(dt);
+    }
+
+    //! Render
+    void CompoundComponent::onRender()
+    {
+        for (auto& comp : m_components)
+            comp->onRender();
+    }
+
+    //! Destroyed
+    void CompoundComponent::onDestroy()
+    {
+        for (auto& comp : m_components)
+            comp->onDestroy();
+    }
+
+    //! Click
+    void CompoundComponent::onClick()
+    {
+        for (auto& comp : m_components)
+            comp->onClick();
+    }
+
+    //! Suspend
+    void CompoundComponent::onSuspend()
+    {
+        for (auto& comp : m_components)
+            comp->onSuspend();
+    }
+
+    //! Resume
+    void CompoundComponent::onResume()
+    {
+        for (auto& comp : m_components)
+            comp->onResume();
     }
 
 } // namespace ige::scene

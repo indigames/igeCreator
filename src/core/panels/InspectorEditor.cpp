@@ -73,223 +73,141 @@ void InspectorEditor::clear() {
 }
 
 std::shared_ptr<EditorComponent> InspectorEditor::addComponent(int type, std::shared_ptr<Component> comp, std::shared_ptr<Group> header) {
-	if (comp == nullptr) return nullptr;
+	if (comp == nullptr)
+		return nullptr;
 
-	ComponentType m_type = (ComponentType)type;
+	auto m_type = (Component::Type)type;
 
 	std::shared_ptr<EditorComponent> view = nullptr;
 	switch (m_type) {
-	case ComponentType::Camera:
-	{
+	case Component::Type::Camera:
 		view = std::make_shared<CameraEditorComponent>();
-	}
 	break;
-	case ComponentType::Environment:
-	{
+	case Component::Type::Environment:
 		view = std::make_shared<EnvironmentEditorComponent>();
-	}
 	break;
-	case ComponentType::Figure:
-	{
+	case Component::Type::Figure:
 		view = std::make_shared<FigureEditorComponent>();
-	}
 	break;	
-	case ComponentType::BoneTransform:
-	{
+	case Component::Type::BoneTransform:
 		view = std::make_shared<BoneTransformEditorComponent>();
-	}
 	break;
-	case ComponentType::Sprite:
-	{
+	case Component::Type::Sprite:
 		view = std::make_shared<SpriteEditorComponent>();
-	}
 	break;
-	case ComponentType::Script:
-	{
+	case Component::Type::Script:
 		view = std::make_shared<ScriptEditorComponent>();
-	}
 	break;
-	case ComponentType::AmbientLight:
-	{
+	case Component::Type::AmbientLight:
 		view = std::make_shared<AmbientLightEditorComponent>();
-	}
 	break;
-	case ComponentType::DirectionalLight:
-	{
+	case Component::Type::DirectionalLight:
 		view = std::make_shared<DirectionalLightEditorComponent>();
-	}
 	break;
-	case ComponentType::PointLight:
-	{
+	case Component::Type::PointLight:
 		view = std::make_shared<PointLightEditorComponent>();
-	}
 	break;
-	case ComponentType::SpotLight:
-	{
+	case Component::Type::SpotLight:
 		view = std::make_shared<SpotLightEditorComponent>();
-	}
 	break;
-	case ComponentType::Canvas:
-	{
+	case Component::Type::Canvas:
 		view = std::make_shared<CanvasEditorComponent>();
-	}
 	break;
-	case ComponentType::UIImage:
-	{
+	case Component::Type::UIImage:
 		view = std::make_shared<UIImageEditorComponent>();
-	}
 	break;
-	case ComponentType::UIText:
-	{
+	case Component::Type::UIText:
 		view = std::make_shared<UITextEditorComponent>();
-	}
 	break;
-	case ComponentType::UITextField:
-	{
+	case Component::Type::UITextField:
 		view = std::make_shared<UITextFieldEditorComponent>();
-	}
 	break;
-	case ComponentType::UIButton:
-	{
+	case Component::Type::UIButton:
 		view = std::make_shared<UIButtonEditorComponent>();
-	}
 	break;
-	case ComponentType::UISlider:
-	{
+	case Component::Type::UISlider:
 		view = std::make_shared<UISliderEditorComponent>();
-	}
 	break;
-	case ComponentType::UIScrollView:
-	{
+	case Component::Type::UIScrollView:
 		view = std::make_shared<UIScrollViewEditorComponent>();
-	}
 	break;
-	case ComponentType::UIMask:
-	{
+	case Component::Type::UIMask:
 		view = std::make_shared<UIMaskEditorComponent>();
-	}
 	break;
-	case ComponentType::UIScrollBar:
-	{
+	case Component::Type::UIScrollBar:
 		view = std::make_shared<UIScrollBarEditorComponent>();
-	}
 	break;
-	case ComponentType::PhysicManager:
-	{
+	case Component::Type::PhysicManager:
 		view = std::make_shared<PhysicManagerEditorComponent>();
-	}
 	break;
-	case ComponentType::PhysicBox:
-	{
+	case Component::Type::PhysicBox:
 		view = std::make_shared<PhysicBoxEditorComponent>();
-	}
 	break;
-	case ComponentType::PhysicSphere:
-	{
+	case Component::Type::PhysicSphere:
 		view = std::make_shared<PhysicSphereEditorComponent>();
-	}
 	break;
-	case ComponentType::PhysicCapsule:
-	{
-		view = std::make_shared<PhysicCapsuleEditorComponent>();
-	}
+	case Component::Type::PhysicCapsule:
+		view = std::make_shared<PhysicCapsuleEditorComponent>();	
 	break;
-	case ComponentType::PhysicMesh:
-	{
+	case Component::Type::PhysicMesh:
 		view = std::make_shared<PhysicMeshEditorComponent>();
-	}
 	break;
-	case ComponentType::PhysicSoftBody:
-	{
+	case Component::Type::PhysicSoftBody:
 		view = std::make_shared<PhysicSoftBodyEditorComponent>();
-	}
 	break;
-	case ComponentType::AudioManager:
-	{
+	case Component::Type::AudioManager:
 		view = std::make_shared<AudioManagerEditorComponent>();
-	}
 	break;
-	case ComponentType::AudioSource:
-	{
+	case Component::Type::AudioSource:
 		view = std::make_shared<AudioSourceEditorComponent>();
-	}
 	break;
-	case ComponentType::AudioListener:
-	{
+	case Component::Type::AudioListener:
 		view = std::make_shared<AudioListenerEditorComponent>();
-	}
 	break;
-	case ComponentType::ParticleManager:
-	{
+	case Component::Type::ParticleManager:
 		view = std::make_shared<ParticleManagerEditorComponent>();
-	}
 	break;
-	case ComponentType::Particle:
-	{
+	case Component::Type::Particle:
 		view = std::make_shared<ParticleEditorComponent>();
-	}
 	break;
-	case ComponentType::Navigable:
-	{
+	case Component::Type::Navigable:
 		view = std::make_shared<NavigableEditorComponent>();
-	}
 	break;
-	case ComponentType::NavMesh:
-	{
+	case Component::Type::NavMesh:
 		view = std::make_shared<NavMeshEditorComponent>();
-	}
 	break;
-	case ComponentType::NavAgent:
-	{
+	case Component::Type::NavAgent:
 		view = std::make_shared<NavAgentEditorComponent>();
-	}
 	break;
-	case ComponentType::NavAgentManager:
-	{
+	case Component::Type::NavAgentManager:
 		view = std::make_shared<NavAgentManagerEditorComponent>();
-	}
 	break;
-	case ComponentType::DynamicNavMesh:
-	{
+	case Component::Type::DynamicNavMesh:
 		view = std::make_shared<DynamicNavMeshEditorComponent>();
-	}
 	break;
-	case ComponentType::NavArea:
-	{
+	case Component::Type::NavArea:
 		view = std::make_shared<NavAgentManagerEditorComponent>();
-	}
 	break;
-	case ComponentType::NavObstacle:
-	{
+	case Component::Type::NavObstacle:
 		view = std::make_shared<NavObstacleEditorComponent>();
-	}
 	break;
-	case ComponentType::OffMeshLink:
-	{
+	case Component::Type::OffMeshLink:
 		view = std::make_shared<OffMeshLinkEditorComponent>();
-	}
 	break;
-	case ComponentType::Transform:
-	{
+	case Component::Type::Transform:
 		view = std::make_shared<TransformEditorComponent>();
-	}
 	break;
-	case ComponentType::RectTransform:
-	{
+	case Component::Type::RectTransform:
 		view = std::make_shared<RectTransformEditorComponent>();
-	}
 	break;
 	default:
 		return nullptr;
 	}
-
 	if (view == nullptr) return nullptr;
-
 	view->setComponent(comp);
 	m_groups[comp->getInstanceId()] = header;
 	m_components[comp->getInstanceId()] = view;
 	view->draw(header);
-
 	return view;
 }
 

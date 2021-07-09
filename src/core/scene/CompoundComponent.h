@@ -23,6 +23,9 @@ namespace ige::scene
         // Inherited via Component
         virtual std::string getName() const override;
 
+        //! Returns the type of the component
+        virtual Type getType() const override;
+
         std::vector<std::shared_ptr<Component>>& getComponents() { return m_components; }
 
         //! Add/remove/clear components
@@ -45,6 +48,32 @@ namespace ige::scene
 
         //! Set dirty to reload components
         void setDirty() { collectSharedElements(); }
+
+        //! Enable
+        virtual void onEnable() override;
+
+        //! Disable
+        virtual void onDisable() override;
+
+        //! Update functions
+        virtual void onUpdate(float dt) override;
+        virtual void onFixedUpdate(float dt) override;
+        virtual void onLateUpdate(float dt) override;
+
+        //! Render
+        virtual void onRender() override;
+
+        //! Destroyed
+        virtual void onDestroy() override;
+
+        //! Click
+        virtual void onClick() override;
+
+        //! Suspend
+        virtual void onSuspend() override;
+
+        //! Resume
+        virtual void onResume() override;
 
     protected:
         //! Deserialize

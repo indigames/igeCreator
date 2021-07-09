@@ -57,12 +57,9 @@ namespace ige::scene
         if (found == m_components.end())
         {
             auto compoundComp = std::make_shared<CompoundComponent>(*this);
-            compoundComp->add(component);
-            m_objects[0]->addComponent(component);
-
             json jComp;
             component->to_json(jComp);
-            for(int i = 1; i < m_objects.size(); ++i)
+            for(int i = 0; i < m_objects.size(); ++i)
             {
                 auto obj = m_objects[i];
                 if (obj != nullptr)
@@ -72,6 +69,7 @@ namespace ige::scene
                     compoundComp->add(comp);
                 }
             }
+            compoundComp->setDirty();
             m_components.push_back(compoundComp);
         }
     }
