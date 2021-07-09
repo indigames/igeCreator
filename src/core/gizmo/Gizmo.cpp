@@ -1,5 +1,6 @@
 #include "core/gizmo/Gizmo.h"
 #include "core/Editor.h"
+#include "core/scene/TargetObject.h"
 
 #include <components/TransformComponent.h>
 #include <components/gui/RectTransform.h>
@@ -15,9 +16,9 @@ namespace ige::creator
         m_mode = gizmo::MODE::LOCAL;
         m_visible = true;
 
-        m_targetAddedEventId = Scene::getTargetAddedEvent().addListener(std::bind(&Gizmo::onTargetAdded, this, std::placeholders::_1));
-        m_targetRemovedEventId = Scene::getTargetRemovedEvent().addListener(std::bind(&Gizmo::onTargetRemoved, this, std::placeholders::_1));
-        m_targetClearedEventId = Scene::getTargetClearedEvent().addListener(std::bind(&Gizmo::onTargetCleared, this));
+        m_targetAddedEventId = Editor::getTargetAddedEvent().addListener(std::bind(&Gizmo::onTargetAdded, this, std::placeholders::_1));
+        m_targetRemovedEventId = Editor::getTargetRemovedEvent().addListener(std::bind(&Gizmo::onTargetRemoved, this, std::placeholders::_1));
+        m_targetClearedEventId = Editor::getTargetClearedEvent().addListener(std::bind(&Gizmo::onTargetCleared, this));
     }
 
     Gizmo::~Gizmo()
@@ -25,9 +26,10 @@ namespace ige::creator
         m_targets.clear();
         m_camera = nullptr;
         onTargetCleared();
-        Scene::getTargetAddedEvent().removeListener(m_targetAddedEventId);
-        Scene::getTargetRemovedEvent().removeListener(m_targetRemovedEventId);
-        Scene::getTargetClearedEvent().removeListener(m_targetClearedEventId);
+
+        Editor::getTargetAddedEvent().removeListener(m_targetAddedEventId);
+        Editor::getTargetRemovedEvent().removeListener(m_targetRemovedEventId);
+        Editor::getTargetClearedEvent().removeListener(m_targetClearedEventId);
     }
 
     void Gizmo::setCamera(Camera* cam)
@@ -65,8 +67,8 @@ namespace ige::creator
         if(!m_bEnabled || m_camera == nullptr || !m_visible || Editor::getCurrentScene() == nullptr)
             return;
 
-        auto targets = Editor::getCurrentScene()->getTargets();
-        if (targets.empty())
+        auto target = Editor::getInstance()->getTarget();
+        if (target->empty())
             return;
         
         // Detect ortho projection
@@ -181,7 +183,7 @@ namespace ige::creator
 
         updateTargets();
 
-        for (auto& target : m_targets)
+        for (const auto& target : m_targets)
         {
             if (target)
             {
@@ -204,7 +206,7 @@ namespace ige::creator
     void Gizmo::updateTargets()
     {
         m_targets.clear();
-        m_targets = Editor::getCurrentScene()->getTargets();
+        m_targets = Editor::getInstance()->getTarget()->getAllTargets();
 
         auto it = m_targets.begin();
         while (it != m_targets.end())
@@ -267,7 +269,7 @@ namespace ige::creator
     //! Translate
     void Gizmo::translate(const Vec3& trans)
     {
-        for (auto& target : m_targets)
+        for (auto target : m_targets)
             if (target) target->getTransform()->worldTranslate(trans);
         updateTargetNode();
     }

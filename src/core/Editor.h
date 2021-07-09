@@ -10,6 +10,7 @@
 #include <scene/SceneManager.h>
 #include "core/Macros.h"
 
+#include "core/scene/TargetObject.h"
 
 using namespace pyxie;
 using namespace ige::scene;
@@ -67,7 +68,7 @@ namespace ige::creator
 
         //! Short-cut access to current scene
         static std::shared_ptr<Scene> getCurrentScene() { return SceneManager::getInstance()->getCurrentScene(); }
-        static void setCurrentScene(const std::shared_ptr<Scene>& scene) { SceneManager::getInstance()->setCurrentScene(scene); }
+        static void setCurrentScene(std::shared_ptr<Scene> scene) { SceneManager::getInstance()->setCurrentScene(scene); }
 
         //! Toggle local/global gizmo
         bool isLocalGizmo() { return m_bIsLocalGizmo; }
@@ -89,6 +90,25 @@ namespace ige::creator
         const std::string& getProjectPath() const { return m_projectPath; }
         void setProjectPath(const std::string& path);
 
+        //! Add target
+        void addTarget(SceneObject* target, bool clear = false);
+
+        //! Remove target
+        void removeTarget(SceneObject* target);
+
+        //! Remove all target
+        void clearTargets();
+
+        //! Return the first selected object
+        SceneObject* getFirstTarget();
+
+        //! Get targeted objects
+        std::shared_ptr<TargetObject>& getTarget() { return m_target; }
+
+        static ige::scene::Event<SceneObject*>& getTargetAddedEvent() { return m_targetAddedEvent; }
+        static ige::scene::Event<SceneObject*>& getTargetRemovedEvent() { return m_targetRemovedEvent; }
+        static ige::scene::Event<>& getTargetClearedEvent() { return m_targetClearedEvent; }
+
     protected:
         virtual void initImGUI();
         virtual bool handleEventImGUI(const SDL_Event* event);
@@ -98,7 +118,6 @@ namespace ige::creator
     protected:
         std::shared_ptr<Canvas> m_canvas = nullptr;
         std::shared_ptr<Application> m_app = nullptr;
-        std::shared_ptr<SceneObject> m_selectedObject = nullptr;
         std::shared_ptr<ShortcutController> m_shortcutController = nullptr;
 
         //! Path settings
@@ -113,6 +132,14 @@ namespace ige::creator
 
         //! Selected objects json data
         json m_selectedJsons = json::array();
+
+        //! Targeted events
+        static ige::scene::Event<SceneObject*> m_targetAddedEvent;
+        static ige::scene::Event<SceneObject*> m_targetRemovedEvent;
+        static ige::scene::Event<> m_targetClearedEvent;
+
+        //! Targeted object
+        std::shared_ptr<TargetObject> m_target;
     };
 
     std::string CreateScript(const std::string& name);

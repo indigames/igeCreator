@@ -14,6 +14,7 @@
 #include "core/dialog/SaveFileDialog.h"
 #include "core/AutoReleasePool.h"
 #include "core/shortcut/ShortcutController.h"
+#include "core/scene/TargetObject.h"
 
 #include <scene/SceneManager.h>
 #include <scene/Scene.h>
@@ -24,12 +25,16 @@ namespace fs = ghc::filesystem;
 
 namespace ige::creator
 {
+    ige::scene::Event<SceneObject*> Editor::m_targetAddedEvent;
+    ige::scene::Event<SceneObject*> Editor::m_targetRemovedEvent;
+    ige::scene::Event<> Editor::m_targetClearedEvent;
+
     Editor::Editor()
     {}
 
     Editor::~Editor()
     {
-        m_selectedObject = nullptr;
+        m_target = nullptr;
         m_canvas = nullptr;
         m_selectedJsons.clear();
 
@@ -194,7 +199,12 @@ namespace ige::creator
 
         if (path.compare(getEnginePath()) != 0)
         {
-            fs::remove_all(path);
+            try
+            {
+                fs::remove_all(path);
+            }
+            catch (std::exception& ex) {}
+
             const auto copyOptions = fs::copy_options::overwrite_existing | fs::copy_options::recursive;
             fs::copy(GetEnginePath("project_template"), path, copyOptions);
         }
@@ -284,18 +294,25 @@ namespace ige::creator
         {
             if (getCanvas()) getCanvas()->getHierarchy()->initialize();
             auto scene = SceneManager::getInstance()->loadScene(path);
-            setCurrentScene(scene);
-            if (getCanvas())
+            if (scene)
             {
-                if(getCanvas()->getMenuBar()) getCanvas()->getMenuBar()->initialize();
-                if(getCanvas()->getProjectSetting()) getCanvas()->getProjectSetting()->initialize();
-            }                
+                setCurrentScene(scene);
+                m_target = std::make_shared<TargetObject>(scene.get());
+                if (getCanvas())
+                {
+                    if (getCanvas()->getMenuBar()) getCanvas()->getMenuBar()->initialize();
+                    if (getCanvas()->getProjectSetting()) getCanvas()->getProjectSetting()->initialize();
+                }
+            }
         }
         return true;
     }
 
     bool Editor::unloadScene()
     {
+        clearTargets();
+        m_target = nullptr;
+
         refreshScene();
         auto scene = Editor::getCurrentScene();
         if(scene) SceneManager::getInstance()->unloadScene(scene);
@@ -339,9 +356,9 @@ namespace ige::creator
     void Editor::refreshScene() {
         if (getCanvas())
         {
-            getCanvas()->setTargetObject(nullptr);
-            getCanvas()->getHierarchy()->clear();
             getCanvas()->getEditorScene()->clear();
+            getCanvas()->getHierarchy()->clear();
+            getCanvas()->getInspector()->clear();
         }
     }
 
@@ -437,10 +454,10 @@ namespace ige::creator
     bool Editor::cloneObject()
     {
         json clonedJson;
-        auto targets = Editor::getCurrentScene()->getTargets();
+        auto targets = Editor::getInstance()->getTarget()->getAllTargets();
         if (targets.size() > 0 && targets[0] != nullptr)
         {
-            for (auto target : targets)
+            for (const auto& target : targets)
             {
                 if (target)
                 {
@@ -450,7 +467,7 @@ namespace ige::creator
                         clonedJson.push_back(jTarget);
                 }
             }
-            for (auto jTarget : clonedJson)
+            for (const auto& jTarget : clonedJson)
             {
                 auto objName = jTarget.value("name", "");
                 auto newObject = Editor::getCurrentScene()->createObject(objName + "_cp");
@@ -459,7 +476,7 @@ namespace ige::creator
                 newObject->setUUID(uuid);
                 newObject->setName(objName + "_cp");
                 newObject->setParent(targets[0]->getParent());
-                Editor::getCurrentScene()->addTarget(newObject.get(), true);
+                Editor::getInstance()->addTarget(newObject.get(), true);
             }
             return true;
         }        
@@ -468,31 +485,29 @@ namespace ige::creator
 
     bool Editor::deleteObject()
     {
-        auto targets = Editor::getCurrentScene()->getTargets();
+        auto targets = Editor::getInstance()->getTarget()->getAllTargets();
         if (targets.size() > 0)
         {
+            Editor::getInstance()->clearTargets();
             auto parent = targets[0] ? targets[0]->getParent() : nullptr;
-            for (auto target : targets)
-                if (target) Editor::getCurrentScene()->removeObjectById(target->getId());
-            Editor::getCurrentScene()->clearTargets();
-            Editor::getCurrentScene()->addTarget(parent);
+            for(auto target: targets)
+                Editor::getCurrentScene()->removeObjectById(target->getId());
+            Editor::getInstance()->addTarget(parent);
+            targets.clear();
         }
-        targets.clear();
         return true;
     }
 
     void Editor::copyObject() 
     {
         m_selectedJsons.clear();
-        auto targets = Editor::getCurrentScene()->getTargets();
-        for (auto target : targets)
+        auto targets = Editor::getInstance()->getTarget()->getAllTargets();
+        for (const auto& target : targets)
         {
-            if (target)
-            {
-                json jTarget;
-                target->to_json(jTarget);
-                if(!jTarget.is_null()) m_selectedJsons.push_back(jTarget);
-            }
+            json jTarget;
+            target->to_json(jTarget);
+            if(!jTarget.is_null())
+                m_selectedJsons.push_back(jTarget);
         }
     }
 
@@ -500,7 +515,7 @@ namespace ige::creator
     {
         if (m_selectedJsons.empty()) return;
 
-        for (auto jTarget : m_selectedJsons)
+        for (const auto& jTarget : m_selectedJsons)
         {
             auto objName = jTarget.value("name", "");
             auto newObject = Editor::getCurrentScene()->createObject(objName + "_cp");
@@ -508,10 +523,9 @@ namespace ige::creator
             newObject->from_json(jTarget);
             newObject->setUUID(uuid);
             newObject->setName(objName + "_cp");
-            auto targets = Editor::getCurrentScene()->getTargets();
-            auto parent = (!targets.empty() && targets[0]) ? targets[0] : nullptr;
+            auto parent = Editor::getInstance()->getTarget()->getFirstTarget();
             newObject->setParent(parent);
-            Editor::getCurrentScene()->addTarget(newObject.get(), true);
+            Editor::getInstance()->addTarget(newObject.get(), true);
         }
     }
 
@@ -546,6 +560,48 @@ namespace ige::creator
         if (Editor::getCurrentScene())
             return Editor::getCurrentScene()->loadPrefab(parentId, file);
         return false;
+    }
+
+    //! Add target
+    void Editor::addTarget(SceneObject* target, bool clear)
+    {
+        if (m_target)
+        {
+            if (clear)
+                clearTargets();
+
+            if (target)
+            {
+                m_target->add(target);
+                getTargetAddedEvent().invoke(target);
+            }
+        }        
+    }
+
+    //! Remove target
+    void Editor::removeTarget(SceneObject* target)
+    {
+        if (m_target)
+        {
+            m_target->remove(target);
+            getTargetRemovedEvent().invoke(target);
+        }
+    }
+
+    //! Remove all target
+    void Editor::clearTargets()
+    {
+        if (m_target)
+        {
+            m_target->clear();
+            getTargetClearedEvent().invoke();
+        }
+    }
+
+    //! Return the first selected object
+    SceneObject* Editor::getFirstTarget()
+    {
+        return m_target ? m_target->getFirstTarget() : nullptr;
     }
 
     const auto script_template =

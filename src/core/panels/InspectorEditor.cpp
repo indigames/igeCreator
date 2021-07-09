@@ -2,330 +2,212 @@
 
 #include "core/widgets/Widgets.h"
 
-#include "core/panels/components/CameraEditorComponent.h"
-#include "core/panels/components/EnvironmentEditorComponent.h"
-#include "core/panels/components/FigureEditorComponent.h"
-#include "core/panels/components/SpriteEditorComponent.h"
-#include "core/panels/components/ScriptEditorComponent.h"
-#include "core/panels/components/TransformEditorComponent.h"
-#include "core/panels/components/BoneTransformEditorComponent.h"
+#include "core/scene/components/CameraEditorComponent.h"
+#include "core/scene/components/EnvironmentEditorComponent.h"
+#include "core/scene/components/FigureEditorComponent.h"
+#include "core/scene/components/SpriteEditorComponent.h"
+#include "core/scene/components/ScriptEditorComponent.h"
+#include "core/scene/components/TransformEditorComponent.h"
+#include "core/scene/components/BoneTransformEditorComponent.h"
 
-#include "core/panels/components/light/AmbientLightEditorComponent.h"
-#include "core/panels/components/light/DirectionalLightEditorComponent.h"
-#include "core/panels/components/light/PointLightEditorComponent.h"
-#include "core/panels/components/light/SpotLightEditorComponent.h"
+#include "core/scene/components/light/AmbientLightEditorComponent.h"
+#include "core/scene/components/light/DirectionalLightEditorComponent.h"
+#include "core/scene/components/light/PointLightEditorComponent.h"
+#include "core/scene/components/light/SpotLightEditorComponent.h"
 
-#include "core/panels/components/gui/CanvasEditorComponent.h"
-#include "core/panels/components/gui/RectTransformEditorComponent.h"
-#include "core/panels/components/gui/UIImageEditorComponent.h"
-#include "core/panels/components/gui/UITextEditorComponent.h"
-#include "core/panels/components/gui/UITextFieldEditorComponent.h"
-#include "core/panels/components/gui/UIButtonEditorComponent.h"
-#include "core/panels/components/gui/UISliderEditorComponent.h"
-#include "core/panels/components/gui/UIScrollViewEditorComponent.h"
-#include "core/panels/components/gui/UIScrollBarEditorComponent.h"
-#include "core/panels/components/gui/UIMaskEditorComponent.h"
+#include "core/scene/components/gui/CanvasEditorComponent.h"
+#include "core/scene/components/gui/RectTransformEditorComponent.h"
+#include "core/scene/components/gui/UIImageEditorComponent.h"
+#include "core/scene/components/gui/UITextEditorComponent.h"
+#include "core/scene/components/gui/UITextFieldEditorComponent.h"
+#include "core/scene/components/gui/UIButtonEditorComponent.h"
+#include "core/scene/components/gui/UISliderEditorComponent.h"
+#include "core/scene/components/gui/UIScrollViewEditorComponent.h"
+#include "core/scene/components/gui/UIScrollBarEditorComponent.h"
+#include "core/scene/components/gui/UIMaskEditorComponent.h"
 
-#include "core/panels/components/physic/PhysicManagerEditorComponent.h"
-#include "core/panels/components/physic/PhysicBoxEditorComponent.h"
-#include "core/panels/components/physic/PhysicSphereEditorComponent.h"
-#include "core/panels/components/physic/PhysicCapsuleEditorComponent.h"
-#include "core/panels/components/physic/PhysicMeshEditorComponent.h"
-#include "core/panels/components/physic/PhysicSoftBodyEditorComponent.h"
+#include "core/scene/components/physic/PhysicManagerEditorComponent.h"
+#include "core/scene/components/physic/PhysicBoxEditorComponent.h"
+#include "core/scene/components/physic/PhysicSphereEditorComponent.h"
+#include "core/scene/components/physic/PhysicCapsuleEditorComponent.h"
+#include "core/scene/components/physic/PhysicMeshEditorComponent.h"
+#include "core/scene/components/physic/PhysicSoftBodyEditorComponent.h"
 
-#include "core/panels/components/audio/AudioManagerEditorComponent.h"
-#include "core/panels/components/audio/AudioSourceEditorComponent.h"
-#include "core/panels/components/audio/AudioListenerEditorComponent.h"
+#include "core/scene/components/audio/AudioManagerEditorComponent.h"
+#include "core/scene/components/audio/AudioSourceEditorComponent.h"
+#include "core/scene/components/audio/AudioListenerEditorComponent.h"
 
-#include "core/panels/components/particle/ParticleManagerEditorComponent.h"
-#include "core/panels/components/particle/ParticleEditorComponent.h"
+#include "core/scene/components/particle/ParticleManagerEditorComponent.h"
+#include "core/scene/components/particle/ParticleEditorComponent.h"
 
-#include "core/panels/components/navigation/NavigableEditorComponent.h"
-#include "core/panels/components/navigation/NavMeshEditorComponent.h"
-#include "core/panels/components/navigation/NavAgentEditorComponent.h"
-#include "core/panels/components/navigation/NavAgentManagerEditorComponent.h"
-#include "core/panels/components/navigation/DynamicNavMeshEditorComponent.h"
-#include "core/panels/components/navigation/NavAreaEditorComponent.h"
-#include "core/panels/components/navigation/NavObstacleEditorComponent.h"
-#include "core/panels/components/navigation/OffMeshLinkEditorComponent.h"
+#include "core/scene/components/navigation/NavigableEditorComponent.h"
+#include "core/scene/components/navigation/NavMeshEditorComponent.h"
+#include "core/scene/components/navigation/NavAgentEditorComponent.h"
+#include "core/scene/components/navigation/NavAgentManagerEditorComponent.h"
+#include "core/scene/components/navigation/DynamicNavMeshEditorComponent.h"
+#include "core/scene/components/navigation/NavAreaEditorComponent.h"
+#include "core/scene/components/navigation/NavObstacleEditorComponent.h"
+#include "core/scene/components/navigation/OffMeshLinkEditorComponent.h"
 
 
 NS_IGE_BEGIN
 
 InspectorEditor::InspectorEditor() {
-	m_componentGroup = nullptr;
-	m_targetObject = nullptr;
 	m_deltaTime = 0;
 }
 
 InspectorEditor::~InspectorEditor() {
 	clear();
-
-	if (m_componentGroup)
-	{
-		m_componentGroup->removeAllWidgets();
-		m_componentGroup->removeAllPlugins();
-		m_componentGroup = nullptr;
-	}
 }
 
 void InspectorEditor::clear() {
-	std::map<uint64_t, std::shared_ptr<Group>> releasings;
-	releasings.swap(m_groups);
-	for (const auto& obj : releasings)
-	{
-		if (obj.second != nullptr) {
-			obj.second->removeAllWidgets();
-			obj.second->removeAllPlugins();
-		}
+	for (auto& [key, value] : m_groups) {
+		value = nullptr;
 	}
+	m_groups.clear();
 
+	for (auto& [key, value] : m_components) {
+		value = nullptr;
+	}
 	m_components.clear();
 }
-	
-void InspectorEditor::setParentGroup(std::shared_ptr<Group> componentGroup)
-{
-	if (m_componentGroup != componentGroup) {
-		if (m_componentGroup) {
-			m_componentGroup->removeAllWidgets();
-			m_componentGroup->removeAllPlugins();
-		}
-		m_componentGroup = componentGroup;
-	}
-}
 
-void InspectorEditor::setTargetObject(SceneObject* obj)
-{
-	if (m_targetObject != obj) {
-		m_targetObject = obj;
+std::shared_ptr<EditorComponent> InspectorEditor::addComponent(int type, std::shared_ptr<Component> comp, std::shared_ptr<Group> header) {
+	if (comp == nullptr)
+		return nullptr;
 
-		for (auto& comp : m_components) {
-			if(comp.second != nullptr)
-				comp.second->setTargetObject(obj);
-		}
-	}
-}
-
-std::shared_ptr<EditorComponent> InspectorEditor::addComponent(int type, Component* comp, std::shared_ptr<Group> header) {
-	if (comp == nullptr) return nullptr;
-
-	ComponentType m_type = (ComponentType)type;
+	auto m_type = (Component::Type)type;
 
 	std::shared_ptr<EditorComponent> view = nullptr;
 	switch (m_type) {
-	case ComponentType::Camera:
-	{
+	case Component::Type::Camera:
 		view = std::make_shared<CameraEditorComponent>();
-	}
 	break;
-	case ComponentType::Environment:
-	{
+	case Component::Type::Environment:
 		view = std::make_shared<EnvironmentEditorComponent>();
-	}
 	break;
-	case ComponentType::Figure:
-	{
+	case Component::Type::Figure:
 		view = std::make_shared<FigureEditorComponent>();
-	}
 	break;	
-	case ComponentType::BoneTransform:
-	{
+	case Component::Type::BoneTransform:
 		view = std::make_shared<BoneTransformEditorComponent>();
-	}
 	break;
-	case ComponentType::Sprite:
-	{
+	case Component::Type::Sprite:
 		view = std::make_shared<SpriteEditorComponent>();
-	}
 	break;
-	case ComponentType::Script:
-	{
+	case Component::Type::Script:
 		view = std::make_shared<ScriptEditorComponent>();
-	}
 	break;
-	case ComponentType::AmbientLight:
-	{
+	case Component::Type::AmbientLight:
 		view = std::make_shared<AmbientLightEditorComponent>();
-	}
 	break;
-	case ComponentType::DirectionalLight:
-	{
+	case Component::Type::DirectionalLight:
 		view = std::make_shared<DirectionalLightEditorComponent>();
-	}
 	break;
-	case ComponentType::PointLight:
-	{
+	case Component::Type::PointLight:
 		view = std::make_shared<PointLightEditorComponent>();
-	}
 	break;
-	case ComponentType::SpotLight:
-	{
+	case Component::Type::SpotLight:
 		view = std::make_shared<SpotLightEditorComponent>();
-	}
 	break;
-	case ComponentType::Canvas:
-	{
+	case Component::Type::Canvas:
 		view = std::make_shared<CanvasEditorComponent>();
-	}
 	break;
-	case ComponentType::UIImage:
-	{
+	case Component::Type::UIImage:
 		view = std::make_shared<UIImageEditorComponent>();
-	}
 	break;
-	case ComponentType::UIText:
-	{
+	case Component::Type::UIText:
 		view = std::make_shared<UITextEditorComponent>();
-	}
 	break;
-	case ComponentType::UITextField:
-	{
+	case Component::Type::UITextField:
 		view = std::make_shared<UITextFieldEditorComponent>();
-	}
 	break;
-	case ComponentType::UIButton:
-	{
+	case Component::Type::UIButton:
 		view = std::make_shared<UIButtonEditorComponent>();
-	}
 	break;
-	case ComponentType::UISlider:
-	{
+	case Component::Type::UISlider:
 		view = std::make_shared<UISliderEditorComponent>();
-	}
 	break;
-	case ComponentType::UIScrollView:
-	{
+	case Component::Type::UIScrollView:
 		view = std::make_shared<UIScrollViewEditorComponent>();
-	}
 	break;
-	case ComponentType::UIMask:
-	{
+	case Component::Type::UIMask:
 		view = std::make_shared<UIMaskEditorComponent>();
-	}
 	break;
-	case ComponentType::UIScrollBar:
-	{
+	case Component::Type::UIScrollBar:
 		view = std::make_shared<UIScrollBarEditorComponent>();
-	}
 	break;
-	case ComponentType::PhysicManager:
-	{
+	case Component::Type::PhysicManager:
 		view = std::make_shared<PhysicManagerEditorComponent>();
-	}
 	break;
-	case ComponentType::PhysicBox:
-	{
+	case Component::Type::PhysicBox:
 		view = std::make_shared<PhysicBoxEditorComponent>();
-	}
 	break;
-	case ComponentType::PhysicSphere:
-	{
+	case Component::Type::PhysicSphere:
 		view = std::make_shared<PhysicSphereEditorComponent>();
-	}
 	break;
-	case ComponentType::PhysicCapsule:
-	{
-		view = std::make_shared<PhysicCapsuleEditorComponent>();
-	}
+	case Component::Type::PhysicCapsule:
+		view = std::make_shared<PhysicCapsuleEditorComponent>();	
 	break;
-	case ComponentType::PhysicMesh:
-	{
+	case Component::Type::PhysicMesh:
 		view = std::make_shared<PhysicMeshEditorComponent>();
-	}
 	break;
-	case ComponentType::PhysicSoftBody:
-	{
+	case Component::Type::PhysicSoftBody:
 		view = std::make_shared<PhysicSoftBodyEditorComponent>();
-	}
 	break;
-	case ComponentType::AudioManager:
-	{
+	case Component::Type::AudioManager:
 		view = std::make_shared<AudioManagerEditorComponent>();
-	}
 	break;
-	case ComponentType::AudioSource:
-	{
+	case Component::Type::AudioSource:
 		view = std::make_shared<AudioSourceEditorComponent>();
-	}
 	break;
-	case ComponentType::AudioListener:
-	{
+	case Component::Type::AudioListener:
 		view = std::make_shared<AudioListenerEditorComponent>();
-	}
 	break;
-	case ComponentType::ParticleManager:
-	{
+	case Component::Type::ParticleManager:
 		view = std::make_shared<ParticleManagerEditorComponent>();
-	}
 	break;
-	case ComponentType::Particle:
-	{
+	case Component::Type::Particle:
 		view = std::make_shared<ParticleEditorComponent>();
-	}
 	break;
-	case ComponentType::Navigable:
-	{
+	case Component::Type::Navigable:
 		view = std::make_shared<NavigableEditorComponent>();
-	}
 	break;
-	case ComponentType::NavMesh:
-	{
+	case Component::Type::NavMesh:
 		view = std::make_shared<NavMeshEditorComponent>();
-	}
 	break;
-	case ComponentType::NavAgent:
-	{
+	case Component::Type::NavAgent:
 		view = std::make_shared<NavAgentEditorComponent>();
-	}
 	break;
-	case ComponentType::NavAgentManager:
-	{
+	case Component::Type::NavAgentManager:
 		view = std::make_shared<NavAgentManagerEditorComponent>();
-	}
 	break;
-	case ComponentType::DynamicNavMesh:
-	{
+	case Component::Type::DynamicNavMesh:
 		view = std::make_shared<DynamicNavMeshEditorComponent>();
-	}
 	break;
-	case ComponentType::NavArea:
-	{
+	case Component::Type::NavArea:
 		view = std::make_shared<NavAgentManagerEditorComponent>();
-	}
 	break;
-	case ComponentType::NavObstacle:
-	{
+	case Component::Type::NavObstacle:
 		view = std::make_shared<NavObstacleEditorComponent>();
-	}
 	break;
-	case ComponentType::OffMeshLink:
-	{
+	case Component::Type::OffMeshLink:
 		view = std::make_shared<OffMeshLinkEditorComponent>();
-	}
 	break;
-	case ComponentType::Transform:
-	{
+	case Component::Type::Transform:
 		view = std::make_shared<TransformEditorComponent>();
-	}
 	break;
-	case ComponentType::RectTransform:
-	{
+	case Component::Type::RectTransform:
 		view = std::make_shared<RectTransformEditorComponent>();
-	}
 	break;
 	default:
 		return nullptr;
 	}
-
 	if (view == nullptr) return nullptr;
-
 	view->setComponent(comp);
-	view->setTargetObject(m_targetObject);
-
 	m_groups[comp->getInstanceId()] = header;
 	m_components[comp->getInstanceId()] = view;
 	view->draw(header);
-
 	return view;
 }
 
@@ -340,16 +222,10 @@ void InspectorEditor::update(float dt) {
 	if (m_deltaTime < INSPECTOR_EDITOR_DELTA_LIMIT) return;
 	m_deltaTime = 0;
 	
-	try {
-		for (auto const& component : m_components) {
-			if (component.second != nullptr && component.second->isDirty()) {
-				component.second->redraw();
-			}
+	for(const auto& component: m_components) {
+		if (component.second != nullptr && component.second->isDirty()) {
+			component.second->redraw();
 		}
-	}
-	catch(...)
-	{
-		pyxie_printf("ERROR !!!");
 	}
 
 	/*for (auto& watch : m_watcher) {
@@ -363,18 +239,6 @@ void InspectorEditor::update(float dt) {
 			
 		}
 	}*/
-}
-
-void InspectorEditor::makeDirty(Component* comp) {
-	std::shared_ptr<EditorComponent> view = nullptr;
-	for (auto obj : m_components) {
-		if (obj.second != nullptr && obj.second->getComponent() == comp) {
-			view = obj.second;
-			break;
-		}
-	}
-	if (view == nullptr) return;
-	view->setDirty(true);
 }
 
 void InspectorEditor::makeDirty(uint64_t componentInstanceId) {

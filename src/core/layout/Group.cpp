@@ -5,14 +5,16 @@
 namespace ige::creator
 {
     Group::Group(const std::string& name, bool collapsable, bool closable, E_Align align, bool open, bool enable)
-        : Widget(enable), m_name(name), m_bIsCollapsable(collapsable), m_bIsClosable(closable), m_align(align), m_bIsOpened(open)
+        : Container(), Widget(enable), m_name(name), m_bIsCollapsable(collapsable), m_bIsClosable(closable), m_align(align), m_bIsOpened(open)
     {
     }
 
     Group::~Group()
     {
+        setContainer(nullptr);
+        removeAllWidgets();
         getOnOpenedEvent().removeAllListeners();
-        getOnClosedEvent().removeAllListeners();        
+        getOnClosedEvent().removeAllListeners();
     }
 
     void Group::_drawImpl()

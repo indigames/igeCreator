@@ -47,7 +47,6 @@ namespace ige::creator
         std::shared_ptr<InputProcessor> m_inputProcessor = nullptr;
 
         //! Cached states
-        bool m_bInitialized = false;
         bool m_bIsPlaying = false;
         bool m_bIsPausing = false;
     };

@@ -18,11 +18,11 @@ namespace ige::creator
     class IgnoreTransformEventScope
     {
     public:
-        IgnoreTransformEventScope(SceneObject* obj, uint64_t& eventId, const std::function<void(SceneObject&)>& task);
+        IgnoreTransformEventScope(std::shared_ptr<Component> comp, uint64_t& eventId, const std::function<void(SceneObject&)>& task);
         ~IgnoreTransformEventScope();
 
     protected:
-        SceneObject* m_object;
+        std::shared_ptr<Component> m_comp;
         std::function<void(SceneObject&)> m_task;
         uint64_t& m_eventId;
     };
@@ -32,20 +32,15 @@ namespace ige::creator
     public:
         Inspector(const std::string& name = "", const Panel::Settings& settings = {});
         virtual ~Inspector();
-        virtual void clear();
 
-        void setTargetObject(SceneObject* obj);
-        void updateMaterial(int index, const char* infoName, std::string txt);
+        virtual void clear();
+        virtual void initialize() override;
 
         virtual void update(float dt) override;
+        void redraw() { m_bNeedRedraw = true; }
 
     protected:
-        virtual void initialize() override;
         virtual void _drawImpl() override;
-
-        //! Redraw
-        void redraw() { m_bNeedRedraw = true;  }
-
 
     public:
         std::shared_ptr<InspectorEditor> getInspectorEditor() { return m_inspectorEditor; }

@@ -6,7 +6,7 @@ namespace ige::creator
     uint64_t Widget::s_idCounter = 0;
 
     Widget::Widget(bool enable, bool eol)
-        : m_bEnabled(enable), m_bEOL(eol), m_container(nullptr)
+        : IDrawable(), Pluggable(), m_bEnabled(enable), m_bEOL(eol), m_container(nullptr)
     {
         m_id = s_idCounter++;
         m_bHovered = false;
@@ -14,8 +14,10 @@ namespace ige::creator
 
     Widget::~Widget()
     {
+        m_container = nullptr;
         removeAllPlugins();
         getOnClickEvent().removeAllListeners();
+        getOnHoveredEvent().removeAllListeners();
     }
 
     void Widget::draw()

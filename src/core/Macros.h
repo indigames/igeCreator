@@ -28,49 +28,4 @@
 #define CALLBACK_2(__selector__,__target__, ...) std::bind(&__selector__,__target__, std::placeholders::_1, std::placeholders::_2, ##__VA_ARGS__)
 #define CALLBACK_3(__selector__,__target__, ...) std::bind(&__selector__,__target__, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, ##__VA_ARGS__)
 
-
-enum class ComponentType
-{
-    Camera = 0,
-    Environment,
-    Figure,
-    Sprite,
-    BoneTransform,
-    Script,
-    AmbientLight,
-    DirectionalLight,
-    PointLight,
-    SpotLight,
-    Canvas,
-    UIImage,
-    UIText,
-    UITextField,
-    UIButton,
-    UISlider,
-    UIScrollView,
-    UIScrollBar,
-    UIMask,
-    PhysicManager,
-    PhysicBox,
-    PhysicSphere,
-    PhysicCapsule,
-    PhysicMesh,
-    PhysicSoftBody,
-    AudioManager,
-    AudioSource,
-    AudioListener,
-    ParticleManager,
-    Particle,
-    Navigable,
-    NavMesh,
-    NavAgent,
-    NavAgentManager,
-    DynamicNavMesh,
-    NavObstacle,
-    NavArea,
-    OffMeshLink,
-    Transform,
-    RectTransform,
-};
-
 #endif

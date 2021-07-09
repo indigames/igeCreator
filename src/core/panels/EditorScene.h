@@ -7,9 +7,8 @@
 #include "core/gizmo/Gizmo.h"
 #include "core/shortcut/IShortcut.h"
 
-#include "components/gui/RectTransform.h"
-#include "scene/Scene.h"
-
+#include <components/gui/RectTransform.h>
+#include <scene/Scene.h>
 
 USING_NS_PYXIE
 USING_NS_IGE_CREATOR
@@ -23,12 +22,8 @@ public:
     EditorScene(const std::string& name = "", const Panel::Settings& settings = {});
     virtual ~EditorScene();
 
-    //! Set target object
-    void setTargetObject(SceneObject* obj);
-
     virtual void clear();
     virtual void update(float dt);
-    virtual void refresh();
 
     void registerShortcut() override;
     void unregisterShortcut() override;
@@ -57,7 +52,6 @@ protected:
 protected:
 
     virtual void initialize() override;
-    virtual void _drawImpl() override;
 
     void initDragDrop();
 
@@ -129,9 +123,6 @@ protected:
 
     //! Cache current scene
     std::shared_ptr<Scene> m_currentScene = nullptr;
-
-    //! Initialize states
-    bool m_bIsInitialized = false;
 
     //keyboard helper
     unsigned short m_fnKeyPressed = 1;

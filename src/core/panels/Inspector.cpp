@@ -18,9 +18,12 @@
 #include "core/Canvas.h"
 #include "core/FileHandle.h"
 #include "core/task/TaskManager.h"
+#include "core/scene/CompoundComponent.h"
+#include "core/scene/TargetObject.h"
 
 #include "core/plugin/DragDropPlugin.h"
 #include "core/dialog/OpenFileDialog.h"
+#include "core/panels/InspectorEditor.h"
 
 #include <components/CameraComponent.h>
 #include <components/TransformComponent.h>
@@ -67,8 +70,6 @@
 #include <components/navigation/NavObstacle.h>
 #include <components/navigation/OffMeshLink.h>
 
-#include "core/panels/InspectorEditor.h"
-
 #include <scene/Scene.h>
 using namespace ige::scene;
 
@@ -77,48 +78,45 @@ using namespace pyxie;
 
 namespace ige::creator
 {
-    IgnoreTransformEventScope::IgnoreTransformEventScope(SceneObject* obj, uint64_t& eventId, const std::function<void(SceneObject&)>& task)
-        : m_object(obj), m_eventId(eventId), m_task(task)
+    IgnoreTransformEventScope::IgnoreTransformEventScope(std::shared_ptr<Component> comp, uint64_t& eventId, const std::function<void(SceneObject&)>& task)
+        : m_comp(comp), m_eventId(eventId), m_task(task)
     {
-        if (m_object)
+        if (m_comp)
         {
             if (m_eventId != (uint64_t)-1)
-                m_object->getTransformChangedEvent().removeListener(m_eventId);
+                m_comp->getOwner()->getTransformChangedEvent().removeListener(m_eventId);
         }
     }
 
     IgnoreTransformEventScope::~IgnoreTransformEventScope()
     {
-        if (m_object)
+        if (m_comp)
         {
-            m_eventId = m_object->getTransformChangedEvent().addListener(m_task);
+            m_eventId = m_comp->getOwner()->getTransformChangedEvent().addListener(m_task);
         }
-        m_object = nullptr;
+        m_comp = nullptr;
         m_task = nullptr;
     }
 
     Inspector::Inspector(const std::string &name, const Panel::Settings &settings)
         : Panel(name, settings)
     {
-        m_inspectorEditor = std::make_shared<InspectorEditor>();
     }
 
     Inspector::~Inspector()
     {
         clear();
-
-        m_targetObject = nullptr;
-
-        m_inspectorEditor->clear();
-        m_inspectorEditor = nullptr;
     }
 
     void Inspector::initialize()
     {
         clear();
 
-        if (m_targetObject == nullptr)
+        if (Editor::getCurrentScene() == nullptr)
             return;
+
+        m_inspectorEditor = std::make_shared<InspectorEditor>();
+        m_targetObject = Editor::getInstance()->getTarget().get();
         m_headerGroup = createWidget<Group>("Inspector_Header", false);
 
         // Object info
@@ -135,184 +133,183 @@ namespace ige::creator
         });
 
         // Create component selection
-        m_createCompCombo = m_headerGroup->createWidget<ComboBox>();
+        m_createCompCombo = m_headerGroup->createWidget<ComboBox>("");
         m_createCompCombo->setEndOfLine(false);
-        m_createCompCombo->addChoice((int)ComponentType::Camera, "Camera");
+        m_createCompCombo->addChoice((int)Component::Type::Camera, "Camera");
 
         if(m_targetObject->getScene()->isDirectionalLightAvailable())
-            m_createCompCombo->addChoice((int)ComponentType::DirectionalLight, "Directional Light");
+            m_createCompCombo->addChoice((int)Component::Type::DirectionalLight, "Directional Light");
 
         if (m_targetObject->getScene()->isPointLightAvailable())
-            m_createCompCombo->addChoice((int)ComponentType::PointLight, "Point Light");
+            m_createCompCombo->addChoice((int)Component::Type::PointLight, "Point Light");
 
         if (m_targetObject->getScene()->isSpotLightAvailable())
-            m_createCompCombo->addChoice((int)ComponentType::SpotLight, "Spot Light");
+            m_createCompCombo->addChoice((int)Component::Type::SpotLight, "Spot Light");
 
         // Scene Object
         if (!m_targetObject->isGUIObject())
         {
-            m_createCompCombo->addChoice((int)ComponentType::Figure, "Figure");
-            m_createCompCombo->addChoice((int)ComponentType::Sprite, "Sprite");
+            m_createCompCombo->addChoice((int)Component::Type::Figure, "Figure");
+            m_createCompCombo->addChoice((int)Component::Type::Sprite, "Sprite");
 
             if (!m_targetObject->hasComponent<BoneTransform>())
-                m_createCompCombo->addChoice((int)ComponentType::BoneTransform, "BoneTransform");
+                m_createCompCombo->addChoice((int)Component::Type::BoneTransform, "BoneTransform");
 
             if (m_targetObject->getComponent<PhysicObject>() == nullptr && m_targetObject->getComponent<PhysicSoftBody>() == nullptr)
             {
-                m_createCompCombo->addChoice((int)ComponentType::PhysicBox, "PhysicBox");
-                m_createCompCombo->addChoice((int)ComponentType::PhysicSphere, "PhysicSphere");
-                m_createCompCombo->addChoice((int)ComponentType::PhysicCapsule, "PhysicCapsule");
-                m_createCompCombo->addChoice((int)ComponentType::PhysicMesh, "PhysicMesh");
+                m_createCompCombo->addChoice((int)Component::Type::PhysicBox, "PhysicBox");
+                m_createCompCombo->addChoice((int)Component::Type::PhysicSphere, "PhysicSphere");
+                m_createCompCombo->addChoice((int)Component::Type::PhysicCapsule, "PhysicCapsule");
+                m_createCompCombo->addChoice((int)Component::Type::PhysicMesh, "PhysicMesh");
                 if (m_targetObject->getComponent<FigureComponent>())
-                    m_createCompCombo->addChoice((int)ComponentType::PhysicSoftBody, "PhysicSoftBody");
+                    m_createCompCombo->addChoice((int)Component::Type::PhysicSoftBody, "PhysicSoftBody");
             }
         }
         else // GUI Object
         {
-            m_createCompCombo->addChoice((int)ComponentType::UIImage, "UIImage");
-            m_createCompCombo->addChoice((int)ComponentType::UIText, "UIText");
-            m_createCompCombo->addChoice((int)ComponentType::UITextField, "UITextField");
-            m_createCompCombo->addChoice((int)ComponentType::UIButton, "UIButton");
-            m_createCompCombo->addChoice((int)ComponentType::UIButton, "UISlider");
-            m_createCompCombo->addChoice((int)ComponentType::UIButton, "UIScrollView");
-            m_createCompCombo->addChoice((int)ComponentType::UIButton, "UIScrollBar");
-            m_createCompCombo->addChoice((int)ComponentType::UIButton, "UIMask");
+            m_createCompCombo->addChoice((int)Component::Type::UIImage, "UIImage");
+            m_createCompCombo->addChoice((int)Component::Type::UIText, "UIText");
+            m_createCompCombo->addChoice((int)Component::Type::UITextField, "UITextField");
+            m_createCompCombo->addChoice((int)Component::Type::UIButton, "UIButton");
+            m_createCompCombo->addChoice((int)Component::Type::UIButton, "UISlider");
+            m_createCompCombo->addChoice((int)Component::Type::UIButton, "UIScrollView");
+            m_createCompCombo->addChoice((int)Component::Type::UIButton, "UIScrollBar");
+            m_createCompCombo->addChoice((int)Component::Type::UIButton, "UIMask");
         }
 
         // Script component
-        m_createCompCombo->addChoice((int)ComponentType::Script, "Script");
+        m_createCompCombo->addChoice((int)Component::Type::Script, "Script");
 
         // Audio source
-        m_createCompCombo->addChoice((int)ComponentType::AudioSource, "Audio Source");
+        m_createCompCombo->addChoice((int)Component::Type::AudioSource, "Audio Source");
 
         // Audio listener
-        m_createCompCombo->addChoice((int)ComponentType::AudioListener, "Audio Listener");
+        m_createCompCombo->addChoice((int)Component::Type::AudioListener, "Audio Listener");
 
         // Particle
-        m_createCompCombo->addChoice((int)ComponentType::Particle, "Particle");
+        m_createCompCombo->addChoice((int)Component::Type::Particle, "Particle");
 
         // Navigation
         if (!m_targetObject->getComponent<NavMesh>() && !m_targetObject->getComponent<DynamicNavMesh>())
         {
-            m_createCompCombo->addChoice((int)ComponentType::NavMesh, "NavMesh");
-            m_createCompCombo->addChoice((int)ComponentType::DynamicNavMesh, "DynamicNavMesh");
+            m_createCompCombo->addChoice((int)Component::Type::NavMesh, "NavMesh");
+            m_createCompCombo->addChoice((int)Component::Type::DynamicNavMesh, "DynamicNavMesh");
         }
-        m_createCompCombo->addChoice((int)ComponentType::Navigable, "Navigable");
-        m_createCompCombo->addChoice((int)ComponentType::NavAgent, "NavAgent");
-        m_createCompCombo->addChoice((int)ComponentType::NavObstacle, "NavObstacle");
-        m_createCompCombo->addChoice((int)ComponentType::OffMeshLink, "OffMeshLink");
-
+        m_createCompCombo->addChoice((int)Component::Type::Navigable, "Navigable");
+        m_createCompCombo->addChoice((int)Component::Type::NavAgent, "NavAgent");
+        m_createCompCombo->addChoice((int)Component::Type::NavObstacle, "NavObstacle");
+        m_createCompCombo->addChoice((int)Component::Type::OffMeshLink, "OffMeshLink");
 
         auto createCompButton = m_headerGroup->createWidget<Button>("Add", ImVec2(64.f, 0.f));
         createCompButton->getOnClickEvent().addListener([this](auto widget) {
             TaskManager::getInstance()->addTask([this]() {
                 switch (m_createCompCombo->getSelectedIndex())
                 {
-                case (int)ComponentType::Camera:
+                case (int)Component::Type::Camera:
                     m_targetObject->addComponent<CameraComponent>("camera");
                     if (!m_targetObject->getComponent<FigureComponent>())
                         m_targetObject->addComponent<FigureComponent>(GetEnginePath("figures/camera.pyxf"))->setSkipSerialize(true);
                     break;
-                case (int)ComponentType::Environment:
+                case (int)Component::Type::Environment:
                     m_targetObject->addComponent<EnvironmentComponent>();
                     break;
-                case (int)ComponentType::Script:
+                case (int)Component::Type::Script:
                     m_targetObject->addComponent<ScriptComponent>();
                     break;
-                case (int)ComponentType::AmbientLight:
+                case (int)Component::Type::AmbientLight:
                     m_targetObject->addComponent<AmbientLight>();
                     break;
-                case (int)ComponentType::DirectionalLight:
+                case (int)Component::Type::DirectionalLight:
                     m_targetObject->addComponent<DirectionalLight>();
                     if (!m_targetObject->getComponent<FigureComponent>() && !m_targetObject->getComponent<SpriteComponent>())
                         m_targetObject->addComponent<SpriteComponent>(GetEnginePath("sprites/direct-light"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
                     break;
-                case (int)ComponentType::PointLight:
+                case (int)Component::Type::PointLight:
                     m_targetObject->addComponent<PointLight>();
                     if (!m_targetObject->getComponent<FigureComponent>() && !m_targetObject->getComponent<SpriteComponent>())
                         m_targetObject->addComponent<SpriteComponent>(GetEnginePath("sprites/point-light"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
                     break;
-                case (int)ComponentType::SpotLight:
+                case (int)Component::Type::SpotLight:
                     m_targetObject->addComponent<SpotLight>();
                     if (!m_targetObject->getComponent<FigureComponent>() && !m_targetObject->getComponent<SpriteComponent>())
                         m_targetObject->addComponent<SpriteComponent>(GetEnginePath("sprites/spot-light"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
                     break;
-                case (int)ComponentType::Figure:
+                case (int)Component::Type::Figure:
                     m_targetObject->addComponent<FigureComponent>();
                     break;
-                case (int)ComponentType::Sprite:
+                case (int)Component::Type::Sprite:
                     m_targetObject->addComponent<SpriteComponent>();
                     break;
-                case (int)ComponentType::BoneTransform:
+                case (int)Component::Type::BoneTransform:
                     m_targetObject->addComponent<BoneTransform>()->initialize();
                     break;
-                case (int)ComponentType::UIImage:
+                case (int)Component::Type::UIImage:
                     m_targetObject->addComponent<UIImage>();
                     break;
-                case (int)ComponentType::UIText:
+                case (int)Component::Type::UIText:
                     m_targetObject->addComponent<UIText>("Text", "fonts/Manjari-Regular.ttf");
                     break;
-                case (int)ComponentType::UITextField:
+                case (int)Component::Type::UITextField:
                     m_targetObject->addComponent<UITextField>("TextField");
                     break;
-                case (int)ComponentType::UIButton:
+                case (int)Component::Type::UIButton:
                     m_targetObject->addComponent<UIButton>();
                     break;
-                case (int)ComponentType::UISlider:
+                case (int)Component::Type::UISlider:
                     m_targetObject->addComponent<UISlider>();
                     break;
-                case (int)ComponentType::UIScrollView:
+                case (int)Component::Type::UIScrollView:
                     m_targetObject->addComponent<UIScrollView>();
                     break;
-                case (int)ComponentType::UIScrollBar:
+                case (int)Component::Type::UIScrollBar:
                     m_targetObject->addComponent<UIScrollBar>();
                     break;
-                case (int)ComponentType::UIMask:
+                case (int)Component::Type::UIMask:
                     m_targetObject->addComponent<UIMask>();
                     break;
-                case (int)ComponentType::PhysicBox:
+                case (int)Component::Type::PhysicBox:
                     m_targetObject->addComponent<PhysicBox>();
                     break;
-                case (int)ComponentType::PhysicSphere:
+                case (int)Component::Type::PhysicSphere:
                     m_targetObject->addComponent<PhysicSphere>();
                     break;
-                case (int)ComponentType::PhysicCapsule:
+                case (int)Component::Type::PhysicCapsule:
                     m_targetObject->addComponent<PhysicCapsule>();
                     break;
-                case (int)ComponentType::PhysicMesh:
+                case (int)Component::Type::PhysicMesh:
                     m_targetObject->addComponent<PhysicMesh>();
                     break;
-                case (int)ComponentType::PhysicSoftBody:
+                case (int)Component::Type::PhysicSoftBody:
                     m_targetObject->addComponent<PhysicSoftBody>();
                     break;
-                case (int)ComponentType::AudioSource:
+                case (int)Component::Type::AudioSource:
                     m_targetObject->addComponent<AudioSource>();
                     break;
-                case (int)ComponentType::AudioListener:
+                case (int)Component::Type::AudioListener:
                     m_targetObject->addComponent<AudioListener>();
                     break;
-                case (int)ComponentType::Particle:
+                case (int)Component::Type::Particle:
                     m_targetObject->addComponent<Particle>();
                     break;
-                case (int)ComponentType::Navigable:
+                case (int)Component::Type::Navigable:
                     m_targetObject->addComponent<Navigable>();
                     break;
-                case (int)ComponentType::NavMesh:
+                case (int)Component::Type::NavMesh:
                     m_targetObject->addComponent<NavMesh>();
                     break;
-                case (int)ComponentType::NavAgent:
+                case (int)Component::Type::NavAgent:
                     m_targetObject->addComponent<NavAgent>();
                     break;
 
-                case (int)ComponentType::DynamicNavMesh:
+                case (int)Component::Type::DynamicNavMesh:
                     m_targetObject->addComponent<DynamicNavMesh>();
                     break;
 
-                case (int)ComponentType::NavObstacle:
+                case (int)Component::Type::NavObstacle:
                     m_targetObject->addComponent<NavObstacle>();
                     break;
 
-                case (int)ComponentType::OffMeshLink:
+                case (int)Component::Type::OffMeshLink:
                     m_targetObject->addComponent<OffMeshLink>();
                     break;
                 }
@@ -321,179 +318,18 @@ namespace ige::creator
         });
 
         // Component
-        m_headerGroup->createWidget<Separator>();
+        createWidget<Separator>();
         m_componentGroup = createWidget<Group>("Inspector_Components", false);
-        m_inspectorEditor->setParentGroup(m_componentGroup);
-        std::for_each(m_targetObject->getComponents().begin(), m_targetObject->getComponents().end(), [this](auto &component) {
-            auto closable = (component->getName() != "Transform" && component->getName() != "RectTransform");
+        for(auto component : m_targetObject->getComponents()) {
+            auto closable = (component->getType() != Component::Type::Transform && component->getType() != Component::Type::RectTransform);
             auto header = m_componentGroup->createWidget<Group>(component->getName(), true, closable);
-            header->getOnClosedEvent().addListener([this, &component]() {
+            header->getOnClosedEvent().addListener([this, component]() {
                 m_inspectorEditor->removeComponent(component->getInstanceId());
                 m_targetObject->removeComponent(component);
                 redraw();
             });
-
-            if (component->getName() == "Transform")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::Transform, component.get(), header);
-            }
-            else if (component->getName() == "BoneTransform")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::BoneTransform, component.get(), header);
-            }
-            else if (component->getName() == "Camera")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::Camera, component.get(), header);
-            }
-            else if (component->getName() == "Environment")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::Environment, component.get(), header);
-            }
-            else if (component->getName() == "Figure")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::Figure, component.get(), header);
-            }
-            else if (component->getName() == "Sprite")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::Sprite, component.get(), header);
-            }
-            else if (component->getName() == "Script")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::Script, component.get(), header);
-            }
-            else if (component->getName() == "RectTransform")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::RectTransform, component.get(), header);
-            }
-            else if (component->getName() == "Canvas")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::Canvas, component.get(), header);
-            }
-            else if (component->getName() == "UIImage")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::UIImage, component.get(), header);
-            }
-            else if (component->getName() == "UIText" )
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::UIText, component.get(), header);
-            }
-            else if (component->getName() == "UITextField")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::UITextField, component.get(), header);
-            }
-            else if (component->getName() == "UIButton")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::UIButton, component.get(), header);
-            }
-            else if (component->getName() == "UISlider")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::UISlider, component.get(), header);
-            }
-            else if (component->getName() == "UIScrollView")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::UIScrollView, component.get(), header);
-            }
-            else if (component->getName() == "UIScrollBar")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::UIScrollBar, component.get(), header);
-            }
-            else if (component->getName() == "UIMask")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::UIMask, component.get(), header);
-            }
-            else if (component->getName() == "PhysicManager")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::PhysicManager, component.get(), header);
-            }
-            else if (component->getName() == "PhysicBox")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::PhysicBox, component.get(), header);
-            }
-            else if (component->getName() == "PhysicSphere")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::PhysicSphere, component.get(), header);
-            }
-            else if (component->getName() == "PhysicCapsule")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::PhysicCapsule, component.get(), header);
-            }
-            else if (component->getName() == "PhysicMesh")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::PhysicMesh, component.get(), header);
-            }
-            else if (component->getName() == "PhysicSoftBody")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::PhysicSoftBody, component.get(), header);
-            }
-            else if (component->getName() == "AudioManager")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::AudioManager, component.get(), header);
-            }
-            else if (component->getName() == "AudioSource")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::AudioSource, component.get(), header);
-            }
-            else if (component->getName() == "AudioListener")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::AudioListener, component.get(), header);
-            }
-            else if (component->getName() == "AmbientLight")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::AmbientLight, component.get(), header);
-            }
-            else if (component->getName() == "DirectionalLight")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::DirectionalLight, component.get(), header);
-            }
-            else if (component->getName() == "PointLight")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::PointLight, component.get(), header);
-            }
-            else if (component->getName() == "SpotLight")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::SpotLight, component.get(), header);
-            }
-            else if (component->getName() == "ParticleManager")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::ParticleManager, component.get(), header);
-            }
-            else if (component->getName() == "Particle")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::Particle, component.get(), header);
-            }
-            else if (component->getName() == "Navigable")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::Navigable, component.get(), header);
-            }
-            else if (component->getName() == "NavMesh")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::NavMesh, component.get(), header);
-            }
-            else if (component->getName() == "NavAgent")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::NavAgent, component.get(), header);
-            }
-            else if (component->getName() == "NavAgentManager")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::NavAgentManager, component.get(), header);
-            }        
-            else if (component->getName() == "DynamicNavMesh")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::DynamicNavMesh, component.get(), header);
-            }        
-            else if (component->getName() == "NavObstacle")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::NavObstacle, component.get(), header);
-            }  
-            else if (component->getName() == "NavArea")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::NavArea, component.get(), header);
-            }
-            else if (component->getName() == "OffMeshLink")
-            {
-                m_inspectorEditor->addComponent((int)ComponentType::OffMeshLink, component.get(), header);
-            }
-        });
+            m_inspectorEditor->addComponent((int)component->getType(), component, header);
+        }
     }
 
     void Inspector::update(float dt)
@@ -517,60 +353,14 @@ namespace ige::creator
 
     void Inspector::clear()
     {
-        if (m_headerGroup)
-        {
-            m_headerGroup->removeAllWidgets();
-            m_headerGroup->removeAllPlugins();
-            m_headerGroup = nullptr;
-        }
+        m_targetObject = nullptr;
+        m_inspectorEditor = nullptr;
 
-        if (m_createCompCombo)
-        {
-            m_createCompCombo->removeAllPlugins();
-            m_createCompCombo = nullptr;
-        }
-
-        if (m_componentGroup)
-        {
-            m_componentGroup->removeAllWidgets();
-            m_componentGroup->removeAllPlugins();
-            m_componentGroup = nullptr;
-        }
+        m_createCompCombo = nullptr;
+        m_headerGroup = nullptr;
+        m_componentGroup = nullptr;
 
         removeAllWidgets();
     }
 
-    void Inspector::setTargetObject(SceneObject* obj)
-    {
-        if (m_targetObject != obj)
-        {
-
-            clear();
-            m_inspectorEditor->clear();
-
-            m_targetObject = obj;
-            m_inspectorEditor->setTargetObject(m_targetObject);
-            if (m_targetObject != nullptr)
-            {
-                initialize();
-            }
-        }
-    }
-
-    void Inspector::updateMaterial(int index, const char *infoName, std::string txt)
-    {
-        auto figureComp = m_targetObject->getComponent<FigureComponent>();
-        auto figure = figureComp->getFigure();
-        if (figure)
-        {
-            Sampler sampler;
-            auto tex = ResourceCreator::Instance().NewTexture(txt.c_str());
-            sampler.tex = tex;
-            sampler.samplerSlotNo = 0;
-            if (tex)
-            {
-                figure->SetMaterialParam(index, infoName, &sampler);
-            }
-        }
-    }
 } // namespace ige::creator

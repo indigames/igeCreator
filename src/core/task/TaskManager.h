@@ -24,6 +24,6 @@ namespace ige::creator
         }
 
     protected:
-        std::vector<std::function<void()>> functors;
+        std::vector<std::function<void()>> functors = {};
     };
 }

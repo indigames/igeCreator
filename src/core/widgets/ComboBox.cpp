@@ -3,8 +3,8 @@
 
 namespace ige::creator
 {
-    ComboBox::ComboBox(const int& selectedIdx, bool enable, bool eol)
-        : DataWidget<int>(selectedIdx, enable, eol), m_selectedIdx(selectedIdx)
+    ComboBox::ComboBox(const std::string& label, const int& selectedIdx, bool enable, bool eol)
+        : DataWidget<int>(selectedIdx, enable, eol), m_selectedIdx(selectedIdx), m_label(label)
     {
     }
 
@@ -22,7 +22,7 @@ namespace ige::creator
         if (m_choices.find(m_selectedIdx) == m_choices.end())
             m_selectedIdx = m_choices.begin()->first;
 
-        if (ImGui::BeginCombo(getIdAString().c_str(), m_choices[m_selectedIdx].c_str()))
+        if (ImGui::BeginCombo((m_label + getIdAString()).c_str(), m_choices[m_selectedIdx].c_str()))
         {
             for (const auto&[key, value] : m_choices)
             {
