@@ -95,6 +95,52 @@ namespace ige::scene
             {
                 if (jComp.contains(key) && jComp[key] != val)
                 {
+                    try {
+                        Vec4 vec1;
+                        jComp[key].get_to<Vec4>(vec1);
+
+                        Vec4 vec2;
+                        val.get_to<Vec4>(vec2);
+
+                        auto x = vmath_almostEqual(vec1[0], vec2[0]) ? vec1[0] : NAN;
+                        auto y = vmath_almostEqual(vec1[1], vec2[1]) ? vec1[1] : NAN;
+                        auto z = vmath_almostEqual(vec1[2], vec2[2]) ? vec1[2] : NAN;
+                        auto w = vmath_almostEqual(vec1[3], vec2[3]) ? vec1[3] : NAN;
+                        m_json[key] = Vec4(x, y, z, w);
+                        continue;
+                    }
+                    catch (std::exception e) {}
+
+                    try {
+                        Vec3 vec1;
+                        jComp[key].get_to<Vec3>(vec1);
+
+                        Vec3 vec2;
+                        val.get_to<Vec3>(vec2);
+
+                        auto x = vmath_almostEqual(vec1[0], vec2[0]) ? vec1[0] : NAN;
+                        auto y = vmath_almostEqual(vec1[1], vec2[1]) ? vec1[1] : NAN;
+                        auto z = vmath_almostEqual(vec1[2], vec2[2]) ? vec1[2] : NAN;
+                        m_json[key] = Vec3(x, y, z);
+                        continue;
+                    }
+                    catch (std::exception e) {}
+                    
+                    try {
+                        Vec2 vec1;
+                        jComp[key].get_to<Vec2>(vec1);
+
+                        Vec2 vec2;
+                        val.get_to<Vec2>(vec2);
+
+                        auto x = vmath_almostEqual(vec1[0], vec2[0]) ? vec1[0] : NAN;
+                        auto y = vmath_almostEqual(vec1[1], vec2[1]) ? vec1[1] : NAN;
+
+                        m_json[key] = Vec2(x, y);
+                        continue;
+                    }
+                    catch (std::exception e) {}
+
                     m_json[key] = nullptr;
                     continue;
                 }

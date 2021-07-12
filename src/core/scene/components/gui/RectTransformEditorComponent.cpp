@@ -276,16 +276,11 @@ void RectTransformEditorComponent::drawPivot() {
         setDirty();
     });
 
-    Vec3 rotE;
-    auto rotQ = getComponent<CompoundComponent>()->getProperty<Quat>("rot", {});
-    vmath_quatToEuler(rotQ.P(), rotE.P());
+    auto rotE = getComponent<CompoundComponent>()->getProperty<Vec3>("rot", {});
     std::array rot = { RADIANS_TO_DEGREES(rotE.X()), RADIANS_TO_DEGREES(rotE.Y()), RADIANS_TO_DEGREES(rotE.Z()) };
     m_pivotGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot)->getOnDataChangedEvent().addListener([this](auto val) {
         IgnoreTransformEventScope scope(getComponent(), m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
-        Quat quat;
-        float rad[3] = { DEGREES_TO_RADIANS(val[0]), DEGREES_TO_RADIANS(val[1]), DEGREES_TO_RADIANS(val[2]) };
-        vmath_eulerToQuat(rad, quat.P());
-        getComponent<CompoundComponent>()->setProperty("rot", quat);
+        getComponent<CompoundComponent>()->setProperty("rot", Vec3(DEGREES_TO_RADIANS(val[0]), DEGREES_TO_RADIANS(val[1]), DEGREES_TO_RADIANS(val[2])));
         m_dirtyFlagSupport = 3;
         setDirty();
     });
