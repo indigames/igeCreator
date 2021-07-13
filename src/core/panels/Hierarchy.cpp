@@ -21,6 +21,7 @@
 #include "components/gui/Canvas.h"
 #include "components/gui/UIImage.h"
 #include "components/gui/UIText.h"
+#include "components/gui/UITextBitmap.h"
 #include "components/gui/UITextField.h"
 #include "components/gui/UIButton.h"
 #include "components/gui/UISlider.h"
@@ -509,6 +510,15 @@ namespace ige::creator
                     Editor::getInstance()->addTarget(newObject.get(), true);
                 });
             });
+
+            guiMenu->createWidget<MenuItem>("UITextBitmap")->getOnClickEvent().addListener([](auto widget) {
+                auto targets = Editor::getCurrentScene()->getTargets();
+                auto currentObject = (!targets.empty() && targets[0]) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
+                auto newObject = Editor::getCurrentScene()->createObject("UITextBitmap", currentObject, true);
+                auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
+                newObject->addComponent<UITextBitmap>("Text");
+                Editor::getCurrentScene()->addTarget(newObject.get(), true);
+                });
 
             guiMenu->createWidget<MenuItem>("UITextField")->getOnClickEvent().addListener([](auto widget) {
                 TaskManager::getInstance()->addTask([&]() {

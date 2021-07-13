@@ -60,6 +60,8 @@ namespace ige::creator
         void pasteObject();
         bool deleteObject();
 
+        void toggleBitmapFontCreator();
+
         void registerApp(std::shared_ptr<Application> app) { m_app = app; }
 
         static std::shared_ptr<Application>& getApp() { return getInstance()->m_app; }

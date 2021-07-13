@@ -14,6 +14,7 @@
 #include "core/panels/AssetBrowser.h"
 #include "core/panels/ProjectSetting.h"
 #include "core/panels/Profiler.h"
+#include "core/panels/subpanels/BitmapFontCreator.h"
 
 #include <scene/SceneManager.h>
 using namespace ige::scene;
@@ -37,6 +38,8 @@ namespace ige::creator
         createPanel<GameScene>("Game", settings);
         createPanel<Profiler>("Profiler", settings);
         createPanel<Inspector>("Inspector", settings);
+        auto bitmapPanel = createPanel<BitmapFontCreator>("BitmapFontCreator", settings);
+        bitmapPanel->close();
     }
 
     Canvas::~Canvas()
