@@ -14,7 +14,18 @@
 #include "core/dialog/SaveFileDialog.h"
 #include "core/AutoReleasePool.h"
 #include "core/shortcut/ShortcutController.h"
+#include "core/panels/subpanels/BitmapFontCreator.h"
 #include "core/scene/TargetObject.h"
+
+#include <scene/SceneManager.h>
+#include <scene/Scene.h>
+using namespace ige::scene;
+
+#include "utils/filesystem.h"
+namespace fs = ghc::filesystem;
+
+namespace ige::creator
+{
 
 #include <scene/SceneManager.h>
 #include <scene/Scene.h>
@@ -157,6 +168,15 @@ namespace ige::creator
         auto window = (SDL_Window*)m_app->getAppWindow();
         bool isFullscreen = SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN;
         SDL_SetWindowFullscreen(window, isFullscreen ? 0 : SDL_WINDOW_FULLSCREEN);
+    }
+
+    void Editor::toggleBitmapFontCreator()
+    {
+        auto panel = getCanvas()->getPanelAs<BitmapFontCreator>("BitmapFontCreator");
+        if (panel != nullptr)
+        {
+            panel->open();
+        }
     }
 
     bool Editor::handleEventImGUI(const SDL_Event* event)
