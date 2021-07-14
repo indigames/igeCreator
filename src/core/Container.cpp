@@ -85,7 +85,7 @@ namespace ige::creator
     {
         for(const auto& widget: m_widgets)
         {
-            widget->draw();
+            if(widget != nullptr) widget->draw();
         }
     }
 }
