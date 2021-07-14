@@ -40,6 +40,7 @@
 #include <components/gui/Canvas.h>
 #include <components/gui/UIImage.h>
 #include <components/gui/UIText.h>
+#include <components/gui/UITextBitmap.h>
 #include <components/gui/UITextField.h>
 #include <components/gui/UIButton.h>
 #include <components/gui/UISlider.h>
@@ -248,6 +249,9 @@ namespace ige::creator
                     break;
                 case (int)Component::Type::UIText:
                     m_targetObject->addComponent<UIText>("Text", "fonts/Manjari-Regular.ttf");
+                    break;
+                case (int)Component::Type::UITextBitmap:
+                    m_targetObject->addComponent<UITextBitmap>("Text");
                     break;
                 case (int)Component::Type::UITextField:
                     m_targetObject->addComponent<UITextField>("TextField");
