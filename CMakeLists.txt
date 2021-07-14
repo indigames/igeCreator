@@ -140,6 +140,7 @@ add_executable(${TARGET_NAME} WIN32 ${SRC_FILES})
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ignore:4099 /ignore:4286 /ignore:4127") # Disable linker warning
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT") # Disable LIBCMT, avoid conflict definition
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:python37") # Disable LIBCMT, avoid conflict definition
 
 target_link_libraries(${TARGET_NAME} 
     igeScene-static
@@ -182,6 +183,8 @@ target_link_libraries(${TARGET_NAME}
     simplecpp
     tokenizer
     GLEW
+    Iphlpapi
+    Pathcch
 )
 
 target_include_directories(${TARGET_NAME} PUBLIC
