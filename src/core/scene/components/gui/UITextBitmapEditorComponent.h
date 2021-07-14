@@ -3,8 +3,8 @@
 
 #include "core/Macros.h"
 
-#include "core/panels/EditorComponent.h"
-#include "components/Component.h"
+#include "core/scene/components/EditorComponent.h"
+#include <components/Component.h>
 
 USING_NS_IGE_SCENE
 NS_IGE_BEGIN
@@ -15,16 +15,12 @@ public:
 	UITextBitmapEditorComponent();
 	~UITextBitmapEditorComponent();
 
-	virtual void redraw() override;
-protected:
-	virtual bool isSafe(Component* comp) override;
+protected:	
 	virtual void onInspectorUpdate() override;
-
 	void drawUIText();
+
 protected:
 	std::shared_ptr<Group> m_uiTextGroup = nullptr;
-
-
 };
 
 NS_IGE_END

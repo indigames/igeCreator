@@ -33,7 +33,8 @@ class IgeConan(ConanFile):
         self.requires("igeSound/0.1.0@ige/test")
         self.requires("igeEffekseer/0.0.18@ige/test")
         self.requires("igeNavigation/0.0.1@ige/test")
-        self.requires("igeCore/0.4.91@ige/test")
+        self.requires("igeCore/0.5.39@ige/test")
+        self.requires("pyxCore/0.5.39@ige/test")
 
     def build(self):
         self._generateCMakeProject()

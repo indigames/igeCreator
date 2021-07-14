@@ -144,7 +144,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:python37") #
 
 target_link_libraries(${TARGET_NAME} 
     igeScene-static
-    pyxcore-static
+    pyxcore
     igeCore-static
     igeVMath-static
     ${Python3_LIBRARIES}

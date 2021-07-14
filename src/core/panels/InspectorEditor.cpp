@@ -19,6 +19,7 @@
 #include "core/scene/components/gui/RectTransformEditorComponent.h"
 #include "core/scene/components/gui/UIImageEditorComponent.h"
 #include "core/scene/components/gui/UITextEditorComponent.h"
+#include "core/scene/components/gui/UITextBitmapEditorComponent.h"
 #include "core/scene/components/gui/UITextFieldEditorComponent.h"
 #include "core/scene/components/gui/UIButtonEditorComponent.h"
 #include "core/scene/components/gui/UISliderEditorComponent.h"
@@ -118,6 +119,9 @@ std::shared_ptr<EditorComponent> InspectorEditor::addComponent(int type, std::sh
 	break;
 	case Component::Type::UIText:
 		view = std::make_shared<UITextEditorComponent>();
+	break;
+	case Component::Type::UITextBitmap:
+		view = std::make_shared<UITextBitmapEditorComponent>();
 	break;
 	case Component::Type::UITextField:
 		view = std::make_shared<UITextFieldEditorComponent>();
