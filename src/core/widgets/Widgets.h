@@ -5,6 +5,7 @@
 
 #include "core/widgets/Label.h"
 #include "core/widgets/TextField.h"
+#include "core/widgets/TextArea.h"
 #include "core/widgets/CheckBox.h"
 #include "core/widgets/ComboBox.h"
 #include "core/widgets/Button.h"

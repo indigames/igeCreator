@@ -17,6 +17,7 @@ enum class E_FileExts
     Figure,
     Script,
     Font,
+    FontBitmap,
     Audio,
     Prefab,
     Scene,
@@ -30,6 +31,7 @@ const auto AllFileExts =
     E_FileExts::Figure,
     E_FileExts::Script,
     E_FileExts::Font,
+    E_FileExts::FontBitmap,
     E_FileExts::Audio,
     E_FileExts::Prefab,
     E_FileExts::Scene,
@@ -52,6 +54,9 @@ inline const std::vector<std::string> &GetFileExtensionSuported(E_FileExts fileE
         break;
     case E_FileExts::Font:
         formats = {".ttf", ".otf"};
+        break;
+    case E_FileExts::FontBitmap:
+        formats = { ".pybm"};
         break;
     case E_FileExts::Audio:
         formats = {".wav", ".ogg", ".mp3"};

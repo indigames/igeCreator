@@ -88,6 +88,13 @@ namespace ige::creator
             });
         });
 
+        auto toolMenu = createWidget<Menu>("Tool");
+        toolMenu->createWidget<MenuItem>("Bitmap Font Creator")->getOnClickEvent().addListener([](auto widget) {
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->toggleBitmapFontCreator();
+                });
+            });
+
         auto buildMenu = createWidget<Menu>("Build");
         buildMenu->createWidget<MenuItem>("Convert Assets")->getOnClickEvent().addListener([](auto widget) {
             TaskManager::getInstance()->addTask([]() {
