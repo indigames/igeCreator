@@ -3,7 +3,7 @@
 
 #include "core/Macros.h"
 
-#include "core/panels/EditorComponent.h"
+#include "core/scene/components/EditorComponent.h"
 #include "components/Component.h"
 
 USING_NS_IGE_SCENE
@@ -17,7 +17,6 @@ public:
 
 	virtual void redraw() override;
 protected:
-	virtual bool isSafe(Component* comp) override;
 	virtual void onInspectorUpdate() override;
 
 	void drawUIText();

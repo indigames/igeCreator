@@ -512,12 +512,12 @@ namespace ige::creator
             });
 
             guiMenu->createWidget<MenuItem>("UITextBitmap")->getOnClickEvent().addListener([](auto widget) {
-                auto targets = Editor::getCurrentScene()->getTargets();
-                auto currentObject = (!targets.empty() && targets[0]) ? Editor::getCurrentScene()->findObjectById(targets[0]->getId()) : nullptr;
+                auto target = Editor::getInstance()->getTarget()->getFirstTarget();
+                const auto& currentObject = (target != nullptr) ? Editor::getCurrentScene()->findObjectById(target->getId()) : nullptr;
                 auto newObject = Editor::getCurrentScene()->createObject("UITextBitmap", currentObject, true);
                 auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
                 newObject->addComponent<UITextBitmap>("Text");
-                Editor::getCurrentScene()->addTarget(newObject.get(), true);
+                Editor::getInstance()->addTarget(newObject.get(), true);
                 });
 
             guiMenu->createWidget<MenuItem>("UITextField")->getOnClickEvent().addListener([](auto widget) {
