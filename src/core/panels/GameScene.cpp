@@ -18,6 +18,8 @@ namespace fs = std::filesystem;
 #include <scene/SceneObject.h>
 #include <scene/SceneManager.h>
 
+#include "event/Event.h"
+
 
 using namespace ige::scene;
 
@@ -174,6 +176,8 @@ namespace ige::creator
                 SceneManager::getInstance()->saveScene(path);
             }
             m_bIsPlaying = true;
+
+            SceneManager::getInstance()->dispathEvent((int)EventType::RunEditor);
         }
         
         m_bIsPausing = false;
@@ -184,6 +188,7 @@ namespace ige::creator
     void GameScene::pause()
     {
         m_bIsPausing = true;
+        SceneManager::getInstance()->dispathEvent((int)EventType::PauseEditor);
     }
 
     void GameScene::stop()
@@ -206,6 +211,8 @@ namespace ige::creator
             }
             m_bIsPausing = false;
             m_bIsPlaying = false;
+
+            SceneManager::getInstance()->dispathEvent((int)EventType::StopEditor);
         }
         Editor::getCanvas()->getEditorScene()->setFocus();
     }
