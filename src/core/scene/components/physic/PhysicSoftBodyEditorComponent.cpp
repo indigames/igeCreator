@@ -42,87 +42,87 @@ void PhysicSoftBodyEditorComponent::drawPhysicSoftBody()
         getComponent<CompoundComponent>()->setProperty("isSoftCol", val);
     });
 
-    std::array dampCoeff = { comp->getProperty<float>("dampCoeff", 1.f) };
+    std::array dampCoeff = { comp->getProperty<float>("dampCoeff", NAN) };
     m_physicGroup->createWidget<Drag<float>>("DampingCoeff", ImGuiDataType_Float, dampCoeff, 0.001f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("dampCoeff", val[0]);
     });
 
-    std::array repStiff = { comp->getProperty<float>("repStiff", 1.f) };
+    std::array repStiff = { comp->getProperty<float>("repStiff", NAN) };
     m_physicGroup->createWidget<Drag<float>>("LinearStiffness", ImGuiDataType_Float, repStiff, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("repStiff", val[0]);
     });
 
-    std::array presCoeff = { comp->getProperty<float>("presCoeff", 1.f) };
+    std::array presCoeff = { comp->getProperty<float>("presCoeff", NAN) };
     m_physicGroup->createWidget<Drag<float>>("PressureCoeff", ImGuiDataType_Float, presCoeff, 0.001f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("presCoeff", val[0]);
     });
 
-    std::array volCoeff = { comp->getProperty<float>("volCoeff", 1.f) };
+    std::array volCoeff = { comp->getProperty<float>("volCoeff", NAN) };
     m_physicGroup->createWidget<Drag<float>>("VolumeConvCoeff", ImGuiDataType_Float, volCoeff, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("volCoeff", val[0]);
     });
 
-    std::array friCoeff = { comp->getProperty<float>("friCoeff", 1.f) };
+    std::array friCoeff = { comp->getProperty<float>("friCoeff", NAN) };
     m_physicGroup->createWidget<Drag<float>>("FrictionCoeff", ImGuiDataType_Float, friCoeff, 0.001f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("friCoeff", val[0]);
     });
 
-    std::array poseCoeff = { comp->getProperty<float>("poseCoeff", 1.f) };
+    std::array poseCoeff = { comp->getProperty<float>("poseCoeff", NAN) };
     m_physicGroup->createWidget<Drag<float>>("PoseMatchCoeff", ImGuiDataType_Float, poseCoeff, 0.001f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("poseCoeff", val[0]);
     });
 
-    std::array graF = { comp->getProperty<float>("graF", 1.f) };
+    std::array graF = { comp->getProperty<float>("graF", NAN) };
     m_physicGroup->createWidget<Drag<float>>("GravityFactor", ImGuiDataType_Float, graF, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("graF", val[0]);
     });
 
-    std::array velF = { comp->getProperty<float>("velF", 1.f) };
+    std::array velF = { comp->getProperty<float>("velF", NAN) };
     m_physicGroup->createWidget<Drag<float>>("VelocityCorFactor", ImGuiDataType_Float, velF, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("velF", val[0]);
     });
 
-    std::array rch = { comp->getProperty<float>("rch", 1.f) };
+    std::array rch = { comp->getProperty<float>("rch", NAN) };
     m_physicGroup->createWidget<Drag<float>>("RigidHardness", ImGuiDataType_Float, rch, 0.001f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("rch", val[0]);
     });
 
-    std::array kch = { comp->getProperty<float>("kch", 1.f) };
+    std::array kch = { comp->getProperty<float>("kch", NAN) };
     m_physicGroup->createWidget<Drag<float>>("KineticHardness", ImGuiDataType_Float, kch, 0.001f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("kch", val[0]);
     });
 
-    std::array sch = { comp->getProperty<float>("sch", 1.f) };
+    std::array sch = { comp->getProperty<float>("sch", NAN) };
     m_physicGroup->createWidget<Drag<float>>("SoftHardness", ImGuiDataType_Float, sch, 0.001f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("sch", val[0]);
     });
 
-    std::array ahr = { comp->getProperty<float>("ahr", 1.f) };
+    std::array ahr = { comp->getProperty<float>("ahr", NAN) };
     m_physicGroup->createWidget<Drag<float>>("AnchorHardness", ImGuiDataType_Float, ahr, 0.001f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("ahr", val[0]);
     });
 
-    std::array pItrNum = { comp->getProperty<int>("pItrNum", 1) };
-    m_physicGroup->createWidget<Drag<int>>("PosIterations", ImGuiDataType_S32, pItrNum, 1, 1)->getOnDataChangedEvent().addListener([this](auto& val) {
-        getComponent<CompoundComponent>()->setProperty("pItrNum", val[0]);
+    std::array pItrNum = { comp->getProperty<float>("pItrNum", NAN) };
+    m_physicGroup->createWidget<Drag<float>>("PosIterations", ImGuiDataType_S32, pItrNum, 1, 1)->getOnDataChangedEvent().addListener([this](auto& val) {
+        getComponent<CompoundComponent>()->setProperty("pItrNum", (int)val[0]);
     });
 
-    std::array sleepThr = { comp->getProperty<float>("sleepThr", 1.f) };
+    std::array sleepThr = { comp->getProperty<float>("sleepThr", NAN) };
     m_physicGroup->createWidget<Drag<float>>("SleepThreshold", ImGuiDataType_Float, sleepThr, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("sleepThr", val[0]);
     });
 
-    std::array restLS = { comp->getProperty<float>("restLS", 1.f) };
+    std::array restLS = { comp->getProperty<float>("restLS", NAN) };
     m_physicGroup->createWidget<Drag<float>>("RestLengthScale", ImGuiDataType_Float, restLS, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("restLS", val[0]);
     });
 
-    std::array aero = { comp->getProperty<int>("aero", 0) };
-    m_physicGroup->createWidget<Drag<int>>("AeroModel", ImGuiDataType_S32, aero, 1, 0, 6)->getOnDataChangedEvent().addListener([this](auto& val) {
-        getComponent<CompoundComponent>()->setProperty("aero", val[0]);
+    std::array aero = { comp->getProperty<float>("aero", NAN) };
+    m_physicGroup->createWidget<Drag<float>>("AeroModel", ImGuiDataType_S32, aero, 1, 0, 6)->getOnDataChangedEvent().addListener([this](auto& val) {
+        getComponent<CompoundComponent>()->setProperty("aero", (int)val[0]);
     });
 
-    auto windVel = comp->getProperty<Vec3>("windVel", {});
+    auto windVel = comp->getProperty<Vec3>("windVel", { NAN, NAN, NAN });
     std::array windVelocity = { windVel.X(), windVel.Y(), windVel.Z() };
     m_physicGroup->createWidget<Drag<float, 3>>("WindVelocity", ImGuiDataType_Float, windVelocity)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("windVel", val[0]);
@@ -137,10 +137,10 @@ void PhysicSoftBodyEditorComponent::drawPhysicSoftBody()
         if (figureComp && figureComp->getFigure())
             maxMeshIdx = figureComp->getFigure()->NumMeshes() - 1;
 
-        std::array meshIdx = { comp->getProperty<int>("meshIdx", 0) };
-        auto meshIdxWg = m_physicGroup->createWidget<Drag<int>>("Mesh Index", ImGuiDataType_S32, meshIdx, 1, 0, maxMeshIdx);
+        std::array meshIdx = { comp->getProperty<float>("meshIdx", NAN) };
+        auto meshIdxWg = m_physicGroup->createWidget<Drag<float>>("Mesh Index", ImGuiDataType_S32, meshIdx, 1, 0, maxMeshIdx);
         meshIdxWg->getOnDataChangedEvent().addListener([this](auto& val) {
-            getComponent<CompoundComponent>()->setProperty("meshIdx", val[0]);
+            getComponent<CompoundComponent>()->setProperty("meshIdx", (int)val[0]);
         });
         meshIdxWg->addPlugin<DDTargetPlugin<int>>(EDragDropID::MESH)->getOnDataReceivedEvent().addListener([this](auto val) {
             getComponent<CompoundComponent>()->setProperty("meshIdx", val);

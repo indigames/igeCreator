@@ -79,23 +79,19 @@ using namespace pyxie;
 
 namespace ige::creator
 {
-    IgnoreTransformEventScope::IgnoreTransformEventScope(std::shared_ptr<Component> comp, uint64_t& eventId, const std::function<void(SceneObject&)>& task)
-        : m_comp(comp), m_eventId(eventId), m_task(task)
+    IgnoreTransformEventScope::IgnoreTransformEventScope(SceneObject* obj, uint64_t& eventId, const std::function<void(SceneObject&)>& task)
+        : m_obj(obj), m_eventId(eventId), m_task(task)
     {
-        if (m_comp)
-        {
-            if (m_eventId != (uint64_t)-1)
-                m_comp->getOwner()->getTransformChangedEvent().removeListener(m_eventId);
-        }
+        if (m_obj && m_eventId != (uint64_t)-1)
+            m_obj->getTransformChangedEvent().removeListener(m_eventId);
+
     }
 
     IgnoreTransformEventScope::~IgnoreTransformEventScope()
     {
-        if (m_comp)
-        {
-            m_eventId = m_comp->getOwner()->getTransformChangedEvent().addListener(m_task);
-        }
-        m_comp = nullptr;
+        if (m_obj)
+            m_eventId = m_obj->getTransformChangedEvent().addListener(m_task);        
+        m_obj = nullptr;
         m_task = nullptr;
     }
 

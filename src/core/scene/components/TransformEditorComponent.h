@@ -13,7 +13,6 @@ public:
     TransformEditorComponent();
     virtual ~TransformEditorComponent();
 
-    //! Override for transform changed event
     virtual bool setComponent(std::shared_ptr<Component> component) override;
 
 protected:
@@ -27,6 +26,12 @@ protected:
     //! onTransformChanged
     void onTransformChanged(SceneObject& sceneObject);
 
+    //! Target object
+    void onTargetAdded(SceneObject* object);
+    void onTargetRemoved(SceneObject* object);
+    void onTargetCleared();
+    void updateTarget();
+
 protected:
     std::shared_ptr<Group> m_localTransformGroup = nullptr;
     std::shared_ptr<Group> m_worldTransformGroup = nullptr;
@@ -36,6 +41,12 @@ protected:
 
     //! Transform listener id
     uint64_t m_listenerId = (uint64_t)-1;
+
+    //! Targeted events
+    uint64_t m_targetAddedEventId;
+    uint64_t m_targetRemovedEventId;
+    uint64_t m_targetClearedEventId;
+    SceneObject* m_lastTarget = nullptr;
 };
 
 NS_IGE_END

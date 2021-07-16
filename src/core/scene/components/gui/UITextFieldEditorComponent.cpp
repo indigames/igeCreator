@@ -51,12 +51,12 @@ void UITextFieldEditorComponent::drawUITextField() {
         });
     }
 
-    std::array size = { comp->getProperty<int>("size", 12) };
-    m_uiTextFieldGroup->createWidget<Drag<int>>("Size", ImGuiDataType_S32, size, 1, 4, 1024)->getOnDataChangedEvent().addListener([this](auto& val) {
-        getComponent<CompoundComponent>()->setProperty("size", val[0]);
+    std::array size = { comp->getProperty<float>("size", NAN) };
+    m_uiTextFieldGroup->createWidget<Drag<float>>("Size", ImGuiDataType_S32, size, 1, 4, 1024)->getOnDataChangedEvent().addListener([this](auto& val) {
+        getComponent<CompoundComponent>()->setProperty("size", (int)val[0]);
     });
 
-    m_uiTextFieldGroup->createWidget<Color>("Color", comp->getProperty<Vec4>("color", {}))->getOnDataChangedEvent().addListener([this](auto& color) {
+    m_uiTextFieldGroup->createWidget<Color>("Color", comp->getProperty<Vec4>("color", { NAN, NAN, NAN, NAN }))->getOnDataChangedEvent().addListener([this](auto& color) {
         getComponent<CompoundComponent>()->setProperty("color", { color[0], color[1], color[2], color[3] });
     });
 }

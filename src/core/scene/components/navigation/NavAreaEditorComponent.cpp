@@ -30,14 +30,14 @@ void NavAreaEditorComponent::drawNavArea()
     auto comp = getComponent<CompoundComponent>();
     if (comp == nullptr) return;
 
-    std::array id = { comp->getProperty<int>("id", 0) };
-    m_navAreaGroup->createWidget<Drag<int>>("AreaID", ImGuiDataType_S32, id, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
-        getComponent<CompoundComponent>()->setProperty("id", val[0]);
+    std::array id = { comp->getProperty<float>("id", NAN) };
+    m_navAreaGroup->createWidget<Drag<float>>("AreaID", ImGuiDataType_S32, id, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("id", (int)val[0]);
     });
 
-    std::array cost = { comp->getProperty<int>("cost", 0) };
-    m_navAreaGroup->createWidget<Drag<int>>("AreaCost", ImGuiDataType_S32, cost, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
-        getComponent<CompoundComponent>()->setProperty("cost", val[0]);
+    std::array cost = { comp->getProperty<float>("cost", NAN) };
+    m_navAreaGroup->createWidget<Drag<float>>("AreaCost", ImGuiDataType_S32, cost, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("cost", (int)val[0]);
     });
 }
 NS_IGE_END

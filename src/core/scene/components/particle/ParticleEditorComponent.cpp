@@ -42,39 +42,39 @@ void ParticleEditorComponent::drawParticle() {
         getComponent<CompoundComponent>()->setProperty("autoDraw", val);
     });
 
-    std::array layer = { comp->getProperty<int>("layer", 0) };
-    m_particleGroup->createWidget<Drag<int>>("Layer", ImGuiDataType_U32, layer, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
-        getComponent<CompoundComponent>()->setProperty("layer", val);
+    std::array layer = { comp->getProperty<float>("layer", NAN) };
+    m_particleGroup->createWidget<Drag<float>>("Layer", ImGuiDataType_U32, layer, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("layer", (int)val[0]);
     });
 
-    std::array mask = { comp->getProperty<int>("mask", 0) };
-    m_particleGroup->createWidget<Drag<int>>("GroupMask", ImGuiDataType_U32, mask, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
-        getComponent<CompoundComponent>()->setProperty("mask", val);
+    std::array mask = { comp->getProperty<float>("mask", NAN) };
+    m_particleGroup->createWidget<Drag<float>>("GroupMask", ImGuiDataType_U32, mask, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("mask", (int)val[0]);
     });
 
-    std::array speed = { comp->getProperty<float>("speed", 0) };
+    std::array speed = { comp->getProperty<float>("speed", NAN) };
     m_particleGroup->createWidget<Drag<float>>("Speed", ImGuiDataType_Float, speed, 0.01f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        getComponent<CompoundComponent>()->setProperty("speed", val);
+        getComponent<CompoundComponent>()->setProperty("speed", val[0]);
     });
 
-    std::array timeScale = { comp->getProperty<float>("timeScale", 0) };
+    std::array timeScale = { comp->getProperty<float>("timeScale", NAN) };
     m_particleGroup->createWidget<Drag<float>>("TimeScale", ImGuiDataType_Float, timeScale, 0.01f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        getComponent<CompoundComponent>()->setProperty("timeScale", val);
+        getComponent<CompoundComponent>()->setProperty("timeScale", val[0]);
     });
 
-    auto target = comp->getProperty<Vec3>("target", {});
+    auto target = comp->getProperty<Vec3>("target", { NAN, NAN, NAN });
     std::array targetArr = { target.X(), target.Y(), target.Z() };
     m_particleGroup->createWidget<Drag<float, 3>>("TargetPos", ImGuiDataType_Float, targetArr, 0.01f)->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("target", { val[0], val[1], val[2] });
     });
 
-    auto params = comp->getProperty<Vec4>("param", {});
+    auto params = comp->getProperty<Vec4>("param", { NAN, NAN, NAN, NAN });
     std::array paramArr = { params.X(), params.Y(), params.Z(), params.W() };
     m_particleGroup->createWidget<Drag<float, 4>>("Parameters", ImGuiDataType_Float, paramArr, 0.01f)->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("param", { val[0], val[1], val[2], val[3] });
     });
 
-    auto col = comp->getProperty<Vec4>("color", {});
+    auto col = comp->getProperty<Vec4>("color", { NAN, NAN, NAN, NAN });
     std::array color = { col.X(), col.Y(), col.Z(), col.W() };
     m_particleGroup->createWidget<Drag<float, 4>>("Color", ImGuiDataType_Float, color, 0.001f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("color", { val[0], val[1], val[2], val[3] });

@@ -30,7 +30,7 @@ void PhysicBoxEditorComponent::drawPhysicBox() {
     auto comp = getComponent<CompoundComponent>();
     if (comp == nullptr) return;
 
-    auto size = comp->getProperty<Vec3>("size", {1.f, 1.f, 1.f});
+    auto size = comp->getProperty<Vec3>("size", { NAN, NAN, NAN });
     std::array sizeArr = { size.X(), size.Y(), size.Z() };
     m_physicGroup->createWidget<Drag<float, 3>>("Size", ImGuiDataType_Float, sizeArr, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("size", { val[0], val[1], val[2] });

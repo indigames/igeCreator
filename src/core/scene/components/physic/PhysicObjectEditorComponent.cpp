@@ -50,56 +50,58 @@ void PhysicObjectEditorComponent::drawPhysicObject() {
         getComponent<CompoundComponent>()->setProperty("isTrigger", val);
     });
 
-    std::array filterGroup = { comp->getProperty<int>("group", 0) };
-    m_physicGroup->createWidget<Drag<int>>("Collision Group", ImGuiDataType_S32, filterGroup, 1, -1)->getOnDataChangedEvent().addListener([this](auto& val) {
-        getComponent<CompoundComponent>()->setProperty("group", val[0]);
+    auto group = comp->getProperty<float>("group", NAN);
+    std::array filterGroup = { group };
+    m_physicGroup->createWidget<Drag<float>>("Collision Group", ImGuiDataType_S32, filterGroup, 1, -1)->getOnDataChangedEvent().addListener([this](auto& val) {
+        getComponent<CompoundComponent>()->setProperty("group", (int)val[0]);
     });
 
-    std::array filterMask = { comp->getProperty<int>("mask", 0) };
-    m_physicGroup->createWidget<Drag<int>>("Collision Mask", ImGuiDataType_S32, filterMask, 1, -1)->getOnDataChangedEvent().addListener([this](auto& val) {
-        getComponent<CompoundComponent>()->setProperty("mask", val[0]);
+    auto mask = comp->getProperty<float>("mask", NAN);
+    std::array filterMask = { mask };
+    m_physicGroup->createWidget<Drag<float>>("Collision Mask", ImGuiDataType_S32, filterMask, 1, -1)->getOnDataChangedEvent().addListener([this](auto& val) {
+        getComponent<CompoundComponent>()->setProperty("mask", (int)val[0]);
     });
 
-    std::array mass = { comp->getProperty<float>("mass", 1.f) };
+    std::array mass = { comp->getProperty<float>("mass", NAN) };
     m_physicGroup->createWidget<Drag<float>>("Mass", ImGuiDataType_Float, mass, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("mass", val[0]);
     });
 
-    std::array friction = { comp->getProperty<float>("friction", 0.5f) };
+    std::array friction = { comp->getProperty<float>("friction", NAN) };
     m_physicGroup->createWidget<Drag<float>>("Friction", ImGuiDataType_Float, friction, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("friction", val[0]);
     });
 
-    std::array restitution = { comp->getProperty<float>("restitution", 1.f) };
+    std::array restitution = { comp->getProperty<float>("restitution", NAN) };
     m_physicGroup->createWidget<Drag<float>>("Restitution", ImGuiDataType_Float, restitution, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("restitution", val[0]);
     });
 
-    auto lVel = comp->getProperty<Vec3>("linearVelocity", {});
+    auto lVel = comp->getProperty<Vec3>("linearVelocity", { NAN, NAN, NAN });
     std::array linearVelocity = { lVel.X(), lVel.Y(), lVel.Z() };
     m_physicGroup->createWidget<Drag<float, 3>>("Linear Velocity", ImGuiDataType_Float, linearVelocity)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("linearVelocity", { val[0], val[1], val[2] });
     });
 
-    auto aVel = comp->getProperty<Vec3>("angularVelocity", {});
+    auto aVel = comp->getProperty<Vec3>("angularVelocity", { NAN, NAN, NAN });
     std::array angularVelocity = { aVel.X(), aVel.Y(), aVel.Z() };
     m_physicGroup->createWidget<Drag<float, 3>>("Angular Velocity", ImGuiDataType_Float, angularVelocity)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("angularVelocity", { val[0], val[1], val[2] });
     });
 
-    auto lFactor = comp->getProperty<Vec3>("linearFactor", {});
+    auto lFactor = comp->getProperty<Vec3>("linearFactor", { NAN, NAN, NAN });
     std::array linearFactor = { lFactor.X(), lFactor.Y(), lFactor.Z() };
     m_physicGroup->createWidget<Drag<float, 3>>("Linear Factor", ImGuiDataType_Float, linearFactor)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("linearFactor", { val[0], val[1], val[2] });
     });
 
-    auto aFactor = comp->getProperty<Vec3>("angularFactor", {});
+    auto aFactor = comp->getProperty<Vec3>("angularFactor", { NAN, NAN, NAN });
     std::array angularFactor = { aFactor.X(), aFactor.Y(), aFactor.Z() };
     m_physicGroup->createWidget<Drag<float, 3>>("Angular Factor", ImGuiDataType_Float, angularFactor)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("angularFactor", { val[0], val[1], val[2] });
     });
 
-    std::array margin = { comp->getProperty<float>("margin", 0.025f) };
+    std::array margin = { comp->getProperty<float>("margin", NAN) };
     m_physicGroup->createWidget<Drag<float>>("Margin", ImGuiDataType_Float, margin, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("margin", val[0]);
     });

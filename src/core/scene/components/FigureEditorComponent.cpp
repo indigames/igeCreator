@@ -85,17 +85,21 @@ void FigureEditorComponent::drawFigureComponent()
 
     if (comp->getProperty<bool>("aBlend", false))
     {
-        auto m_alphaCombo = m_figureCompGroup->createWidget<ComboBox>("Blend OP", comp->getProperty<int>("aBlendOp", 0));
-        m_alphaCombo->getOnDataChangedEvent().addListener([this](auto val) {
-            getComponent<CompoundComponent>()->setProperty("aBlendOp", val);
-            setDirty();
+        auto aBlendOp = comp->getProperty<int>("aBlendOp", -1);
+        auto alphaCombo = m_figureCompGroup->createWidget<ComboBox>("Blend OP", aBlendOp);
+        alphaCombo->getOnDataChangedEvent().addListener([this](auto val) {
+            if (val != -1) {
+                getComponent<CompoundComponent>()->setProperty("aBlendOp", val);
+                setDirty();
+            }
         });
-        m_alphaCombo->setEndOfLine(false);
-        m_alphaCombo->addChoice((int)ShaderDescriptor::AlphaBlendOP::COL, "COL");
-        m_alphaCombo->addChoice((int)ShaderDescriptor::AlphaBlendOP::ADD, "ADD");
-        m_alphaCombo->addChoice((int)ShaderDescriptor::AlphaBlendOP::SUB, "SUB");
-        m_alphaCombo->addChoice((int)ShaderDescriptor::AlphaBlendOP::MUL, "MUL");
-        m_alphaCombo->setEndOfLine(true);
+        alphaCombo->setEndOfLine(false);
+        alphaCombo->addChoice((int)ShaderDescriptor::AlphaBlendOP::COL, "COL");
+        alphaCombo->addChoice((int)ShaderDescriptor::AlphaBlendOP::ADD, "ADD");
+        alphaCombo->addChoice((int)ShaderDescriptor::AlphaBlendOP::SUB, "SUB");
+        alphaCombo->addChoice((int)ShaderDescriptor::AlphaBlendOP::MUL, "MUL");
+        if(aBlendOp == -1) alphaCombo->addChoice((int)-1, "");
+        alphaCombo->setEndOfLine(true);
     }
 
     // Only show details if this is single target

@@ -52,10 +52,10 @@ void PhysicMeshEditorComponent::drawPhysicMesh()
         concaveChk->setSelected(concave);
     });
 
-    std::array meshIdx = { comp->getProperty<int>("meshIdx", 0) };
-    auto meshIdxWg = m_physicGroup->createWidget<Drag<int>>("MeshIndex", ImGuiDataType_S32, meshIdx, 1, 0);
+    std::array meshIdx = { comp->getProperty<float>("meshIdx", NAN) };
+    auto meshIdxWg = m_physicGroup->createWidget<Drag<float>>("MeshIndex", ImGuiDataType_S32, meshIdx, 1, 0);
     meshIdxWg->getOnDataChangedEvent().addListener([this](const auto& val) {
-        getComponent<CompoundComponent>()->setProperty("meshIdx", val[0]);
+        getComponent<CompoundComponent>()->setProperty("meshIdx", (int)val[0]);
     });
     meshIdxWg->addPlugin<DDTargetPlugin<int>>(EDragDropID::MESH)->getOnDataReceivedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("meshIdx", val);

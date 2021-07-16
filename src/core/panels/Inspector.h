@@ -18,11 +18,11 @@ namespace ige::creator
     class IgnoreTransformEventScope
     {
     public:
-        IgnoreTransformEventScope(std::shared_ptr<Component> comp, uint64_t& eventId, const std::function<void(SceneObject&)>& task);
+        IgnoreTransformEventScope(SceneObject* obj, uint64_t& eventId, const std::function<void(SceneObject&)>& task);
         ~IgnoreTransformEventScope();
 
     protected:
-        std::shared_ptr<Component> m_comp;
+        SceneObject* m_obj;
         std::function<void(SceneObject&)> m_task;
         uint64_t& m_eventId;
     };

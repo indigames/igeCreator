@@ -30,12 +30,12 @@ void NavObstacleEditorComponent::drawNavObstacle()
     auto comp = getComponent<CompoundComponent>();
     if (comp == nullptr) return;
 
-    std::array radius = { comp->getProperty<float>("radius", 0.3f) };
+    std::array radius = { comp->getProperty<float>("radius", NAN) };
     m_navObstacleGroup->createWidget<Drag<float>>("Radius", ImGuiDataType_Float, radius, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("radius", val[0]);
     });
     
-    std::array height = { comp->getProperty<float>("height", 0.3f) };
+    std::array height = { comp->getProperty<float>("height", NAN) };
     m_navObstacleGroup->createWidget<Drag<float>>("Height", ImGuiDataType_Float, height, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("height", val[0]);
     });

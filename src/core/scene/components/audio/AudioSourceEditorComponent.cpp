@@ -47,49 +47,51 @@ void AudioSourceEditorComponent::drawAudioSource() {
     });
 
 
-    std::array volume = { comp->getProperty<float>("volume", 1.f) };
+    std::array volume = { comp->getProperty<float>("volume", NAN) };
     m_audioSourceGroup->createWidget<Drag<float>>("Volume", ImGuiDataType_Float, volume, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("volume", val);
     });
 
-    std::array pan = { comp->getProperty<float>("pan", 0.f) };
+    std::array pan = { comp->getProperty<float>("pan", NAN) };
     m_audioSourceGroup->createWidget<Drag<float>>("Pan", ImGuiDataType_Float, pan, 0.01f, -1.f, 1.f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("pan", val);
     });
 
-    std::array minDistance = { comp->getProperty<float>("minDist", 0.f) };
+    std::array minDistance = { comp->getProperty<float>("minDist", NAN) };
     m_audioSourceGroup->createWidget<Drag<float>>("Min Distance", ImGuiDataType_Float, minDistance, 0.01f, 0.f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("minDist", val);
     });
 
-    std::array maxDistance = { comp->getProperty<float>("maxDist", 0.f) };
+    std::array maxDistance = { comp->getProperty<float>("maxDist", NAN) };
     m_audioSourceGroup->createWidget<Drag<float>>("Max Distance", ImGuiDataType_Float, maxDistance, 0.01f, 0.f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("maxDist", val);
     });
 
-    auto vel = comp->getProperty<Vec3>("velocity", {0.f, 0.f, 0.f});
+    auto vel = comp->getProperty<Vec3>("velocity", {NAN, NAN, NAN});
     std::array velocity = { vel[0], vel[1], vel[2] };
     m_audioSourceGroup->createWidget<Drag<float, 3>>("Velocity", ImGuiDataType_Float, velocity, 0.01f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("velocity", { val[0], val[1], val[2] });
     });
 
-    auto attenuationModel = m_audioSourceGroup->createWidget<ComboBox>("Attenuation Model", comp->getProperty<int>("aBlendOp", 0));
+    auto aBlendOp = comp->getProperty<int>("aBlendOp", -1);
+    auto attenuationModel = m_audioSourceGroup->createWidget<ComboBox>("Attenuation Model", aBlendOp);
     attenuationModel->getOnDataChangedEvent().addListener([this](auto val) {
-        getComponent<CompoundComponent>()->setProperty("attModel", val);
+        if(val != -1) getComponent<CompoundComponent>()->setProperty("attModel", val);
     });
     attenuationModel->setEndOfLine(false);
     attenuationModel->addChoice((int)SoLoud::AudioSource::ATTENUATION_MODELS::NO_ATTENUATION, "NO ATTENUATION");
     attenuationModel->addChoice((int)SoLoud::AudioSource::ATTENUATION_MODELS::INVERSE_DISTANCE, "INVERSE DISTANCE");
     attenuationModel->addChoice((int)SoLoud::AudioSource::ATTENUATION_MODELS::LINEAR_DISTANCE, "LINEAR DISTANCE");
     attenuationModel->addChoice((int)SoLoud::AudioSource::ATTENUATION_MODELS::EXPONENTIAL_DISTANCE, "EXPONENTIAL DISTANCE");
+    if(aBlendOp == -1) attenuationModel->addChoice(-1, "");
     attenuationModel->setEndOfLine(true);
 
-    std::array attenuationFactor = { comp->getProperty<float>("attFactor", 0.f) };
+    std::array attenuationFactor = { comp->getProperty<float>("attFactor", NAN) };
     m_audioSourceGroup->createWidget<Drag<float>>("Attenuation Factor", ImGuiDataType_Float, attenuationFactor, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("attFactor", val);
     });
 
-    std::array dopplerFactor = { comp->getProperty<float>("dopFactor", 0.f) };
+    std::array dopplerFactor = { comp->getProperty<float>("dopFactor", NAN) };
     m_audioSourceGroup->createWidget<Drag<float>>("Doppler Factor", ImGuiDataType_Float, dopplerFactor, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("dopFactor", val);
     });

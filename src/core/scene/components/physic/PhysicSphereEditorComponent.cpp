@@ -31,7 +31,7 @@ void PhysicSphereEditorComponent::drawPhysicSphere()
     auto comp = getComponent<CompoundComponent>();
     if (comp == nullptr) return;
 
-    std::array radius = { comp->getProperty<float>("radius", 1.f) };
+    std::array radius = { comp->getProperty<float>("radius", NAN) };
     m_physicGroup->createWidget<Drag<float>>("Radius", ImGuiDataType_Float, radius, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("radius", val[0]);
     });

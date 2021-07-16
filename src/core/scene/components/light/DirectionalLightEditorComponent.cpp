@@ -28,12 +28,12 @@ void DirectionalLightEditorComponent::drawDirectionalLight() {
     auto comp = getComponent<CompoundComponent>();
     if (comp == nullptr) return;
 
-    auto color = Vec4(comp->getProperty<Vec3>("col", {}), 1.f);
+    auto color = Vec4(comp->getProperty<Vec3>("col", { NAN, NAN, NAN }), 1.f);
     m_directionalLightGroup->createWidget<Color>("Color", color)->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("col", { val[0], val[1], val[2] });
     });
 
-    std::array its = { comp->getProperty<float>("its", 1.f) };
+    std::array its = { comp->getProperty<float>("its", NAN) };
     m_directionalLightGroup->createWidget<Drag<float>>("Intensity", ImGuiDataType_Float, its)->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("its", val[0]);
     });

@@ -46,50 +46,55 @@ void UIScrollViewEditorComponent::drawUIScrollView() {
         getComponent<CompoundComponent>()->setProperty("interactable", val);
     });
 
-    auto spriteType = comp->getProperty<int>("spritetype", 0);
+    auto spriteType = comp->getProperty<int>("spritetype", -1);
     auto spriteTypeCombo = m_uiScrollViewGroup->createWidget<ComboBox>("Sprite Type", spriteType);
     spriteTypeCombo->getOnDataChangedEvent().addListener([this](auto val) {
-        getComponent<CompoundComponent>()->setProperty("spritetype", val);
-        setDirty();
+        if (val != -1) {
+            getComponent<CompoundComponent>()->setProperty("spritetype", val);
+            setDirty();
+        }
     });
     spriteTypeCombo->setEndOfLine(false);
     spriteTypeCombo->addChoice((int)SpriteType::Simple, "Simple");
     spriteTypeCombo->addChoice((int)SpriteType::Sliced, "Sliced");
+    if (spriteType == -1) spriteTypeCombo->addChoice(-1, "");
     spriteTypeCombo->setEndOfLine(true);
 
     if (spriteType == (int)SpriteType::Sliced) {
-        auto border = comp->getProperty<Vec4>("border", {});
+        auto border = comp->getProperty<Vec4>("border", { NAN, NAN, NAN, NAN });
         std::array borderLeft = { border.X() };
         m_uiScrollViewGroup->createWidget<Drag<float, 1>>("Border Left", ImGuiDataType_Float, borderLeft, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", {});
+            auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", { NAN, NAN, NAN, NAN });
             border.X(val[0]);
             getComponent<CompoundComponent>()->setProperty("border", val);
         });
         std::array borderRight = { border.Y() };
         m_uiScrollViewGroup->createWidget<Drag<float, 1>>("Border Right", ImGuiDataType_Float, borderRight, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", {});
+            auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", { NAN, NAN, NAN, NAN });
             border.Y(val[0]);
             getComponent<CompoundComponent>()->setProperty("border", val);
         });
         std::array borderTop = { border.Z() };
         m_uiScrollViewGroup->createWidget<Drag<float, 1>>("Border Top", ImGuiDataType_Float, borderTop, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", {});
+            auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", { NAN, NAN, NAN, NAN });
             border.Z(val[0]);
             getComponent<CompoundComponent>()->setProperty("border", val);
         });
         std::array borderBottom = { border.W() };
         m_uiScrollViewGroup->createWidget<Drag<float, 1>>("Border Bottom", ImGuiDataType_Float, borderBottom, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", {});
+            auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", { NAN, NAN, NAN, NAN });
             border.W(val[0]);
             getComponent<CompoundComponent>()->setProperty("border", val);
         });
     }
     else {
-        auto fillMethod = comp->getProperty<int>("fillmethod", 0);
+        auto fillMethod = comp->getProperty<int>("fillmethod", -1);
         auto fillMethodCombo = m_uiScrollViewGroup->createWidget<ComboBox>("Fill Method", (int)fillMethod);
         fillMethodCombo->getOnDataChangedEvent().addListener([this](auto val) {
-            getComponent<CompoundComponent>()->setProperty("fillmethod", val);
-            setDirty();
+            if (val != -1) {
+                getComponent<CompoundComponent>()->setProperty("fillmethod", val);
+                setDirty();
+            }
         });
         fillMethodCombo->setEndOfLine(false);
         fillMethodCombo->addChoice((int)FillMethod::None, "None");
@@ -98,13 +103,16 @@ void UIScrollViewEditorComponent::drawUIScrollView() {
         fillMethodCombo->addChoice((int)FillMethod::Radial90, "Radial 90");
         fillMethodCombo->addChoice((int)FillMethod::Radial180, "Radial 180");
         fillMethodCombo->addChoice((int)FillMethod::Radial360, "Radial 360");
+        if (fillMethod == -1) fillMethodCombo->addChoice(-1, "");
         fillMethodCombo->setEndOfLine(true);
-
-        if (fillMethod != (int)FillMethod::None) {
-            auto fillOriginCombo = m_uiScrollViewGroup->createWidget<ComboBox>("Fill Origin", comp->getProperty<int>("fillorigin", 0));
+        if (fillMethod != (int)FillMethod::None && fillMethod != -1) {
+            auto fillOrigin = comp->getProperty<int>("fillorigin", -1);
+            auto fillOriginCombo = m_uiScrollViewGroup->createWidget<ComboBox>("Fill Origin", fillOrigin);
             fillOriginCombo->getOnDataChangedEvent().addListener([this](auto val) {
-                getComponent<CompoundComponent>()->setProperty("fillorigin", val);
-                setDirty();
+                if (val != -1) {
+                    getComponent<CompoundComponent>()->setProperty("fillorigin", val);
+                    setDirty();
+                }
             });
             fillOriginCombo->setEndOfLine(false);
             if (fillMethod == (int)FillMethod::Horizontal) {
@@ -127,9 +135,10 @@ void UIScrollViewEditorComponent::drawUIScrollView() {
                 fillOriginCombo->addChoice((int)FillOrigin::Left, "Left");
                 fillOriginCombo->addChoice((int)FillOrigin::Right, "Right");
             }
+            if (fillOrigin == -1) fillOriginCombo->addChoice(-1, "");
             fillOriginCombo->setEndOfLine(true);
 
-            std::array fillAmount = { comp->getProperty<float>("fillamount", 0.f) };
+            std::array fillAmount = { comp->getProperty<float>("fillamount", NAN) };
             m_uiScrollViewGroup->createWidget<Drag<float, 1>>("Fill Amount", ImGuiDataType_Float, fillAmount, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
                 getComponent<CompoundComponent>()->setProperty("fillamount", val[0]);
             });
@@ -141,7 +150,7 @@ void UIScrollViewEditorComponent::drawUIScrollView() {
             }
         }
     }
-    m_uiScrollViewGroup->createWidget<Color>("Color", comp->getProperty<Vec4>("color", {}))->getOnDataChangedEvent().addListener([this](auto val) {
+    m_uiScrollViewGroup->createWidget<Color>("Color", comp->getProperty<Vec4>("color", { NAN, NAN, NAN, NAN }))->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("color", { val[0], val[1], val[2], val[3] });
     });
 
@@ -152,25 +161,28 @@ void UIScrollViewEditorComponent::drawUIScrollView() {
         getComponent<CompoundComponent>()->setProperty("enablevertical", val);
     });
 
-    auto movementType = comp->getProperty<int>("movementtype", 0);
+    auto movementType = comp->getProperty<int>("movementtype", -1);
     auto moveTypeCombo = m_uiScrollViewGroup->createWidget<ComboBox>("Move Type", (int)movementType);
     moveTypeCombo->getOnDataChangedEvent().addListener([this](auto val) {
-        getComponent<CompoundComponent>()->setProperty("movementtype", val);
-        setDirty();
+        if (val != -1) {
+            getComponent<CompoundComponent>()->setProperty("movementtype", val);
+            setDirty();
+        }
     });
     moveTypeCombo->setEndOfLine(false);
     moveTypeCombo->addChoice((int)UIScrollView::MovementType::Elastic, "Elastic");
     moveTypeCombo->addChoice((int)UIScrollView::MovementType::Clamped, "Clamped");
+    if(movementType == -1) moveTypeCombo->addChoice(-1, "");
     moveTypeCombo->setEndOfLine(true);
 
     if (movementType == (int)UIScrollView::MovementType::Elastic) 
     {
-        std::array elasticity = { comp->getProperty<float>("elasticity", 0.f) };
+        std::array elasticity = { comp->getProperty<float>("elasticity", NAN) };
         m_uiScrollViewGroup->createWidget<Drag<float>>("Elasticity", ImGuiDataType_Float, elasticity, 0.01f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
             getComponent<CompoundComponent>()->setProperty("elasticity", val[0]);
         });
 
-        auto elasticExtra = comp->getProperty<Vec2>("elasticextra", {});
+        auto elasticExtra = comp->getProperty<Vec2>("elasticextra", { NAN, NAN });
         std::array elasticExtraArr = { elasticExtra[0], elasticExtra[1] };
         m_uiScrollViewGroup->createWidget<Drag<float, 2>>("Elastic Extra", ImGuiDataType_Float, elasticExtraArr, 0.1f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
             getComponent<CompoundComponent>()->setProperty("elasticextra", {val[0], val[1]});
@@ -183,7 +195,7 @@ void UIScrollViewEditorComponent::drawUIScrollView() {
         setDirty();
     });
     if (isInertia) {
-        std::array deceleration = { comp->getProperty<float>("decelerationrate", 0.f) };
+        std::array deceleration = { comp->getProperty<float>("decelerationrate", NAN) };
         m_uiScrollViewGroup->createWidget<Drag<float>>("Deceleration Rate", ImGuiDataType_Float, deceleration, 0.01f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
             getComponent<CompoundComponent>()->setProperty("decelerationrate", val[0]);
         });

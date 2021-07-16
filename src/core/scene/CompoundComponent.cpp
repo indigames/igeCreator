@@ -156,6 +156,39 @@ namespace ige::scene
             m_json[key] = val;
             for (auto& comp : m_components)
             {
+                try {
+                    Vec4 vec;
+                    val.get_to<Vec4>(vec);
+                    auto oldVec = comp->getProperty<Vec4>(key, {NAN, NAN, NAN, NAN});
+                    for (int i = 0; i < 4; ++i)
+                        vec[i] = std::isnan(vec[i]) ? oldVec[i] : vec[i];
+                    comp->setProperty(key, vec);
+                    continue;
+                }
+                catch (std::exception e) {}
+
+                try {
+                    Vec3 vec;
+                    val.get_to<Vec3>(vec);
+                    auto oldVec = comp->getProperty<Vec3>(key, { NAN, NAN, NAN });
+                    for (int i = 0; i < 3; ++i)
+                        vec[i] = std::isnan(vec[i]) ? oldVec[i] : vec[i];
+                    comp->setProperty(key, vec);
+                    continue;
+                }
+                catch (std::exception e) {}
+
+                try {
+                    Vec2 vec;
+                    val.get_to<Vec2>(vec);
+                    auto oldVec = comp->getProperty<Vec2>(key, { NAN, NAN });
+                    for (int i = 0; i < 2; ++i)
+                        vec[i] = std::isnan(vec[i]) ? oldVec[i] : vec[i];
+                    comp->setProperty(key, vec);
+                    continue;
+                }
+                catch (std::exception e) {}
+
                 comp->setProperty(key, val);
             }
         }

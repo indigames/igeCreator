@@ -24,6 +24,12 @@ protected:
 	void drawAnchorMinMax();
 	void drawPivot();
 
+	//! Target object
+	void onTargetAdded(SceneObject* object);
+	void onTargetRemoved(SceneObject* object);
+	void onTargetCleared();
+	void updateTarget();
+
 protected:
 	std::shared_ptr<Group> m_pivotGroup = nullptr;
 	std::shared_ptr<Group> m_anchor_transform_ParentGroup = nullptr;
@@ -34,6 +40,12 @@ protected:
 	int m_dirtyFlagSupport = 0;
 	bool m_bIsLockTransformUpdate = false;
 	uint64_t m_listenerId = -1;
+
+	//! Targeted events
+	uint64_t m_targetAddedEventId;
+	uint64_t m_targetRemovedEventId;
+	uint64_t m_targetClearedEventId;
+	SceneObject* m_lastTarget = nullptr;
 };
 
 NS_IGE_END

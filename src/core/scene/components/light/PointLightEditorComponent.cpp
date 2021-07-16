@@ -28,17 +28,17 @@ void PointLightEditorComponent::drawPointLight() {
     auto comp = getComponent<CompoundComponent>();
     if (comp == nullptr) return;
 
-    auto color = Vec4(comp->getProperty<Vec3>("col", {}), 1.f);
+    auto color = Vec4(comp->getProperty<Vec3>("col", { NAN, NAN, NAN }), 1.f);
     m_pointLightGroup->createWidget<Color>("Color", color)->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("col", { val[0], val[1], val[2] });
     });
 
-    std::array its = { comp->getProperty<float>("its", 1.f) };
+    std::array its = { comp->getProperty<float>("its", NAN) };
     m_pointLightGroup->createWidget<Drag<float>>("Intensity", ImGuiDataType_Float, its)->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("its", val[0]);
     });
 
-    std::array rng = { comp->getProperty<float>("rng", 1.f) };
+    std::array rng = { comp->getProperty<float>("rng", NAN) };
     m_pointLightGroup->createWidget<Drag<float>>("Range", ImGuiDataType_Float, rng)->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("rng", val[0]);
     });

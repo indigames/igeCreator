@@ -69,8 +69,11 @@ namespace ige::creator
             ImGui::PushID(i);
             if (i > 0)
                 ImGui::SameLine(0, g.Style.ItemInnerSpacing.x);
-            if (ImGui::DragScalar("", m_dataType, p_data, m_speed, &m_min, &m_max, "%.3f"))
+
+            // Notice: to show NAN the data type must be Float, so to present Int type we use %.0f format here
+            if (ImGui::DragScalar("", ImGuiDataType_Float, p_data, m_speed, &m_min, &m_max, (m_dataType == ImGuiDataType_S32) ? "%.0f" : "%.3f"))
                 changedIdx = i;
+
             ImGui::PopID();
             ImGui::PopItemWidth();
             p_data = (void*)((char*)p_data + type_size);

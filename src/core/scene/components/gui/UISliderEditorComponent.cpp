@@ -57,37 +57,40 @@ void UISliderEditorComponent::drawUISlider() {
     });
 
     //! Normal Color
-    m_uiSliderGroup->createWidget<Color>("Normal Color", comp->getProperty<Vec4>("color", {}))->getOnDataChangedEvent().addListener([this](auto val) {
+    m_uiSliderGroup->createWidget<Color>("Normal Color", comp->getProperty<Vec4>("color", { NAN, NAN, NAN, NAN }))->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("color", { val[0], val[1], val[2], val[3] });
     });
 
     //! Pressed Color
-    m_uiSliderGroup->createWidget<Color>("Pressed Color", comp->getProperty<Vec4>("pressedcolor", {}))->getOnDataChangedEvent().addListener([this](auto val) {
+    m_uiSliderGroup->createWidget<Color>("Pressed Color", comp->getProperty<Vec4>("pressedcolor", { NAN, NAN, NAN, NAN }))->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("pressedcolor", { val[0], val[1], val[2], val[3] });
     });
 
     //! Disable Color
-    m_uiSliderGroup->createWidget<Color>("Disabled Color", comp->getProperty<Vec4>("disabledcolor", {}))->getOnDataChangedEvent().addListener([this](auto val) {
+    m_uiSliderGroup->createWidget<Color>("Disabled Color", comp->getProperty<Vec4>("disabledcolor", { NAN, NAN, NAN, NAN }))->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("disabledcolor", { val[0], val[1], val[2], val[3] });
     });
 
     //! Fade Duration
-    std::array fadeDuration = { comp->getProperty<float>("fadeduration", 0.f) };
+    std::array fadeDuration = { comp->getProperty<float>("fadeduration", NAN) };
     m_uiSliderGroup->createWidget<Drag<float>>("Fade Duration", ImGuiDataType_Float, fadeDuration, 0.01f, 0.0f, 60.0f)->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("fadeduration", val[0]);
     });
 
-    auto direction = comp->getProperty<int>("directionbar", 0);
+    auto direction = comp->getProperty<int>("directionbar", -1);
     auto directionCombo = m_uiSliderGroup->createWidget<ComboBox>("Direction", (int)direction);
     directionCombo->getOnDataChangedEvent().addListener([this](auto val) {
-        getComponent<CompoundComponent>()->setProperty("directionbar", val);
-        setDirty();
+        if (val != -1) {
+            getComponent<CompoundComponent>()->setProperty("directionbar", val);
+            setDirty();
+        }
     });
     directionCombo->setEndOfLine(false);
     directionCombo->addChoice((int)UISlider::Direction::LeftToRight, "Left To Right");
     directionCombo->addChoice((int)UISlider::Direction::RightToLeft, "Right To Left");
     directionCombo->addChoice((int)UISlider::Direction::BottomToTop, "Bottom To Top");
     directionCombo->addChoice((int)UISlider::Direction::TopToBottom, "Top To Bottom");
+    if(direction == -1) directionCombo->addChoice(-1, "");
     directionCombo->setEndOfLine(true);
 
     drawMin();
@@ -107,7 +110,7 @@ void UISliderEditorComponent::drawMin() {
     auto comp = getComponent<CompoundComponent>();
     if (comp == nullptr) return;
 
-    std::array min = { comp->getProperty<float>("min", 0.f) };
+    std::array min = { comp->getProperty<float>("min", NAN) };
     m_uiSliderMinGroup->createWidget<Drag<float>>("Min ", ImGuiDataType_Float, min, 0.01f, 0.0f, comp->getProperty<float>("max", 1.f))->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("min", val[0]); 
         m_dirtyFlag = 1;
@@ -122,7 +125,7 @@ void UISliderEditorComponent::drawMax() {
     auto comp = getComponent<CompoundComponent>();
     if (comp == nullptr) return;
 
-    std::array max = { comp->getProperty<float>("max", 1.f) };
+    std::array max = { comp->getProperty<float>("max", NAN) };
     m_uiSliderMaxGroup->createWidget<Drag<float>>("Max ", ImGuiDataType_Float, max, 0.01f, comp->getProperty<float>("min", 0.f))->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("max", val[0]);
     });
@@ -136,7 +139,7 @@ void UISliderEditorComponent::drawValue() {
     auto comp = getComponent<CompoundComponent>();
     if (comp == nullptr) return;
 
-    std::array value = { comp->getProperty<float>("value", 1.f) };
+    std::array value = { comp->getProperty<float>("value", NAN) };
     m_uiSliderValueGroup->createWidget<Drag<float>>("Value ", ImGuiDataType_Float, value, 0.01f, comp->getProperty<float>("min", 0.f), comp->getProperty<float>("max", 1.f))->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("value", val[0]);
     });

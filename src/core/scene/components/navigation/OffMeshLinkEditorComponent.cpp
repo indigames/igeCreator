@@ -53,19 +53,19 @@ void OffMeshLinkEditorComponent::drawOffMeshLink()
         setDirty();
     });
 
-    std::array radius = { comp->getProperty<float>("radius", 1.f) };
+    std::array radius = { comp->getProperty<float>("radius", NAN) };
     m_offMeshLinkGroup->createWidget<Drag<float>>("Radius", ImGuiDataType_Float, radius, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("radius", val[0]);
     });
 
-    std::array mask = { comp->getProperty<int>("mask", 0) };
-    m_offMeshLinkGroup->createWidget<Drag<int>>("Mask", ImGuiDataType_S32, mask, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
-        getComponent<CompoundComponent>()->setProperty("mask", val[0]);
+    std::array mask = { comp->getProperty<float>("mask", NAN) };
+    m_offMeshLinkGroup->createWidget<Drag<float>>("Mask", ImGuiDataType_S32, mask, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("mask", (int)val[0]);
     });
 
-    std::array areaId = { comp->getProperty<int>("areaId", 0) };
-    m_offMeshLinkGroup->createWidget<Drag<int>>("AreaID", ImGuiDataType_S32, areaId, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
-        getComponent<CompoundComponent>()->setProperty("areaId", val[0]);
+    std::array areaId = { comp->getProperty<float>("areaId", NAN) };
+    m_offMeshLinkGroup->createWidget<Drag<float>>("AreaID", ImGuiDataType_S32, areaId, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("areaId", (int)val[0]);
     });
 }
 NS_IGE_END
