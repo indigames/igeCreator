@@ -5,14 +5,43 @@ set(TARGET_NAME igeCreator)
 
 project(${TARGET_NAME})
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
+set(CMAKE_PROJECT_VERSION_MAJOR 0)
+set(CMAKE_PROJECT_VERSION_MINOR 0)
+set(CMAKE_PROJECT_VERSION_PATCH 6)
+set(CMAKE_PROJECT_VERSION ${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR}.${CMAKE_PROJECT_VERSION_PATCH})
 
 # Modules and install path (required by conan)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
 set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR} ${CMAKE_MODULE_PATH})
 set(CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR} ${CMAKE_PREFIX_PATH})
+
+# Set the Relative Path Configurations
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
+
+#####################################
+# CMake Module Imports
+#####################################
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+include(InstallRequiredSystemLibraries)
+include(GenerateExportHeader)
+
+#####################################
+# CPack Configurations
+#####################################
+set(CPACK_PACKAGE_VENDOR "Indigames <admin@indigames.net>")
+set(CPACK_PACKAGE_VERSION_MAJOR "${CMAKE_PROJECT_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR "${CMAKE_PROJECT_VERSION_MINOR}")
+set(CPACK_PACKAGE_VERSION_PATCH "${CMAKE_PROJECT_VERSION_PATCH}")
+set(CPACK_GENERATOR "ZIP")
+set(CPACK_STRIP_FILES "TRUE")
+include(CPack)
 
 if(DEFINED ANDROID_PLATFORM)
     set (ANDROID 1)
@@ -95,10 +124,10 @@ include_directories(
 )
 
 add_compile_definitions(EDITOR_MODE=1)
-add_subdirectory(libs/pyxCore/pyxcore ${CMAKE_BINARY_DIR}/pyxCore)
-add_subdirectory(libs/igeCore ${CMAKE_BINARY_DIR}/igeCore)
-add_subdirectory(libs/igeVMath ${CMAKE_BINARY_DIR}/igeVMath)
-add_subdirectory(libs/igeScene ${CMAKE_BINARY_DIR}/igeScene)
+add_subdirectory(libs/pyxCore/pyxcore ${CMAKE_BINARY_DIR}/pyxCore EXCLUDE_FROM_ALL)
+add_subdirectory(libs/igeCore ${CMAKE_BINARY_DIR}/igeCore EXCLUDE_FROM_ALL)
+add_subdirectory(libs/igeVMath ${CMAKE_BINARY_DIR}/igeVMath EXCLUDE_FROM_ALL)
+add_subdirectory(libs/igeScene ${CMAKE_BINARY_DIR}/igeScene EXCLUDE_FROM_ALL)
 
 # Source files
 file(GLOB_RECURSE SRC_FILES
@@ -236,19 +265,12 @@ set_target_properties(
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${TARGET_NAME})
 
 
-# Install Targets
+#####################################
+# Define Install Targets
+#####################################
 install(TARGETS
-    ${TARGET_NAME}
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    PUBLIC_HEADER DESTINATION include
+  ${TARGET_NAME}
+  RUNTIME DESTINATION bin
 )
 
-file(GLOB_RECURSE PUBLIC_INCLUDE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/*.h*")
-foreach(HEADER ${PUBLIC_INCLUDE_FILES})
-    file(RELATIVE_PATH HEADER_RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/" "${HEADER}")
-    get_filename_component(DIR ${HEADER_RELATIVE} DIRECTORY)
-    install(FILES ${HEADER} DESTINATION include/${DIR})
-endforeach()
-
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/app" DESTINATION bin)

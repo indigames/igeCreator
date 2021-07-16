@@ -76,7 +76,7 @@ class IgeConan(ConanFile):
             exit(1)
 
     def _buildCMakeProject(self):
-        error_code = self.run('cmake --build . --config Release', ignore_errors=True)
+        error_code = self.run('cmake --build . --config Release --target Package', ignore_errors=True)
         if(error_code != 0):
             print(f'CMake build failed, error code: {error_code}')
             exit(1)

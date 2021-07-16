@@ -55,6 +55,7 @@ Requires: # Modules config
     - Python/[>=3.9.1]@ige/test
     - numpy/[>=1.19.5]@ige/test
     - igeCore/[>=0.5.39]@ige/test
+    - pyxCore/[>=0.5.39]@ige/test
     - igeVmath/[>=0.6.2]@ige/test
     - bullet/[>=3.0.8]@ige/test
     - igeBullet/[>=0.4.61]@ige/test 
