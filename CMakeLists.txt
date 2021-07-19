@@ -5,14 +5,55 @@ set(TARGET_NAME igeCreator)
 
 project(${TARGET_NAME})
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
+set(CMAKE_PROJECT_VERSION_MAJOR 0)
+set(CMAKE_PROJECT_VERSION_MINOR 0)
+set(CMAKE_PROJECT_VERSION_PATCH 6)
+set(CMAKE_PROJECT_VERSION ${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR}.${CMAKE_PROJECT_VERSION_PATCH})
 
 # Modules and install path (required by conan)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
 set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR} ${CMAKE_MODULE_PATH})
 set(CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR} ${CMAKE_PREFIX_PATH})
+
+# Set the Relative Path Configurations
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
+
+#####################################
+# CMake Module Imports
+#####################################
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+include(InstallRequiredSystemLibraries)
+include(GenerateExportHeader)
+
+#####################################
+# CPack Configurations
+#####################################
+set(CPACK_PACKAGE_NAME "${TARGET_NAME}")
+set(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "${TARGET_NAME}")
+set(CPACK_PACKAGE_VENDOR "Indi Games")
+set(CPACK_PACKAGE_VERSION_MAJOR "${CMAKE_PROJECT_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR "${CMAKE_PROJECT_VERSION_MINOR}")
+set(CPACK_PACKAGE_VERSION_PATCH "${CMAKE_PROJECT_VERSION_PATCH}")
+set(CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+set(CPACK_GENERATOR "ZIP;NSIS")
+set(CPACK_STRIP_FILES "TRUE")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+set(CPACK_RESOURCE_FILE_LICENSE_PROVIDED "1")
+set(CPACK_NSIS_CONTACT "admin@indigames.net")
+set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/src/igeCreator.ico")
+set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL "ON")
+set(CPACK_NSIS_INSTALLED_ICON_NAME "${CMAKE_CURRENT_SOURCE_DIR}/src/igeCreator.ico")
+set(CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${TARGET_NAME}.lnk' '$INSTDIR\\\\bin\\\\${TARGET_NAME}.exe'")
+set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "CreateShortCut \\\"$DESKTOP\\\\${TARGET_NAME}.lnk\\\" \\\"$INSTDIR\\\\bin\\\\${TARGET_NAME}.exe\\\"")
+set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "Delete \\\"$DESKTOP\\\\${TARGET_NAME}.lnk\\\"")
+include(CPack)
 
 if(DEFINED ANDROID_PLATFORM)
     set (ANDROID 1)
@@ -95,10 +136,10 @@ include_directories(
 )
 
 add_compile_definitions(EDITOR_MODE=1)
-add_subdirectory(libs/pyxCore/pyxcore ${CMAKE_BINARY_DIR}/pyxCore)
-add_subdirectory(libs/igeCore ${CMAKE_BINARY_DIR}/igeCore)
-add_subdirectory(libs/igeVMath ${CMAKE_BINARY_DIR}/igeVMath)
-add_subdirectory(libs/igeScene ${CMAKE_BINARY_DIR}/igeScene)
+add_subdirectory(libs/pyxCore/pyxcore ${CMAKE_BINARY_DIR}/pyxCore EXCLUDE_FROM_ALL)
+add_subdirectory(libs/igeCore ${CMAKE_BINARY_DIR}/igeCore EXCLUDE_FROM_ALL)
+add_subdirectory(libs/igeVMath ${CMAKE_BINARY_DIR}/igeVMath EXCLUDE_FROM_ALL)
+add_subdirectory(libs/igeScene ${CMAKE_BINARY_DIR}/igeScene EXCLUDE_FROM_ALL)
 
 # Source files
 file(GLOB_RECURSE SRC_FILES
@@ -136,7 +177,7 @@ set(SRC_FILES ${SRC_FILES}
 )
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SRC_FILES})
-add_executable(${TARGET_NAME} WIN32 ${SRC_FILES})
+add_executable(${TARGET_NAME} WIN32 "${CMAKE_CURRENT_SOURCE_DIR}/src/igeCreator.rc" ${SRC_FILES})
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ignore:4099 /ignore:4286 /ignore:4127") # Disable linker warning
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT") # Disable LIBCMT, avoid conflict definition
@@ -229,26 +270,15 @@ set_target_properties(
     ${TARGET_NAME} PROPERTIES
     VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/app")
 
-set_target_properties(
-    ${TARGET_NAME} PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/app/$<0:>")
-
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${TARGET_NAME})
 
+#####################################
+# Define Install Targets
+#####################################
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/app/" DESTINATION ".")
 
-# Install Targets
 install(TARGETS
-    ${TARGET_NAME}
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    PUBLIC_HEADER DESTINATION include
+  ${TARGET_NAME}
+  RUNTIME DESTINATION bin
 )
-
-file(GLOB_RECURSE PUBLIC_INCLUDE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/*.h*")
-foreach(HEADER ${PUBLIC_INCLUDE_FILES})
-    file(RELATIVE_PATH HEADER_RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/" "${HEADER}")
-    get_filename_component(DIR ${HEADER_RELATIVE} DIRECTORY)
-    install(FILES ${HEADER} DESTINATION include/${DIR})
-endforeach()
 
