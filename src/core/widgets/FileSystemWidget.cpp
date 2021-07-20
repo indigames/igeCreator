@@ -180,6 +180,7 @@ namespace ige::creator
         m_iconTextures["python"] = ResourceCreator::Instance().NewTexture(GetEnginePath("icons/file_python").c_str());
         m_iconTextures["model"] = ResourceCreator::Instance().NewTexture(GetEnginePath("icons/file_model").c_str());
         m_iconTextures["font"] = ResourceCreator::Instance().NewTexture(GetEnginePath("icons/file_font").c_str());
+        m_iconTextures["audio"] = ResourceCreator::Instance().NewTexture(GetEnginePath("icons/file_audio").c_str());
 
         const auto root_path = fs::current_path(); // fs::absolute("");
 
@@ -284,6 +285,10 @@ namespace ige::creator
                 m_selection = absolute_path;
             };
 
+            // Do not show hidden file/folder
+            if (IsFormat(E_FileExts::Hidden, name))
+                return;
+
             if (fs::is_directory(cache_entry.entry.status()))
             {
                 const auto on_double_click = [&]() {
@@ -297,6 +302,10 @@ namespace ige::creator
             }
             else //file
             {
+                // Do not show hidden files
+                if (IsFormat(E_FileExts::Hidden, file_ext))
+                    return;
+
                 auto icon = m_iconTextures["file"];
                 if (IsFormat(E_FileExts::Script, file_ext))
                 {
@@ -310,9 +319,13 @@ namespace ige::creator
                 {
                     icon = m_iconTextures["image"];
                 }
-                else if (IsFormat(E_FileExts::Font, file_ext))
+                else if (IsFormat(E_FileExts::Font, file_ext) || IsFormat(E_FileExts::FontBitmap, file_ext))
                 {
                     icon = m_iconTextures["font"];
+                }
+                else if (IsFormat(E_FileExts::Audio, file_ext))
+                {
+                    icon = m_iconTextures["audio"];
                 }
 
                 const auto on_double_click = [&]() {

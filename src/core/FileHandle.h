@@ -13,7 +13,8 @@ using namespace ige::scene;
 
 enum class E_FileExts
 {
-    Sprite = 0,
+    Hidden = 0,
+    Sprite,
     Figure,
     Script,
     Font,
@@ -43,11 +44,14 @@ inline const std::vector<std::string> &GetFileExtensionSuported(E_FileExts fileE
     static std::vector<std::string> formats = {};
     switch (fileExt)
     {
+    case E_FileExts::Hidden:
+        formats = { ".git",".gitignore", ".tmp", ".pyc", ".pyxd", ".meta"};
+        break;
     case E_FileExts::Sprite:
-        formats = {".pyxi"};
+        formats = {".pyxi", ".png", ".tga", ".jpg", ".jpeg", ".bmp"};
         break;
     case E_FileExts::Figure:
-        formats = {".pyxf"};
+        formats = {".pyxf", ".dae", ".obj", ".pbx"};
         break;
     case E_FileExts::Script:
         formats = {".py"};
