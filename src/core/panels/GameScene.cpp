@@ -1,8 +1,5 @@
 #include <imgui.h>
 
-#include <filesystem>
-namespace fs = std::filesystem;
-
 #include "core/panels/GameScene.h"
 #include "core/panels/EditorScene.h"
 #include "core/widgets/Image.h"
@@ -17,9 +14,7 @@ namespace fs = std::filesystem;
 #include <scene/Scene.h>
 #include <scene/SceneObject.h>
 #include <scene/SceneManager.h>
-
 #include "event/Event.h"
-
 
 using namespace ige::scene;
 

@@ -45,7 +45,7 @@ inline const std::vector<std::string> &GetFileExtensionSuported(E_FileExts fileE
     switch (fileExt)
     {
     case E_FileExts::Hidden:
-        formats = { ".git",".gitignore", ".tmp", ".pyc", ".pyxd", ".meta"};
+        formats = { ".git",".gitignore", ".tmp", ".pyc", ".pyxd", ".meta", ".igeproj", ".ini", "config", "release"};
         break;
     case E_FileExts::Sprite:
         formats = {".pyxi", ".png", ".tga", ".jpg", ".jpeg", ".bmp"};

@@ -21,9 +21,6 @@
 #include <scene/Scene.h>
 using namespace ige::scene;
 
-#include "utils/filesystem.h"
-namespace fs = ghc::filesystem;
-
 namespace ige::creator
 {
     ige::scene::Event<SceneObject*> Editor::m_targetAddedEvent;

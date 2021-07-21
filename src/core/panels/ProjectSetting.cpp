@@ -11,11 +11,9 @@
 #include "core/widgets/Drag.h"
 #include "core/plugin/DragDropPlugin.h"
 #include "core/Editor.h"
+#include "core/filesystem/FileSystem.h"
 
 #include <utils/Serialize.h>
-
-#include "utils/filesystem.h"
-namespace fs = ghc::filesystem;
 
 namespace ige::creator
 {

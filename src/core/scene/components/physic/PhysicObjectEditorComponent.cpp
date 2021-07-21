@@ -121,7 +121,7 @@ void PhysicObjectEditorComponent::drawPhysicConstraints() {
     m_constraintGroup = m_physicGroup->createWidget<Group>("ConstraintGroup");
 
     // Create constraint selection
-    m_constraintCreateCombo = m_constraintGroup->createWidget<ComboBox>("Constraint", 0, true, false);
+    m_constraintCreateCombo = m_constraintGroup->createWidget<ComboBox>("", 0, true, false);
     m_constraintCreateCombo->addChoice((int)PhysicConstraint::ConstraintType::Fixed, "Fixed Constraint");
     m_constraintCreateCombo->addChoice((int)PhysicConstraint::ConstraintType::Hinge, "Hinge Constraint");
     m_constraintCreateCombo->addChoice((int)PhysicConstraint::ConstraintType::Slider, "Slider Constraint");

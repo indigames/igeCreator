@@ -38,7 +38,7 @@ namespace ige::creator
         createPanel<GameScene>("Game", settings);
         createPanel<Profiler>("Profiler", settings);
         createPanel<Inspector>("Inspector", settings);
-        createPanel<AssetViewer>("AssetViewer", settings);
+        createPanel<AssetViewer>("Asset", settings);
         auto bitmapPanel = createPanel<BitmapFontCreator>("BitmapFontCreator", settings);
         bitmapPanel->close();
     }
@@ -96,7 +96,7 @@ namespace ige::creator
                     ImGui::DockBuilderDockWindow("Hierarchy", dock_id_left);
                     ImGui::DockBuilderDockWindow("Settings", dock_id_right);
                     ImGui::DockBuilderDockWindow("Inspector", dock_id_right);
-                    ImGui::DockBuilderDockWindow("AssetViewer", dock_id_right_bottom);
+                    ImGui::DockBuilderDockWindow("Asset", dock_id_right_bottom);
                     ImGui::DockBuilderDockWindow("Console", dock_id_bottom);
                     ImGui::DockBuilderDockWindow("Assets", dock_id_bottom);
                     ImGui::DockBuilderDockWindow("Scene", dock_main_id);

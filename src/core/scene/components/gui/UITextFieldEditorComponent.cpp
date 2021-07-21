@@ -10,8 +10,6 @@
 #include <core/dialog/OpenFileDialog.h>
 
 #include <string>
-#include "utils/filesystem.h"
-namespace fs = ghc::filesystem;
 
 NS_IGE_BEGIN
 

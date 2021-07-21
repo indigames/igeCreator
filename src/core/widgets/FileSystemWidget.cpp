@@ -182,8 +182,9 @@ namespace ige::creator
         m_iconTextures["font"] = ResourceCreator::Instance().NewTexture(GetEnginePath("icons/file_font").c_str());
         m_iconTextures["audio"] = ResourceCreator::Instance().NewTexture(GetEnginePath("icons/file_audio").c_str());
 
-        const auto root_path = fs::current_path(); // fs::absolute("");
+        m_cache.set_scan_frequency(std::chrono::milliseconds(1000));
 
+        const auto root_path = fs::current_path();
         std::error_code err;
         if (m_root != root_path || !fs::exists(m_cache.get_path(), err))
         {
@@ -227,9 +228,10 @@ namespace ige::creator
             }
             m_hierarchy.clear();
             m_hierarchy = fs::split_until(m_cache.get_path(), m_root);
+            m_selection = "";
             m_isDirty = false;
         }
-        const float size = ImGui::GetFrameHeight() * 5.0f * 0.75;
+        const float size = ImGui::GetFrameHeight() * 3.33f;
 
         int id = 0;
         for (const auto &dir : m_hierarchy)
@@ -277,7 +279,6 @@ namespace ige::creator
             const auto on_delete = [&]() {
                 std::error_code err;
                 fs::remove(absolute_path, err);
-
                 m_selection = "";
             };
 

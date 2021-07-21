@@ -15,5 +15,8 @@ namespace ige::creator
     protected:
         virtual void initialize() override;
         virtual void _drawImpl() override;
+
+    protected:
+        std::string m_path = "";
     };
 }

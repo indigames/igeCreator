@@ -9,11 +9,9 @@
 #include <core/FileHandle.h>
 #include <core/plugin/DragDropPlugin.h>
 #include <core/dialog/OpenFileDialog.h>
+#include "core/filesystem/FileSystem.h"
 
 #include <cstdlib>
-
-#include "utils/filesystem.h"
-namespace fs = ghc::filesystem;
 
 namespace ige::creator
 {
