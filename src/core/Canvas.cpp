@@ -38,6 +38,7 @@ namespace ige::creator
         createPanel<GameScene>("Game", settings);
         createPanel<Profiler>("Profiler", settings);
         createPanel<Inspector>("Inspector", settings);
+        createPanel<AssetViewer>("Asset", settings);
         auto bitmapPanel = createPanel<BitmapFontCreator>("BitmapFontCreator", settings);
         bitmapPanel->close();
     }
@@ -86,15 +87,16 @@ namespace ige::creator
                     ImGui::DockBuilderSetNodeSize(dockspace_id, displaySize);
 
                     ImGuiID dock_main_id = dockspace_id; // This variable will track the document node, however we are not using it here as we aren't docking anything into it.
-                    ImGuiID dock_id_left = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.15f, NULL, &dock_main_id);
+                    ImGuiID dock_id_left = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.17f, NULL, &dock_main_id);
                     ImGuiID dock_id_right = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.2f, NULL, &dock_main_id);
                     ImGuiID dock_id_bottom = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down, 0.2f, NULL, &dock_main_id);
-                    ImGuiID dock_id_left_bottom = ImGui::DockBuilderSplitNode(dock_id_left, ImGuiDir_Down, 0.22f, NULL, &dock_id_left);
-                    ImGuiID dock_id_right_bottom = ImGui::DockBuilderSplitNode(dock_id_right, ImGuiDir_Down, 0.22f, NULL, &dock_id_right);
+                    ImGuiID dock_id_left_bottom = ImGui::DockBuilderSplitNode(dock_id_left, ImGuiDir_Down, 0.21f, NULL, &dock_id_left);
+                    ImGuiID dock_id_right_bottom = ImGui::DockBuilderSplitNode(dock_id_right, ImGuiDir_Down, 0.21f, NULL, &dock_id_right);
 
                     ImGui::DockBuilderDockWindow("Hierarchy", dock_id_left);
                     ImGui::DockBuilderDockWindow("Settings", dock_id_right);
                     ImGui::DockBuilderDockWindow("Inspector", dock_id_right);
+                    ImGui::DockBuilderDockWindow("Asset", dock_id_right_bottom);
                     ImGui::DockBuilderDockWindow("Console", dock_id_bottom);
                     ImGui::DockBuilderDockWindow("Assets", dock_id_bottom);
                     ImGui::DockBuilderDockWindow("Scene", dock_main_id);

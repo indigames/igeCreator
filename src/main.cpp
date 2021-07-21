@@ -35,10 +35,9 @@ int main(void* data) {
 	// Initialize
 	if (gApp->isInitialized())
 	{
-		// Set game size width based
-		SystemInfo::Instance().SetGemeScreenSize(SCREEN_WIDTH);
-
 		// Show window
+		SystemInfo::Instance().UseNativeSize(true);
+		SystemInfo::Instance().SetGemeScreenSize(SCREEN_WIDTH);
 		gApp->showAppWindow(true, SCREEN_WIDTH, SCREEN_HEIGHT, true, true);
 
 		// Create editor instance

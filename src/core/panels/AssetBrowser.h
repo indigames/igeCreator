@@ -1,12 +1,9 @@
 #pragma once
 
-#include <unordered_map>
 
 #include "core/Panel.h"
-#include "core/layout/Columns.h"
-
-#include "pyxieTexture.h"
-using namespace pyxie;
+#include "core/filesystem/FileSystem.h"
+#include "core/filesystem/FileSystemCache.h"
 
 namespace ige::creator
 {
@@ -19,6 +16,7 @@ namespace ige::creator
         virtual ~AssetBrowser();
         ige::scene::Event<>& getOnFocusEvent() { return m_focusEvent; }
         void setDirty();
+        std::string getSelectedPath();
 
     protected:
         virtual void initialize() override;
@@ -27,5 +25,6 @@ namespace ige::creator
         bool m_bLastFocused = false;
         ige::scene::Event<> m_focusEvent;
         std::shared_ptr<Widget> m_fileSystemWidget = nullptr;
+        fs::recursive_directory_cache m_cache;
     };
 }

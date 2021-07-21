@@ -10,6 +10,7 @@
 #include "core/task/TaskManager.h"
 #include "core/shortcut/ShortcutController.h"
 #include "core/scene/TargetObject.h"
+#include "core/layout/Columns.h"
 
 #include "utils/GraphicsHelper.h"
 #include "scene/Scene.h"
@@ -29,16 +30,10 @@
 
 #include "components/tween/Tween.h"
 #include "components/tween/Tweener.h"
-
-
 using namespace ige::scene;
 
 #include <utils/PyxieHeaders.h>
 using namespace pyxie;
-
-#include "utils/filesystem.h"
-//#include <iostream>
-namespace fs = ghc::filesystem;
 
 namespace ige::creator
 {
@@ -120,10 +115,11 @@ namespace ige::creator
                             m_currCamera->SetAspectRate(size.x / size.y);
 
                         // Update window pos and size
-                        if (Editor::getCurrentScene())
-                            Editor::getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
-                        });
+                        if (Editor::getCurrentScene()) {
+                            Editor::getCurrentScene()->setWindowSize({ size.x , size.y });
+                        }
                     });
+                });
 
                 m_grid2D = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, GetEnginePath("sprites/grid"));
                 m_grid2D->SetPosition(Vec3(0.f, 0.f, 0.f));

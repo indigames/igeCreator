@@ -180,9 +180,11 @@ namespace ige::creator
         m_iconTextures["python"] = ResourceCreator::Instance().NewTexture(GetEnginePath("icons/file_python").c_str());
         m_iconTextures["model"] = ResourceCreator::Instance().NewTexture(GetEnginePath("icons/file_model").c_str());
         m_iconTextures["font"] = ResourceCreator::Instance().NewTexture(GetEnginePath("icons/file_font").c_str());
+        m_iconTextures["audio"] = ResourceCreator::Instance().NewTexture(GetEnginePath("icons/file_audio").c_str());
 
-        const auto root_path = fs::current_path(); // fs::absolute("");
+        m_cache.set_scan_frequency(std::chrono::milliseconds(1000));
 
+        const auto root_path = fs::current_path();
         std::error_code err;
         if (m_root != root_path || !fs::exists(m_cache.get_path(), err))
         {
@@ -226,9 +228,10 @@ namespace ige::creator
             }
             m_hierarchy.clear();
             m_hierarchy = fs::split_until(m_cache.get_path(), m_root);
+            m_selection = "";
             m_isDirty = false;
         }
-        const float size = ImGui::GetFrameHeight() * 5.0f * 0.75;
+        const float size = ImGui::GetFrameHeight() * 3.33f;
 
         int id = 0;
         for (const auto &dir : m_hierarchy)
@@ -276,13 +279,16 @@ namespace ige::creator
             const auto on_delete = [&]() {
                 std::error_code err;
                 fs::remove(absolute_path, err);
-
                 m_selection = "";
             };
 
             const auto on_click = [&]() {
                 m_selection = absolute_path;
             };
+
+            // Do not show hidden file/folder
+            if (IsFormat(E_FileExts::Hidden, name))
+                return;
 
             if (fs::is_directory(cache_entry.entry.status()))
             {
@@ -297,6 +303,10 @@ namespace ige::creator
             }
             else //file
             {
+                // Do not show hidden files
+                if (IsFormat(E_FileExts::Hidden, file_ext))
+                    return;
+
                 auto icon = m_iconTextures["file"];
                 if (IsFormat(E_FileExts::Script, file_ext))
                 {
@@ -310,9 +320,13 @@ namespace ige::creator
                 {
                     icon = m_iconTextures["image"];
                 }
-                else if (IsFormat(E_FileExts::Font, file_ext))
+                else if (IsFormat(E_FileExts::Font, file_ext) || IsFormat(E_FileExts::FontBitmap, file_ext))
                 {
                     icon = m_iconTextures["font"];
+                }
+                else if (IsFormat(E_FileExts::Audio, file_ext))
+                {
+                    icon = m_iconTextures["audio"];
                 }
 
                 const auto on_double_click = [&]() {

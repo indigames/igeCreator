@@ -16,6 +16,7 @@ namespace ige::creator
         FileSystemWidget(const fs::directory_cache& cache);
         virtual ~FileSystemWidget();
         void setDirty() { m_isDirty = true; }
+        std::string getSelectedPath() { return m_selection.string(); }
 
     protected:
         virtual void _drawImpl() override;
@@ -23,7 +24,7 @@ namespace ige::creator
     private:
         fs::directory_cache m_cache;
         fs::path m_root;
-        fs::path m_selection;        
+        fs::path m_selection;
         bool m_isDirty;
         std::vector<fs::path> m_hierarchy;
         std::unordered_map<std::string, pyxie::pyxieTexture*> m_iconTextures;

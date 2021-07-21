@@ -12,6 +12,7 @@
 #include "core/menu/MenuItem.h"
 #include "core/widgets/Button.h"
 #include "core/widgets/CheckBox.h"
+#include "core/layout/Columns.h"
 
 #include <utils/GraphicsHelper.h>
 using namespace ige::scene;
