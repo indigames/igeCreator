@@ -117,7 +117,14 @@ namespace ige::creator
         m_headerGroup = createWidget<Group>("Inspector_Header", false);
 
         // Object info
-        auto columns = m_headerGroup->createWidget<Columns<2>>();
+        if (m_infoGroup != nullptr) {
+            m_infoGroup->removeAllPlugins();
+            m_infoGroup->removeAllWidgets();
+            m_infoGroup = nullptr;
+        }
+        m_infoGroup = createWidget<Group>("BaseInfo_Header", false);
+        _drawBaseInfo();
+        /*auto columns = m_headerGroup->createWidget<Columns<2>>();
         columns->createWidget<TextField>("ID", std::to_string(m_targetObject->getId()).c_str(), true);
         columns->createWidget<CheckBox>("Active", m_targetObject->isActive())->getOnDataChangedEvent().addListener([this](bool active) {
             if (m_targetObject)
@@ -125,9 +132,10 @@ namespace ige::creator
         });
         m_headerGroup->createWidget<TextField>("UUID", m_targetObject->getUUID().c_str(), true);
         m_headerGroup->createWidget<TextField>("Name", m_targetObject->getName().c_str())->getOnDataChangedEvent().addListener([this](auto name) {
-            if (m_targetObject)
+            if (m_targetObject) {
                 m_targetObject->setName(name);
-        });
+            }
+        });*/
 
         // Create component selection
         m_createCompCombo = m_headerGroup->createWidget<ComboBox>("");
@@ -348,17 +356,53 @@ namespace ige::creator
             return;
         }
 
+        if (m_bInfoDirty)
+            _drawBaseInfo();
+
         Panel::_drawImpl();
+    }
+
+    void Inspector::_drawBaseInfo()
+    {
+        if (m_infoGroup == nullptr) return;
+        m_infoGroup->removeAllPlugins();
+        m_infoGroup->removeAllWidgets();
+
+        // Object info
+        auto columns = m_infoGroup->createWidget<Columns<2>>();
+        columns->createWidget<TextField>("ID", std::to_string(m_targetObject->getId()).c_str(), true);
+        columns->createWidget<CheckBox>("Active", m_targetObject->isActive())->getOnDataChangedEvent().addListener([this](bool active) {
+            if (m_targetObject)
+                m_targetObject->setActive(active);
+            });
+        pyxie_printf("Target Name %s \n", m_targetObject->getName().c_str());
+        m_infoGroup->createWidget<TextField>("UUID", m_targetObject->getUUID().c_str(), true);
+        m_infoGroup->createWidget<TextField>("Name", m_targetObject->getName().c_str())->getOnDataChangedEvent().addListener([this](auto name) {
+            if (m_targetObject) {
+                m_targetObject->setName(name);
+                m_bInfoDirty = true;
+            }
+            });
+
+        m_bInfoDirty = false;
     }
 
     void Inspector::clear()
     {
+        if (m_infoGroup) {
+            m_infoGroup->removeAllPlugins();
+            m_infoGroup->removeAllWidgets();
+            m_infoGroup = nullptr;
+        }
+
         m_targetObject = nullptr;
         m_inspectorEditor = nullptr;
 
         m_createCompCombo = nullptr;
         m_headerGroup = nullptr;
         m_componentGroup = nullptr;
+
+        
 
         removeAllWidgets();
     }

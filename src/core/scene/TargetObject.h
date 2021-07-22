@@ -28,6 +28,9 @@ namespace ige::scene
         //! Get Name
         virtual std::string getName() const override;
 
+        //! Set Name 
+        virtual void setName(const std::string& name) override;
+
         // Get parent
         virtual SceneObject *getParent() const override;
 

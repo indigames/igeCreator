@@ -28,7 +28,9 @@ namespace ige::scene
     //! Get UUID
     std::string TargetObject::getUUID() const 
     {
-        if(m_objects.size() == 1)
+        if (m_objects.size() == 0)
+            return "";
+        else if(m_objects.size() == 1)
             return m_objects[0]->getUUID();
         return "Multiple Values";
     }
@@ -36,9 +38,20 @@ namespace ige::scene
     //! Get Name
     std::string TargetObject::getName() const 
     {
-        if(m_objects.size() == 1)
+        if (m_objects.size() == 0)
+            return "";
+        else if(m_objects.size() == 1)
             return m_objects[0]->getName();
         return "Multiple Values";
+    }
+
+    void TargetObject::setName(const std::string& name)
+    {
+        int size = m_objects.size();
+        for (int i = 0; i < size; i++)
+        {
+            m_objects[0]->setName(name);
+        }
     }
 
     // Get parent

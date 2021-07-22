@@ -42,6 +42,8 @@ namespace ige::creator
     protected:
         virtual void _drawImpl() override;
 
+        void _drawBaseInfo();
+
     public:
         std::shared_ptr<InspectorEditor> getInspectorEditor() { return m_inspectorEditor; }
 
@@ -53,9 +55,14 @@ namespace ige::creator
         std::shared_ptr<Group> m_headerGroup = nullptr;
         std::shared_ptr<ComboBox> m_createCompCombo = nullptr;
         std::shared_ptr<Group> m_componentGroup = nullptr;
+        std::shared_ptr<Group> m_infoGroup = nullptr;
+
+        //! Flag for redrawing base info
+        bool m_bInfoDirty = false;
 
         //! Flags for redrawing component in main thread
         bool m_bNeedRedraw = false;
         std::shared_ptr<InspectorEditor> m_inspectorEditor = nullptr;
     };
 }
+
