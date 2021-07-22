@@ -79,6 +79,12 @@ elseif(IOS)
     endif()
 endif()
 
+add_compile_definitions(EDITOR_MODE=1)
+add_subdirectory(libs/pyxCore ${CMAKE_BINARY_DIR}/pyxCore EXCLUDE_FROM_ALL)
+add_subdirectory(libs/igeCore ${CMAKE_BINARY_DIR}/igeCore EXCLUDE_FROM_ALL)
+add_subdirectory(libs/igeVMath ${CMAKE_BINARY_DIR}/igeVMath EXCLUDE_FROM_ALL)
+add_subdirectory(libs/igeScene ${CMAKE_BINARY_DIR}/igeScene EXCLUDE_FROM_ALL)
+
 if(${APP_STYLE} MATCHES "SHARED")
     find_package (Python3 ${PYTHON_VERSION} EXACT REQUIRED COMPONENTS Development)
 else()
@@ -135,12 +141,6 @@ include_directories(
     "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/Recast/Include"
 )
 
-add_compile_definitions(EDITOR_MODE=1)
-add_subdirectory(libs/pyxCore/pyxcore ${CMAKE_BINARY_DIR}/pyxCore EXCLUDE_FROM_ALL)
-add_subdirectory(libs/igeCore ${CMAKE_BINARY_DIR}/igeCore EXCLUDE_FROM_ALL)
-add_subdirectory(libs/igeVMath ${CMAKE_BINARY_DIR}/igeVMath EXCLUDE_FROM_ALL)
-add_subdirectory(libs/igeScene ${CMAKE_BINARY_DIR}/igeScene EXCLUDE_FROM_ALL)
-
 # Source files
 file(GLOB_RECURSE SRC_FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
@@ -186,6 +186,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:python37") #
 target_link_libraries(${TARGET_NAME} 
     igeScene-static
     pyxcore
+    pyxtools
     igeCore-static
     igeVMath-static
     ${Python3_LIBRARIES}
@@ -282,3 +283,22 @@ install(TARGETS
   RUNTIME DESTINATION bin
 )
 
+get_filename_component(PVRTEXLIB_LIB_DIR ${PVRTEXLIB_LIB} DIRECTORY)
+install(DIRECTORY
+    ${PVRTEXLIB_LIB_DIR}/
+    DESTINATION bin
+    FILES_MATCHING
+        PATTERN "*.dll"
+        PATTERN "*.so"
+        PATTERN "*.dylib"
+)
+
+get_filename_component(FBX_LIB_DIR ${FBX_LIB} DIRECTORY)
+install(DIRECTORY
+    ${FBX_LIB_DIR}/
+    DESTINATION bin
+    FILES_MATCHING
+        PATTERN "*.dll"
+        PATTERN "*.so"
+        PATTERN "*.dylib"
+)
