@@ -7,6 +7,9 @@
 #include "core/plugin/DragDropPlugin.h"
 #include "core/dialog/OpenFileDialog.h"
 
+#include <Components/SpriteComponent.h>
+using namespace ige::scene;
+
 NS_IGE_BEGIN
 
 SpriteEditorComponent::SpriteEditorComponent() {

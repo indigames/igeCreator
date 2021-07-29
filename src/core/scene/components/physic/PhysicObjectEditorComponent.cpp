@@ -118,7 +118,7 @@ void PhysicObjectEditorComponent::drawPhysicConstraints() {
         m_constraintGroup->removeAllWidgets();
         m_constraintGroup = nullptr;
     }
-    m_constraintGroup = m_physicGroup->createWidget<Group>("ConstraintGroup");
+    m_constraintGroup = m_physicGroup->createWidget<Group>("Constraints");
 
     // Create constraint selection
     m_constraintCreateCombo = m_constraintGroup->createWidget<ComboBox>("", 0, true, false);

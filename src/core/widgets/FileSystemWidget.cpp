@@ -362,7 +362,7 @@ namespace ige::creator
         auto extra = ((items_per_line_exact - items_per_line_floor) * item_size) /
                      std::max(1.0f, items_per_line_floor - 1);
         auto lines = std::max<int>(1, int(ImCeil(float(count) / float(items_per_line))));
-        ImGuiListClipper clipper(lines);
+        ImGuiListClipper clipper(lines, item_size);
 
         while (clipper.Step())
         {

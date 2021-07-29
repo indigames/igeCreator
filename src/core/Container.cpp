@@ -71,8 +71,6 @@ namespace ige::creator
         {
             if (widget)
             {
-                widget->setContainer(nullptr);
-                widget->removeAllPlugins();
                 auto& group = std::dynamic_pointer_cast<Group>(widget);
                 if (group) group->removeAllWidgets();
                 widget = nullptr;

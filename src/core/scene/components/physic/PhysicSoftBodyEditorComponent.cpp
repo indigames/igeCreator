@@ -4,6 +4,7 @@
 #include <core/layout/Group.h>
 
 #include "components/physic/PhysicSoftBody.h"
+#include "components/FigureComponent.h"
 #include "core/widgets/Widgets.h"
 #include "core/layout/Columns.h"
 

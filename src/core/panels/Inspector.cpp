@@ -205,7 +205,7 @@ namespace ige::creator
                 case (int)Component::Type::Camera:
                     m_targetObject->addComponent<CameraComponent>("camera");
                     if (!m_targetObject->getComponent<FigureComponent>())
-                        m_targetObject->addComponent<FigureComponent>(GetEnginePath("figures/camera.pyxf"))->setSkipSerialize(true);
+                        m_targetObject->addComponent<FigureComponent>(GetEnginePath("figures/camera"))->setSkipSerialize(true);
                     break;
                 case (int)Component::Type::Environment:
                     m_targetObject->addComponent<EnvironmentComponent>();

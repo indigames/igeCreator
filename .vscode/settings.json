@@ -78,6 +78,16 @@
         "future": "cpp",
         "resumable": "cpp",
         "random": "cpp",
-        "stack": "cpp"
+        "stack": "cpp",
+        "any": "cpp",
+        "bit": "cpp",
+        "charconv": "cpp",
+        "compare": "cpp",
+        "csignal": "cpp",
+        "coroutine": "cpp",
+        "format": "cpp",
+        "optional": "cpp",
+        "stop_token": "cpp",
+        "typeindex": "cpp"
     }
 }
