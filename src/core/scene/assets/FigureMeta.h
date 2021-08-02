@@ -1,5 +1,5 @@
-#ifndef __FIGURE_EDITOR_COMPONENT_H_
-#define __FIGURE_EDITOR_COMPONENT_H_
+#ifndef __FIGURE_META_H_
+#define __FIGURE_META_H_
 
 #include "core/Macros.h"
 
@@ -29,4 +29,4 @@ protected:
 
 NS_IGE_END
 
-#endif //__FIGURE_EDITOR_COMPONENT_H_
+#endif //__FIGURE_META_H_

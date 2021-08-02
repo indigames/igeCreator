@@ -17,6 +17,7 @@
 
 #include "core/Editor.h"
 #include "core/scene/assets/FigureMeta.h"
+#include "core/scene/assets/TextureMeta.h"
 
 #include "utils/GraphicsHelper.h"
 #include <imgui_internal.h>
@@ -73,12 +74,14 @@ namespace ige::creator
             if (hidden) continue;
             if (fs::is_regular_file(file.entry.status()) && file_ext.compare(".meta") != 0) {
                 const auto metaPath = fsPath.parent_path().append(filename + ".meta");
-                bool resave = false;
 
-                if (!fs::exists(metaPath)) {
-                    resave = true;
-                }
-                else {
+                // check file exist
+                bool dirty = !fs::exists(metaPath)
+                    || IsFormat(E_FileExts::Figure, file_ext) && !fs::exists(fsPath.parent_path().append(fsPath.stem().string() + ".pyxf"))
+                    || IsFormat(E_FileExts::Sprite, file_ext) && !fs::exists(fsPath.parent_path().append(fsPath.stem().string() + ".pyxi"));
+
+                // check timestamp
+                if (!dirty) {
                     auto file = std::ifstream(metaPath);
                     if (file.is_open()) {
                         json metaJs;
@@ -87,13 +90,17 @@ namespace ige::creator
                         auto timeStamp = metaJs.value("Timestamp", (long long)-1);
                         auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(fs::last_write_time(fsPath).time_since_epoch()).count();
                         if (timeStamp != ms) {
-                            resave = true;
+                            dirty = true;
                         }
                     }
                 }
-                if (resave) {
+
+                // resave
+                if (dirty) {
                     if (IsFormat(E_FileExts::Figure, file_ext)) {
                         std::make_unique<FigureMeta>(path)->save();
+                    } else if (IsFormat(E_FileExts::Sprite, file_ext)) {
+                        std::make_unique<TextureMeta>(path)->save();
                     }
                     else {
                         std::make_unique<AssetMeta>(path)->save();

@@ -104,12 +104,12 @@ void AssetMeta::draw(std::shared_ptr<Group> group) {
                         // Todo: parse Vec<N>, Quat,
                     }
                 }
-            }
 
-            auto optionGroup = group->createWidget<Button>("Save", ImVec2(64.f, 0.f));
-            optionGroup->getOnClickEvent().addListener([this](auto widget) {
-                save();
-            });
+                auto optionGroup = group->createWidget<Button>("Save", ImVec2(64.f, 0.f));
+                optionGroup->getOnClickEvent().addListener([this](auto widget) {
+                    save();
+                });
+            }
         }
     }
 }

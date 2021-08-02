@@ -7,6 +7,7 @@
 #include "core/Canvas.h"
 #include "core/FileHandle.h"
 #include "core/scene/assets/FigureMeta.h"
+#include "core/scene/assets/TextureMeta.h"
 
 namespace ige::creator
 {
@@ -36,7 +37,10 @@ namespace ige::creator
                 if(IsFormat(E_FileExts::Figure, fsPath.extension()))
                 {
                     m_assetMeta = std::make_shared<FigureMeta>(m_path);
-                } else {
+                } else if (IsFormat(E_FileExts::Sprite, fsPath.extension())) {
+                    m_assetMeta = std::make_shared<TextureMeta>(m_path);
+                }
+                 else {
                     m_assetMeta = std::make_shared<AssetMeta>(m_path);
                 }
                 m_assetMeta->draw(m_assetGroup);
