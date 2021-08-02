@@ -105,8 +105,8 @@ void AssetMeta::draw(std::shared_ptr<Group> group) {
                     }
                 }
 
-                auto optionGroup = group->createWidget<Button>("Save", ImVec2(64.f, 0.f));
-                optionGroup->getOnClickEvent().addListener([this](auto widget) {
+                auto btnSave = group->createWidget<Button>("Save", ImVec2(64.f, 0.f));
+                btnSave->getOnClickEvent().addListener([this](auto widget) {
                     save();
                 });
             }
