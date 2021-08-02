@@ -71,15 +71,8 @@ namespace ige::creator
                 ImGui::SameLine(0, g.Style.ItemInnerSpacing.x);
 
             // Notice: to show NAN the data type must be Float, so to present Int type we use %.0f format here
-            if (type_size == ImGui::DataTypeInfo[ImGuiDataType_Float].Size)
-            {
-                if(ImGui::DragScalar("", ImGuiDataType_Float, p_data, m_speed, &m_min, &m_max, m_dataType == ImGuiDataType_Float ? "%.3f" : "%.0f"))
-                    changedIdx = i;
-            }            
-            else if(ImGui::DragScalar("", m_dataType, p_data, m_speed, &m_min, &m_max))
-            {
+            if(ImGui::DragScalar("", ImGuiDataType_Float, p_data, m_speed, &m_min, &m_max, m_dataType == ImGuiDataType_Float ? "%.3f" : "%.0f"))
                 changedIdx = i;
-            }
 
             ImGui::PopID();
             ImGui::PopItemWidth();

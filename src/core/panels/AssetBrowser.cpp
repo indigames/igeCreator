@@ -84,7 +84,7 @@ namespace ige::creator
                         json metaJs;
                         file >> metaJs;
                         file.close();
-                        auto timeStamp = metaJs.value("timestamp", (long long)-1);
+                        auto timeStamp = metaJs.value("Timestamp", (long long)-1);
                         auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(fs::last_write_time(fsPath).time_since_epoch()).count();
                         if (timeStamp != ms) {
                             resave = true;

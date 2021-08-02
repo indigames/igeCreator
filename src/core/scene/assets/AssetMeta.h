@@ -15,14 +15,24 @@ public:
 	AssetMeta(const std::string& path);
 	virtual ~AssetMeta();
 
+	//! Load options
+	virtual bool loadOptions();
+
 	//! Save to meta file
 	virtual bool save();
 
 	//! Draw
 	virtual void draw(std::shared_ptr<Group> group);
 
+	//! Set option
+	virtual void setOption(const std::string& key, json val);
+
 protected:
+	//! Path to the asset file
 	std::string m_path;
+
+	//! Options
+	std::unordered_map<std::string, json> m_options;
 };
 
 NS_IGE_END

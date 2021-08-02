@@ -33,7 +33,7 @@ namespace ige::creator
             auto fsPath = fs::path(m_path);
             auto metaPath = fsPath.parent_path().append(fsPath.filename().string() + ".meta");
             if (fs::exists(metaPath)) {
-                if(IsFormat(E_FileExts::Figure, fsPath.extension()) == 0)
+                if(IsFormat(E_FileExts::Figure, fsPath.extension()))
                 {
                     m_assetMeta = std::make_shared<FigureMeta>(m_path);
                 } else {

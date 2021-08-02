@@ -12,7 +12,25 @@
 NS_IGE_BEGIN
 
 FigureMeta::FigureMeta(const std::string& path)
-	: AssetMeta(path) {
+	: AssetMeta(path) 
+{
+    m_options = {
+        {"BASE_SCALE", 1.f},
+        {"EXPORT_NAMES", true},
+        {"TRIANGLE_STRIP", true},
+        {"GEN_MIPMAP", true},
+        {"OPTIMIZE_MESH", true},
+        {"OPTIMIZE_VERTEX", true},
+        {"OPTIMIZE_ANIMATION", true},
+        {"SHADER_MAKE_SHADOW", true},
+        {"SHADER_RECEIVE_SHADOW", true},
+        {"SHADER_DEPTH_SHADOW", true},
+        {"MATERIAL_PARAM_SPARE", 8},
+        {"SHADER_NUM_DIR_LAMP", 3},
+        {"SHADER_NUM_POINT_LAMP", 7},
+        {"SHADER_NUM_SPOT_LAMP", 7},
+    };
+    loadOptions();
 }
 
 FigureMeta::~FigureMeta() {
@@ -28,29 +46,22 @@ bool FigureMeta::loadCollada(EditableFigure& efig, const std::string& path) {
     pyxieFigureExportConfigManager::Instance().ClearOption();
 
     auto fsPath = fs::path(path);
+    auto parentPath = fsPath.parent_path();
     auto relPath = fsPath.is_absolute() ? fs::relative(fsPath, fs::current_path()).string() : fsPath.string();
     std::replace(relPath.begin(), relPath.end(), '\\', '/');
 
-    auto parentPath = fsPath.parent_path();
-    auto metaPath = parentPath.append(fsPath.filename().string() + ".meta");
-    auto file = std::ifstream(metaPath);
-    if (file.is_open()) {
-        json metaJs;
-        file >> metaJs;
-        file.close();
-        json options = metaJs.value("options", json{});
-        for (auto& [key, val] : options.items()) {
-            if (val.type() == nlohmann::json::value_t::boolean
-                || val.type() == nlohmann::json::value_t::number_integer
-                || val.type() == nlohmann::json::value_t::number_unsigned) {
-                pyxieFigureExportConfigManager::Instance().SetOptionInt(key.c_str(), val);
-            } else if (val.type() == nlohmann::json::value_t::number_float) {
-                pyxieFigureExportConfigManager::Instance().SetOptionFloat(key.c_str(), val);
-            } else if (val.type() == nlohmann::json::value_t::string) {
-                pyxieFigureExportConfigManager::Instance().SetOptionString(key.c_str(), val.get<std::string>().c_str());
-            } else {
-                // Just ignore
-            }
+    //! Load options
+    for (auto& [key, val] :m_options) {
+        if (val.type() == nlohmann::json::value_t::boolean
+            || val.type() == nlohmann::json::value_t::number_integer
+            || val.type() == nlohmann::json::value_t::number_unsigned) {
+            pyxieFigureExportConfigManager::Instance().SetOptionInt(key.c_str(), val);
+        } else if (val.type() == nlohmann::json::value_t::number_float) {
+            pyxieFigureExportConfigManager::Instance().SetOptionFloat(key.c_str(), val);
+        } else if (val.type() == nlohmann::json::value_t::string) {
+            pyxieFigureExportConfigManager::Instance().SetOptionString(key.c_str(), val.get<std::string>().c_str());
+        } else {
+            // Just ignore
         }
     }
 
@@ -80,24 +91,11 @@ bool FigureMeta::save() {
     auto fsPath = fs::path(m_path);
     auto efig = ResourceCreator::Instance().NewEditableFigure(m_path.c_str(), true);
     if (loadCollada(*efig, m_path))
-        efig->SaveFigure((fsPath.parent_path().append(fsPath.filename().string() + ".pyxf")).c_str());
+        efig->SaveFigure((fsPath.parent_path().append(fsPath.stem().string() + ".pyxf")).c_str());
     efig->DecReference();
     efig = nullptr;
 
-    if (fs::exists(fsPath)) {
-        const auto metaPath = fsPath.parent_path().append(fsPath.filename().string() + ".meta");
-        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(fs::last_write_time(fsPath).time_since_epoch()).count();
-
-        json metaJson = json{
-            {"timestamp", ms },
-            {"options", {}}
-        };
-        std::ofstream file(metaPath);
-        file << std::setw(2) << metaJson << std::endl;
-        file.close();
-        return true;
-    }
-    return false;
+    return AssetMeta::save();
 }
 
 

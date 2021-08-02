@@ -153,7 +153,7 @@ void ScriptEditorComponent::drawScriptComponent() {
                     auto uuid = value.value("uuid", std::string());
                     auto compName = value.value("comp", std::string());
                     sceneObject = Editor::getCurrentScene()->findObjectByUUID(uuid);
-                    txtField = m_scriptCompGroup->createWidget<TextField>(key, sceneObject ? (compName.empty() ? sceneObject->getName() : sceneObject->getName() + "/" + compName) : value.get<std::string>());
+                    txtField = m_scriptCompGroup->createWidget<TextField>(key, sceneObject ? (compName.empty() ? sceneObject->getName() : sceneObject->getName() + "/" + compName) : "");
                 }
                 else {
                     txtField = m_scriptCompGroup->createWidget<TextField>(key, "");
