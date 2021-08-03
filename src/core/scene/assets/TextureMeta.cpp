@@ -19,7 +19,7 @@ TextureMeta::TextureMeta(const std::string& path)
         {"IsNormalMap", false},
         {"WrapRepeat", false},
         {"UseMipmap", false},
-        {"Quality", 2},
+        {"Quality", 1},
     };
     loadOptions();
 }
