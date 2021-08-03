@@ -8,9 +8,6 @@
 #include "core/widgets/Button.h"
 #include "core/widgets/Drag.h"
 
-#include <nlohmann/json.hpp>
-using json = nlohmann::json;
-
 #include <chrono>
 #include <ctime>
 #include <iomanip>
