@@ -18,10 +18,6 @@ public:
 
 	//! Save to file
 	virtual bool save() override;
-
-protected:
-	//! Convert texture
-	bool convertTexture(const std::string& path);
 };
 
 NS_IGE_END

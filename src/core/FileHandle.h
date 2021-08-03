@@ -28,44 +28,42 @@ const auto AllFileExts =  {
     E_FileExts::Particle
 };
 
-inline const std::vector<std::string> &GetFileExtensionSuported(E_FileExts fileExt) {
-    static std::vector<std::string> formats = {};
+inline std::vector<std::string> GetFileExtensionSuported(E_FileExts fileExt) {
     switch (fileExt) {
     case E_FileExts::Hidden:
-        formats = { ".pyxf", ".pyxi", ".git",".gitignore", ".pyc", ".pyxd", ".meta", ".igeproj", ".ini", ".tmp", "__pycache__", "config", "release"};
+        return { ".pyxf", ".pyxi", ".git",".gitignore", ".pyc", ".pyxd", ".meta", ".igeproj", ".ini", ".tmp", "__pycache__", "config", "release"};
         break;
     case E_FileExts::Sprite:
-        formats = {".png", ".tga", ".jpg", ".jpeg", ".bmp"};
+        return {".png", ".tga", ".jpg", ".jpeg", ".bmp"};
         break;
     case E_FileExts::Figure:
-        formats = {".dae", ".fbx"};
+        return {".dae", ".fbx"};
         break;
     case E_FileExts::Script:
-        formats = {".py"};
+        return {".py"};
         break;
     case E_FileExts::Font:
-        formats = {".ttf", ".otf"};
+        return {".ttf", ".otf"};
         break;
     case E_FileExts::FontBitmap:
-        formats = { ".pybm"};
+        return { ".pybm"};
         break;
     case E_FileExts::Audio:
-        formats = {".wav", ".ogg", ".mp3"};
+        return {".wav", ".ogg", ".mp3"};
         break;
     case E_FileExts::Prefab:
-        formats = { ".prefab" };
+        return { ".prefab" };
         break;
     case E_FileExts::Scene:
-        formats = { ".scene" };
+        return { ".scene" };
         break;
     case E_FileExts::Particle:
-        formats = { ".efk" };
+        return { ".efk" };
         break;
     default:
-        formats = {};
         break;
     }
-    return formats;
+    return {};
 }
 
 inline bool IsFormat(E_FileExts fileExt, const std::string &ex) {
