@@ -1,11 +1,9 @@
 #ifndef __FIGURE_META_H_
 #define __FIGURE_META_H_
 
-#include "core/Macros.h"
-
-#include "core/scene/components/EditorComponent.h"
 #include "core/scene/assets/AssetMeta.h"
-#include "components/Component.h"
+
+#include <utils/PyxieHeaders.h>
 
 USING_NS_IGE_SCENE
 NS_IGE_BEGIN
