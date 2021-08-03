@@ -2,17 +2,7 @@
 #include <string>
 #include <vector>
 
-#include <Components/CameraComponent.h>
-#include <Components/TransformComponent.h>
-#include <Components/EnvironmentComponent.h>
-#include <Components/FigureComponent.h>
-#include <Components/SpriteComponent.h>
-#include <Components/ScriptComponent.h>
-
-using namespace ige::scene;
-
-enum class E_FileExts
-{
+enum class E_FileExts {
     Hidden = 0,
     Sprite,
     Figure,
@@ -26,8 +16,7 @@ enum class E_FileExts
 };
 
 // Useful when iterate though all supported file types
-const auto AllFileExts = 
-{
+const auto AllFileExts =  {
     E_FileExts::Sprite,
     E_FileExts::Figure,
     E_FileExts::Script,
@@ -39,19 +28,17 @@ const auto AllFileExts =
     E_FileExts::Particle
 };
 
-inline const std::vector<std::string> &GetFileExtensionSuported(E_FileExts fileExt)
-{
+inline const std::vector<std::string> &GetFileExtensionSuported(E_FileExts fileExt) {
     static std::vector<std::string> formats = {};
-    switch (fileExt)
-    {
+    switch (fileExt) {
     case E_FileExts::Hidden:
-        formats = { ".git",".gitignore", ".tmp", ".pyc", ".pyxd", ".meta", ".igeproj", ".ini", "config", "release"};
+        formats = { ".pyxf", ".pyxi", ".git",".gitignore", ".pyc", ".pyxd", ".meta", ".igeproj", ".ini", ".tmp", "__pycache__", "config", "release"};
         break;
     case E_FileExts::Sprite:
-        formats = {".pyxi", ".png", ".tga", ".jpg", ".jpeg", ".bmp"};
+        formats = {".png", ".tga", ".jpg", ".jpeg", ".bmp"};
         break;
     case E_FileExts::Figure:
-        formats = {".pyxf", ".dae", ".obj", ".pbx"};
+        formats = {".dae", ".fbx"};
         break;
     case E_FileExts::Script:
         formats = {".py"};
@@ -81,8 +68,8 @@ inline const std::vector<std::string> &GetFileExtensionSuported(E_FileExts fileE
     return formats;
 }
 
-inline bool IsFormat(E_FileExts fileExt, const std::string &ex)
-{
+inline bool IsFormat(E_FileExts fileExt, const std::string &ex) {
+    if (ex.empty() || ex.size() <= 0 || ex.compare("") == 0) return false;
     const auto &supported = GetFileExtensionSuported(fileExt);
     return std::find(std::begin(supported), std::end(supported), ex) != std::end(supported);
 }
@@ -91,16 +78,14 @@ inline const std::vector<std::vector<std::string>> &IGEExtensionSuported()
 {
     static const std::vector<std::vector<std::string>> types = {
         GetFileExtensionSuported(E_FileExts::Figure),
-        GetFileExtensionSuported(E_FileExts::Sprite)};
-
+        GetFileExtensionSuported(E_FileExts::Sprite)
+    };
     return types;
 }
 
-inline bool IsIGEExtensionSuported(const std::string &ex)
-{
+inline bool IsIGEExtensionSuported(const std::string &ex) {
     std::vector<std::string> types;
     types.insert(types.end(), GetFileExtensionSuported(E_FileExts::Figure).begin(), GetFileExtensionSuported(E_FileExts::Figure).end());
     types.insert(types.end(), GetFileExtensionSuported(E_FileExts::Sprite).begin(), GetFileExtensionSuported(E_FileExts::Sprite).end());
-
     return std::find(std::begin(types), std::end(types), ex) != std::end(types);
 }

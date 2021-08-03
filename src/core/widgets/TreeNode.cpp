@@ -14,6 +14,9 @@ namespace ige::creator
     {
         getOnOpenedEvent().removeAllListeners();
         getOnClosedEvent().removeAllListeners();
+
+        removeAllWidgets();
+        removeAllPlugins();
     }
 
     void TreeNode::draw()

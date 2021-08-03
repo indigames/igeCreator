@@ -25,7 +25,7 @@ namespace ImGui {
         { sizeof(float),            "%f",   "%f"    },  // ImGuiDataType_Float (float are promoted to double in va_arg)
         { sizeof(double),           "%f",   "%lf"   },  // ImGuiDataType_Double
     };
-}    
+}
 
 namespace ige::creator
 {
@@ -38,7 +38,7 @@ namespace ige::creator
 
     template <typename T, size_t N>
     Drag<T, N>::~Drag()
-    {        
+    {
     }
 
     template <typename T, size_t N>
@@ -46,7 +46,7 @@ namespace ige::creator
     {
         if (m_max < m_min)
             m_max = m_min;
-        
+
         for (size_t i = 0; i < N; ++i)
         {
             if (m_data[i] < m_min)
@@ -71,7 +71,7 @@ namespace ige::creator
                 ImGui::SameLine(0, g.Style.ItemInnerSpacing.x);
 
             // Notice: to show NAN the data type must be Float, so to present Int type we use %.0f format here
-            if (ImGui::DragScalar("", ImGuiDataType_Float, p_data, m_speed, &m_min, &m_max, (m_dataType == ImGuiDataType_S32) ? "%.0f" : "%.3f"))
+            if(ImGui::DragScalar("", ImGuiDataType_Float, p_data, m_speed, &m_min, &m_max, m_dataType == ImGuiDataType_Float ? "%.3f" : "%.0f"))
                 changedIdx = i;
 
             ImGui::PopID();

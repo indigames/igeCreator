@@ -18,6 +18,8 @@
 #include "scene/SceneManager.h"
 #include "utils/RayOBBChecker.h"
 #include "utils/ShapeDrawer.h"
+#include "components/FigureComponent.h"
+#include "components/SpriteComponent.h"
 #include "components/gui/RectTransform.h"
 #include "components/gui/Canvas.h"
 #include "components/physic/PhysicBox.h"

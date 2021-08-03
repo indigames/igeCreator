@@ -79,6 +79,12 @@ elseif(IOS)
     endif()
 endif()
 
+add_compile_definitions(EDITOR_MODE=1)
+add_subdirectory(libs/pyxCore ${CMAKE_BINARY_DIR}/pyxCore EXCLUDE_FROM_ALL)
+add_subdirectory(libs/igeCore ${CMAKE_BINARY_DIR}/igeCore EXCLUDE_FROM_ALL)
+add_subdirectory(libs/igeVMath ${CMAKE_BINARY_DIR}/igeVMath EXCLUDE_FROM_ALL)
+add_subdirectory(libs/igeScene ${CMAKE_BINARY_DIR}/igeScene EXCLUDE_FROM_ALL)
+
 if(${APP_STYLE} MATCHES "SHARED")
     find_package (Python3 ${PYTHON_VERSION} EXACT REQUIRED COMPONENTS Development)
 else()
@@ -99,10 +105,12 @@ find_package(igeSound REQUIRED)
 find_package(igeEffekseer REQUIRED)
 find_package(igeNavigation REQUIRED)
 find_package(zlib)
+find_package(json)
 
 include_directories(
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/pyxcore"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/pyxtools"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/GLEW"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/edge/include"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/vectormath/scalar/cpp"
@@ -114,6 +122,7 @@ include_directories(
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeCore"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeVMath"
     "${zlib_INCLUDE_DIRS}"
+    "${json_INCLUDE_DIRS}"
     "${Python3_INCLUDE_DIRS}"
     "${numpy_INCLUDE_DIRS}"
     "${stb_INCLUDE_DIRS}"
@@ -134,12 +143,6 @@ include_directories(
     "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/DetourTileCache/Include"
     "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/Recast/Include"
 )
-
-add_compile_definitions(EDITOR_MODE=1)
-add_subdirectory(libs/pyxCore/pyxcore ${CMAKE_BINARY_DIR}/pyxCore EXCLUDE_FROM_ALL)
-add_subdirectory(libs/igeCore ${CMAKE_BINARY_DIR}/igeCore EXCLUDE_FROM_ALL)
-add_subdirectory(libs/igeVMath ${CMAKE_BINARY_DIR}/igeVMath EXCLUDE_FROM_ALL)
-add_subdirectory(libs/igeScene ${CMAKE_BINARY_DIR}/igeScene EXCLUDE_FROM_ALL)
 
 # Source files
 file(GLOB_RECURSE SRC_FILES
@@ -181,11 +184,12 @@ add_executable(${TARGET_NAME} WIN32 "${CMAKE_CURRENT_SOURCE_DIR}/src/igeCreator.
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ignore:4099 /ignore:4286 /ignore:4127") # Disable linker warning
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT") # Disable LIBCMT, avoid conflict definition
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:python37") # Disable LIBCMT, avoid conflict definition
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:python37") # Disable python37, avoid conflict definition
 
 target_link_libraries(${TARGET_NAME} 
     igeScene-static
     pyxcore
+    pyxtools
     igeCore-static
     igeVMath-static
     ${Python3_LIBRARIES}
@@ -282,3 +286,22 @@ install(TARGETS
   RUNTIME DESTINATION bin
 )
 
+get_filename_component(PVRTEXLIB_LIB_DIR ${PVRTEXLIB_LIB} DIRECTORY)
+install(DIRECTORY
+    ${PVRTEXLIB_LIB_DIR}/
+    DESTINATION bin
+    FILES_MATCHING
+        PATTERN "*.dll"
+        PATTERN "*.so"
+        PATTERN "*.dylib"
+)
+
+get_filename_component(FBX_LIB_DIR ${FBX_LIB} DIRECTORY)
+install(DIRECTORY
+    ${FBX_LIB_DIR}/
+    DESTINATION bin
+    FILES_MATCHING
+        PATTERN "*.dll"
+        PATTERN "*.so"
+        PATTERN "*.dylib"
+)

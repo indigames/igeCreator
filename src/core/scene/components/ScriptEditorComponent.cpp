@@ -139,12 +139,25 @@ void ScriptEditorComponent::drawScriptComponent() {
             break;
 
             case json::value_t::string:
+            case json::value_t::object:
+            case json::value_t::null:
             {
-                auto jVal = json::parse(value.get<std::string>(), 0, false);
-                auto uuid = jVal.is_null() || jVal.is_discarded() ? "" : jVal.value("uuid", std::string());
-                auto compName = jVal.is_null() || jVal.is_discarded() ? "" : jVal.value("comp", std::string());
-                auto sceneObject = Editor::getCurrentScene()->findObjectByUUID(uuid);
-                auto txtField = m_scriptCompGroup->createWidget<TextField>(key, sceneObject ? (compName.empty() ? sceneObject->getName() : sceneObject->getName() + "/" + compName) : value.get<std::string>());
+                auto val = std::string();
+                std::shared_ptr<SceneObject> sceneObject = nullptr;
+                std::shared_ptr<Widget> txtField = nullptr;
+
+                if (value.type() == json::value_t::string) {
+                    txtField = m_scriptCompGroup->createWidget<TextField>(key, value.get<std::string>());
+                }
+                else if (value.type() == json::value_t::object) {
+                    auto uuid = value.value("uuid", std::string());
+                    auto compName = value.value("comp", std::string());
+                    sceneObject = Editor::getCurrentScene()->findObjectByUUID(uuid);
+                    txtField = m_scriptCompGroup->createWidget<TextField>(key, sceneObject ? (compName.empty() ? sceneObject->getName() : sceneObject->getName() + "/" + compName) : "");
+                }
+                else {
+                    txtField = m_scriptCompGroup->createWidget<TextField>(key, "");
+                }
 
                 if (sceneObject)
                 {

@@ -16,12 +16,12 @@
 #include "core/dialog/OpenFileDialog.h"
 
 #include "core/Editor.h"
+#include "core/scene/assets/FigureMeta.h"
+#include "core/scene/assets/TextureMeta.h"
 
 #include "utils/GraphicsHelper.h"
 #include <imgui_internal.h>
 #include "SDL.h"
-
-#include <iomanip>
 
 namespace ige::creator
 {
@@ -51,41 +51,63 @@ namespace ige::creator
         m_cache.set_scan_frequency(std::chrono::milliseconds(1000));
     }
 
-    void AssetBrowser::_drawImpl()
-    {
-            for(const auto& file : m_cache) {
-            const auto& absPath = file.entry.path();
+    void AssetBrowser::_drawImpl() {
+        for(const auto& file : m_cache) {
+            const auto& fsPath = file.entry.path();
             const auto& name = file.stem;
             const auto& relative = file.protocol_path;
             const auto& file_ext = file.extension;
             const std::string& filename = file.filename;
 
+            if (IsFormat(E_FileExts::Hidden, file_ext))
+                continue;
+
             auto hidden = false;
-            auto path = absPath.string();
+            auto path = fsPath.string();
             const auto& hiddenItems = GetFileExtensionSuported(E_FileExts::Hidden);
             for (const auto& item : hiddenItems) {
-                if (path.find_first_of(item) != std::string::npos) {
+                if (path.find(item) != std::string::npos) {
                     hidden = true;
                     break;
                 }
             }
-
-            if (hidden || IsFormat(E_FileExts::Hidden, name) || IsFormat(E_FileExts::Hidden, file_ext))
-                continue;
-
+            if (hidden) continue;
             if (fs::is_regular_file(file.entry.status()) && file_ext.compare(".meta") != 0) {
-                const auto metaPath = absPath.parent_path().append(filename + ".meta");
-                if (!fs::exists(metaPath)) {
-                    json metaJson = json {
-                        {"name", filename },
-                    };
-                    std::ofstream file(metaPath);
-                    file << std::setw(2) << metaJson << std::endl;
-                    file.close();
+                const auto metaPath = fsPath.parent_path().append(filename + ".meta");
+
+                // check file exist
+                bool dirty = !fs::exists(metaPath)
+                    || IsFormat(E_FileExts::Figure, file_ext) && !fs::exists(fsPath.parent_path().append(fsPath.stem().string() + ".pyxf"))
+                    || IsFormat(E_FileExts::Sprite, file_ext) && !fs::exists(fsPath.parent_path().append(fsPath.stem().string() + ".pyxi"));
+
+                // check timestamp
+                if (!dirty) {
+                    auto file = std::ifstream(metaPath);
+                    if (file.is_open()) {
+                        json metaJs;
+                        file >> metaJs;
+                        file.close();
+                        auto timeStamp = metaJs.value("Timestamp", (long long)-1);
+                        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(fs::last_write_time(fsPath).time_since_epoch()).count();
+                        if (timeStamp != ms) {
+                            dirty = true;
+                        }
+                    }
+                }
+
+                // resave
+                if (dirty) {
+                    if (IsFormat(E_FileExts::Figure, file_ext)) {
+                        std::make_unique<FigureMeta>(path)->save();
+                    } else if (IsFormat(E_FileExts::Sprite, file_ext)) {
+                        std::make_unique<TextureMeta>(path)->save();
+                    }
+                    else {
+                        std::make_unique<AssetMeta>(path)->save();
+                    }
                 }
             }
  	    }
-
         Panel::_drawImpl();
     }
     

@@ -74,7 +74,7 @@ void PhysicMeshEditorComponent::drawPhysicMesh()
         });
     }
     m_physicGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
-        auto files = OpenFileDialog("Import Assets", "", { "Figure (*.pyxf)", "*.pyxf" }).result();
+        auto files = OpenFileDialog("Import Assets", "", { "Figure", "*.dae", "*.fbx" }).result();
         if (files.size() > 0) {
             getComponent<CompoundComponent>()->setProperty("path", files[0]);
             setDirty();

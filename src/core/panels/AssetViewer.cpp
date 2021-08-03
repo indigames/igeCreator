@@ -5,75 +5,55 @@
 
 #include "core/Editor.h"
 #include "core/Canvas.h"
-
-#include "core/widgets/Label.h"
-#include "core/widgets/CheckBox.h"
-#include "core/widgets/TextField.h"
-#include "core/widgets/Drag.h"
+#include "core/FileHandle.h"
+#include "core/scene/assets/FigureMeta.h"
+#include "core/scene/assets/TextureMeta.h"
 
 namespace ige::creator
 {
     AssetViewer::AssetViewer(const std::string& name, const Panel::Settings& settings)
-        : Panel(name, settings)
-    {
+        : Panel(name, settings) {
         close();
-    }
-    
-    AssetViewer::~AssetViewer()
-    {
-
+        m_assetGroup = createWidget<Group>("Asset", false, false);
     }
 
-    void AssetViewer::initialize()
-    {
+    AssetViewer::~AssetViewer() {
+        m_assetGroup->removeAllWidgets();
+        m_assetGroup = nullptr;
+    }
+
+    void AssetViewer::initialize() {
         clear();
     }
 
-    void AssetViewer::_drawImpl()
-    {
+    void AssetViewer::_drawImpl() {
         auto path = Editor::getCanvas()->getAssetBrowser()->getSelectedPath();
-        if (!path.empty() || path.compare("") != 0 && m_path.compare(path) != 0)
-        {
+        if (m_path.compare(path) != 0) {
             m_path = path;
-            removeAllWidgets();
-
+            clear();
             auto fsPath = fs::path(m_path);
             auto metaPath = fsPath.parent_path().append(fsPath.filename().string() + ".meta");
-            std::ifstream file(metaPath);
-            if (file.is_open())
-            {
-                json metaJs;
-                file >> metaJs;
-                file.close();
-                
-                for (auto& [key, val] : metaJs.items())
+            if (fs::exists(metaPath)) {
+                if(IsFormat(E_FileExts::Figure, fsPath.extension()))
                 {
-                    if(val.type() == nlohmann::json::value_t::boolean)
-                        createWidget<CheckBox>(key, val);
-                    else if (val.type() == nlohmann::json::value_t::number_float)
-                        createWidget<Drag<float>>(key, ImGuiDataType_Float, val);
-                    else if(val.type() == nlohmann::json::value_t::number_integer)
-                        createWidget<Drag<int32_t>>(key, ImGuiDataType_S32, val);
-                    else if(val.type() == nlohmann::json::value_t::number_unsigned)
-                        createWidget<Drag<uint32_t>>(key, ImGuiDataType_U32, val);
-                    else if (val.type() == nlohmann::json::value_t::string)
-                        createWidget<TextField>(key, val);
-                    else {
-                        // Todo: parse Vec<N>, Quat, ...
-                    }
+                    m_assetMeta = std::make_shared<FigureMeta>(m_path);
+                } else if (IsFormat(E_FileExts::Sprite, fsPath.extension())) {
+                    m_assetMeta = std::make_shared<TextureMeta>(m_path);
                 }
+                 else {
+                    m_assetMeta = std::make_shared<AssetMeta>(m_path);
+                }
+                m_assetMeta->draw(m_assetGroup);
                 open();
-            }
-            else
-            {
+            } else {
                 close();
             }
         }
         Panel::_drawImpl();
     }
 
-    void AssetViewer::clear()
-    {
-
+    void AssetViewer::clear() {
+        m_assetGroup->removeAllWidgets();
+        m_assetMeta = nullptr;
     }
 }

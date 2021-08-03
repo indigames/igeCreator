@@ -322,7 +322,7 @@ namespace ige::creator
                 const auto& currentObject = (target != nullptr) ? Editor::getCurrentScene()->findObjectById(target->getId()) : nullptr;
                 auto newObject = Editor::getCurrentScene()->createObject("Camera", currentObject);
                 newObject->addComponent<CameraComponent>("camera");
-                newObject->addComponent<FigureComponent>(GetEnginePath("figures/camera.pyxf"))->setSkipSerialize(true);
+                newObject->addComponent<FigureComponent>(GetEnginePath("figures/camera"))->setSkipSerialize(true);
                 Editor::getInstance()->addTarget(newObject.get(), true);
             });
         });
@@ -335,7 +335,7 @@ namespace ige::creator
                     auto target = Editor::getInstance()->getTarget()->getFirstTarget();
                     const auto& currentObject = (target != nullptr) ? Editor::getCurrentScene()->findObjectById(target->getId()) : nullptr;
                     auto newObject = Editor::getCurrentScene()->createObject("Cube", currentObject);
-                    newObject->addComponent<FigureComponent>("figures/cube.pyxf");
+                    newObject->addComponent<FigureComponent>("figures/cube.dae");
                     Editor::getInstance()->addTarget(newObject.get(), true);
                 });
             });
@@ -345,7 +345,7 @@ namespace ige::creator
                     auto target = Editor::getInstance()->getTarget()->getFirstTarget();
                     const auto& currentObject = (target != nullptr) ? Editor::getCurrentScene()->findObjectById(target->getId()) : nullptr;
                     auto newObject = Editor::getCurrentScene()->createObject("Plane", currentObject);
-                    newObject->addComponent<FigureComponent>("figures/plane.pyxf");
+                    newObject->addComponent<FigureComponent>("figures/plane.dae");
                     Editor::getInstance()->addTarget(newObject.get(), true);
                 });
             });
@@ -355,7 +355,7 @@ namespace ige::creator
                     auto target = Editor::getInstance()->getTarget()->getFirstTarget();
                     const auto& currentObject = (target != nullptr) ? Editor::getCurrentScene()->findObjectById(target->getId()) : nullptr;
                     auto newObject = Editor::getCurrentScene()->createObject("Sphere", currentObject);
-                    newObject->addComponent<FigureComponent>("figures/sphere.pyxf");
+                    newObject->addComponent<FigureComponent>("figures/sphere.dae");
                     Editor::getInstance()->addTarget(newObject.get(), true);
                 });
             });
@@ -365,7 +365,7 @@ namespace ige::creator
                     auto target = Editor::getInstance()->getTarget()->getFirstTarget();
                     const auto& currentObject = (target != nullptr) ? Editor::getCurrentScene()->findObjectById(target->getId()) : nullptr;
                     auto newObject = Editor::getCurrentScene()->createObject("Cone", currentObject);
-                    newObject->addComponent<FigureComponent>("figures/cone.pyxf");
+                    newObject->addComponent<FigureComponent>("figures/cone.dae");
                     Editor::getInstance()->addTarget(newObject.get(), true);
                 });
             });
@@ -375,7 +375,7 @@ namespace ige::creator
                     auto target = Editor::getInstance()->getTarget()->getFirstTarget();
                     const auto& currentObject = (target != nullptr) ? Editor::getCurrentScene()->findObjectById(target->getId()) : nullptr;
                     auto newObject = Editor::getCurrentScene()->createObject("Cylinder", currentObject);
-                    newObject->addComponent<FigureComponent>("figures/cylinder.pyxf");
+                    newObject->addComponent<FigureComponent>("figures/cylinder.dae");
                     Editor::getInstance()->addTarget(newObject.get(), true);
                 });
             });
@@ -385,7 +385,7 @@ namespace ige::creator
                     auto target = Editor::getInstance()->getTarget()->getFirstTarget();
                     const auto& currentObject = (target != nullptr) ? Editor::getCurrentScene()->findObjectById(target->getId()) : nullptr;
                     auto newObject = Editor::getCurrentScene()->createObject("Torus", currentObject);
-                    newObject->addComponent<FigureComponent>("figures/torus.pyxf");
+                    newObject->addComponent<FigureComponent>("figures/torus.dae");
                     Editor::getInstance()->addTarget(newObject.get(), true);
                 });
             });

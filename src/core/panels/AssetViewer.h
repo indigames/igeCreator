@@ -1,6 +1,8 @@
 #pragma once
 
 #include "core/Panel.h"
+#include "core/layout/Group.h"
+#include "core/scene/assets/AssetMeta.h"
 
 namespace ige::creator
 {
@@ -18,5 +20,7 @@ namespace ige::creator
 
     protected:
         std::string m_path = "";
+        std::shared_ptr<Group> m_assetGroup = nullptr;
+        std::shared_ptr<AssetMeta> m_assetMeta = nullptr;
     };
 }
