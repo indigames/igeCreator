@@ -20,6 +20,9 @@ public:
 	const static char* TOOL_PIVOT_POSITION;
 	const static char* TOOL_PIVOT_ORIENTATION;
 
+	//! Asset
+	const static char* ASSET_RELOAD_SOURCE;
+
 	//! Edit
 	const static char* EDIT_SCENE_OBJECT_SELECTED;
 	const static char* DELETE_SCENE_OBJECT_SELECTED;

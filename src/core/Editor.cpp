@@ -166,6 +166,17 @@ namespace ige::creator
         }
     }
 
+    void Editor::toggleReloadSource()
+    {
+        auto scene = SceneManager::getInstance()->getCurrentScene();
+        if (scene != nullptr) {
+            auto root = scene->getRoot();
+            if (root != nullptr) {
+                root->reloadScripts();
+            }
+        }
+    }
+
     bool Editor::handleEventImGUI(const SDL_Event* event)
     {
         return ImGui_ImplSDL2_ProcessEvent(event);

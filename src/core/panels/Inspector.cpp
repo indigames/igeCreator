@@ -140,6 +140,10 @@ namespace ige::creator
         // Create component selection
         m_createCompCombo = m_headerGroup->createWidget<ComboBox>("");
         m_createCompCombo->setEndOfLine(false);
+
+        // Script component
+        m_createCompCombo->addChoice((int)Component::Type::Script, "Script");
+
         m_createCompCombo->addChoice((int)Component::Type::Camera, "Camera");
 
         if(m_targetObject->getScene()->isDirectionalLightAvailable())
@@ -182,9 +186,6 @@ namespace ige::creator
             m_createCompCombo->addChoice((int)Component::Type::UIButton, "UIMask");
         }
 
-        // Script component
-        m_createCompCombo->addChoice((int)Component::Type::Script, "Script");
-
         // Audio source
         m_createCompCombo->addChoice((int)Component::Type::AudioSource, "Audio Source");
 
@@ -202,6 +203,7 @@ namespace ige::creator
         }
         m_createCompCombo->addChoice((int)Component::Type::Navigable, "Navigable");
         m_createCompCombo->addChoice((int)Component::Type::NavAgent, "NavAgent");
+        m_createCompCombo->addChoice((int)Component::Type::NavAgentManager, "NavAgentManager");
         m_createCompCombo->addChoice((int)Component::Type::NavObstacle, "NavObstacle");
         m_createCompCombo->addChoice((int)Component::Type::OffMeshLink, "OffMeshLink");
 
@@ -308,7 +310,9 @@ namespace ige::creator
                 case (int)Component::Type::NavAgent:
                     m_targetObject->addComponent<NavAgent>();
                     break;
-
+                case (int)Component::Type::NavAgentManager:
+                    m_targetObject->addComponent<NavAgentManager>();
+                    break;
                 case (int)Component::Type::DynamicNavMesh:
                     m_targetObject->addComponent<DynamicNavMesh>();
                     break;

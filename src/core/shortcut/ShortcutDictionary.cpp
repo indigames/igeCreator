@@ -13,6 +13,8 @@ const char* ShortcutDictionary::TOOL_SCALE = "Tools/Scale";
 const char* ShortcutDictionary::TOOL_PIVOT_POSITION = "Tools/Toggle Pivot Position";
 const char* ShortcutDictionary::TOOL_PIVOT_ORIENTATION = "Tools/Toggle Pivot Orientation";
 
+const char* ShortcutDictionary::ASSET_RELOAD_SOURCE = "Tools/Reload Source";
+
 const char* ShortcutDictionary::EDIT_SCENE_OBJECT_SELECTED = "Edit/Scene Object Selected";
 const char* ShortcutDictionary::DELETE_SCENE_OBJECT_SELECTED = "Edit/Delete Object Selected";
 const char* ShortcutDictionary::COPY_SCENE_OBJECT_SELECTED = "Edit/Copy Object Selected";
@@ -39,6 +41,9 @@ void ShortcutDictionary::initDefaultShortcutCommand() {
 	ASSIGN_COMMAND_TO_DICT(TOOL_SCALE, EditorUtils::Tools_Scale);
 
 	ASSIGN_COMMAND_TO_DICT(TOOL_PIVOT_ORIENTATION, EditorUtils::Tools_TogglePivotOrientation);
+
+	ASSIGN_COMMAND_TO_DICT(ASSET_RELOAD_SOURCE, EditorUtils::Assets_ToggleReloadSource);
+	
 }
 
 void ShortcutDictionary::assignDefaultShortcut() {
@@ -48,6 +53,8 @@ void ShortcutDictionary::assignDefaultShortcut() {
 	ASSIGN_KEY_TO_COMMAND(TOOL_SCALE, KeyCode::KEY_R, false, false, false);
 
 	ASSIGN_KEY_TO_COMMAND(TOOL_PIVOT_ORIENTATION, KeyCode::KEY_X, false, false, false);
+
+	ASSIGN_KEY_TO_COMMAND(ASSET_RELOAD_SOURCE, KeyCode::KEY_R, false, true, false);
 }
 
 NS_IGE_END

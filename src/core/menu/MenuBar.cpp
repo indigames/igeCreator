@@ -95,6 +95,14 @@ namespace ige::creator
                 });
             });
 
+        //Asset
+        auto assetMenu = createWidget<Menu>("Asset");
+        assetMenu->createWidget<MenuItem>("Refresh", "CTRL + R ")->getOnClickEvent().addListener([](auto widget) {
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->toggleReloadSource();
+                });
+            });
+
         auto buildMenu = createWidget<Menu>("Build");
         buildMenu->createWidget<MenuItem>("Convert Assets")->getOnClickEvent().addListener([](auto widget) {
             TaskManager::getInstance()->addTask([]() {
