@@ -1,28 +1,28 @@
 [submodule "3rd-party/pfd"]
 	path = 3rd-party/pfd
-	url = https://github.com/samhocevar/portable-file-dialogs
+	url = git@github.com:samhocevar/portable-file-dialogs.git
 	branch = master
 [submodule "3rd-party/ImGuizmo"]
 	path = 3rd-party/ImGuizmo
-	url = https://github.com/indigames/ImGuizmo.git
+	url = git@github.com:indigames/ImGuizmo.git
 	branch = dev-ige
 [submodule "3rd-party/imgui"]
 	path = 3rd-party/imgui
-	url = https://github.com/indigames/imgui
+	url = git@github.com:indigames/imgui.git
 	branch = docking
 [submodule "libs/igeScene"]
 	path = libs/igeScene
-	url = https://github.com/indigames/igeScene
+	url = git@github.com:indigames/igeScene.git
 	branch = ige-dev
 [submodule "libs/pyxCore"]
 	path = libs/pyxCore
-	url = https://github.com/indigames/pyxCore
+	url = git@github.com:indigames/pyxCore.git
 	branch = ige-dev
 [submodule "libs/igeVMath"]
 	path = libs/igeVMath
-	url = https://github.com/indigames/igeVMath
+	url = git@github.com:indigames/igeVMath.git
 	branch = ige-dev
 [submodule "libs/igeCore"]
 	path = libs/igeCore
-	url = https://github.com/indigames/igeCore
+	url = git@github.com:indigames/igeCore.git
 	branch = ige-dev
