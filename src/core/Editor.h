@@ -33,11 +33,9 @@ namespace ige::creator
         void resetLayout();
         void toggleFullScreen();
 
-        bool convertAssets();
         bool buildRom();
         bool buildPC();
         bool buildAndroid();
-        bool buildIOS();
 
         bool openDocument();
         bool openAbout();

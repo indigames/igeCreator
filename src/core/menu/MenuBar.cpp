@@ -104,11 +104,7 @@ namespace ige::creator
             });
 
         auto buildMenu = createWidget<Menu>("Build");
-        buildMenu->createWidget<MenuItem>("Convert Assets")->getOnClickEvent().addListener([](auto widget) {
-            TaskManager::getInstance()->addTask([]() {
-                Editor::getInstance()->convertAssets();
-            });
-        });
+
         buildMenu->createWidget<MenuItem>("ROM")->getOnClickEvent().addListener([](auto widget) {
             TaskManager::getInstance()->addTask([]() {
                 Editor::getInstance()->buildRom();
@@ -124,12 +120,6 @@ namespace ige::creator
                 Editor::getInstance()->buildAndroid();
             });
         });
-        buildMenu->createWidget<MenuItem>("iOS")->getOnClickEvent().addListener([](auto widget) {
-            TaskManager::getInstance()->addTask([]() {
-                Editor::getInstance()->buildIOS();
-            });
-        });
-
         auto helpMenu = createWidget<Menu>("Help");
         helpMenu->createWidget<MenuItem>("Document", "CTRL + F1 ")->getOnClickEvent().addListener([](auto widget) {
             TaskManager::getInstance()->addTask([]() {

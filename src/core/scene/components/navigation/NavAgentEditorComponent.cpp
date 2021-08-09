@@ -34,11 +34,6 @@ void NavAgentEditorComponent::drawNavAgent()
         getComponent<CompoundComponent>()->setProperty("syncPos", val);
     });
 
-    std::array maxObs = { comp->getProperty<float>("maxObs", NAN) };
-    m_navAgentGroup->createWidget<Drag<float>>("MaxObstacle", ImGuiDataType_S32, maxObs, 1, 0)->getOnDataChangedEvent().addListener([this](auto& val) {
-        getComponent<CompoundComponent>()->setProperty("maxObs", (int)val[0]);
-    });
-
     std::array radius = { comp->getProperty<float>("radius", NAN) };
     m_navAgentGroup->createWidget<Drag<float>>("Radius", ImGuiDataType_Float, radius, 0.001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("radius", val[0]);
