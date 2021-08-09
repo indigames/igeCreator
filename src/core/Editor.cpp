@@ -380,21 +380,6 @@ namespace ige::creator
         }
     }
 
-    bool Editor::convertAssets()
-    {
-        auto buildCmd = [](void*)
-        {
-            pyxie_printf("Converting assets...");
-            system((std::string("python.exe ") + GetEnginePath("convert.py")).c_str());
-            pyxie_printf("Converting assets DONE!");
-            return 1;
-        };
-
-        auto buildThread = SDL_CreateThreadWithStackSize(buildCmd, "Build_Thread", 32 * 1024 * 1024, (void*)nullptr);
-        SDL_DetachThread(buildThread);
-        return true;
-    }
-
     bool Editor::buildRom()
     {
         auto buildCmd = [](void*)
@@ -444,12 +429,6 @@ namespace ige::creator
         auto buildThread = SDL_CreateThreadWithStackSize(buildCmd, "Build_Thread", 32 * 1024 * 1024, (void*)nullptr);
         SDL_DetachThread(buildThread);
         return true;
-    }
-
-    bool Editor::buildIOS()
-    {
-        pyxie_printf("Build IOS: WIP...");
-        return false;
     }
 
     bool Editor::openDocument()

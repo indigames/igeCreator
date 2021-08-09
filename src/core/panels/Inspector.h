@@ -65,4 +65,3 @@ namespace ige::creator
         std::shared_ptr<InspectorEditor> m_inspectorEditor = nullptr;
     };
 }
-
