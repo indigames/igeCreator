@@ -63,7 +63,12 @@ void FigureEditorComponent::drawFigureComponent()
         setDirty();
     });
 
-    figColumn->createWidget<CheckBox>("CullFace", comp->getProperty<bool>("cull", false))->getOnDataChangedEvent().addListener([this](bool val) {
+    figColumn->createWidget<CheckBox>("DoubleSide", comp->getProperty<bool>("doubleSide", false))->getOnDataChangedEvent().addListener([this](bool val) {
+        getComponent<CompoundComponent>()->setProperty("doubleSide", val);
+        setDirty();
+    });
+
+    figColumn->createWidget<CheckBox>("FFCulling", comp->getProperty<bool>("cull", false))->getOnDataChangedEvent().addListener([this](bool val) {
         getComponent<CompoundComponent>()->setProperty("cull", val);
         setDirty();
     });
@@ -75,6 +80,11 @@ void FigureEditorComponent::drawFigureComponent()
 
     figColumn->createWidget<CheckBox>("Z-Write", comp->getProperty<bool>("zWrite", false))->getOnDataChangedEvent().addListener([this](bool val) {
         getComponent<CompoundComponent>()->setProperty("zWrite", val);
+        setDirty();
+    });
+
+    figColumn->createWidget<CheckBox>("ScissorTest", comp->getProperty<bool>("scissor", false))->getOnDataChangedEvent().addListener([this](bool val) {
+        getComponent<CompoundComponent>()->setProperty("scissor", val);
         setDirty();
     });
 

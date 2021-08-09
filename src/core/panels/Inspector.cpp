@@ -117,25 +117,7 @@ namespace ige::creator
         m_headerGroup = createWidget<Group>("Inspector_Header", false);
 
         // Object info
-        if (m_infoGroup != nullptr) {
-            m_infoGroup->removeAllPlugins();
-            m_infoGroup->removeAllWidgets();
-            m_infoGroup = nullptr;
-        }
-        m_infoGroup = createWidget<Group>("BaseInfo_Header", false);
         _drawBaseInfo();
-        /*auto columns = m_headerGroup->createWidget<Columns<2>>();
-        columns->createWidget<TextField>("ID", std::to_string(m_targetObject->getId()).c_str(), true);
-        columns->createWidget<CheckBox>("Active", m_targetObject->isActive())->getOnDataChangedEvent().addListener([this](bool active) {
-            if (m_targetObject)
-                m_targetObject->setActive(active);
-        });
-        m_headerGroup->createWidget<TextField>("UUID", m_targetObject->getUUID().c_str(), true);
-        m_headerGroup->createWidget<TextField>("Name", m_targetObject->getName().c_str())->getOnDataChangedEvent().addListener([this](auto name) {
-            if (m_targetObject) {
-                m_targetObject->setName(name);
-            }
-        });*/
 
         // Create component selection
         m_createCompCombo = m_headerGroup->createWidget<ComboBox>("");
@@ -203,7 +185,6 @@ namespace ige::creator
         }
         m_createCompCombo->addChoice((int)Component::Type::Navigable, "Navigable");
         m_createCompCombo->addChoice((int)Component::Type::NavAgent, "NavAgent");
-        m_createCompCombo->addChoice((int)Component::Type::NavAgentManager, "NavAgentManager");
         m_createCompCombo->addChoice((int)Component::Type::NavObstacle, "NavObstacle");
         m_createCompCombo->addChoice((int)Component::Type::OffMeshLink, "OffMeshLink");
 
@@ -305,22 +286,17 @@ namespace ige::creator
                     m_targetObject->addComponent<Navigable>();
                     break;
                 case (int)Component::Type::NavMesh:
-                    m_targetObject->addComponent<NavMesh>();
+                    m_targetObject->addComponent<NavMesh>()->build();
                     break;
                 case (int)Component::Type::NavAgent:
                     m_targetObject->addComponent<NavAgent>();
                     break;
-                case (int)Component::Type::NavAgentManager:
-                    m_targetObject->addComponent<NavAgentManager>();
-                    break;
                 case (int)Component::Type::DynamicNavMesh:
-                    m_targetObject->addComponent<DynamicNavMesh>();
+                    m_targetObject->addComponent<DynamicNavMesh>()->build();
                     break;
-
                 case (int)Component::Type::NavObstacle:
                     m_targetObject->addComponent<NavObstacle>();
                     break;
-
                 case (int)Component::Type::OffMeshLink:
                     m_targetObject->addComponent<OffMeshLink>();
                     break;
@@ -368,9 +344,12 @@ namespace ige::creator
 
     void Inspector::_drawBaseInfo()
     {
-        if (m_infoGroup == nullptr) return;
-        m_infoGroup->removeAllPlugins();
-        m_infoGroup->removeAllWidgets();
+        if (m_infoGroup != nullptr) {
+            m_infoGroup->removeAllPlugins();
+            m_infoGroup->removeAllWidgets();
+            m_infoGroup = nullptr;
+        }
+        m_infoGroup = createWidget<Group>("BaseInfo_Header", false);
 
         // Object info
         auto columns = m_infoGroup->createWidget<Columns<2>>();
@@ -378,16 +357,14 @@ namespace ige::creator
         columns->createWidget<CheckBox>("Active", m_targetObject->isActive())->getOnDataChangedEvent().addListener([this](bool active) {
             if (m_targetObject)
                 m_targetObject->setActive(active);
-            });
-        pyxie_printf("Target Name %s \n", m_targetObject->getName().c_str());
+        });
         m_infoGroup->createWidget<TextField>("UUID", m_targetObject->getUUID().c_str(), true);
         m_infoGroup->createWidget<TextField>("Name", m_targetObject->getName().c_str())->getOnDataChangedEvent().addListener([this](auto name) {
             if (m_targetObject) {
                 m_targetObject->setName(name);
                 m_bInfoDirty = true;
             }
-            });
-
+        });
         m_bInfoDirty = false;
     }
 

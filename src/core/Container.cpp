@@ -73,7 +73,7 @@ namespace ige::creator
             {
                 auto& group = std::dynamic_pointer_cast<Group>(widget);
                 if (group) group->removeAllWidgets();
-                widget = nullptr;
+                group = nullptr;
             }
         }
         m_widgets.clear();
