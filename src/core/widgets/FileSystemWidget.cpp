@@ -171,7 +171,7 @@ namespace ImGui
 namespace ige::creator
 {
     FileSystemWidget::FileSystemWidget()
-        : m_isDirty(true)
+        : m_isDirty(false)
     {
         m_iconTextures["folder"] = ResourceCreator::Instance().NewTexture(GetEnginePath("icons/folder").c_str());
         m_iconTextures["image"] = ResourceCreator::Instance().NewTexture(GetEnginePath("icons/file_image").c_str());
@@ -183,27 +183,11 @@ namespace ige::creator
         m_iconTextures["audio"] = ResourceCreator::Instance().NewTexture(GetEnginePath("icons/file_audio").c_str());
 
         m_cache.set_scan_frequency(std::chrono::milliseconds(1000));
-
-        const auto root_path = fs::current_path();
-        std::error_code err;
-        if (m_root != root_path || !fs::exists(m_cache.get_path(), err))
-        {
-            m_root = root_path;
-            m_cache.set_path(m_root);
-        }
     }
 
     FileSystemWidget::FileSystemWidget(const fs::directory_cache &cache)
-        : m_cache(cache), m_isDirty(true)
+        : m_cache(cache), m_isDirty(false)
     {
-        const auto root_path = fs::absolute("");
-
-        std::error_code err;
-        if (m_root != root_path || !fs::exists(m_cache.get_path(), err))
-        {
-            m_root = root_path;
-            m_cache.set_path(m_root);
-        }
     }
 
     FileSystemWidget::~FileSystemWidget()
@@ -251,6 +235,19 @@ namespace ige::creator
                 m_isDirty = true;
                 break;
             }
+        }
+
+        if (ImGui::BeginPopupContextWindow())
+        {
+            if (ImGui::MenuItem(("Create Folder" + getIdAString()).c_str(), nullptr, nullptr, true))
+            {
+                try {
+                    auto path = fs::path(m_cache.get_path()).append("0_NewFolder");
+                    fs::create_directory(path);
+                }
+                catch (std::exception e) {}
+            }
+            ImGui::EndPopup();
         }
 
         ImGui::Separator();
