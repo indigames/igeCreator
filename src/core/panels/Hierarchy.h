@@ -36,6 +36,9 @@ namespace ige::creator
         void onSceneObjectAttached(SceneObject& sceneObject);
         void onSceneObjectDetached(SceneObject& sceneObject);
 
+        //! Object selected
+        void onSceneObjectSelected(SceneObject& sceneObject);
+
         //! Object changed name
         void onSceneObjectChangedName(SceneObject& sceneObject);
 

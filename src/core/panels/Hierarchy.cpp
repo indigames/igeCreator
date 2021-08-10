@@ -46,7 +46,8 @@ namespace ige::creator
         SceneObject::getCreatedEvent().addListener(std::bind(&Hierarchy::onSceneObjectCreated, this, std::placeholders::_1));
         SceneObject::getDestroyedEvent().addListener(std::bind(&Hierarchy::onSceneObjectDeleted, this, std::placeholders::_1));
         SceneObject::getAttachedEvent().addListener(std::bind(&Hierarchy::onSceneObjectAttached, this, std::placeholders::_1));
-        SceneObject::getDetachedEvent().addListener(std::bind(&Hierarchy::onSceneObjectDetached, this, std::placeholders::_1));        
+        SceneObject::getDetachedEvent().addListener(std::bind(&Hierarchy::onSceneObjectDetached, this, std::placeholders::_1));
+        SceneObject::getSelectedEvent().addListener(std::bind(&Hierarchy::onSceneObjectSelected, this, std::placeholders::_1));
         Editor::getTargetAddedEvent().addListener(std::bind(&Hierarchy::onTargetAdded, this, std::placeholders::_1));
         Editor::getTargetRemovedEvent().addListener(std::bind(&Hierarchy::onTargetRemoved, this, std::placeholders::_1));
         Editor::getTargetClearedEvent().addListener(std::bind(&Hierarchy::onTargetCleared, this));
@@ -58,6 +59,7 @@ namespace ige::creator
         SceneObject::getDestroyedEvent().removeAllListeners();
         SceneObject::getAttachedEvent().removeAllListeners();
         SceneObject::getDetachedEvent().removeAllListeners();
+        SceneObject::getSelectedEvent().removeAllListeners();
         Editor::getTargetAddedEvent().removeAllListeners();
         Editor::getTargetRemovedEvent().removeAllListeners();
         Editor::getTargetClearedEvent().removeAllListeners();
@@ -213,6 +215,13 @@ namespace ige::creator
                         widget->getContainer()->removeWidget(widget);
                 }
             }
+        }
+    }
+
+    void Hierarchy::onSceneObjectSelected(SceneObject& sceneObject)
+    {
+        if (sceneObject.isSelected()) {
+            Editor::getInstance()->addTarget(&sceneObject);
         }
     }
 

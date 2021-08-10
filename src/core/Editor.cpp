@@ -293,11 +293,11 @@ namespace ige::creator
     bool Editor::createScene()
     {
         unloadScene();
-        if (getCanvas()) getCanvas()->getHierarchy()->initialize();
         auto scene = SceneManager::getInstance()->createScene();
         setCurrentScene(scene);
         if (getCanvas())
         {
+            getCanvas()->getHierarchy()->initialize();
             if (getCanvas()->getMenuBar()) getCanvas()->getMenuBar()->initialize();
             if (getCanvas()->getProjectSetting()) getCanvas()->getProjectSetting()->initialize();
         }
@@ -311,16 +311,24 @@ namespace ige::creator
         if (fs::exists(scenePath))
         {
             if (getCanvas()) getCanvas()->getHierarchy()->initialize();
-            auto scene = SceneManager::getInstance()->loadScene(path);
-            if (scene)
+            auto scene = SceneManager::getInstance()->createScene();
+            m_target = std::make_shared<TargetObject>(scene.get());
+
+            auto success = SceneManager::getInstance()->loadScene(scene, path);
+            if (success)
             {
                 setCurrentScene(scene);
-                m_target = std::make_shared<TargetObject>(scene.get());
                 if (getCanvas())
                 {
                     if (getCanvas()->getMenuBar()) getCanvas()->getMenuBar()->initialize();
                     if (getCanvas()->getProjectSetting()) getCanvas()->getProjectSetting()->initialize();
                 }
+            }
+            else
+            {
+                SceneManager::getInstance()->unloadScene(scene);
+                scene = nullptr;
+                m_target = nullptr;
             }
         }
         return true;
@@ -334,6 +342,7 @@ namespace ige::creator
         refreshScene();
         auto scene = Editor::getCurrentScene();
         if(scene) SceneManager::getInstance()->unloadScene(scene);
+        scene = nullptr;
         return true;
     }
 
