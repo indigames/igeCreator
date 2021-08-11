@@ -69,10 +69,11 @@ namespace ige::creator
 
     void Hierarchy::onSceneObjectCreated(SceneObject& sceneObject)
     {
+        if (m_groupLayout == nullptr) return;
         auto objId = sceneObject.getId();
         auto name = sceneObject.getName();
         auto isGuiObj = sceneObject.isGUIObject();
-        auto node = createWidget<TreeNode>(sceneObject.getName(), false, sceneObject.getChildren().size() == 0);
+        auto node = m_groupLayout->createWidget<TreeNode>(sceneObject.getName(), false, sceneObject.getChildren().size() == 0);
         node->getOnClickEvent().addListener([objId, this](auto widget) {
             auto object = Editor::getCurrentScene()->findObjectById(objId);
             if (object)

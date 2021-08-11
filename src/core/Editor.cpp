@@ -556,8 +556,27 @@ namespace ige::creator
     //! Prefab save/load
     bool Editor::savePrefab(uint64_t objectId, const std::string& file)
     {
-        if (Editor::getCurrentScene())
-            return Editor::getCurrentScene()->savePrefab(objectId, file);
+        if (!Editor::getCurrentScene()) return false;
+        auto object = Editor::getCurrentScene()->findObjectById(objectId);
+        if (object != nullptr)
+        {
+            auto fsPath = file.empty() ? fs::path(object->getName()) : fs::path(file + "/" + object->getName());
+            auto ext = fsPath.extension();
+            if (ext.string() != ".prefab") fsPath = fsPath.replace_extension(".prefab");
+            if (!fs::exists(fsPath))
+            {
+                return Editor::getCurrentScene()->savePrefab(objectId, file);
+            }
+            else
+            {
+                auto btn = MsgBox("File exists", "Do you want to overwrite?", MsgBox::EBtnLayout::ok_cancel, MsgBox::EMsgType::question).result();
+                if (btn == MsgBox::EButton::ok)
+                {
+                    fs::remove(fsPath);
+                    return savePrefab(objectId, file);
+                }
+            }
+        }
         return false;
     }
 

@@ -385,6 +385,18 @@ namespace ige::creator
         ImGui::PopStyleVar();
 
         SetCachePath(current_path);
+
+        // Drag & drop zone
+        auto window = ImGui::GetCurrentWindow();
+        if (ImGui::BeginDragDropTargetCustom(window->InnerClipRect, window->ID))
+        {
+            ImGuiDragDropFlags flags = 0;
+            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(std::to_string((int)EDragDropID::OBJECT).c_str(), flags))
+            {
+                Editor::getInstance()->savePrefab(*(uint64_t*)payload->Data, current_path.string());
+            }
+            ImGui::EndDragDropTarget();
+        }
     }
 
     void FileSystemWidget::SetCachePath(const fs::path &path)
