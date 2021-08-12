@@ -389,6 +389,13 @@ namespace ige::creator
         }
     }
 
+    bool Editor::openPrefab(const std::string& path)
+    {
+        // TODO: open prefab
+        pyxie_printf("Opening %s", path.c_str());
+        return false;
+    }
+
     bool Editor::buildRom()
     {
         auto buildCmd = [](void*)

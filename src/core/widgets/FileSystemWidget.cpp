@@ -333,6 +333,12 @@ namespace ige::creator
                             Editor::getInstance()->loadScene(absolute_path.string());
                         });
                     }
+                    else if (IsFormat(E_FileExts::Prefab, file_ext))
+                    {
+                        TaskManager::getInstance()->addTask([&]() {
+                            Editor::getInstance()->openPrefab(absolute_path.string());
+                        });
+                    }
                     else
                     {
                     #ifdef WIN32
