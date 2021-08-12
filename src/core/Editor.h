@@ -52,6 +52,7 @@ namespace ige::creator
         bool saveScene();
         bool saveSceneAs();
         void refreshScene();
+        bool openPrefab(const std::string& path);
 
         bool cloneObject();
         void copyObject();

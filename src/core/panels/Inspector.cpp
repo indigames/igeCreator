@@ -365,6 +365,9 @@ namespace ige::creator
                 m_bInfoDirty = true;
             }
         });
+        if (m_targetObject->isPrefab()) {
+            m_infoGroup->createWidget<TextField>("PrefabID", m_targetObject->getPrefabId().c_str(), true);
+        }
         m_bInfoDirty = false;
     }
 

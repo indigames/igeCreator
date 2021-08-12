@@ -72,6 +72,15 @@ namespace ige::scene
         //! Get all targets
         std::vector<SceneObject*>& getAllTargets();
 
+        //! override
+        virtual bool isPrefab() const override {
+            return !empty() && m_objects[0]->isPrefab();
+        }
+
+        virtual std::string getPrefabId() override { 
+            return isPrefab() ? m_objects[0]->getPrefabId() : std::string();
+        }
+
     protected:
         //! Utils to collect shared components
         void collectSharedComponents();
