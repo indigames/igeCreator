@@ -63,7 +63,9 @@ inline bool EditorComponent::isSafe(const std::shared_ptr<Component>& component)
 template <typename T>
 inline std::shared_ptr<T> EditorComponent::getComponent()
 {
-	return std::dynamic_pointer_cast<T>(m_component);
+	if (m_component != nullptr)
+		return std::dynamic_pointer_cast<T>(m_component);
+	else return nullptr;
 }
 
 #define INSPECTOR_WATCH(COMPONENT, TYPE, VALUE) \
