@@ -24,6 +24,9 @@ namespace ige::creator
         //! Highlight node
         void setNodeHighlight(uint64_t nodeId, bool highlight = true);
 
+        //! Rebuild hierarchy from scene
+        bool rebuildHierarchy();
+
     protected:
         virtual void drawWidgets() override;
         void addCreationContextMenu(std::shared_ptr<ContextMenu> ctxMenu);
@@ -43,15 +46,15 @@ namespace ige::creator
         void onSceneObjectChangedName(SceneObject& sceneObject);
 
         //! Target object
-        void onTargetAdded(SceneObject* object);
-        void onTargetRemoved(SceneObject* object);
+        void onTargetAdded(std::shared_ptr<SceneObject> object);
+        void onTargetRemoved(std::shared_ptr<SceneObject> object);
         void onTargetCleared();
 
         //! Tree node objects
         std::map<uint64_t, std::shared_ptr<TreeNode>> m_objectNodeMap;
 
         //! Group layout to add WindowContextMenu
-        std::shared_ptr<Group> m_groupLayout;
+        std::shared_ptr<Group> m_groupLayout = nullptr;;
 
         //! Use for catch click
         const float k_nodeDefaultHeight = 17;

@@ -31,9 +31,6 @@ namespace ige::scene
         //! Set Name 
         virtual void setName(const std::string& name) override;
 
-        // Get parent
-        virtual SceneObject *getParent() const override;
-
         //! Add a component
         virtual void addComponent(const std::shared_ptr<Component> &component) override;
 
@@ -56,8 +53,8 @@ namespace ige::scene
         virtual void from_json(const json &j) override {}
 
         //! Add/remove/clear object
-        void add(SceneObject* object);
-        void remove(SceneObject* object);
+        void add(std::shared_ptr<SceneObject> object);
+        void remove(std::shared_ptr<SceneObject> object);
         void clear();
 
         //! Check if the targets is empty
@@ -67,10 +64,10 @@ namespace ige::scene
         inline size_t size() const { return m_objects.size(); }
         
         //! Get first target
-        SceneObject* getFirstTarget();
+        std::shared_ptr<SceneObject> getFirstTarget();
 
         //! Get all targets
-        std::vector<SceneObject*>& getAllTargets();
+        std::vector<std::shared_ptr<SceneObject>>& getAllTargets();
 
         //! override
         virtual bool isPrefab() const override {
@@ -87,6 +84,6 @@ namespace ige::scene
 
     protected:
         //! List of objects
-        std::vector<SceneObject*> m_objects;
+        std::vector<std::shared_ptr<SceneObject>> m_objects;
     };
 } // namespace ige::scene

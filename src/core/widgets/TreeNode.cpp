@@ -6,7 +6,7 @@
 namespace ige::creator
 {
     TreeNode::TreeNode(const std::string& name, bool isSelected, bool isLeaf, bool opened)
-        : m_name(name), m_bIsSelected(isSelected), m_bIsLeaf(isLeaf), m_bIsDefaultOpened(opened)
+        : m_name(name), m_bIsSelected(isSelected), m_bIsLeaf(isLeaf), m_bIsDefaultOpened(opened), m_color(1.f, 1.f, 1.f, 1.f)
     {
     }
 
@@ -63,7 +63,9 @@ namespace ige::creator
         if (m_bIsLeaf)          flags |= ImGuiTreeNodeFlags_Leaf;
         if (m_bIsHighlighted)   flags |= ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_Bullet;
 
+        ImGui::PushStyleColor(ImGuiCol_Text, m_color);
         bool opened = ImGui::TreeNodeEx((m_name + getIdAString()).c_str(), flags);
+        ImGui::PopStyleColor();
 
         executePlugins();
 

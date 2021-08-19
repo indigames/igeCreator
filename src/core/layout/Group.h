@@ -21,6 +21,10 @@ namespace ige::creator
         ige::scene::Event<>& getOnClosedEvent() { return m_onClosedEvent; }
         ige::scene::Event<>& getOnOpenedEvent() { return m_onOpenedEvent; }
 
+        bool isOpened() { return m_bIsOpened; }
+        bool isCollapsable() { return m_bIsCollapsable; }
+        bool isClosable() { return m_bIsClosable; }
+
     protected:
         virtual void _drawImpl() override;
 

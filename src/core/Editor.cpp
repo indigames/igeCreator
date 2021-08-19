@@ -23,8 +23,8 @@ using namespace ige::scene;
 
 namespace ige::creator
 {
-    ige::scene::Event<SceneObject*> Editor::m_targetAddedEvent;
-    ige::scene::Event<SceneObject*> Editor::m_targetRemovedEvent;
+    ige::scene::Event<std::shared_ptr<SceneObject>> Editor::m_targetAddedEvent;
+    ige::scene::Event<std::shared_ptr<SceneObject>> Editor::m_targetRemovedEvent;
     ige::scene::Event<> Editor::m_targetClearedEvent;
 
     Editor::Editor()
@@ -363,6 +363,7 @@ namespace ige::creator
         {
             SceneManager::getInstance()->saveScene();
         }
+
         return true;
     }
 
@@ -391,8 +392,49 @@ namespace ige::creator
 
     bool Editor::openPrefab(const std::string& path)
     {
-        // TODO: open prefab
-        pyxie_printf("Opening %s", path.c_str());
+        auto fsPath = fs::path(path);
+        if (!fs::exists(fsPath) || fsPath.extension().string() != ".prefab")
+            return false;
+
+        refreshScene();
+        clearTargets();
+        m_target = nullptr;
+
+        auto scene = SceneManager::getInstance()->createSceneFromPrefab(path);
+        if (scene)
+        {
+            m_target = std::make_shared<TargetObject>(scene.get());
+            SceneManager::getInstance()->setCurrentScene(scene);
+            if (getCanvas()) getCanvas()->getHierarchy()->rebuildHierarchy();
+            return true;
+        }        
+        return false;
+    }
+
+    bool Editor::closePrefab()
+    {
+        auto scene = SceneManager::getInstance()->getCurrentScene();
+        if (scene)
+        {
+            refreshScene();
+            clearTargets();
+            m_target = nullptr;
+
+            auto prefabRoot = scene->getObjects()[0];
+            auto prefabId = prefabRoot->getPrefabId();
+            auto path = fs::path(SceneManager::getInstance()->getPrefabPath(prefabId)).parent_path().string();
+            savePrefab(prefabRoot->getId(), path);
+            prefabRoot = nullptr;
+            SceneManager::getInstance()->unloadScene(scene);
+
+            scene = SceneManager::getInstance()->getScenes().back();
+            SceneManager::getInstance()->setCurrentScene(scene);
+            m_target = std::make_shared<TargetObject>(scene.get());
+            scene->reloadPrefabs(prefabId);
+            
+            getCanvas()->getHierarchy()->rebuildHierarchy();
+            return true;
+        }
         return false;
     }
 
@@ -489,7 +531,7 @@ namespace ige::creator
                 newObject->setUUID(uuid);
                 newObject->setName(objName + "_cp");
                 newObject->setParent(targets[0]->getParent());
-                Editor::getInstance()->addTarget(newObject.get(), true);
+                Editor::getInstance()->addTarget(newObject, true);
             }
             return true;
         }        
@@ -503,8 +545,11 @@ namespace ige::creator
         {
             Editor::getInstance()->clearTargets();
             auto parent = targets[0] ? targets[0]->getParent() : nullptr;
-            for(auto target: targets)
-                Editor::getCurrentScene()->removeObjectById(target->getId());
+            for (auto& target : targets) {
+                if (target->isPrefab() && target->getParent())
+                        target->getParent()->removePrefabIdsLinked(target->getPrefabId());
+                Editor::getCurrentScene()->removeObject(target);
+            }
             Editor::getInstance()->addTarget(parent);
             targets.clear();
         }
@@ -536,9 +581,9 @@ namespace ige::creator
             newObject->from_json(jTarget);
             newObject->setUUID(uuid);
             newObject->setName(objName + "_cp");
-            auto parent = Editor::getInstance()->getTarget()->getFirstTarget();
+            auto parent = Editor::getInstance()->getTarget()->getFirstTarget()->getSharedPtr();
             newObject->setParent(parent);
-            Editor::getInstance()->addTarget(newObject.get(), true);
+            Editor::getInstance()->addTarget(newObject, true);
         }
     }
 
@@ -595,7 +640,7 @@ namespace ige::creator
     }
 
     //! Add target
-    void Editor::addTarget(SceneObject* target, bool clear)
+    void Editor::addTarget(std::shared_ptr<SceneObject> target, bool clear)
     {
         if (m_target)
         {
@@ -611,7 +656,7 @@ namespace ige::creator
     }
 
     //! Remove target
-    void Editor::removeTarget(SceneObject* target)
+    void Editor::removeTarget(std::shared_ptr<SceneObject> target)
     {
         if (m_target)
         {
@@ -631,7 +676,7 @@ namespace ige::creator
     }
 
     //! Return the first selected object
-    SceneObject* Editor::getFirstTarget()
+    std::shared_ptr<SceneObject> Editor::getFirstTarget()
     {
         return m_target ? m_target->getFirstTarget() : nullptr;
     }

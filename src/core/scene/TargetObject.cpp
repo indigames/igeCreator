@@ -54,12 +54,6 @@ namespace ige::scene
         }
     }
 
-    // Get parent
-    SceneObject* TargetObject::getParent() const 
-    {
-        return SceneObject::getParent();
-    }
-
     //! Add a component
     void TargetObject::addComponent(const std::shared_ptr<Component> &component) 
     {
@@ -189,7 +183,7 @@ namespace ige::scene
     }
     
     //! Add object
-    void TargetObject::add(SceneObject* object)
+    void TargetObject::add(std::shared_ptr<SceneObject> object)
     {
         if(object != nullptr)
         {
@@ -204,7 +198,7 @@ namespace ige::scene
     }
 
     //! Remove object
-    void TargetObject::remove(SceneObject* object)
+    void TargetObject::remove(std::shared_ptr<SceneObject> object)
     {
         if(object != nullptr)
         {
@@ -233,15 +227,13 @@ namespace ige::scene
     }
 
     //! Get first target
-    SceneObject* TargetObject::getFirstTarget()
+    std::shared_ptr<SceneObject> TargetObject::getFirstTarget()
     {
-        if (m_objects.size() > 0)
-            return m_objects[0];
-        return nullptr;
+        return m_objects.size() > 0 ? m_objects[0] : nullptr;
     }
 
     //! Get all targets
-    std::vector<SceneObject*>& TargetObject::getAllTargets()
+    std::vector< std::shared_ptr<SceneObject>>& TargetObject::getAllTargets()
     {
         return m_objects;
     }

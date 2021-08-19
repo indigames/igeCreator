@@ -46,11 +46,11 @@ bool TransformEditorComponent::setComponent(std::shared_ptr<Component> component
 }
 
 //! Target events
-void TransformEditorComponent::onTargetAdded(SceneObject* object) {
+void TransformEditorComponent::onTargetAdded(std::shared_ptr<SceneObject> object) {
     updateTarget();
 }
 
-void TransformEditorComponent::onTargetRemoved(SceneObject* object) {
+void TransformEditorComponent::onTargetRemoved(std::shared_ptr<SceneObject> object) {
     updateTarget();
 }
 

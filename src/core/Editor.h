@@ -52,7 +52,9 @@ namespace ige::creator
         bool saveScene();
         bool saveSceneAs();
         void refreshScene();
+
         bool openPrefab(const std::string& path);
+        bool closePrefab();
 
         bool cloneObject();
         void copyObject();
@@ -94,22 +96,22 @@ namespace ige::creator
         void setProjectPath(const std::string& path);
 
         //! Add target
-        void addTarget(SceneObject* target, bool clear = false);
+        void addTarget(std::shared_ptr<SceneObject> target, bool clear = false);
 
         //! Remove target
-        void removeTarget(SceneObject* target);
+        void removeTarget(std::shared_ptr<SceneObject> target);
 
         //! Remove all target
         void clearTargets();
 
         //! Return the first selected object
-        SceneObject* getFirstTarget();
+        std::shared_ptr<SceneObject> getFirstTarget();
 
         //! Get targeted objects
         std::shared_ptr<TargetObject>& getTarget() { return m_target; }
 
-        static ige::scene::Event<SceneObject*>& getTargetAddedEvent() { return m_targetAddedEvent; }
-        static ige::scene::Event<SceneObject*>& getTargetRemovedEvent() { return m_targetRemovedEvent; }
+        static ige::scene::Event<std::shared_ptr<SceneObject>>& getTargetAddedEvent() { return m_targetAddedEvent; }
+        static ige::scene::Event<std::shared_ptr<SceneObject>>& getTargetRemovedEvent() { return m_targetRemovedEvent; }
         static ige::scene::Event<>& getTargetClearedEvent() { return m_targetClearedEvent; }
 
     protected:
@@ -137,8 +139,8 @@ namespace ige::creator
         json m_selectedJsons = json::array();
 
         //! Targeted events
-        static ige::scene::Event<SceneObject*> m_targetAddedEvent;
-        static ige::scene::Event<SceneObject*> m_targetRemovedEvent;
+        static ige::scene::Event<std::shared_ptr<SceneObject>> m_targetAddedEvent;
+        static ige::scene::Event<std::shared_ptr<SceneObject>> m_targetRemovedEvent;
         static ige::scene::Event<> m_targetClearedEvent;
 
         //! Targeted object
