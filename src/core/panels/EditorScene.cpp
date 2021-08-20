@@ -239,7 +239,7 @@ namespace ige::creator
         {
             m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto path) {
                 if (Editor::getCurrentScene() && !path.empty()) {
-                    auto target = Editor::getInstance()->getTarget()->getFirstTarget();
+                    auto target = Editor::getInstance()->getFirstTarget();
                     auto newObj = Editor::getCurrentScene()->createObject(fs::path(path).stem(), target);
                     newObj->addComponent<FigureComponent>(path);
                     Editor::getInstance()->addTarget(newObj, true);
@@ -252,7 +252,7 @@ namespace ige::creator
         {
             m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto path) {
                 if (Editor::getCurrentScene() && !path.empty()) {
-                    auto target = Editor::getInstance()->getTarget()->getFirstTarget();
+                    auto target = Editor::getInstance()->getFirstTarget();
                     auto newObj = Editor::getCurrentScene()->createObject(fs::path(path).stem(), target);
                     newObj->addComponent<SpriteComponent>(path);
                     Editor::getInstance()->addTarget(newObj, true);
@@ -265,7 +265,7 @@ namespace ige::creator
         {
             m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto path) {
                 if (Editor::getCurrentScene() && !path.empty()) {
-                    auto target = Editor::getInstance()->getTarget()->getFirstTarget();
+                    auto target = Editor::getInstance()->getFirstTarget();
                     auto newObj = Editor::getCurrentScene()->createObject(fs::path(path).stem(), target);
                     newObj->addComponent<AudioSource>(path);
                     Editor::getInstance()->addTarget(newObj, true);
@@ -278,7 +278,7 @@ namespace ige::creator
         {
             m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto path) {
                 if (Editor::getCurrentScene() && !path.empty()) {
-                    auto target = Editor::getInstance()->getTarget()->getFirstTarget();
+                    auto target = Editor::getInstance()->getFirstTarget();
                     if(target != nullptr)
                         Editor::getCurrentScene()->loadPrefab(target->getId(), path);
                 }
@@ -290,7 +290,7 @@ namespace ige::creator
         {
             m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto path) {
                 if (Editor::getCurrentScene() && !path.empty()) {
-                    auto target = Editor::getInstance()->getTarget()->getFirstTarget();
+                    auto target = Editor::getInstance()->getFirstTarget();
                     auto newObj = Editor::getCurrentScene()->createObject(fs::path(path).stem(), target);
                     newObj->addComponent<Particle>(path);
                     Editor::getInstance()->addTarget(newObj, true);
@@ -306,7 +306,7 @@ namespace ige::creator
             // Switch to 2D camera
             m_currCamera = m_2dCamera;
 
-            auto target = Editor::getInstance()->getTarget()->getFirstTarget();
+            auto target = Editor::getInstance()->getFirstTarget();
             if (target)
             {
                 auto canvas = target->getCanvas();
@@ -712,7 +712,7 @@ namespace ige::creator
         if (!isOpened())
             return;
 
-        const auto& target = Editor::getInstance()->getTarget()->getFirstTarget();
+        const auto& target = Editor::getInstance()->getFirstTarget();
         if (target == nullptr)
             return;
 
@@ -815,7 +815,7 @@ namespace ige::creator
     }
 
     void EditorScene::lookSelectedObject() {
-        const auto& target = Editor::getInstance()->getTarget()->getFirstTarget();
+        const auto& target = Editor::getInstance()->getFirstTarget();
         if (target && m_currCamera)
             lookAtObject(target.get());
     }

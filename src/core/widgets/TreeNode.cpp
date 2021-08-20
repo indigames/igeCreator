@@ -70,7 +70,7 @@ namespace ige::creator
         executePlugins();
 
         // Use mouse release to allow drag&drop without changing focus
-        if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && ImGui::IsItemHovered(ImGuiHoveredFlags_None) && (ImGui::GetMousePos().x - ImGui::GetItemRectMin().x) > ImGui::GetTreeNodeToLabelSpacing())
+        if ((ImGui::IsMouseReleased(ImGuiMouseButton_Left) || ImGui::IsMouseReleased(ImGuiMouseButton_Right)) && ImGui::IsItemHovered(ImGuiHoveredFlags_None) && (ImGui::GetMousePos().x - ImGui::GetItemRectMin().x) > ImGui::GetTreeNodeToLabelSpacing())
             getOnClickEvent().invoke(this);
 
         if (opened)

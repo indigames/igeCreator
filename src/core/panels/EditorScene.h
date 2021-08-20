@@ -36,10 +36,6 @@ public:
 
     void lookSelectedObject();
 
-    bool openPrefab(const std::string& path);
-    bool isPrefabEditMode() { return m_bIsPrefabEditMode; }
-    void setPrefabEditMode(bool isPrefab = true) { m_bIsPrefabEditMode = isPrefab; }
-
 protected:
     enum class ViewTool
     {
@@ -164,8 +160,5 @@ protected:
     //! Camera 2D
     float m_currentCanvasHeight = 0;
     float m_canvasRatio = 0;
-
-    //! Prefab editor
-    bool m_bIsPrefabEditMode = false;
 };
 NS_IGE_END

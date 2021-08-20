@@ -25,8 +25,8 @@ protected:
 	void drawPivot();
 
 	//! Target object
-	void onTargetAdded(std::shared_ptr<SceneObject> object);
-	void onTargetRemoved(std::shared_ptr<SceneObject> object);
+	void onTargetAdded(const std::shared_ptr<SceneObject>& object);
+	void onTargetRemoved(const std::shared_ptr<SceneObject>& object);
 	void onTargetCleared();
 	void updateTarget();
 

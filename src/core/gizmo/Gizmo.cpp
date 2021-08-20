@@ -147,12 +147,12 @@ namespace ige::creator
     }
 
     //! Target events
-    void Gizmo::onTargetAdded(std::shared_ptr<SceneObject> object)
+    void Gizmo::onTargetAdded(const std::shared_ptr<SceneObject>& object)
     {
         updateTargetNode();
     }
 
-    void Gizmo::onTargetRemoved(std::shared_ptr<SceneObject> object)
+    void Gizmo::onTargetRemoved(const std::shared_ptr<SceneObject>& object)
     {
         updateTargetNode();
     }

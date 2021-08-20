@@ -48,12 +48,15 @@ namespace ige::creator
 
         bool createScene();
         bool loadScene(const std::string& path);
+        void setCurrentScene(std::shared_ptr<Scene> scene);
+
         bool unloadScene();
         bool saveScene();
         bool saveSceneAs();
         void refreshScene();
 
         bool openPrefab(const std::string& path);
+        bool openPrefabById(const std::string& prefabId);
         bool closePrefab();
 
         bool cloneObject();
@@ -73,7 +76,6 @@ namespace ige::creator
 
         //! Short-cut access to current scene
         static std::shared_ptr<Scene> getCurrentScene() { return SceneManager::getInstance()->getCurrentScene(); }
-        static void setCurrentScene(std::shared_ptr<Scene> scene) { SceneManager::getInstance()->setCurrentScene(scene); }
 
         //! Toggle local/global gizmo
         bool isLocalGizmo() { return m_bIsLocalGizmo; }
@@ -110,8 +112,8 @@ namespace ige::creator
         //! Get targeted objects
         std::shared_ptr<TargetObject>& getTarget() { return m_target; }
 
-        static ige::scene::Event<std::shared_ptr<SceneObject>>& getTargetAddedEvent() { return m_targetAddedEvent; }
-        static ige::scene::Event<std::shared_ptr<SceneObject>>& getTargetRemovedEvent() { return m_targetRemovedEvent; }
+        static ige::scene::Event<const std::shared_ptr<SceneObject>&>& getTargetAddedEvent() { return m_targetAddedEvent; }
+        static ige::scene::Event<const std::shared_ptr<SceneObject>&>& getTargetRemovedEvent() { return m_targetRemovedEvent; }
         static ige::scene::Event<>& getTargetClearedEvent() { return m_targetClearedEvent; }
 
     protected:
@@ -139,8 +141,8 @@ namespace ige::creator
         json m_selectedJsons = json::array();
 
         //! Targeted events
-        static ige::scene::Event<std::shared_ptr<SceneObject>> m_targetAddedEvent;
-        static ige::scene::Event<std::shared_ptr<SceneObject>> m_targetRemovedEvent;
+        static ige::scene::Event<const std::shared_ptr<SceneObject>&> m_targetAddedEvent;
+        static ige::scene::Event<const std::shared_ptr<SceneObject>&> m_targetRemovedEvent;
         static ige::scene::Event<> m_targetClearedEvent;
 
         //! Targeted object

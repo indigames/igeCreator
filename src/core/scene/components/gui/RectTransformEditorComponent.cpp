@@ -56,11 +56,11 @@ bool RectTransformEditorComponent::setComponent(std::shared_ptr<Component> compo
 }
 
 //! Target events
-void RectTransformEditorComponent::onTargetAdded(std::shared_ptr<SceneObject> object) {
+void RectTransformEditorComponent::onTargetAdded(const std::shared_ptr<SceneObject>& object) {
     updateTarget();
 }
 
-void RectTransformEditorComponent::onTargetRemoved(std::shared_ptr<SceneObject> object) {
+void RectTransformEditorComponent::onTargetRemoved(const std::shared_ptr<SceneObject>& object) {
     updateTarget();
 }
 

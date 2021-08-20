@@ -23,8 +23,8 @@ using namespace ige::scene;
 
 namespace ige::creator
 {
-    ige::scene::Event<std::shared_ptr<SceneObject>> Editor::m_targetAddedEvent;
-    ige::scene::Event<std::shared_ptr<SceneObject>> Editor::m_targetRemovedEvent;
+    ige::scene::Event<const std::shared_ptr<SceneObject>&> Editor::m_targetAddedEvent;
+    ige::scene::Event<const std::shared_ptr<SceneObject>&> Editor::m_targetRemovedEvent;
     ige::scene::Event<> Editor::m_targetClearedEvent;
 
     Editor::Editor()
@@ -295,13 +295,20 @@ namespace ige::creator
         unloadScene();
         auto scene = SceneManager::getInstance()->createScene();
         setCurrentScene(scene);
+        return true;
+    }
+
+    void Editor::setCurrentScene(std::shared_ptr<Scene> scene)
+    { 
+        SceneManager::getInstance()->setCurrentScene(scene);
+
         if (getCanvas())
         {
+            getCanvas()->getMenuBar()->initialize();
+            getCanvas()->getProjectSetting()->initialize();
             getCanvas()->getHierarchy()->initialize();
-            if (getCanvas()->getMenuBar()) getCanvas()->getMenuBar()->initialize();
-            if (getCanvas()->getProjectSetting()) getCanvas()->getProjectSetting()->initialize();
+            getCanvas()->getHierarchy()->rebuildHierarchy();
         }
-        return true;
     }
 
     bool Editor::loadScene(const std::string& path)
@@ -310,7 +317,6 @@ namespace ige::creator
         auto scenePath = fs::path(path);
         if (fs::exists(scenePath))
         {
-            if (getCanvas()) getCanvas()->getHierarchy()->initialize();
             auto scene = SceneManager::getInstance()->createScene();
             m_target = std::make_shared<TargetObject>(scene.get());
 
@@ -318,11 +324,6 @@ namespace ige::creator
             if (success)
             {
                 setCurrentScene(scene);
-                if (getCanvas())
-                {
-                    if (getCanvas()->getMenuBar()) getCanvas()->getMenuBar()->initialize();
-                    if (getCanvas()->getProjectSetting()) getCanvas()->getProjectSetting()->initialize();
-                }
             }
             else
             {
@@ -390,6 +391,11 @@ namespace ige::creator
         }
     }
 
+    bool Editor::openPrefabById(const std::string& prefabId)
+    {
+        return openPrefab(SceneManager::getInstance()->getPrefabPath(prefabId));
+    }
+
     bool Editor::openPrefab(const std::string& path)
     {
         auto fsPath = fs::path(path);
@@ -404,8 +410,7 @@ namespace ige::creator
         if (scene)
         {
             m_target = std::make_shared<TargetObject>(scene.get());
-            SceneManager::getInstance()->setCurrentScene(scene);
-            if (getCanvas()) getCanvas()->getHierarchy()->rebuildHierarchy();
+            setCurrentScene(scene);
             return true;
         }        
         return false;
@@ -428,11 +433,9 @@ namespace ige::creator
             SceneManager::getInstance()->unloadScene(scene);
 
             scene = SceneManager::getInstance()->getScenes().back();
-            SceneManager::getInstance()->setCurrentScene(scene);
             m_target = std::make_shared<TargetObject>(scene.get());
             scene->reloadPrefabs(prefabId);
-            
-            getCanvas()->getHierarchy()->rebuildHierarchy();
+            setCurrentScene(scene);
             return true;
         }
         return false;
@@ -581,7 +584,7 @@ namespace ige::creator
             newObject->from_json(jTarget);
             newObject->setUUID(uuid);
             newObject->setName(objName + "_cp");
-            auto parent = Editor::getInstance()->getTarget()->getFirstTarget()->getSharedPtr();
+            auto parent = Editor::getInstance()->getFirstTarget()->getSharedPtr();
             newObject->setParent(parent);
             Editor::getInstance()->addTarget(newObject, true);
         }
@@ -660,8 +663,8 @@ namespace ige::creator
     {
         if (m_target)
         {
-            m_target->remove(target);
             getTargetRemovedEvent().invoke(target);
+            m_target->remove(target);
         }
     }
 
