@@ -365,10 +365,16 @@ namespace ige::creator
 
         if (sceneObject.isInPrefab())
         {
-            auto prefabId = sceneObject.getPrefabIdRecursive();
+            auto prefabId = sceneObject.getPrefabRootId();
+            auto objectId = sceneObject.getId();
             ctxMenu->createWidget<MenuItem>("Open Prefab")->getOnClickEvent().addListener([prefabId](auto widget) {
                 TaskManager::getInstance()->addTask([prefabId]() {
                     Editor::getInstance()->openPrefabById(prefabId);
+                });
+            });
+            ctxMenu->createWidget<MenuItem>("Reload Prefab")->getOnClickEvent().addListener([objectId](auto widget) {
+                TaskManager::getInstance()->addTask([objectId]() {
+                    Editor::getInstance()->reloadPrefab(objectId);
                 });
             });
         }

@@ -391,11 +391,6 @@ namespace ige::creator
         }
     }
 
-    bool Editor::openPrefabById(const std::string& prefabId)
-    {
-        return openPrefab(SceneManager::getInstance()->getPrefabPath(prefabId));
-    }
-
     bool Editor::openPrefab(const std::string& path)
     {
         auto fsPath = fs::path(path);
@@ -416,6 +411,31 @@ namespace ige::creator
         return false;
     }
 
+    bool Editor::openPrefabById(const std::string& prefabId)
+    {
+        return openPrefab(SceneManager::getInstance()->getPrefabPath(prefabId));
+    }
+
+    bool Editor::reloadPrefab(uint64_t objectId)
+    {
+        auto sceneObject = getCurrentScene()->findObjectById(objectId);
+        if (sceneObject != nullptr) {
+            auto prefabRoot = sceneObject->getPrefabRoot();
+            if (prefabRoot != nullptr) {
+                auto prefabId = sceneObject->getPrefabRootId();
+                auto parentObject = prefabRoot->getParent();
+                getCurrentScene()->removeObject(prefabRoot);
+                prefabRoot = nullptr;
+                if (parentObject != nullptr) {
+                    getCurrentScene()->loadPrefab(parentObject->getId(), SceneManager::getInstance()->getPrefabPath(prefabId));
+                    if(getCanvas()) getCanvas()->getHierarchy()->rebuildHierarchy();
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+    
     bool Editor::closePrefab()
     {
         auto scene = SceneManager::getInstance()->getCurrentScene();
