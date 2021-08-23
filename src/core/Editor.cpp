@@ -421,19 +421,35 @@ namespace ige::creator
         auto scene = SceneManager::getInstance()->getCurrentScene();
         if (scene)
         {
+            bool saved = false;
             auto prefabRoot = scene->getObjects()[0];
             auto prefabId = prefabRoot->getPrefabId();
-            auto path = fs::path(SceneManager::getInstance()->getPrefabPath(prefabId)).parent_path().string();
-            auto saved = savePrefab(prefabRoot->getId(), path);
+            auto btn = MsgBox("Save prefab", "Do you want to save changes?", MsgBox::EBtnLayout::yes_no, MsgBox::EMsgType::question).result();
+            if (btn == MsgBox::EButton::yes)
+            {
+                auto path = fs::path(SceneManager::getInstance()->getPrefabPath(prefabId)).parent_path().string();
+                saved = savePrefab(prefabRoot->getId(), path);
+            }
             prefabRoot = nullptr;
             unloadScene();
 
             scene = SceneManager::getInstance()->getScenes().back();
             m_target = std::make_shared<TargetObject>(scene.get());
-            if(saved) scene->reloadPrefabs(prefabId);
+            if (saved)
+            {
+                auto btn = MsgBox("Reload prefab", "Do you want to reload all the nodes with the changed prefab?", MsgBox::EBtnLayout::yes_no, MsgBox::EMsgType::question).result();
+                if (btn == MsgBox::EButton::yes)
+                {
+                    scene->reloadPrefabs(prefabId);
+                }
+            }
             setCurrentScene(scene);
             return true;
         }
+
+        scene = SceneManager::getInstance()->getScenes().back();
+        m_target = std::make_shared<TargetObject>(scene.get());
+        setCurrentScene(scene);
         return false;
     }
 
@@ -618,8 +634,8 @@ namespace ige::creator
             }
             else
             {
-                auto btn = MsgBox("File exists", "Do you want to overwrite?", MsgBox::EBtnLayout::ok_cancel, MsgBox::EMsgType::question).result();
-                if (btn == MsgBox::EButton::ok)
+                auto btn = MsgBox("Save prefab", "Prefab file exists. Do you want to overwrite?", MsgBox::EBtnLayout::yes_no, MsgBox::EMsgType::question).result();
+                if (btn == MsgBox::EButton::yes)
                 {
                     fs::remove(fsPath);
                     return savePrefab(objectId, file);
