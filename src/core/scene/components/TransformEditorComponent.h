@@ -46,7 +46,7 @@ protected:
     uint64_t m_targetAddedEventId;
     uint64_t m_targetRemovedEventId;
     uint64_t m_targetClearedEventId;
-    SceneObject* m_lastTarget = nullptr;
+    std::weak_ptr<SceneObject> m_lastTarget;
 };
 
 NS_IGE_END

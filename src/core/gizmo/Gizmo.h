@@ -101,6 +101,6 @@ namespace ige::creator
         uint64_t m_targetClearedEventId;
 
         //! Targeted objects
-        std::vector<std::shared_ptr<SceneObject>> m_targets = {};
+        std::vector<std::weak_ptr<SceneObject>> m_targets = {};
     };
 }

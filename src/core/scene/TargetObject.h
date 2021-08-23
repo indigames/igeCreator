@@ -67,15 +67,15 @@ namespace ige::scene
         std::shared_ptr<SceneObject> getFirstTarget();
 
         //! Get all targets
-        std::vector<std::shared_ptr<SceneObject>>& getAllTargets();
+        std::vector<std::weak_ptr<SceneObject>>& getAllTargets();
 
         //! override
         virtual bool isPrefab() const override {
-            return !empty() && m_objects[0]->isPrefab();
+            return !empty() && m_objects[0].lock()->isPrefab();
         }
 
         virtual std::string getPrefabId() override { 
-            return isPrefab() ? m_objects[0]->getPrefabId() : std::string();
+            return isPrefab() ? m_objects[0].lock()->getPrefabId() : std::string();
         }
 
     protected:
@@ -84,6 +84,6 @@ namespace ige::scene
 
     protected:
         //! List of objects
-        std::vector<std::shared_ptr<SceneObject>> m_objects;
+        std::vector<std::weak_ptr<SceneObject>> m_objects;
     };
 } // namespace ige::scene

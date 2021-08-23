@@ -277,10 +277,10 @@ namespace ige::creator
         for (const auto& type : GetFileExtensionSuported(E_FileExts::Prefab))
         {
             m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto path) {
-                if (Editor::getCurrentScene() && !path.empty()) {
-                    auto target = Editor::getInstance()->getFirstTarget();
-                    if(target != nullptr)
-                        Editor::getCurrentScene()->loadPrefab(target->getId(), path);
+                if (!path.empty()) {
+                    TaskManager::getInstance()->addTask([path]() {
+                        Editor::getInstance()->openPrefab(path);
+                    });
                 }
             });
         }
@@ -617,8 +617,8 @@ namespace ige::creator
     void EditorScene::renderBoundingBoxes()
     {
         auto targets = Editor::getInstance()->getTarget()->getAllTargets();
-        for (const auto& target : targets)
-            renderBoundingBox(target.get());
+        for (auto& target : targets)
+            renderBoundingBox(target.lock().get());
     }
 
     void EditorScene::renderBoundingBox(SceneObject* target)
@@ -1153,9 +1153,11 @@ namespace ige::creator
         AABBox sumAABB;
         const AABBox& aabb = object->getFrameAABB();
         sumAABB.addInternalBox(aabb);
-        for (const auto& child : object->getChildren()) {
-            auto childAABB = getRenderableAABBox(child.get());
-            sumAABB.addInternalBox(childAABB);
+        for (auto& child : object->getChildren()) {
+            if (!child.expired()) {
+                auto childAABB = getRenderableAABBox(child.lock().get());
+                sumAABB.addInternalBox(childAABB);
+            }
         }
         return sumAABB;
     }

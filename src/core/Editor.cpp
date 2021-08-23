@@ -337,10 +337,10 @@ namespace ige::creator
 
     bool Editor::unloadScene()
     {
+        refreshScene();
+
         clearTargets();
         m_target = nullptr;
-
-        refreshScene();
         auto scene = Editor::getCurrentScene();
         if(scene) SceneManager::getInstance()->unloadScene(scene);
         scene = nullptr;
@@ -421,20 +421,16 @@ namespace ige::creator
         auto scene = SceneManager::getInstance()->getCurrentScene();
         if (scene)
         {
-            refreshScene();
-            clearTargets();
-            m_target = nullptr;
-
             auto prefabRoot = scene->getObjects()[0];
             auto prefabId = prefabRoot->getPrefabId();
             auto path = fs::path(SceneManager::getInstance()->getPrefabPath(prefabId)).parent_path().string();
-            savePrefab(prefabRoot->getId(), path);
+            auto saved = savePrefab(prefabRoot->getId(), path);
             prefabRoot = nullptr;
-            SceneManager::getInstance()->unloadScene(scene);
+            unloadScene();
 
             scene = SceneManager::getInstance()->getScenes().back();
             m_target = std::make_shared<TargetObject>(scene.get());
-            scene->reloadPrefabs(prefabId);
+            if(saved) scene->reloadPrefabs(prefabId);
             setCurrentScene(scene);
             return true;
         }
@@ -513,14 +509,14 @@ namespace ige::creator
     {
         json clonedJson;
         auto targets = Editor::getInstance()->getTarget()->getAllTargets();
-        if (targets.size() > 0 && targets[0] != nullptr)
+        if (targets.size() > 0 && !targets[0].expired())
         {
-            for (const auto& target : targets)
+            for (auto& target : targets)
             {
-                if (target)
+                if (!target.expired())
                 {
                     json jTarget;
-                    target->to_json(jTarget);
+                    target.lock()->to_json(jTarget);
                     if (!jTarget.is_null())
                         clonedJson.push_back(jTarget);
                 }
@@ -533,7 +529,7 @@ namespace ige::creator
                 newObject->from_json(jTarget);
                 newObject->setUUID(uuid);
                 newObject->setName(objName + "_cp");
-                newObject->setParent(targets[0]->getParent());
+                newObject->setParent(targets[0].lock()->getParent());
                 Editor::getInstance()->addTarget(newObject, true);
             }
             return true;
@@ -546,15 +542,13 @@ namespace ige::creator
         auto targets = Editor::getInstance()->getTarget()->getAllTargets();
         if (targets.size() > 0)
         {
-            Editor::getInstance()->clearTargets();
-            auto parent = targets[0] ? targets[0]->getParent() : nullptr;
+            auto parent = targets[0].expired() ? targets[0].lock()->getParent() : nullptr;
+            if(parent) Editor::getInstance()->addTarget(parent);
+
             for (auto& target : targets) {
-                if (target->isPrefab() && target->getParent())
-                        target->getParent()->removePrefabIdsLinked(target->getPrefabId());
-                Editor::getCurrentScene()->removeObject(target);
+                removeTarget(target.lock());
+                Editor::getCurrentScene()->removeObject(target.lock());
             }
-            Editor::getInstance()->addTarget(parent);
-            targets.clear();
         }
         return true;
     }
@@ -566,7 +560,7 @@ namespace ige::creator
         for (const auto& target : targets)
         {
             json jTarget;
-            target->to_json(jTarget);
+            target.lock()->to_json(jTarget);
             if(!jTarget.is_null())
                 m_selectedJsons.push_back(jTarget);
         }

@@ -152,7 +152,8 @@ namespace ige::creator
                 auto loop = false;
                 for (auto& target : Editor::getInstance()->getTarget()->getAllTargets())
                 {
-                    if (target && parent->isRelative(target->getId()))
+                    if (!target.expired()
+                        && parent->isRelative(target.lock()->getId()))
                     {
                         loop = true; break;
                     }
@@ -162,8 +163,8 @@ namespace ige::creator
                     std::vector<std::shared_ptr<SceneObject>> movingObjects = {};
                     for (auto& target : Editor::getInstance()->getTarget()->getAllTargets())
                     {
-                        if (target && (!target->getParent() || target->getParent()->isSelected() == false))
-                            movingObjects.push_back(target);
+                        if (!target.expired() && (!target.lock()->getParent() || target.lock()->getParent()->isSelected() == false))
+                            movingObjects.push_back(target.lock());
                     }
                     for (auto& target : movingObjects)
                     {
@@ -175,8 +176,10 @@ namespace ige::creator
         });
         node->addPlugin<DDTargetPlugin<std::string>>(GetFileExtensionSuported(E_FileExts::Prefab)[0])->getOnDataReceivedEvent().addListener([objId](auto path) {
             auto parent = Editor::getCurrentScene()->findObjectById(objId);
-            if (!parent->isInPrefab()) {
-                Editor::getCurrentScene()->loadPrefab(objId, path);
+            if (parent) {
+                if (!parent->isInPrefab()) {
+                    Editor::getCurrentScene()->loadPrefab(objId, path);
+                }
             }
         });
 
@@ -213,9 +216,10 @@ namespace ige::creator
             if (widget->hasContainer())
                 widget->getContainer()->removeWidget(widget);
 
-            if (sceneObject.getParent())
+            auto parent = sceneObject.getParent();
+            if (parent != nullptr)
             {
-                auto parentWidget = m_objectNodeMap.at(sceneObject.getParent()->getId());
+                auto parentWidget = m_objectNodeMap.at(parent->getId());
                 parentWidget->setIsLeaf(false);
                 parentWidget->addWidget(widget);
                 parentWidget->open();
@@ -358,10 +362,10 @@ namespace ige::creator
     void Hierarchy::addCreationContextMenu(SceneObject& sceneObject, std::shared_ptr<ContextMenu> ctxMenu)
     {
         if (ctxMenu == nullptr) return;
-        
+
         if (sceneObject.isInPrefab())
         {
-            auto prefabId = sceneObject.getPrefabId();
+            auto prefabId = sceneObject.getPrefabIdRecursive();
             ctxMenu->createWidget<MenuItem>("Open Prefab")->getOnClickEvent().addListener([prefabId](auto widget) {
                 TaskManager::getInstance()->addTask([prefabId]() {
                     Editor::getInstance()->openPrefabById(prefabId);
@@ -830,7 +834,7 @@ namespace ige::creator
         if (!m_bInitialized)
         {
             auto scene = SceneManager::getInstance()->getCurrentScene();
-            auto isPrefab = scene && scene->getObjects().size() > 0 && scene->getObjects()[0]->isPrefab();
+            auto isPrefab = scene && scene->isPrefab();
             m_groupLayout = createWidget<Group>("Prefab", isPrefab, isPrefab);
             m_groupLayout->getOnClosedEvent().addListener([]() {
                 TaskManager::getInstance()->addTask([] {
