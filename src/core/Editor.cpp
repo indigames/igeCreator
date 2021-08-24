@@ -702,7 +702,7 @@ namespace ige::creator
     bool Editor::loadPrefab(uint64_t parentId, const std::string& file)
     {
         if (Editor::getCurrentScene())
-            return Editor::getCurrentScene()->loadPrefab(parentId, file);
+            return Editor::getCurrentScene()->loadPrefab(parentId, file) != nullptr;
         return false;
     }
 
