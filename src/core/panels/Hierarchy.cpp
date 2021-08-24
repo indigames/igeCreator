@@ -377,6 +377,11 @@ namespace ige::creator
                     Editor::getInstance()->reloadPrefab(objectId);
                 });
             });
+            ctxMenu->createWidget<MenuItem>("Unpack Prefab")->getOnClickEvent().addListener([objectId](auto widget) {
+                TaskManager::getInstance()->addTask([objectId]() {
+                    Editor::getInstance()->unpackPrefab(objectId);
+                });
+            });
         }
 
         auto createMenu = ctxMenu->createWidget<Menu>("Create");

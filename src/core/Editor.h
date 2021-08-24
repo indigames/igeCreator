@@ -58,6 +58,7 @@ namespace ige::creator
         bool openPrefab(const std::string& path);
         bool openPrefabById(const std::string& prefabId);
         bool reloadPrefab(uint64_t objectId);
+        bool unpackPrefab(uint64_t objectId);
         bool closePrefab();
 
         bool cloneObject();

@@ -435,7 +435,21 @@ namespace ige::creator
         }
         return false;
     }
-    
+
+    bool Editor::unpackPrefab(uint64_t objectId)
+    {
+        auto sceneObject = getCurrentScene()->findObjectById(objectId);
+        if (sceneObject != nullptr) {
+            auto prefabRoot = sceneObject->getPrefabRoot();
+            if (prefabRoot != nullptr) {
+                prefabRoot->unpackPrefab();
+                if(getCanvas()) getCanvas()->getHierarchy()->rebuildHierarchy();
+                return true;
+            }
+        }
+        return false;
+    }
+
     bool Editor::closePrefab()
     {
         auto scene = SceneManager::getInstance()->getCurrentScene();
