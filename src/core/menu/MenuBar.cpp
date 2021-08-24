@@ -48,26 +48,37 @@ namespace ige::creator
     void MenuBar::createFileMenu()
     {
         auto projectOpened = (Editor::getInstance()->getProjectPath().length() > 0);
+        auto isPrefabScene = Editor::getCurrentScene() && Editor::getCurrentScene()->isPrefab();
         auto fileMenu = createWidget<Menu>("File");
-        fileMenu->createWidget<MenuItem>("New Project", "CTRL + SHIFT + N")->getOnClickEvent().addListener([this](auto widget) {            
+        fileMenu->createWidget<MenuItem>("New Project", "CTRL + SHIFT + N")->getOnClickEvent().addListener([this](auto widget) {
             Editor::getInstance()->createProject();
         });
-        fileMenu->createWidget<MenuItem>("Open Project", "CTRL + SHIFT + O")->getOnClickEvent().addListener([this](auto widget) {            
+        fileMenu->createWidget<MenuItem>("Open Project", "CTRL + SHIFT + O")->getOnClickEvent().addListener([this](auto widget) {
             Editor::getInstance()->openProject();
         });
-        fileMenu->createWidget<MenuItem>("New Scene", "CTRL + ALT + N", projectOpened)->getOnClickEvent().addListener([this](auto widget) {
+        fileMenu->createWidget<MenuItem>("New Scene", "CTRL + ALT + N", projectOpened && !isPrefabScene)->getOnClickEvent().addListener([this](auto widget) {
             TaskManager::getInstance()->addTask([](){
                 Editor::getInstance()->createScene();
             });
         });
-        fileMenu->createWidget<MenuItem>("Save Scene", "CTRL + S", projectOpened)->getOnClickEvent().addListener([this](auto widget) {
+        fileMenu->createWidget<MenuItem>(isPrefabScene ? "Save Prefab" : "Save Scene", "CTRL + S", projectOpened)->getOnClickEvent().addListener([this](auto widget) {
             TaskManager::getInstance()->addTask([]() {
-                Editor::getInstance()->saveScene();
+                if (Editor::getCurrentScene() && Editor::getCurrentScene()->isPrefab()) {
+                    Editor::getInstance()->savePrefab();
+                }
+                else {
+                    Editor::getInstance()->saveScene();
+                }
             });
         });
-        fileMenu->createWidget<MenuItem>("Save Scene As", "CTRL + SHIFT + S", projectOpened)->getOnClickEvent().addListener([this](auto widget) {
+        fileMenu->createWidget<MenuItem>(isPrefabScene ? "Save Prefab As" : "Save Scene As", "CTRL + SHIFT + S", projectOpened)->getOnClickEvent().addListener([this](auto widget) {
             TaskManager::getInstance()->addTask([]() {
-                Editor::getInstance()->saveSceneAs();
+                if (Editor::getCurrentScene() && Editor::getCurrentScene()->isPrefab()) {
+                    Editor::getInstance()->savePrefabAs();
+                }
+                else {
+                    Editor::getInstance()->saveSceneAs();
+                }
             });
         });
         fileMenu->createWidget<MenuItem>("Exit", "ALT + F4")->getOnClickEvent().addListener([](auto widget) {

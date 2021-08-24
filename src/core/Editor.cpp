@@ -456,15 +456,11 @@ namespace ige::creator
         if (scene)
         {
             bool saved = false;
-            auto prefabRoot = scene->getObjects()[0];
-            auto prefabId = prefabRoot->getPrefabId();
+            auto prefabId = scene->getPrefabId();
             auto btn = MsgBox("Save prefab", "Do you want to save changes?", MsgBox::EBtnLayout::yes_no, MsgBox::EMsgType::question).result();
-            if (btn == MsgBox::EButton::yes)
-            {
-                auto path = fs::path(SceneManager::getInstance()->getPrefabPath(prefabId)).parent_path().string();
-                saved = savePrefab(prefabRoot->getId(), path);
+            if (btn == MsgBox::EButton::yes) {
+                saved = savePrefab();
             }
-            prefabRoot = nullptr;
             unloadScene();
 
             scene = SceneManager::getInstance()->getScenes().back();
@@ -484,6 +480,31 @@ namespace ige::creator
         scene = SceneManager::getInstance()->getScenes().back();
         m_target = std::make_shared<TargetObject>(scene.get());
         setCurrentScene(scene);
+        return false;
+    }
+
+    bool Editor::savePrefab()
+    {
+        auto scene = SceneManager::getInstance()->getCurrentScene();
+        if (scene && scene->isPrefab()) {
+            auto prefabRootId = scene->getObjects()[0]->getId();
+            auto prefabId = scene->getPrefabId();
+            auto path = fs::path(SceneManager::getInstance()->getPrefabPath(prefabId)).parent_path().string();
+            return savePrefab(prefabRootId, path);
+        }
+        return false;
+    }
+
+    bool Editor::savePrefabAs()
+    {
+        auto scene = SceneManager::getInstance()->getCurrentScene();
+        if (scene && scene->isPrefab()) {
+            auto prefabRootId = scene->getObjects()[0]->getId();
+            auto selectedFile = SaveFileDialog("Save Prefab As", "prefab", { "prefab", "*.prefab" }).result();
+            if (!selectedFile.empty()) {
+                return savePrefab(prefabRootId, selectedFile);
+            }
+        }
         return false;
     }
 
@@ -659,20 +680,19 @@ namespace ige::creator
         auto object = Editor::getCurrentScene()->findObjectById(objectId);
         if (object != nullptr)
         {
-            auto fsPath = file.empty() ? fs::path(object->getName()) : fs::path(file + "/" + object->getName());
+            auto fsPath = file.empty() ? fs::path(object->getName() + ".prefab") : fs::path(file);
+            if (fs::is_directory(fsPath)) fsPath = fsPath.append(object->getName() + ".prefab");
             auto ext = fsPath.extension();
-            if (ext.string() != ".prefab") fsPath = fsPath.replace_extension(".prefab");
-            if (!fs::exists(fsPath))
-            {
-                return Editor::getCurrentScene()->savePrefab(objectId, file);
+            if (ext.string() != ".prefab") 
+                fsPath = fsPath.replace_extension(".prefab");
+            if (!fs::exists(fsPath)) {
+                return Editor::getCurrentScene()->savePrefab(objectId, fsPath.string());
             }
             else
             {
                 auto btn = MsgBox("Save prefab", "Prefab file exists. Do you want to overwrite?", MsgBox::EBtnLayout::yes_no, MsgBox::EMsgType::question).result();
-                if (btn == MsgBox::EButton::yes)
-                {
-                    fs::remove(fsPath);
-                    return savePrefab(objectId, file);
+                if (btn == MsgBox::EButton::yes) {
+                    return Editor::getCurrentScene()->savePrefab(objectId, fsPath.string());
                 }
             }
         }

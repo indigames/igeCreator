@@ -60,6 +60,8 @@ namespace ige::creator
         bool reloadPrefab(uint64_t objectId);
         bool unpackPrefab(uint64_t objectId);
         bool closePrefab();
+        bool savePrefab();
+        bool savePrefabAs();
 
         bool cloneObject();
         void copyObject();
