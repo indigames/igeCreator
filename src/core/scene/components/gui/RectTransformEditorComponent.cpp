@@ -42,11 +42,11 @@ RectTransformEditorComponent::~RectTransformEditorComponent() {
     Editor::getTargetRemovedEvent().removeListener(m_targetRemovedEventId);
     Editor::getTargetClearedEvent().removeListener(m_targetClearedEventId);
 
-    if (m_lastTarget && m_listenerId != (uint64_t)-1) {
-        m_lastTarget->getTransformChangedEvent().removeListener(m_listenerId);
+    if (!m_lastTarget.expired() && m_listenerId != (uint64_t)-1) {
+        m_lastTarget.lock()->getTransformChangedEvent().removeListener(m_listenerId);
         m_listenerId = -1;
     }
-    m_lastTarget = nullptr;
+    m_lastTarget.reset();
 }
 
 bool RectTransformEditorComponent::setComponent(std::shared_ptr<Component> component) {
@@ -56,35 +56,31 @@ bool RectTransformEditorComponent::setComponent(std::shared_ptr<Component> compo
 }
 
 //! Target events
-void RectTransformEditorComponent::onTargetAdded(SceneObject* object) {
+void RectTransformEditorComponent::onTargetAdded(const std::shared_ptr<SceneObject>& object) {
     updateTarget();
 }
 
-void RectTransformEditorComponent::onTargetRemoved(SceneObject* object) {
+void RectTransformEditorComponent::onTargetRemoved(const std::shared_ptr<SceneObject>& object) {
     updateTarget();
 }
 
 void RectTransformEditorComponent::updateTarget() {
-    auto target = getComponent<CompoundComponent>()->getComponents()[0]->getOwner();
-    if (m_lastTarget != target) {
-        if (m_lastTarget && m_listenerId != (uint64_t)-1) {
-            m_lastTarget->getTransformChangedEvent().removeListener(m_listenerId);
-            m_listenerId = -1;
-        }
-
-        m_lastTarget = target;
-        if (m_lastTarget) {
-            m_listenerId = m_lastTarget->getTransformChangedEvent().addListener(CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
-        }
+    if (!m_lastTarget.expired() && m_listenerId != (uint64_t)-1) {
+        m_lastTarget.lock()->getTransformChangedEvent().removeListener(m_listenerId);
+        m_listenerId = -1;
+    }
+    m_lastTarget = getComponent<CompoundComponent>()->getComponents()[0]->getOwner()->getSharedPtr();
+    if (!m_lastTarget.expired()) {
+        m_listenerId = m_lastTarget.lock()->getTransformChangedEvent().addListener(CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
     }
 }
 
 void RectTransformEditorComponent::onTargetCleared() {
-    if (m_lastTarget && m_listenerId != (uint64_t)-1) {
-        m_lastTarget->getTransformChangedEvent().removeListener(m_listenerId);
+    if (!m_lastTarget.expired() && m_listenerId != (uint64_t)-1) {
+        m_lastTarget.lock()->getTransformChangedEvent().removeListener(m_listenerId);
         m_listenerId = -1;
     }
-    m_lastTarget = nullptr;
+    m_lastTarget.reset();
 }
 
 void RectTransformEditorComponent::onInspectorUpdate() {
@@ -189,7 +185,7 @@ void RectTransformEditorComponent::drawRect() {
     std::array A = { a };
     auto anchorGroupColums = m_rectGroup->createWidget<Columns<3>>(-1.f, true, 52.f);
     anchorGroupColums->createWidget<Drag<float>>(showPosX ? "X" : "L", ImGuiDataType_Float, A, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        IgnoreTransformEventScope scope(m_lastTarget, m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
+        IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
         auto comp = getComponent<CompoundComponent>();
         auto anchor = comp->getProperty<Vec4>("anchor", { NAN, NAN, NAN, NAN });
         bool showPosX = (anchor[0] == anchor[2]);
@@ -206,7 +202,7 @@ void RectTransformEditorComponent::drawRect() {
 
     std::array B = { b };
     anchorGroupColums->createWidget<Drag<float>>(showPosY ? "Y" : "T", ImGuiDataType_Float, B, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        IgnoreTransformEventScope scope(m_lastTarget, m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
+        IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
         auto comp = getComponent<CompoundComponent>();
         auto anchor = comp->getProperty<Vec4>("anchor", { NAN, NAN, NAN, NAN });
         bool showPosY = (anchor[1] == anchor[3]);
@@ -223,7 +219,7 @@ void RectTransformEditorComponent::drawRect() {
 
     std::array posZ = { getComponent<CompoundComponent>()->getProperty<Vec3>("pos", { NAN, NAN, NAN }).Z() };
     anchorGroupColums->createWidget<Drag<float>>("Z", ImGuiDataType_Float, posZ, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        IgnoreTransformEventScope scope(m_lastTarget, m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
+        IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
         auto comp = getComponent<CompoundComponent>();
         auto position = comp->getProperty<Vec3>("pos", { NAN, NAN, NAN });
         position.Z(val[0]);
@@ -232,7 +228,7 @@ void RectTransformEditorComponent::drawRect() {
 
     std::array C = { c };
     anchorGroupColums->createWidget<Drag<float>>(showPosX ? "W" : "R", ImGuiDataType_Float, C, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        IgnoreTransformEventScope scope(m_lastTarget, m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
+        IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
         auto comp = getComponent<CompoundComponent>();
         auto anchor = comp->getProperty<Vec4>("anchor", { NAN, NAN, NAN, NAN });
         bool showPosX = (anchor[0] == anchor[2]);
@@ -249,7 +245,7 @@ void RectTransformEditorComponent::drawRect() {
 
     std::array D = { d };
     anchorGroupColums->createWidget<Drag<float>>(showPosY ? "H" : "B", ImGuiDataType_Float, D, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        IgnoreTransformEventScope scope(m_lastTarget, m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
+        IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
         auto comp = getComponent<CompoundComponent>();
         auto anchor = comp->getProperty<Vec4>("anchor", { NAN, NAN, NAN, NAN });
         bool showPosY = (anchor[1] == anchor[3]);
@@ -273,7 +269,7 @@ void RectTransformEditorComponent::drawAnchorMinMax() {
     auto anchor = getComponent<CompoundComponent>()->getProperty<Vec4>("anchor", { NAN, NAN, NAN, NAN });
     std::array anchorMin = { anchor[0], anchor[1] };
     m_anchorMinMaxGroup->createWidget<Drag<float, 2>>("Anchor Min", ImGuiDataType_Float, anchorMin, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        IgnoreTransformEventScope scope(m_lastTarget, m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
+        IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
         auto anchor = getComponent<CompoundComponent>()->getProperty<Vec4>("anchor", { NAN, NAN, NAN, NAN });
         anchor[0] = val[0];
         anchor[1] = val[1];
@@ -285,7 +281,7 @@ void RectTransformEditorComponent::drawAnchorMinMax() {
 
     std::array anchorMax = { anchor[2], anchor[3] };
     m_anchorMinMaxGroup->createWidget<Drag<float, 2>>("Anchor Max", ImGuiDataType_Float, anchorMax, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        IgnoreTransformEventScope scope(m_lastTarget, m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
+        IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
         auto anchor = getComponent<CompoundComponent>()->getProperty<Vec4>("anchor", { NAN, NAN, NAN, NAN });
         anchor[2] = val[0];
         anchor[3] = val[1];
@@ -304,7 +300,7 @@ void RectTransformEditorComponent::drawPivot() {
     auto pivot = getComponent<CompoundComponent>()->getProperty<Vec2>("pivot", { NAN, NAN });
     std::array pivotArr = { pivot.X(), pivot.Y() };
     m_pivotGroup->createWidget<Drag<float, 2>>("Pivot", ImGuiDataType_Float, pivotArr, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
-        IgnoreTransformEventScope scope(m_lastTarget, m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
+        IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
         getComponent<CompoundComponent>()->setProperty("pivot", { val[0], val[1] });
         m_dirtyFlagSupport = 3;
         setDirty();
@@ -314,7 +310,7 @@ void RectTransformEditorComponent::drawPivot() {
     auto rotE = getComponent<CompoundComponent>()->getProperty<Vec3>("rot", { NAN, NAN, NAN });
     std::array rot = { RADIANS_TO_DEGREES(rotE.X()), RADIANS_TO_DEGREES(rotE.Y()), RADIANS_TO_DEGREES(rotE.Z()) };
     m_pivotGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot)->getOnDataChangedEvent().addListener([this](auto val) {
-        IgnoreTransformEventScope scope(m_lastTarget, m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
+        IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
         getComponent<CompoundComponent>()->setProperty("rot", Vec3(DEGREES_TO_RADIANS(val[0]), DEGREES_TO_RADIANS(val[1]), DEGREES_TO_RADIANS(val[2])));
         m_dirtyFlagSupport = 3;
         setDirty();
@@ -324,7 +320,7 @@ void RectTransformEditorComponent::drawPivot() {
     auto scale = getComponent<CompoundComponent>()->getProperty<Vec3>("scale", { NAN, NAN, NAN });
     std::array scaleArr = { scale.X(), scale.Y(), scale.Z() };
     m_pivotGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scaleArr)->getOnDataChangedEvent().addListener([this](auto val) {
-        IgnoreTransformEventScope scope(m_lastTarget, m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
+        IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
         getComponent<CompoundComponent>()->setProperty("scale", { val[0], val[1], val[2] });
         m_dirtyFlagSupport = 3;
         setDirty();

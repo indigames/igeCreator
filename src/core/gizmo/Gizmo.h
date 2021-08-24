@@ -58,8 +58,8 @@ namespace ige::creator
         const Quat& getRotation() const;
 
         //! Target object
-        void onTargetAdded(SceneObject* object);
-        void onTargetRemoved(SceneObject* object);
+        void onTargetAdded(const std::shared_ptr<SceneObject>& object);
+        void onTargetRemoved(const std::shared_ptr<SceneObject>& object);
         void onTargetCleared();
 
         //! Check if using gizmo
@@ -70,7 +70,7 @@ namespace ige::creator
         
         //! Update targets
         void updateTargets();
-        void removeAllChildren(SceneObject* obj);
+        void removeAllChildren(std::shared_ptr<SceneObject> obj);
 
         //! Translate
         void translate(const Vec3& trans);
@@ -101,6 +101,6 @@ namespace ige::creator
         uint64_t m_targetClearedEventId;
 
         //! Targeted objects
-        std::vector<SceneObject*> m_targets = {};
+        std::vector<std::weak_ptr<SceneObject>> m_targets = {};
     };
 }

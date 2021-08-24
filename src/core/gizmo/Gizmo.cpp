@@ -147,12 +147,12 @@ namespace ige::creator
     }
 
     //! Target events
-    void Gizmo::onTargetAdded(SceneObject* object)
+    void Gizmo::onTargetAdded(const std::shared_ptr<SceneObject>& object)
     {
         updateTargetNode();
     }
 
-    void Gizmo::onTargetRemoved(SceneObject* object)
+    void Gizmo::onTargetRemoved(const std::shared_ptr<SceneObject>& object)
     {
         updateTargetNode();
     }
@@ -185,12 +185,13 @@ namespace ige::creator
 
         for (const auto& target : m_targets)
         {
-            if (target)
+            if (!target.expired())
             {
-                auto transform = target->getTransform();
+                auto targetObj = target.lock();
+                auto transform = targetObj->getTransform();
                 m_position += transform->getWorldPosition();
-                m_initScales[target->getId()] = transform->getWorldScale();
-                m_initPositions[target->getId()] = transform->getWorldPosition();
+                m_initScales[targetObj->getId()] = transform->getWorldScale();
+                m_initPositions[targetObj->getId()] = transform->getWorldPosition();
             }
         }
         m_position /= m_targets.size();
@@ -198,8 +199,11 @@ namespace ige::creator
         if(m_targets.size() == 1)
         {
             auto target = m_targets.at(0);
-            auto transform = target->getTransform();
-            m_rotation = transform->getWorldRotation();
+            if (!target.expired())
+            {
+                auto transform = target.lock()->getTransform();
+                m_rotation = transform->getWorldRotation();
+            }
         }
     }
 
@@ -211,37 +215,41 @@ namespace ige::creator
         auto it = m_targets.begin();
         while (it != m_targets.end())
         {
-            if (*it != nullptr)
+            if ((*it).expired())
             {
-                auto parent = (*it)->getParent();
+                auto parent = (*it).lock()->getParent();
                 if (parent != nullptr)
                 {
-                    auto itr = std::find(m_targets.begin(), m_targets.end(), parent);
+                    auto itr = std::find_if(m_targets.begin(), m_targets.end(), [parent](auto& elem) {
+                        return !elem.expired() && elem.lock()->getId() == parent->getId();
+                    });
                     if (itr != m_targets.end())
                     {
-                        removeAllChildren(*itr);
+                        removeAllChildren((*itr).lock());
                     }
                 }
                 else
                 {
-                    removeAllChildren(*it);
+                    removeAllChildren((*it).lock());
                 }
             }
             if (it != m_targets.end()) it++;
         }
     }
 
-    void Gizmo::removeAllChildren(SceneObject* obj)
+    void Gizmo::removeAllChildren(std::shared_ptr<SceneObject> obj)
     {
         if (obj != nullptr)
         {
             for (const auto& child : obj->getChildren())
             {
-                auto itr = std::find(m_targets.begin(), m_targets.end(), child);
+                auto itr = std::find_if(m_targets.begin(), m_targets.end(), [child](auto& elem) {
+                    return !elem.expired() && elem.lock()->getId() == child.lock()->getId();
+                });
                 if (itr != m_targets.end())
                 {
                     m_targets.erase(itr);
-                    removeAllChildren(*itr);
+                    removeAllChildren(itr->lock());
                 }
             }
         }
@@ -269,8 +277,8 @@ namespace ige::creator
     //! Translate
     void Gizmo::translate(const Vec3& trans)
     {
-        for (auto target : m_targets)
-            if (target) target->getTransform()->worldTranslate(trans);
+        for (auto& target : m_targets)
+            if (!target.expired()) target.lock()->getTransform()->worldTranslate(trans);
         updateTargetNode();
     }
 
@@ -278,7 +286,7 @@ namespace ige::creator
     void Gizmo::rotate(const Quat& rot)
     {
         for (auto& target : m_targets)
-            if (target) target->getTransform()->worldRotate(rot);
+            if (!target.expired()) target.lock()->getTransform()->worldRotate(rot);
     }
 
     float Quat_Norm(const Quat& rotation)
@@ -313,10 +321,11 @@ namespace ige::creator
     //! Scale
     void Gizmo::scale(const Vec3& scale)
     {
-        for (auto& target : m_targets)
+        for (auto& targetObj : m_targets)
         {
-            if (target)
+            if (!targetObj.expired())
             {
+                auto target = targetObj.lock();
                 auto transform = target->getTransform();
                 transform->setWorldScale(Vec3_Mul(scale, m_initScales[target->getId()]));
 

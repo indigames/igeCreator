@@ -32,11 +32,11 @@ TransformEditorComponent::~TransformEditorComponent() {
     Editor::getTargetRemovedEvent().removeListener(m_targetRemovedEventId);
     Editor::getTargetClearedEvent().removeListener(m_targetClearedEventId);
 
-    if (m_lastTarget && m_listenerId != (uint64_t)-1) {
-        m_lastTarget->getTransformChangedEvent().removeListener(m_listenerId);
+    if (!m_lastTarget.expired() && m_listenerId != (uint64_t)-1) {
+        m_lastTarget.lock()->getTransformChangedEvent().removeListener(m_listenerId);
         m_listenerId = -1;
     }
-    m_lastTarget = nullptr;
+    m_lastTarget.reset();
 }
 
 bool TransformEditorComponent::setComponent(std::shared_ptr<Component> component) {
@@ -46,35 +46,31 @@ bool TransformEditorComponent::setComponent(std::shared_ptr<Component> component
 }
 
 //! Target events
-void TransformEditorComponent::onTargetAdded(SceneObject* object) {
+void TransformEditorComponent::onTargetAdded(const std::shared_ptr<SceneObject>& object) {
     updateTarget();
 }
 
-void TransformEditorComponent::onTargetRemoved(SceneObject* object) {
+void TransformEditorComponent::onTargetRemoved(const std::shared_ptr<SceneObject>& object) {
     updateTarget();
 }
 
 void TransformEditorComponent::updateTarget() {
-    auto target = getComponent<CompoundComponent>()->getComponents()[0]->getOwner();
-    if (m_lastTarget != target) {
-        if (m_lastTarget && m_listenerId != (uint64_t)-1) {
-            m_lastTarget->getTransformChangedEvent().removeListener(m_listenerId);
-            m_listenerId = -1;
-        }
-
-        m_lastTarget = target;
-        if (m_lastTarget) {
-            m_listenerId = m_lastTarget->getTransformChangedEvent().addListener(CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
-        }
+    if (!m_lastTarget.expired() && m_listenerId != (uint64_t)-1) {
+        m_lastTarget.lock()->getTransformChangedEvent().removeListener(m_listenerId);
+        m_listenerId = -1;
+    }
+    m_lastTarget = getComponent<CompoundComponent>()->getComponents()[0]->getOwner()->getSharedPtr();
+    if (!m_lastTarget.expired()) {
+        m_listenerId = m_lastTarget.lock()->getTransformChangedEvent().addListener(CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
     }
 }
 
 void TransformEditorComponent::onTargetCleared() {
-    if (m_lastTarget && m_listenerId != (uint64_t)-1) {
-        m_lastTarget->getTransformChangedEvent().removeListener(m_listenerId);
+    if (!m_lastTarget.expired() && m_listenerId != (uint64_t)-1) {
+        m_lastTarget.lock()->getTransformChangedEvent().removeListener(m_listenerId);
         m_listenerId = -1;
     }
-    m_lastTarget = nullptr;
+    m_lastTarget.reset();
 }
 
 void TransformEditorComponent::onInspectorUpdate() {
@@ -112,7 +108,7 @@ void TransformEditorComponent::drawLocalTransformComponent() {
             || (std::isnan(pos[2]) && !std::isnan(val[2]))) {
             m_dirtyFlag = 0;
         }
-        IgnoreTransformEventScope scope(m_lastTarget, m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
+        IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
         getComponent<CompoundComponent>()->setProperty("pos", Vec3(val[0], val[1], val[2]));
         getComponent<CompoundComponent>()->setDirty();
         setDirty();
@@ -121,7 +117,7 @@ void TransformEditorComponent::drawLocalTransformComponent() {
     auto euler = comp->getProperty<Vec3>("rot", Vec3(NAN, NAN, NAN));
     std::array rotArr = { RADIANS_TO_DEGREES(euler.X()), RADIANS_TO_DEGREES(euler.Y()), RADIANS_TO_DEGREES(euler.Z()) };
     m_localTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rotArr)->getOnDataChangedEvent().addListener([this](auto val) {
-        IgnoreTransformEventScope scope(m_lastTarget, m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
+        IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
         m_dirtyFlag = 2;
         auto euler = getComponent<CompoundComponent>()->getProperty<Vec3>("rot", Vec3(NAN, NAN, NAN));
         if ((std::isnan(euler[0]) && !std::isnan(val[0]))
@@ -137,7 +133,7 @@ void TransformEditorComponent::drawLocalTransformComponent() {
     auto scale = comp->getProperty<Vec3>("scale", Vec3(NAN, NAN, NAN));
     std::array scaleArr = { scale.X(), scale.Y(), scale.Z() };
     m_localTransformGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scaleArr)->getOnDataChangedEvent().addListener([this](auto val) {
-        IgnoreTransformEventScope scope(m_lastTarget, m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
+        IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
         m_dirtyFlag = 2;
         auto scale = getComponent<CompoundComponent>()->getProperty<Vec3>("scale", Vec3(NAN, NAN, NAN));
         if ((std::isnan(scale[0]) && !std::isnan(val[0]))
@@ -169,7 +165,7 @@ void TransformEditorComponent::drawWorldTransformComponent() {
             || (std::isnan(pos[2]) && !std::isnan(val[2]))) {
             m_dirtyFlag = 0;
         }
-        IgnoreTransformEventScope scope(m_lastTarget, m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
+        IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
         getComponent<CompoundComponent>()->setProperty("wpos", Vec3(val[0], val[1], val[2]));
         getComponent<CompoundComponent>()->setDirty();
         setDirty();
@@ -178,7 +174,7 @@ void TransformEditorComponent::drawWorldTransformComponent() {
     auto euler = comp->getProperty<Vec3>("wrot", Vec3(NAN, NAN, NAN));
     std::array rotArr = { RADIANS_TO_DEGREES(euler.X()), RADIANS_TO_DEGREES(euler.Y()), RADIANS_TO_DEGREES(euler.Z()) };
     m_worldTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rotArr)->getOnDataChangedEvent().addListener([this](auto val) {
-        IgnoreTransformEventScope scope(m_lastTarget, m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
+        IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
         m_dirtyFlag = 1;
         auto euler = getComponent<CompoundComponent>()->getProperty<Vec3>("wrot", Vec3(NAN, NAN, NAN));
         if ((std::isnan(euler[0]) && !std::isnan(val[0]))
@@ -194,7 +190,7 @@ void TransformEditorComponent::drawWorldTransformComponent() {
     auto scale = comp->getProperty<Vec3>("wscale", Vec3(NAN, NAN, NAN));
     std::array scaleArr = { scale.X(), scale.Y(), scale.Z() };
     m_worldTransformGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scaleArr)->getOnDataChangedEvent().addListener([this](auto val) {
-        IgnoreTransformEventScope scope(m_lastTarget, m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
+        IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
         m_dirtyFlag = 1;
         auto scale = getComponent<CompoundComponent>()->getProperty<Vec3>("wscale", Vec3(NAN, NAN, NAN));
         if ((std::isnan(scale[0]) && !std::isnan(val[0]))

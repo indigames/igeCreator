@@ -86,9 +86,13 @@ namespace ige::creator
                             file >> metaJs;
                             file.close();
                             auto timeStamp = metaJs.value("Timestamp", (long long)-1);
-                            auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(fs::last_write_time(fsPath).time_since_epoch()).count();
-                            if (timeStamp != ms) {
-                                dirty = true;
+                            try {
+                                auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(fs::last_write_time(fsPath).time_since_epoch()).count();
+                                if (timeStamp != ms) {
+                                    dirty = true;
+                                }
+                            }
+                            catch (std::exception e) {
                             }
                         }
                     }

@@ -48,11 +48,20 @@ namespace ige::creator
 
         bool createScene();
         bool loadScene(const std::string& path);
+        void setCurrentScene(std::shared_ptr<Scene> scene);
+
         bool unloadScene();
         bool saveScene();
         bool saveSceneAs();
         void refreshScene();
+
         bool openPrefab(const std::string& path);
+        bool openPrefabById(const std::string& prefabId);
+        bool reloadPrefab(uint64_t objectId);
+        bool unpackPrefab(uint64_t objectId);
+        bool closePrefab();
+        bool savePrefab();
+        bool savePrefabAs();
 
         bool cloneObject();
         void copyObject();
@@ -71,7 +80,6 @@ namespace ige::creator
 
         //! Short-cut access to current scene
         static std::shared_ptr<Scene> getCurrentScene() { return SceneManager::getInstance()->getCurrentScene(); }
-        static void setCurrentScene(std::shared_ptr<Scene> scene) { SceneManager::getInstance()->setCurrentScene(scene); }
 
         //! Toggle local/global gizmo
         bool isLocalGizmo() { return m_bIsLocalGizmo; }
@@ -94,22 +102,22 @@ namespace ige::creator
         void setProjectPath(const std::string& path);
 
         //! Add target
-        void addTarget(SceneObject* target, bool clear = false);
+        void addTarget(std::shared_ptr<SceneObject> target, bool clear = false);
 
         //! Remove target
-        void removeTarget(SceneObject* target);
+        void removeTarget(std::shared_ptr<SceneObject> target);
 
         //! Remove all target
         void clearTargets();
 
         //! Return the first selected object
-        SceneObject* getFirstTarget();
+        std::shared_ptr<SceneObject> getFirstTarget();
 
         //! Get targeted objects
         std::shared_ptr<TargetObject>& getTarget() { return m_target; }
 
-        static ige::scene::Event<SceneObject*>& getTargetAddedEvent() { return m_targetAddedEvent; }
-        static ige::scene::Event<SceneObject*>& getTargetRemovedEvent() { return m_targetRemovedEvent; }
+        static ige::scene::Event<const std::shared_ptr<SceneObject>&>& getTargetAddedEvent() { return m_targetAddedEvent; }
+        static ige::scene::Event<const std::shared_ptr<SceneObject>&>& getTargetRemovedEvent() { return m_targetRemovedEvent; }
         static ige::scene::Event<>& getTargetClearedEvent() { return m_targetClearedEvent; }
 
     protected:
@@ -137,8 +145,8 @@ namespace ige::creator
         json m_selectedJsons = json::array();
 
         //! Targeted events
-        static ige::scene::Event<SceneObject*> m_targetAddedEvent;
-        static ige::scene::Event<SceneObject*> m_targetRemovedEvent;
+        static ige::scene::Event<const std::shared_ptr<SceneObject>&> m_targetAddedEvent;
+        static ige::scene::Event<const std::shared_ptr<SceneObject>&> m_targetRemovedEvent;
         static ige::scene::Event<> m_targetClearedEvent;
 
         //! Targeted object

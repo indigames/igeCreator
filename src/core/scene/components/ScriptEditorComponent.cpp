@@ -89,8 +89,10 @@ void ScriptEditorComponent::drawScriptComponent() {
     }
 
     auto jMembers = comp->getProperty<json>("members", json{});
-    auto members = jMembers.get<std::unordered_map<std::string, json>>();
+    if (jMembers.is_null() || jMembers.is_discarded())
+        return;
 
+    auto members = jMembers.get<std::unordered_map<std::string, json>>();
     for (const auto& [k, value]: members)
     {
         const auto& key = k;

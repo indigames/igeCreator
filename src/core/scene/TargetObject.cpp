@@ -8,20 +8,19 @@ namespace ige::scene
     //! Constructor
     TargetObject::TargetObject(Scene* scene)
         : SceneObject::SceneObject(scene, 0)
-    {       
+    {
     }
 
     //! Destructor
     TargetObject::~TargetObject()
     {
-
     }
 
     //! Get ID
     uint64_t TargetObject::getId() const 
     {
         if(m_objects.size() == 1)
-            return m_objects[0]->getId();
+            return m_objects[0].lock()->getId();
         return 0;
     }
 
@@ -31,7 +30,7 @@ namespace ige::scene
         if (m_objects.size() == 0)
             return "";
         else if(m_objects.size() == 1)
-            return m_objects[0]->getUUID();
+            return m_objects[0].lock()->getUUID();
         return "Multiple Values";
     }
 
@@ -41,23 +40,14 @@ namespace ige::scene
         if (m_objects.size() == 0)
             return "";
         else if(m_objects.size() == 1)
-            return m_objects[0]->getName();
+            return m_objects[0].lock()->getName();
         return "Multiple Values";
     }
 
     void TargetObject::setName(const std::string& name)
     {
-        int size = m_objects.size();
-        for (int i = 0; i < size; i++)
-        {
-            m_objects[0]->setName(name);
-        }
-    }
-
-    // Get parent
-    SceneObject* TargetObject::getParent() const 
-    {
-        return SceneObject::getParent();
+        if (!m_objects[0].expired())
+            m_objects[0].lock()->setName(name);
     }
 
     //! Add a component
@@ -66,7 +56,6 @@ namespace ige::scene
         auto found = std::find_if(m_components.begin(), m_components.end(), [&component](auto element) {
             return component->getName().compare(element->getName()) == 0;
         });
-
         if (found == m_components.end())
         {
             auto compoundComp = std::make_shared<CompoundComponent>(*this);
@@ -75,9 +64,9 @@ namespace ige::scene
             for(int i = 0; i < m_objects.size(); ++i)
             {
                 auto obj = m_objects[i];
-                if (obj != nullptr)
+                if (!obj.expired())
                 {
-                    auto comp = obj->createComponent(component->getName());
+                    auto comp = obj.lock()->createComponent(component->getName());
                     comp->from_json(jComp);
                     compoundComp->add(comp);
                 }
@@ -94,12 +83,12 @@ namespace ige::scene
             auto compoundComponent = std::dynamic_pointer_cast<CompoundComponent>(element);
             return compoundComponent && component->getName().compare(compoundComponent->getName()) == 0;
         });
-
         if (found != m_components.end())
         {
             for(auto& object: m_objects)
             {
-                object->removeComponent(component->getName());
+                if (!object.expired())
+                    object.lock()->removeComponent(component->getName());
             }
             m_components.erase(found);
             return true;
@@ -114,12 +103,12 @@ namespace ige::scene
             auto compoundComponent = std::dynamic_pointer_cast<CompoundComponent>(element);
             return compoundComponent && name.compare(compoundComponent->getName()) == 0;
         });
-
         if (found != m_components.end())
         {
             for (auto& object : m_objects)
             {
-                object->removeComponent(name);
+                if (!object.expired())
+                    object.lock()->removeComponent(name);
             }
             m_components.erase(found);
             return true;
@@ -130,9 +119,9 @@ namespace ige::scene
     //! Check active
     bool TargetObject::isActive() const
     {
-        if(m_objects.size() <= 0)
+        if(m_objects.size() <= 0 || m_objects[0].expired())
             return false;
-        return m_objects[0]->isActive();
+        return m_objects[0].lock()->isActive();
     }
 
     //! Enable or disable the actor
@@ -140,18 +129,23 @@ namespace ige::scene
     {
         for(auto& obj : m_objects)
         {
-            obj->setActive(isActive);
+            if (!obj.expired())
+                obj.lock()->setActive(isActive);
         }
     }
-    
+
     //! Utils to collect shared components
     void TargetObject::collectSharedComponents()
     {
         m_components.clear();
-        if(m_objects.size() < 0)
+        if(m_objects.size() <= 0)
             return;
+        if(m_objects[0].expired()) {
+            clear();
+            return;
+        }
 
-        for(auto comp: m_objects[0]->getComponents())
+        for(auto comp: m_objects[0].lock()->getComponents())
         {
             if (comp == nullptr) continue;
 
@@ -164,7 +158,7 @@ namespace ige::scene
                 for (int i = 1; i < m_objects.size(); ++i)
                 {
                     auto name = comp->getName();
-                    const auto& components = m_objects[i]->getComponents();
+                    const auto& components = m_objects[i].lock()->getComponents();
                     const auto& itr = std::find_if(components.begin(), components.end(), [&name](auto elem) {
                         return name.compare(elem->getName()) == 0;
                     });
@@ -187,14 +181,16 @@ namespace ige::scene
             }
         }
     }
-    
+
     //! Add object
-    void TargetObject::add(SceneObject* object)
+    void TargetObject::add(std::shared_ptr<SceneObject> object)
     {
         if(object != nullptr)
         {
             object->setSelected(true);
-            auto itr = std::find(m_objects.begin(), m_objects.end(), object);
+            auto itr = std::find_if(m_objects.begin(), m_objects.end(), [&](auto& elem) {
+                return !elem.expired() && elem.lock()->getId() == object->getId();
+            });
             if (itr == m_objects.end())
             {
                 m_objects.push_back(object);
@@ -204,17 +200,19 @@ namespace ige::scene
     }
 
     //! Remove object
-    void TargetObject::remove(SceneObject* object)
+    void TargetObject::remove(std::shared_ptr<SceneObject> object)
     {
         if(object != nullptr)
         {
-            auto itr = std::find(m_objects.begin(), m_objects.end(), object);
+            auto itr = std::find_if(m_objects.begin(), m_objects.end(), [&](auto& elem) {
+                return !elem.expired() && elem.lock()->getId() == object->getId();
+            });
             if(itr != m_objects.end())
             {
                 object->setSelected(false);
                 m_objects.erase(itr);
                 collectSharedComponents();
-            }            
+            }
         }
     }
 
@@ -223,9 +221,9 @@ namespace ige::scene
     {
         for (auto& object : m_objects)
         {
-            if (object)
+            if (!object.expired())
             {
-                object->setSelected(false);
+                object.lock()->setSelected(false);
             }
         }
         m_components.clear();
@@ -233,15 +231,13 @@ namespace ige::scene
     }
 
     //! Get first target
-    SceneObject* TargetObject::getFirstTarget()
+    std::shared_ptr<SceneObject> TargetObject::getFirstTarget()
     {
-        if (m_objects.size() > 0)
-            return m_objects[0];
-        return nullptr;
+        return m_objects.size() > 0 && !m_objects[0].expired() ? m_objects[0].lock() : nullptr;
     }
 
     //! Get all targets
-    std::vector<SceneObject*>& TargetObject::getAllTargets()
+    std::vector< std::weak_ptr<SceneObject>>& TargetObject::getAllTargets()
     {
         return m_objects;
     }
