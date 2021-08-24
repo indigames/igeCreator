@@ -56,16 +56,14 @@ protected:
 template <typename T>
 inline bool EditorComponent::isSafe(const std::shared_ptr<Component>& component)
 {
-	return std::dynamic_pointer_cast<T>(component) != nullptr;
+	return (component != nullptr) && std::dynamic_pointer_cast<T>(component) != nullptr;
 }
 
 //! Get component by type
 template <typename T>
 inline std::shared_ptr<T> EditorComponent::getComponent()
 {
-	if (m_component != nullptr)
-		return std::dynamic_pointer_cast<T>(m_component);
-	else return nullptr;
+	return (m_component != nullptr) ? std::dynamic_pointer_cast<T>(m_component) : nullptr;
 }
 
 #define INSPECTOR_WATCH(COMPONENT, TYPE, VALUE) \
