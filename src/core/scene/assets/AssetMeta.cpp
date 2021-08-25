@@ -26,14 +26,19 @@ bool AssetMeta::loadOptions() {
     auto metaPath = parentPath.append(fsPath.filename().string() + ".meta");
     auto file = std::ifstream(metaPath);
     if (file.is_open()) {
-        json metaJs;
-        file >> metaJs;
-        file.close();
-        json options = metaJs.value("Option", json{});
-        for (auto& [key, val] : options.items()) {
-            if (m_options.count(key) != 0) {
-                m_options[key] = val;
+        try {
+            json metaJs;
+            file >> metaJs;
+            file.close();
+            json options = metaJs.value("Option", json{});
+            for (auto& [key, val] : options.items()) {
+                if (m_options.count(key) != 0) {
+                    m_options[key] = val;
+                }
             }
+        }
+        catch (std::exception e) {
+            return false;
         }
     }
     return true;

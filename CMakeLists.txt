@@ -305,3 +305,19 @@ install(DIRECTORY
         PATTERN "*.so"
         PATTERN "*.dylib"
 )
+
+file(GLOB PVRTexLib_DLLS "${PVRTEXLIB_LIB_DIR}/*.dll")
+foreach(dll IN LISTS PVRTexLib_DLLS)
+    add_custom_command(
+        TARGET ${TARGET_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${dll}" $<TARGET_FILE_DIR:${TARGET_NAME}>
+        COMMENT "Copying dll: ${dll}")
+endforeach()
+
+file(GLOB FBX_DLLS "${FBX_LIB_DIR}/*.dll")
+foreach(dll IN LISTS FBX_DLLS)
+    add_custom_command(
+        TARGET ${TARGET_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${dll}" $<TARGET_FILE_DIR:${TARGET_NAME}>
+        COMMENT "Copying dll: ${dll}")
+endforeach()

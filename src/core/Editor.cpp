@@ -612,12 +612,16 @@ namespace ige::creator
         auto targets = Editor::getInstance()->getTarget()->getAllTargets();
         if (targets.size() > 0)
         {
-            auto parent = targets[0].expired() ? targets[0].lock()->getParent() : nullptr;
+            auto parent = !targets[0].expired() ? targets[0].lock()->getParent() : nullptr;
             if(parent) Editor::getInstance()->addTarget(parent);
 
             for (auto& target : targets) {
-                removeTarget(target.lock());
-                Editor::getCurrentScene()->removeObject(target.lock());
+                auto obj = target.lock();
+                if (obj) {
+                    removeTarget(obj);
+                    Editor::getCurrentScene()->removeObject(obj);
+                }
+                obj = nullptr;
             }
         }
         return true;

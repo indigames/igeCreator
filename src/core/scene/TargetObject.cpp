@@ -214,6 +214,12 @@ namespace ige::scene
                 collectSharedComponents();
             }
         }
+
+        auto itr = m_objects.begin();
+        while (itr != m_objects.end()) {
+            if (itr->expired()) { itr = m_objects.erase(itr); continue; }
+            ++itr;
+        }
     }
 
     //! Clear object
