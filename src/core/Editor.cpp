@@ -338,9 +338,9 @@ namespace ige::creator
     bool Editor::unloadScene()
     {
         refreshScene();
-
         clearTargets();
         m_target = nullptr;
+
         auto scene = Editor::getCurrentScene();
         if(scene) SceneManager::getInstance()->unloadScene(scene);
         scene = nullptr;
@@ -462,18 +462,17 @@ namespace ige::creator
                 saved = savePrefab();
             }
             unloadScene();
-
             scene = SceneManager::getInstance()->getScenes().back();
-            m_target = std::make_shared<TargetObject>(scene.get());
-            if (saved)
-            {
-                auto btn = MsgBox("Reload prefab", "Do you want to reload all the nodes with the changed prefab?", MsgBox::EBtnLayout::yes_no, MsgBox::EMsgType::question).result();
-                if (btn == MsgBox::EButton::yes)
-                {
-                    scene->reloadPrefabs(prefabId);
+            if (scene != nullptr) {
+                m_target = std::make_shared<TargetObject>(scene.get());
+                if (saved) {
+                    auto btn = MsgBox("Reload prefab", "Do you want to reload all the nodes with the changed prefab?", MsgBox::EBtnLayout::yes_no, MsgBox::EMsgType::question).result();
+                    if (btn == MsgBox::EButton::yes) {
+                        scene->reloadPrefabs(prefabId);
+                    }
                 }
+                setCurrentScene(scene);
             }
-            setCurrentScene(scene);
             return true;
         }
 
