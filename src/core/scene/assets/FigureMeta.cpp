@@ -4,6 +4,7 @@
 
 #include <pyxieFigureExportConfigManager.h>
 #include <pyxieColladaLoader.h>
+#include <pyxieFbxLoader.h>
 
 #include <chrono>
 #include <ctime>
@@ -65,6 +66,30 @@ bool FigureMeta::loadCollada(EditableFigure& efig, const std::string& path) {
         }
     }
 
+    bool isFbx = fsPath.extension().string().compare(".fbx") == 0;
+    if (isFbx) {
+        // Load model data and binded animation
+        pyxieFbxLoader loader;
+        auto rv = loader.LoadModel(relPath.c_str(), &efig);
+        if (!rv) return false;
+
+        // Load additional animations
+        bool folderRule = fsPath.filename().compare(parentPath.filename()) == 0;
+        if (folderRule) {
+            for (const auto& entry : fs::directory_iterator(parentPath)) {
+                if (entry.is_regular_file()) {
+                    if (entry.path().filename().compare(parentPath.filename()))
+                        continue;
+                    auto relPath = entry.path().is_absolute() ? fs::relative(entry.path(), fs::current_path()).string() : entry.path().string();
+                    std::replace(relPath.begin(), relPath.end(), '\\', '/');
+                    rv = loader.LoadAnimation(relPath.c_str(), &efig);
+                    if (!rv) return false;
+                }
+            }
+        }
+        return rv;
+    }
+    
     // Load model data and binded animation
     pyxieColladaLoader loader;
     auto rv = loader.LoadCollada(relPath.c_str(), &efig);
