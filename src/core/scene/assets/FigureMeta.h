@@ -23,6 +23,12 @@ public:
 protected:
 	//! Load figure
 	bool loadCollada(EditableFigure& efig, const std::string& path);
+
+	//! Load fbx
+	bool loadFbx(EditableFigure& efig, const std::string& path);
+
+	//! Replace texture path
+	bool replaceTextures(EditableFigure& efig);
 };
 
 NS_IGE_END

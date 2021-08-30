@@ -42,14 +42,72 @@ void FigureMeta::draw(std::shared_ptr<Group> group) {
     AssetMeta::draw(group);
 }
 
+
+//! Replace texture path
+bool FigureMeta::replaceTextures(EditableFigure& efig)
+{
+    auto fsPath = fs::path(efig.ResourceName());
+    auto relPath = fsPath.is_absolute() ? fs::relative(fsPath, fs::current_path()) : fsPath;
+    auto texSrcs = efig.GetTextureSources();
+    for (const auto& texSrc : texSrcs) {
+        auto texName = fs::path(texSrc.path).filename();
+        auto newTexSrc = TextureSource(texSrc);
+        for (const auto& entry : fs::recursive_directory_iterator(relPath.parent_path())) {
+            if (entry.is_regular_file()) {
+                if (entry.path().filename().compare(texName) == 0) {
+                    auto newPath = entry.path().relative_path().replace_extension(".pyxi").string();
+                    std::replace(newPath.begin(), newPath.end(), '\\', '/');
+                    memset(newTexSrc.path, 0, MAX_PATH);
+                    memcpy(newTexSrc.path, newPath.c_str(), newPath.length());
+                    break;
+                }
+            }
+        }
+        efig.ReplaceTextureSource(texSrc, newTexSrc);
+    }
+    return true;
+}
+
+bool FigureMeta::loadFbx(EditableFigure& efig, const std::string& path) {
+    auto fsPath = fs::path(path);
+    auto relPath = fsPath.is_absolute() ? fs::relative(fsPath, fs::current_path()) : fsPath;
+    auto parentPath = relPath.parent_path();
+
+    // Load model data and binded animation
+    auto parentName = parentPath.filename();
+    auto baseModelPath = parentPath;
+    baseModelPath.append(parentName.string() + ".fbx");
+    bool folderRule = fs::exists(baseModelPath);
+
+    if (folderRule && fsPath.filename().compare(baseModelPath.filename()) != 0)
+        return false;
+
+    pyxieFbxLoader loader;
+    auto rv = loader.LoadModel(relPath.c_str(), &efig);
+    if (!rv) return false;
+
+    if (folderRule) {
+        for (const auto& entry : fs::directory_iterator(parentPath)) {
+            if (entry.is_regular_file()) {
+                if (entry.path().filename().compare(baseModelPath.filename()) == 0 || entry.path().extension().compare(".fbx") != 0)
+                    continue;
+                auto relPath = entry.path().is_absolute() ? fs::relative(entry.path(), fs::current_path()).string() : entry.path().string();
+                std::replace(relPath.begin(), relPath.end(), '\\', '/');
+                rv = loader.LoadModel(relPath.c_str(), &efig);
+                if (!rv) return false;
+            }
+        }
+    }
+    return rv;
+}
+
 bool FigureMeta::loadCollada(EditableFigure& efig, const std::string& path) {
     // Setting figure loader options
     pyxieFigureExportConfigManager::Instance().ClearOption();
 
     auto fsPath = fs::path(path);
-    auto parentPath = fsPath.parent_path();
-    auto relPath = fsPath.is_absolute() ? fs::relative(fsPath, fs::current_path()).string() : fsPath.string();
-    std::replace(relPath.begin(), relPath.end(), '\\', '/');
+    auto relPath = fsPath.is_absolute() ? fs::relative(fsPath, fs::current_path()) : fsPath;
+    auto parentPath = relPath.parent_path();
 
     //! Load options
     for (auto& [key, val] :m_options) {
@@ -68,39 +126,26 @@ bool FigureMeta::loadCollada(EditableFigure& efig, const std::string& path) {
 
     bool isFbx = fsPath.extension().string().compare(".fbx") == 0;
     if (isFbx) {
-        // Load model data and binded animation
-        pyxieFbxLoader loader;
-        auto rv = loader.LoadModel(relPath.c_str(), &efig);
-        if (!rv) return false;
-
-        // Load additional animations
-        bool folderRule = fsPath.filename().compare(parentPath.filename()) == 0;
-        if (folderRule) {
-            for (const auto& entry : fs::directory_iterator(parentPath)) {
-                if (entry.is_regular_file()) {
-                    if (entry.path().filename().compare(parentPath.filename()))
-                        continue;
-                    auto relPath = entry.path().is_absolute() ? fs::relative(entry.path(), fs::current_path()).string() : entry.path().string();
-                    std::replace(relPath.begin(), relPath.end(), '\\', '/');
-                    rv = loader.LoadAnimation(relPath.c_str(), &efig);
-                    if (!rv) return false;
-                }
-            }
-        }
-        return rv;
+        return loadFbx(efig, path);
     }
     
     // Load model data and binded animation
+    auto parentName = parentPath.filename();
+    auto baseModelPath = parentPath;
+    baseModelPath.append(parentName.string() + ".dae");
+    bool folderRule = fs::exists(baseModelPath);
+
+    if (folderRule && fsPath.filename().compare(baseModelPath.filename()) != 0) 
+        return false;
+
     pyxieColladaLoader loader;
     auto rv = loader.LoadCollada(relPath.c_str(), &efig);
     if (!rv) return false;
 
-    // Load additional animations
-    bool folderRule = fsPath.filename().compare(parentPath.filename()) == 0;
     if (folderRule) {
         for (const auto& entry : fs::directory_iterator(parentPath)) {
             if (entry.is_regular_file()) {
-                if (entry.path().filename().compare(parentPath.filename()))
+                if (entry.path().filename().compare(baseModelPath.filename()) == 0 || entry.path().extension().compare(".dae") != 0)
                     continue;
                 auto relPath = entry.path().is_absolute() ? fs::relative(entry.path(), fs::current_path()).string() : entry.path().string();
                 std::replace(relPath.begin(), relPath.end(), '\\', '/');
@@ -115,11 +160,12 @@ bool FigureMeta::loadCollada(EditableFigure& efig, const std::string& path) {
 bool FigureMeta::save() {
     auto fsPath = fs::path(m_path);
     auto efig = ResourceCreator::Instance().NewEditableFigure(m_path.c_str(), true);
-    if (loadCollada(*efig, m_path))
+    if (loadCollada(*efig, m_path)) {
+        replaceTextures(*efig);
         efig->SaveFigure((fsPath.parent_path().append(fsPath.stem().string() + ".pyxf")).c_str());
+    }
     efig->DecReference();
     efig = nullptr;
-
     return AssetMeta::save();
 }
 
