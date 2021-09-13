@@ -114,7 +114,7 @@ struct _inittab g_customInitTabs[] = {
 #endif
 
 #ifdef USE_IGEEFFEKSEER
-    {"igeEffekseer", PyInit_igeEffekseer},
+    {"igeEffekseer", PyInit__igeEffekseer},
 #endif
 
 #ifdef USE_TENSORFLOW

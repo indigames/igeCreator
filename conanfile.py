@@ -28,13 +28,10 @@ class IgeConan(ConanFile):
         self.requires("tracy/[>=0.6.6]@ige/test")
         self.requires("json/[>=3.9.1]@ige/test")
         self.requires("bullet/[>=3.0.8]@ige/test")
-        self.requires("igeBullet/[>=0.4.61]@ige/test")
         self.requires("igeSound/[>=0.1.0]@ige/test")
-        self.requires("igeEffekseer/[>=0.0.18]@ige/test")
-        self.requires("igeNavigation/[>=0.0.1]@ige/test")
-        self.requires("igeVmath/0.6.7@ige/test")
-        self.requires("igeCore/0.5.47@ige/test")
-        self.requires("pyxCore/0.5.47@ige/test")
+        self.requires("igeEffekseer/[>=0.1.6]@ige/test")
+        self.requires("igeNavigation/[>=0.0.2]@ige/test")
+        self.requires("igeCore/0.5.56@ige/test")
 
 
     def build(self):

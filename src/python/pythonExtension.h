@@ -94,7 +94,7 @@ extern PyObject *PyInit_igeAutoTest(void);
 #endif
 
 #ifdef USE_IGEEFFEKSEER
-extern PyObject *PyInit_igeEffekseer(void);
+extern PyObject *PyInit__igeEffekseer(void);
 #endif
 
 #ifdef USE_TENSORFLOW
