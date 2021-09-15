@@ -91,5 +91,12 @@ void ParticleEditorComponent::drawParticle() {
             setDirty();
         });
     }
+    m_particleGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
+        auto files = OpenFileDialog("Import Particle Assets", "", { "Particle (*.efk)", "*.efk" }).result();
+        if (files.size() > 0) {
+            getComponent<CompoundComponent>()->setProperty("path", files[0]);
+            setDirty();
+        }
+        });
 }
 NS_IGE_END

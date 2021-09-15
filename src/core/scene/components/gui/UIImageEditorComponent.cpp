@@ -66,25 +66,25 @@ void UIImageEditorComponent::drawUIImage() {
         m_uiImageGroup->createWidget<Drag<float, 1>>("Border Left", ImGuiDataType_Float, borderLeft, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
             auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", { NAN, NAN, NAN, NAN });
             border.X(val[0]);
-            getComponent<CompoundComponent>()->setProperty("border", val);
+            getComponent<CompoundComponent>()->setProperty("border", border);
         });
         std::array borderRight = { border.Y() };
         m_uiImageGroup->createWidget<Drag<float, 1>>("Border Right", ImGuiDataType_Float, borderRight, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
             auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", { NAN, NAN, NAN, NAN });
             border.Y(val[0]);
-            getComponent<CompoundComponent>()->setProperty("border", val);
+            getComponent<CompoundComponent>()->setProperty("border", border);
         });
         std::array borderTop = { border.Z() };
         m_uiImageGroup->createWidget<Drag<float, 1>>("Border Top", ImGuiDataType_Float, borderTop, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
             auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", { NAN, NAN, NAN, NAN });
             border.Z(val[0]);
-            getComponent<CompoundComponent>()->setProperty("border", val);
+            getComponent<CompoundComponent>()->setProperty("border", border);
         });
         std::array borderBottom = { border.W() };
         m_uiImageGroup->createWidget<Drag<float, 1>>("Border Bottom", ImGuiDataType_Float, borderBottom, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
             auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", { NAN, NAN, NAN, NAN });
             border.W(val[0]);
-            getComponent<CompoundComponent>()->setProperty("border", val);
+            getComponent<CompoundComponent>()->setProperty("border", border);
         });
     } else {
         auto fillMethod = comp->getProperty<int>("fillmethod", -1);

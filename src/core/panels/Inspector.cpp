@@ -160,6 +160,7 @@ namespace ige::creator
         {
             m_createCompCombo->addChoice((int)Component::Type::UIImage, "UIImage");
             m_createCompCombo->addChoice((int)Component::Type::UIText, "UIText");
+            m_createCompCombo->addChoice((int)Component::Type::UITextBitmap, "UITextBitmap");
             m_createCompCombo->addChoice((int)Component::Type::UITextField, "UITextField");
             m_createCompCombo->addChoice((int)Component::Type::UIButton, "UIButton");
             m_createCompCombo->addChoice((int)Component::Type::UIButton, "UISlider");

@@ -149,6 +149,9 @@ namespace ige::creator
             SceneManager::getInstance()->render();
             renderContext->EndScene();
         }
+
+        // Late Update scene
+        SceneManager::getInstance()->lateUpdate(dt);
     }
 
     void GameScene::_drawImpl()

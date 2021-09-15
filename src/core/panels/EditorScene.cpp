@@ -444,6 +444,9 @@ namespace ige::creator
 
         //! Update Panel
         Panel::update(dt);
+
+        // Late Update scene
+        SceneManager::getInstance()->lateUpdate(dt);
     }
 
     //! Update keyboard

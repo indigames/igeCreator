@@ -422,7 +422,6 @@ namespace ige::creator
                 if (kq) {
                     this->onLoadImg(m_path);
                     dirty();
-                    m_bPageFlag;
                 }
             }
             });
@@ -447,6 +446,12 @@ namespace ige::creator
         m_fontPageGroup->removeAllPlugins();
         m_fontPageGroup->removeAllWidgets();
         
+        std::array sizeT = { (float)m_font->getWidth(), (float)m_font->getHeigth() };
+        m_fontPageGroup->createWidget<Drag<float, 2>>("Texture Size", ImGuiDataType_Float, sizeT, 1.0f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            m_font->setWidth((int)val[0]);
+            m_font->setHeight((int)val[1]);
+            });
+
         std::array sizeD = { (float)m_font->getSize() };
         m_fontPageGroup->createWidget<Drag<float, 1>>("Font Size", ImGuiDataType_Float, sizeD, 1.0f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
             m_font->setSize((int)val[0]);

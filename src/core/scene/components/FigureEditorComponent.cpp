@@ -159,12 +159,35 @@ void FigureEditorComponent::drawFigureComponent()
                             else if ((currMat->params[j].type == ParamTypeSampler))
                             {
                                 auto textPath = currMat->params[j].sampler.tex->ResourceName();
-                                materialGroup->createWidget<TextField>(info->name, textPath);
+                                /*materialGroup->createWidget<TextField>(info->name, textPath);*/
+                                auto txtPath = materialGroup->createWidget<TextField>(info->name, textPath);
+                                txtPath->setEndOfLine(false);
+                                txtPath->getOnDataChangedEvent().addListener([this](const auto& txt) {
+                                    //getComponent<CompoundComponent>()->setProperty("path", txt);
+                                    });
+
+                                for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
+                                {
+                                    txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& txt) {
+                                        //getComponent<CompoundComponent>()->setProperty("path", txt);
+                                        setDirty();
+                                        });
+                                }
+
+                                materialGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
+                                    auto files = OpenFileDialog("Import Assets", "", { "Texture (*.pyxi)", "*.pyxi" }).result();
+                                    if (files.size() > 0) {
+                                        //getComponent<CompoundComponent>()->setProperty("path", files[0]);
+                                        setDirty();
+                                    }
+                                    });
                             }
                             else if ((currMat->params[j].type == ParamTypeFloat))
                             {
                                 std::array val = { currMat->params[j].fValue[0] };
-                                materialGroup->createWidget<Drag<float>>(info->name, ImGuiDataType_Float, val);
+                                materialGroup->createWidget<Drag<float>>(info->name, ImGuiDataType_Float, val)->getOnDataChangedEvent().addListener([this](auto val) {
+                                    //getComponent<CompoundComponent>()->setProperty("color", { val[0], val[1], val[2], val[3] });
+                                    });
                             }
                         }
                     }

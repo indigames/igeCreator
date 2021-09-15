@@ -47,7 +47,7 @@ void UITextBitmapEditorComponent::drawUIText()
     txtFontPath->getOnDataChangedEvent().addListener([this](auto txt) {
         getComponent<CompoundComponent>()->setProperty("font", txt);
     });
-    for (const auto& type : GetFileExtensionSuported(E_FileExts::Font)) {
+    for (const auto& type : GetFileExtensionSuported(E_FileExts::FontBitmap)) {
         txtFontPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
             getComponent<CompoundComponent>()->setProperty("font", txt);
             setDirty();
