@@ -191,7 +191,7 @@ target_link_libraries(${TARGET_NAME}
     pyxcore
     pyxtools
     igeCore-static
-    igeVMath-static
+    igeVmath-static
     ${Python3_LIBRARIES}
     ${numpy_LIBRARIES}
     ${tracy_LIBRARIES}
