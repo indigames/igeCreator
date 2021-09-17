@@ -141,6 +141,9 @@ namespace ige::creator
         // Update scene
         SceneManager::getInstance()->update(dt);
 
+        // Physic update scene
+        SceneManager::getInstance()->physicUpdate(dt);
+        
         // Render
         auto renderContext = RenderContext::InstancePtr();
         if (renderContext && m_fbo)
