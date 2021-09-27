@@ -41,7 +41,7 @@ namespace ige::scene
         virtual bool removeComponent(const std::string& name) override;
 
         //! Enable or disable the actor
-        void setActive(bool isActive) override;
+        void setActive(bool isActive, bool recursive = false) override;
 
         //! Check active
         bool isActive() const override;

@@ -560,8 +560,10 @@ namespace ige::creator
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObject = Editor::getCurrentScene()->createObject("UIImage", target, true);
                     auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
-                    newObject->addComponent<UIImage>("sprites/background", rect->getSize());
-                    Editor::getInstance()->addTarget(newObject, true);
+                    if (rect) {
+                        newObject->addComponent<UIImage>("sprites/background", rect->getSize());
+                        Editor::getInstance()->addTarget(newObject, true);
+                    }
                 });
             });
 

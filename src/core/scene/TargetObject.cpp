@@ -125,12 +125,12 @@ namespace ige::scene
     }
 
     //! Enable or disable the actor
-    void TargetObject::setActive(bool isActive)
+    void TargetObject::setActive(bool isActive, bool recursive)
     {
         for(auto& obj : m_objects)
         {
             if (!obj.expired())
-                obj.lock()->setActive(isActive);
+                obj.lock()->setActive(isActive, recursive);
         }
     }
 
