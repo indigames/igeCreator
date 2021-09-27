@@ -105,6 +105,16 @@ void PhysicObjectEditorComponent::drawPhysicObject() {
     m_physicGroup->createWidget<Drag<float>>("Margin", ImGuiDataType_Float, margin, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("margin", val[0]);
     });
+
+    std::array linearSleepThreshold = { comp->getProperty<float>("linearSleepingThreshold", NAN) };
+    m_physicGroup->createWidget<Drag<float>>("Linear Sleeping Threshold", ImGuiDataType_Float, linearSleepThreshold, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
+        getComponent<CompoundComponent>()->setProperty("linearSleepingThreshold", val[0]);
+        });
+
+    std::array angularSleepThreshold = { comp->getProperty<float>("angularSleepingThreshold", NAN) };
+    m_physicGroup->createWidget<Drag<float>>("Angular Sleeping Threshold", ImGuiDataType_Float, angularSleepThreshold, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
+        getComponent<CompoundComponent>()->setProperty("angularSleepingThreshold", val[0]);
+        });
 }
 
 void PhysicObjectEditorComponent::drawPhysicConstraints() {
