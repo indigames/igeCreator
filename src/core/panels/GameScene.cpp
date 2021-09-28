@@ -87,9 +87,15 @@ namespace ige::creator
                 getOnSizeChangedEvent().addListener([this](auto size) {
                     TaskManager::getInstance()->addTask([this]() {
                         auto size = getSize();
-                        m_fbo->Resize(size.x, size.y);
-                        m_imageWidget->setSize(size);
-
+                        if (m_fbo == nullptr) {
+                            m_rtTexture = ResourceCreator::Instance().NewTexture("GameScene_RTTexture", nullptr, size.x, size.y, GL_RGBA);
+                            m_fbo = ResourceCreator::Instance().NewRenderTarget(m_rtTexture, true, true);
+                            m_imageWidget = createWidget<Image>(m_fbo->GetColorTexture()->GetTextureHandle(), size);
+                        }
+                        else {
+                            m_fbo->Resize(size.x, size.y);
+                            m_imageWidget->setSize(size);
+                        }
                         // Adjust camera aspect ratio
                         if (Editor::getCurrentScene() 
                             && Editor::getCurrentScene()->getActiveCamera())                        
