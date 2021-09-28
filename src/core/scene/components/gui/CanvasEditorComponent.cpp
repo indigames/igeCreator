@@ -35,8 +35,6 @@ void CanvasEditorComponent::drawCanvas()
     m_canvasGroup->createWidget<Drag<float, 2>>("DesignSize", ImGuiDataType_Float, size)->getOnDataChangedEvent().addListener([this](auto val) {
         auto canvas = std::dynamic_pointer_cast<Canvas>(getComponent<CompoundComponent>()->getComponents()[0]);
         canvas->setDesignCanvasSize({ val[0], val[1] });
-        auto transformToViewport = Mat4::Translate(Vec3(-val[0] * 0.5f, -val[1] * 0.5f, 0.f));
-        canvas->setCanvasToViewportMatrix(transformToViewport);
     });
 
     std::array targetSize = { canvas->getTargetCanvasSize().X(), canvas->getTargetCanvasSize().Y() };
