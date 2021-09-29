@@ -166,6 +166,25 @@ namespace ige::creator
                 m_canvasRatio = SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH();
 
                 m_HandleCameraTouchId = -1;
+
+                if(m_fbo)
+                    m_fbo->Resize(size.x, size.y);
+                if(m_imageWidget)
+                    m_imageWidget->setSize(size);
+
+                // Update camera aspect rate
+                if (m_currCamera) {
+                    if(size.y == 0) 
+                        m_currCamera->SetAspectRate(size.x);
+                    else
+                        m_currCamera->SetAspectRate(size.x / size.y);
+                }
+
+                // Update window pos and size
+                if (Editor::getCurrentScene()) {
+                    Editor::getCurrentScene()->setWindowSize({ size.x , size.y });
+                }
+
                 m_bInitialized = true;
             }
         }
