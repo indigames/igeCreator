@@ -50,7 +50,7 @@ void FigureEditorComponent::drawFigureComponent()
     }
 
     m_figureCompGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
-        auto files = OpenFileDialog("Import Assets", "", { "Figure", "*.dae", "*.fbx" }).result();
+        auto files = OpenFileDialog("Import Assets", "", { "Figure", "*.dae", "FBX file (*.fbx)", "*.fbx" }).result();
         if (files.size() > 0) {
             getComponent<CompoundComponent>()->setProperty("path", files[0]);
             setDirty();
@@ -175,7 +175,7 @@ void FigureEditorComponent::drawFigureComponent()
                                 }
 
                                 materialGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
-                                    auto files = OpenFileDialog("Import Assets", "", { "Texture (*.pyxi)", "*.pyxi" }).result();
+                                    auto files = OpenFileDialog("Import Assets", "", { "Texture (*.pyxi)", "*.pyxi"}).result();
                                     if (files.size() > 0) {
                                         //getComponent<CompoundComponent>()->setProperty("path", files[0]);
                                         setDirty();
