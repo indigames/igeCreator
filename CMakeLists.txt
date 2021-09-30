@@ -186,6 +186,24 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ignore:4099 /ignore:4286 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT") # Disable LIBCMT, avoid conflict definition
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:python37") # Disable python37, avoid conflict definition
 
+message(STATUS "Python3_LIBRARIES: ${Python3_LIBRARIES}")
+message(STATUS "numpy_LIBRARIES: ${numpy_LIBRARIES}")
+message(STATUS "tracy_LIBRARIES: ${tracy_LIBRARIES}")
+message(STATUS "bullet_LIBRARIES: ${bullet_LIBRARIES}")
+message(STATUS "igeBullet_LIBRARIES: ${igeBullet_LIBRARIES}")
+message(STATUS "stb_LIBRARIES: ${stb_LIBRARIES}")
+message(STATUS "SDL_LIBRARIES: ${SDL_LIBRARIES}")
+message(STATUS "openssl_LIBRARIES: ${openssl_LIBRARIES}")
+message(STATUS "igeSound_LIBRARIES: ${igeSound_LIBRARIES}")
+message(STATUS "igeEffekseer_LIBRARIES: ${igeEffekseer_LIBRARIES}")
+message(STATUS "igeNavigation_LIBRARIES: ${igeNavigation_LIBRARIES}")
+
+set (LIBS_TO_REMOVE "igeVmath::igeVmath" "pyxCore::pyxCore" )
+foreach(elem ${LIBS_TO_REMOVE})
+    list(REMOVE_ITEM igeBullet_LIBRARIES ${elem})
+    list(REMOVE_ITEM igeEffekseer_LIBRARIES ${elem})
+endforeach()
+
 target_link_libraries(${TARGET_NAME} 
     igeScene-static
     pyxcore
