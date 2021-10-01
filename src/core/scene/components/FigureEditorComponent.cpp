@@ -115,13 +115,14 @@ void FigureEditorComponent::drawFigureComponent()
     // Only show details if this is single target
     if (comp->size() == 1)
     {
-        auto figure = std::dynamic_pointer_cast<FigureComponent>(comp->getComponents()[0])->getFigure();
-        if (figure)
+        auto figureComp = std::dynamic_pointer_cast<FigureComponent>(comp->getComponents()[0]);
+        if (figureComp)
         {
+            auto figure = figureComp->getFigure();
             if (figure->NumMeshes() > 0)
             {
                 auto meshGroup = m_figureCompGroup->createWidget<Group>("Mesh", true, false, Group::E_Align::LEFT, false);
-                auto meshColumn = meshGroup->createWidget<Columns<3>>();
+                auto meshColumn = meshGroup->createWidget<Columns<4>>();
                 for (int i = 0; i < figure->NumMeshes(); i++)
                 {
                     auto mesh = figure->GetMesh(i);
@@ -129,6 +130,12 @@ void FigureEditorComponent::drawFigureComponent()
                     txtName->addPlugin<DDSourcePlugin<int>>(EDragDropID::MESH, figure->GetMeshName(i), i);
                     meshColumn->createWidget<TextField>("V", std::to_string(mesh->numVerticies).c_str(), true);
                     meshColumn->createWidget<TextField>("I", std::to_string(mesh->numIndices).c_str(), true);
+                    meshColumn->createWidget<CheckBox>("", figureComp->isMeshEnable(i))->getOnDataChangedEvent().addListener([this, i](auto val) {
+                        auto figureComp = std::dynamic_pointer_cast<FigureComponent>(getComponent<CompoundComponent>()->getComponents()[0]);
+                        if (figureComp) {
+                            figureComp->setMeshEnable(i, val);
+                        }
+                    });
                 }
             }
 
