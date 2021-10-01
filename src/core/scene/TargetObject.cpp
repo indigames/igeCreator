@@ -157,10 +157,10 @@ namespace ige::scene
                 auto shoudAdd = true;
                 for (int i = 1; i < m_objects.size(); ++i)
                 {
-                    auto name = comp->getName();
+                    auto type = comp->getType();
                     const auto& components = m_objects[i].lock()->getComponents();
-                    const auto& itr = std::find_if(components.begin(), components.end(), [&name](auto elem) {
-                        return name.compare(elem->getName()) == 0;
+                    const auto& itr = std::find_if(components.begin(), components.end(), [&type](auto elem) {
+                        return elem->getType() == type;
                     });
 
                     if (itr != components.end())

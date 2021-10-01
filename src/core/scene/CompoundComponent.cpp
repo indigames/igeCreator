@@ -86,63 +86,64 @@ namespace ige::scene
         m_json.clear();
         if (m_components.size() == 0) return;
         m_components[0]->to_json(m_json);
-        json jComp;
-        for (int i = 1; i < m_components.size(); ++i)
+
+        for (auto& [key, val] : m_json.items())
         {
-            m_components[i]->to_json(jComp);
-            
-            for (auto& [key, val] : m_json.items())
+            for (int i = 1; i < m_components.size(); ++i)
             {
-                if (jComp.contains(key) && jComp[key] != val)
+                auto jVal = m_components[i]->getProperty(key, json());
+                if (jVal != val)
                 {
-                    try {
-                        Vec4 vec1;
-                        jComp[key].get_to<Vec4>(vec1);
+                    if (jVal.is_array() && val.is_array()) {
+                        if (jVal.size() >= 4 && val.size() >= 4) {
+                            Vec4 vec1;
+                            jVal.get_to<Vec4>(vec1);
 
-                        Vec4 vec2;
-                        val.get_to<Vec4>(vec2);
+                            Vec4 vec2;
+                            val.get_to<Vec4>(vec2);
 
-                        auto x = vmath_almostEqual(vec1[0], vec2[0]) ? vec1[0] : NAN;
-                        auto y = vmath_almostEqual(vec1[1], vec2[1]) ? vec1[1] : NAN;
-                        auto z = vmath_almostEqual(vec1[2], vec2[2]) ? vec1[2] : NAN;
-                        auto w = vmath_almostEqual(vec1[3], vec2[3]) ? vec1[3] : NAN;
-                        m_json[key] = Vec4(x, y, z, w);
-                        continue;
+                            auto x = vmath_almostEqual(vec1[0], vec2[0]) ? vec1[0] : NAN;
+                            auto y = vmath_almostEqual(vec1[1], vec2[1]) ? vec1[1] : NAN;
+                            auto z = vmath_almostEqual(vec1[2], vec2[2]) ? vec1[2] : NAN;
+                            auto w = vmath_almostEqual(vec1[3], vec2[3]) ? vec1[3] : NAN;
+                            m_json[key] = Vec4(x, y, z, w);
+                            if (x == y == z == w == NAN) break;
+                            continue;
+                        }
+                        
+                        if (jVal.size() >= 3 && val.size() >= 3) {
+                            Vec3 vec1;
+                            jVal.get_to<Vec3>(vec1);
+
+                            Vec3 vec2;
+                            val.get_to<Vec3>(vec2);
+
+                            auto x = vmath_almostEqual(vec1[0], vec2[0]) ? vec1[0] : NAN;
+                            auto y = vmath_almostEqual(vec1[1], vec2[1]) ? vec1[1] : NAN;
+                            auto z = vmath_almostEqual(vec1[2], vec2[2]) ? vec1[2] : NAN;
+                            m_json[key] = Vec3(x, y, z);
+                            if (x == y == z == NAN) break;
+                            continue;
+                        }
+
+                        if (jVal.size() >= 2 && val.size() >= 2) {
+                            Vec2 vec1;
+                            jVal.get_to<Vec2>(vec1);
+
+                            Vec2 vec2;
+                            val.get_to<Vec2>(vec2);
+
+                            auto x = vmath_almostEqual(vec1[0], vec2[0]) ? vec1[0] : NAN;
+                            auto y = vmath_almostEqual(vec1[1], vec2[1]) ? vec1[1] : NAN;
+
+                            m_json[key] = Vec2(x, y);
+                            if (x == y == NAN) break;
+                            continue;
+                        }
                     }
-                    catch (std::exception e) {}
-
-                    try {
-                        Vec3 vec1;
-                        jComp[key].get_to<Vec3>(vec1);
-
-                        Vec3 vec2;
-                        val.get_to<Vec3>(vec2);
-
-                        auto x = vmath_almostEqual(vec1[0], vec2[0]) ? vec1[0] : NAN;
-                        auto y = vmath_almostEqual(vec1[1], vec2[1]) ? vec1[1] : NAN;
-                        auto z = vmath_almostEqual(vec1[2], vec2[2]) ? vec1[2] : NAN;
-                        m_json[key] = Vec3(x, y, z);
-                        continue;
-                    }
-                    catch (std::exception e) {}
-                    
-                    try {
-                        Vec2 vec1;
-                        jComp[key].get_to<Vec2>(vec1);
-
-                        Vec2 vec2;
-                        val.get_to<Vec2>(vec2);
-
-                        auto x = vmath_almostEqual(vec1[0], vec2[0]) ? vec1[0] : NAN;
-                        auto y = vmath_almostEqual(vec1[1], vec2[1]) ? vec1[1] : NAN;
-
-                        m_json[key] = Vec2(x, y);
-                        continue;
-                    }
-                    catch (std::exception e) {}
 
                     m_json[key] = nullptr;
-                    continue;
+                    break;
                 }
             }
         }
