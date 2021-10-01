@@ -642,6 +642,7 @@ namespace ige::creator
 
     void EditorScene::renderBoundingBoxes()
     {
+        if (Editor::getInstance() == nullptr || Editor::getInstance()->getTarget() == nullptr) return;
         auto targets = Editor::getInstance()->getTarget()->getAllTargets();
         for (auto& target : targets)
             renderBoundingBox(target.lock().get());

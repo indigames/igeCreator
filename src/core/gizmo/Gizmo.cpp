@@ -68,7 +68,7 @@ namespace ige::creator
             return;
 
         auto target = Editor::getInstance()->getTarget();
-        if (target->empty())
+        if (target == nullptr || target->empty())
             return;
         
         // Detect ortho projection

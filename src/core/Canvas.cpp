@@ -61,12 +61,6 @@ namespace ige::creator
                 if (value != nullptr)
                     value->update(dt);
             }
-            /*for (auto x : m_panels) {
-                if (x.second != nullptr) {
-                    x.second->update(dt);
-
-                }
-            }*/
         }
     }
 
