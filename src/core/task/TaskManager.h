@@ -19,7 +19,10 @@ namespace ige::creator
         
         void update()
         {
-            for (auto fun: functors) fun();
+            for (auto fun : functors) {
+                if(fun != nullptr)
+                    fun();
+            }
             functors.clear();
         }
 

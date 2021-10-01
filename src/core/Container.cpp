@@ -15,6 +15,7 @@ namespace ige::creator
 
     void Container::addWidget(std::shared_ptr<Widget> widget)
     {
+        if (widget == nullptr) return;
         auto found = std::find(m_widgets.begin(), m_widgets.end(), widget);
         if (found == m_widgets.end())
         {
@@ -29,6 +30,7 @@ namespace ige::creator
 
     void Container::removeWidget(std::shared_ptr<Widget> widget)
     {
+        if (widget == nullptr) return;
         auto found = std::find(m_widgets.begin(), m_widgets.end(), widget);
         if (found != m_widgets.end())
         {

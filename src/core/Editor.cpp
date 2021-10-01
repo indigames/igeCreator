@@ -103,10 +103,12 @@ namespace ige::creator
         TaskManager::getInstance()->update();
 
         // Update layouts
-        m_canvas->update(dt);
+        if(m_canvas)
+            m_canvas->update(dt);
 
         // Update shortcut
-        m_shortcutController->update(dt);
+        if(m_shortcutController)
+            m_shortcutController->update(dt);
     }
 
     void Editor::render()

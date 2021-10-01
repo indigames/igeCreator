@@ -119,6 +119,11 @@ namespace ige::creator
                     Editor::getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
                 }
 
+                if (m_fbo)
+                    m_fbo->Resize(size.x, size.y);
+                if (m_imageWidget)
+                    m_imageWidget->setSize(size);
+
                 m_bInitialized = true;
 
                 m_inputProcessor = std::make_shared<InputProcessor>();

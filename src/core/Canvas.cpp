@@ -55,8 +55,19 @@ namespace ige::creator
 
     void Canvas::update(float dt)
     {
-        for (const auto& [key, value] : m_panels)
-            value->update(dt);
+        int size = m_panels.size();
+        if (size > 0) {
+            for (const auto& [key, value] : m_panels) {
+                if (value != nullptr)
+                    value->update(dt);
+            }
+            /*for (auto x : m_panels) {
+                if (x.second != nullptr) {
+                    x.second->update(dt);
+
+                }
+            }*/
+        }
     }
 
     void Canvas::draw()
