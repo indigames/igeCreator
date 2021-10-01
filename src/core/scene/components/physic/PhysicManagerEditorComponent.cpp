@@ -44,16 +44,16 @@ void PhysicManagerEditorComponent::drawPhysicManager()
         physicComp->setShowDebug(val);
     });
 
-    std::array numItr = { physicComp->getNumIteration() };
-    m_physicManagerGroup->createWidget<Drag<int>>("Iterations Number", ImGuiDataType_S32, numItr, 1, 1, 32)->getOnDataChangedEvent().addListener([this](auto& val) {
+    std::array numItr = { (float)physicComp->getNumIteration() };
+    m_physicManagerGroup->createWidget<Drag<float>>("Iterations Number", ImGuiDataType_S32, numItr, 1, 1, 32)->getOnDataChangedEvent().addListener([this](auto& val) {
         auto physicComp = std::dynamic_pointer_cast<PhysicManager>(getComponent<CompoundComponent>()->getComponents()[0]);
-        physicComp->setNumIteration(val[0]);
+        physicComp->setNumIteration((int)val[0]);
     });
 
-    std::array subSteps = { physicComp->getFrameMaxSubStep() };
-    m_physicManagerGroup->createWidget<Drag<int>>("Max Substeps Number", ImGuiDataType_S32, subSteps, 1, 1, 32)->getOnDataChangedEvent().addListener([this](auto& val) {
+    std::array subSteps = { (float)physicComp->getFrameMaxSubStep() };
+    m_physicManagerGroup->createWidget<Drag<float>>("Max Substeps Number", ImGuiDataType_S32, subSteps, 1, 1, 32)->getOnDataChangedEvent().addListener([this](auto& val) {
         auto physicComp = std::dynamic_pointer_cast<PhysicManager>(getComponent<CompoundComponent>()->getComponents()[0]);
-        physicComp->setFrameMaxSubStep(val[0]);
+        physicComp->setFrameMaxSubStep((int)val[0]);
     });
 
     std::array timeStep = { physicComp->getFixedTimeStep() };

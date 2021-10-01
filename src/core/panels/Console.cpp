@@ -74,9 +74,9 @@ namespace ige::creator
             m_bAutoScroll = val;
         });
 
-        std::array maxLines = { m_maxLines };
-        columns->createWidget<Drag<int>>("Rows", ImGuiDataType_S32, maxLines, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
-            m_maxLines = val[0];
+        std::array maxLines = { (float)m_maxLines };
+        columns->createWidget<Drag<float>>("Rows", ImGuiDataType_S32, maxLines, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+            m_maxLines = (int)val[0];
         });
 
         m_logGroup = createWidget<Group>("Console Log", false, false);

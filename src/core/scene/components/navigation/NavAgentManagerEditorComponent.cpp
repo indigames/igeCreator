@@ -33,10 +33,10 @@ void NavAgentManagerEditorComponent::drawNavAgentManager()
         if (navAgentManager == nullptr)
             return;
 
-        std::array maxAgents = { (int)navAgentManager->getMaxAgentNumber() };
-        m_navAgentManagerGroup->createWidget<Drag<int>>("Max Agents", ImGuiDataType_S32, maxAgents, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+        std::array maxAgents = { (float)navAgentManager->getMaxAgentNumber() };
+        m_navAgentManagerGroup->createWidget<Drag<float>>("Max Agents", ImGuiDataType_S32, maxAgents, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
             auto navAgentManager = std::dynamic_pointer_cast<NavAgentManager>(getComponent<CompoundComponent>()->getComponents()[0]);
-            navAgentManager->setMaxAgentNumber(val[0]);
+            navAgentManager->setMaxAgentNumber((int)val[0]);
         });
 
         std::array maxRadius = { navAgentManager->getMaxAgentRadius() };

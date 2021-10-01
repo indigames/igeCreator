@@ -101,12 +101,12 @@ void ScriptEditorComponent::drawScriptComponent() {
         case json::value_t::number_integer:
         case json::value_t::number_unsigned:
             {
-                std::array val = { value.get<int>() };
-                m_scriptCompGroup->createWidget<Drag<int>>(key, ImGuiDataType_S32, val)->getOnDataChangedEvent().addListener([key, this](auto& val) {                    
+                std::array val = { (float)value.get<int>() };
+                m_scriptCompGroup->createWidget<Drag<float>>(key, ImGuiDataType_S32, val)->getOnDataChangedEvent().addListener([key, this](auto& val) {
                     auto comp = getComponent<CompoundComponent>();
                     auto members = comp->getProperty<json>("members", json::array());
                     if (members.contains(key)) {
-                        members[key] = val[0];
+                        members[key] = (int)val[0];
                         comp->setProperty("members", members);
                     }
                 });
