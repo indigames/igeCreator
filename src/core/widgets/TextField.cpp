@@ -18,7 +18,7 @@ namespace ige::creator
 
     void TextField::_drawImpl()
     {
-        int flag = ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue;
+        int flag = ImGuiInputTextFlags_AutoSelectAll;
         if (m_bIsReadOnly)
         {
             flag |= ImGuiInputTextFlags_ReadOnly;

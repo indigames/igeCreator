@@ -146,7 +146,7 @@ void ScriptEditorComponent::drawScriptComponent() {
             {
                 auto val = std::string();
                 std::shared_ptr<SceneObject> sceneObject = nullptr;
-                std::shared_ptr<Widget> txtField = nullptr;
+                std::shared_ptr<TextField> txtField = nullptr;
 
                 if (value.type() == json::value_t::string) {
                     txtField = m_scriptCompGroup->createWidget<TextField>(key, value.get<std::string>());
@@ -160,6 +160,15 @@ void ScriptEditorComponent::drawScriptComponent() {
                 else {
                     txtField = m_scriptCompGroup->createWidget<TextField>(key, "");
                 }
+
+                txtField->getOnDataChangedEvent().addListener([key, this](auto val) {
+                    auto comp = getComponent<CompoundComponent>();
+                    auto members = comp->getProperty<json>("members", json::array());
+                    if (members.contains(key)) {
+                        members[key] = val;
+                        comp->setProperty("members", members);
+                    }
+                });
 
                 if (sceneObject)
                 {
