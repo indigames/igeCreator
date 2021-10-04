@@ -27,6 +27,8 @@ namespace ige::creator
     
     ToolBar::~ToolBar()
     {
+        m_playBtn = nullptr;
+        m_stopBtn = nullptr;
     }
 
     void ToolBar::initialize()
@@ -76,16 +78,27 @@ namespace ige::creator
         });
 
         auto playGroup = columns->createWidget<Group>("PlayGroup", false, false, Group::E_Align::CENTER);
-        playGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture(GetEnginePath("icons/btn_play").c_str())->GetTextureHandle(), ImVec2(16.f, 16.f), true, false)->getOnClickEvent().addListener([](auto widget){
-            Editor::getCanvas()->getGameScene()->play();
-        });        
+        m_playBtn = playGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture(GetEnginePath("icons/btn_play").c_str())->GetTextureHandle(), ImVec2(16.f, 16.f), true, false);
+        m_playBtn->getOnClickEvent().addListener([this](auto widget) {
+            if (!Editor::getCanvas()->getGameScene()->isPlaying() || Editor::getCanvas()->getGameScene()->isPausing()) {
+                Editor::getCanvas()->getGameScene()->play();
+                if (Editor::getCanvas()->getGameScene()->isPlaying()) {
+                    m_stopBtn->setEnable(true);
+                    m_playBtn->setTextureId(ResourceCreator::Instance().NewTexture(GetEnginePath("icons/btn_pause").c_str())->GetTextureHandle());
+                }
+            }
+            else {
+                Editor::getCanvas()->getGameScene()->pause();
+                m_playBtn->setTextureId(ResourceCreator::Instance().NewTexture(GetEnginePath("icons/btn_play").c_str())->GetTextureHandle());
+            }
+        });
 
-        playGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture(GetEnginePath("icons/btn_pause").c_str())->GetTextureHandle(), ImVec2(16.f, 16.f), true, false)->getOnClickEvent().addListener([](auto widget){
-            Editor::getCanvas()->getGameScene()->pause();
-        });        
-
-        playGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture(GetEnginePath("icons/btn_stop").c_str())->GetTextureHandle(), ImVec2(16.f, 16.f), true, true)->getOnClickEvent().addListener([](auto widget){
+        m_stopBtn = playGroup->createWidget<Button>(ResourceCreator::Instance().NewTexture(GetEnginePath("icons/btn_stop").c_str())->GetTextureHandle(), ImVec2(16.f, 16.f), true, true);
+        m_stopBtn->setEnable(false);
+        m_stopBtn->getOnClickEvent().addListener([this](auto widget) {
             Editor::getCanvas()->getGameScene()->stop();
+            m_stopBtn->setEnable(false);
+            m_playBtn->setTextureId(ResourceCreator::Instance().NewTexture(GetEnginePath("icons/btn_play").c_str())->GetTextureHandle());
         });
 
         auto serviceGroup = columns->createWidget<Group>("ServiceGroup", false, false, Group::E_Align::RIGHT);

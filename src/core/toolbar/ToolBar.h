@@ -2,6 +2,7 @@
 
 #include "core/Widget.h"
 #include "core/Container.h"
+#include "core/widgets/Button.h"
 
 namespace ige::creator
 {
@@ -17,5 +18,7 @@ namespace ige::creator
 
     protected:
         std::string m_name;
+        std::shared_ptr<Button> m_playBtn = nullptr;
+        std::shared_ptr<Button> m_stopBtn = nullptr;
     };
 }

@@ -23,6 +23,7 @@ namespace ige::creator
         virtual void update(float dt);
 
         bool isPlaying() const { return m_bIsPlaying; }
+        bool isPausing() const { return m_bIsPausing; }
 
         void play();
         void pause();

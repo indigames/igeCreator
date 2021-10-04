@@ -170,7 +170,7 @@ namespace ige::creator
 
     void GameScene::play()
     {
-        if (Editor::getCurrentScene()->isPrefab())
+        if (!Editor::getCurrentScene() || Editor::getCurrentScene()->isPrefab())
             return;
 
         if (!m_bIsPlaying)
