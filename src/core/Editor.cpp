@@ -296,6 +296,7 @@ namespace ige::creator
     {
         unloadScene();
         auto scene = SceneManager::getInstance()->createScene();
+        m_target = std::make_shared<TargetObject>(scene.get());
         setCurrentScene(scene);
         return true;
     }
@@ -611,20 +612,20 @@ namespace ige::creator
 
     bool Editor::deleteObject()
     {
+        if (!Editor::getInstance()->getTarget()) return false;
         auto targets = Editor::getInstance()->getTarget()->getAllTargets();
         if (targets.size() > 0)
         {
             auto parent = !targets[0].expired() ? targets[0].lock()->getParent() : nullptr;
-            if(parent) Editor::getInstance()->addTarget(parent);
-
             for (auto& target : targets) {
                 auto obj = target.lock();
                 if (obj) {
                     removeTarget(obj);
-                    Editor::getCurrentScene()->removeObject(obj);
+                    if (getCanvas()) getCanvas()->getInspector()->clear();
+                    Editor::getCurrentScene()->removeObjectById(obj->getId());
                 }
-                obj = nullptr;
             }
+            if (parent) Editor::getInstance()->addTarget(parent);
         }
         return true;
     }

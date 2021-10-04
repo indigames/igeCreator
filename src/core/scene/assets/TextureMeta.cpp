@@ -21,7 +21,10 @@ bool convertTexture(const std::string& path, std::unordered_map<std::string, jso
 
     ImageConv imgConv;
     imgConv.SetInputFile(relPathStr.c_str());
-    imgConv.SetOutputFile((relPath.parent_path().append(relPath.stem().string() + ".pyxi")).c_str());
+
+    auto outPath = (relPath.parent_path().append(relPath.stem().string() + ".pyxi")).string();
+    std::replace(outPath.begin(), outPath.end(), '\\', '/');
+    imgConv.SetOutputFile(outPath.c_str());
 
     auto platform = options["IsMobile"].get<bool>() ? (int)TargetPlatform::MOBILE_Platform : (int)TargetPlatform::PC_Platform;
     imgConv.SetTargetPlatform(platform);
@@ -35,9 +38,7 @@ bool convertTexture(const std::string& path, std::unordered_map<std::string, jso
     auto useMipmap = options["UseMipmap"].get<bool>();
     imgConv.SetNoMipmaps(!useMipmap);
 
-    auto quality = options["Quality"].get<int>();
-    if (quality < 0) quality = 0;
-    if (quality > 3) quality = 3;
+    auto quality = std::clamp(options["Quality"].get<int>(), 0, 3);
     imgConv.SetQuality(quality);
 
     imgConv.SetAutoDetectAlpha();
@@ -53,7 +54,7 @@ TextureMeta::TextureMeta(const std::string& path)
         {"IsNormalMap", false},
         {"WrapRepeat", false},
         {"UseMipmap", false},
-        {"Quality", 1},
+        {"Quality", 0},
     };
     loadOptions();
 }
@@ -62,9 +63,8 @@ TextureMeta::~TextureMeta() {
 }
 
 bool TextureMeta::save() {
-    // Do not convert, it take lots of time so better do it when build rom
-    //std::thread convertThread(convertTexture, m_path, m_options);
-    //convertThread.detach();
+    // To Do: show progress bar, it take lots of time so better do it when build rom
+    convertTexture(m_path, m_options);
     return AssetMeta::save();
 }
 

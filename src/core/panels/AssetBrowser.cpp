@@ -143,10 +143,10 @@ namespace ige::creator
     
     AssetBrowser::~AssetBrowser()
     {
+        stopWatcherThread();
         m_fileSystemWidget = nullptr;
         removeAllWidgets();
         getOnFocusEvent().removeAllListeners();
-        stopWatcherThread();
     }
 
     void AssetBrowser::initialize()
@@ -159,7 +159,6 @@ namespace ige::creator
                 });
             }
         }
-        
     }
 
     void AssetBrowser::setDirty()
