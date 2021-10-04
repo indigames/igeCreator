@@ -119,14 +119,9 @@ namespace ige::creator
                     Editor::getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
                 }
 
-                if (m_fbo)
-                    m_fbo->Resize(size.x, size.y);
-                if (m_imageWidget)
-                    m_imageWidget->setSize(size);
+                m_inputProcessor = std::make_shared<InputProcessor>();
 
                 m_bInitialized = true;
-
-                m_inputProcessor = std::make_shared<InputProcessor>();
             }
         }
     }
@@ -175,6 +170,9 @@ namespace ige::creator
 
     void GameScene::play()
     {
+        if (Editor::getCurrentScene()->isPrefab())
+            return;
+
         if (!m_bIsPlaying)
         {
             if (Editor::getCanvas()->getConsole()->isAutoClearOnStart())

@@ -261,7 +261,6 @@ namespace ige::creator
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObj = Editor::getCurrentScene()->createObject(fs::path(path).stem(), target);
                     newObj->addComponent<FigureComponent>(path);
-                    Editor::getInstance()->addTarget(newObj, true);
                 }
             });
         }
@@ -274,7 +273,6 @@ namespace ige::creator
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObj = Editor::getCurrentScene()->createObject(fs::path(path).stem(), target);
                     newObj->addComponent<SpriteComponent>(path);
-                    Editor::getInstance()->addTarget(newObj, true);
                 }
             });
         }
@@ -287,7 +285,6 @@ namespace ige::creator
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObj = Editor::getCurrentScene()->createObject(fs::path(path).stem(), target);
                     newObj->addComponent<AudioSource>(path);
-                    Editor::getInstance()->addTarget(newObj, true);
                 }
             });
         }
@@ -312,7 +309,6 @@ namespace ige::creator
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObj = Editor::getCurrentScene()->createObject(fs::path(path).stem(), target);
                     newObj->addComponent<Particle>(path);
-                    Editor::getInstance()->addTarget(newObj, true);
                 }
             });
         }

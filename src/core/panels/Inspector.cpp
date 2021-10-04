@@ -309,12 +309,13 @@ namespace ige::creator
         // Component
         createWidget<Separator>();
         m_componentGroup = createWidget<Group>("Inspector_Components", false);
-        for(auto component : m_targetObject->getComponents()) {
+        for(const auto& component : m_targetObject->getComponents()) {
             auto closable = (component->getType() != Component::Type::Transform && component->getType() != Component::Type::RectTransform);
             auto header = m_componentGroup->createWidget<Group>(component->getName(), true, closable);
-            header->getOnClosedEvent().addListener([this, component]() {
-                m_inspectorEditor->removeComponent(component->getInstanceId());
-                m_targetObject->removeComponent(component);
+            auto compId = component->getInstanceId();
+            header->getOnClosedEvent().addListener([this, compId]() {
+                m_inspectorEditor->removeComponent(compId);
+                m_targetObject->removeComponent(compId);
                 redraw();
             });
             m_inspectorEditor->addComponent((int)component->getType(), component, header);
@@ -386,8 +387,6 @@ namespace ige::creator
         m_createCompCombo = nullptr;
         m_headerGroup = nullptr;
         m_componentGroup = nullptr;
-
-        
 
         removeAllWidgets();
     }

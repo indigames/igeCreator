@@ -603,7 +603,6 @@ namespace ige::creator
                 newObject->setUUID(uuid);
                 newObject->setName(objName + "_cp");
                 newObject->setParent(targets[0].lock()->getParent());
-                Editor::getInstance()->addTarget(newObject, true);
             }
             return true;
         }        
@@ -614,18 +613,14 @@ namespace ige::creator
     {
         if (!Editor::getInstance()->getTarget()) return false;
         auto targets = Editor::getInstance()->getTarget()->getAllTargets();
-        if (targets.size() > 0)
-        {
-            auto parent = !targets[0].expired() ? targets[0].lock()->getParent() : nullptr;
+        if (targets.size() > 0) {
             for (auto& target : targets) {
                 auto obj = target.lock();
                 if (obj) {
                     removeTarget(obj);
-                    if (getCanvas()) getCanvas()->getInspector()->clear();
-                    Editor::getCurrentScene()->removeObjectById(obj->getId());
+                    Editor::getCurrentScene()->removeObject(obj);
                 }
             }
-            if (parent) Editor::getInstance()->addTarget(parent);
         }
         return true;
     }
@@ -657,7 +652,6 @@ namespace ige::creator
             newObject->setName(objName + "_cp");
             auto parent = Editor::getInstance()->getFirstTarget()->getSharedPtr();
             newObject->setParent(parent);
-            Editor::getInstance()->addTarget(newObject, true);
         }
     }
 

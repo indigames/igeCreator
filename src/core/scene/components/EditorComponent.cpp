@@ -7,24 +7,24 @@
 NS_IGE_BEGIN
 
 EditorComponent::EditorComponent() 
-	: m_component(nullptr),
-	m_group(nullptr),
+	: m_group(nullptr),
 	m_bisDirty(false)
 {	
 }
 
 EditorComponent::~EditorComponent() {
 	m_group = nullptr;
-	m_component = nullptr;	
+	m_component.reset();	
 }
 
 void EditorComponent::draw(std::shared_ptr<Group> group) {
 	m_group = group;
 	if (m_group != nullptr) {
-		if (m_component != nullptr)
-		{
-			m_group->createWidget<CheckBox>("Enable", m_component->isEnabled())->getOnDataChangedEvent().addListener([this](bool val) {				
-				m_component->setEnabled(val);
+		if (!m_component.expired()) {
+			m_group->createWidget<CheckBox>("Enable", m_component.lock()->isEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
+				if (!m_component.expired()) {
+					m_component.lock()->setEnabled(val);
+				}
 			});
 		}
 		onInspectorUpdate();

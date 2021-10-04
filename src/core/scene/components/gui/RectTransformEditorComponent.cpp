@@ -332,7 +332,7 @@ void RectTransformEditorComponent::onTransformChanged(SceneObject& sceneObject)
 {
     // Just redraw the transform in Inspector
     TaskManager::getInstance()->addTask([this]() {
-        if (m_component != nullptr) {
+        if (!m_component.expired()) {
             if (m_dirtyFlagSupport != 1 && m_dirtyFlagSupport != 4) {
                 m_dirtyFlagSupport = 2;
                 if (getComponent<CompoundComponent>())

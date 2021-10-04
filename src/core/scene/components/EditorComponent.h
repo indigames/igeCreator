@@ -31,7 +31,7 @@ public:
 	void setDirty(bool value = true) { m_bisDirty = value; }
 
 	//! Get component
-	std::shared_ptr<Component>& getComponent() { return m_component; }
+	std::shared_ptr<Component>& getComponent() { return m_component.expired() ? nullptr : m_component.lock(); }
 	virtual bool setComponent(std::shared_ptr<Component> component);
 
 	//! Check if component type is safe to cast
@@ -47,7 +47,7 @@ protected:
 	virtual void onInspectorUpdate() = 0;
 
 protected:
-	std::shared_ptr<Component> m_component = nullptr;
+	std::weak_ptr<Component> m_component;
 	std::shared_ptr<Group> m_group = nullptr;
 	bool m_bisDirty;
 };
@@ -63,7 +63,7 @@ inline bool EditorComponent::isSafe(const std::shared_ptr<Component>& component)
 template <typename T>
 inline std::shared_ptr<T> EditorComponent::getComponent()
 {
-	return (m_component != nullptr) ? std::dynamic_pointer_cast<T>(m_component) : nullptr;
+	return (!m_component.expired()) ? std::dynamic_pointer_cast<T>(m_component.lock()) : nullptr;
 }
 
 #define INSPECTOR_WATCH(COMPONENT, TYPE, VALUE) \
