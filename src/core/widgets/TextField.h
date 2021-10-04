@@ -9,7 +9,7 @@ namespace ige::creator
     class TextField: public DataWidget<std::string>
     {
     public:
-        TextField(const std::string& label, const std::string& content = {}, bool readOnly = false);
+        TextField(const std::string& label, const std::string& content = {}, bool readOnly = false, bool inputWithEnter = false);
         virtual ~TextField();
 
     protected:
@@ -18,5 +18,6 @@ namespace ige::creator
         std::string m_label;
         std::array<char, MAX_TEXT_LENGHT> m_content;
         bool m_bIsReadOnly;
+        bool m_bInputWithEnter;
     };
 }

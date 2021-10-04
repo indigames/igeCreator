@@ -96,7 +96,7 @@ void AudioSourceEditorComponent::drawAudioSource() {
         getComponent<CompoundComponent>()->setProperty("dopFactor", val);
     });
 
-    auto txtPath = m_audioSourceGroup->createWidget<TextField>("Path", comp->getProperty<std::string>("path", ""));
+    auto txtPath = m_audioSourceGroup->createWidget<TextField>("Path", comp->getProperty<std::string>("path", ""), false, true);
     txtPath->setEndOfLine(false);
     txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
         getComponent<CompoundComponent>()->setProperty("path", txt);

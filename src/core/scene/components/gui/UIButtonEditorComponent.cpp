@@ -52,7 +52,7 @@ void UIButtonEditorComponent::drawUIButton() {
 
     if (transitionMode == (int)TransitionMode::ColorTint) {
         //Normal Path
-        auto txtPath = m_uiButtonGroup->createWidget<TextField>("Image", comp->getProperty<std::string>("path", ""));
+        auto txtPath = m_uiButtonGroup->createWidget<TextField>("Image", comp->getProperty<std::string>("path", ""), false, true);
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
             getComponent<CompoundComponent>()->setProperty("path", txt);
         });
@@ -90,7 +90,7 @@ void UIButtonEditorComponent::drawUIButton() {
         });
     } else if (transitionMode == (int)TransitionMode::SpriteSwap) {
         //Normal Path
-        auto txtPath = m_uiButtonGroup->createWidget<TextField>("Normal", comp->getProperty<std::string>("path", ""));
+        auto txtPath = m_uiButtonGroup->createWidget<TextField>("Normal", comp->getProperty<std::string>("path", ""), false, true);
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
             getComponent<CompoundComponent>()->setProperty("path", txt);
         });
@@ -102,7 +102,7 @@ void UIButtonEditorComponent::drawUIButton() {
         }
 
         //Pressed Path
-        txtPath = m_uiButtonGroup->createWidget<TextField>("Pressed", comp->getProperty<std::string>("pressedpath", ""));
+        txtPath = m_uiButtonGroup->createWidget<TextField>("Pressed", comp->getProperty<std::string>("pressedpath", ""), false, true);
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
             getComponent<CompoundComponent>()->setProperty("pressedpath", txt);
         });
@@ -114,7 +114,7 @@ void UIButtonEditorComponent::drawUIButton() {
         }
 
         //Selected Path
-        txtPath = m_uiButtonGroup->createWidget<TextField>("Selected", comp->getProperty<std::string>("seletecpath", ""));
+        txtPath = m_uiButtonGroup->createWidget<TextField>("Selected", comp->getProperty<std::string>("seletecpath", ""), false, true);
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
             getComponent<CompoundComponent>()->setProperty("seletecpath", txt);
         });
@@ -126,7 +126,7 @@ void UIButtonEditorComponent::drawUIButton() {
         }
 
         //Disabled Path
-        txtPath = m_uiButtonGroup->createWidget<TextField>("Disabled", comp->getProperty<std::string>("disabledpath", ""));
+        txtPath = m_uiButtonGroup->createWidget<TextField>("Disabled", comp->getProperty<std::string>("disabledpath", ""), false, true);
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
             getComponent<CompoundComponent>()->setProperty("disabledpath", txt);
         });

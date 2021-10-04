@@ -31,7 +31,7 @@ void UIImageEditorComponent::drawUIImage() {
     auto comp = getComponent<CompoundComponent>();
     if (comp == nullptr) return;
 
-    auto txtPath = m_uiImageGroup->createWidget<TextField>("Path", comp->getProperty<std::string>("path", ""));
+    auto txtPath = m_uiImageGroup->createWidget<TextField>("Path", comp->getProperty<std::string>("path", ""), false, true);
     txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
         getComponent<CompoundComponent>()->setProperty("path", txt);
     });

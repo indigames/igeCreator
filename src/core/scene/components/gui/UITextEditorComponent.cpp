@@ -38,7 +38,7 @@ void UITextEditorComponent::drawUIText()
         getComponent<CompoundComponent>()->setProperty("text", txt);
     });
 
-    auto txtFontPath = m_uiTextGroup->createWidget<TextField>("Font", comp->getProperty<std::string>("font", ""));
+    auto txtFontPath = m_uiTextGroup->createWidget<TextField>("Font", comp->getProperty<std::string>("font", ""), false, true);
     txtFontPath->getOnDataChangedEvent().addListener([this](auto txt) {
         getComponent<CompoundComponent>()->setProperty("font", txt);
     });

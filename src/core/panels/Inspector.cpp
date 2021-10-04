@@ -364,7 +364,6 @@ namespace ige::creator
         m_infoGroup->createWidget<TextField>("Name", m_targetObject->getName().c_str())->getOnDataChangedEvent().addListener([this](auto name) {
             if (m_targetObject) {
                 m_targetObject->setName(name);
-                m_bInfoDirty = true;
             }
         });
         if (m_targetObject->isPrefab()) {

@@ -356,7 +356,7 @@ namespace ige::creator
         m_GroupRight = m_columns->createWidget<Group>("G2", false, false);
 
 
-        auto txtPath = m_GroupLeft->createWidget<TextField>("Path", m_path);
+        auto txtPath = m_GroupLeft->createWidget<TextField>("Path", m_path, false, true);
         txtPath->setEndOfLine(false);
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
             this->onLoadImg(txt);

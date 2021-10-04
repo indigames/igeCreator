@@ -80,7 +80,7 @@ void ParticleEditorComponent::drawParticle() {
         getComponent<CompoundComponent>()->setProperty("color", { val[0], val[1], val[2], val[3] });
     });
 
-    auto txtPath = m_particleGroup->createWidget<TextField>("Path", comp->getProperty<std::string>("path", ""));
+    auto txtPath = m_particleGroup->createWidget<TextField>("Path", comp->getProperty<std::string>("path", ""), false, true);
     txtPath->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("path", val);
     });

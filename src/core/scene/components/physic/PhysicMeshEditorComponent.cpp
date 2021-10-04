@@ -62,7 +62,7 @@ void PhysicMeshEditorComponent::drawPhysicMesh()
         setDirty();
     });
 
-    auto txtPath = m_physicGroup->createWidget<TextField>("Path", comp->getProperty<std::string>("path", ""));
+    auto txtPath = m_physicGroup->createWidget<TextField>("Path", comp->getProperty<std::string>("path", ""), false, true);
     txtPath->setEndOfLine(false);
     txtPath->getOnDataChangedEvent().addListener([this](const auto& txt) {
         getComponent<CompoundComponent>()->setProperty("path", txt);

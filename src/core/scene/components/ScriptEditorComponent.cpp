@@ -44,7 +44,7 @@ void ScriptEditorComponent::drawScriptComponent() {
     auto comp = getComponent<CompoundComponent>();
     if (comp == nullptr) return;
 
-    auto txtPath = m_scriptCompGroup->createWidget<TextField>("Path", comp->getProperty<std::string>("path", ""));
+    auto txtPath = m_scriptCompGroup->createWidget<TextField>("Path", comp->getProperty<std::string>("path", ""), false, true);
     txtPath->setEndOfLine(false);
     txtPath->getOnDataChangedEvent().addListener([this](const auto& txt) {
         auto comp = getComponent<CompoundComponent>();
