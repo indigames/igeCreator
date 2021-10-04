@@ -1,5 +1,6 @@
 #include "core/scene/components/EditorComponent.h"
 #include "core/panels/InspectorEditor.h"
+#include "core/scene/CompoundComponent.h"
 
 #include <core/layout/Group.h>
 #include <core/widgets/CheckBox.h>
@@ -19,14 +20,10 @@ EditorComponent::~EditorComponent() {
 
 void EditorComponent::draw(std::shared_ptr<Group> group) {
 	m_group = group;
-	if (m_group != nullptr) {
-		if (!m_component.expired()) {
-			m_group->createWidget<CheckBox>("Enable", m_component.lock()->isEnabled())->getOnDataChangedEvent().addListener([this](bool val) {
-				if (!m_component.expired()) {
-					m_component.lock()->setEnabled(val);
-				}
-			});
-		}
+	if (m_group != nullptr) {		
+		m_group->createWidget<CheckBox>("Enable", getComponent<CompoundComponent>()->getProperty("enabled", true))->getOnDataChangedEvent().addListener([this](bool val) {
+			getComponent<CompoundComponent>()->setProperty("enabled", val);
+		});		
 		onInspectorUpdate();
 	}
 }
