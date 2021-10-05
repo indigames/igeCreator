@@ -20,7 +20,9 @@ EditorComponent::~EditorComponent() {
 
 void EditorComponent::draw(std::shared_ptr<Group> group) {
 	m_group = group;
-	if (m_group != nullptr) {		
+	if (m_group != nullptr) {
+		auto comp = getComponent<CompoundComponent>();
+		if (comp == nullptr) return;
 		m_group->createWidget<CheckBox>("Enable", getComponent<CompoundComponent>()->getProperty("enabled", true))->getOnDataChangedEvent().addListener([this](bool val) {
 			getComponent<CompoundComponent>()->setProperty("enabled", val);
 		});		

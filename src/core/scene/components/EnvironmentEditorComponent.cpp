@@ -30,6 +30,9 @@ void EnvironmentEditorComponent::drawEnvironmentComponent() {
     }
     m_environmentCompGroup->removeAllWidgets();
 
+    auto comp = getComponent<CompoundComponent>();
+	if (comp == nullptr) return;
+
     auto environment = std::dynamic_pointer_cast<EnvironmentComponent>(getComponent<CompoundComponent>()->getComponents()[0]);
     if (environment == nullptr)
         return;

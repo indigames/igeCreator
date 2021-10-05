@@ -28,6 +28,9 @@ void AudioManagerEditorComponent::drawAudioManager()
         m_audioManagerGroup = m_group->createWidget<Group>("AudioManager", false);
     m_audioManagerGroup->removeAllWidgets();
 
+    auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
+
     auto audioMngComp = std::dynamic_pointer_cast<AudioManager>(getComponent<CompoundComponent>()->getComponents()[0]);
     if (audioMngComp == nullptr)
         return;
