@@ -239,7 +239,7 @@ namespace ige::creator
         file << settingsJson;
         file.close();
 
-        return loadScene("scenes/main.scene");        
+        return true;
     }
     
     bool Editor::openProject()
