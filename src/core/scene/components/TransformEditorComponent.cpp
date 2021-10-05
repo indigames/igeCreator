@@ -111,6 +111,7 @@ void TransformEditorComponent::drawLocalTransformComponent() {
         IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
         getComponent<CompoundComponent>()->setProperty("pos", Vec3(val[0], val[1], val[2]));
         getComponent<CompoundComponent>()->setDirty();
+        Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
         setDirty();
     });
 
@@ -127,6 +128,7 @@ void TransformEditorComponent::drawLocalTransformComponent() {
         }
         getComponent<CompoundComponent>()->setProperty("rot", Vec3(DEGREES_TO_RADIANS(val[0]), DEGREES_TO_RADIANS(val[1]), DEGREES_TO_RADIANS(val[2])));
         getComponent<CompoundComponent>()->setDirty();
+        Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
         setDirty();
     });
 
@@ -143,6 +145,7 @@ void TransformEditorComponent::drawLocalTransformComponent() {
         }
         getComponent<CompoundComponent>()->setProperty("scale", Vec3(val[0], val[1], val[2]));
         getComponent<CompoundComponent>()->setDirty();
+        Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
         setDirty();
     });
 }
@@ -168,6 +171,7 @@ void TransformEditorComponent::drawWorldTransformComponent() {
         IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
         getComponent<CompoundComponent>()->setProperty("wpos", Vec3(val[0], val[1], val[2]));
         getComponent<CompoundComponent>()->setDirty();
+        Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
         setDirty();
     });
 
@@ -184,6 +188,7 @@ void TransformEditorComponent::drawWorldTransformComponent() {
         }
         getComponent<CompoundComponent>()->setProperty("wrot", Vec3(DEGREES_TO_RADIANS(val[0]), DEGREES_TO_RADIANS(val[1]), DEGREES_TO_RADIANS(val[2])));
         getComponent<CompoundComponent>()->setDirty();
+        Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
         setDirty();
     });
 
@@ -200,6 +205,7 @@ void TransformEditorComponent::drawWorldTransformComponent() {
         }
         getComponent<CompoundComponent>()->setProperty("wscale", Vec3(val[0], val[1], val[2]));
         getComponent<CompoundComponent>()->setDirty();
+        Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
         setDirty();
     });
 }
@@ -210,7 +216,10 @@ void TransformEditorComponent::onTransformChanged(SceneObject& sceneObject)
     TaskManager::getInstance()->addTask([this]() {
         m_dirtyFlag = 0;
         auto comp = getComponent<CompoundComponent>();
-        if (comp) comp->setDirty();
+        if (comp) {
+            comp->setDirty();
+            Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
+        }
         setDirty();
     });
 }
