@@ -72,7 +72,9 @@ namespace ige::creator
             if (size.x > 0 && size.y > 0)
             {
                 m_rtTexture = ResourceCreator::Instance().NewTexture("GameScene_RTTexture", nullptr, size.x, size.y, GL_RGBA);
+                m_rtTexture->WaitInitialize();
                 m_fbo = ResourceCreator::Instance().NewRenderTarget(m_rtTexture, true, true);
+                m_fbo->WaitInitialize();
                 m_imageWidget = createWidget<Image>(m_fbo->GetColorTexture()->GetTextureHandle(), size);
 
                 // Position changed event
@@ -86,20 +88,16 @@ namespace ige::creator
                 // Size changed event
                 getOnSizeChangedEvent().addListener([this](auto size) {
                     TaskManager::getInstance()->addTask([this]() {
+                        if (!m_bInitialized) return;
+
                         auto size = getSize();
-                        if (m_fbo == nullptr) {
-                            m_rtTexture = ResourceCreator::Instance().NewTexture("GameScene_RTTexture", nullptr, size.x, size.y, GL_RGBA);
-                            m_fbo = ResourceCreator::Instance().NewRenderTarget(m_rtTexture, true, true);
-                            m_imageWidget = createWidget<Image>(m_fbo->GetColorTexture()->GetTextureHandle(), size);
-                        }
-                        else {
-                            m_fbo->Resize(size.x, size.y);
-                            m_imageWidget->setSize(size);
-                        }
+                        m_fbo->Resize(size.x, size.y);
+                        m_imageWidget->setSize(size);
+
                         // Adjust camera aspect ratio
                         if (Editor::getCurrentScene() 
-                            && Editor::getCurrentScene()->getActiveCamera())                        
-                            Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(size.x / size.y);                        
+                            && Editor::getCurrentScene()->getActiveCamera())
+                            Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(size.x / size.y);
 
                         if (Editor::getCurrentScene())
                             Editor::getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
@@ -128,7 +126,7 @@ namespace ige::creator
 
     void GameScene::update(float dt)
     {
-        if (!m_bIsPlaying || m_bIsPausing)
+        if (isPausing() || !isPlaying())
             return;
 
         // Ensure initialization

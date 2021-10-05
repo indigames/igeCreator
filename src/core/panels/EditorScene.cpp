@@ -108,6 +108,8 @@ namespace ige::creator
                 // Size changed event
                 getOnSizeChangedEvent().addListener([this](auto size) {
                     TaskManager::getInstance()->addTask([this]() {
+                        if (!m_bInitialized) return;
+
                         auto size = getSize();
                         m_fbo->Resize(size.x, size.y);
                         m_imageWidget->setSize(size);
@@ -166,11 +168,6 @@ namespace ige::creator
                 m_canvasRatio = SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH();
 
                 m_HandleCameraTouchId = -1;
-
-                if(m_fbo)
-                    m_fbo->Resize(size.x, size.y);
-                if(m_imageWidget)
-                    m_imageWidget->setSize(size);
 
                 // Update camera aspect rate
                 if (m_currCamera) {

@@ -26,6 +26,7 @@ namespace ige::creator
         fs::path m_root;
         fs::path m_selection;
         bool m_isDirty;
+        bool m_bShowHidden = false;
         std::vector<fs::path> m_hierarchy;
         std::unordered_map<std::string, pyxie::pyxieTexture*> m_iconTextures;
         

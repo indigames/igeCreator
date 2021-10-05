@@ -237,6 +237,9 @@ namespace ige::creator
             }
         }
 
+        ImGui::SameLine(ImGui::GetWindowContentRegionWidth() - 100.f);
+        ImGui::Checkbox("Show Hidden", &m_bShowHidden);
+
         if (ImGui::BeginPopupContextWindow())
         {
             if (ImGui::MenuItem(("Create Folder" + getIdAString()).c_str(), nullptr, nullptr, true))
@@ -284,7 +287,7 @@ namespace ige::creator
             };
 
             // Do not show hidden file/folder
-            if (IsFormat(E_FileExts::Hidden, name))
+            if (!m_bShowHidden && IsFormat(E_FileExts::Hidden, name))
                 return;
 
             if (fs::is_directory(cache_entry.entry.status()))
@@ -301,7 +304,7 @@ namespace ige::creator
             else //file
             {
                 // Do not show hidden files
-                if (IsFormat(E_FileExts::Hidden, file_ext))
+                if (!m_bShowHidden && IsFormat(E_FileExts::Hidden, file_ext))
                     return;
 
                 auto icon = m_iconTextures["file"];
