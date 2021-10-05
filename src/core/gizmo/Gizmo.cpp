@@ -215,7 +215,7 @@ namespace ige::creator
         auto it = m_targets.begin();
         while (it != m_targets.end())
         {
-            if ((*it).expired())
+            if (!(*it).expired())
             {
                 auto parent = (*it).lock()->getParent();
                 if (parent != nullptr)
