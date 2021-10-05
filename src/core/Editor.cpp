@@ -594,11 +594,12 @@ namespace ige::creator
                         clonedJson.push_back(jTarget);
                 }
             }
-            for (const auto& jTarget : clonedJson)
+            for (auto& jTarget : clonedJson)
             {
                 auto objName = jTarget.value("name", "");
                 auto newObject = Editor::getCurrentScene()->createObject(objName + "_cp");
                 auto uuid = newObject->getUUID();
+                jTarget["selected"] = false; // This is new node, should not auto selected
                 newObject->from_json(jTarget);
                 newObject->setUUID(uuid);
                 newObject->setName(objName + "_cp");

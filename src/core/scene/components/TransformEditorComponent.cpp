@@ -59,9 +59,15 @@ void TransformEditorComponent::updateTarget() {
         m_lastTarget.lock()->getTransformChangedEvent().removeListener(m_listenerId);
         m_listenerId = -1;
     }
-    m_lastTarget = getComponent<CompoundComponent>()->getComponents()[0]->getOwner()->getSharedPtr();
-    if (!m_lastTarget.expired()) {
-        m_listenerId = m_lastTarget.lock()->getTransformChangedEvent().addListener(CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
+    auto comp = getComponent<CompoundComponent>();
+    if (comp != nullptr) {
+        auto comps = comp->getComponents();
+        if (comps.size() > 0) {
+            m_lastTarget = comps[0]->getOwner()->getSharedPtr();
+            if (!m_lastTarget.expired()) {
+                m_listenerId = m_lastTarget.lock()->getTransformChangedEvent().addListener(CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
+            }
+        }
     }
 }
 
