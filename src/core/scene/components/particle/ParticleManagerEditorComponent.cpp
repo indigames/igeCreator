@@ -27,6 +27,9 @@ void ParticleManagerEditorComponent::drawParticleManager()
         m_particleManagerGroup = m_group->createWidget<Group>("ParticleManager", false);;
     m_particleManagerGroup->removeAllWidgets();
 
+    auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
+
     auto particleManager = std::dynamic_pointer_cast<ParticleManager>(getComponent<CompoundComponent>()->getComponents()[0]);
     if (particleManager == nullptr)
         return;

@@ -69,10 +69,17 @@ void RectTransformEditorComponent::updateTarget() {
         m_lastTarget.lock()->getTransformChangedEvent().removeListener(m_listenerId);
         m_listenerId = -1;
     }
-    m_lastTarget = getComponent<CompoundComponent>()->getComponents()[0]->getOwner()->getSharedPtr();
-    if (!m_lastTarget.expired()) {
-        m_listenerId = m_lastTarget.lock()->getTransformChangedEvent().addListener(CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
+    auto comp = getComponent<CompoundComponent>();
+    if (comp != nullptr) {
+        auto comps = comp->getComponents();
+        if (comps.size() > 0) {
+            m_lastTarget = comps[0]->getOwner()->getSharedPtr();
+            if (!m_lastTarget.expired()) {
+                m_listenerId = m_lastTarget.lock()->getTransformChangedEvent().addListener(CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
+            }
+        }
     }
+
 }
 
 void RectTransformEditorComponent::onTargetCleared() {
@@ -84,6 +91,9 @@ void RectTransformEditorComponent::onTargetCleared() {
 }
 
 void RectTransformEditorComponent::onInspectorUpdate() {
+    auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
+
     switch (m_dirtyFlagSupport) {
     case 1:
         //! Draw Anchor Btn & Position

@@ -27,6 +27,9 @@ void CanvasEditorComponent::drawCanvas()
         m_canvasGroup = m_group->createWidget<Group>("CanvasGroup", false);;
     m_canvasGroup->removeAllWidgets();
 
+    auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
+
     auto canvas = std::dynamic_pointer_cast<Canvas>(getComponent<CompoundComponent>()->getComponents()[0]); 
     if (canvas == nullptr)
         return;

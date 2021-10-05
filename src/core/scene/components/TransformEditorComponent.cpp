@@ -80,6 +80,9 @@ void TransformEditorComponent::onTargetCleared() {
 }
 
 void TransformEditorComponent::onInspectorUpdate() {
+    auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
+
     switch (m_dirtyFlag) {
     case 0:
         drawLocalTransformComponent();
@@ -104,6 +107,8 @@ void TransformEditorComponent::drawLocalTransformComponent() {
     m_localTransformGroup->createWidget<Label>("Local");
 
     auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
+
     auto position = comp->getProperty<Vec3>("pos", Vec3(NAN, NAN, NAN));
     std::array pos = { position.X(), position.Y(), position.Z() };
     m_localTransformGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos)->getOnDataChangedEvent().addListener([this](auto val) {

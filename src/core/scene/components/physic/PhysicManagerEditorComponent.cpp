@@ -27,6 +27,9 @@ void PhysicManagerEditorComponent::drawPhysicManager()
         m_physicManagerGroup = m_group->createWidget<Group>("PhysicManagerGroup", false);;
     m_physicManagerGroup->removeAllWidgets();
 
+    auto comp = getComponent<CompoundComponent>();
+    if (comp == nullptr) return;
+
     if (getComponent<CompoundComponent>()->size() <= 0)
         return;
 
