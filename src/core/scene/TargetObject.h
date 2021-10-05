@@ -46,6 +46,9 @@ namespace ige::scene
         //! Check active
         bool isActive() const override;
 
+        //! update
+        void onUpdate(float dt) override;
+
         //! Serialize
         virtual void to_json(json &j) override {}
 
@@ -71,11 +74,11 @@ namespace ige::scene
 
         //! override
         virtual bool isPrefab() const override {
-            return !empty() && m_objects[0].lock()->isPrefab();
+            return !empty() && !m_objects[0].expired() && m_objects[0].lock()->isPrefab();
         }
 
         virtual std::string getPrefabId() override { 
-            return isPrefab() ? m_objects[0].lock()->getPrefabId() : std::string();
+            return isPrefab() && !m_objects[0].expired() ? m_objects[0].lock()->getPrefabId() : std::string();
         }
 
     protected:

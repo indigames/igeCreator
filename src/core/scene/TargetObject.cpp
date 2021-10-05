@@ -116,6 +116,17 @@ namespace ige::scene
         return false;
     }
 
+    //! Update
+    void TargetObject::onUpdate(float dt)
+    {
+        // Clear expired objects
+        auto itr = m_objects.begin();
+        while (itr != m_objects.end()) {
+            if (itr->expired()) { itr = m_objects.erase(itr); continue; }
+            ++itr;
+        }
+    }
+
     //! Check active
     bool TargetObject::isActive() const
     {
