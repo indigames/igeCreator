@@ -31,7 +31,7 @@ public:
 	void setDirty(bool value = true) { m_bisDirty = value; }
 
 	//! Get component
-	std::shared_ptr<Component>& getComponent() { return m_component.expired() ? nullptr : m_component.lock(); }
+	std::shared_ptr<Component> getComponent() { return m_component.expired() ? nullptr : m_component.lock(); }
 	virtual bool setComponent(std::shared_ptr<Component> component);
 
 	//! Check if component type is safe to cast
