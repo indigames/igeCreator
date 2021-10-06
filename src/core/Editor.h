@@ -70,6 +70,7 @@ namespace ige::creator
 
         void toggleBitmapFontCreator();
 
+        void convertAssets();
         void toggleReloadSource();
 
         void registerApp(std::shared_ptr<Application> app) { m_app = app; }

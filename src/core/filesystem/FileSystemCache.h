@@ -14,8 +14,8 @@ class cache
 public:
 	using iterator_t = T;
 	static_assert(std::is_same<iterator_t, recursive_directory_iterator>::value ||
-					  std::is_same<iterator_t, directory_iterator>::value,
-				  "T must be a valid directory iterator type");
+		std::is_same<iterator_t, directory_iterator>::value,
+		"T must be a valid directory iterator type");
 
 	using clock_t = std::chrono::steady_clock;
 
@@ -84,7 +84,7 @@ public:
 	//-----------------------------------------------------------------------------
 	decltype(auto) begin() const
 	{
-		if(should_refresh())
+		if (should_refresh())
 		{
 			refresh();
 		}
@@ -102,7 +102,7 @@ public:
 		return entries_.end();
 	}
 
-    //-----------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------
 	//  Name : size ()
 	/// <summary>
 	/// Returns the size for the underlying cached container.
@@ -110,14 +110,14 @@ public:
 	//-----------------------------------------------------------------------------
 	decltype(auto) size() const
 	{
-		if(should_refresh())
+		if (should_refresh())
 		{
 			refresh();
 		}
 		return entries_.size();
 	}
 
-    //-----------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------
 	//  Name : at ()
 	/// <summary>
 	/// Directly index into the underlying cached container.
@@ -127,10 +127,10 @@ public:
 	{
 		return entries_.at(idx);
 	}
-    decltype(auto) operator[](size_t idx) const
-    {
-        return entries_[idx];
-    }
+	decltype(auto) operator[](size_t idx) const
+	{
+		return entries_[idx];
+	}
 
 	//-----------------------------------------------------------------------------
 	//  Name : refresh ()
@@ -147,18 +147,18 @@ public:
 
 		std::error_code err;
 		iterator_t it(path_, err);
-		for(const auto& p : it)
+		for (const auto& p : it)
 		{
 			entries_.emplace_back();
 			auto& cache_entry = entries_.back();
 			cache_entry.entry = p;
 			const auto& absolute_path = cache_entry.entry.path();
-            auto filename = absolute_path.filename();
-            cache_entry.filename = absolute_path.filename().string();
+			auto filename = absolute_path.filename();
+			cache_entry.filename = absolute_path.filename().string();
 			cache_entry.extension = filename.extension().string();
 			cache_entry.stem = filename.string();
 
-			while(filename.has_extension())
+			while (filename.has_extension())
 			{
 				filename = filename.stem();
 				cache_entry.stem = filename.string();
@@ -170,6 +170,7 @@ public:
 		});
 
 		should_refresh_ = false;
+		processed = false;
 	}
 
 	const fs::path& get_path() const
@@ -179,7 +180,7 @@ public:
 
 	void set_path(const fs::path& path)
 	{
-		if(path_ == path)
+		if (path_ == path)
 		{
 			return;
 		}
@@ -191,7 +192,7 @@ public:
 
 	void set_scan_frequency(clock_t::duration scan_frequency)
 	{
-		if(scan_frequency_ == scan_frequency)
+		if (scan_frequency_ == scan_frequency)
 		{
 			return;
 		}
@@ -201,15 +202,30 @@ public:
 		watch();
 	}
 
-
 	struct cache_entry
 	{
 		directory_entry entry;
-        std::string filename;
-        std::string stem;
-        std::string extension;
-        std::string protocol_path;
+		std::string filename;
+		std::string stem;
+		std::string extension;
+		std::string protocol_path;
 	};
+
+	std::vector<cache_entry>& entries() {
+		if (should_refresh())
+		{
+			refresh();
+		}
+		return entries_;
+	}
+
+	bool isProcessed() {
+		return processed;
+	}
+
+	void setProcessed(bool process = true) {
+		processed = process;
+	}
 
 private:
 	//-----------------------------------------------------------------------------
@@ -246,6 +262,8 @@ private:
 	mutable std::atomic_bool should_refresh_ = {true};
 	///
 	std::uint64_t watch_id_ = 0;
+	///
+	mutable std::atomic_bool processed = {false};
 };
 
 using directory_cache = cache<directory_iterator>;

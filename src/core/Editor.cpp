@@ -168,6 +168,19 @@ namespace ige::creator
         }
     }
 
+    void Editor::convertAssets()
+    {
+        auto buildCmd = [](void* param)
+        {
+            pyxie_printf("Converting assets...");
+            system((std::string("python.exe ") + GetEnginePath("convert.py")).c_str());
+            pyxie_printf("Converting assets DONE!");
+            return 1;
+        };
+        auto buildThread = SDL_CreateThreadWithStackSize(buildCmd, "Build_Thread", 32 * 1024 * 1024, (void*)NULL);
+        SDL_DetachThread(buildThread);
+    }
+
     void Editor::toggleReloadSource()
     {
         auto scene = SceneManager::getInstance()->getCurrentScene();

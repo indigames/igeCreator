@@ -108,6 +108,11 @@ namespace ige::creator
 
         //Asset
         auto assetMenu = createWidget<Menu>("Asset");
+        assetMenu->createWidget<MenuItem>("Convert Texture")->getOnClickEvent().addListener([](auto widget) {
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->convertAssets();
+                });
+            });
         assetMenu->createWidget<MenuItem>("Refresh", "CTRL + R ")->getOnClickEvent().addListener([](auto widget) {
             TaskManager::getInstance()->addTask([]() {
                 Editor::getInstance()->toggleReloadSource();
