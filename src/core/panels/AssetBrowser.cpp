@@ -75,8 +75,7 @@ namespace ige::creator
 
                     // check file exist
                     bool dirty = !fs::exists(metaPath)
-                        || IsFormat(E_FileExts::Figure, file_ext) && !fs::exists(fsPath.parent_path().append(fsPath.stem().string() + ".pyxf"))
-                        || IsFormat(E_FileExts::Sprite, file_ext) && !fs::exists(fsPath.parent_path().append(fsPath.stem().string() + ".pyxi"));
+                        || IsFormat(E_FileExts::Figure, file_ext) && !fs::exists(fsPath.parent_path().append(fsPath.stem().string() + ".pyxf"));
 
                     // check timestamp
                     if (!dirty) {
