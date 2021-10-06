@@ -267,7 +267,6 @@ namespace ige::creator
     void Hierarchy::onTargetAdded(const std::shared_ptr<SceneObject>& object)
     {
         if (!object) return;
-        if (!SceneManager::getInstance()->isEditor()) return;
 
         // Update current selected id
         auto nodePair = m_objectNodeMap.find(object->getId());

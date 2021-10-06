@@ -136,7 +136,8 @@ void RectTransformEditorComponent::drawRectTransform() {
         m_dirtyFlagSupport = 1;
         setDirty();
         getComponent<CompoundComponent>()->setDirty();
-        Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
+        if(Editor::getCanvas()->getEditorScene()->getGizmo())
+            Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
     });
 
     auto anchorColumn = m_anchor_transform_ParentGroup->createWidget<Columns<2>>();
@@ -211,7 +212,8 @@ void RectTransformEditorComponent::drawRect() {
             comp->setProperty("offset", offset);
         }
         getComponent<CompoundComponent>()->setDirty();
-        Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
+        if (Editor::getCanvas()->getEditorScene()->getGizmo())
+            Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
     });
 
     std::array B = { b };
@@ -230,7 +232,8 @@ void RectTransformEditorComponent::drawRect() {
             comp->setProperty("offset", offset);
         }
         getComponent<CompoundComponent>()->setDirty();
-        Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
+        if (Editor::getCanvas()->getEditorScene()->getGizmo())
+            Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
     });
 
     std::array posZ = { getComponent<CompoundComponent>()->getProperty<Vec3>("pos", { NAN, NAN, NAN }).Z() };
@@ -241,7 +244,8 @@ void RectTransformEditorComponent::drawRect() {
         position.Z(val[0]);
         comp->setProperty("pos", position);
         getComponent<CompoundComponent>()->setDirty();
-        Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
+        if (Editor::getCanvas()->getEditorScene()->getGizmo())
+            Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
     });
 
     std::array C = { c };
@@ -260,7 +264,8 @@ void RectTransformEditorComponent::drawRect() {
             comp->setProperty("offset", offset);
         }
         getComponent<CompoundComponent>()->setDirty();
-        Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
+        if (Editor::getCanvas()->getEditorScene()->getGizmo())
+            Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
     });
 
     std::array D = { d };
@@ -279,7 +284,8 @@ void RectTransformEditorComponent::drawRect() {
             comp->setProperty("offset", offset);
         }
         getComponent<CompoundComponent>()->setDirty();
-        Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
+        if (Editor::getCanvas()->getEditorScene()->getGizmo())
+            Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
     });
 }
 
@@ -299,7 +305,8 @@ void RectTransformEditorComponent::drawAnchorMinMax() {
         m_dirtyFlagSupport = 4;
         setDirty();
         getComponent<CompoundComponent>()->setDirty();
-        Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
+        if (Editor::getCanvas()->getEditorScene()->getGizmo())
+            Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
     });
 
     std::array anchorMax = { anchor[2], anchor[3] };
@@ -312,7 +319,8 @@ void RectTransformEditorComponent::drawAnchorMinMax() {
         m_dirtyFlagSupport = 4;
         setDirty();
         getComponent<CompoundComponent>()->setDirty();
-        Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
+        if (Editor::getCanvas()->getEditorScene()->getGizmo())
+            Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
     });
 }
 
@@ -329,7 +337,8 @@ void RectTransformEditorComponent::drawPivot() {
         m_dirtyFlagSupport = 3;
         setDirty();
         getComponent<CompoundComponent>()->setDirty();
-        Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
+        if (Editor::getCanvas()->getEditorScene()->getGizmo())
+            Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
     });
 
     auto rotE = getComponent<CompoundComponent>()->getProperty<Vec3>("rot", { NAN, NAN, NAN });
@@ -340,7 +349,8 @@ void RectTransformEditorComponent::drawPivot() {
         m_dirtyFlagSupport = 3;
         setDirty();
         getComponent<CompoundComponent>()->setDirty();
-        Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
+        if (Editor::getCanvas()->getEditorScene()->getGizmo())
+            Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
     });
 
     auto scale = getComponent<CompoundComponent>()->getProperty<Vec3>("scale", { NAN, NAN, NAN });
@@ -351,7 +361,8 @@ void RectTransformEditorComponent::drawPivot() {
         m_dirtyFlagSupport = 3;
         setDirty();
         getComponent<CompoundComponent>()->setDirty();
-        Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
+        if (Editor::getCanvas()->getEditorScene()->getGizmo())
+            Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
     });
 }
 
@@ -364,7 +375,8 @@ void RectTransformEditorComponent::onTransformChanged(SceneObject& sceneObject)
                 m_dirtyFlagSupport = 2;
                 if (getComponent<CompoundComponent>()) {
                     getComponent<CompoundComponent>()->setDirty();
-                    Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
+                    if (Editor::getCanvas()->getEditorScene()->getGizmo())
+                        Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
                 }
                 setDirty();
             }
