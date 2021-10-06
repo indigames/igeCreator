@@ -53,22 +53,26 @@ namespace ige::scene
     //! Add a component
     void TargetObject::addComponent(const std::shared_ptr<Component> &component) 
     {
+        if (m_objects.size() <= 0)
+            return;
         auto found = std::find_if(m_components.begin(), m_components.end(), [&component](auto element) {
             return component->getName().compare(element->getName()) == 0;
         });
         if (found == m_components.end())
         {
             auto compoundComp = std::make_shared<CompoundComponent>(*this);
-            json jComp;
-            component->to_json(jComp);
-            for(int i = 0; i < m_objects.size(); ++i)
-            {
-                auto obj = m_objects[i];
-                if (!obj.expired())
-                {
-                    auto comp = obj.lock()->createComponent(component->getName());
-                    comp->from_json(jComp);
-                    compoundComp->add(comp);
+            compoundComp->add(component);
+            if (m_objects[0].expired()) m_objects[0].lock()->addComponent(component);
+            if (m_objects.size() > 1) {
+                json jComp;
+                component->to_json(jComp);
+                for (int i = 1; i < m_objects.size(); ++i) {
+                    auto obj = m_objects[i];
+                    if (!obj.expired()) {
+                        auto comp = obj.lock()->createComponent(component->getName());
+                        comp->from_json(jComp);
+                        compoundComp->add(comp);
+                    }
                 }
             }
             compoundComp->setDirty();
@@ -109,6 +113,26 @@ namespace ige::scene
             {
                 if (!object.expired())
                     object.lock()->removeComponent(name);
+            }
+            m_components.erase(found);
+            return true;
+        }
+        return false;
+    }
+
+    //! Remove a component by id
+    bool TargetObject::removeComponent(uint64_t id)
+    {
+        auto found = std::find_if(m_components.begin(), m_components.end(), [&id](auto element) {
+            auto compoundComponent = std::dynamic_pointer_cast<CompoundComponent>(element);
+            return compoundComponent && id == compoundComponent->getInstanceId();
+        });
+        if (found != m_components.end())
+        {
+            for (auto& object : m_objects)
+            {
+                if (!object.expired())
+                    object.lock()->removeComponent((*found)->getName());
             }
             m_components.erase(found);
             return true;
