@@ -64,7 +64,7 @@ TextureMeta::~TextureMeta() {
 
 bool TextureMeta::save() {
     // To Do: show progress bar, it take lots of time so better do it when build rom
-    convertTexture(m_path, m_options);
+    // convertTexture(m_path, m_options);
     return AssetMeta::save();
 }
 
