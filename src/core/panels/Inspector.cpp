@@ -31,6 +31,7 @@
 #include <components/FigureComponent.h>
 #include <components/BoneTransform.h>
 #include <components/SpriteComponent.h>
+#include <components/TextComponent.h>
 #include <components/ScriptComponent.h>
 #include <components/light/AmbientLight.h>
 #include <components/light/DirectionalLight.h>
@@ -142,6 +143,7 @@ namespace ige::creator
         {
             m_createCompCombo->addChoice((int)Component::Type::Figure, "Figure");
             m_createCompCombo->addChoice((int)Component::Type::Sprite, "Sprite");
+            m_createCompCombo->addChoice((int)Component::Type::Text, "Text");
 
             if (!m_targetObject->hasComponent<BoneTransform>())
                 m_createCompCombo->addChoice((int)Component::Type::BoneTransform, "BoneTransform");
@@ -228,6 +230,9 @@ namespace ige::creator
                     break;
                 case (int)Component::Type::Sprite:
                     m_targetObject->addComponent<SpriteComponent>();
+                    break;
+                case (int)Component::Type::Text:
+                    m_targetObject->addComponent<TextComponent>("Text", "fonts/Manjari-Regular.ttf");
                     break;
                 case (int)Component::Type::BoneTransform:
                     m_targetObject->addComponent<BoneTransform>()->initialize();
