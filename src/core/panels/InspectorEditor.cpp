@@ -7,6 +7,7 @@
 #include "core/scene/components/FigureEditorComponent.h"
 #include "core/scene/components/SpriteEditorComponent.h"
 #include "core/scene/components/TextEditorComponent.h"
+#include "core/scene/components/TextBitmapEditorComponent.h"
 #include "core/scene/components/ScriptEditorComponent.h"
 #include "core/scene/components/TransformEditorComponent.h"
 #include "core/scene/components/BoneTransformEditorComponent.h"
@@ -100,6 +101,9 @@ std::shared_ptr<EditorComponent> InspectorEditor::addComponent(int type, std::sh
 	case Component::Type::Text:
 		view = std::make_shared<TextEditorComponent>();
 	break;
+	case Component::Type::TextBitmap:
+		view = std::make_shared<TextBitmapEditorComponent>();
+		break;
 	case Component::Type::Script:
 		view = std::make_shared<ScriptEditorComponent>();
 	break;
