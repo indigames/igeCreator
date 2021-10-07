@@ -62,7 +62,7 @@ namespace ige::scene
         {
             auto compoundComp = std::make_shared<CompoundComponent>(*this);
             compoundComp->add(component);
-            if (m_objects[0].expired()) m_objects[0].lock()->addComponent(component);
+            if (!m_objects[0].expired()) m_objects[0].lock()->addComponent(component);
             if (m_objects.size() > 1) {
                 json jComp;
                 component->to_json(jComp);
