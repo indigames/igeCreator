@@ -53,7 +53,7 @@ void TextEditorComponent::drawComponent()
     }
 
     std::array size = { comp->getProperty<float>("size", NAN) };
-    m_textCompGroup->createWidget<Drag<float>>("Size", ImGuiDataType_S32, size, 1, 4, 1024)->getOnDataChangedEvent().addListener([this](auto& val) {
+    m_textCompGroup->createWidget<Drag<float>>("Size", ImGuiDataType_S32, size, 1, 4, 300)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("size", (int)val[0]);
         });
 

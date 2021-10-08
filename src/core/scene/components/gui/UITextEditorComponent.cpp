@@ -50,7 +50,7 @@ void UITextEditorComponent::drawUIText()
     }
     
     std::array size = { comp->getProperty<float>("size", NAN) };
-    m_uiTextGroup->createWidget<Drag<float>>("Size", ImGuiDataType_S32, size, 1, 4, 1024)->getOnDataChangedEvent().addListener([this](auto& val) {
+    m_uiTextGroup->createWidget<Drag<float>>("Size", ImGuiDataType_S32, size, 1, 4, 300)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("size", (int)val[0]);
     });
 
