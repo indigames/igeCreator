@@ -31,6 +31,7 @@ namespace ige::creator
     std::thread g_watcherThread;
     std::mutex g_watcherMutex;
     bool g_stopWatcherThread = false;
+    bool g_assetMetaChecked = false;
 
     void watchThreadFunc()
     {
@@ -49,77 +50,85 @@ namespace ige::creator
                 lk.unlock();
             }
 
-            // sleep 10s
-            std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+            auto size = g_cache.size();
+            if (!g_cache.isProcessed() && size > 0) {
+                for (const auto& file : g_cache) {
+                    const auto& fsPath = file.entry.path();
+                    const auto& name = file.stem;
+                    const auto& relative = file.protocol_path;
+                    const auto& file_ext = file.extension;
+                    const std::string& filename = file.filename;
 
-            for (const auto& file : g_cache) {
-                const auto& fsPath = file.entry.path();
-                const auto& name = file.stem;
-                const auto& relative = file.protocol_path;
-                const auto& file_ext = file.extension;
-                const std::string& filename = file.filename;
+                    if (IsFormat(E_FileExts::Hidden, file_ext))
+                        continue;
 
-                if (IsFormat(E_FileExts::Hidden, file_ext))
-                    continue;
-
-                auto hidden = false;
-                auto path = fsPath.string();
-                const auto& hiddenItems = GetFileExtensionSuported(E_FileExts::Hidden);
-                for (const auto& item : hiddenItems) {
-                    if (path.find(item) != std::string::npos) {
-                        hidden = true;
-                        break;
+                    auto hidden = false;
+                    auto path = fsPath.string();
+                    const auto& hiddenItems = GetFileExtensionSuported(E_FileExts::Hidden);
+                    for (const auto& item : hiddenItems) {
+                        if (path.find(item) != std::string::npos) {
+                            hidden = true;
+                            break;
+                        }
                     }
-                }
-                if (hidden) continue;
-                if (fs::is_regular_file(file.entry.status()) && file_ext.compare(".meta") != 0) {
-                    const auto metaPath = fsPath.parent_path().append(filename + ".meta");
+                    if (hidden) continue;
+                    if (fs::is_regular_file(file.entry.status()) && file_ext.compare(".meta") != 0) {
+                        const auto metaPath = fsPath.parent_path().append(filename + ".meta");
 
-                    // check file exist
-                    bool dirty = !fs::exists(metaPath);
+                        // check file exist
+                        bool dirty = !fs::exists(metaPath);
 
-                    // check crc
-                    if (!dirty) {
-                        auto file = std::ifstream(metaPath);
-                        if (file.is_open()) {
-                            try {
-                                json metaJs;
-                                file >> metaJs;
-                                file.close();
-                                auto crc = metaJs.value("CRC", (uint32_t)-1);
+                        // check crc
+                        if (!dirty) {
+                            auto file = std::ifstream(metaPath);
+                            if (file.is_open()) {
                                 try {
-                                    auto newCrc = crc32::crc32_from_file(fsPath.string().c_str());
-                                    if (newCrc != crc) {
-                                        dirty = true;
+                                    json metaJs;
+                                    file >> metaJs;
+                                    file.close();
+                                    auto crc = metaJs.value("CRC", (uint32_t)-1);
+                                    try {
+                                        auto newCrc = crc32::crc32_from_file(fsPath.string().c_str());
+                                        if (newCrc != crc) {
+                                            dirty = true;
+                                        }
+                                    }
+                                    catch (std::exception e) {
                                     }
                                 }
                                 catch (std::exception e) {
+                                    dirty = true;
                                 }
                             }
-                            catch (std::exception e) {
-                                dirty = true;
-                            }
                         }
-                    }
 
-                    // resave
-                    if (dirty) {
-                        if (IsFormat(E_FileExts::Figure, file_ext)) {
-                            std::make_unique<FigureMeta>(path)->save();
-                        }
-                        else if (IsFormat(E_FileExts::Sprite, file_ext)) {
-                            std::make_unique<TextureMeta>(path)->save();
-                        }
-                        else {
-                            std::make_unique<AssetMeta>(path)->save();
+                        // resave
+                        if (dirty) {
+                            if (IsFormat(E_FileExts::Figure, file_ext)) {
+                                std::make_unique<FigureMeta>(path)->save();
+                            }
+                            else if (IsFormat(E_FileExts::Sprite, file_ext)) {
+                                std::make_unique<TextureMeta>(path)->save();
+                            }
+                            else {
+                                std::make_unique<AssetMeta>(path)->save();
+                            }
                         }
                     }
                 }
+                g_cache.setProcessed(true);
             }
+
+            if(!g_assetMetaChecked)
+                g_assetMetaChecked = true;
+
+            // sleep 1s
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         }
     }
 
     void stopWatcherThread() {
+        g_assetMetaChecked = false;
         std::unique_lock<std::mutex> lk(g_watcherMutex);
         g_stopWatcherThread = true;
         lk.unlock();
@@ -165,6 +174,11 @@ namespace ige::creator
     {
         startWatcherThread();
         std::static_pointer_cast<FileSystemWidget>(m_fileSystemWidget)->setDirty();
+
+        // Wait until meta data was checked sucessfully the first time
+        while (!g_assetMetaChecked) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        }
     }
   
     std::string AssetBrowser::getSelectedPath()
