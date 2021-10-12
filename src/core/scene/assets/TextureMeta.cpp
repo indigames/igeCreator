@@ -2,10 +2,6 @@
 #include "core/filesystem/FileSystem.h"
 #include "core/filesystem/FileSystemCache.h"
 
-#include <chrono>
-#include <ctime>
-#include <iomanip>
-
 #include "pyxieImageConv.h"
 using namespace pyxie;
 

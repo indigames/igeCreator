@@ -19,6 +19,8 @@
 #include "core/scene/assets/FigureMeta.h"
 #include "core/scene/assets/TextureMeta.h"
 
+#include "core/utils/crc32.h"
+
 #include "utils/GraphicsHelper.h"
 #include <imgui_internal.h>
 #include "SDL.h"
@@ -47,8 +49,8 @@ namespace ige::creator
                 lk.unlock();
             }
 
-            // sleep 1s
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+            // sleep 10s
+            std::this_thread::sleep_for(std::chrono::milliseconds(10000));
 
             for (const auto& file : g_cache) {
                 const auto& fsPath = file.entry.path();
@@ -74,10 +76,9 @@ namespace ige::creator
                     const auto metaPath = fsPath.parent_path().append(filename + ".meta");
 
                     // check file exist
-                    bool dirty = !fs::exists(metaPath)
-                        || IsFormat(E_FileExts::Figure, file_ext) && !fs::exists(fsPath.parent_path().append(fsPath.stem().string() + ".pyxf"));
+                    bool dirty = !fs::exists(metaPath);
 
-                    // check timestamp
+                    // check crc
                     if (!dirty) {
                         auto file = std::ifstream(metaPath);
                         if (file.is_open()) {
@@ -85,10 +86,10 @@ namespace ige::creator
                                 json metaJs;
                                 file >> metaJs;
                                 file.close();
-                                auto timeStamp = metaJs.value("Timestamp", (long long)-1);
+                                auto crc = metaJs.value("CRC", (uint32_t)-1);
                                 try {
-                                    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(fs::last_write_time(fsPath).time_since_epoch()).count();
-                                    if (timeStamp != ms) {
+                                    auto newCrc = crc32::crc32_from_file(fsPath.string().c_str());
+                                    if (newCrc != crc) {
                                         dirty = true;
                                     }
                                 }
