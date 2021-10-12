@@ -6,10 +6,6 @@
 #include <pyxieColladaLoader.h>
 #include <pyxieFbxLoader.h>
 
-#include <chrono>
-#include <ctime>
-#include <iomanip>
-
 NS_IGE_BEGIN
 
 FigureMeta::FigureMeta(const std::string& path)
@@ -79,7 +75,13 @@ bool FigureMeta::loadFbx(EditableFigure& efig, const std::string& path) {
     baseModelPath.append(parentName.string() + ".fbx");
     bool folderRule = fs::exists(baseModelPath);
 
-    if (folderRule && fsPath.filename().compare(baseModelPath.filename()) != 0)
+    auto filename = fsPath.filename().string();
+    std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
+
+    auto basename = baseModelPath.filename().string();
+    std::transform(basename.begin(), basename.end(), basename.begin(), ::tolower);
+
+    if (folderRule && filename.compare(basename) != 0)
         return false;
 
     pyxieFbxLoader loader;
@@ -89,12 +91,13 @@ bool FigureMeta::loadFbx(EditableFigure& efig, const std::string& path) {
     if (folderRule) {
         for (const auto& entry : fs::directory_iterator(parentPath)) {
             if (entry.is_regular_file()) {
-                if (entry.path().filename().compare(baseModelPath.filename()) == 0 || entry.path().extension().compare(".fbx") != 0)
+                auto ext = entry.path().extension().string();
+                std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+                if (entry.path().filename().compare(baseModelPath.filename()) == 0 || ext.compare(".fbx") != 0)
                     continue;
                 auto relPath = entry.path().is_absolute() ? fs::relative(entry.path(), fs::current_path()).string() : entry.path().string();
                 std::replace(relPath.begin(), relPath.end(), '\\', '/');
-                rv = loader.LoadModel(relPath.c_str(), &efig);
-                if (!rv) return false;
+                loader.LoadAnimation(relPath.c_str(), &efig);
             }
         }
     }
@@ -124,7 +127,9 @@ bool FigureMeta::loadCollada(EditableFigure& efig, const std::string& path) {
         }
     }
 
-    bool isFbx = fsPath.extension().string().compare(".fbx") == 0;
+    auto ext = fsPath.extension().string();
+    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+    bool isFbx = ext.compare(".fbx") == 0;
     if (isFbx) {
         return loadFbx(efig, path);
     }
@@ -135,7 +140,13 @@ bool FigureMeta::loadCollada(EditableFigure& efig, const std::string& path) {
     baseModelPath.append(parentName.string() + ".dae");
     bool folderRule = fs::exists(baseModelPath);
 
-    if (folderRule && fsPath.filename().compare(baseModelPath.filename()) != 0) 
+    auto filename = fsPath.filename().string();
+    std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
+
+    auto basename = baseModelPath.filename().string();
+    std::transform(basename.begin(), basename.end(), basename.begin(), ::tolower);
+
+    if (folderRule && filename.compare(basename) != 0)
         return false;
 
     pyxieColladaLoader loader;
@@ -145,12 +156,13 @@ bool FigureMeta::loadCollada(EditableFigure& efig, const std::string& path) {
     if (folderRule) {
         for (const auto& entry : fs::directory_iterator(parentPath)) {
             if (entry.is_regular_file()) {
-                if (entry.path().filename().compare(baseModelPath.filename()) == 0 || entry.path().extension().compare(".dae") != 0)
+                auto ext = entry.path().extension().string();
+                std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+                if (entry.path().filename().compare(baseModelPath.filename()) == 0 || ext.compare(".dae") != 0)
                     continue;
                 auto relPath = entry.path().is_absolute() ? fs::relative(entry.path(), fs::current_path()).string() : entry.path().string();
                 std::replace(relPath.begin(), relPath.end(), '\\', '/');
-                rv = loader.LoadColladaAnimation(relPath.c_str(), &efig);
-                if (!rv) return false;
+                loader.LoadColladaAnimation(relPath.c_str(), &efig);
             }
         }
     }

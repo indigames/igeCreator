@@ -1,6 +1,7 @@
 #include "core/scene/assets/AssetMeta.h"
 #include "core/filesystem/FileSystem.h"
 #include "core/filesystem/FileSystemCache.h"
+#include "core/utils/crc32.h"
 
 #include "core/widgets/Label.h"
 #include "core/widgets/CheckBox.h"
@@ -8,8 +9,6 @@
 #include "core/widgets/Button.h"
 #include "core/widgets/Drag.h"
 
-#include <chrono>
-#include <ctime>
 #include <iomanip>
 
 NS_IGE_BEGIN
@@ -126,11 +125,10 @@ AssetMeta::~AssetMeta() {
 bool AssetMeta::save() {
     auto fsPath = fs::path(m_path);
     if (fs::exists(fsPath)) {
-        const auto metaPath = fsPath.parent_path().append(fsPath.filename().string() + ".meta"); 
-        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(fs::last_write_time(fsPath).time_since_epoch()).count();
+        const auto metaPath = fsPath.parent_path().append(fsPath.filename().string() + ".meta");
         json metaJson = json {
             {"Name", fsPath.filename().string() },
-            {"Timestamp", (long long)ms },
+            {"CRC", crc32::crc32_from_file(m_path.c_str())},
             {"Option", m_options}
         };
         std::ofstream file(metaPath);
