@@ -5,6 +5,8 @@
 #include <pyxieFigureExportConfigManager.h>
 #include <pyxieColladaLoader.h>
 #include <pyxieFbxLoader.h>
+#include <pyxieImageConv.h>
+
 
 NS_IGE_BEGIN
 
@@ -16,11 +18,11 @@ FigureMeta::FigureMeta(const std::string& path)
         {"EXPORT_NAMES", true},
         {"TRIANGLE_STRIP", true},
         {"GEN_MIPMAP", true},
-        {"OPTIMIZE_MESH", true},
+        {"OPTIMIZE_MESH", false},
         {"OPTIMIZE_VERTEX", true},
         {"OPTIMIZE_ANIMATION", true},
         {"SHADER_MAKE_SHADOW", true},
-        {"SHADER_RECEIVE_SHADOW", true},
+        {"SHADER_RECEIVE_SHADOW", false},
         {"SHADER_DEPTH_SHADOW", true},
         {"MATERIAL_PARAM_SPARE", 8},
         {"SHADER_NUM_DIR_LAMP", 3},
@@ -45,6 +47,9 @@ bool FigureMeta::replaceTextures(EditableFigure& efig)
     auto fsPath = fs::path(efig.ResourceName());
     auto relPath = fsPath.is_absolute() ? fs::relative(fsPath, fs::current_path()) : fsPath;
     auto texSrcs = efig.GetTextureSources();
+    pyxie::ImageConv imgConv;
+    bool alpha = false;
+
     for (const auto& texSrc : texSrcs) {
         auto texName = fs::path(texSrc.path).filename();
         auto newTexSrc = TextureSource(texSrc);
@@ -60,6 +65,11 @@ bool FigureMeta::replaceTextures(EditableFigure& efig)
             }
         }
         efig.ReplaceTextureSource(texSrc, newTexSrc);
+
+        // Set mesh alpha based on texture alpha
+        imgConv.SetInputFile(newTexSrc.path);
+        alpha = imgConv.DoConvert(true);
+        if(alpha) efig.EnableAlphaModeByTexture(newTexSrc.path);
     }
     return true;
 }
@@ -174,6 +184,12 @@ bool FigureMeta::save() {
     auto efig = ResourceCreator::Instance().NewEditableFigure(m_path.c_str(), true);
     if (loadCollada(*efig, m_path)) {
         replaceTextures(*efig);
+        if (m_options["OPTIMIZE_VERTEX"]) {
+            efig->RemoveUnreferencedVertices();
+        }
+        if (m_options["OPTIMIZE_MESH"]) {
+            efig->MergeSameMaterialMesh();
+        }
         efig->SaveFigure((fsPath.parent_path().append(fsPath.stem().string() + ".pyxf")).c_str());
     }
     efig->DecReference();
