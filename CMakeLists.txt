@@ -79,6 +79,22 @@ elseif(IOS)
     endif()
 endif()
 
+include_directories(
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/pyxcore"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/pyxtools"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/GLEW"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/edge/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/vectormath/scalar/cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/doboz"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/simplecpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/tokenizer"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/spdlog/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/spdlog/include/spdlog"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeCore"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeVMath"
+)
+
 add_compile_definitions(EDITOR_MODE=1)
 add_subdirectory(libs/pyxCore ${CMAKE_BINARY_DIR}/pyxCore EXCLUDE_FROM_ALL)
 add_subdirectory(libs/igeCore ${CMAKE_BINARY_DIR}/igeCore EXCLUDE_FROM_ALL)
@@ -108,19 +124,6 @@ find_package(zlib)
 find_package(json)
 
 include_directories(
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/pyxcore"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/pyxtools"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/GLEW"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/edge/include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/vectormath/scalar/cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/doboz"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/simplecpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/tokenizer"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/spdlog/include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/spdlog/include/spdlog"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeCore"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeVMath"
     "${zlib_INCLUDE_DIRS}"
     "${json_INCLUDE_DIRS}"
     "${Python3_INCLUDE_DIRS}"

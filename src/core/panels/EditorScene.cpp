@@ -97,14 +97,6 @@ namespace ige::creator
                 m_fbo = ResourceCreator::Instance().NewRenderTarget(m_rtTexture, true, true);
                 m_imageWidget = createWidget<Image>(m_fbo->GetColorTexture()->GetTextureHandle(), size);
 
-                // Position changed event
-                getOnPositionChangedEvent().addListener([this](auto pos) {
-                    TaskManager::getInstance()->addTask([this]() {
-                        if (Editor::getCurrentScene())
-                            Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y + 25.f }); // Title bar size
-                        });
-                    });
-
                 // Size changed event
                 getOnSizeChangedEvent().addListener([this](auto size) {
                     TaskManager::getInstance()->addTask([this]() {
@@ -117,11 +109,6 @@ namespace ige::creator
                         // Update camera aspect rate
                         if (m_currCamera)
                             m_currCamera->SetAspectRate(size.x / size.y);
-
-                        // Update window pos and size
-                        if (Editor::getCurrentScene()) {
-                            Editor::getCurrentScene()->setWindowSize({ size.x , size.y });
-                        }
                     });
                 });
 
@@ -143,17 +130,17 @@ namespace ige::creator
                 m_3dCamera->SetPosition({ 0.f, 3.f, 10.f });
                 m_3dCamera->LockonTarget(false);
                 m_3dCamera->SetAspectRate(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
+                m_3dCamera->SetNearPlane(1.f);
+                m_3dCamera->SetFarPlane(10000.f);
 
                 m_gizmo = createWidget<Gizmo>();
                 m_gizmo->setMode(Editor::getInstance()->isLocalGizmo() ? gizmo::MODE::LOCAL : gizmo::MODE::WORLD);
 
                 initDragDrop();
 
-                // Initialize window pos and size
+                // Initialize camera
                 if (Editor::getCurrentScene())
                 {
-                    Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y + 25.f }); // Title bar size
-                    Editor::getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
                     m_currCamera = m_2dCamera; // trick to reset 3D camera
                     set2DMode(false);
                 }
@@ -401,9 +388,6 @@ namespace ige::creator
 
     void EditorScene::update(float dt)
     {
-        if (Editor::getCanvas()->getGameScene()->isPlaying())
-            return;
-
         // Ensure initialization
         initialize();
 
@@ -419,32 +403,40 @@ namespace ige::creator
             return;
         }
 
+        SceneManager::getInstance()->setIsEditor(true);
+        if (Editor::getCurrentScene()) {
+            Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y + 25.f });
+            Editor::getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
+        }
+
+        if (m_currCamera) {
+            m_currCamera->Step(dt);
+            if(Editor::getCurrentScene())
+                Editor::getCurrentScene()->getShowcase()->ZSort(m_currCamera);
+        }
+
         // Update keyboard
         updateKeyboard();
 
         // Update touch
         updateTouch();
 
-        // Update scene
-        SceneManager::getInstance()->update(dt);
+        // Update
+        if (!Editor::getCanvas()->getGameScene()->isPlaying()) {
+            SceneManager::getInstance()->update(dt);
+        }
 
-        // Physic update scene 
-        // Disable in Editor
-        //SceneManager::getInstance()->physicUpdate(dt);
-
-        // Render
+        // Render scene
         auto renderContext = RenderContext::InstancePtr();
-        if (renderContext && m_fbo)
-        {
+        if (renderContext && m_fbo) {
+            SceneManager::getInstance()->preRender(m_currCamera);
+
             renderContext->BeginScene(m_fbo, Vec4(0.2f, 0.2f, 0.2f, 1.f), true, true);
 
             // Render camera
-            m_currCamera->Step(dt);
-            m_currCamera->Render();
-
-            // Render scene
-            Editor::getCurrentScene()->getShowcase()->ZSort(m_currCamera);
-            SceneManager::getInstance()->render();
+            if (m_currCamera) {
+                m_currCamera->Render();
+            }
 
             // Render bounding box
             renderBoundingBoxes();
@@ -455,14 +447,19 @@ namespace ige::creator
             // Render object select rect
             renderCameraSelect();
 
+            // Render scene
+            SceneManager::getInstance()->render();
+
             renderContext->EndScene();
         }
 
         //! Update Panel
         Panel::update(dt);
 
-        // Late Update scene
-        SceneManager::getInstance()->lateUpdate(dt);
+        // Late Update
+        if (!Editor::getCanvas()->getGameScene()->isPlaying()) {
+            SceneManager::getInstance()->lateUpdate(dt);
+        }
     }
 
     //! Update keyboard
@@ -615,7 +612,7 @@ namespace ige::creator
         {
             float touchX, touchY;
             touch->getFingerPosition(0, touchX, touchY);
-            auto hit = Editor::getCurrentScene()->raycast(Vec2(touchX, touchY), m_currCamera, 10000.f);
+            auto hit = Editor::getCurrentScene()->raycast(Vec2(touchX, touchY), m_currCamera, m_currCamera->GetFarPlane());
             if (hit.first)
             {
                 if (keyModifier & (int)KeyModifier::KEY_MOD_CTRL || keyModifier & (int)KeyModifier::KEY_MOD_SHIFT)

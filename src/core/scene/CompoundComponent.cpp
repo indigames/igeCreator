@@ -107,7 +107,7 @@ namespace ige::scene
                             auto z = vmath_almostEqual(vec1[2], vec2[2]) ? vec1[2] : NAN;
                             auto w = vmath_almostEqual(vec1[3], vec2[3]) ? vec1[3] : NAN;
                             m_json[key] = Vec4(x, y, z, w);
-                            if (x == y == z == w == NAN) break;
+                            if (x == y && y == z && z == w && w == NAN) break;
                             continue;
                         }
                         
@@ -122,7 +122,7 @@ namespace ige::scene
                             auto y = vmath_almostEqual(vec1[1], vec2[1]) ? vec1[1] : NAN;
                             auto z = vmath_almostEqual(vec1[2], vec2[2]) ? vec1[2] : NAN;
                             m_json[key] = Vec3(x, y, z);
-                            if (x == y == z == NAN) break;
+                            if (x == y && y == z && z == NAN) break;
                             continue;
                         }
 
@@ -137,7 +137,7 @@ namespace ige::scene
                             auto y = vmath_almostEqual(vec1[1], vec2[1]) ? vec1[1] : NAN;
 
                             m_json[key] = Vec2(x, y);
-                            if (x == y == NAN) break;
+                            if (x == y && y == NAN) break;
                             continue;
                         }
                     }

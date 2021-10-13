@@ -126,39 +126,50 @@ namespace ige::creator
 
     void GameScene::update(float dt)
     {
-        if (isPausing() || !isPlaying())
-            return;
-
         // Ensure initialization
         initialize();
 
         if (!m_bInitialized)
             return;
 
-        //! Update Panel
-        Panel::update(dt);
+        SceneManager::getInstance()->setIsEditor(false);
 
-        //! Update Touch & Keyboard, using for UI Object to capture touch before any raycast
-        updateKeyboard();
-        updateTouch();
+        // Update
+        if (isPlaying() && !isPausing()) {
+            // Update windows pos and size
+            if (Editor::getCurrentScene()) {
+                Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y + 25.f });
+                Editor::getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
+            }
 
-        // Update scene
-        SceneManager::getInstance()->update(dt);
+            //! Update Touch & Keyboard, using for UI Object to capture touch before any raycast
+            updateKeyboard();
+            updateTouch();
 
-        // Physic update scene
-        SceneManager::getInstance()->physicUpdate(dt);
-        
-        // Render
+            // Update scene
+            SceneManager::getInstance()->update(dt);
+
+            // Physic update scene
+            SceneManager::getInstance()->physicUpdate(dt);
+        }
+
+        // Render scene
         auto renderContext = RenderContext::InstancePtr();
         if (renderContext && m_fbo)
         {
+            SceneManager::getInstance()->preRender();
             renderContext->BeginScene(m_fbo, {0.f, 0.f, 0.f, 0.f}, true, true);
             SceneManager::getInstance()->render();
             renderContext->EndScene();
         }
 
-        // Late Update scene
-        SceneManager::getInstance()->lateUpdate(dt);
+        // Update Panel
+        Panel::update(dt);
+
+        // Late Update
+        if (isPlaying() && !isPausing()) {
+            SceneManager::getInstance()->lateUpdate(dt);
+        }
     }
 
     void GameScene::_drawImpl()
@@ -175,8 +186,6 @@ namespace ige::creator
         {
             if (Editor::getCanvas()->getConsole()->isAutoClearOnStart())
                 Editor::getCanvas()->getConsole()->clearAllLogs();
-
-            SceneManager::getInstance()->setIsEditor(false);
 
             if (Editor::getCurrentScene())
             {
@@ -205,8 +214,6 @@ namespace ige::creator
         if (m_bIsPlaying)
         {
             clear();
-
-            SceneManager::getInstance()->setIsEditor(true);
 
             if (Editor::getCurrentScene())
             {

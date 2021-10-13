@@ -60,7 +60,7 @@ namespace ige::creator
 
         std::shared_ptr<Inspector> getInspector() { return getPanelAs<Inspector>("Inspector"); }
         std::shared_ptr<EditorScene> getEditorScene() { return getPanelAs<EditorScene>("Scene"); }
-        std::shared_ptr<GameScene> getGameScene() { return getPanelAs<GameScene>("Game"); }
+        std::shared_ptr<GameScene> getGameScene() { return getPanelAs<GameScene>("Preview"); }
         std::shared_ptr<Hierarchy> getHierarchy() { return getPanelAs<Hierarchy>("Hierarchy"); }
         std::shared_ptr<Console> getConsole() { return getPanelAs<Console>("Console"); }
         std::shared_ptr<AssetBrowser> getAssetBrowser() { return getPanelAs<AssetBrowser>("Assets"); }

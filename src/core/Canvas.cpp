@@ -35,7 +35,7 @@ namespace ige::creator
         createPanel<Console>("Console", settings);
         createPanel<ProjectSetting>("Settings", settings);
         createPanel<EditorScene>("Scene", settings);
-        createPanel<GameScene>("Game", settings);
+        createPanel<GameScene>("Preview", settings);
         createPanel<Profiler>("Profiler", settings);
         createPanel<Inspector>("Inspector", settings);
         createPanel<AssetViewer>("Asset", settings);
@@ -105,7 +105,7 @@ namespace ige::creator
                     ImGui::DockBuilderDockWindow("Console", dock_id_bottom);
                     ImGui::DockBuilderDockWindow("Assets", dock_id_bottom);
                     ImGui::DockBuilderDockWindow("Scene", dock_main_id);
-                    ImGui::DockBuilderDockWindow("Game", dock_main_id);
+                    ImGui::DockBuilderDockWindow("Preview", dock_main_id);
                     ImGui::DockBuilderDockWindow("Profiler", dock_id_left_bottom);
                     ImGui::DockBuilderFinish(dockspace_id);
                 }
