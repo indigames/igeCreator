@@ -156,11 +156,13 @@ namespace ige::creator
             SceneManager::getInstance()->physicUpdate(dt);
         }
 
+        // Pre render
+        SceneManager::getInstance()->preRender();
+
         // Render scene
         auto renderContext = RenderContext::InstancePtr();
         if (renderContext && m_fbo)
         {
-            SceneManager::getInstance()->preRender();
             renderContext->BeginScene(m_fbo, {0.f, 0.f, 0.f, 0.f}, true, true);
             SceneManager::getInstance()->render();
             renderContext->EndScene();

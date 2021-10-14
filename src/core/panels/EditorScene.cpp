@@ -50,8 +50,6 @@ namespace ige::creator
 
     void EditorScene::clear()
     {
-        resetShowcase();
-
         m_currentScene = nullptr;
 
         if(m_grid2D) m_grid2D->DecReference();
@@ -116,7 +114,7 @@ namespace ige::creator
                 m_grid2D->SetPosition(Vec3(0.f, 0.f, 0.f));
 
                 m_grid3D = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, GetEnginePath("sprites/grid"));
-                m_grid3D->SetPosition(Vec3(0.f, 0.f, 0.f));
+                m_grid3D->SetPosition(Vec3(0.f, -0.01f, -0.01f));
                 m_grid3D->SetRotation(Quat::RotationX(PI / 2.f));
 
                 m_2dCamera = ResourceCreator::Instance().NewCamera("editor_2d_camera", nullptr);
@@ -324,54 +322,29 @@ namespace ige::creator
                 m_currCamera->SetOrthoHeight(m_currentCanvasHeight * 0.5f);
                 m_grid2D->SetScale({ m_currentCanvasHeight * 0.125f ,m_currentCanvasHeight * 0.125f, 1.f });
             }
-
-            if (m_currShowcase)
-            {
-                m_currShowcase->Remove(m_grid3D);
-                m_currShowcase->Add(m_grid2D);
-            }
         }
         else if (!is2D && m_currCamera == m_2dCamera)
         {
             // Switch to 3D camera
             m_currCamera = m_3dCamera;
-
-            if (m_currShowcase)
-            {
-                m_currShowcase->Remove(m_grid2D);
-                m_currShowcase->Add(m_grid3D);
-            }
         }
         m_gizmo->setCamera(m_currCamera);
 
-
-        auto lastShowcase = m_currShowcase;
-        m_currShowcase = m_currCamera == m_2dCamera ? Editor::getCurrentScene()->getUIShowcase() : Editor::getCurrentScene()->getShowcase();
-
-        if (lastShowcase != m_currShowcase)
-        {
-            if (m_currCamera == m_2dCamera)
-            {
-                if (lastShowcase)
-                    lastShowcase->Remove(m_grid2D);
-                m_currShowcase->Add(m_grid2D);
+        if(!Editor::getCanvas()->getGameScene()->isPlaying()) {
+            auto showcase = Editor::getCurrentScene()->getShowcase();
+            if (m_currCamera == m_2dCamera) {
+                showcase->Remove(m_grid3D);
+                showcase->Add(m_grid2D);
             }
-            else
-            {
-                if (lastShowcase)
-                    lastShowcase->Remove(m_grid3D);
-                m_currShowcase->Add(m_grid3D);
+            else {
+                showcase->Remove(m_grid2D);
+                showcase->Add(m_grid3D);
             }
         }
     }
 
     bool EditorScene::is2DMode() const {
         return m_currCamera ? m_currCamera == m_2dCamera : false;
-    }
-
-    void EditorScene::resetShowcase()
-    {
-        m_currShowcase = nullptr;
     }
 
     bool EditorScene::isResizing()
@@ -409,12 +382,6 @@ namespace ige::creator
             Editor::getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
         }
 
-        if (m_currCamera) {
-            m_currCamera->Step(dt);
-            if(Editor::getCurrentScene())
-                Editor::getCurrentScene()->getShowcase()->ZSort(m_currCamera);
-        }
-
         // Update keyboard
         updateKeyboard();
 
@@ -426,17 +393,13 @@ namespace ige::creator
             SceneManager::getInstance()->update(dt);
         }
 
+        // Pre render
+        SceneManager::getInstance()->preRender(m_currCamera);
+
         // Render scene
         auto renderContext = RenderContext::InstancePtr();
         if (renderContext && m_fbo) {
-            SceneManager::getInstance()->preRender(m_currCamera);
-
             renderContext->BeginScene(m_fbo, Vec4(0.2f, 0.2f, 0.2f, 1.f), true, true);
-
-            // Render camera
-            if (m_currCamera) {
-                m_currCamera->Render();
-            }
 
             // Render bounding box
             renderBoundingBoxes();

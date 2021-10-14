@@ -79,9 +79,6 @@ protected:
 
     void updateViewTool(int TouchID);
 
-    //! reset showcase
-    void resetShowcase();
-
     //! camera Look
     void lookAtObject(SceneObject* object);
     void handleCameraOrbit(const Vec2& offset);
@@ -114,9 +111,6 @@ protected:
     Camera* m_2dCamera = nullptr;
     Camera* m_3dCamera = nullptr;
     Camera* m_currCamera = nullptr;
-
-    //! Showcase
-    Showcase* m_currShowcase = nullptr;
 
     //! Gizmo
     std::shared_ptr<Gizmo> m_gizmo = nullptr;
