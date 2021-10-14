@@ -126,6 +126,9 @@ namespace ige::creator
 
     void GameScene::update(float dt)
     {
+        if (!Editor::getCurrentScene())
+            return;
+
         // Ensure initialization
         initialize();
 
@@ -182,6 +185,8 @@ namespace ige::creator
         if (!Editor::getCurrentScene() || Editor::getCurrentScene()->isPrefab())
             return;
 
+        SceneManager::getInstance()->setIsEditor(false);
+
         if (!m_bIsPlaying)
         {
             if (Editor::getCanvas()->getConsole()->isAutoClearOnStart())
@@ -214,6 +219,8 @@ namespace ige::creator
         if (m_bIsPlaying)
         {
             clear();
+
+            SceneManager::getInstance()->setIsEditor(true);
 
             if (Editor::getCurrentScene())
             {
