@@ -75,6 +75,9 @@ namespace ige::scene
         //! Get all targets
         std::vector<std::weak_ptr<SceneObject>>& getAllTargets();
 
+        //! Find an object within all targets
+        std::shared_ptr<SceneObject> findObject(uint64_t id);
+
         //! override
         virtual bool isPrefab() const override {
             return !empty() && !m_objects[0].expired() && m_objects[0].lock()->isPrefab();

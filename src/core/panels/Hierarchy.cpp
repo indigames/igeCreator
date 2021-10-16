@@ -143,33 +143,43 @@ namespace ige::creator
             }
         });
 
-        node->addPlugin<DDTargetPlugin<uint64_t>>(EDragDropID::OBJECT)->getOnDataReceivedEvent().addListener([objId](auto txt) {
+        node->addPlugin<DDTargetPlugin<uint64_t>>(EDragDropID::OBJECT)->getOnDataReceivedEvent().addListener([objId](auto id) {
+            if (Editor::getInstance()->getTarget() == nullptr) return;
+            bool dragObjFromTarget = Editor::getInstance()->getTarget()->findObject(id) != nullptr;
             auto parent = Editor::getCurrentScene()->findObjectById(objId);
-            auto object = Editor::getCurrentScene()->findObjectById(txt);
             bool isPrefabScene = parent->getScene()->getObjects().size() > 0 && parent->getScene()->getObjects()[0]->isPrefab();
             if (!parent->isInPrefab() || isPrefabScene)
             {
-                auto loop = false;
-                for (auto& target : Editor::getInstance()->getTarget()->getAllTargets())
-                {
-                    if (!target.expired()
-                        && parent->isRelative(target.lock()->getId()))
-                    {
-                        loop = true; break;
-                    }
-                }
-                if (!loop)
-                {
-                    std::vector<std::shared_ptr<SceneObject>> movingObjects = {};
+                if (dragObjFromTarget) {
+                    auto loop = false;
                     for (auto& target : Editor::getInstance()->getTarget()->getAllTargets())
                     {
-                        if (!target.expired() && (!target.lock()->getParent() || target.lock()->getParent()->isSelected() == false))
-                            movingObjects.push_back(target.lock());
+                        if (!target.expired()
+                            && parent->isRelative(target.lock()->getId()))
+                        {
+                            loop = true; break;
+                        }
                     }
-                    for (auto& target : movingObjects)
+                    if (!loop)
                     {
-                        if(target->isPrefab() || !target->isInPrefab() || isPrefabScene)
-                            target->setParent(parent);
+                        std::vector<std::shared_ptr<SceneObject>> movingObjects = {};
+                        for (auto& target : Editor::getInstance()->getTarget()->getAllTargets())
+                        {
+                            if (!target.expired() && (!target.lock()->getParent() || target.lock()->getParent()->isSelected() == false))
+                                movingObjects.push_back(target.lock());
+                        }
+                        for (auto& target : movingObjects)
+                        {
+                            if (target->isPrefab() || !target->isInPrefab() || isPrefabScene)
+                                target->setParent(parent);
+                        }
+                    }
+                }
+                else {
+                    auto object = Editor::getCurrentScene()->findObjectById(id);
+                    if(!parent->isRelative(id)) {
+                        if (object->isPrefab() || !object->isInPrefab() || isPrefabScene)
+                            object->setParent(parent);
                     }
                 }
             }            

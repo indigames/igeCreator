@@ -283,4 +283,13 @@ namespace ige::scene
         return m_objects;
     }
 
+    //! Find object by id among all targets
+    std::shared_ptr<SceneObject> TargetObject::findObject(uint64_t id)
+    {
+        auto itr = std::find_if(m_objects.begin(), m_objects.end(), [&](const auto& elem) {
+            return !elem.expired() && elem.lock()->getId() == id;
+        });
+        return (itr != m_objects.end()) ? (*itr).lock() : nullptr;
+    }
+
 } // namespace ige::scene
