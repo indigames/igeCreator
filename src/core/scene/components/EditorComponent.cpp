@@ -25,6 +25,7 @@ void EditorComponent::draw(std::shared_ptr<Group> group) {
 		if (comp == nullptr) return;
 		m_group->createWidget<CheckBox>("Enable", getComponent<CompoundComponent>()->getProperty("enabled", true))->getOnDataChangedEvent().addListener([this](bool val) {
 			getComponent<CompoundComponent>()->setProperty("enabled", val);
+			setDirty();
 		});		
 		onInspectorUpdate();
 	}

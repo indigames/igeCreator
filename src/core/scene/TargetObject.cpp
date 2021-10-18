@@ -53,26 +53,24 @@ namespace ige::scene
     //! Add a component
     void TargetObject::addComponent(const std::shared_ptr<Component> &component) 
     {
-        if (m_objects.size() <= 0)
+        if (m_objects.size() <= 0 || component == nullptr)
             return;
-        auto found = std::find_if(m_components.begin(), m_components.end(), [&component](auto element) {
-            return component->getName().compare(element->getName()) == 0;
+        auto compName = component->getName();
+        auto found = std::find_if(m_components.begin(), m_components.end(), [compName](auto element) {
+            return compName.compare(element->getName()) == 0;
         });
+
         if (found == m_components.end())
         {
+            json jComp;
+            component->to_json(jComp);
+
             auto compoundComp = std::make_shared<CompoundComponent>(*this);
-            compoundComp->add(component);
-            if (!m_objects[0].expired()) m_objects[0].lock()->addComponent(component);
-            if (m_objects.size() > 1) {
-                json jComp;
-                component->to_json(jComp);
-                for (int i = 1; i < m_objects.size(); ++i) {
-                    auto obj = m_objects[i];
-                    if (!obj.expired()) {
-                        auto comp = obj.lock()->createComponent(component->getName());
-                        comp->from_json(jComp);
-                        compoundComp->add(comp);
-                    }
+            for (int i = 0; i < m_objects.size(); ++i) {
+                if (!m_objects[i].expired()) {
+                    auto comp = m_objects[i].lock()->createComponent(compName);
+                    comp->from_json(jComp);
+                    compoundComp->add(comp);
                 }
             }
             compoundComp->setDirty();

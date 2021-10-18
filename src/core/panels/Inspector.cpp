@@ -240,7 +240,7 @@ namespace ige::creator
                     m_targetObject->addComponent<TextBitmapComponent>("Text");
                     break;
                 case (int)Component::Type::BoneTransform:
-                    m_targetObject->addComponent<BoneTransform>()->initialize();
+                    m_targetObject->addComponent<BoneTransform>();
                     break;
                 case (int)Component::Type::UIImage:
                     m_targetObject->addComponent<UIImage>();
@@ -297,13 +297,13 @@ namespace ige::creator
                     m_targetObject->addComponent<Navigable>();
                     break;
                 case (int)Component::Type::NavMesh:
-                    m_targetObject->addComponent<NavMesh>()->build();
+                    m_targetObject->addComponent<NavMesh>();
                     break;
                 case (int)Component::Type::NavAgent:
                     m_targetObject->addComponent<NavAgent>();
                     break;
                 case (int)Component::Type::DynamicNavMesh:
-                    m_targetObject->addComponent<DynamicNavMesh>()->build();
+                    m_targetObject->addComponent<DynamicNavMesh>();
                     break;
                 case (int)Component::Type::NavObstacle:
                     m_targetObject->addComponent<NavObstacle>();
