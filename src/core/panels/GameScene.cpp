@@ -201,7 +201,7 @@ namespace ige::creator
                 Editor::getInstance()->loadScene(path);
             }
             m_bIsPlaying = true;
-
+            SceneManager::getInstance()->setIsPlaying(m_bIsPlaying);
             SceneManager::getInstance()->dispathEvent((int)EventType::RunEditor);
         }
         
@@ -233,7 +233,7 @@ namespace ige::creator
             }
             m_bIsPausing = false;
             m_bIsPlaying = false;
-
+            SceneManager::getInstance()->setIsPlaying(m_bIsPlaying);
             SceneManager::getInstance()->dispathEvent((int)EventType::StopEditor);
         }
         Editor::getCanvas()->getEditorScene()->setFocus();
