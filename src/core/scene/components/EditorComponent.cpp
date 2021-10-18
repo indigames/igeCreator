@@ -23,10 +23,12 @@ void EditorComponent::draw(std::shared_ptr<Group> group) {
 	if (m_group != nullptr) {
 		auto comp = getComponent<CompoundComponent>();
 		if (comp == nullptr) return;
-		m_group->createWidget<CheckBox>("Enable", getComponent<CompoundComponent>()->getProperty("enabled", true))->getOnDataChangedEvent().addListener([this](bool val) {
-			getComponent<CompoundComponent>()->setProperty("enabled", val);
-			setDirty();
-		});		
+		if (comp->getName() != "Transform" && comp->getName() != "RectTransform") {
+			m_group->createWidget<CheckBox>("Enable", getComponent<CompoundComponent>()->getProperty("enabled", true))->getOnDataChangedEvent().addListener([this](bool val) {
+				getComponent<CompoundComponent>()->setProperty("enabled", val);
+				setDirty();
+			});
+		}
 		onInspectorUpdate();
 	}
 }
