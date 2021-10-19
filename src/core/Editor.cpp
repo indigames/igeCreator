@@ -21,6 +21,8 @@
 #include <scene/Scene.h>
 using namespace ige::scene;
 
+#define LAYOUT_CONFIG_INI "imgui.ini"
+
 namespace ige::creator
 {
     ige::scene::Event<const std::shared_ptr<SceneObject>&> Editor::m_targetAddedEvent;
@@ -32,6 +34,9 @@ namespace ige::creator
 
     Editor::~Editor()
     {
+        auto retPath = (fs::path(m_enginePath).append(LAYOUT_CONFIG_INI)).string();
+        ImGui::SaveIniSettingsToDisk(retPath.c_str());
+
         m_target = nullptr;
         m_canvas = nullptr;
         m_selectedJsons.clear();
@@ -43,7 +48,7 @@ namespace ige::creator
 
         PoolManager::destroyInstance();
         SceneManager::destroy();
-        m_app = nullptr;
+        m_app = nullptr;        
 
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplSDL2_Shutdown();
@@ -135,6 +140,8 @@ namespace ige::creator
 
         ImGui_ImplSDL2_InitForOpenGL((SDL_Window*)m_app->getAppWindow(), m_app->getAppContext());
         ImGui_ImplOpenGL3_Init("#version 130");
+
+        ImGui::LoadIniSettingsFromDisk(GetEnginePath(LAYOUT_CONFIG_INI).c_str());
     }
 
     void Editor::setImGUIStyle()
@@ -149,7 +156,12 @@ namespace ige::creator
 
     void Editor::resetLayout()
     {
-        ImGui::LoadIniSettingsFromDisk(GetEnginePath("layout.ini").c_str());
+        try
+        {
+            fs::copy(GetEnginePath("layout.ini"), LAYOUT_CONFIG_INI, fs::copy_options::overwrite_existing);
+            ImGui::LoadIniSettingsFromDisk(GetEnginePath(LAYOUT_CONFIG_INI).c_str());
+        }
+        catch (std::exception& ex) {}
     }
 
     void Editor::toggleFullScreen()
