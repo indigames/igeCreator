@@ -119,82 +119,84 @@ void FigureEditorComponent::drawFigureComponent()
         if (figureComp)
         {
             auto figure = figureComp->getFigure();
-            if (figure->NumMeshes() > 0)
-            {
-                auto meshGroup = m_figureCompGroup->createWidget<Group>("Mesh", true, false, Group::E_Align::LEFT, false);
-                auto meshColumn = meshGroup->createWidget<Columns<4>>();
-                for (int i = 0; i < figure->NumMeshes(); i++)
+            if (figure != nullptr) {
+                if (figure->NumMeshes() > 0)
                 {
-                    auto mesh = figure->GetMesh(i);
-                    auto txtName = meshColumn->createWidget<TextField>("", figure->GetMeshName(i), true);
-                    txtName->addPlugin<DDSourcePlugin<int>>(EDragDropID::MESH, figure->GetMeshName(i), i);
-                    meshColumn->createWidget<TextField>("V", std::to_string(mesh->numVerticies).c_str(), true);
-                    meshColumn->createWidget<TextField>("I", std::to_string(mesh->numIndices).c_str(), true);
-                    meshColumn->createWidget<CheckBox>("", figureComp->isMeshEnable(i))->getOnDataChangedEvent().addListener([this, i](auto val) {
-                        auto figureComp = std::dynamic_pointer_cast<FigureComponent>(getComponent<CompoundComponent>()->getComponents()[0]);
-                        if (figureComp) {
-                            figureComp->setMeshEnable(i, val);
-                        }
-                    });
-                }
-            }
-
-            if (figure->NumMaterials() > 0)
-            {
-                auto materialGroup = m_figureCompGroup->createWidget<Group>("Material", true, false, Group::E_Align::LEFT, false);
-                for (int i = 0; i < figure->NumMaterials(); i++)
-                {
-                    const char* matName = figure->GetMaterialName(i);
-                    if (matName)
+                    auto meshGroup = m_figureCompGroup->createWidget<Group>("Mesh", true, false, Group::E_Align::LEFT, false);
+                    auto meshColumn = meshGroup->createWidget<Columns<4>>();
+                    for (int i = 0; i < figure->NumMeshes(); i++)
                     {
-                        materialGroup->createWidget<Label>(matName);
-                        int index = figure->GetMaterialIndex(GenerateNameHash(matName));
-                        auto currMat = figure->GetMaterial(i);
+                        auto mesh = figure->GetMesh(i);
+                        auto txtName = meshColumn->createWidget<TextField>("", figure->GetMeshName(i), true);
+                        txtName->addPlugin<DDSourcePlugin<int>>(EDragDropID::MESH, figure->GetMeshName(i), i);
+                        meshColumn->createWidget<TextField>("V", std::to_string(mesh->numVerticies).c_str(), true);
+                        meshColumn->createWidget<TextField>("I", std::to_string(mesh->numIndices).c_str(), true);
+                        meshColumn->createWidget<CheckBox>("", figureComp->isMeshEnable(i))->getOnDataChangedEvent().addListener([this, i](auto val) {
+                            auto figureComp = std::dynamic_pointer_cast<FigureComponent>(getComponent<CompoundComponent>()->getComponents()[0]);
+                            if (figureComp) {
+                                figureComp->setMeshEnable(i, val);
+                            }
+                        });
+                    }
+                }
 
-                        for (auto j = 0; j < currMat->numParams; j++)
+                if (figure->NumMaterials() > 0)
+                {
+                    auto materialGroup = m_figureCompGroup->createWidget<Group>("Material", true, false, Group::E_Align::LEFT, false);
+                    for (int i = 0; i < figure->NumMaterials(); i++)
+                    {
+                        const char* matName = figure->GetMaterialName(i);
+                        if (matName)
                         {
-                            auto info = RenderContext::Instance().GetShaderParameterInfoByHash(currMat->params[j].hash);
-                            if (!info)
-                                continue;
+                            materialGroup->createWidget<Label>(matName);
+                            int index = figure->GetMaterialIndex(GenerateNameHash(matName));
+                            auto currMat = figure->GetMaterial(i);
 
-                            auto infoName = info->name;
-                            if ((currMat->params[j].type == ParamTypeFloat4))
+                            for (auto j = 0; j < currMat->numParams; j++)
                             {
-                                auto color = Vec4(currMat->params[j].fValue[0], currMat->params[j].fValue[1], currMat->params[j].fValue[2], currMat->params[j].fValue[3]);
-                                materialGroup->createWidget<Color>(info->name, color);
-                            }
-                            else if ((currMat->params[j].type == ParamTypeSampler))
-                            {
-                                auto textPath = currMat->params[j].sampler.tex->ResourceName();
-                                /*materialGroup->createWidget<TextField>(info->name, textPath);*/
-                                auto txtPath = materialGroup->createWidget<TextField>(info->name, textPath);
-                                txtPath->setEndOfLine(false);
-                                txtPath->getOnDataChangedEvent().addListener([this](const auto& txt) {
-                                    //getComponent<CompoundComponent>()->setProperty("path", txt);
-                                    });
+                                auto info = RenderContext::Instance().GetShaderParameterInfoByHash(currMat->params[j].hash);
+                                if (!info)
+                                    continue;
 
-                                for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
+                                auto infoName = info->name;
+                                if ((currMat->params[j].type == ParamTypeFloat4))
                                 {
-                                    txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& txt) {
-                                        //getComponent<CompoundComponent>()->setProperty("path", txt);
-                                        setDirty();
-                                        });
+                                    auto color = Vec4(currMat->params[j].fValue[0], currMat->params[j].fValue[1], currMat->params[j].fValue[2], currMat->params[j].fValue[3]);
+                                    materialGroup->createWidget<Color>(info->name, color);
                                 }
+                                else if ((currMat->params[j].type == ParamTypeSampler))
+                                {
+                                    auto textPath = currMat->params[j].sampler.tex->ResourceName();
+                                    /*materialGroup->createWidget<TextField>(info->name, textPath);*/
+                                    auto txtPath = materialGroup->createWidget<TextField>(info->name, textPath);
+                                    txtPath->setEndOfLine(false);
+                                    txtPath->getOnDataChangedEvent().addListener([this](const auto& txt) {
+                                        //getComponent<CompoundComponent>()->setProperty("path", txt);
+                                    });
 
-                                materialGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
-                                    auto files = OpenFileDialog("Import Assets", "", { "Texture (*.pyxi)", "*.pyxi"}).result();
-                                    if (files.size() > 0) {
-                                        //getComponent<CompoundComponent>()->setProperty("path", files[0]);
-                                        setDirty();
+                                    for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
+                                    {
+                                        txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& txt) {
+                                            //getComponent<CompoundComponent>()->setProperty("path", txt);
+                                            setDirty();
+                                        });
                                     }
+
+                                    materialGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
+                                        auto files = OpenFileDialog("Import Assets", "", { "Texture (*.pyxi)", "*.pyxi" }).result();
+                                        if (files.size() > 0) {
+                                            //getComponent<CompoundComponent>()->setProperty("path", files[0]);
+                                            setDirty();
+                                        }
                                     });
-                            }
-                            else if ((currMat->params[j].type == ParamTypeFloat))
-                            {
-                                std::array val = { currMat->params[j].fValue[0] };
-                                materialGroup->createWidget<Drag<float>>(info->name, ImGuiDataType_Float, val)->getOnDataChangedEvent().addListener([this](auto val) {
-                                    //getComponent<CompoundComponent>()->setProperty("color", { val[0], val[1], val[2], val[3] });
+                                }
+                                else if ((currMat->params[j].type == ParamTypeFloat))
+                                {
+                                    std::array val = { currMat->params[j].fValue[0] };
+                                    materialGroup->createWidget<Drag<float>>(info->name, ImGuiDataType_Float, val)->getOnDataChangedEvent().addListener([this](auto val) {
+                                        //getComponent<CompoundComponent>()->setProperty("color", { val[0], val[1], val[2], val[3] });
                                     });
+                                }
                             }
                         }
                     }

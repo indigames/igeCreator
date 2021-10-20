@@ -187,24 +187,21 @@ namespace ige::creator
         if (!Editor::getCurrentScene() || Editor::getCurrentScene()->isPrefab())
             return;
 
-        SceneManager::getInstance()->setIsEditor(false);
-
         if (!m_bIsPlaying)
         {
             if (Editor::getCanvas()->getConsole()->isAutoClearOnStart())
                 Editor::getCanvas()->getConsole()->clearAllLogs();
 
-            if (Editor::getCurrentScene())
-            {
-                auto path = Editor::getCurrentScene()->getName() + ".scene.tmp";
-                SceneManager::getInstance()->saveScene(path);
-                Editor::getInstance()->loadScene(path);
-            }
+            auto path = Editor::getCurrentScene()->getName() + ".scene.tmp";
+            SceneManager::getInstance()->saveScene(path);
+
+            SceneManager::getInstance()->setIsEditor(false);
             m_bIsPlaying = true;
+            Editor::getInstance()->loadScene(path);
+
             SceneManager::getInstance()->setIsPlaying(m_bIsPlaying);
             SceneManager::getInstance()->dispathEvent((int)EventType::RunEditor);
         }
-        
         m_bIsPausing = false;
 
         setFocus();
