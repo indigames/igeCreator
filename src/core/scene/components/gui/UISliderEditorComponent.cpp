@@ -77,11 +77,11 @@ void UISliderEditorComponent::drawUISlider() {
         getComponent<CompoundComponent>()->setProperty("fadeduration", val[0]);
     });
 
-    auto direction = comp->getProperty<int>("directionbar", -1);
+    auto direction = comp->getProperty<int>("direction", -1);
     auto directionCombo = m_uiSliderGroup->createWidget<ComboBox>("Direction", (int)direction);
     directionCombo->getOnDataChangedEvent().addListener([this](auto val) {
         if (val != -1) {
-            getComponent<CompoundComponent>()->setProperty("directionbar", val);
+            getComponent<CompoundComponent>()->setProperty("direction", val);
             setDirty();
         }
     });
