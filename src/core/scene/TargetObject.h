@@ -47,7 +47,7 @@ namespace ige::scene
         void setActive(bool isActive, bool recursive = false) override;
 
         //! Check active
-        bool isActive() const override;
+        bool isActive(bool recursive = false) const override;
 
         //! update
         void onUpdate(float dt) override;

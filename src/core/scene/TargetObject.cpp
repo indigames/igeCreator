@@ -150,11 +150,11 @@ namespace ige::scene
     }
 
     //! Check active
-    bool TargetObject::isActive() const
+    bool TargetObject::isActive(bool recursive) const
     {
         if(m_objects.size() <= 0 || m_objects[0].expired())
             return false;
-        return m_objects[0].lock()->isActive();
+        return m_objects[0].lock()->isActive(recursive);
     }
 
     //! Enable or disable the actor
