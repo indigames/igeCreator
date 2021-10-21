@@ -104,17 +104,12 @@ namespace ige::creator
                     });
                 });
 
-                // Adjust camera aspect ratio
-                if (Editor::getCurrentScene() && Editor::getCurrentScene()->getActiveCamera())
-                {
-                    Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(size.x / size.y);
-                }
-
                 // Initialize window pos and size
                 if (Editor::getCurrentScene())
                 {
                     Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y + 25.f }); // Title bar size
                     Editor::getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
+                    Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(size.x / size.y);
                 }
 
                 m_inputProcessor = std::make_shared<InputProcessor>();
@@ -143,6 +138,7 @@ namespace ige::creator
             if (Editor::getCurrentScene()) {
                 Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y + 25.f });
                 Editor::getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
+                Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(getSize().x / getSize().y);
             }
 
             //! Update Touch & Keyboard, using for UI Object to capture touch before any raycast
