@@ -34,7 +34,7 @@ namespace ige::creator
 
     Editor::~Editor()
     {
-        auto retPath = (fs::path(m_enginePath).append(LAYOUT_CONFIG_INI)).string();
+        auto retPath = (fs::path(m_projectPath).append(LAYOUT_CONFIG_INI)).string();
         ImGui::SaveIniSettingsToDisk(retPath.c_str());
 
         m_target = nullptr;
@@ -59,12 +59,16 @@ namespace ige::creator
     { 
         if (m_projectPath.compare(path) != 0)
         {
+            auto retPath = (fs::path(m_projectPath).append(LAYOUT_CONFIG_INI)).string();
+            ImGui::SaveIniSettingsToDisk(retPath.c_str());
             unloadScene();
             m_projectPath = path;
             fs::current_path(m_projectPath);
             SceneManager::getInstance()->setProjectPath(m_projectPath);
             if (getCanvas() && getCanvas()->getAssetBrowser())
                 getCanvas()->getAssetBrowser()->setDirty();
+            retPath = (fs::path(m_projectPath).append(LAYOUT_CONFIG_INI)).string();
+            ImGui::LoadIniSettingsFromDisk(retPath.c_str());
         }
     }
 
@@ -140,8 +144,6 @@ namespace ige::creator
 
         ImGui_ImplSDL2_InitForOpenGL((SDL_Window*)m_app->getAppWindow(), m_app->getAppContext());
         ImGui_ImplOpenGL3_Init("#version 130");
-
-        ImGui::LoadIniSettingsFromDisk(GetEnginePath(LAYOUT_CONFIG_INI).c_str());
     }
 
     void Editor::setImGUIStyle()
@@ -158,8 +160,9 @@ namespace ige::creator
     {
         try
         {
-            fs::copy(GetEnginePath("layout.ini"), LAYOUT_CONFIG_INI, fs::copy_options::overwrite_existing);
-            ImGui::LoadIniSettingsFromDisk(GetEnginePath(LAYOUT_CONFIG_INI).c_str());
+            auto retPath = (fs::path(m_projectPath).append(LAYOUT_CONFIG_INI)).string();
+            fs::copy(GetEnginePath("layout.ini"), retPath, fs::copy_options::overwrite_existing);
+            ImGui::LoadIniSettingsFromDisk(retPath.c_str());
         }
         catch (std::exception& ex) {}
     }
