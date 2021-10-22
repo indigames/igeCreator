@@ -230,16 +230,14 @@ void TransformEditorComponent::drawWorldTransformComponent() {
 void TransformEditorComponent::onTransformChanged(SceneObject& sceneObject)
 {
     // Just redraw the transform in Inspector
-    TaskManager::getInstance()->addTask([this]() {
-        m_dirtyFlag = 0;
-        auto comp = getComponent<CompoundComponent>();
-        if (comp) {
-            comp->setDirty();
-            if (Editor::getCanvas()->getEditorScene()->getGizmo())
-                Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
-        }
-        setDirty();
-    });
+    m_dirtyFlag = 0;
+    auto comp = getComponent<CompoundComponent>();
+    if (comp) {
+        comp->setDirty();
+        if (Editor::getCanvas()->getEditorScene()->getGizmo())
+            Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
+    }
+    setDirty();
 }
 
 NS_IGE_END

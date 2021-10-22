@@ -111,7 +111,7 @@ namespace ige::creator
     {
         clear();
 
-        if (Editor::getCurrentScene() == nullptr)
+        if (!Editor::getInstance()->getTarget() || Editor::getInstance()->getTarget()->size() == 0)
             return;
 
         m_inspectorEditor = std::make_shared<InspectorEditor>();
@@ -140,7 +140,19 @@ namespace ige::creator
             m_createCompCombo->addChoice((int)Component::Type::SpotLight, "Spot Light");
 
         // Scene Object
-        if (!m_targetObject->isGUIObject())
+        if (Editor::getInstance()->getTarget()->getFirstTarget()->isGUIObject())
+        {
+            m_createCompCombo->addChoice((int)Component::Type::UIImage, "UIImage");
+            m_createCompCombo->addChoice((int)Component::Type::UIText, "UIText");
+            m_createCompCombo->addChoice((int)Component::Type::UITextBitmap, "UITextBitmap");
+            m_createCompCombo->addChoice((int)Component::Type::UITextField, "UITextField");
+            m_createCompCombo->addChoice((int)Component::Type::UIButton, "UIButton");
+            m_createCompCombo->addChoice((int)Component::Type::UIButton, "UISlider");
+            m_createCompCombo->addChoice((int)Component::Type::UIButton, "UIScrollView");
+            m_createCompCombo->addChoice((int)Component::Type::UIButton, "UIScrollBar");
+            m_createCompCombo->addChoice((int)Component::Type::UIButton, "UIMask"); 
+        }
+        else // GUI Object
         {
             m_createCompCombo->addChoice((int)Component::Type::Figure, "Figure");
             m_createCompCombo->addChoice((int)Component::Type::Sprite, "Sprite");
@@ -159,18 +171,20 @@ namespace ige::creator
                 if (m_targetObject->getComponent<FigureComponent>())
                     m_createCompCombo->addChoice((int)Component::Type::PhysicSoftBody, "PhysicSoftBody");
             }
-        }
-        else // GUI Object
-        {
-            m_createCompCombo->addChoice((int)Component::Type::UIImage, "UIImage");
-            m_createCompCombo->addChoice((int)Component::Type::UIText, "UIText");
-            m_createCompCombo->addChoice((int)Component::Type::UITextBitmap, "UITextBitmap");
-            m_createCompCombo->addChoice((int)Component::Type::UITextField, "UITextField");
-            m_createCompCombo->addChoice((int)Component::Type::UIButton, "UIButton");
-            m_createCompCombo->addChoice((int)Component::Type::UIButton, "UISlider");
-            m_createCompCombo->addChoice((int)Component::Type::UIButton, "UIScrollView");
-            m_createCompCombo->addChoice((int)Component::Type::UIButton, "UIScrollBar");
-            m_createCompCombo->addChoice((int)Component::Type::UIButton, "UIMask");
+
+            // Particle
+            m_createCompCombo->addChoice((int)Component::Type::Particle, "Particle");
+
+            // Navigation
+            if (!m_targetObject->getComponent<NavMesh>() && !m_targetObject->getComponent<DynamicNavMesh>())
+            {
+                m_createCompCombo->addChoice((int)Component::Type::NavMesh, "NavMesh");
+                m_createCompCombo->addChoice((int)Component::Type::DynamicNavMesh, "DynamicNavMesh");
+            }
+            m_createCompCombo->addChoice((int)Component::Type::Navigable, "Navigable");
+            m_createCompCombo->addChoice((int)Component::Type::NavAgent, "NavAgent");
+            m_createCompCombo->addChoice((int)Component::Type::NavObstacle, "NavObstacle");
+            m_createCompCombo->addChoice((int)Component::Type::OffMeshLink, "OffMeshLink");
         }
 
         // Audio source
@@ -178,20 +192,6 @@ namespace ige::creator
 
         // Audio listener
         m_createCompCombo->addChoice((int)Component::Type::AudioListener, "Audio Listener");
-
-        // Particle
-        m_createCompCombo->addChoice((int)Component::Type::Particle, "Particle");
-
-        // Navigation
-        if (!m_targetObject->getComponent<NavMesh>() && !m_targetObject->getComponent<DynamicNavMesh>())
-        {
-            m_createCompCombo->addChoice((int)Component::Type::NavMesh, "NavMesh");
-            m_createCompCombo->addChoice((int)Component::Type::DynamicNavMesh, "DynamicNavMesh");
-        }
-        m_createCompCombo->addChoice((int)Component::Type::Navigable, "Navigable");
-        m_createCompCombo->addChoice((int)Component::Type::NavAgent, "NavAgent");
-        m_createCompCombo->addChoice((int)Component::Type::NavObstacle, "NavObstacle");
-        m_createCompCombo->addChoice((int)Component::Type::OffMeshLink, "OffMeshLink");
 
         auto createCompButton = m_headerGroup->createWidget<Button>("Add", ImVec2(64.f, 0.f));
         createCompButton->getOnClickEvent().addListener([this](auto widget) {
