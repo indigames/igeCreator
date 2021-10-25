@@ -30,6 +30,8 @@
 #include "components/gui/UIMask.h"
 #include "components/audio/AudioSource.h"
 #include "components/audio/AudioListener.h"
+#include "components/TextComponent.h"
+#include "components/TextBitmapComponent.h"
 #include "components/particle/Particle.h"
 
 #include <scene/Scene.h>
@@ -532,6 +534,26 @@ namespace ige::creator
                     newObject->addComponent<AudioListener>();
                 });
             });
+        }
+
+        // Text
+        {
+            auto textMenu = createMenu->createWidget<Menu>("Text");
+            textMenu->createWidget<MenuItem>("Text")->getOnClickEvent().addListener([](auto widget) {
+                TaskManager::getInstance()->addTask([&]() {
+                    auto target = Editor::getInstance()->getFirstTarget();
+                    auto newObject = Editor::getCurrentScene()->createObject("Text", target);
+                    newObject->addComponent<TextComponent>();
+                    });
+                });
+
+            textMenu->createWidget<MenuItem>("Text Bitmap")->getOnClickEvent().addListener([](auto widget) {
+                TaskManager::getInstance()->addTask([&]() {
+                    auto target = Editor::getInstance()->getFirstTarget();
+                    auto newObject = Editor::getCurrentScene()->createObject("TextBitmap", target);
+                    newObject->addComponent<TextBitmapComponent>();
+                    });
+                });
         }
 
         // Effects
