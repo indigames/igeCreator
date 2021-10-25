@@ -139,7 +139,7 @@ namespace ige::creator
         if (m_targetObject->getScene()->isSpotLightAvailable())
             m_createCompCombo->addChoice((int)Component::Type::SpotLight, "Spot Light");
 
-        // Scene Object
+        // GUI Object
         if (Editor::getInstance()->getTarget()->getFirstTarget()->isGUIObject())
         {
             m_createCompCombo->addChoice((int)Component::Type::UIImage, "UIImage");
@@ -152,7 +152,7 @@ namespace ige::creator
             m_createCompCombo->addChoice((int)Component::Type::UIButton, "UIScrollBar");
             m_createCompCombo->addChoice((int)Component::Type::UIButton, "UIMask"); 
         }
-        else // GUI Object
+        else // Scene Object
         {
             m_createCompCombo->addChoice((int)Component::Type::Figure, "Figure");
             m_createCompCombo->addChoice((int)Component::Type::Sprite, "Sprite");
