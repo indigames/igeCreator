@@ -31,7 +31,7 @@ const auto AllFileExts =  {
 inline std::vector<std::string> GetFileExtensionSuported(E_FileExts fileExt) {
     switch (fileExt) {
     case E_FileExts::Hidden:
-        return { ".pyxf", ".pyxi", ".git",".gitignore", ".pyc", ".pyxd", ".meta", ".igeproj", ".ini", ".INI", ".tmp", ".TMP", "__pycache__", "config", "release"};
+        return { ".pyxf", ".pyxi", ".git",".gitignore", ".pyc", ".pyxd", ".meta", ".igeproj", ".ini", ".INI", ".tmp", ".TMP", ".log", ".LOG", "__pycache__", "config", "release"};
         break;
     case E_FileExts::Sprite:
         return {".png",".PNG", ".tga",".TGA", ".jpg",".JPG", ".jpeg",".JPEG", ".bmp", ".BMP"};

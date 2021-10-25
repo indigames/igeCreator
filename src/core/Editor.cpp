@@ -284,6 +284,9 @@ namespace ige::creator
 
     bool Editor::openProjectInternal(const std::string& path)
     {
+        // Stop previous logging process if any
+        pyxie_logg_stop();
+
         auto prjPath = fs::path(path);
         auto prjName = prjPath.stem().string();
         auto prjFile = prjPath.append(prjName + ".igeproj");
@@ -292,6 +295,11 @@ namespace ige::creator
         if (fs::exists(prjFile))
         {
             setProjectPath(path);
+
+            // Start new logging process
+            auto logFilePath = fs::path(path).append("error.log");
+            if (fs::exists(logFilePath)) fs::remove(logFilePath);
+            pyxie_logg_start();
 
             std::ifstream file(prjFile.string());
             if (file.is_open())

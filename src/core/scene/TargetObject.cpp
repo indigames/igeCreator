@@ -190,18 +190,19 @@ namespace ige::scene
                 auto shoudAdd = true;
                 for (int i = 1; i < m_objects.size(); ++i)
                 {
+                    if (m_objects[i].expired()) {
+                        shoudAdd = false;
+                        break;
+                    }
                     auto type = comp->getType();
                     const auto& components = m_objects[i].lock()->getComponents();
                     const auto& itr = std::find_if(components.begin(), components.end(), [&type](auto elem) {
                         return elem->getType() == type;
                     });
-
-                    if (itr != components.end())
-                    {
+                    if (itr != components.end()) {
                         compoundComp->add(*itr);
                     }
-                    else
-                    {
+                    else {
                         shoudAdd = false;
                         break;
                     }
