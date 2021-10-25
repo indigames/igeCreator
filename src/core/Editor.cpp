@@ -755,9 +755,9 @@ namespace ige::creator
     void Editor::removeTarget(std::shared_ptr<SceneObject> target)
     {
         if (m_target)
-        {
-            getTargetRemovedEvent().invoke(target);
+        {            
             m_target->remove(target);
+            getTargetRemovedEvent().invoke(target);
         }
     }
 
