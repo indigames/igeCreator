@@ -158,8 +158,6 @@ file(GLOB_RECURSE SRC_FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/pfd/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/ImGuizmo/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/ImGuizmo/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui/*.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui/*.cpp"
 )
 
 set (EXCLUDE_DIR
@@ -179,8 +177,12 @@ foreach (TMP_PATH ${SRC_FILES})
 endforeach(TMP_PATH)
 
 set(SRC_FILES ${SRC_FILES}
-    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui/examples/imgui_impl_opengl3.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui/examples/imgui_impl_sdl.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui/imgui.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui/imgui_draw.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui/imgui_tables.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui/imgui_widgets.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui/backends/imgui_impl_opengl3.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui/backends/imgui_impl_sdl.cpp"
 )
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SRC_FILES})

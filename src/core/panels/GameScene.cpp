@@ -68,48 +68,30 @@ namespace ige::creator
     void GameScene::initialize()
     {
         if (!m_bInitialized) {
-            auto size = getSize();
-            if (size.x > 0 && size.y > 0)
+            m_windowSize = Editor::getCurrentScene()->getCanvas() ? Editor::getCurrentScene()->getCanvas()->getTargetCanvasSize() : Vec2(getSize().x, getSize().y);
+            if (m_windowSize.X() > 0 && m_windowSize.Y() > 0)
             {
-                m_rtTexture = ResourceCreator::Instance().NewTexture("GameScene_RTTexture", nullptr, size.x, size.y, GL_RGBA);
+                m_rtTexture = ResourceCreator::Instance().NewTexture("GameScene_RTTexture", nullptr, m_windowSize.X() * 2.f, m_windowSize.Y() * 2.f, GL_RGBA); // 2x size, improve quality
                 m_rtTexture->WaitInitialize();
                 m_fbo = ResourceCreator::Instance().NewRenderTarget(m_rtTexture, true, true);
                 m_fbo->WaitInitialize();
-                m_imageWidget = createWidget<Image>(m_fbo->GetColorTexture()->GetTextureHandle(), size);
+
+                m_imageWidget = createWidget<Image>(m_fbo->GetColorTexture()->GetTextureHandle(), ImVec2(m_windowSize.X(), m_windowSize.Y()), true);
 
                 // Position changed event
                 getOnPositionChangedEvent().addListener([this](auto pos) {
                     TaskManager::getInstance()->addTask([this]() {
                         if (Editor::getCurrentScene())
-                            Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y + 25.f }); // Title bar size
-                    });
-                });
-
-                // Size changed event
-                getOnSizeChangedEvent().addListener([this](auto size) {
-                    TaskManager::getInstance()->addTask([this]() {
-                        if (!m_bInitialized) return;
-
-                        auto size = getSize();
-                        m_fbo->Resize(size.x, size.y);
-                        m_imageWidget->setSize(size);
-
-                        // Adjust camera aspect ratio
-                        if (Editor::getCurrentScene() 
-                            && Editor::getCurrentScene()->getActiveCamera())
-                            Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(size.x / size.y);
-
-                        if (Editor::getCurrentScene())
-                            Editor::getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
+                            Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y });
                     });
                 });
 
                 // Initialize window pos and size
                 if (Editor::getCurrentScene())
                 {
-                    Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y + 25.f }); // Title bar size
-                    Editor::getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
-                    Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(size.x / size.y);
+                    Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y }); // Title bar size
+                    Editor::getCurrentScene()->setWindowSize(m_windowSize);
+                    Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(m_windowSize.X() / m_windowSize.Y());
                 }
 
                 m_inputProcessor = std::make_shared<InputProcessor>();
@@ -136,9 +118,9 @@ namespace ige::creator
         if (isPlaying() && !isPausing()) {
             // Update windows pos and size
             if (Editor::getCurrentScene()) {
-                Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y + 25.f });
-                Editor::getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
-                Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(getSize().x / getSize().y);
+                Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y });
+                Editor::getCurrentScene()->setWindowSize(m_windowSize);
+                Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(m_windowSize.X() / m_windowSize.Y());
             }
 
             //! Update Touch & Keyboard, using for UI Object to capture touch before any raycast
@@ -197,6 +179,8 @@ namespace ige::creator
 
             SceneManager::getInstance()->setIsPlaying(m_bIsPlaying);
             SceneManager::getInstance()->dispathEvent((int)EventType::RunEditor);
+
+            clear();
         }
         m_bIsPausing = false;
 
@@ -238,31 +222,29 @@ namespace ige::creator
 
     void GameScene::updateTouch()
     {
-        auto touch = Editor::getApp()->getInputHandler()->getTouchDevice();
-        auto isFocus = isFocused();
-        auto isHover = isHovered();
-        if (!isFocus || !isHover) return;
+        if (!isHovered()) return;
 
+        auto wSize = Vec2(getSize().x, getSize().y);
+        auto delta = (wSize - m_windowSize) * 0.5f;
+
+        auto touch = Editor::getApp()->getInputHandler()->getTouchDevice();
         if (touch->isFingerPressed(0))
         {
             float touchX, touchY;
             touch->getFingerPosition(0, touchX, touchY);
-            m_inputProcessor->touchDown(0, touchX, touchY);
+            m_inputProcessor->touchDown(0, touchX - delta.X(), touchY + delta.Y());
         }
-
         if (touch->isFingerMoved(0)) 
         {
             float touchX, touchY;
             touch->getFingerPosition(0, touchX, touchY);
-            m_inputProcessor->touchMove(0, touchX, touchY);
+            m_inputProcessor->touchMove(0, touchX - delta.X(), touchY + delta.Y());
         }
-
         if (touch->isFingerReleased(0))
         {
             float touchX, touchY;
             touch->getFingerPosition(0, touchX, touchY);
-            m_inputProcessor->touchUp(0, touchX, touchY);
-            
+            m_inputProcessor->touchUp(0, touchX - delta.X(), touchY + delta.Y());
         }
     }
 }

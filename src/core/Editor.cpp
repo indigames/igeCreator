@@ -1,7 +1,7 @@
 #include <imgui.h>
 
-#include <examples/imgui_impl_sdl.h>
-#include <examples/imgui_impl_opengl3.h>
+#include <backends/imgui_impl_sdl.h>
+#include <backends/imgui_impl_opengl3.h>
 
 #include "core/Version.h"
 #include "core/Editor.h"

@@ -50,5 +50,6 @@ namespace ige::creator
         //! Cached states
         bool m_bIsPlaying = false;
         bool m_bIsPausing = false;
+        Vec2 m_windowSize = {};
     };
 }

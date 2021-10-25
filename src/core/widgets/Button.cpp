@@ -34,7 +34,7 @@ namespace ige::creator
         {
             getOnClickEvent().invoke(this);
         }
-        else if (m_label != "" && ImGui::ButtonEx((m_label + getIdAString()).c_str(), m_size, !m_bEnabled ? ImGuiButtonFlags_Disabled : 0))
+        else if (m_label != "" && ImGui::ButtonEx((m_label + getIdAString()).c_str(), m_size, !m_bEnabled ? ImGuiItemFlags_Disabled : 0))
         {
             getOnClickEvent().invoke(this);
         }
