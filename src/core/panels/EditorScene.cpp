@@ -635,7 +635,7 @@ namespace ige::creator
             if (canvas)
             {
                 const auto& designSize = canvas->getCanvasSize();
-                auto position = transform->getPosition();
+                auto position = transform->getLocalPosition();
                 Vec2 halfSize = designSize * 0.5f;
                 ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 1.f });
                 ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 1.f });
@@ -651,7 +651,7 @@ namespace ige::creator
                     const auto& designSize = canvasParent->getCanvasSize();
                     auto canvasTransform = canvasParent->getOwner()->getTransform();
                     if (canvasTransform) {
-                        auto& position = canvasTransform->getPosition();
+                        auto& position = canvasTransform->getLocalPosition();
                         Vec2 halfSize = designSize * 0.5f;
                         ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 1.f });
                         ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 1.f });
@@ -701,8 +701,8 @@ namespace ige::creator
             return;
 
         auto transform = target->getTransform();
-        auto cameraPos = transform->getWorldPosition();
-        auto cameraRotation = transform->getWorldRotation();
+        auto cameraPos = transform->getPosition();
+        auto cameraRotation = transform->getRotation();
         auto cameraForward = transform->getWorldForward().Negative();
 
         Mat4 proj;
@@ -803,7 +803,7 @@ namespace ige::creator
     void EditorScene::lookAtObject(SceneObject* object) {
         if (Editor::getInstance()->is3DCamera()) {
             if (m_cameraMoving) return;
-            auto targetPos = object->getTransform()->getWorldPosition();
+            auto targetPos = object->getTransform()->getPosition();
             m_viewSize = k_defaultViewSize; //Reset ViewSize
 
             auto aabb = getRenderableAABBox(object);
@@ -837,7 +837,7 @@ namespace ige::creator
                     m_currentCanvasHeight = viewSize < 0 ? 0.001f : viewSize;
                     m_currCamera->SetOrthoHeight(m_currentCanvasHeight * 0.5f);
                     auto cameraPosition = m_currCamera->GetPosition();
-                    auto pos = object->getTransform()->getWorldPosition();
+                    auto pos = object->getTransform()->getPosition();
                     //cameraPosition.X(pos.X());
                     //cameraPosition.Y(pos.Y());
                     //m_currCamera->SetPosition(cameraPosition);

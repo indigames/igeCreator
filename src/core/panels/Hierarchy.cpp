@@ -479,8 +479,8 @@ namespace ige::creator
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObject = Editor::getCurrentScene()->createObject("Directional Light", target);
                     newObject->addComponent<DirectionalLight>();
-                    newObject->getTransform()->setPosition({ 0.f, 5.f, 0.f });
-                    newObject->getTransform()->setRotation({ DEGREES_TO_RADIANS(90.f), 0.f, .0f });
+                    newObject->getTransform()->setLocalPosition({ 0.f, 5.f, 0.f });
+                    newObject->getTransform()->setLocalRotation({ DEGREES_TO_RADIANS(90.f), 0.f, .0f });
                     newObject->addComponent<SpriteComponent>(GetEnginePath("sprites/direct-light"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
                 });
             });

@@ -189,9 +189,9 @@ namespace ige::creator
             {
                 auto targetObj = target.lock();
                 auto transform = targetObj->getTransform();
-                m_position += transform->getWorldPosition();
-                m_initScales[targetObj->getId()] = transform->getWorldScale();
-                m_initPositions[targetObj->getId()] = transform->getWorldPosition();
+                m_position += transform->getPosition();
+                m_initScales[targetObj->getId()] = transform->getScale();
+                m_initPositions[targetObj->getId()] = transform->getPosition();
             }
         }
         m_position /= m_targets.size();
@@ -202,7 +202,7 @@ namespace ige::creator
             if (!target.expired())
             {
                 auto transform = target.lock()->getTransform();
-                m_rotation = transform->getWorldRotation();
+                m_rotation = transform->getRotation();
             }
         }
     }
@@ -278,7 +278,7 @@ namespace ige::creator
     void Gizmo::translate(const Vec3& trans)
     {
         for (auto& target : m_targets)
-            if (!target.expired()) target.lock()->getTransform()->worldTranslate(trans);
+            if (!target.expired()) target.lock()->getTransform()->translate(trans);
         updateTargetNode();
     }
 
@@ -286,7 +286,7 @@ namespace ige::creator
     void Gizmo::rotate(const Quat& rot)
     {
         for (auto& target : m_targets)
-            if (!target.expired()) target.lock()->getTransform()->worldRotate(rot);
+            if (!target.expired()) target.lock()->getTransform()->rotate(rot);
     }
 
     float Quat_Norm(const Quat& rotation)
@@ -327,14 +327,14 @@ namespace ige::creator
             {
                 auto target = targetObj.lock();
                 auto transform = target->getTransform();
-                transform->setWorldScale(Vec3_Mul(scale, m_initScales[target->getId()]));
+                transform->setScale(Vec3_Mul(scale, m_initScales[target->getId()]));
 
                 if (m_targets.size() > 1)
                 {
                     auto deltaPos = m_initPositions[target->getId()] - m_position;
                     deltaPos = Quat_Inverse(m_rotation) * Vec3_Mul(scale - Vec3(1.f, 1.f, 1.f), deltaPos);
                     auto newPosition = m_initPositions[target->getId()] + deltaPos;
-                    transform->setWorldPosition(newPosition);
+                    transform->setPosition(newPosition);
                 }
             }
         }

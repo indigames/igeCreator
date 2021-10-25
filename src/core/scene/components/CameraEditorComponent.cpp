@@ -79,7 +79,7 @@ void CameraEditorComponent::drawCameraComponent() {
         comp->setProperty("lock", val);
         if (val) {
             auto transform = comp->getOwner()->getTransform();
-            comp->setProperty("target", transform->getPosition() + Vec3(0.f, 0.f, -1.f));
+            comp->setProperty("target", transform->getLocalPosition() + Vec3(0.f, 0.f, -1.f));
         } else {
             comp->setProperty("pan", 0.f);
             comp->setProperty("tilt", 0.f);
