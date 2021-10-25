@@ -140,6 +140,59 @@ void ScriptEditorComponent::drawScriptComponent() {
             }
             break;
 
+            case json::value_t::array:
+            {
+                if (value.size() == 2) {
+                    try {
+                        Vec2 vec;
+                        value.get_to<Vec2>(vec);
+                        std::array vecArr = { vec.X(), vec.Y() };
+                        m_scriptCompGroup->createWidget<Drag<float, 2>>(key, ImGuiDataType_Float, vecArr)->getOnDataChangedEvent().addListener([key, this](auto& val) {
+                            auto comp = getComponent<CompoundComponent>();
+                            auto members = comp->getProperty<json>("members", json::array());
+                            if (members.contains(key)) {
+                                members[key] = Vec2(val[0], val[1]);
+                                comp->setProperty("members", members);
+                            }
+                        });
+                    }
+                    catch (std::exception ex) {}
+                }
+                else if (value.size() == 3) {
+                    try {
+                        Vec3 vec;
+                        value.get_to<Vec3>(vec);
+                        std::array vecArr = { vec.X(), vec.Y(), vec.Z() };
+                        m_scriptCompGroup->createWidget<Drag<float, 3>>(key, ImGuiDataType_Float, vecArr)->getOnDataChangedEvent().addListener([key, this](auto& val) {
+                            auto comp = getComponent<CompoundComponent>();
+                            auto members = comp->getProperty<json>("members", json::array());
+                            if (members.contains(key)) {
+                                members[key] = Vec3(val[0], val[1], val[2]);
+                                comp->setProperty("members", members);
+                            }
+                        });
+                    }
+                    catch (std::exception ex) {}
+                }
+                else if (value.size() > 3) {
+                    try {
+                        Vec4 vec;
+                        value.get_to<Vec4>(vec);
+                        std::array vecArr = { vec.X(), vec.Y(), vec.Z(), vec.W() };
+                        m_scriptCompGroup->createWidget<Drag<float, 4>>(key, ImGuiDataType_Float, vecArr)->getOnDataChangedEvent().addListener([key, this](auto& val) {
+                            auto comp = getComponent<CompoundComponent>();
+                            auto members = comp->getProperty<json>("members", json::array());
+                            if (members.contains(key)) {
+                                members[key] = Vec4(val[0], val[1], val[2], val[3]);
+                                comp->setProperty("members", members);
+                            }
+                        });
+                    }
+                    catch (std::exception ex) {}
+                }
+            }
+            break;
+
             case json::value_t::string:
             case json::value_t::object:
             case json::value_t::null:
