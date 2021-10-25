@@ -26,13 +26,13 @@ def convertAssets(sourceDir, destDir, platform, unit=1.0, rootDir=None):
 
     imageList = devtool.findImageFiles(sourceDir)
     allTextures = dict()
-    for img in imageList:        
+    for img in imageList:
         outFile = devtool.replaceExt(img, '.pyxi');
         if not path.exists(outFile) and img not in allTextures:
             allTextures[img] = {'path': devtool.removeRoot(img, sourceDir), 'normal': False, 'wrap': False}
     if len(allTextures) > 0:
         devtool.convertImages(allTextures, sourceDir, destDir, platform)
 
-convertAssets('.','.', igeCore.TARGET_PLATFORM_MOBILE)
+convertAssets('.', '.', igeCore.TARGET_PLATFORM_MOBILE)
 
 input("Convert successed, press Enter to continue...")
