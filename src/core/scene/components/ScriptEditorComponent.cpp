@@ -78,7 +78,7 @@ void ScriptEditorComponent::drawScriptComponent() {
     }
 
     auto path = comp->getProperty<std::string>("path", "");
-    if (path.length() > 0)
+    if (!SceneManager::getInstance()->isPlaying() &&  path.length() > 0)
     {
         m_watchId = fs::watcher::watch(fs::path(path), false, false, std::chrono::milliseconds(1000), [this](const auto&, bool) {
             auto comp = getComponent<CompoundComponent>();

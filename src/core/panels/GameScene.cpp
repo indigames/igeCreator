@@ -23,6 +23,9 @@ using namespace pyxie;
 
 namespace ige::creator
 {
+    extern void startWatcherThread();
+    extern void stopWatcherThread();
+
     GameScene::GameScene(const std::string& name, const Panel::Settings& settings)
         : Panel(name, settings)
     {}
@@ -167,6 +170,8 @@ namespace ige::creator
 
         if (!m_bIsPlaying)
         {
+            stopWatcherThread();
+
             if (Editor::getCanvas()->getConsole()->isAutoClearOnStart())
                 Editor::getCanvas()->getConsole()->clearAllLogs();
 
@@ -212,6 +217,8 @@ namespace ige::creator
             m_bIsPlaying = false;
             SceneManager::getInstance()->setIsPlaying(m_bIsPlaying);
             SceneManager::getInstance()->dispathEvent((int)EventType::StopEditor);
+
+            startWatcherThread();
         }
         Editor::getCanvas()->getEditorScene()->setFocus();
     }
