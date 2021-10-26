@@ -105,8 +105,8 @@ namespace ige::creator
                         m_imageWidget->setSize(size);
 
                         // Update camera aspect rate
-                        if (m_currCamera)
-                            m_currCamera->SetAspectRate(size.x / size.y);
+                        m_2dCamera->SetAspectRate(size.x / size.y);
+                        m_3dCamera->SetAspectRate(size.x / size.y);
                     });
                 });
 
@@ -120,14 +120,14 @@ namespace ige::creator
                 m_2dCamera = ResourceCreator::Instance().NewCamera("editor_2d_camera", nullptr);
                 m_2dCamera->SetPosition({ 0.f, 0.f, 10.f });
                 m_2dCamera->LockonTarget(false);
-                m_2dCamera->SetAspectRate(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
+                m_2dCamera->SetAspectRate(size.x / size.y);
                 m_2dCamera->SetOrthographicProjection(true);
                 m_2dCamera->SetWidthBase(false);
 
                 m_3dCamera = ResourceCreator::Instance().NewCamera("editor_3d_camera", nullptr);
                 m_3dCamera->SetPosition({ 0.f, 3.f, 10.f });
                 m_3dCamera->LockonTarget(false);
-                m_3dCamera->SetAspectRate(SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH());
+                m_3dCamera->SetAspectRate(size.x / size.y);
                 m_3dCamera->SetNearPlane(1.f);
                 m_3dCamera->SetFarPlane(10000.f);
 
@@ -149,18 +149,10 @@ namespace ige::creator
                 m_viewSize = k_defaultViewSize;
                 updateFocusPoint(true, true);
 
-                m_currentCanvasHeight = SystemInfo::Instance().GetGameH();
-                m_canvasRatio = SystemInfo::Instance().GetGameW() / SystemInfo::Instance().GetGameH();
+                m_currentCanvasHeight = size.y;
+                m_canvasRatio = size.x / size.y;
 
                 m_HandleCameraTouchId = -1;
-
-                // Update camera aspect rate
-                if (m_currCamera) {
-                    if(size.y == 0) 
-                        m_currCamera->SetAspectRate(size.x);
-                    else
-                        m_currCamera->SetAspectRate(size.x / size.y);
-                }
 
                 // Update window pos and size
                 if (Editor::getCurrentScene()) {
@@ -303,18 +295,14 @@ namespace ige::creator
             // Switch to 2D camera
             m_currCamera = m_2dCamera;
 
-            auto target = Editor::getInstance()->getFirstTarget();
-            if (target)
+            auto canvas =  Editor::getCurrentScene()->getCanvas();
+            if (canvas)
             {
-                auto canvas = target->getCanvas();
-                if (canvas)
-                {
-                    auto canvasSize = canvas->getDesignCanvasSize();
-                    m_currCamera->SetOrthoHeight(canvasSize.Y() * 0.5f);
-                    m_grid2D->SetScale({ canvasSize.Y() * 0.125f , canvasSize.Y() * 0.125f, 1.f });
-                    m_currentCanvasHeight = canvasSize.Y();
-                    m_canvasRatio = canvasSize.X() / canvasSize.Y();
-                }
+                auto canvasSize = canvas->getDesignCanvasSize();
+                m_currCamera->SetOrthoHeight(canvasSize.Y() * 0.5f);
+                m_grid2D->SetScale({ canvasSize.Y() * 0.125f , canvasSize.Y() * 0.125f, 1.f });
+                m_currentCanvasHeight = canvasSize.Y();
+                m_canvasRatio = canvasSize.X() / canvasSize.Y();
             }
             else
             {
