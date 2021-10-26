@@ -139,8 +139,14 @@ namespace ige::creator
                 // Initialize camera
                 if (Editor::getCurrentScene())
                 {
-                    m_currCamera = m_2dCamera; // trick to reset 3D camera
-                    set2DMode(false);
+                    if (Editor::getInstance()->is3DCamera()) {
+                        m_currCamera = m_2dCamera; // trick to reset camera
+                        set2DMode(false);
+                    }
+                    else {
+                        m_currCamera = m_3dCamera; // trick to reset camera
+                        set2DMode(true);
+                    }
                 }
 
                 //viet.nv : create dummy object to focus
@@ -639,7 +645,7 @@ namespace ige::creator
                     const auto& designSize = canvasParent->getCanvasSize();
                     auto canvasTransform = canvasParent->getOwner()->getTransform();
                     if (canvasTransform) {
-                        auto& position = canvasTransform->getLocalPosition();
+                        const auto& position = canvasTransform->getLocalPosition();
                         Vec2 halfSize = designSize * 0.5f;
                         ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 1.f });
                         ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 1.f });
@@ -661,13 +667,6 @@ namespace ige::creator
                     ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 0.f });
                     ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], -halfSize[1], 0 }, { 1.f, 0.f, 0.f });
                     ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], -halfSize[1], 0 }, { 1.f, 0.f, 0.f });
-
-                    auto& anchorOffset = rectTransform->getAnchorOffset();
-
-                    ShapeDrawer::drawLine(Vec3{ anchorOffset[0], anchorOffset[1], 0 }, Vec3{ anchorOffset[0], anchorOffset[3], 0 }, { 0.f, 0.f, 1.f });
-                    ShapeDrawer::drawLine(Vec3{ anchorOffset[0], anchorOffset[3], 0 }, Vec3{ anchorOffset[2], anchorOffset[3], 0 }, { 0.f, 0.f, 1.f });
-                    ShapeDrawer::drawLine(Vec3{ anchorOffset[2], anchorOffset[3], 0 }, Vec3{ anchorOffset[2], anchorOffset[1], 0 }, { 0.f, 0.f, 1.f });
-                    ShapeDrawer::drawLine(Vec3{ anchorOffset[2], anchorOffset[1], 0 }, Vec3{ anchorOffset[0], anchorOffset[1], 0 }, { 0.f, 0.f, 1.f });
                 }
 
             }

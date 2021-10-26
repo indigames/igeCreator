@@ -159,43 +159,39 @@ void FigureEditorComponent::drawFigureComponent()
                                     continue;
 
                                 auto infoName = info->name;
-                                if ((currMat->params[j].type == ParamTypeFloat4))
+                                if (currMat->params[j].type == ParamTypeSampler)
+                                {
+                                    materialGroup->createWidget<TextField>(info->name, currMat->params[j].sampler.tex->ResourceName());
+                                }
+                                else if (currMat->params[j].type == ParamTypeBool)
+                                {
+                                    std::array val = { currMat->params[j].fValue[0] };
+                                    materialGroup->createWidget<Drag<float>>(info->name, ImGuiDataType_S32, val, 1, 0, 1);
+                                }
+                                else if (currMat->params[j].type == ParamTypeInt)
+                                {
+                                    std::array val = { currMat->params[j].fValue[0] };
+                                    materialGroup->createWidget<Drag<float>>(info->name, ImGuiDataType_S32, val);
+                                }
+                                else if (currMat->params[j].type == ParamTypeFloat)
+                                {
+                                    std::array val = { currMat->params[j].fValue[0] };
+                                    materialGroup->createWidget<Drag<float>>(info->name, ImGuiDataType_Float, val);
+                                }
+                                else if (currMat->params[j].type == ParamTypeFloat2)
+                                {
+                                    std::array val = { currMat->params[j].fValue[0], currMat->params[j].fValue[1] };
+                                    materialGroup->createWidget<Drag<float, 2>>(info->name, ImGuiDataType_Float, val);
+                                }
+                                else if (currMat->params[j].type == ParamTypeFloat3)
+                                {
+                                    std::array val = { currMat->params[j].fValue[0], currMat->params[j].fValue[1], currMat->params[j].fValue[2] };
+                                    materialGroup->createWidget<Drag<float, 3>>(info->name, ImGuiDataType_Float, val);
+                                }
+                                else if (currMat->params[j].type == ParamTypeFloat4)
                                 {
                                     auto color = Vec4(currMat->params[j].fValue[0], currMat->params[j].fValue[1], currMat->params[j].fValue[2], currMat->params[j].fValue[3]);
                                     materialGroup->createWidget<Color>(info->name, color);
-                                }
-                                else if ((currMat->params[j].type == ParamTypeSampler))
-                                {
-                                    auto textPath = currMat->params[j].sampler.tex->ResourceName();
-                                    /*materialGroup->createWidget<TextField>(info->name, textPath);*/
-                                    auto txtPath = materialGroup->createWidget<TextField>(info->name, textPath);
-                                    txtPath->setEndOfLine(false);
-                                    txtPath->getOnDataChangedEvent().addListener([this](const auto& txt) {
-                                        //getComponent<CompoundComponent>()->setProperty("path", txt);
-                                    });
-
-                                    for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
-                                    {
-                                        txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& txt) {
-                                            //getComponent<CompoundComponent>()->setProperty("path", txt);
-                                            setDirty();
-                                        });
-                                    }
-
-                                    materialGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
-                                        auto files = OpenFileDialog("Import Assets", "", { "Texture (*.pyxi)", "*.pyxi" }).result();
-                                        if (files.size() > 0) {
-                                            //getComponent<CompoundComponent>()->setProperty("path", files[0]);
-                                            setDirty();
-                                        }
-                                    });
-                                }
-                                else if ((currMat->params[j].type == ParamTypeFloat))
-                                {
-                                    std::array val = { currMat->params[j].fValue[0] };
-                                    materialGroup->createWidget<Drag<float>>(info->name, ImGuiDataType_Float, val)->getOnDataChangedEvent().addListener([this](auto val) {
-                                        //getComponent<CompoundComponent>()->setProperty("color", { val[0], val[1], val[2], val[3] });
-                                    });
                                 }
                             }
                         }
@@ -203,6 +199,6 @@ void FigureEditorComponent::drawFigureComponent()
                 }
             }
         }
-    }    
+    }
 }
 NS_IGE_END
