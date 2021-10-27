@@ -145,6 +145,12 @@ namespace ige::creator
             }
         });
 
+        node->getOnDoubleClickEvent().addListener([](auto widget) {
+            if (Editor::getInstance()->getCanvas()->getEditorScene()) {
+                Editor::getInstance()->getCanvas()->getEditorScene()->lookSelectedObject();
+            }            
+        });
+
         node->addPlugin<DDTargetPlugin<uint64_t>>(EDragDropID::OBJECT)->getOnDataReceivedEvent().addListener([objId](auto id) {
             if (Editor::getInstance()->getTarget() == nullptr) return;
             bool dragObjFromTarget = Editor::getInstance()->getTarget()->findObject(id) != nullptr;

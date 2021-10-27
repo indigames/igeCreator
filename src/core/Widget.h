@@ -38,6 +38,8 @@ namespace ige::creator
         Container* getContainer() const { return m_container; }
 
         ige::scene::Event<Widget*>& getOnClickEvent() { return m_onClickEvent; }
+        ige::scene::Event<Widget*>& getOnRightClickEvent() { return m_onRightClickEvent; }
+        ige::scene::Event<Widget*>& getOnDoubleClickEvent() { return m_onDoubleClickEvent; }
         ige::scene::Event<Widget*>& getOnHoveredEvent() { return m_onHoveredEvent; }
 
     protected:
@@ -50,6 +52,8 @@ namespace ige::creator
         bool m_bEOL = true;
         bool m_bHovered = false;
         ige::scene::Event<Widget*> m_onClickEvent;
+        ige::scene::Event<Widget*> m_onRightClickEvent;
+        ige::scene::Event<Widget*> m_onDoubleClickEvent;
         ige::scene::Event<Widget*> m_onHoveredEvent;
 
     private:
