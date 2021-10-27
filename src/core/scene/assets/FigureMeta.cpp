@@ -56,6 +56,8 @@ bool FigureMeta::replaceTextures(EditableFigure& efig)
         for (const auto& entry : fs::recursive_directory_iterator(relPath.parent_path())) {
             if (entry.is_regular_file()) {
                 if (entry.path().filename().compare(texName) == 0) {
+                    imgConv.SetInputFile(entry.path().string().c_str());
+                    alpha = imgConv.DoConvert(true);
                     auto newPath = entry.path().relative_path().replace_extension(".pyxi").string();
                     std::replace(newPath.begin(), newPath.end(), '\\', '/');
                     memset(newTexSrc.path, 0, MAX_PATH);
@@ -65,10 +67,6 @@ bool FigureMeta::replaceTextures(EditableFigure& efig)
             }
         }
         efig.ReplaceTextureSource(texSrc, newTexSrc);
-
-        // Set mesh alpha based on texture alpha
-        imgConv.SetInputFile(newTexSrc.path);
-        alpha = imgConv.DoConvert(true);
         if(alpha) efig.EnableAlphaModeByTexture(newTexSrc.path);
     }
     return true;
