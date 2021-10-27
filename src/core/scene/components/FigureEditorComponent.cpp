@@ -149,7 +149,7 @@ void FigureEditorComponent::drawFigureComponent()
                         if (matName)
                         {
                             materialGroup->createWidget<Label>(matName);
-                            int index = figure->GetMaterialIndex(GenerateNameHash(matName));
+                            int idx = figure->GetMaterialIndex(GenerateNameHash(matName));
                             auto currMat = figure->GetMaterial(i);
 
                             for (auto j = 0; j < currMat->numParams; j++)
@@ -159,39 +159,111 @@ void FigureEditorComponent::drawFigureComponent()
                                     continue;
 
                                 auto infoName = info->name;
+                                auto hash = currMat->params[j].hash;
+
                                 if (currMat->params[j].type == ParamTypeSampler)
                                 {
-                                    materialGroup->createWidget<TextField>(info->name, currMat->params[j].sampler.tex->ResourceName());
+                                    auto samplerPath = materialGroup->createWidget<TextField>(info->name, currMat->params[j].sampler.tex->ResourceName());
+                                    samplerPath->getOnDataChangedEvent().addListener([this, idx, hash](const auto& txt) {
+                                        auto comp = getComponent<CompoundComponent>();
+                                        if (comp && comp->size() == 1) {
+                                            auto figureComp = std::dynamic_pointer_cast<FigureComponent>(comp->getComponents()[0]);
+                                            if (figureComp) {
+                                                figureComp->setMaterialParams(idx, hash, txt);
+                                            }
+                                        }
+                                    });
+                                    for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
+                                    {
+                                        samplerPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this, idx, hash](const auto& txt) {
+                                            auto comp = getComponent<CompoundComponent>();
+                                            if (comp && comp->size() == 1) {
+                                                auto figureComp = std::dynamic_pointer_cast<FigureComponent>(comp->getComponents()[0]);
+                                                if (figureComp) {
+                                                    figureComp->setMaterialParams(idx, hash, txt);
+                                                }
+                                                setDirty();
+                                            }
+                                        });
+                                    }
                                 }
                                 else if (currMat->params[j].type == ParamTypeBool)
                                 {
                                     std::array val = { currMat->params[j].fValue[0] };
-                                    materialGroup->createWidget<Drag<float>>(info->name, ImGuiDataType_S32, val, 1, 0, 1);
+                                    materialGroup->createWidget<Drag<float>>(info->name, ImGuiDataType_S32, val, 1, 0, 1)->getOnDataChangedEvent().addListener([this, idx, hash](const auto& val) {
+                                        auto comp = getComponent<CompoundComponent>();
+                                        if (comp && comp->size() == 1) {
+                                            auto figureComp = std::dynamic_pointer_cast<FigureComponent>(comp->getComponents()[0]);
+                                            if (figureComp) {
+                                                figureComp->setMaterialParams(idx, hash, Vec4(val[0], 0, 0, 0));
+                                            }
+                                        }
+                                    });
                                 }
                                 else if (currMat->params[j].type == ParamTypeInt)
                                 {
                                     std::array val = { currMat->params[j].fValue[0] };
-                                    materialGroup->createWidget<Drag<float>>(info->name, ImGuiDataType_S32, val);
+                                    materialGroup->createWidget<Drag<float>>(info->name, ImGuiDataType_S32, val)->getOnDataChangedEvent().addListener([this, idx, hash](const auto& val) {
+                                        auto comp = getComponent<CompoundComponent>();
+                                        if (comp && comp->size() == 1) {
+                                            auto figureComp = std::dynamic_pointer_cast<FigureComponent>(comp->getComponents()[0]);
+                                            if (figureComp) {
+                                                figureComp->setMaterialParams(idx, hash, Vec4(val[0], 0, 0, 0));
+                                            }
+                                        }
+                                    });
                                 }
                                 else if (currMat->params[j].type == ParamTypeFloat)
                                 {
                                     std::array val = { currMat->params[j].fValue[0] };
-                                    materialGroup->createWidget<Drag<float>>(info->name, ImGuiDataType_Float, val);
+                                    materialGroup->createWidget<Drag<float>>(info->name, ImGuiDataType_Float, val)->getOnDataChangedEvent().addListener([this, idx, hash](const auto& val) {
+                                        auto comp = getComponent<CompoundComponent>();
+                                        if (comp && comp->size() == 1) {
+                                            auto figureComp = std::dynamic_pointer_cast<FigureComponent>(comp->getComponents()[0]);
+                                            if (figureComp) {
+                                                figureComp->setMaterialParams(idx, hash, Vec4(val[0], 0, 0, 0));
+                                            }
+                                        }
+                                    });
                                 }
                                 else if (currMat->params[j].type == ParamTypeFloat2)
                                 {
                                     std::array val = { currMat->params[j].fValue[0], currMat->params[j].fValue[1] };
-                                    materialGroup->createWidget<Drag<float, 2>>(info->name, ImGuiDataType_Float, val);
+                                    materialGroup->createWidget<Drag<float, 2>>(info->name, ImGuiDataType_Float, val)->getOnDataChangedEvent().addListener([this, idx, hash](const auto& val) {
+                                        auto comp = getComponent<CompoundComponent>();
+                                        if (comp && comp->size() == 1) {
+                                            auto figureComp = std::dynamic_pointer_cast<FigureComponent>(comp->getComponents()[0]);
+                                            if (figureComp) {
+                                                figureComp->setMaterialParams(idx, hash, Vec4(val[0], val[1], 0, 0));
+                                            }
+                                        }
+                                    });
                                 }
                                 else if (currMat->params[j].type == ParamTypeFloat3)
                                 {
                                     std::array val = { currMat->params[j].fValue[0], currMat->params[j].fValue[1], currMat->params[j].fValue[2] };
-                                    materialGroup->createWidget<Drag<float, 3>>(info->name, ImGuiDataType_Float, val);
+                                    materialGroup->createWidget<Drag<float, 3>>(info->name, ImGuiDataType_Float, val)->getOnDataChangedEvent().addListener([this, idx, hash](const auto& val) {
+                                        auto comp = getComponent<CompoundComponent>();
+                                        if (comp && comp->size() == 1) {
+                                            auto figureComp = std::dynamic_pointer_cast<FigureComponent>(comp->getComponents()[0]);
+                                            if (figureComp) {
+                                                figureComp->setMaterialParams(idx, hash, Vec4(val[0], val[1], val[2], 0));
+                                            }
+                                        }
+                                    });
                                 }
                                 else if (currMat->params[j].type == ParamTypeFloat4)
                                 {
                                     auto color = Vec4(currMat->params[j].fValue[0], currMat->params[j].fValue[1], currMat->params[j].fValue[2], currMat->params[j].fValue[3]);
-                                    materialGroup->createWidget<Color>(info->name, color);
+                                    materialGroup->createWidget<Color>(info->name, color)->getOnDataChangedEvent().addListener([this, idx, hash](const auto& val) {
+                                        auto comp = getComponent<CompoundComponent>();
+                                        if (comp && comp->size() == 1) {
+                                            auto figureComp = std::dynamic_pointer_cast<FigureComponent>(comp->getComponents()[0]);
+                                            if (figureComp) {
+                                                figureComp->setMaterialParams(idx, hash, Vec4(val[0], val[1], val[2], val[3]));
+                                            }
+                                        }
+                                    });
                                 }
                             }
                         }
