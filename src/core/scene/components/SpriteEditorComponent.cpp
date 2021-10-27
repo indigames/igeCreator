@@ -119,32 +119,98 @@ void SpriteEditorComponent::drawSpriteComponent()
         });
     }
     else {
-        auto tiling = comp->getProperty<Vec2>("tiling", { NAN, NAN });
-        std::array tilingArr = { tiling.X(), tiling.Y() };
-        m_spriteCompGroup->createWidget<Drag<float, 2>>("Tiling", ImGuiDataType_Float, tilingArr, 0.01f, -16384.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            getComponent<CompoundComponent>()->setProperty("tiling", { val[0], val[1] });
-        });
-        auto offset = comp->getProperty<Vec2>("offset", { NAN, NAN });
-        std::array offsetArr = { offset.X(), offset.Y() };
-        m_spriteCompGroup->createWidget<Drag<float, 2>>("Offset", ImGuiDataType_Float, offsetArr, 0.01f, -16384.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
-            getComponent<CompoundComponent>()->setProperty("offset", { val[0], val[1] });
-        });
 
-        auto wrapMode = comp->getProperty<int>("wrapmode", -1);
-        auto compCombo = m_spriteCompGroup->createWidget<ComboBox>("WrapMode", wrapMode);
-        compCombo->getOnDataChangedEvent().addListener([this](auto val) {
+        auto fillMethod = comp->getProperty<int>("fillmethod", -1);
+        auto fillMethodCombo = m_spriteCompGroup->createWidget<ComboBox>("Fill Method", (int)fillMethod);
+        fillMethodCombo->getOnDataChangedEvent().addListener([this](auto val) {
             if (val != -1) {
-                getComponent<CompoundComponent>()->setProperty("wrapmode", val);
+                getComponent<CompoundComponent>()->setProperty("fillmethod", val);
                 setDirty();
             }
-        });
-        compCombo->setEndOfLine(false);
-        compCombo->addChoice((int)SamplerState::WrapMode::WRAP, "Wrap");
-        compCombo->addChoice((int)SamplerState::WrapMode::MIRROR, "Mirror");
-        compCombo->addChoice((int)SamplerState::WrapMode::CLAMP, "Clamp");
-        compCombo->addChoice((int)SamplerState::WrapMode::BORDER, "Border");
-        if(wrapMode == -1) compCombo->addChoice(-1, "");
-        compCombo->setEndOfLine(true);
+            });
+        fillMethodCombo->setEndOfLine(false);
+        fillMethodCombo->addChoice((int)FillMethod::None, "None");
+        fillMethodCombo->addChoice((int)FillMethod::Horizontal, "Horizontal");
+        fillMethodCombo->addChoice((int)FillMethod::Vertical, "Vertical");
+        fillMethodCombo->addChoice((int)FillMethod::Radial90, "Radial 90");
+        fillMethodCombo->addChoice((int)FillMethod::Radial180, "Radial 180");
+        fillMethodCombo->addChoice((int)FillMethod::Radial360, "Radial 360");
+        if (fillMethod == -1) fillMethodCombo->addChoice(-1, "");
+        fillMethodCombo->setEndOfLine(true);
+
+        if (fillMethod != (int)FillMethod::None && fillMethod != -1) {
+            auto fillOrigin = comp->getProperty<int>("fillorigin", -1);
+            auto fillOriginCombo = m_spriteCompGroup->createWidget<ComboBox>("Fill Origin", fillOrigin);
+            fillOriginCombo->getOnDataChangedEvent().addListener([this](auto val) {
+                if (val != -1) {
+                    getComponent<CompoundComponent>()->setProperty("fillorigin", val);
+                    setDirty();
+                }
+                });
+            fillOriginCombo->setEndOfLine(false);
+            if (fillMethod == (int)FillMethod::Horizontal) {
+                fillOriginCombo->addChoice((int)FillOrigin::Left, "Left");
+                fillOriginCombo->addChoice((int)FillOrigin::Right, "Right");
+            }
+            else if (fillMethod == (int)FillMethod::Vertical) {
+                fillOriginCombo->addChoice((int)FillOrigin::Top, "Top");
+                fillOriginCombo->addChoice((int)FillOrigin::Bottom, "Bottom");
+            }
+            else if (fillMethod == (int)FillMethod::Radial90) {
+                fillOriginCombo->addChoice((int)FillOrigin::BottomLeft, "Bottom Left");
+                fillOriginCombo->addChoice((int)FillOrigin::TopLeft, "Top Left");
+                fillOriginCombo->addChoice((int)FillOrigin::TopRight, "Top Right");
+                fillOriginCombo->addChoice((int)FillOrigin::BottomRight, "Bottom Right");
+            }
+            else {
+                fillOriginCombo->addChoice((int)FillOrigin::Bottom, "Bottom");
+                fillOriginCombo->addChoice((int)FillOrigin::Top, "Top");
+                fillOriginCombo->addChoice((int)FillOrigin::Left, "Left");
+                fillOriginCombo->addChoice((int)FillOrigin::Right, "Right");
+            }
+            if (fillOrigin == -1) fillOriginCombo->addChoice(-1, "");
+            fillOriginCombo->setEndOfLine(true);
+
+            std::array fillAmount = { comp->getProperty<float>("fillamount", NAN) };
+            m_spriteCompGroup->createWidget<Drag<float, 1>>("Fill Amount", ImGuiDataType_Float, fillAmount, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+                getComponent<CompoundComponent>()->setProperty("fillamount", val[0]);
+                });
+
+            if (fillMethod == (int)FillMethod::Radial90 || fillMethod == (int)FillMethod::Radial180 || fillMethod == (int)FillMethod::Radial360) {
+                m_spriteCompGroup->createWidget<CheckBox>("Clockwise", comp->getProperty<bool>("clockwise", false))->getOnDataChangedEvent().addListener([this](bool val) {
+                    getComponent<CompoundComponent>()->setProperty("clockwise", val);
+                    });
+            }
+        }
+        else
+        {
+            auto tiling = comp->getProperty<Vec2>("tiling", { NAN, NAN });
+            std::array tilingArr = { tiling.X(), tiling.Y() };
+            m_spriteCompGroup->createWidget<Drag<float, 2>>("Tiling", ImGuiDataType_Float, tilingArr, 0.01f, -16384.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+                getComponent<CompoundComponent>()->setProperty("tiling", { val[0], val[1] });
+                });
+            auto offset = comp->getProperty<Vec2>("offset", { NAN, NAN });
+            std::array offsetArr = { offset.X(), offset.Y() };
+            m_spriteCompGroup->createWidget<Drag<float, 2>>("Offset", ImGuiDataType_Float, offsetArr, 0.01f, -16384.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+                getComponent<CompoundComponent>()->setProperty("offset", { val[0], val[1] });
+                });
+
+            auto wrapMode = comp->getProperty<int>("wrapmode", -1);
+            auto compCombo = m_spriteCompGroup->createWidget<ComboBox>("WrapMode", wrapMode);
+            compCombo->getOnDataChangedEvent().addListener([this](auto val) {
+                if (val != -1) {
+                    getComponent<CompoundComponent>()->setProperty("wrapmode", val);
+                    setDirty();
+                }
+                });
+            compCombo->setEndOfLine(false);
+            compCombo->addChoice((int)SamplerState::WrapMode::WRAP, "Wrap");
+            compCombo->addChoice((int)SamplerState::WrapMode::MIRROR, "Mirror");
+            compCombo->addChoice((int)SamplerState::WrapMode::CLAMP, "Clamp");
+            compCombo->addChoice((int)SamplerState::WrapMode::BORDER, "Border");
+            if (wrapMode == -1) compCombo->addChoice(-1, "");
+            compCombo->setEndOfLine(true);
+        }
     }
 
     m_spriteCompGroup->createWidget<CheckBox>("Alpha Blend", comp->getProperty<bool>("aBlend", false))->getOnDataChangedEvent().addListener([this](bool val) {
