@@ -42,20 +42,14 @@ namespace ige::creator
     EditorScene::EditorScene(const std::string& name, const Panel::Settings& settings)
         : Panel(name, settings)
     {
-        m_2dCamera = ResourceCreator::Instance().NewCamera("editor_2d_camera", nullptr);
-        m_2dCamera->SetPosition({ 0.f, 0.f, 10.f });
-        m_2dCamera->LockonTarget(false);
-        m_2dCamera->SetOrthographicProjection(true);
-        m_2dCamera->SetWidthBase(false);
-
-        m_3dCamera = ResourceCreator::Instance().NewCamera("editor_3d_camera", nullptr);
-        m_3dCamera->SetPosition({ 0.f, 3.f, 10.f });
-        m_3dCamera->LockonTarget(false);
-        m_3dCamera->SetNearPlane(1.f);
-        m_3dCamera->SetFarPlane(10000.f);
     }
 
     EditorScene::~EditorScene()
+    {
+        clear();
+    }
+
+    void EditorScene::clear()
     {
         m_currCamera = nullptr;
         if (m_2dCamera) m_2dCamera->DecReference();
@@ -63,13 +57,6 @@ namespace ige::creator
 
         if (m_3dCamera) m_3dCamera->DecReference();
         m_3dCamera = nullptr;
-
-        clear();
-    }
-
-    void EditorScene::clear()
-    {
-        m_currentScene = nullptr;
 
         if(m_grid2D) m_grid2D->DecReference();
         m_grid2D = nullptr;
@@ -96,15 +83,29 @@ namespace ige::creator
 
     void EditorScene::initialize()
     {
-        if (!Editor::getCurrentScene()) return;
-
         if (!m_bInitialized)
         {
+            m_2dCamera = ResourceCreator::Instance().NewCamera("editor_2d_camera", nullptr);
+            m_2dCamera->SetPosition({ 0.f, 0.f, 10.f });
+            m_2dCamera->LockonTarget(false);
+            m_2dCamera->SetOrthographicProjection(true);
+            m_2dCamera->SetWidthBase(false);
+
+            m_3dCamera = ResourceCreator::Instance().NewCamera("editor_3d_camera", nullptr);
+            m_3dCamera->SetPosition({ 0.f, 3.f, 10.f });
+            m_3dCamera->LockonTarget(false);
+            m_3dCamera->SetNearPlane(1.f);
+            m_3dCamera->SetFarPlane(10000.f);
+
             auto size = getSize();
             if (size.x > 0 && size.y > 0)
             {
                 m_rtTexture = ResourceCreator::Instance().NewTexture("Editor_RTTexture", nullptr, size.x, size.y, GL_RGBA);
+                m_rtTexture->WaitInitialize();
+
                 m_fbo = ResourceCreator::Instance().NewRenderTarget(m_rtTexture, true, true);
+                m_fbo->WaitInitialize();
+
                 m_imageWidget = createWidget<Image>(m_fbo->GetColorTexture()->GetTextureHandle(), size);
 
                 // Size changed event
@@ -131,24 +132,12 @@ namespace ige::creator
 
                 m_2dCamera->SetAspectRate(size.x / size.y);
                 m_3dCamera->SetAspectRate(size.x / size.y);
+                set2DMode(!Editor::getInstance()->is3DCamera());
 
                 m_gizmo = createWidget<Gizmo>();
                 m_gizmo->setMode(Editor::getInstance()->isLocalGizmo() ? gizmo::MODE::LOCAL : gizmo::MODE::WORLD);
 
                 initDragDrop();
-
-                // Initialize camera
-                if (Editor::getCurrentScene())
-                {
-                    if (Editor::getInstance()->is3DCamera()) {
-                        m_currCamera = m_2dCamera; // trick to reset camera
-                        set2DMode(false);
-                    }
-                    else {
-                        m_currCamera = m_3dCamera; // trick to reset camera
-                        set2DMode(true);
-                    }
-                }
 
                 //viet.nv : create dummy object to focus
                 m_focusPosition = Vec3(0, 0, 0);
@@ -160,12 +149,6 @@ namespace ige::creator
                 m_canvasRatio = size.x / size.y;
 
                 m_HandleCameraTouchId = -1;
-
-                // Update window pos and size
-                if (Editor::getCurrentScene()) {
-                    Editor::getCurrentScene()->setWindowSize({ size.x , size.y });
-                }
-
                 m_bInitialized = true;
             }
         }
@@ -297,11 +280,9 @@ namespace ige::creator
 
     void EditorScene::set2DMode(bool is2D)
     {
-        if (is2D && m_currCamera == m_3dCamera)
+        if (is2D)
         {
-            // Switch to 2D camera
             m_currCamera = m_2dCamera;
-
             auto canvas =  Editor::getCurrentScene()->getCanvas();
             if (canvas)
             {
@@ -318,24 +299,28 @@ namespace ige::creator
                 m_grid2D->SetScale({ m_currentCanvasHeight * 0.125f ,m_currentCanvasHeight * 0.125f, 1.f });
             }
         }
-        else if (!is2D && m_currCamera == m_2dCamera)
+        else
         {
-            // Switch to 3D camera
             m_currCamera = m_3dCamera;
         }
-        m_gizmo->setCamera(m_currCamera);
 
         if(!Editor::getCanvas()->getGameScene()->isPlaying()) {
-            auto showcase = Editor::getCurrentScene()->getShowcase();
-            if (m_currCamera == m_2dCamera) {
-                showcase->Remove(m_grid3D);
-                showcase->Add(m_grid2D);
-            }
-            else {
-                showcase->Remove(m_grid2D);
-                showcase->Add(m_grid3D);
+            if (Editor::getCurrentScene()) {
+                auto showcase = Editor::getCurrentScene()->getShowcase();
+                if (showcase) {
+                    showcase->Remove(m_grid3D);
+                    showcase->Remove(m_grid2D);
+                }
+                if (m_currCamera == m_2dCamera) {
+                    showcase->Add(m_grid2D);
+                }
+                else {
+                    showcase->Add(m_grid3D);
+                }
             }
         }
+
+        m_gizmo->setCamera(m_currCamera);
     }
 
     bool EditorScene::is2DMode() const {

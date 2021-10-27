@@ -112,6 +112,11 @@ void FigureEditorComponent::drawFigureComponent()
         alphaCombo->setEndOfLine(true);
     }
 
+    std::array ratio = { comp->getProperty<float>("updateRatio", NAN) };
+    m_figureCompGroup->createWidget<Drag<float>>("Update Ratio", ImGuiDataType_Float, ratio, 0.01f, 0.01f)->getOnDataChangedEvent().addListener([this](auto& val) {
+        getComponent<CompoundComponent>()->setProperty("updateRatio", (float)val[0]);
+    });
+
     // Only show details if this is single target
     if (comp->size() == 1)
     {

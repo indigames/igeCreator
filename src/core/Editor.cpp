@@ -352,6 +352,7 @@ namespace ige::creator
             getCanvas()->getProjectSetting()->initialize();
             getCanvas()->getHierarchy()->initialize();
             getCanvas()->getHierarchy()->rebuildHierarchy();
+            getCanvas()->getEditorScene()->set2DMode(!Editor::getInstance()->is3DCamera());
         }
     }
 
@@ -429,7 +430,6 @@ namespace ige::creator
     void Editor::refreshScene() {
         if (getCanvas())
         {
-            getCanvas()->getEditorScene()->clear();
             getCanvas()->getHierarchy()->clear();
             getCanvas()->getInspector()->clear();
         }

@@ -115,9 +115,6 @@ protected:
     //! Gizmo
     std::shared_ptr<Gizmo> m_gizmo = nullptr;
 
-    //! Cache current scene
-    std::shared_ptr<Scene> m_currentScene = nullptr;
-
     //keyboard helper
     unsigned short m_fnKeyPressed = 1;
     ViewTool m_viewTool = ViewTool::None;

@@ -106,7 +106,7 @@ namespace ige::creator
 
     void GameScene::update(float dt)
     {
-        if (!Editor::getCurrentScene())
+        if (!Editor::getCurrentScene() || Editor::getCurrentScene()->isPrefab())
             return;
 
         // Ensure initialization
@@ -121,7 +121,8 @@ namespace ige::creator
         if (Editor::getCurrentScene()) {
             Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y });
             Editor::getCurrentScene()->setWindowSize(m_windowSize);
-            Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(m_windowSize.X() / m_windowSize.Y());
+            if(Editor::getCurrentScene()->getActiveCamera())
+                Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(m_windowSize.X() / m_windowSize.Y());
         }
 
         // Update
