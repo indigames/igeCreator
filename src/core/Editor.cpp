@@ -300,7 +300,10 @@ namespace ige::creator
 
             // Start new logging process
             auto logFilePath = fs::path(path).append("error.log");
-            if (fs::exists(logFilePath)) fs::remove(logFilePath);
+            if (fs::exists(logFilePath)) {
+                std::error_code ec;
+                fs::remove(logFilePath, ec);
+            }
             pyxie_logg_start();
 
             std::ifstream file(prjFile.string());
