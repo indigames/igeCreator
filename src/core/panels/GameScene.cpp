@@ -117,15 +117,15 @@ namespace ige::creator
 
         SceneManager::getInstance()->setIsEditor(false);
 
+        // Update windows pos and size
+        if (Editor::getCurrentScene()) {
+            Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y });
+            Editor::getCurrentScene()->setWindowSize(m_windowSize);
+            Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(m_windowSize.X() / m_windowSize.Y());
+        }
+
         // Update
         if (isPlaying() && !isPausing()) {
-            // Update windows pos and size
-            if (Editor::getCurrentScene()) {
-                Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y });
-                Editor::getCurrentScene()->setWindowSize(m_windowSize);
-                Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(m_windowSize.X() / m_windowSize.Y());
-            }
-
             //! Update Touch & Keyboard, using for UI Object to capture touch before any raycast
             updateKeyboard();
             updateTouch();
