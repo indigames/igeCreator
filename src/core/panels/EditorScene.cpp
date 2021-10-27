@@ -41,10 +41,29 @@ namespace ige::creator
 {
     EditorScene::EditorScene(const std::string& name, const Panel::Settings& settings)
         : Panel(name, settings)
-    {}
+    {
+        m_2dCamera = ResourceCreator::Instance().NewCamera("editor_2d_camera", nullptr);
+        m_2dCamera->SetPosition({ 0.f, 0.f, 10.f });
+        m_2dCamera->LockonTarget(false);
+        m_2dCamera->SetOrthographicProjection(true);
+        m_2dCamera->SetWidthBase(false);
+
+        m_3dCamera = ResourceCreator::Instance().NewCamera("editor_3d_camera", nullptr);
+        m_3dCamera->SetPosition({ 0.f, 3.f, 10.f });
+        m_3dCamera->LockonTarget(false);
+        m_3dCamera->SetNearPlane(1.f);
+        m_3dCamera->SetFarPlane(10000.f);
+    }
 
     EditorScene::~EditorScene()
     {
+        m_currCamera = nullptr;
+        if (m_2dCamera) m_2dCamera->DecReference();
+        m_2dCamera = nullptr;
+
+        if (m_3dCamera) m_3dCamera->DecReference();
+        m_3dCamera = nullptr;
+
         clear();
     }
 
@@ -57,13 +76,6 @@ namespace ige::creator
 
         if(m_grid3D) m_grid3D->DecReference();
         m_grid3D = nullptr;
-
-        m_currCamera = nullptr;
-        if (m_2dCamera) m_2dCamera->DecReference();
-        m_2dCamera = nullptr;
-
-        if (m_3dCamera) m_3dCamera->DecReference();
-        m_3dCamera = nullptr;
 
         getOnPositionChangedEvent().removeAllListeners();
         getOnSizeChangedEvent().removeAllListeners();
@@ -117,19 +129,8 @@ namespace ige::creator
                 m_grid3D->SetPosition(Vec3(0.f, -0.01f, -0.01f));
                 m_grid3D->SetRotation(Quat::RotationX(PI / 2.f));
 
-                m_2dCamera = ResourceCreator::Instance().NewCamera("editor_2d_camera", nullptr);
-                m_2dCamera->SetPosition({ 0.f, 0.f, 10.f });
-                m_2dCamera->LockonTarget(false);
                 m_2dCamera->SetAspectRate(size.x / size.y);
-                m_2dCamera->SetOrthographicProjection(true);
-                m_2dCamera->SetWidthBase(false);
-
-                m_3dCamera = ResourceCreator::Instance().NewCamera("editor_3d_camera", nullptr);
-                m_3dCamera->SetPosition({ 0.f, 3.f, 10.f });
-                m_3dCamera->LockonTarget(false);
                 m_3dCamera->SetAspectRate(size.x / size.y);
-                m_3dCamera->SetNearPlane(1.f);
-                m_3dCamera->SetFarPlane(10000.f);
 
                 m_gizmo = createWidget<Gizmo>();
                 m_gizmo->setMode(Editor::getInstance()->isLocalGizmo() ? gizmo::MODE::LOCAL : gizmo::MODE::WORLD);
