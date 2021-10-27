@@ -132,10 +132,11 @@ namespace ige::creator
 
                 m_2dCamera->SetAspectRate(size.x / size.y);
                 m_3dCamera->SetAspectRate(size.x / size.y);
-                set2DMode(!Editor::getInstance()->is3DCamera());
 
                 m_gizmo = createWidget<Gizmo>();
                 m_gizmo->setMode(Editor::getInstance()->isLocalGizmo() ? gizmo::MODE::LOCAL : gizmo::MODE::WORLD);
+
+                set2DMode(!Editor::getInstance()->is3DCamera());
 
                 initDragDrop();
 
