@@ -66,10 +66,6 @@ namespace ige::creator
     {
         if(!m_bEnabled || m_camera == nullptr || !m_visible || Editor::getCurrentScene() == nullptr)
             return;
-
-        auto target = Editor::getInstance()->getTarget();
-        if (target == nullptr || target->empty())
-            return;
         
         // Detect ortho projection
         gizmo::SetOrthographic(m_camera->IsOrthographicProjection());
@@ -80,11 +76,6 @@ namespace ige::creator
         Mat4 projMat;
         auto proj = m_camera->GetProjectionMatrix(projMat).P();
 
-        auto modelMat = Mat4::IdentityMat();
-        vmath_mat4_from_rottrans(m_rotation.P(), m_position.P(), modelMat.P());
-        vmath_mat_appendScale(modelMat.P(), m_scale.P(), 4, 4, modelMat.P());
-        auto model = modelMat.P();
-
         ImGui::PushStyleColor(ImGuiCol_Border, 0);
         gizmo::BeginFrame();
         gizmo::Enable(m_bEnabled);
@@ -92,9 +83,6 @@ namespace ige::creator
         ImGuizmo::SetDrawlist();
         ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y + 25.f, ImGui::GetWindowWidth(), ImGui::GetWindowHeight() - 25.f);
 
-        float delta[16] = { 0.f };
-        gizmo::Manipulate(&view[0], &proj[0], m_operation, m_mode, &model[0], &delta[0]);
-        
         bool isManipulating = false;
 
         // Show view manipulation in 3D mode only
@@ -108,6 +96,20 @@ namespace ige::creator
                 m_camera->SetTarget({ newTarget.x, newTarget.y, newTarget.z });
             }
         }
+
+        auto target = Editor::getInstance()->getTarget();
+        if (target == nullptr || target->empty()) {
+            ImGui::PopStyleColor();
+            return;
+        }
+
+        auto modelMat = Mat4::IdentityMat();
+        vmath_mat4_from_rottrans(m_rotation.P(), m_position.P(), modelMat.P());
+        vmath_mat_appendScale(modelMat.P(), m_scale.P(), 4, 4, modelMat.P());
+        auto model = modelMat.P();
+
+        float delta[16] = { 0.f };
+        gizmo::Manipulate(&view[0], &proj[0], m_operation, m_mode, &model[0], &delta[0]);
 
         if(m_bIsUsing && !gizmo::IsUsing())
             updateTargetNode();
