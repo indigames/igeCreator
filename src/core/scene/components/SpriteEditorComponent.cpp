@@ -40,12 +40,14 @@ void SpriteEditorComponent::drawSpriteComponent()
     txtPath->setEndOfLine(false);
     txtPath->getOnDataChangedEvent().addListener([this](const auto& txt) {
         getComponent<CompoundComponent>()->setProperty("path", txt);
+        getComponent<CompoundComponent>()->setDirty();
     });
 
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
     {
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& txt) {
             getComponent<CompoundComponent>()->setProperty("path", txt);
+            getComponent<CompoundComponent>()->setDirty();
             setDirty();
         });
     }
@@ -54,6 +56,7 @@ void SpriteEditorComponent::drawSpriteComponent()
         auto files = OpenFileDialog("Import Assets", "", { "Texture (*.pyxi)", "*.pyxi" }).result();
         if (files.size() > 0) {
             getComponent<CompoundComponent>()->setProperty("path", files[0]);
+            getComponent<CompoundComponent>()->setDirty();
             setDirty();
         }
     });

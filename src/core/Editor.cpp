@@ -437,6 +437,9 @@ namespace ige::creator
 
     bool Editor::openPrefab(const std::string& path)
     {
+        if (SceneManager::getInstance()->isPlaying()) 
+            return false;
+
         auto fsPath = fs::path(path);
         if (!fs::exists(fsPath) || fsPath.extension().string() != ".prefab")
             return false;
