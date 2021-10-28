@@ -638,7 +638,8 @@ namespace ige::creator
             for (auto& jTarget : clonedJson)
             {
                 auto objName = jTarget.value("name", "");
-                auto newObject = Editor::getCurrentScene()->createObject(objName + "_cp");
+                auto isGui = jTarget.value("gui", false);
+                auto newObject = Editor::getCurrentScene()->createObject(objName + "_cp", nullptr, isGui);
                 auto uuid = newObject->getUUID();
                 jTarget["selected"] = false; // This is new node, should not auto selected
                 newObject->from_json(jTarget);

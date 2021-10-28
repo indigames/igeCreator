@@ -346,7 +346,7 @@ namespace ige::creator
         initialize();
 
         //! If there is no scene, just do nothing
-        if (!m_bInitialized)
+        if (Editor::getCurrentScene() == nullptr)
         {
             auto renderContext = RenderContext::InstancePtr();
             if (renderContext && m_fbo)
