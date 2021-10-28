@@ -34,11 +34,13 @@ void UIScrollBarEditorComponent::drawUIScrollBar() {
     auto txtPath = m_uiScrollBarGroup->createWidget<TextField>("Path", comp->getProperty<std::string>("path", ""), false, true);
     txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
         getComponent<CompoundComponent>()->setProperty("path", txt);
+        getComponent<CompoundComponent>()->setDirty();
     });
 
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite)) {
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
             getComponent<CompoundComponent>()->setProperty("path", txt);
+            getComponent<CompoundComponent>()->setDirty();
             setDirty();
         });
     }
