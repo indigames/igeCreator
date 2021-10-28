@@ -29,6 +29,7 @@
 #include <components/TransformComponent.h>
 #include <components/EnvironmentComponent.h>
 #include <components/FigureComponent.h>
+#include <components/EditableFigureComponent.h>
 #include <components/BoneTransform.h>
 #include <components/SpriteComponent.h>
 #include <components/TextComponent.h>
@@ -155,6 +156,7 @@ namespace ige::creator
         else // Scene Object
         {
             m_createCompCombo->addChoice((int)Component::Type::Figure, "Figure");
+            m_createCompCombo->addChoice((int)Component::Type::EditableFigure, "EditableFigure");
             m_createCompCombo->addChoice((int)Component::Type::Sprite, "Sprite");
             m_createCompCombo->addChoice((int)Component::Type::Text, "Text");
             m_createCompCombo->addChoice((int)Component::Type::TextBitmap, "TextBitmap");
@@ -229,6 +231,9 @@ namespace ige::creator
                     break;
                 case (int)Component::Type::Figure:
                     m_targetObject->addComponent<FigureComponent>();
+                    break;
+                case (int)Component::Type::EditableFigure:
+                    m_targetObject->addComponent<EditableFigureComponent>();
                     break;
                 case (int)Component::Type::Sprite:
                     m_targetObject->addComponent<SpriteComponent>();

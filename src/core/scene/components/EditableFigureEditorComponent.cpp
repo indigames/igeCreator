@@ -1,6 +1,5 @@
-#include "core/scene/components/FigureEditorComponent.h"
+#include "core/scene/components/EditableFigureEditorComponent.h"
 #include "core/scene/CompoundComponent.h"
-#include "components/FigureComponent.h"
 #include "components/EditableFigureComponent.h"
 
 #include <core/layout/Group.h>
@@ -12,23 +11,23 @@
 
 NS_IGE_BEGIN
 
-FigureEditorComponent::FigureEditorComponent() {
+EditableFigureEditorComponent::EditableFigureEditorComponent() {
     m_figureCompGroup = nullptr;
 }
 
-FigureEditorComponent::~FigureEditorComponent() {
+EditableFigureEditorComponent::~EditableFigureEditorComponent() {
     m_figureCompGroup = nullptr;
 }
 
 
-void FigureEditorComponent::onInspectorUpdate() {
+void EditableFigureEditorComponent::onInspectorUpdate() {
     drawFigureComponent();
 }
 
-void FigureEditorComponent::drawFigureComponent()
+void EditableFigureEditorComponent::drawFigureComponent()
 {
     if (m_figureCompGroup == nullptr) {
-        m_figureCompGroup = m_group->createWidget<Group>("FigureGroup", false);
+        m_figureCompGroup = m_group->createWidget<Group>("EditableFigureGroup", false);
     }
     m_figureCompGroup->removeAllWidgets();
 
@@ -97,7 +96,7 @@ void FigureEditorComponent::drawFigureComponent()
     // Only show details if this is single target
     if (comp->size() == 1)
     {
-        auto figureComp = std::dynamic_pointer_cast<FigureComponent>(comp->getComponents()[0]);
+        auto figureComp = std::dynamic_pointer_cast<EditableFigureComponent>(comp->getComponents()[0]);
         if (figureComp)
         {
             auto figure = figureComp->getFigure();
@@ -111,10 +110,10 @@ void FigureEditorComponent::drawFigureComponent()
                         auto mesh = figure->GetMesh(i);
                         auto txtName = meshColumn->createWidget<TextField>("", figure->GetMeshName(i), true);
                         txtName->addPlugin<DDSourcePlugin<int>>(EDragDropID::MESH, figure->GetMeshName(i), i);
-                        meshColumn->createWidget<TextField>("V", std::to_string(mesh->numVerticies).c_str(), true);
-                        meshColumn->createWidget<TextField>("I", std::to_string(mesh->numIndices).c_str(), true);
+                        meshColumn->createWidget<TextField>("V", std::to_string(mesh->numVertices).c_str(), true);
+                        meshColumn->createWidget<TextField>("I", std::to_string(mesh->numPrims).c_str(), true);
                         meshColumn->createWidget<CheckBox>("", figureComp->isMeshEnable(i))->getOnDataChangedEvent().addListener([this, i](auto val) {
-                            auto figureComp = std::dynamic_pointer_cast<FigureComponent>(getComponent<CompoundComponent>()->getComponents()[0]);
+                            auto figureComp = std::dynamic_pointer_cast<EditableFigureComponent>(getComponent<CompoundComponent>()->getComponents()[0]);
                             if (figureComp) {
                                 figureComp->setMeshEnable(i, val);
                             }
@@ -149,7 +148,7 @@ void FigureEditorComponent::drawFigureComponent()
                                     samplerPath->getOnDataChangedEvent().addListener([this, idx, hash](const auto& txt) {
                                         auto comp = getComponent<CompoundComponent>();
                                         if (comp && comp->size() == 1) {
-                                            auto figureComp = std::dynamic_pointer_cast<FigureComponent>(comp->getComponents()[0]);
+                                            auto figureComp = std::dynamic_pointer_cast<EditableFigureComponent>(comp->getComponents()[0]);
                                             if (figureComp) {
                                                 figureComp->setMaterialParams(idx, hash, txt);
                                             }
@@ -160,7 +159,7 @@ void FigureEditorComponent::drawFigureComponent()
                                         samplerPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this, idx, hash](const auto& txt) {
                                             auto comp = getComponent<CompoundComponent>();
                                             if (comp && comp->size() == 1) {
-                                                auto figureComp = std::dynamic_pointer_cast<FigureComponent>(comp->getComponents()[0]);
+                                                auto figureComp = std::dynamic_pointer_cast<EditableFigureComponent>(comp->getComponents()[0]);
                                                 if (figureComp) {
                                                     figureComp->setMaterialParams(idx, hash, txt);
                                                 }
@@ -175,7 +174,7 @@ void FigureEditorComponent::drawFigureComponent()
                                     materialGroup->createWidget<Drag<float>>(info->name, ImGuiDataType_S32, val, 1, 0, 1)->getOnDataChangedEvent().addListener([this, idx, hash](const auto& val) {
                                         auto comp = getComponent<CompoundComponent>();
                                         if (comp && comp->size() == 1) {
-                                            auto figureComp = std::dynamic_pointer_cast<FigureComponent>(comp->getComponents()[0]);
+                                            auto figureComp = std::dynamic_pointer_cast<EditableFigureComponent>(comp->getComponents()[0]);
                                             if (figureComp) {
                                                 figureComp->setMaterialParams(idx, hash, Vec4(val[0], 0, 0, 0));
                                             }
@@ -188,7 +187,7 @@ void FigureEditorComponent::drawFigureComponent()
                                     materialGroup->createWidget<Drag<float>>(info->name, ImGuiDataType_S32, val)->getOnDataChangedEvent().addListener([this, idx, hash](const auto& val) {
                                         auto comp = getComponent<CompoundComponent>();
                                         if (comp && comp->size() == 1) {
-                                            auto figureComp = std::dynamic_pointer_cast<FigureComponent>(comp->getComponents()[0]);
+                                            auto figureComp = std::dynamic_pointer_cast<EditableFigureComponent>(comp->getComponents()[0]);
                                             if (figureComp) {
                                                 figureComp->setMaterialParams(idx, hash, Vec4(val[0], 0, 0, 0));
                                             }
@@ -201,7 +200,7 @@ void FigureEditorComponent::drawFigureComponent()
                                     materialGroup->createWidget<Drag<float>>(info->name, ImGuiDataType_Float, val)->getOnDataChangedEvent().addListener([this, idx, hash](const auto& val) {
                                         auto comp = getComponent<CompoundComponent>();
                                         if (comp && comp->size() == 1) {
-                                            auto figureComp = std::dynamic_pointer_cast<FigureComponent>(comp->getComponents()[0]);
+                                            auto figureComp = std::dynamic_pointer_cast<EditableFigureComponent>(comp->getComponents()[0]);
                                             if (figureComp) {
                                                 figureComp->setMaterialParams(idx, hash, Vec4(val[0], 0, 0, 0));
                                             }
@@ -214,7 +213,7 @@ void FigureEditorComponent::drawFigureComponent()
                                     materialGroup->createWidget<Drag<float, 2>>(info->name, ImGuiDataType_Float, val)->getOnDataChangedEvent().addListener([this, idx, hash](const auto& val) {
                                         auto comp = getComponent<CompoundComponent>();
                                         if (comp && comp->size() == 1) {
-                                            auto figureComp = std::dynamic_pointer_cast<FigureComponent>(comp->getComponents()[0]);
+                                            auto figureComp = std::dynamic_pointer_cast<EditableFigureComponent>(comp->getComponents()[0]);
                                             if (figureComp) {
                                                 figureComp->setMaterialParams(idx, hash, Vec4(val[0], val[1], 0, 0));
                                             }
@@ -227,7 +226,7 @@ void FigureEditorComponent::drawFigureComponent()
                                     materialGroup->createWidget<Drag<float, 3>>(info->name, ImGuiDataType_Float, val)->getOnDataChangedEvent().addListener([this, idx, hash](const auto& val) {
                                         auto comp = getComponent<CompoundComponent>();
                                         if (comp && comp->size() == 1) {
-                                            auto figureComp = std::dynamic_pointer_cast<FigureComponent>(comp->getComponents()[0]);
+                                            auto figureComp = std::dynamic_pointer_cast<EditableFigureComponent>(comp->getComponents()[0]);
                                             if (figureComp) {
                                                 figureComp->setMaterialParams(idx, hash, Vec4(val[0], val[1], val[2], 0));
                                             }
@@ -240,7 +239,7 @@ void FigureEditorComponent::drawFigureComponent()
                                     materialGroup->createWidget<Color>(info->name, color)->getOnDataChangedEvent().addListener([this, idx, hash](const auto& val) {
                                         auto comp = getComponent<CompoundComponent>();
                                         if (comp && comp->size() == 1) {
-                                            auto figureComp = std::dynamic_pointer_cast<FigureComponent>(comp->getComponents()[0]);
+                                            auto figureComp = std::dynamic_pointer_cast<EditableFigureComponent>(comp->getComponents()[0]);
                                             if (figureComp) {
                                                 figureComp->setMaterialParams(idx, hash, Vec4(val[0], val[1], val[2], val[3]));
                                             }
