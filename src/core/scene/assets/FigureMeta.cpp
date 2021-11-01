@@ -21,7 +21,7 @@ FigureMeta::FigureMeta(const std::string& path)
         {"OPTIMIZE_MESH", false},
         {"OPTIMIZE_VERTEX", true},
         {"OPTIMIZE_ANIMATION", true},
-        {"SHADER_MAKE_SHADOW", true},
+        {"SHADER_MAKE_SHADOW", false},
         {"SHADER_RECEIVE_SHADOW", false},
         {"SHADER_DEPTH_SHADOW", true},
         {"MATERIAL_PARAM_SPARE", 8},
