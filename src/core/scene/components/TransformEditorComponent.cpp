@@ -231,13 +231,8 @@ void TransformEditorComponent::onTransformChanged(SceneObject& sceneObject)
 {
     // Just redraw the transform in Inspector
     m_dirtyFlag = 0;
-    auto comp = getComponent<CompoundComponent>();
-    if (comp) {
-        comp->setDirty();
-        if (Editor::getCanvas()->getEditorScene()->getGizmo())
-            Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
-    }
-    setDirty();
+    if (Editor::getCanvas()->getEditorScene()->getGizmo())
+        Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
 }
 
 NS_IGE_END
