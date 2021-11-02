@@ -95,6 +95,7 @@ namespace ige::creator
                     Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y }); // Title bar size
                     Editor::getCurrentScene()->setWindowSize(m_windowSize);
                     Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(m_windowSize.X() / m_windowSize.Y());
+                    Editor::getCurrentScene()->setViewSize({ getSize().x, getSize().y });
                 }
 
                 m_inputProcessor = std::make_shared<InputProcessor>();
@@ -121,6 +122,7 @@ namespace ige::creator
         if (Editor::getCurrentScene()) {
             Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y });
             Editor::getCurrentScene()->setWindowSize(m_windowSize);
+            Editor::getCurrentScene()->setViewSize({ getSize().x, getSize().y });
             if(Editor::getCurrentScene()->getActiveCamera())
                 Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(m_windowSize.X() / m_windowSize.Y());
         }
