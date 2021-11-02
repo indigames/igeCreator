@@ -361,6 +361,7 @@ namespace ige::creator
         if (Editor::getCurrentScene()) {
             Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y + 25.f });
             Editor::getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
+            Editor::getCurrentScene()->setViewSize({ getSize().x, getSize().y });
         }
 
         // Update keyboard
