@@ -52,6 +52,7 @@ namespace ige::creator
 
         const ImVec2& getSize() const;
         const ImVec2& getPosition() const;
+        const ImVec2& getScrollPosition() const;
 
         ige::scene::Event<>& getOnOpenedEvent() { return m_openEvent; }
         ige::scene::Event<>& getOnClosedEvent() { return m_closeEvent; }
@@ -80,6 +81,7 @@ namespace ige::creator
         static uint64_t s_idCounter;
 
         ImVec2 m_position = {0.f, 0.f};
+        ImVec2 m_scrollPosition = { 0.f, 0.f };
 
         ImVec2 m_size = {0.f, 0.f};
         bool m_bSizeChanged = false;

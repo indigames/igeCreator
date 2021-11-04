@@ -1,6 +1,7 @@
 #include <imgui.h>
 
 #include "core/Panel.h"
+#include <pyxcore/pyxieDebug.h>
 
 namespace ige::creator
 {
@@ -115,7 +116,18 @@ namespace ige::creator
                 {
                     drawWidgets();
                 }
+
+                
             }
+
+            auto scrollX = ImGui::GetScrollX();
+            auto scrollY = ImGui::GetScrollY();
+            if (m_scrollPosition.x != scrollX || m_scrollPosition.y != scrollY)
+            {
+                m_scrollPosition.x = scrollX;
+                m_scrollPosition.y = scrollY;
+            }
+
             ImGui::End();
         }
     }
@@ -128,5 +140,10 @@ namespace ige::creator
     const ImVec2& Panel::getSize() const
     {
         return m_size;
+    }
+
+    const ImVec2& Panel::getScrollPosition() const
+    {
+        return m_scrollPosition;
     }
 }

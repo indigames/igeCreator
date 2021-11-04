@@ -152,6 +152,8 @@ namespace ige::creator
                 m_HandleCameraTouchId = -1;
                 m_bInitialized = true;
             }
+
+            SceneManager::getInstance()->setIsIgeEditor(true);
         }
     }
 
