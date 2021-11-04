@@ -27,6 +27,8 @@ def convertAssets(sourceDir, destDir, platform, unit=1.0, rootDir=None):
     imageList = devtool.findImageFiles(sourceDir)
     allTextures = dict()
     for img in imageList:
+        if img.find('\\config\\') != -1 or img.find('/config/') != -1:
+            continue
         outFile = devtool.replaceExt(img, '.pyxi');
         if not path.exists(outFile) and img not in allTextures:
             allTextures[img] = {'path': devtool.removeRoot(img, sourceDir), 'normal': False, 'wrap': False}
@@ -34,5 +36,3 @@ def convertAssets(sourceDir, destDir, platform, unit=1.0, rootDir=None):
         devtool.convertImages(allTextures, sourceDir, destDir, platform)
 
 convertAssets('.', '.', igeCore.TARGET_PLATFORM_MOBILE)
-
-input("Convert successed, press Enter to continue...")

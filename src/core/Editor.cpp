@@ -190,7 +190,8 @@ namespace ige::creator
             pyxie_printf("Converting assets...");
             auto scriptPath = fs::path(Editor::getInstance()->getEnginePath()).append("tools").append("convert-textures.bat");
             auto projectDir = Editor::getInstance()->getProjectPath();
-            system((std::string("cmd.exe /c ") + scriptPath.string() + " " + projectDir).c_str());
+            auto cmd = (std::string("cmd.exe /c \"\"") + scriptPath.string() + "\" \"" + projectDir +"\"\"").c_str();
+            system(cmd);
             pyxie_printf("Converting assets finished!");
             return 1;
         };

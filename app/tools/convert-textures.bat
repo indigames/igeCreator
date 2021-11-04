@@ -13,6 +13,8 @@ python -m pip install -i https://test.pypi.org/simple/ igeCore --user --upgrade
 cd %PROJECT_DIR%
 python %~dp0..\convert.py
 
+pause
+
 if %ERRORLEVEL% NEQ 0 goto ERROR
 
 
