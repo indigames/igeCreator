@@ -3,6 +3,9 @@ from os import path
 import igeCore
 from igeCore import devtool
 
+import sys
+import getopt
+
 def convertAssets(sourceDir, destDir, platform, unit=1.0, rootDir=None):
     """
     Convert model and image data to ige format
@@ -35,4 +38,23 @@ def convertAssets(sourceDir, destDir, platform, unit=1.0, rootDir=None):
     if len(allTextures) > 0:
         devtool.convertImages(allTextures, sourceDir, destDir, platform)
 
-convertAssets('.', '.', igeCore.TARGET_PLATFORM_MOBILE)
+def main(argv):
+    project_dir = '.'
+    output_dir = '.'
+
+    try:
+        opts, args = getopt.getopt(argv, "i:o")
+    except getopt.GetoptError:
+        print('convert.py -i <project_dir> -o <output_dir>')
+        sys.exit(2)
+
+    for opt, arg in opts:
+        if opt in ("-i"):
+            project_dir = arg
+        elif opt in ("-o"):
+            output_dir = arg
+        
+    convertAssets(project_dir, output_dir, igeCore.TARGET_PLATFORM_MOBILE)
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
