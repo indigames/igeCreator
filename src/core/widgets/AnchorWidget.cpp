@@ -10,7 +10,7 @@ namespace ige::creator
 
     void AnchorWidget::_drawImpl()
     {
-        ImGui::BeginChild(getIdAString().c_str(), ImVec2(42.f, 42.f), true, ImGuiWindowFlags_NoScrollbar);
+        ImGui::BeginChild(getIdAsString().c_str(), ImVec2(42.f, 42.f), true, ImGuiWindowFlags_NoScrollbar);
 
         auto windowPos = ImGui::GetWindowPos();
         auto minPos = ImVec2(windowPos.x + 5.f, windowPos.y + 5.f);

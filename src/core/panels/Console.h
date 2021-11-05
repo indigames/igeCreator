@@ -1,8 +1,9 @@
 #pragma once
-#include <deque>
+#include <sstream>
 
 #include "core/Panel.h"
 #include "core/layout/Group.h"
+#include "core/widgets/TextArea.h"
 
 namespace ige::creator
 {
@@ -21,11 +22,11 @@ namespace ige::creator
         
         //! Auto scroll
         bool isAutoScroll() { return m_bAutoScroll; }
-        void setAutoScroll(bool autoScroll = true) { m_bAutoScroll = autoScroll; }
+        void setAutoScroll(bool autoScroll = true);
 
         //! Max number of lines
-        int getMaxLines() const { return m_maxLines; }
-        void setMaxLines(int max) { m_maxLines = max; }
+        int getMaxLogSize() const { return m_maxLogSize; }
+        void setMaxLogSize(int max) { m_maxLogSize = max; }
 
     protected:
         virtual void initialize() override;
@@ -35,10 +36,10 @@ namespace ige::creator
     protected:
         std::shared_ptr<Group> m_topGroup = nullptr;
         std::shared_ptr<Group> m_logGroup = nullptr;
-        std::deque<uint64_t> m_logIds;
+        std::shared_ptr<TextArea> m_logTextWidget = nullptr;
+        std::stringstream m_logBuffer;
 
-        int m_maxLines = 3000;
-        int _scrollToBottom = 0;
+        int m_maxLogSize = 4096;
         bool m_bAutoClearOnStart = true;
         bool m_bAutoScroll = true;
     };

@@ -15,7 +15,7 @@ namespace ige::creator
 
     void Color::_drawImpl()
     {
-        ImGui::PushID((m_label + getIdAString()).c_str());
+        ImGui::PushID((m_label + getIdAsString()).c_str());
 
         if (ImGui::ColorEdit4(m_label.c_str(), m_data.P()))
         {

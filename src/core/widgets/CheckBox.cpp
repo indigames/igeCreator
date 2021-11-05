@@ -16,7 +16,7 @@ namespace ige::creator
     void CheckBox::_drawImpl()
     {
         bool prevValue = m_bIsSelected;
-        ImGui::Checkbox((m_label + getIdAString()).c_str(), &m_bIsSelected);
+        ImGui::Checkbox((m_label + getIdAsString()).c_str(), &m_bIsSelected);
 
         if(prevValue != m_bIsSelected)
         {

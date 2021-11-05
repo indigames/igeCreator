@@ -13,7 +13,7 @@ namespace ige::creator
 
     void MenuItem::_drawImpl()
     {
-        if (ImGui::MenuItem((m_name + getIdAString()).c_str(), m_shortcut.c_str(), nullptr, m_bEnabled))
+        if (ImGui::MenuItem((m_name + getIdAsString()).c_str(), m_shortcut.c_str(), nullptr, m_bEnabled))
         {
             getOnClickEvent().invoke(this);
         }

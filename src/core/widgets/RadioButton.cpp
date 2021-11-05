@@ -24,7 +24,7 @@ namespace ige::creator
     
     void RadioButton::_drawImpl()
     {
-        if (ImGui::RadioButton((m_label + getIdAString()).c_str(), m_bIsSelected))
+        if (ImGui::RadioButton((m_label + getIdAsString()).c_str(), m_bIsSelected))
         {            
             setSelected(true);
         }

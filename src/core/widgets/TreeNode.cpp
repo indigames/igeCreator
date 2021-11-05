@@ -64,7 +64,7 @@ namespace ige::creator
         if (m_bIsHighlighted)   flags |= ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_Bullet;
 
         ImGui::PushStyleColor(ImGuiCol_Text, m_color);
-        bool opened = ImGui::TreeNodeEx((m_name + getIdAString()).c_str(), flags);
+        bool opened = ImGui::TreeNodeEx((m_name + getIdAsString()).c_str(), flags);
         ImGui::PopStyleColor();
 
         executePlugins();

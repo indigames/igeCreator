@@ -22,7 +22,7 @@ namespace ige::creator
         if (m_choices.find(m_selectedIdx) == m_choices.end())
             m_selectedIdx = m_choices.begin()->first;
 
-        if (ImGui::BeginCombo((m_label + getIdAString()).c_str(), m_choices[m_selectedIdx].c_str()))
+        if (ImGui::BeginCombo((m_label + getIdAsString()).c_str(), m_choices[m_selectedIdx].c_str()))
         {
             for (const auto&[key, value] : m_choices)
             {

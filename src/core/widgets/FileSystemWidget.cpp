@@ -264,7 +264,7 @@ namespace ige::creator
 
         if (ImGui::BeginPopupContextWindow())
         {
-            if (ImGui::MenuItem(("Create Folder" + getIdAString()).c_str(), nullptr, nullptr, true))
+            if (ImGui::MenuItem(("Create Folder" + getIdAsString()).c_str(), nullptr, nullptr, true))
             {
                 try {
                     auto path = fs::path(m_cache.get_path()).append("0_NewFolder");

@@ -43,7 +43,7 @@ namespace ige::creator
     {
         auto found = std::find_if(m_widgets.begin(), m_widgets.end(), [&](std::shared_ptr<Widget> itr)
         {
-            return itr->getIdAString() == widgetId;
+            return itr->getIdAsString() == widgetId;
         });
 
         if (found != m_widgets.end())

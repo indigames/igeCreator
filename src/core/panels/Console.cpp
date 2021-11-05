@@ -4,7 +4,7 @@
 #include "core/panels/Console.h"
 #include "core/Canvas.h"
 #include "core/Editor.h"
-#include "core/widgets/Label.h"
+#include "core/widgets/TextField.h"
 #include "core/widgets/Button.h"
 #include "core/widgets/Drag.h"
 #include "core/task/TaskManager.h"
@@ -54,7 +54,7 @@ namespace ige::creator
 
         m_topGroup = createWidget<Group>("Console Top", false, false);
 
-        auto columns = m_topGroup->createWidget<Columns<10>>(128.f);
+        auto columns = m_topGroup->createWidget<Columns<10>>(160.f);
 
         columns->createWidget<Button>("Clear", ImVec2(64.f, 20.f), true, false)->getOnClickEvent().addListener([this](auto widget) {
             TaskManager::getInstance()->addTask([this]() {
@@ -71,21 +71,16 @@ namespace ige::creator
         auto scrollChk = columns->createWidget<CheckBox>("AutoScroll", m_bAutoScroll);
         scrollChk->setEndOfLine(false);
         scrollChk->getOnDataChangedEvent().addListener([this](bool val) {
-            m_bAutoScroll = val;
+            setAutoScroll(val);
         });
 
-        std::array maxLines = { (float)m_maxLines };
-        columns->createWidget<Drag<float>>("Rows", ImGuiDataType_S32, maxLines, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
-            m_maxLines = (int)val[0];
+        std::array maxSize = { (float)m_maxLogSize };
+        columns->createWidget<Drag<float>>("Limit", ImGuiDataType_S32, maxSize, 1, 0, 16 * 1024)->getOnDataChangedEvent().addListener([this](auto val) {
+            m_maxLogSize = std::clamp((int)val[0], 0, 16 * 1024);
         });
 
         m_logGroup = createWidget<Group>("Console Log", false, false);
-        auto ctxMenu = m_logGroup->addPlugin<WindowContextMenu>("Console_Context");
-        ctxMenu->createWidget<MenuItem>("Clear")->getOnClickEvent().addListener([this](auto widget) {
-            TaskManager::getInstance()->addTask([this]() {
-                initialize();
-            });
-        });
+        m_logTextWidget = m_logGroup->createWidget<TextArea>("", "", ImVec2(-1.f, -1.f), true, true);
     }
 
     void Console::_drawImpl()
@@ -144,11 +139,6 @@ namespace ige::creator
                 // draw scrollable group
                 ImGui::BeginChild("log_group_child");
                     m_logGroup->draw();
-                    if (m_bAutoScroll && _scrollToBottom > 1) {
-                        auto pos = ImGui::GetScrollMaxY();
-                        ImGui::SetScrollY(pos);
-                        _scrollToBottom = 0;
-                    }
                 ImGui::EndChild();
             }
             ImGui::End();
@@ -157,10 +147,9 @@ namespace ige::creator
 
     void Console::clear()
     {
+        m_logBuffer.str(std::string());
         if (m_logGroup)
-        {
             m_logGroup->removeAllWidgets();
-        }
         m_logGroup = nullptr;
         removeAllWidgets();
     }
@@ -176,22 +165,36 @@ namespace ige::creator
 
         char buffer[80];
         strftime(buffer, sizeof(buffer), "%d-%m-%Y %H:%M:%S", timeinfo);
-        auto msg = std::string(buffer) + "\t" + std::string(message);
+        auto msg = std::string(buffer) + "\t" + std::string(message) + "\n";
 
-        while (m_logIds.size() > m_maxLines)
-        {
-            auto id = m_logIds.front();
-            m_logIds.pop_front();
-            m_logGroup->removeWidgetById(id);
+        if (m_logBuffer.gcount() > 1) {
+            char last_char;
+            m_logBuffer.seekg(-1, std::ios::end);
+            m_logBuffer >> last_char;
+            m_logBuffer.seekg(0, std::ios::end);
+            if (last_char != '\n') msg = "\n" + msg;
         }
 
-        m_logIds.push_back(m_logGroup->createWidget<Label>(msg)->getId());
+        std::streamsize logSize = m_logBuffer.gcount() + msg.length();
 
-        _scrollToBottom++;
+        if (logSize >= getMaxLogSize())
+            m_logBuffer.ignore(logSize - getMaxLogSize());
+
+        m_logBuffer << msg;
+
+        if(m_logTextWidget)
+            m_logTextWidget->setText(m_logBuffer.str());
     }
 
     void Console::clearAllLogs()
     {
         initialize();
+    }
+
+    void Console::setAutoScroll(bool autoScroll) 
+    {
+        m_bAutoScroll = autoScroll;
+        if (m_logTextWidget)
+            m_logTextWidget->setAutoScroll(m_bAutoScroll);
     }
 }

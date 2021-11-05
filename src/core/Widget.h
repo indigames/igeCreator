@@ -19,7 +19,7 @@ namespace ige::creator
 
         void draw() override;
         
-        std::string getIdAString() const { return "##" + std::to_string(m_id); }
+        std::string getIdAsString() const { return "##" + std::to_string(m_id); }
         uint64_t getId() const { return m_id; }
 
         //! Hover status

@@ -33,7 +33,7 @@ namespace ige::creator
     Drag<T, N>::Drag(const std::string& label, ImGuiDataType type, const std::array<T, N>& val, float speed, const T& minVal, const T& maxVal)
         : DataWidget(val), m_label(label), m_dataType(type), m_speed(speed), m_min(minVal), m_max(maxVal)
     {
-        m_label.append(getIdAString());
+        m_label.append(getIdAsString());
     }
 
     template <typename T, size_t N>
