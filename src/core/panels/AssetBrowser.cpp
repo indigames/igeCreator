@@ -1,6 +1,4 @@
-﻿#include <imgui.h>
-#include "core/panels/AssetBrowser.h"
-
+﻿#include "core/panels/AssetBrowser.h"
 #include "core/widgets/Button.h"
 #include "core/widgets/TreeNode.h"
 #include "core/widgets/Separator.h"
@@ -21,9 +19,9 @@
 
 #include "core/utils/crc32.h"
 
-#include "utils/GraphicsHelper.h"
-#include <imgui_internal.h>
-#include "SDL.h"
+#include <utils/GraphicsHelper.h>
+#include <SDL.h>
+#include <imgui.h>
 
 namespace ige::creator
 {
@@ -98,6 +96,24 @@ namespace ige::creator
                                 }
                                 catch (std::exception e) {
                                     dirty = true;
+                                }
+                            }
+                        }
+
+                        // check figure dirty
+                        if (!dirty) {
+                            if (IsFormat(E_FileExts::Figure, file_ext)) {
+                                auto figureMeta = std::make_unique<FigureMeta>(path);
+                                if(figureMeta->isAnim()) {
+                                    if (!fs::exists(fsPath.parent_path().append(fsPath.stem().string() + ".pyxa"))) {
+                                        dirty = true;
+                                    }
+                                }
+                                else if (figureMeta->isBaseModel()) {
+                                    auto basePath = fs::path(figureMeta->baseModelPath());
+                                    if (!fs::exists(basePath.parent_path().append(basePath.stem().string() + ".pyxf"))) {
+                                        dirty = true;
+                                    }
                                 }
                             }
                         }

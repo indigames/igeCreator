@@ -36,9 +36,84 @@ FigureMeta::FigureMeta(const std::string& path)
 FigureMeta::~FigureMeta() {
 }
 
-
 void FigureMeta::draw(std::shared_ptr<Group> group) {
     AssetMeta::draw(group);
+}
+
+bool FigureMeta::isFolderRule() {
+    auto fsPath = fs::path(m_path);
+    auto relPath = fsPath.is_absolute() ? fs::relative(fsPath, fs::current_path()) : fsPath;
+    auto parentPath = relPath.parent_path();
+
+    auto ext = fsPath.extension().string();
+    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+    bool isFbx = ext.compare(".fbx") == 0;
+
+    // Load model data and binded animation
+    auto parentName = parentPath.filename();
+    auto baseModelPath = parentPath;
+    if (isFbx)
+        baseModelPath.append(parentName.string() + ".fbx");
+    else
+        baseModelPath.append(parentName.string() + ".dae");
+    return fs::exists(baseModelPath);
+}
+
+bool FigureMeta::isBaseModel() {
+    auto fsPath = fs::path(m_path);
+    auto relPath = fsPath.is_absolute() ? fs::relative(fsPath, fs::current_path()) : fsPath;
+    auto parentPath = relPath.parent_path();
+
+    auto ext = fsPath.extension().string();
+    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+    bool isFbx = ext.compare(".fbx") == 0;
+
+    // Load model data and binded animation
+    auto parentName = parentPath.filename();
+    auto baseModelPath = parentPath;
+    if (isFbx)
+        baseModelPath.append(parentName.string() + ".fbx");
+    else
+        baseModelPath.append(parentName.string() + ".dae");
+    auto folderRule = fs::exists(baseModelPath);
+    if (!folderRule)
+        return true;
+
+    auto filename = fsPath.filename().string();
+    std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
+
+    auto basename = baseModelPath.filename().string();
+    std::transform(basename.begin(), basename.end(), basename.begin(), ::tolower);
+
+    return (filename.compare(basename) == 0);
+}
+
+std::string FigureMeta::baseModelPath()
+{
+    auto fsPath = fs::path(m_path);
+    auto relPath = fsPath.is_absolute() ? fs::relative(fsPath, fs::current_path()) : fsPath;
+    auto parentPath = relPath.parent_path();
+
+    auto ext = fsPath.extension().string();
+    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+    bool isFbx = ext.compare(".fbx") == 0;
+
+    // Load model data and binded animation
+    auto parentName = parentPath.filename();
+    auto baseModelPath = parentPath;
+    if (isFbx)
+        baseModelPath.append(parentName.string() + ".fbx");
+    else
+        baseModelPath.append(parentName.string() + ".dae");
+    return fs::exists(baseModelPath) ? baseModelPath : m_path;
+}
+
+bool FigureMeta::isAnim() 
+{
+    bool embedded = std::make_unique<FigureMeta>(baseModelPath())->getOption("EMBEDDED_ANIMATION").get<bool>();
+    if (!embedded && (!isFolderRule() || (isFolderRule() && !isBaseModel())))
+        return true;
+    return false;
 }
 
 
@@ -57,8 +132,13 @@ bool FigureMeta::replaceTextures(EditableFigure& efig)
         for (const auto& entry : fs::recursive_directory_iterator(relPath.parent_path())) {
             if (entry.is_regular_file()) {
                 if (entry.path().filename().compare(texName) == 0) {
-                    imgConv.SetInputFile(entry.path().string().c_str());
+                    // Check for alpha
+                    auto path = entry.path().string();
+                    std::replace(path.begin(), path.end(), '\\', '/');
+                    imgConv.SetInputFile(path.c_str());
                     alpha = imgConv.DoConvert(true);
+
+                    // Replace texture
                     auto newPath = entry.path().relative_path().replace_extension(".pyxi").string();
                     std::replace(newPath.begin(), newPath.end(), '\\', '/');
                     memset(newTexSrc.path, 0, MAX_PATH);

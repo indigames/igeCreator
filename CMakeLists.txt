@@ -96,7 +96,7 @@ include_directories(
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeVMath"
 )
 
-add_compile_definitions(EDITOR_MODE=1)
+add_compile_definitions(EDITOR_MODE=1 IMGUI_DEFINE_MATH_OPERATORS=1)
 add_subdirectory(libs/pyxCore ${CMAKE_BINARY_DIR}/pyxCore EXCLUDE_FROM_ALL)
 add_subdirectory(libs/igeCore ${CMAKE_BINARY_DIR}/igeCore EXCLUDE_FROM_ALL)
 add_subdirectory(libs/igeVMath ${CMAKE_BINARY_DIR}/igeVMath EXCLUDE_FROM_ALL)

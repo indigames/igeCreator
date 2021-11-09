@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef __TEXTURE_META_H_
 #define __TEXTURE_META_H_
 

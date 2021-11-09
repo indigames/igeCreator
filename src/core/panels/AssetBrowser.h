@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "core/Panel.h"
 #include "core/filesystem/FileSystem.h"
 #include "core/filesystem/FileSystemCache.h"
