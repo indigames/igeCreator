@@ -31,7 +31,7 @@ namespace ige::creator
         int flag = ImGuiInputTextFlags_AutoSelectAll;
         if (m_bIsReadOnly) flag |= ImGuiInputTextFlags_ReadOnly;
         else flag |= ImGuiInputTextFlags_EnterReturnsTrue;
-        if (m_bIsAutoScroll) flag |= ImGuiInputTextFlags_AutoScrolling;
+        //if (m_bIsAutoScroll) flag |= ImGuiInputTextFlags_AutoScrolling;
 
         ImGui::PushID(getIdAsString().c_str());
         ImGui::PushItemWidth(ImGui::GetWindowSize().x);
