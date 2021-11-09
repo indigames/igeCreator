@@ -1,6 +1,3 @@
-#include <imgui.h>
-#include <imgui_internal.h>
-
 #include "core/Canvas.h"
 #include "core/Panel.h"
 #include "core/menu/MenuBar.h"
@@ -18,6 +15,9 @@
 
 #include <scene/SceneManager.h>
 using namespace ige::scene;
+
+#include <imgui.h>
+#include <imgui_internal.h>
 
 namespace ige::creator
 {

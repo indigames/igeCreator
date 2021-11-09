@@ -1,6 +1,6 @@
 #pragma once
-#include <map>
 #include "core/Widget.h"
+#include <map>
 
 namespace ige::creator
 {

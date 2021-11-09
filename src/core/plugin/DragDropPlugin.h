@@ -1,11 +1,11 @@
 #pragma once
-
-#include <imgui.h>
-
 #include <string>
 #include "core/plugin/IPlugin.h"
 
 #include <event/Event.h>
+
+#include <imgui.h>
+#include <imgui_internal.h>
 
 namespace ige::creator
 {
@@ -22,7 +22,7 @@ namespace ige::creator
     {
     public:
         DDSourcePlugin(EDragDropID id, const std::string& tooltip, const T& data);
-        DDSourcePlugin(std::string id, const std::string& tooltip, const T& data);
+        DDSourcePlugin(const std::string& id, const std::string& tooltip, const T& data);
         virtual ~DDSourcePlugin() {
             m_onStartDragEvent.removeAllListeners();
             m_onStopDragEvent.removeAllListeners();
@@ -57,7 +57,7 @@ namespace ige::creator
     {
     public:
         DDTargetPlugin(EDragDropID id);
-        DDTargetPlugin(std::string id);
+        DDTargetPlugin(const std::string& id);
 
         virtual ~DDTargetPlugin() {
             m_onStartHoverEvent.removeAllListeners();
@@ -86,6 +86,32 @@ namespace ige::creator
 
         bool m_isHovered = false;
     };
+
+    // Drag & Drop target plugin custom with top and bottom zones
+    template<typename T>
+    class DDTargetPluginCustom : public DDTargetPlugin<T>
+    {
+    public:
+        DDTargetPluginCustom(EDragDropID id) : DDTargetPlugin<T>(id) {};
+        DDTargetPluginCustom(const std::string& id) : DDTargetPlugin<T>(id) {};
+
+        virtual ~DDTargetPluginCustom() {};
+
+        virtual void execute() override;
+
+        ige::scene::Event<T>& getOnTopDataReceivedEvent() { return m_onTopDataReceivedEvent; }
+        ige::scene::Event<T>& getOnBottomDataReceivedEvent() { return m_onBottomDataReceivedEvent; }
+
+        bool isHovered() const {
+            return m_isHovered;
+        }
+
+        const std::string& getId() { return m_id; }
+
+    protected:
+        ige::scene::Event<T> m_onTopDataReceivedEvent;
+        ige::scene::Event<T> m_onBottomDataReceivedEvent;
+    };
     
     // DDSourcePlugin implementation
     template<typename T>
@@ -96,7 +122,7 @@ namespace ige::creator
     }
 
     template<typename T>
-    DDSourcePlugin<T>::DDSourcePlugin(std::string id, const std::string& tooltip, const T& data)
+    DDSourcePlugin<T>::DDSourcePlugin(const std::string& id, const std::string& tooltip, const T& data)
         : m_tooltip(tooltip), m_data(data)
     {
         m_id = id;
@@ -143,7 +169,7 @@ namespace ige::creator
     }
 
     template<typename T>
-    DDTargetPlugin<T>::DDTargetPlugin(std::string id)
+    DDTargetPlugin<T>::DDTargetPlugin(const std::string& id)
     {
         m_id = id;
     }
@@ -151,6 +177,33 @@ namespace ige::creator
     template<typename T>
     void DDTargetPlugin<T>::execute()
     {
+        if (ImGui::BeginDragDropTarget())
+        {
+            if (!m_isHovered)
+                m_onStartHoverEvent.invoke();
+
+            m_isHovered = true;
+
+            ImGuiDragDropFlags flags = 0;
+            if (auto payload = ImGui::AcceptDragDropPayload(getId().c_str(), flags))
+            {
+                T data = *(T*)payload->Data;
+                m_onDataReceivedEvent.invoke(data);
+            }
+            ImGui::EndDragDropTarget();
+        }
+        else
+        {
+            if (m_isHovered)
+                m_onStopHoverEvent.invoke();
+
+            m_isHovered = false;
+        }
+    }
+
+    template<typename T>
+    void DDTargetPluginCustom<T>::execute()
+    {        
         if (ImGui::BeginDragDropTarget())
         {
             if (!m_isHovered)

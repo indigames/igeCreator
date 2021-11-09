@@ -2,6 +2,8 @@
 #include "core/gizmo/Gizmo.h"
 #include "core/Editor.h"
 #include "core/Canvas.h"
+#include "core/panels/Hierarchy.h"
+#include "core/panels/EditorScene.h"
 #include "core/scene/TargetObject.h"
 
 NS_IGE_BEGIN

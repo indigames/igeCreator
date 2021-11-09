@@ -1,5 +1,3 @@
-#include <imgui.h>
-
 #include "core/panels/AssetViewer.h"
 #include "core/panels/AssetBrowser.h"
 
@@ -8,6 +6,8 @@
 #include "core/FileHandle.h"
 #include "core/scene/assets/FigureMeta.h"
 #include "core/scene/assets/TextureMeta.h"
+
+#include <imgui.h>
 
 namespace ige::creator
 {

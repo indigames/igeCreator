@@ -1,7 +1,7 @@
+#include "core/widgets/TreeNode.h"
+
 #include <imgui.h>
 #include <algorithm>
-
-#include "core/widgets/TreeNode.h"
 
 namespace ige::creator
 {

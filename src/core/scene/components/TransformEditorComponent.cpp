@@ -11,7 +11,6 @@
 
 #include "core/Editor.h"
 #include "core/Canvas.h"
-#include "core/panels/InspectorEditor.h"
 NS_IGE_BEGIN
 
 TransformEditorComponent::TransformEditorComponent() {

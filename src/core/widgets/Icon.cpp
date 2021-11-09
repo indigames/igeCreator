@@ -1,6 +1,4 @@
 #include "core/widgets/Icon.h"
-#include <imgui_internal.h>
-
 namespace ige::creator
 {
     Icon::Icon(const std::string& label, uint32_t textureId, const ImVec2& size, bool enable, bool eol)

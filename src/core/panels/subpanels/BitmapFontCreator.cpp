@@ -1,17 +1,14 @@
-﻿#include <imgui.h>
-
-#include "core/panels/subpanels/BitmapFontCreator.h"
+﻿#include "core/panels/subpanels/BitmapFontCreator.h"
 #include "core/widgets/Widgets.h"
 #include "core/widgets/TextArea.h"
-
-#include <core/widgets/Image.h>
-
-#include <core/FileHandle.h>
-#include <core/plugin/DragDropPlugin.h>
-#include <core/dialog/OpenFileDialog.h>
+#include "core/widgets/Image.h"
+#include "core/FileHandle.h"
+#include "core/plugin/DragDropPlugin.h"
+#include "core/dialog/OpenFileDialog.h"
 #include "core/filesystem/FileSystem.h"
 
 #include <cstdlib>
+#include <imgui.h>
 
 namespace ige::creator
 {

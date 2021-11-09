@@ -10,6 +10,9 @@
 #include "core/Editor.h"
 #include "core/Canvas.h"
 #include "core/panels/InspectorEditor.h"
+#include "core/panels/Hierarchy.h"
+#include "core/panels/EditorScene.h"
+#include "core/panels/Inspector.h"
 
 NS_IGE_BEGIN
 

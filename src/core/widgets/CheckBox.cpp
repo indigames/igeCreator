@@ -1,6 +1,6 @@
-#include <imgui.h>
-
 #include "core/widgets/CheckBox.h"
+
+#include <imgui.h>
 
 namespace ige::creator
 {

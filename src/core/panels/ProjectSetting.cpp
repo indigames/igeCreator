@@ -1,7 +1,4 @@
-#include <imgui.h>
-
 #include "core/panels/ProjectSetting.h"
-
 #include "core/layout/Group.h"
 #include "core/layout/Columns.h"
 #include "core/widgets/Label.h"
@@ -14,6 +11,7 @@
 #include "core/filesystem/FileSystem.h"
 
 #include <utils/Serialize.h>
+#include <imgui.h>
 
 namespace ige::creator
 {

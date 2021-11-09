@@ -1,17 +1,16 @@
-#include <imgui.h>
 #include "core/plugin/DragDropPlugin.h"
 #include "core/FileHandle.h"
 #include "core/Editor.h"
 #include "core/task/TaskManager.h"
 
 #include "core/widgets/FileSystemWidget.h"
-#ifndef IMGUI_DEFINE_MATH_OPERATORS
-#define IMGUI_DEFINE_MATH_OPERATORS
-#endif
-#include <imgui_internal.h>
+
 #include <SDL.h>
 #include <array>
 #include <string>
+
+#include <imgui.h>
+#include <imgui_internal.h>
 
 #ifdef WIN32
 #include <window.h>

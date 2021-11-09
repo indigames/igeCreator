@@ -1,5 +1,3 @@
-#include <imgui.h>
-
 #include "core/panels/GameScene.h"
 #include "core/panels/EditorScene.h"
 #include "core/widgets/Image.h"
@@ -7,19 +5,24 @@
 #include "core/Canvas.h"
 #include "core/panels/Hierarchy.h"
 #include "core/panels/EditorScene.h"
+#include "core/panels/Console.h"
 #include "core/dialog/SaveFileDialog.h"
 #include "core/task/TaskManager.h"
+#include "core/filesystem/FileSystem.h"
 
 #include <utils/GraphicsHelper.h>
 #include <scene/Scene.h>
 #include <scene/SceneObject.h>
 #include <scene/SceneManager.h>
-#include "event/Event.h"
-
+#include <event/Event.h>
 using namespace ige::scene;
 
 #include <utils/PyxieHeaders.h>
 using namespace pyxie;
+
+
+
+#include <imgui.h>
 
 namespace ige::creator
 {

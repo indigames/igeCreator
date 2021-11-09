@@ -1,9 +1,8 @@
 #pragma once
+#include "core/Widget.h"
 
 #include <imgui.h>
 #include <limits>
-
-#include "core/Widget.h"
 
 namespace ige::creator
 {

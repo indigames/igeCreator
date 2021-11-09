@@ -1,16 +1,15 @@
-#include <imgui.h>
-#include <imgui_internal.h>
-
+#include "core/panels/Hierarchy.h"
+#include "core/panels/Inspector.h"
 #include "core/filesystem/FileSystem.h"
 #include "core/FileHandle.h"
 #include "core/dialog/MsgBox.h"
-#include "core/panels/Hierarchy.h"
 #include "core/Editor.h"
 #include "core/Canvas.h"
 #include "core/menu/ContextMenu.h"
 #include "core/menu/MenuItem.h"
 #include "core/task/TaskManager.h"
 #include "core/plugin/DragDropPlugin.h"
+
 #include "components/FigureComponent.h"
 #include "components/SpriteComponent.h"
 #include "components/ScriptComponent.h"
@@ -36,9 +35,8 @@
 
 #include <scene/Scene.h>
 #include <scene/SceneObject.h>
-using namespace ige::scene;
-
 #include <utils/PyxieHeaders.h>
+using namespace ige::scene;
 
 #define NORMAL_COLOR {1.f, 1.f, 1.f, 1.f}
 #define PREFAB_COLOR {0.f, 0.85f, 0.85f, 1.f}
@@ -192,7 +190,7 @@ namespace ige::creator
                 }
             }            
         });
-        node->addPlugin<DDTargetPlugin<std::string>>(GetFileExtensionSuported(E_FileExts::Prefab)[0])->getOnDataReceivedEvent().addListener([objId](auto path) {
+        node->addPlugin<DDTargetPluginCustom<std::string>>(GetFileExtensionSuported(E_FileExts::Prefab)[0])->getOnDataReceivedEvent().addListener([objId](auto path) {
             auto parent = Editor::getCurrentScene()->findObjectById(objId);
             if (parent) {
                 if (!parent->isInPrefab()) {
@@ -369,7 +367,8 @@ namespace ige::creator
             initialize();
             for (const auto& obj : scene->getObjects()) {
                 onSceneObjectCreated(*obj);
-                if (obj->getParent()) onSceneObjectAttached(*obj);
+                if (obj->getParent())
+                    onSceneObjectAttached(*obj);
             }
             return true;
         }
@@ -873,34 +872,7 @@ namespace ige::creator
 
     void Hierarchy::drawWidgets()
     {
-        // Draw widgets
         Panel::drawWidgets();
-
-        // TODO: fix position calculation in some cases
-        //if (m_bIsOpened && !m_bSkipDeselect && ImGui::IsWindowFocused() && ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-        //    auto vMin = ImGui::GetWindowContentRegionMin();
-        //    auto vMax = ImGui::GetWindowContentRegionMax();
-        //    
-        //    vMin.y += 6; // padding
-
-        //    vMin.x += ImGui::GetWindowPos().x;
-        //    vMin.y += ImGui::GetWindowPos().y;
-        //    vMax.x += ImGui::GetWindowPos().x;
-        //    vMax.y += ImGui::GetWindowPos().y;
-
-        //    float nodeMapHeight = 0.f;
-        //    for (const auto& item : m_objectNodeMap) {
-        //        if (item.second && item.second->isOpened())
-        //            nodeMapHeight += k_nodeDefaultHeight;
-        //    }
-        //    vMin.y += nodeMapHeight;
-
-        //    if (ImGui::GetMousePos().x >= vMin.x && ImGui::GetMousePos().x <= vMax.x
-        //        && ImGui::GetMousePos().y >= vMin.y && ImGui::GetMousePos().y <= vMax.y) {
-        //        if(Editor::getCurrentScene())
-        //            Editor::getInstance()->clearTargets();
-        //    }
-        //}
     }
 
     void Hierarchy::clear()

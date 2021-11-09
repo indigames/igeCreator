@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef FS_WATCHER_H
 #define FS_WATCHER_H
 

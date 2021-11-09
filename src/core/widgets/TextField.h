@@ -1,11 +1,10 @@
 #pragma once
-
 #include "core/Widget.h"
 #include <array>
 
 namespace ige::creator
 {
-    static const int MAX_TEXT_LENGHT = 16 * 1024;
+    static const int MAX_TEXT_LENGHT = 512;
     class TextField: public DataWidget<std::string>
     {
     public:

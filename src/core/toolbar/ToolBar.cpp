@@ -1,7 +1,4 @@
-#include <imgui.h>
-
 #include "core/toolbar/ToolBar.h"
-
 #include "core/Widget.h"
 #include "core/widgets/Button.h"
 #include "core/widgets/TextField.h"
@@ -17,6 +14,8 @@
 #include "core/panels/EditorScene.h"
 #include "core/panels/GameScene.h"
 #include "core/Canvas.h"
+
+#include <imgui.h>
 
 namespace ige::creator
 {

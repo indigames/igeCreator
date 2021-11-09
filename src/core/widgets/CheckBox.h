@@ -1,5 +1,4 @@
 #pragma once
-
 #include "core/Widget.h"
 
 namespace ige::creator

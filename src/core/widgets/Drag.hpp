@@ -1,10 +1,10 @@
 #pragma once
 
-#include <imgui.h>
-#include <imgui_internal.h>
-
 #include "core/Widget.h"
 #include "core/widgets/Drag.h"
+
+#include <imgui.h>
+#include <imgui_internal.h>
 
 namespace ImGui {
     const ImGuiDataTypeInfo DataTypeInfo[] =
@@ -59,7 +59,7 @@ namespace ige::creator
         void* p_data = m_data.data();
         int changedIdx = -1;
 
-        ImGuiContext& g = *GImGui;
+        auto& g = *(ImGui::GetCurrentContext());
         ImGui::BeginGroup();
         ImGui::PushID(label);
         ImGui::PushMultiItemsWidths(N, ImGui::CalcItemWidth());

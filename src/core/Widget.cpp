@@ -1,5 +1,6 @@
-#include <imgui.h>
 #include "core/Widget.h"
+
+#include <imgui.h>
 
 namespace ige::creator
 {

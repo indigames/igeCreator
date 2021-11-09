@@ -1,5 +1,3 @@
-#include <imgui.h>
-
 #include "core/panels/EditorScene.h"
 #include "core/panels/GameScene.h"
 #include "core/widgets/Image.h"
@@ -7,6 +5,7 @@
 #include "core/Canvas.h"
 #include "core/plugin/DragDropPlugin.h"
 #include "core/FileHandle.h"
+#include "core/filesystem/FileSystem.h"
 #include "core/task/TaskManager.h"
 #include "core/shortcut/ShortcutController.h"
 #include "core/scene/TargetObject.h"
@@ -36,6 +35,8 @@ using namespace ige::scene;
 
 #include <utils/PyxieHeaders.h>
 using namespace pyxie;
+
+#include <imgui.h>
 
 namespace ige::creator
 {

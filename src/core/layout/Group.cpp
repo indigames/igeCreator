@@ -1,6 +1,6 @@
-#include <imgui.h>
-
 #include "core/layout/Group.h"
+
+#include <imgui.h>
 
 namespace ige::creator
 {

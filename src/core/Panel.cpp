@@ -1,7 +1,7 @@
-#include <imgui.h>
-
 #include "core/Panel.h"
+
 #include <pyxcore/pyxieDebug.h>
+#include <imgui.h>
 
 namespace ige::creator
 {

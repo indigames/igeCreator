@@ -1,5 +1,3 @@
-#include <imgui.h>
-
 #include "core/layout/Columns.h"
 #include "core/widgets/Label.h"
 #include "core/widgets/TextField.h"
@@ -15,7 +13,6 @@
 #include "core/menu/MenuItem.h"
 #include "core/panels/Inspector.h"
 #include "core/Editor.h"
-#include "core/Canvas.h"
 #include "core/FileHandle.h"
 #include "core/task/TaskManager.h"
 #include "core/scene/CompoundComponent.h"
@@ -79,6 +76,8 @@ using namespace ige::scene;
 
 #include <pyxieUtilities.h>
 using namespace pyxie;
+
+#include <imgui.h>
 
 namespace ige::creator
 {

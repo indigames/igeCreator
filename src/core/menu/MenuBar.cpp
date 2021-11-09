@@ -1,5 +1,3 @@
-#include <imgui.h>
-
 #include "core/menu/MenuBar.h"
 #include "core/menu/Menu.h"
 #include "core/menu/MenuItem.h"
@@ -11,6 +9,8 @@
 #include "core/panels/Hierarchy.h"
 #include "core/panels/EditorScene.h"
 #include "core/task/TaskManager.h"
+
+#include <imgui.h>
 
 namespace ige::creator
 {

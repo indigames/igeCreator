@@ -6,6 +6,7 @@
 #include "core/Container.h"
 
 #include <event/Event.h>
+#include <imgui.h>
 
 namespace ige::creator
 {

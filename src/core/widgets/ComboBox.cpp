@@ -1,5 +1,6 @@
-#include <imgui.h>
 #include "core/widgets/ComboBox.h"
+
+#include <imgui.h>
 
 namespace ige::creator
 {

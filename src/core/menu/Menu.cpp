@@ -1,6 +1,6 @@
-#include <imgui.h>
-
 #include "core/menu/Menu.h"
+
+#include <imgui.h>
 
 namespace ige::creator
 {

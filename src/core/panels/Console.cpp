@@ -1,6 +1,3 @@
-#include <imgui.h>
-#include <ctime>
-
 #include "core/panels/Console.h"
 #include "core/Canvas.h"
 #include "core/Editor.h"
@@ -16,6 +13,9 @@
 
 #include <utils/GraphicsHelper.h>
 using namespace ige::scene;
+
+#include <imgui.h>
+#include <ctime>
 
 #ifdef __cplusplus
 extern "C" {

@@ -1,13 +1,12 @@
-#include <imgui.h>
-
-#include <backends/imgui_impl_sdl.h>
-#include <backends/imgui_impl_opengl3.h>
-
 #include "core/Version.h"
 #include "core/Editor.h"
 #include "core/Canvas.h"
 #include "core/panels/Inspector.h"
 #include "core/panels/EditorScene.h"
+#include "core/panels/Hierarchy.h"
+#include "core/panels/ProjectSetting.h"
+#include "core/panels/AssetBrowser.h"
+#include "core/panels/AssetViewer.h"
 #include "core/task/TaskManager.h"
 #include "core/dialog/MsgBox.h"
 #include "core/dialog/OpenFileDialog.h"
@@ -16,11 +15,15 @@
 #include "core/shortcut/ShortcutController.h"
 #include "core/panels/subpanels/BitmapFontCreator.h"
 #include "core/scene/TargetObject.h"
+#include "core/filesystem/FileSystem.h"
 
 #include <scene/SceneManager.h>
 #include <scene/Scene.h>
 using namespace ige::scene;
 
+#include <imgui.h>
+#include <backends/imgui_impl_sdl.h>
+#include <backends/imgui_impl_opengl3.h>
 #define LAYOUT_CONFIG_INI "imgui.ini"
 
 namespace ige::creator

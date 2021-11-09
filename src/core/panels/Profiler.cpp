@@ -1,7 +1,6 @@
-#include <imgui.h>
-
 #include "core/panels/Profiler.h"
 
+#include <imgui.h>
 
 namespace ige::creator
 {

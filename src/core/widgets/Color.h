@@ -1,7 +1,4 @@
 #pragma once
-
-#include <imgui.h>
-
 #include "core/Widget.h"
 
 #include <utils/PyxieHeaders.h>

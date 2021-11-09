@@ -1,7 +1,7 @@
+#include "core/widgets/Button.h"
+
 #include <imgui.h>
 #include <imgui_internal.h>
-
-#include "core/widgets/Button.h"
 
 namespace ige::creator
 {

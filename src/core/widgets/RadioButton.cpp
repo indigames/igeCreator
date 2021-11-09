@@ -1,6 +1,6 @@
-#include <imgui.h>
-
 #include "core/widgets/RadioButton.h"
+
+#include <imgui.h>
 
 namespace ige::creator
 {
