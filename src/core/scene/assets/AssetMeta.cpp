@@ -115,6 +115,10 @@ void AssetMeta::draw(std::shared_ptr<Group> group) {
     }
 }
 
+json AssetMeta::getOption(const std::string& key) {
+    return m_options.count(key) > 0 ? m_options[key] : json();
+}
+
 void AssetMeta::setOption(const std::string& key, json val) {
     m_options[key] = val;
 }

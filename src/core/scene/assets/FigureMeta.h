@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef __FIGURE_META_H_
 #define __FIGURE_META_H_
 
@@ -19,6 +21,18 @@ public:
 
 	//! Draw
 	virtual void draw(std::shared_ptr<Group> group) override;
+
+	//! Check if this is folder rule
+	bool isFolderRule();
+
+	//! Check if this base model
+	bool isBaseModel();
+
+	//! Check if this animation
+	bool isAnim();
+
+	//! Get base model path
+	std::string baseModelPath();
 
 protected:
 

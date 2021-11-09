@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef __ASSET_META_H_
 #define __ASSET_META_H_
 
@@ -24,7 +26,8 @@ public:
 	//! Draw
 	virtual void draw(std::shared_ptr<Group> group);
 
-	//! Set option
+	//! Get/Set option
+	virtual json getOption(const std::string& key);
 	virtual void setOption(const std::string& key, json val);
 
 protected:
