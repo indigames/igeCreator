@@ -203,8 +203,8 @@ namespace ige::creator
         const auto& rect = (GImGui->LastItemData.StatusFlags & ImGuiItemStatusFlags_HasDisplayRect) ? GImGui->LastItemData.DisplayRect : GImGui->LastItemData.Rect;
         auto id = GImGui->LastItemData.ID;
 
-        auto topRect = ImRect(ImVec2(rect.GetTL().x, rect.GetTL().y  - rect.GetHeight() * 0.25f), ImVec2(rect.GetTR().x, rect.GetTR().y + rect.GetHeight() * 0.25f));
-        auto bottomRect = ImRect(ImVec2(rect.GetBL().x, rect.GetBL().y - rect.GetHeight() * 0.25f), ImVec2(rect.GetBR().x, rect.GetBR().y + rect.GetHeight() * 0.25f));
+        auto topRect = ImRect(ImVec2(rect.GetTL().x, rect.GetTL().y  - rect.GetHeight() * 0.1f), ImVec2(rect.GetTR().x, rect.GetTR().y + rect.GetHeight() * 0.1f));
+        auto bottomRect = ImRect(ImVec2(rect.GetBL().x, rect.GetBL().y - rect.GetHeight() * 0.1f), ImVec2(rect.GetBR().x, rect.GetBR().y + rect.GetHeight() * 0.1f));
 
         if (ImGui::BeginDragDropTargetCustom(topRect, id))
         {
