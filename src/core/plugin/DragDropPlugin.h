@@ -7,6 +7,9 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
+struct ImGuiContext;
+extern IMGUI_API ImGuiContext* GImGui;
+
 namespace ige::creator
 {
     enum class EDragDropID
@@ -89,24 +92,17 @@ namespace ige::creator
 
     // Drag & Drop target plugin custom with top and bottom zones
     template<typename T>
-    class DDTargetPluginCustom : public DDTargetPlugin<T>
+    class DDTargetTopBottomPlugin : public DDTargetPlugin<T>
     {
     public:
-        DDTargetPluginCustom(EDragDropID id) : DDTargetPlugin<T>(id) {};
-        DDTargetPluginCustom(const std::string& id) : DDTargetPlugin<T>(id) {};
-
-        virtual ~DDTargetPluginCustom() {};
+        DDTargetTopBottomPlugin(EDragDropID id) : DDTargetPlugin<T>(id) {};
+        DDTargetTopBottomPlugin(const std::string& id) : DDTargetPlugin<T>(id) {};
+        virtual ~DDTargetTopBottomPlugin() {};
 
         virtual void execute() override;
 
         ige::scene::Event<T>& getOnTopDataReceivedEvent() { return m_onTopDataReceivedEvent; }
         ige::scene::Event<T>& getOnBottomDataReceivedEvent() { return m_onBottomDataReceivedEvent; }
-
-        bool isHovered() const {
-            return m_isHovered;
-        }
-
-        const std::string& getId() { return m_id; }
 
     protected:
         ige::scene::Event<T> m_onTopDataReceivedEvent;
@@ -202,29 +198,34 @@ namespace ige::creator
     }
 
     template<typename T>
-    void DDTargetPluginCustom<T>::execute()
-    {        
-        if (ImGui::BeginDragDropTarget())
+    void DDTargetTopBottomPlugin<T>::execute()
+    {
+        const auto& rect = (GImGui->LastItemData.StatusFlags & ImGuiItemStatusFlags_HasDisplayRect) ? GImGui->LastItemData.DisplayRect : GImGui->LastItemData.Rect;
+        auto id = GImGui->LastItemData.ID;
+
+        auto topRect = ImRect(ImVec2(rect.GetTL().x, rect.GetTL().y  - rect.GetHeight() * 0.25f), ImVec2(rect.GetTR().x, rect.GetTR().y + rect.GetHeight() * 0.25f));
+        auto bottomRect = ImRect(ImVec2(rect.GetBL().x, rect.GetBL().y - rect.GetHeight() * 0.25f), ImVec2(rect.GetBR().x, rect.GetBR().y + rect.GetHeight() * 0.25f));
+
+        if (ImGui::BeginDragDropTargetCustom(topRect, id))
         {
-            if (!m_isHovered)
-                m_onStartHoverEvent.invoke();
-
-            m_isHovered = true;
-
             ImGuiDragDropFlags flags = 0;
-            if (auto payload = ImGui::AcceptDragDropPayload(getId().c_str(), flags))
-            {
+            if (auto payload = ImGui::AcceptDragDropPayload(getId().c_str(), flags)) {
                 T data = *(T*)payload->Data;
-                m_onDataReceivedEvent.invoke(data);
+                m_onTopDataReceivedEvent.invoke(data);
             }
             ImGui::EndDragDropTarget();
         }
-        else
+        else if (ImGui::BeginDragDropTargetCustom(bottomRect, id))
         {
-            if (m_isHovered)
-                m_onStopHoverEvent.invoke();
-
-            m_isHovered = false;
+            ImGuiDragDropFlags flags = 0;
+            if (auto payload = ImGui::AcceptDragDropPayload(getId().c_str(), flags)) {
+                T data = *(T*)payload->Data;
+                m_onBottomDataReceivedEvent.invoke(data);
+            }
+            ImGui::EndDragDropTarget();
+        }
+        else {
+            DDTargetPlugin<T>::execute();
         }
     }
 }

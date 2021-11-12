@@ -149,8 +149,9 @@ namespace ige::creator
             }            
         });
 
-        node->addPlugin<DDTargetPlugin<uint64_t>>(EDragDropID::OBJECT)->getOnDataReceivedEvent().addListener([objId](auto id) {
-            if (Editor::getInstance()->getTarget() == nullptr) return;
+        auto objDDTarget = node->addPlugin<DDTargetTopBottomPlugin<uint64_t>>(EDragDropID::OBJECT);
+        objDDTarget->getOnDataReceivedEvent().addListener([objId](auto id) {
+            if (Editor::getInstance()->getTarget() == nullptr) return; // Scene not loaded
             bool dragObjFromTarget = Editor::getInstance()->getTarget()->findObject(id) != nullptr;
             auto parent = Editor::getCurrentScene()->findObjectById(objId);
             bool isPrefabScene = parent->getScene()->getObjects().size() > 0 && parent->getScene()->getObjects()[0]->isPrefab();
@@ -158,24 +159,19 @@ namespace ige::creator
             {
                 if (dragObjFromTarget) {
                     auto loop = false;
-                    for (auto& target : Editor::getInstance()->getTarget()->getAllTargets())
-                    {
-                        if (!target.expired()
-                            && parent->isRelative(target.lock()->getId()))
-                        {
-                            loop = true; break;
+                    for (auto& target : Editor::getInstance()->getTarget()->getAllTargets()) {
+                        if (!target.expired() && parent->isRelative(target.lock()->getId())) {
+                            loop = true;
+                            break;
                         }
                     }
-                    if (!loop)
-                    {
+                    if (!loop) {
                         std::vector<std::shared_ptr<SceneObject>> movingObjects = {};
-                        for (auto& target : Editor::getInstance()->getTarget()->getAllTargets())
-                        {
+                        for (auto& target : Editor::getInstance()->getTarget()->getAllTargets()) {
                             if (!target.expired() && (!target.lock()->getParent() || target.lock()->getParent()->isSelected() == false))
                                 movingObjects.push_back(target.lock());
                         }
-                        for (auto& target : movingObjects)
-                        {
+                        for (auto& target : movingObjects) {
                             if (target->isPrefab() || !target->isInPrefab() || isPrefabScene)
                                 target->setParent(parent);
                         }
@@ -188,9 +184,75 @@ namespace ige::creator
                             object->setParent(parent);
                     }
                 }
-            }            
+            }
         });
-        node->addPlugin<DDTargetPluginCustom<std::string>>(GetFileExtensionSuported(E_FileExts::Prefab)[0])->getOnDataReceivedEvent().addListener([objId](auto path) {
+        objDDTarget->getOnTopDataReceivedEvent().addListener([objId](auto id) {
+            if (Editor::getCurrentScene() == nullptr) return;
+            auto currObject = Editor::getCurrentScene()->findObjectById(objId);
+            auto parent = currObject->getParent();
+            if (parent == nullptr) return; // Skip root nodes
+            bool isPrefabScene = parent->getScene()->getObjects().size() > 0 && parent->getScene()->getObjects()[0]->isPrefab();
+            if (!parent->isInPrefab() || isPrefabScene) {
+                auto object = Editor::getCurrentScene()->findObjectById(id);
+                if (!parent->isRelative(id)) {
+                    if (object->isPrefab() || !object->isInPrefab() || isPrefabScene) {
+                        auto idx = parent->getChildIndex(currObject);
+                        if (parent == object->getParent())
+                        {
+                            auto idx2 = parent->getChildIndex(object);
+                            if (idx2 > idx) {
+                                parent->insertChild(idx, object);
+                                object->setParent(parent);
+                            }
+                            else if (idx2 < idx)
+                            {
+                                parent->insertChild(idx - 1, object);
+                                object->setParent(parent);
+                            }
+                        }
+                        else {
+                            parent->insertChild(idx, object);
+                            object->setParent(parent);
+                        }
+                    }
+                }
+            }
+        });
+        objDDTarget->getOnBottomDataReceivedEvent().addListener([objId](auto id) {
+            if (Editor::getCurrentScene() == nullptr) return;
+            auto currObject = Editor::getCurrentScene()->findObjectById(objId);
+            auto parent = currObject->getParent();
+            if (parent == nullptr) return; // Skip root nodes
+            bool isPrefabScene = parent->getScene()->getObjects().size() > 0 && parent->getScene()->getObjects()[0]->isPrefab();
+            if (!parent->isInPrefab() || isPrefabScene) {
+                auto object = Editor::getCurrentScene()->findObjectById(id);
+                if (!parent->isRelative(id)) {
+                    if (object->isPrefab() || !object->isInPrefab() || isPrefabScene) {
+                        auto idx = parent->getChildIndex(currObject);
+                        if (parent == object->getParent())
+                        {
+                            auto idx2 = parent->getChildIndex(object);
+                            if (idx2 > idx) {
+                                parent->insertChild(idx + 1, object);
+                                object->setParent(parent);
+                            }
+                            else if (idx2 < idx)
+                            {
+                                parent->insertChild(idx, object);
+                                object->setParent(parent);
+                            }
+                        }
+                        else {
+                            parent->insertChild(idx + 1, object);
+                            object->setParent(parent);
+                        }
+                    }
+                }
+            }
+        });
+
+        auto prefabTarget = node->addPlugin<DDTargetTopBottomPlugin<std::string>>(GetFileExtensionSuported(E_FileExts::Prefab)[0]);
+        prefabTarget->getOnDataReceivedEvent().addListener([objId](auto path) {
             auto parent = Editor::getCurrentScene()->findObjectById(objId);
             if (parent) {
                 if (!parent->isInPrefab()) {
@@ -198,6 +260,33 @@ namespace ige::creator
                 }
             }
         });
+        prefabTarget->getOnTopDataReceivedEvent().addListener([objId](auto path) {
+            auto currObject = Editor::getCurrentScene()->findObjectById(objId);
+            auto parent = currObject->getParent();
+            if (parent == nullptr) return; // Skip root nodes
+            if (parent) {
+                if (!parent->isInPrefab()) {
+                    auto prefabObj = Editor::getCurrentScene()->loadPrefab(parent->getId(), path);
+                    auto idx = parent->getChildIndex(currObject);
+                    parent->insertChild(idx, prefabObj);
+                    prefabObj->setParent(parent);
+                }
+            }
+        });
+        prefabTarget->getOnBottomDataReceivedEvent().addListener([objId](auto path) {
+            auto currObject = Editor::getCurrentScene()->findObjectById(objId);
+            auto parent = currObject->getParent();
+            if (parent == nullptr) return; // Skip root nodes
+            if (parent) {
+                if (!parent->isInPrefab()) {
+                    auto prefabObj = Editor::getCurrentScene()->loadPrefab(parent->getId(), path);
+                    auto idx = parent->getChildIndex(currObject);
+                    parent->insertChild(idx + 1, prefabObj);
+                    prefabObj->setParent(parent);
+                }
+            }
+        });
+
 
         node->addPlugin<DDSourcePlugin<uint64_t>>(EDragDropID::OBJECT, sceneObject.getName(), objId);
 
@@ -235,9 +324,11 @@ namespace ige::creator
             auto parent = sceneObject.getParent();
             if (parent != nullptr)
             {
+                auto obj = sceneObject.getSharedPtr();
+                auto idx = parent->getChildIndex(obj);
                 auto parentWidget = m_objectNodeMap.at(parent->getId());
                 parentWidget->setIsLeaf(false);
-                parentWidget->addWidget(widget);
+                parentWidget->addWidget(widget, idx);
                 parentWidget->open();
             }
             auto color = sceneObject.isInPrefab() ? ImVec4(PREFAB_COLOR) : ImVec4(NORMAL_COLOR);

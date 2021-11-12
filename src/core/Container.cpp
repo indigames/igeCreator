@@ -13,7 +13,7 @@ namespace ige::creator
         removeAllWidgets();
     }
 
-    void Container::addWidget(std::shared_ptr<Widget> widget)
+    void Container::addWidget(std::shared_ptr<Widget> widget, int pos)
     {
         if (widget == nullptr) return;
         auto found = std::find(m_widgets.begin(), m_widgets.end(), widget);
@@ -23,7 +23,12 @@ namespace ige::creator
             if (!thisWidget || thisWidget != widget.get())
             {
                 widget->setContainer(this);
-                m_widgets.push_back(widget);
+                if (pos >= 0 && pos < m_widgets.size()) {
+                    m_widgets.insert(m_widgets.begin() + pos, widget);
+                }
+                else {
+                    m_widgets.push_back(widget);
+                }                
             }
         }
     }
