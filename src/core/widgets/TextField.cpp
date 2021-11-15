@@ -28,13 +28,9 @@ namespace ige::creator
             flag |= ImGuiInputTextFlags_EnterReturnsTrue;
         }
 
-        ImGui::PushID(getIdAsString().c_str());
-        ImGui::PushItemWidth(ImGui::GetWindowSize().x);
         if (ImGui::InputText((m_label + getIdAsString()).c_str(), m_content.data(), MAX_TEXT_LENGHT, flag)) {
             notifyChange(m_content.data());
         }
-        ImGui::PopItemWidth();
-        ImGui::PopID();
     }
         
     void TextField::setText(const std::string& text)
