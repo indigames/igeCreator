@@ -56,12 +56,8 @@ namespace ige::scene
         if (m_objects.size() <= 0 || component == nullptr)
             return;
         auto compName = component->getName();
-        auto found = std::find_if(m_components.begin(), m_components.end(), [compName](auto element) {
-            return compName.compare(element->getName()) == 0;
-        });
-
-        if (found == m_components.end())
-        {
+        auto comp = getComponent(compName);
+        if (comp != nullptr) {
             json jComp;
             component->to_json(jComp);
 
@@ -173,6 +169,7 @@ namespace ige::scene
         m_components.clear();
         if(m_objects.size() <= 0)
             return;
+
         if(m_objects[0].expired()) {
             clear();
             return;
@@ -194,20 +191,15 @@ namespace ige::scene
                         shoudAdd = false;
                         break;
                     }
-                    auto type = comp->getType();
-                    const auto& components = m_objects[i].lock()->getComponents();
-                    const auto& itr = std::find_if(components.begin(), components.end(), [&type](auto elem) {
-                        return elem->getType() == type;
-                    });
-                    if (itr != components.end()) {
-                        compoundComp->add(*itr);
+                    auto component = m_objects[i].lock()->getComponent(comp->getName());
+                    if (component != nullptr) {
+                        compoundComp->add(component);
                     }
                     else {
                         shoudAdd = false;
                         break;
                     }
                 }
-
                 if (shoudAdd)
                 {
                     m_components.push_back(compoundComp);
@@ -228,7 +220,26 @@ namespace ige::scene
             if (itr == m_objects.end())
             {
                 m_objects.push_back(object);
-                collectSharedComponents();
+                if (m_components.empty()) {
+                    collectSharedComponents();
+                }
+                else {
+                    auto itr = m_components.begin();
+                    while (itr != m_components.end()) {
+                        auto compoundComp = std::dynamic_pointer_cast<CompoundComponent>((*itr));
+                        if (compoundComp) {
+                            auto component = object->getComponent(compoundComp->getName());
+                            if (component != nullptr && component->canMultiEdit()) {
+                                compoundComp->add(component);
+                            }
+                            else {
+                                m_components.erase(std::find(m_components.begin(), m_components.end(), compoundComp));
+                                continue;
+                            }
+                        }
+                        itr++;
+                    }
+                }
             }
         }
     }
@@ -245,7 +256,6 @@ namespace ige::scene
             {
                 object->setSelected(false);
                 m_objects.erase(itr);
-                collectSharedComponents();
             }
         }
 

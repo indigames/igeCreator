@@ -374,12 +374,12 @@ void RectTransformEditorComponent::onTransformChanged(SceneObject& sceneObject)
             m_dirtyFlagSupport = 2;
             if (getComponent<CompoundComponent>()) {
                 getComponent<CompoundComponent>()->setDirty();
-                if (Editor::getCanvas()->getEditorScene()->getGizmo())
-                    Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
             }
             setDirty();
         }
     }
+    if (Editor::getCanvas()->getEditorScene()->getGizmo())
+        Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
 }
 
 NS_IGE_END
