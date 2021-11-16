@@ -56,22 +56,25 @@ namespace ige::scene
         if (m_objects.size() <= 0 || component == nullptr)
             return;
         auto compName = component->getName();
-        auto comp = getComponent(compName);
-        if (comp != nullptr) {
-            json jComp;
-            component->to_json(jComp);
 
-            auto compoundComp = std::make_shared<CompoundComponent>(*this);
-            for (int i = 0; i < m_objects.size(); ++i) {
-                if (!m_objects[i].expired()) {
-                    auto comp = m_objects[i].lock()->createComponent(compName);
-                    comp->from_json(jComp);
-                    compoundComp->add(comp);
-                }
-            }
-            compoundComp->setDirty();
-            m_components.push_back(compoundComp);
+        // Check if allow multiple instance
+        if (!component->canMultiInstance() && getComponent(compName) != nullptr) {
+            return;
         }
+
+        json jComp;
+        component->to_json(jComp);
+
+        auto compoundComp = std::make_shared<CompoundComponent>(*this);
+        for (int i = 0; i < m_objects.size(); ++i) {
+            if (!m_objects[i].expired()) {
+                auto comp = m_objects[i].lock()->createComponent(compName);
+                comp->from_json(jComp);
+                compoundComp->add(comp);
+            }
+        }
+        compoundComp->setDirty();
+        m_components.push_back(compoundComp);        
     }
 
     //! Remove a component
