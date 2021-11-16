@@ -74,7 +74,7 @@ namespace ige::scene
             }
         }
         compoundComp->setDirty();
-        m_components.push_back(compoundComp);        
+        m_components.push_back(compoundComp);
     }
 
     //! Remove a component
