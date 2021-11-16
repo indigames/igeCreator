@@ -201,18 +201,14 @@ namespace ige::creator
                         {
                             auto idx2 = parent->getChildIndex(object);
                             if (idx2 > idx) {
-                                parent->insertChild(idx, object);
-                                object->setParent(parent);
+                                parent->setChildIndex(object, idx);
                             }
-                            else if (idx2 < idx)
-                            {
-                                parent->insertChild(idx - 1, object);
-                                object->setParent(parent);
+                            else if (idx2 < idx) {
+                                parent->setChildIndex(object, idx - 1);
                             }
                         }
                         else {
-                            parent->insertChild(idx, object);
-                            object->setParent(parent);
+                            parent->setChildIndex(object, idx);
                         }
                     }
                 }
@@ -233,18 +229,14 @@ namespace ige::creator
                         {
                             auto idx2 = parent->getChildIndex(object);
                             if (idx2 > idx) {
-                                parent->insertChild(idx + 1, object);
-                                object->setParent(parent);
+                                parent->setChildIndex(object, idx + 1);
                             }
-                            else if (idx2 < idx)
-                            {
-                                parent->insertChild(idx, object);
-                                object->setParent(parent);
+                            else if (idx2 < idx) {
+                                parent->setChildIndex(object, idx);
                             }
                         }
                         else {
-                            parent->insertChild(idx + 1, object);
-                            object->setParent(parent);
+                            parent->setChildIndex(object, idx + 1);
                         }
                     }
                 }
@@ -268,8 +260,7 @@ namespace ige::creator
                 if (!parent->isInPrefab()) {
                     auto prefabObj = Editor::getCurrentScene()->loadPrefab(parent->getId(), path);
                     auto idx = parent->getChildIndex(currObject);
-                    parent->insertChild(idx, prefabObj);
-                    prefabObj->setParent(parent);
+                    parent->setChildIndex(prefabObj, idx);
                 }
             }
         });
@@ -281,8 +272,7 @@ namespace ige::creator
                 if (!parent->isInPrefab()) {
                     auto prefabObj = Editor::getCurrentScene()->loadPrefab(parent->getId(), path);
                     auto idx = parent->getChildIndex(currObject);
-                    parent->insertChild(idx + 1, prefabObj);
-                    prefabObj->setParent(parent);
+                    parent->setChildIndex(prefabObj, idx + 1);
                 }
             }
         });
