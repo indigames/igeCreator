@@ -537,9 +537,8 @@ namespace ige::creator
     {
         auto scene = SceneManager::getInstance()->getCurrentScene();
         if (scene && scene->isPrefab()) {
-            auto prefabRootId = scene->getObjects()[0]->getId();
-            auto prefabId = scene->getPrefabId();
-            auto path = fs::path(SceneManager::getInstance()->getPrefabPath(prefabId)).parent_path().string();
+            auto prefabRootId = scene->getObjects()[0]->getId();            
+            auto path = scene->getPath();;
             return savePrefab(prefabRootId, path);
         }
         return false;
