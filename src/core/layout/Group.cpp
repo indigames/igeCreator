@@ -38,7 +38,7 @@ namespace ige::creator
         {
             bool prevOpened = m_bIsOpened;
 
-            if (!m_bIsCollapsable || (m_bIsCollapsable && ImGui::CollapsingHeader(m_name.c_str(), m_bIsClosable ? &m_bIsOpened : nullptr, m_bIsOpened ? ImGuiTreeNodeFlags_DefaultOpen : 0)))
+            if (!m_bIsCollapsable || (m_bIsCollapsable && ImGui::CollapsingHeader((m_name + getIdAsString()).c_str(), m_bIsClosable ? &m_bIsOpened : nullptr, m_bIsOpened ? ImGuiTreeNodeFlags_DefaultOpen : 0)))
             {
                 drawWidgets();
             }
