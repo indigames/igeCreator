@@ -178,10 +178,8 @@ namespace ige::scene
             return;
         }
 
-        for(auto comp: m_objects[0].lock()->getComponents())
+        for(const auto& comp: m_objects[0].lock()->getComponents())
         {
-            if (comp == nullptr) continue;
-
             if(comp && (m_objects.size() == 1 || comp->canMultiEdit()))
             {
                 auto compoundComp = std::make_shared<CompoundComponent>(*this);
@@ -259,6 +257,9 @@ namespace ige::scene
             {
                 object->setSelected(false);
                 m_objects.erase(itr);
+
+                // Recalculate shared components
+                collectSharedComponents();
             }
         }
 

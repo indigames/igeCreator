@@ -661,16 +661,18 @@ namespace ige::creator
     bool Editor::deleteObject()
     {
         if (!Editor::getInstance()->getTarget()) return false;
-        auto targets = Editor::getInstance()->getTarget()->getAllTargets();
-        if (targets.size() > 0) {
-            for (auto& target : targets) {
-                auto obj = target.lock();
-                if (obj) {
-                    removeTarget(obj);
-                    Editor::getCurrentScene()->removeObject(obj);
-                }
+
+        if (getCanvas())
+            getCanvas()->getInspector()->clear();
+
+        for (auto& target : Editor::getInstance()->getTarget()->getAllTargets()) {
+            if (!target.expired()) {
+                removeTarget(target.lock());
+                Editor::getCurrentScene()->removeObject(target.lock());
             }
         }
+
+        clearTargets();
         return true;
     }
 
