@@ -95,7 +95,7 @@ namespace ige::creator
                 // Initialize window pos and size
                 if (Editor::getCurrentScene())
                 {
-                    Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y }); // Title bar size
+                    Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y });
                     Editor::getCurrentScene()->setWindowSize(m_windowSize);
                     Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(m_windowSize.X() / m_windowSize.Y());
                     if (SceneManager::getInstance()->isIgeEditor())
@@ -111,6 +111,30 @@ namespace ige::creator
 
                 m_inputProcessor = std::make_shared<InputProcessor>();
 
+                if (Editor::getCurrentScene()->getCanvas()) {
+                    Editor::getCurrentScene()->getCanvas()->getOnTargetSizeChanged().addListener([this](auto size) {
+                        TaskManager::getInstance()->addTask([this, size]() {
+                            if (!m_bInitialized) return;
+
+                            m_fbo->Resize(size.X(), size.Y());
+                            m_imageWidget->setSize({ size.X(), size.Y() });
+
+                            if (Editor::getCurrentScene())
+                            {
+                                Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y });
+                                Editor::getCurrentScene()->setWindowSize(m_windowSize);
+                                Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(m_windowSize.X() / m_windowSize.Y());
+                                if (SceneManager::getInstance()->isIgeEditor()) {
+                                    Editor::getCurrentScene()->setViewSize({ getSize().x, getSize().y });
+                                    Editor::getCurrentScene()->setViewPosition({ getScrollPosition().x, getScrollPosition().y });
+                                }
+                                else {
+                                    Editor::getCurrentScene()->setViewSize(m_windowSize);
+                                }
+                            }
+                        });
+                    });
+                }
                 m_bInitialized = true;
             }
         }
@@ -226,11 +250,11 @@ namespace ige::creator
         if (m_bIsPlaying)
         {
             clear();
-
             SceneManager::getInstance()->setIsEditor(true);
 
-            if (Editor::getCurrentScene())
-            {
+            if (Editor::getCurrentScene()) {
+                if (Editor::getCurrentScene()->getCanvas())
+                    Editor::getCurrentScene()->getCanvas()->getOnTargetSizeChanged().removeAllListeners();
                 auto name = Editor::getCurrentScene()->getName();
                 Editor::getInstance()->loadScene(name + ".scene.tmp");
                 auto fsPath = fs::path(name + ".scene.tmp");
