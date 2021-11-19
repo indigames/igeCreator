@@ -77,7 +77,7 @@ namespace ige::creator
             m_windowSize = Editor::getCurrentScene()->getCanvas() ? Editor::getCurrentScene()->getCanvas()->getTargetCanvasSize() : Vec2(getSize().x, getSize().y);
             if (m_windowSize.X() > 0 && m_windowSize.Y() > 0)
             {
-                m_rtTexture = ResourceCreator::Instance().NewTexture("GameScene_RTTexture", nullptr, m_windowSize.X() * 2.f, m_windowSize.Y() * 2.f, GL_RGBA); // 2x size, improve quality
+                m_rtTexture = ResourceCreator::Instance().NewTexture("GameScene_RTTexture", nullptr, m_windowSize.X(), m_windowSize.Y(), GL_RGBA);
                 m_rtTexture->WaitInitialize();
                 m_fbo = ResourceCreator::Instance().NewRenderTarget(m_rtTexture, true, true);
                 m_fbo->WaitInitialize();
