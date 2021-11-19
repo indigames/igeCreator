@@ -77,7 +77,7 @@ namespace ige::creator
             m_windowSize = Editor::getCurrentScene()->getCanvas() ? Editor::getCurrentScene()->getCanvas()->getTargetCanvasSize() : Vec2(getSize().x, getSize().y);
             if (m_windowSize.X() > 0 && m_windowSize.Y() > 0)
             {
-                m_rtTexture = ResourceCreator::Instance().NewTexture("GameScene_RTTexture", nullptr, m_windowSize.X(), m_windowSize.Y(), GL_RGBA);
+                m_rtTexture = ResourceCreator::Instance().NewTexture("GameScene_RTTexture", nullptr, m_windowSize.X() * 2.f, m_windowSize.Y() * 2.f, GL_RGBA);
                 m_rtTexture->WaitInitialize();
                 m_fbo = ResourceCreator::Instance().NewRenderTarget(m_rtTexture, true, true);
                 m_fbo->WaitInitialize();
@@ -116,7 +116,9 @@ namespace ige::creator
                         TaskManager::getInstance()->addTask([this, size]() {
                             if (!m_bInitialized) return;
 
-                            m_fbo->Resize(size.X(), size.Y());
+                            m_windowSize = size;
+
+                            m_fbo->Resize(size.X() * 2.f, size.Y() * 2.f);
                             m_imageWidget->setSize({ size.X(), size.Y() });
 
                             if (Editor::getCurrentScene())
@@ -124,14 +126,10 @@ namespace ige::creator
                                 Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y });
                                 Editor::getCurrentScene()->setWindowSize(m_windowSize);
                                 Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(m_windowSize.X() / m_windowSize.Y());
-                                if (SceneManager::getInstance()->isIgeEditor()) {
-                                    Editor::getCurrentScene()->setViewSize({ getSize().x, getSize().y });
-                                    Editor::getCurrentScene()->setViewPosition({ getScrollPosition().x, getScrollPosition().y });
-                                }
-                                else {
-                                    Editor::getCurrentScene()->setViewSize(m_windowSize);
-                                }
+                                Editor::getCurrentScene()->setViewSize(m_windowSize);
                             }
+
+                            SceneManager::getInstance()->update(0.f);
                         });
                     });
                 }
