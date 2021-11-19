@@ -42,6 +42,9 @@ namespace ige::creator
         //! Object selected
         void onSceneObjectSelected(SceneObject& sceneObject);
 
+        //! Object activated
+        void onSceneObjectActivated(SceneObject& sceneObject);
+
         //! Object changed name
         void onSceneObjectChangedName(SceneObject& sceneObject);
 

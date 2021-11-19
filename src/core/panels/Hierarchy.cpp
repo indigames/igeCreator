@@ -39,7 +39,9 @@
 using namespace ige::scene;
 
 #define NORMAL_COLOR {1.f, 1.f, 1.f, 1.f}
+#define DISABLED_COLOR {0.5f, 0.5f, 0.5f, 1.f}
 #define PREFAB_COLOR {0.f, 0.85f, 0.85f, 1.f}
+#define PREFAB_DISABLED_COLOR {0.f, 0.45f, 0.45f, 1.f}
 
 namespace ige::creator
 {
@@ -51,6 +53,7 @@ namespace ige::creator
         SceneObject::getAttachedEvent().addListener(std::bind(&Hierarchy::onSceneObjectAttached, this, std::placeholders::_1));
         SceneObject::getDetachedEvent().addListener(std::bind(&Hierarchy::onSceneObjectDetached, this, std::placeholders::_1));
         SceneObject::getSelectedEvent().addListener(std::bind(&Hierarchy::onSceneObjectSelected, this, std::placeholders::_1));
+        SceneObject::getActivatedEvent().addListener(std::bind(&Hierarchy::onSceneObjectActivated, this, std::placeholders::_1));
         Editor::getTargetAddedEvent().addListener(std::bind(&Hierarchy::onTargetAdded, this, std::placeholders::_1));
         Editor::getTargetRemovedEvent().addListener(std::bind(&Hierarchy::onTargetRemoved, this, std::placeholders::_1));
         Editor::getTargetClearedEvent().addListener(std::bind(&Hierarchy::onTargetCleared, this));
@@ -63,6 +66,7 @@ namespace ige::creator
         SceneObject::getAttachedEvent().removeAllListeners();
         SceneObject::getDetachedEvent().removeAllListeners();
         SceneObject::getSelectedEvent().removeAllListeners();
+        SceneObject::getActivatedEvent().removeAllListeners();
         Editor::getTargetAddedEvent().removeAllListeners();
         Editor::getTargetRemovedEvent().removeAllListeners();
         Editor::getTargetClearedEvent().removeAllListeners();
@@ -280,7 +284,7 @@ namespace ige::creator
 
         node->addPlugin<DDSourcePlugin<uint64_t>>(EDragDropID::OBJECT, sceneObject.getName(), objId);
 
-        auto color = sceneObject.isInPrefab() ? ImVec4(PREFAB_COLOR) : ImVec4(NORMAL_COLOR);
+        auto color = sceneObject.isInPrefab() ? (sceneObject.isActive() ? ImVec4(PREFAB_COLOR) : ImVec4(PREFAB_DISABLED_COLOR)) : (sceneObject.isActive() ? ImVec4(NORMAL_COLOR) : ImVec4(DISABLED_COLOR));
         node->setColor(color);
 
         auto ctxMenu = node->addPlugin<ContextMenu>(sceneObject.getName() + "_Context");
@@ -321,7 +325,7 @@ namespace ige::creator
                 parentWidget->addWidget(widget, idx);
                 parentWidget->open();
             }
-            auto color = sceneObject.isInPrefab() ? ImVec4(PREFAB_COLOR) : ImVec4(NORMAL_COLOR);
+            auto color = sceneObject.isInPrefab() ? (sceneObject.isActive() ? ImVec4(PREFAB_COLOR) : ImVec4(PREFAB_DISABLED_COLOR)): (sceneObject.isActive() ? ImVec4(NORMAL_COLOR) : ImVec4(DISABLED_COLOR));            
             widget->setColor(color);
         }
     }
@@ -351,6 +355,15 @@ namespace ige::creator
     {
         if (sceneObject.isSelected()) {            
             Editor::getInstance()->addTarget(sceneObject.getSharedPtr());
+        }
+    }
+
+    void Hierarchy::onSceneObjectActivated(SceneObject& sceneObject)
+    {
+        auto nodePair = m_objectNodeMap.find(sceneObject.getId());
+        if (nodePair != m_objectNodeMap.end()) {
+            auto color = sceneObject.isInPrefab() ? (sceneObject.isActive() ? ImVec4(PREFAB_COLOR) : ImVec4(PREFAB_DISABLED_COLOR)) : (sceneObject.isActive() ? ImVec4(NORMAL_COLOR) : ImVec4(DISABLED_COLOR));
+            nodePair->second->setColor(color);
         }
     }
 
