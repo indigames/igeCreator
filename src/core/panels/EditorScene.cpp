@@ -619,7 +619,7 @@ namespace ige::creator
             auto canvas = target->getComponent<ige::scene::Canvas>();
             if (canvas)
             {
-                const auto& designSize = canvas->getCanvasSize();
+                const auto& designSize = canvas->getTargetCanvasSize();
                 auto position = transform->getLocalPosition();
                 Vec2 halfSize = designSize * 0.5f;
                 ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 1.f });
@@ -633,7 +633,7 @@ namespace ige::creator
                 auto canvasParent = target->getCanvas();
                 if (canvasParent)
                 {
-                    const auto& designSize = canvasParent->getCanvasSize();
+                    const auto& designSize = canvasParent->getTargetCanvasSize();
                     auto canvasTransform = canvasParent->getOwner()->getTransform();
                     if (canvasTransform) {
                         const auto& position = canvasTransform->getLocalPosition();
