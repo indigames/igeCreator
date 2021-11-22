@@ -47,7 +47,7 @@ namespace ige::creator
         bool openProjectInternal(const std::string& path);
 
         bool createScene();
-        bool loadScene(const std::string& path);
+        bool loadScene(const std::string& path, bool reset = false);
         void setCurrentScene(std::shared_ptr<Scene> scene);
         bool reloadResource(const std::string& path);
 
