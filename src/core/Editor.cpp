@@ -337,6 +337,12 @@ namespace ige::creator
         return loaded;
     }
 
+    bool Editor::reloadResource(const std::string& path) {
+        auto& scene = SceneManager::getInstance()->getCurrentScene();
+        if (!scene) return false;
+        return scene->reloadResource(path);
+    }
+
     bool Editor::createScene()
     {
         unloadScene();

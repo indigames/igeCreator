@@ -1,6 +1,7 @@
 #include "core/scene/assets/FigureMeta.h"
 #include "core/filesystem/FileSystem.h"
 #include "core/filesystem/FileSystemCache.h"
+#include "core/Editor.h"
 
 #include <pyxieFigureExportConfigManager.h>
 #include <pyxieColladaLoader.h>
@@ -154,6 +155,25 @@ bool FigureMeta::replaceTextures(EditableFigure& efig)
 }
 
 bool FigureMeta::loadModel() {
+    // Setting figure loader options
+    pyxieFigureExportConfigManager::Instance().ClearOption();
+    for (auto& [key, val] : m_options) {
+        if (val.type() == nlohmann::json::value_t::boolean
+            || val.type() == nlohmann::json::value_t::number_integer
+            || val.type() == nlohmann::json::value_t::number_unsigned) {
+            pyxieFigureExportConfigManager::Instance().SetOptionInt(key.c_str(), val);
+        }
+        else if (val.type() == nlohmann::json::value_t::number_float) {
+            pyxieFigureExportConfigManager::Instance().SetOptionFloat(key.c_str(), val);
+        }
+        else if (val.type() == nlohmann::json::value_t::string) {
+            pyxieFigureExportConfigManager::Instance().SetOptionString(key.c_str(), val.get<std::string>().c_str());
+        }
+        else {
+            // TODO: Just ignore for now
+        }
+    }
+
     auto fsPath = fs::path(m_path);
     auto relPath = fsPath.is_absolute() ? fs::relative(fsPath, fs::current_path()) : fsPath;
     auto parentPath = relPath.parent_path();    
@@ -256,7 +276,10 @@ bool FigureMeta::loadModel() {
 
 bool FigureMeta::save() {
     auto loaded = loadModel();
-    if (!loaded) {
+    if (loaded) {
+        Editor::getInstance()->reloadResource(m_path);
+    }
+    else {
         pyxie_printf("[WARN] Model load failed: %s", m_path.c_str());
     }
     return AssetMeta::save();
