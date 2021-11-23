@@ -366,18 +366,12 @@ namespace ige::creator
         }
     }
 
-    bool Editor::loadScene(const std::string& path, bool reset)
+    bool Editor::loadScene(const std::string& path)
     {
         unloadScene();
         auto scenePath = fs::path(path);
         if (fs::exists(scenePath))
         {
-            if (reset) {
-                // Trigger Python reinitialization
-                SceneManager::getInstance()->setProjectPath(std::string());
-                SceneManager::getInstance()->setProjectPath(m_projectPath);
-            }
-
             auto scene = SceneManager::getInstance()->createScene();
             m_target = std::make_shared<TargetObject>(scene.get());
 

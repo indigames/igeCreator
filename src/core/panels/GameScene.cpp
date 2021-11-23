@@ -225,7 +225,7 @@ namespace ige::creator
 
             SceneManager::getInstance()->setIsEditor(false);
             m_bIsPlaying = true;
-            Editor::getInstance()->loadScene(path, true);
+            Editor::getInstance()->loadScene(path);
 
             SceneManager::getInstance()->setIsPlaying(m_bIsPlaying);
             SceneManager::getInstance()->dispathEvent((int)EventType::RunEditor);
@@ -254,7 +254,7 @@ namespace ige::creator
                 if (Editor::getCurrentScene()->getCanvas())
                     Editor::getCurrentScene()->getCanvas()->getOnTargetSizeChanged().removeAllListeners();
                 auto name = Editor::getCurrentScene()->getName();
-                Editor::getInstance()->loadScene(name + ".scene.tmp", true);
+                Editor::getInstance()->loadScene(name + ".scene.tmp");
                 auto fsPath = fs::path(name + ".scene.tmp");
                 fs::remove(fsPath);
             }
