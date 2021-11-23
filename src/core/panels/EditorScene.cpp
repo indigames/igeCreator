@@ -43,6 +43,8 @@ namespace ige::creator
     EditorScene::EditorScene(const std::string& name, const Panel::Settings& settings)
         : Panel(name, settings)
     {
+        // Initialize shape drawer
+        ShapeDrawer::initialize();
     }
 
     EditorScene::~EditorScene()
@@ -386,6 +388,8 @@ namespace ige::creator
         if (renderContext && m_fbo) {
             renderContext->BeginScene(m_fbo, Vec4(0.2f, 0.2f, 0.2f, 1.f), true, true);
 
+            ShapeDrawer::setViewProjectionMatrix(renderContext->GetRenderViewProjectionMatrix());
+
             // Render bounding box
             renderBoundingBoxes();
 
@@ -397,6 +401,8 @@ namespace ige::creator
 
             // Render scene
             SceneManager::getInstance()->render();
+
+            ShapeDrawer::flush();
 
             renderContext->EndScene();
         }

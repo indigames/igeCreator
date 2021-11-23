@@ -173,9 +173,6 @@ namespace ige::creator
                     m_createCompCombo->addChoice((int)Component::Type::PhysicSoftBody, "PhysicSoftBody");
             }
 
-            // Particle
-            m_createCompCombo->addChoice((int)Component::Type::Particle, "Particle");
-
             // Navigation
             if (!m_targetObject->getComponent<NavMesh>() && !m_targetObject->getComponent<DynamicNavMesh>())
             {
@@ -187,6 +184,9 @@ namespace ige::creator
             m_createCompCombo->addChoice((int)Component::Type::NavObstacle, "NavObstacle");
             m_createCompCombo->addChoice((int)Component::Type::OffMeshLink, "OffMeshLink");
         }
+
+        // Particle
+        m_createCompCombo->addChoice((int)Component::Type::Particle, "Particle");
 
         // Audio source
         m_createCompCombo->addChoice((int)Component::Type::AudioSource, "Audio Source");

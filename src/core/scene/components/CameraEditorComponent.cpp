@@ -159,6 +159,12 @@ void CameraEditorComponent::drawCameraComponent() {
     m_cameraCompGroup->createWidget<Drag<float>>("scrRad", ImGuiDataType_Float, scrRad)->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("scrRad", val[0]);
     });
+
+    auto color = comp->getProperty<Vec4>("clearColor", Vec4(1.f, 1.f, 1.f, 1.f));
+    auto colorVec = Vec4(color[0], color[1], color[2], color[3]);
+    m_cameraCompGroup->createWidget<Color>("Clear Color", colorVec)->getOnDataChangedEvent().addListener([this](const auto& val) {
+        getComponent<CompoundComponent>()->setProperty("clearColor", { val[0], val[1], val[2], val[3] });
+    });
 }
 
 void CameraEditorComponent::onTransformChanged()
