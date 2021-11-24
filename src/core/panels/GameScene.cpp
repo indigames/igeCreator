@@ -217,6 +217,8 @@ namespace ige::creator
             if (Editor::getCanvas()->getConsole()->isAutoClearOnStart())
                 Editor::getCanvas()->getConsole()->clearAllLogs();
 
+            m_scenePath = Editor::getCurrentScene()->getPath();
+
             auto path = Editor::getCurrentScene()->getName() + ".scene.tmp";
             SceneManager::getInstance()->saveScene(path);
 
@@ -251,7 +253,8 @@ namespace ige::creator
                 if (Editor::getCurrentScene()->getCanvas())
                     Editor::getCurrentScene()->getCanvas()->getOnTargetSizeChanged().removeAllListeners();
                 auto name = Editor::getCurrentScene()->getName();
-                Editor::getInstance()->loadScene(name + ".scene.tmp");
+                Editor::getInstance()->loadScene(m_scenePath);
+                m_scenePath = {};
                 auto fsPath = fs::path(name + ".scene.tmp");
                 fs::remove(fsPath);
             }

@@ -51,5 +51,6 @@ namespace ige::creator
         bool m_bIsPlaying = false;
         bool m_bIsPausing = false;
         Vec2 m_windowSize = {};
+        std::string m_scenePath;
     };
 }
