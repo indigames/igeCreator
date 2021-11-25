@@ -37,7 +37,7 @@ namespace ige::creator
         std::shared_ptr<Group> m_topGroup = nullptr;
         std::shared_ptr<Group> m_logGroup = nullptr;
         std::shared_ptr<TextArea> m_logTextWidget = nullptr;
-        std::stringstream m_logBuffer;
+        std::string m_logBuffer;
 
         int m_maxLogSize = 4096;
         bool m_bAutoClearOnStart = true;

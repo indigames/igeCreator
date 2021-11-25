@@ -97,14 +97,13 @@ namespace ige::creator
                 {
                     Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y });
                     Editor::getCurrentScene()->setWindowSize(m_windowSize);
-                    Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(m_windowSize.X() / m_windowSize.Y());
-                    if (SceneManager::getInstance()->isIgeEditor())
-                    {
+                    if(Editor::getCurrentScene()->getActiveCamera())
+                        Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(m_windowSize.X() / m_windowSize.Y());
+                    if (SceneManager::getInstance()->isIgeEditor()) {
                         Editor::getCurrentScene()->setViewSize({ getSize().x, getSize().y });
                         Editor::getCurrentScene()->setViewPosition({ getScrollPosition().x, getScrollPosition().y });
                     }
-                    else 
-                    {
+                    else {
                         Editor::getCurrentScene()->setViewSize(m_windowSize);
                     }
                 }

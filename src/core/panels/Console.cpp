@@ -147,7 +147,7 @@ namespace ige::creator
 
     void Console::clear()
     {
-        m_logBuffer.str(std::string());
+        m_logBuffer.clear();
         if (m_logGroup)
             m_logGroup->removeAllWidgets();
         m_logGroup = nullptr;
@@ -167,23 +167,13 @@ namespace ige::creator
         strftime(buffer, sizeof(buffer), "%d-%m-%Y %H:%M:%S", timeinfo);
         auto msg = std::string(buffer) + "\t" + std::string(message) + "\n";
 
-        if (m_logBuffer.gcount() > 1) {
-            char last_char;
-            m_logBuffer.seekg(-1, std::ios::end);
-            m_logBuffer >> last_char;
-            m_logBuffer.seekg(0, std::ios::end);
-            if (last_char != '\n') msg = "\n" + msg;
-        }
+        m_logBuffer += msg;
 
-        std::streamsize logSize = m_logBuffer.gcount() + msg.length();
-
-        if (logSize >= getMaxLogSize())
-            m_logBuffer.ignore(logSize - getMaxLogSize());
-
-        m_logBuffer << msg;
-
+        if (m_logBuffer.length() > m_maxLogSize)
+            m_logBuffer = m_logBuffer.substr(m_logBuffer.length() - m_maxLogSize, m_maxLogSize);
+        
         if(m_logTextWidget)
-            m_logTextWidget->setText(m_logBuffer.str());
+            m_logTextWidget->setText(m_logBuffer);
     }
 
     void Console::clearAllLogs()
