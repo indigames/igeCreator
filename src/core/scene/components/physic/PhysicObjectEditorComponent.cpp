@@ -50,6 +50,22 @@ void PhysicObjectEditorComponent::drawPhysicObject() {
         getComponent<CompoundComponent>()->setProperty("isTrigger", val);
     });
 
+    auto activeState = comp->getProperty<int>("activeState", 1);
+    auto activeStateCombo = m_physicGroup->createWidget<ComboBox>("activeState", activeState);
+    activeStateCombo->getOnDataChangedEvent().addListener([this](auto val) {
+        if (val != -1) {
+            getComponent<CompoundComponent>()->setProperty("activeState", val);
+            setDirty();
+        }
+    });
+    activeStateCombo->setEndOfLine(false);
+    activeStateCombo->addChoice(1, "Active");
+    activeStateCombo->addChoice(2, "Island Sleep");
+    activeStateCombo->addChoice(3, "Want Deactivation");
+    activeStateCombo->addChoice(4, "Disable Deactivation");
+    activeStateCombo->addChoice(5, "Disable Simulation");
+    activeStateCombo->setEndOfLine(true);
+
     auto group = comp->getProperty<float>("group", NAN);
     std::array filterGroup = { group };
     m_physicGroup->createWidget<Drag<float>>("Collision Group", ImGuiDataType_S32, filterGroup, 1, -1)->getOnDataChangedEvent().addListener([this](auto& val) {
