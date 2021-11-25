@@ -407,6 +407,10 @@ namespace ige::creator
         if (Editor::getCurrentScene() == nullptr)
             return false;
 
+        // Not allow saving while playing
+        if (getCanvas() && (getCanvas()->getGameScene()->isPlaying() || getCanvas()->getGameScene()->isPausing()))
+            return false;
+        
         if (Editor::getCurrentScene()->getPath().empty())
         {
             auto selectedFile = SaveFileDialog("Save Scene", "scenes", { "scene", "*.scene" }).result();
@@ -426,6 +430,10 @@ namespace ige::creator
     bool Editor::saveSceneAs()
     {
         if (Editor::getCurrentScene() == nullptr)
+            return false;
+
+        // Not allow saving while playing
+        if (getCanvas() && (getCanvas()->getGameScene()->isPlaying() || getCanvas()->getGameScene()->isPausing()))
             return false;
 
         auto selectedFile = SaveFileDialog("Save Scene As", "scenes", { "scene", "*.scene" }).result();
