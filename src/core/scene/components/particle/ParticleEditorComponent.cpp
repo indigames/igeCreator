@@ -42,11 +42,6 @@ void ParticleEditorComponent::drawParticle() {
         getComponent<CompoundComponent>()->setProperty("autoDraw", val);
     });
 
-    std::array layer = { comp->getProperty<float>("layer", NAN) };
-    m_particleGroup->createWidget<Drag<float>>("Layer", ImGuiDataType_U32, layer, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
-        getComponent<CompoundComponent>()->setProperty("layer", (int)val[0]);
-    });
-
     std::array mask = { comp->getProperty<float>("mask", NAN) };
     m_particleGroup->createWidget<Drag<float>>("GroupMask", ImGuiDataType_U32, mask, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("mask", (int)val[0]);

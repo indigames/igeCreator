@@ -50,7 +50,7 @@ void ParticleManagerEditorComponent::drawParticleManager()
         });
 
         std::array numLayer = { (float)particleManager->getCullingLayerNumber() };
-        m_particleManagerGroup->createWidget<Drag<float>>("Number Layers", ImGuiDataType_S32, numLayer, 1, 1, 8)->getOnDataChangedEvent().addListener([this](auto val) {
+        m_particleManagerGroup->createWidget<Drag<float>>("Culling Layers", ImGuiDataType_S32, numLayer, 1, 1, 8)->getOnDataChangedEvent().addListener([this](auto val) {
             auto particleManager = std::dynamic_pointer_cast<ParticleManager>(getComponent<CompoundComponent>()->getComponents()[0]);
             particleManager->setCullingLayerNumber((int)val[0]);
         });
