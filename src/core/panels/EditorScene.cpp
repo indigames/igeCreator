@@ -390,6 +390,9 @@ namespace ige::creator
 
             ShapeDrawer::setViewProjectionMatrix(renderContext->GetRenderViewProjectionMatrix());
 
+            // Render scene
+            SceneManager::getInstance()->render();
+
             // Render bounding box
             renderBoundingBoxes();
 
@@ -398,9 +401,6 @@ namespace ige::creator
 
             // Render object select rect
             renderCameraSelect();
-
-            // Render scene
-            SceneManager::getInstance()->render();
 
             ShapeDrawer::flush();
 
