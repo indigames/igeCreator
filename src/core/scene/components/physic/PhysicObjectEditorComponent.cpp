@@ -131,6 +131,12 @@ void PhysicObjectEditorComponent::drawPhysicObject() {
     m_physicGroup->createWidget<Drag<float>>("Angular Sleeping Threshold", ImGuiDataType_Float, angularSleepThreshold, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("angularSleepingThreshold", val[0]);
         });
+
+    auto aPosOffset = comp->getProperty<Vec3>("offset", { NAN, NAN, NAN });
+    std::array posOffset = { aPosOffset.X(), aPosOffset.Y(), aPosOffset.Z() };
+    m_physicGroup->createWidget<Drag<float, 3>>("Pos Offset", ImGuiDataType_Float, posOffset)->getOnDataChangedEvent().addListener([this](auto& val) {
+        getComponent<CompoundComponent>()->setProperty("offset", { val[0], val[1], val[2] });
+    });
 }
 
 void PhysicObjectEditorComponent::drawPhysicConstraints() {
