@@ -411,6 +411,10 @@ namespace ige::creator
         if (getCanvas() && (getCanvas()->getGameScene()->isPlaying() || getCanvas()->getGameScene()->isPausing()))
             return false;
         
+        // If this is prefab, save prefab instead
+        if (SceneManager::getInstance()->getCurrentScene()->isPrefab())
+            return savePrefab();
+
         if (Editor::getCurrentScene()->getPath().empty())
         {
             auto selectedFile = SaveFileDialog("Save Scene", "scenes", { "scene", "*.scene" }).result();
@@ -435,6 +439,10 @@ namespace ige::creator
         // Not allow saving while playing
         if (getCanvas() && (getCanvas()->getGameScene()->isPlaying() || getCanvas()->getGameScene()->isPausing()))
             return false;
+
+        // If this is prefab, save prefab instead
+        if (SceneManager::getInstance()->getCurrentScene()->isPrefab())
+            return saveSceneAs();
 
         auto selectedFile = SaveFileDialog("Save Scene As", "scenes", { "scene", "*.scene" }).result();
         if (!selectedFile.empty())
