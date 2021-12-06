@@ -126,18 +126,18 @@ void TransformEditorComponent::drawLocalTransformComponent() {
         setDirty();
     });
 
-    auto euler = comp->getProperty<Vec3>("rot", Vec3(NAN, NAN, NAN));
+    auto euler = comp->getProperty<Vec3>("originRot", Vec3(NAN, NAN, NAN));
     std::array rotArr = { RADIANS_TO_DEGREES(euler.X()), RADIANS_TO_DEGREES(euler.Y()), RADIANS_TO_DEGREES(euler.Z()) };
     m_localTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rotArr)->getOnDataChangedEvent().addListener([this](auto val) {
         IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
         m_dirtyFlag = 2;
-        auto euler = getComponent<CompoundComponent>()->getProperty<Vec3>("rot", Vec3(NAN, NAN, NAN));
+        auto euler = getComponent<CompoundComponent>()->getProperty<Vec3>("originRot", Vec3(NAN, NAN, NAN));
         if ((std::isnan(euler[0]) && !std::isnan(val[0]))
             || (std::isnan(euler[1]) && !std::isnan(val[1]))
             || (std::isnan(euler[2]) && !std::isnan(val[2]))) {
             m_dirtyFlag = 0;
         }
-        getComponent<CompoundComponent>()->setProperty("rot", Vec3(DEGREES_TO_RADIANS(val[0]), DEGREES_TO_RADIANS(val[1]), DEGREES_TO_RADIANS(val[2])));
+        getComponent<CompoundComponent>()->setProperty("originRot", Vec3(DEGREES_TO_RADIANS(val[0]), DEGREES_TO_RADIANS(val[1]), DEGREES_TO_RADIANS(val[2])));
         getComponent<CompoundComponent>()->setDirty();
         if (Editor::getCanvas()->getEditorScene()->getGizmo())
             Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
@@ -191,21 +191,23 @@ void TransformEditorComponent::drawWorldTransformComponent() {
 
     auto euler = comp->getProperty<Vec3>("wrot", Vec3(NAN, NAN, NAN));
     std::array rotArr = { RADIANS_TO_DEGREES(euler.X()), RADIANS_TO_DEGREES(euler.Y()), RADIANS_TO_DEGREES(euler.Z()) };
-    m_worldTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rotArr)->getOnDataChangedEvent().addListener([this](auto val) {
-        IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
-        m_dirtyFlag = 1;
+    auto w_widget = m_worldTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rotArr);
+    w_widget->getOnDataChangedEvent().addListener([this](auto val) {
+        //IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
+        //m_dirtyFlag = 1;
+        m_dirtyFlag = 2;
         auto euler = getComponent<CompoundComponent>()->getProperty<Vec3>("wrot", Vec3(NAN, NAN, NAN));
         if ((std::isnan(euler[0]) && !std::isnan(val[0]))
             || (std::isnan(euler[1]) && !std::isnan(val[1]))
             || (std::isnan(euler[2]) && !std::isnan(val[2]))) {
             m_dirtyFlag = 0;
         }
-        getComponent<CompoundComponent>()->setProperty("wrot", Vec3(DEGREES_TO_RADIANS(val[0]), DEGREES_TO_RADIANS(val[1]), DEGREES_TO_RADIANS(val[2])));
-        getComponent<CompoundComponent>()->setDirty();
+        /*getComponent<CompoundComponent>()->setProperty("wrot", Vec3(DEGREES_TO_RADIANS(val[0]), DEGREES_TO_RADIANS(val[1]), DEGREES_TO_RADIANS(val[2])));
+        getComponent<CompoundComponent>()->setDirty();*/
         if (Editor::getCanvas()->getEditorScene()->getGizmo())
             Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
         setDirty();
-    });
+        });
 
     auto scale = comp->getProperty<Vec3>("wscale", Vec3(NAN, NAN, NAN));
     std::array scaleArr = { scale.X(), scale.Y(), scale.Z() };
