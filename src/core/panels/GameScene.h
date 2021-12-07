@@ -51,5 +51,7 @@ namespace ige::creator
         bool m_bIsPlaying = false;
         bool m_bIsPausing = false;
         Vec2 m_windowSize = {};
+
+        float delta_time = 0;
     };
 }
