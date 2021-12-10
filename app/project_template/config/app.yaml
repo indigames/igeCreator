@@ -1,8 +1,8 @@
 App: # Application config
     Name: igeSample # App Name: must not contains space
     Label: Sample # App Label: Icon label, can contains space
-    VersionName: '0.0.1' # Version Name (major.minor.build + a-z)
-    VersionCode: 100 # Version Code ([1][0][0][00] <=> [Major][Minor][Build][0 - 24])
+    VersionName: '0.0.1' # (major.minor.build)
+    VersionCode: 1 # MUST BE INTEGER (without leading '0' character)
     BundleId: net.indigames.igesample # BundleID (iOS/MacOS), Package Name (Android)
 
 Platforms: # Platforms config
