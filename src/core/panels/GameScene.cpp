@@ -177,6 +177,15 @@ namespace ige::creator
             // Update scene
             SceneManager::getInstance()->update(dt);
 
+            delta_time += dt;
+            if (delta_time >= 0.02f) {
+                while (delta_time > 0.02f) {
+                    delta_time -= 0.02f;
+                    SceneManager::getInstance()->fixedUpdate(0.02f);
+                }
+                delta_time = 0;
+
+            }
             // Physic update scene
             SceneManager::getInstance()->physicUpdate(dt);
         }
