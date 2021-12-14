@@ -154,7 +154,7 @@ namespace ige::creator
         //! Targeted object
         std::shared_ptr<TargetObject> m_target;
     };
-
-    std::string CreateScript(const std::string& name);
+        
     std::string GetEnginePath(const std::string& path);
+    std::string GetRelativePath(const std::string& path);
 }

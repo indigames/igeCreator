@@ -1,5 +1,6 @@
 #include "core/scene/components/SpriteEditorComponent.h"
 #include "core/scene/CompoundComponent.h"
+#include "core/Editor.h"
 
 #include "core/layout/Group.h"
 #include "core/widgets/Widgets.h"
@@ -45,17 +46,17 @@ void SpriteEditorComponent::drawSpriteComponent()
 
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
     {
-        txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& txt) {
-            getComponent<CompoundComponent>()->setProperty("path", txt);
+        txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
+            getComponent<CompoundComponent>()->setProperty("path", GetRelativePath(path));
             getComponent<CompoundComponent>()->setDirty();
             setDirty();
         });
     }
 
-    m_spriteCompGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
+    m_spriteCompGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](const auto& widget) {
         auto files = OpenFileDialog("Import Assets", "", { "Texture (*.pyxi)", "*.pyxi" }).result();
         if (files.size() > 0) {
-            getComponent<CompoundComponent>()->setProperty("path", files[0]);
+            getComponent<CompoundComponent>()->setProperty("path", GetRelativePath(files[0]));
             getComponent<CompoundComponent>()->setDirty();
             setDirty();
         }

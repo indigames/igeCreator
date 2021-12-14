@@ -1,5 +1,6 @@
 #include "core/scene/components/gui/UIButtonEditorComponent.h"
 #include "core/scene/CompoundComponent.h"
+#include "core/Editor.h"
 
 #include <core/layout/Group.h>
 
@@ -58,8 +59,8 @@ void UIButtonEditorComponent::drawUIButton() {
             getComponent<CompoundComponent>()->setDirty();
         });
         for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite)) {
-            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-                getComponent<CompoundComponent>()->setProperty("path", txt);
+            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
+                getComponent<CompoundComponent>()->setProperty("path", GetRelativePath(path));
                 getComponent<CompoundComponent>()->setDirty();
                 setDirty();
             });
@@ -97,44 +98,44 @@ void UIButtonEditorComponent::drawUIButton() {
             getComponent<CompoundComponent>()->setProperty("path", txt);
         });
         for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite)) {
-            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-                getComponent<CompoundComponent>()->setProperty("path", txt);
+            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
+                getComponent<CompoundComponent>()->setProperty("path", GetRelativePath(path));
                 setDirty();
             });
         }
 
         //Pressed Path
         txtPath = m_uiButtonGroup->createWidget<TextField>("Pressed", comp->getProperty<std::string>("pressedpath", ""), false, true);
-        txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
-            getComponent<CompoundComponent>()->setProperty("pressedpath", txt);
+        txtPath->getOnDataChangedEvent().addListener([this](const auto& path) {
+            getComponent<CompoundComponent>()->setProperty("pressedpath", GetRelativePath(path));
         });
         for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite)) {
-            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-                getComponent<CompoundComponent>()->setProperty("pressedpath", txt);
+            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
+                getComponent<CompoundComponent>()->setProperty("pressedpath", GetRelativePath(path));
                 setDirty();
             });
         }
 
         //Selected Path
         txtPath = m_uiButtonGroup->createWidget<TextField>("Selected", comp->getProperty<std::string>("seletecpath", ""), false, true);
-        txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
-            getComponent<CompoundComponent>()->setProperty("seletecpath", txt);
+        txtPath->getOnDataChangedEvent().addListener([this](const auto& path) {
+            getComponent<CompoundComponent>()->setProperty("seletecpath", GetRelativePath(path));
         });
         for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite)) {
-            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-                getComponent<CompoundComponent>()->setProperty("seletecpath", txt);
+            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
+                getComponent<CompoundComponent>()->setProperty("seletecpath", GetRelativePath(path));
                 setDirty();
             });
         }
 
         //Disabled Path
         txtPath = m_uiButtonGroup->createWidget<TextField>("Disabled", comp->getProperty<std::string>("disabledpath", ""), false, true);
-        txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
-            getComponent<CompoundComponent>()->setProperty("disabledpath", txt);
+        txtPath->getOnDataChangedEvent().addListener([this](const auto& path) {
+            getComponent<CompoundComponent>()->setProperty("disabledpath", GetRelativePath(path));
         });
         for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite)) {
-            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-                getComponent<CompoundComponent>()->setProperty("disabledpath", txt);
+            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
+                getComponent<CompoundComponent>()->setProperty("disabledpath", GetRelativePath(path));
                 setDirty();
             });
         }

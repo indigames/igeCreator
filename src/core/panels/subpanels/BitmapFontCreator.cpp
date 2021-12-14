@@ -361,10 +361,10 @@ namespace ige::creator
 
         for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
         {
-            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-                this->onLoadImg(txt);
+            txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
+                this->onLoadImg(path);
                 dirty();
-                });
+            });
         }
 
         auto btnB1 = m_GroupLeft->createWidget<Button>("Browse", ImVec2(64.f, 0.f));

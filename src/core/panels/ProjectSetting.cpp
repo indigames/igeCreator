@@ -50,8 +50,8 @@ namespace ige::creator
 
         auto sceneGroup = createWidget<Group>("Scene Manager");
         auto startScene = sceneGroup->createWidget<TextField>("Start scene", getStartScene().c_str(), true);
-        startScene->addPlugin<DDTargetPlugin<std::string>>(".scene")->getOnDataReceivedEvent().addListener([this](auto val) {
-            setStartScene(val);
+        startScene->addPlugin<DDTargetPlugin<std::string>>(".scene")->getOnDataReceivedEvent().addListener([this](const auto& path) {
+            setStartScene(path);
             saveSettings();
             redraw();
         });

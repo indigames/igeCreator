@@ -1,5 +1,6 @@
 #include "core/scene/components/gui/UIScrollViewEditorComponent.h"
 #include "core/scene/CompoundComponent.h"
+#include "core/Editor.h"
 
 #include <core/layout/Group.h>
 
@@ -37,8 +38,8 @@ void UIScrollViewEditorComponent::drawUIScrollView() {
         getComponent<CompoundComponent>()->setDirty();
     });
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite)) {
-        txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-            getComponent<CompoundComponent>()->setProperty("path", txt);
+        txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
+            getComponent<CompoundComponent>()->setProperty("path", GetRelativePath(path));
             getComponent<CompoundComponent>()->setDirty();
             setDirty();
         });

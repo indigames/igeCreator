@@ -1,5 +1,6 @@
 #include "core/scene/components/gui/UITextFieldEditorComponent.h"
 #include "core/scene/CompoundComponent.h"
+#include "core/Editor.h"
 
 #include <core/layout/Group.h>
 
@@ -39,12 +40,12 @@ void UITextFieldEditorComponent::drawUITextField() {
     });
 
     auto txtFontPath = m_uiTextFieldGroup->createWidget<TextField>("Font", comp->getProperty<std::string>("font", ""), false, true);
-    txtFontPath->getOnDataChangedEvent().addListener([this](auto txt) {
-        getComponent<CompoundComponent>()->setProperty("font", txt);
+    txtFontPath->getOnDataChangedEvent().addListener([this](const auto& path) {
+        getComponent<CompoundComponent>()->setProperty("font", GetRelativePath(path));
     });
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Font)) {
-        txtFontPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-            getComponent<CompoundComponent>()->setProperty("font", txt);
+        txtFontPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
+            getComponent<CompoundComponent>()->setProperty("font", GetRelativePath(path));
             setDirty();
         });
     }

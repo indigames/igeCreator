@@ -824,45 +824,6 @@ namespace ige::creator
         return m_target ? m_target->getFirstTarget() : nullptr;
     }
 
-    const auto script_template =
-        "from igeScene import Script\n\
-\n\
-class %s(Script):\n\
-    def __init__(self, owner):\n\
-        super().__init__(owner)\n\
-        print(f'Hello {self.owner.name}')\n\
-    \n\
-    def onAwake(self):\n\
-        print('onAwake() called!')\n\
-    \n\
-    def onStart(self):\n\
-        print('onStart() called!')\n\
-    \n\
-    def onUpdate(self, dt):\n\
-        pass\n\
-    \n\
-    def onClick(self):\n\
-        print(f'onClick(): {self.owner.name}!')\n\
-    \n\
-    def onDestroy(self):\n\
-        print('onDestroy called!')\n\
-    \n";
-
-    std::string CreateScript(const std::string& name)
-    {
-        char script[512] = { 0 };
-        sprintf(script, script_template, name.c_str());
-
-        auto fileName = name;
-        std::transform(fileName.begin(), fileName.end(), fileName.begin(),
-            [](unsigned char c) { return std::tolower(c); });
-        fs::path path{ "scripts/" + fileName + ".py" };
-        std::ofstream ofs(path);
-        ofs << script;
-        ofs.close();
-        return fileName;
-    }
-
     std::string GetEnginePath(const std::string& path)
     {
         if (Editor::getInstance()->getEnginePath().compare(Editor::getInstance()->getProjectPath()) == 0)
@@ -870,5 +831,14 @@ class %s(Script):\n\
         auto retPath = (fs::path(Editor::getInstance()->getEnginePath()).append(path)).string();
         std::replace(retPath.begin(), retPath.end(), '\\', '/');
         return retPath;
+    }
+
+    std::string GetRelativePath(const std::string& path)
+    {
+        auto fsPath = fs::path(path);
+        auto relPath = fsPath.is_absolute() ? fs::relative(fs::path(path), fs::current_path()).string() : fsPath.string();
+        if (relPath.size() == 0) relPath = fsPath.string();
+        std::replace(relPath.begin(), relPath.end(), '\\', '/');
+        return relPath;
     }
 }

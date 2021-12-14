@@ -1,6 +1,7 @@
 #include "core/scene/components/EditableFigureEditorComponent.h"
 #include "core/scene/CompoundComponent.h"
 #include "components/EditableFigureComponent.h"
+#include "core/Editor.h"
 
 #include <core/layout/Group.h>
 #include "core/layout/Columns.h"
@@ -43,8 +44,8 @@ void EditableFigureEditorComponent::drawFigureComponent()
 
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Figure))
     {
-        txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& txt) {
-            getComponent<CompoundComponent>()->setProperty("path", txt);
+        txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
+            getComponent<CompoundComponent>()->setProperty("path", GetRelativePath(path));
             setDirty();
         });
     }
@@ -52,7 +53,7 @@ void EditableFigureEditorComponent::drawFigureComponent()
     m_figureCompGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
         auto files = OpenFileDialog("Import Assets", "", { "Figure", "*.dae", "FBX file (*.fbx)", "*.fbx" }).result();
         if (files.size() > 0) {
-            getComponent<CompoundComponent>()->setProperty("path", files[0]);
+            getComponent<CompoundComponent>()->setProperty("path", GetRelativePath(files[0]));
             setDirty();
         }
     });
@@ -156,12 +157,12 @@ void EditableFigureEditorComponent::drawFigureComponent()
                                     });
                                     for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
                                     {
-                                        samplerPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this, idx, hash](const auto& txt) {
+                                        samplerPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this, idx, hash](const auto& path) {
                                             auto comp = getComponent<CompoundComponent>();
                                             if (comp && comp->size() == 1) {
                                                 auto figureComp = std::dynamic_pointer_cast<EditableFigureComponent>(comp->getComponents()[0]);
                                                 if (figureComp) {
-                                                    figureComp->setMaterialParams(idx, hash, txt);
+                                                    figureComp->setMaterialParams(idx, hash, GetRelativePath(path));
                                                 }
                                                 setDirty();
                                             }

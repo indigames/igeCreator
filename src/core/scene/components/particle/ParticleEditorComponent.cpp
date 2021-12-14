@@ -1,5 +1,6 @@
 #include "core/scene/components/particle/ParticleEditorComponent.h"
 #include "core/scene/CompoundComponent.h"
+#include "core/Editor.h"
 
 #include <core/layout/Group.h>
 
@@ -81,15 +82,15 @@ void ParticleEditorComponent::drawParticle() {
     });
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Particle))
     {
-        txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto val) {
-            getComponent<CompoundComponent>()->setProperty("path", val);
+        txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
+            getComponent<CompoundComponent>()->setProperty("path", GetRelativePath(path));
             setDirty();
         });
     }
     m_particleGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
         auto files = OpenFileDialog("Import Particle Assets", "", { "Particle (*.efk)", "*.efk" }).result();
         if (files.size() > 0) {
-            getComponent<CompoundComponent>()->setProperty("path", files[0]);
+            getComponent<CompoundComponent>()->setProperty("path", GetRelativePath(files[0]));
             setDirty();
         }
         });

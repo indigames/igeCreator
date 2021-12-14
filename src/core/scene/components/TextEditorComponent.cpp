@@ -1,5 +1,6 @@
 #include "core/scene/components/TextEditorComponent.h"
 #include "core/scene/CompoundComponent.h"
+#include "core/Editor.h"
 
 #include "core/layout/Group.h"
 #include "core/widgets/Widgets.h"
@@ -46,8 +47,8 @@ void TextEditorComponent::drawComponent()
         getComponent<CompoundComponent>()->setProperty("font", txt);
         });
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Font)) {
-        txtFontPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-            getComponent<CompoundComponent>()->setProperty("font", txt);
+        txtFontPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
+            getComponent<CompoundComponent>()->setProperty("font", GetRelativePath(path));
             setDirty();
             });
     }

@@ -214,7 +214,7 @@ namespace ige::creator
         // Scene drag/drop
         for (const auto& type : GetFileExtensionSuported(E_FileExts::Scene))
         {
-            m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([](auto path) {
+            m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([](const auto& path) {
                 if (!path.empty()) {
                     TaskManager::getInstance()->addTask([path]() {
                         Editor::getInstance()->loadScene(path);
@@ -226,7 +226,7 @@ namespace ige::creator
         // Figure drag/drop
         for (const auto& type : GetFileExtensionSuported(E_FileExts::Figure))
         {
-            m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto path) {
+            m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
                 if (Editor::getCurrentScene() && !path.empty()) {
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObj = Editor::getCurrentScene()->createObject(fs::path(path).stem(), target);
@@ -238,7 +238,7 @@ namespace ige::creator
         // Sprite drag/drop
         for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
         {
-            m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto path) {
+            m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
                 if (Editor::getCurrentScene() && !path.empty()) {
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObj = Editor::getCurrentScene()->createObject(fs::path(path).stem(), target);
@@ -250,7 +250,7 @@ namespace ige::creator
         // Audio drag/drop
         for (const auto& type : GetFileExtensionSuported(E_FileExts::Audio))
         {
-            m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto path) {
+            m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
                 if (Editor::getCurrentScene() && !path.empty()) {
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObj = Editor::getCurrentScene()->createObject(fs::path(path).stem(), target);
@@ -262,7 +262,7 @@ namespace ige::creator
         // Prefab drag/drop
         for (const auto& type : GetFileExtensionSuported(E_FileExts::Prefab))
         {
-            m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto path) {
+            m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
                 if (!path.empty()) {
                     TaskManager::getInstance()->addTask([path]() {
                         Editor::getInstance()->openPrefab(path);
@@ -274,7 +274,7 @@ namespace ige::creator
         // Particle
         for (const auto& type : GetFileExtensionSuported(E_FileExts::Particle))
         {
-            m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto path) {
+            m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
                 if (Editor::getCurrentScene() && !path.empty()) {
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObj = Editor::getCurrentScene()->createObject(fs::path(path).stem(), target);

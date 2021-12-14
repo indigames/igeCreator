@@ -53,19 +53,19 @@ void ScriptEditorComponent::drawScriptComponent() {
         setDirty();
     });
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Script)) {
-        txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
+        txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
             auto comp = getComponent<CompoundComponent>();
-            comp->setProperty("path", txt);
+            comp->setProperty("path", GetRelativePath(path));
             comp->setDirty();
             setDirty();
         });
     }
-    m_scriptCompGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
+    m_scriptCompGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](const auto& widget) {
         auto files = OpenFileDialog("Import Assets", "", { "Script (*.py)", "*.py" }).result();
         if (files.size() > 0)
         {
             auto comp = getComponent<CompoundComponent>();
-            comp->setProperty("path", files[0]);
+            comp->setProperty("path", GetRelativePath(files[0]));
             comp->setDirty();
             setDirty();
         }
@@ -320,11 +320,11 @@ void ScriptEditorComponent::drawScriptComponent() {
                     }
                 });
                
-                txtField->addPlugin<DDTargetPlugin<std::string>>(EDragDropID::FILE)->getOnDataReceivedEvent().addListener([key, this](auto val) {
+                txtField->addPlugin<DDTargetPlugin<std::string>>(EDragDropID::FILE)->getOnDataReceivedEvent().addListener([key, this](const auto& path) {
                     auto comp = getComponent<CompoundComponent>();
                     auto members = comp->getProperty<json>("members", json::array());
                     if (members.contains(key)) {
-                        members[key] = val;
+                        members[key] = GetRelativePath(path);
                         comp->setProperty("members", members);
                     }
                     setDirty();
@@ -334,11 +334,11 @@ void ScriptEditorComponent::drawScriptComponent() {
                 {
                     for (const auto& type : GetFileExtensionSuported(ext))
                     {
-                        txtField->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([key, this](auto val) {
+                        txtField->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([key, this](const auto& path) {
                             auto comp = getComponent<CompoundComponent>();
                             auto members = comp->getProperty<json>("members", json::array());
                             if (members.contains(key)) {
-                                members[key] = val;
+                                members[key] = GetRelativePath(path);
                                 comp->setProperty("members", members);
                             }
                             setDirty();

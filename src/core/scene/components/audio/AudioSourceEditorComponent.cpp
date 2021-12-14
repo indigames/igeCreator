@@ -1,5 +1,6 @@
 #include "core/scene/components/audio/AudioSourceEditorComponent.h"
 #include "core/scene/CompoundComponent.h"
+#include "core/Editor.h"
 
 #include <core/layout/Group.h>
 
@@ -103,15 +104,15 @@ void AudioSourceEditorComponent::drawAudioSource() {
     });
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Audio))
     {
-        txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](auto txt) {
-            getComponent<CompoundComponent>()->setProperty("path", txt);
+        txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
+            getComponent<CompoundComponent>()->setProperty("path", GetRelativePath(path));
             setDirty();
         });
     }
     m_audioSourceGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
         auto files = OpenFileDialog("Import Assets", "", { "WAV audio file (*.wav)", "*.wav", "OGG audio file (*.ogg)", "*.ogg" , "MP3 audio file (*.mp3)", "*.mp3" }).result();
         if (files.size() > 0) {
-            getComponent<CompoundComponent>()->setProperty("path", files[0]);
+            getComponent<CompoundComponent>()->setProperty("path", GetRelativePath(files[0]));
             setDirty();
         }
     });
