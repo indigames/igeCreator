@@ -90,9 +90,6 @@ namespace ige::creator
         m_canvas = std::make_shared<Canvas>();
         m_canvas->setDockable(true);
 
-        // Set editor mode
-        SceneManager::getInstance()->setIsEditor(true);
-
         //! Init Shortcut
         m_shortcutController = std::make_shared<ShortcutController>();
         m_shortcutController->retain();

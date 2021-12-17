@@ -99,7 +99,7 @@ namespace ige::creator
                     Editor::getCurrentScene()->setWindowSize(m_windowSize);
                     if(Editor::getCurrentScene()->getActiveCamera())
                         Editor::getCurrentScene()->getActiveCamera()->setAspectRatio(m_windowSize.X() / m_windowSize.Y());
-                    if (SceneManager::getInstance()->isIgeEditor()) {
+                    if (SceneManager::getInstance()->isPlaying()) {
                         Editor::getCurrentScene()->setViewSize({ getSize().x, getSize().y });
                         Editor::getCurrentScene()->setViewPosition({ getScrollPosition().x, getScrollPosition().y });
                     }
@@ -148,13 +148,11 @@ namespace ige::creator
         if (!m_bInitialized)
             return;
 
-        SceneManager::getInstance()->setIsEditor(false);
-
         // Update windows pos and size
         if (Editor::getCurrentScene()) {
             Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y });
             Editor::getCurrentScene()->setWindowSize(m_windowSize);
-            if (SceneManager::getInstance()->isIgeEditor())
+            if (SceneManager::getInstance()->isPlaying())
             {
                 Editor::getCurrentScene()->setViewSize({ getSize().x, getSize().y });
                 Editor::getCurrentScene()->setViewPosition({ getScrollPosition().x, getScrollPosition().y });
@@ -228,12 +226,9 @@ namespace ige::creator
             auto path = Editor::getCurrentScene()->getName() + ".scene.tmp";
             SceneManager::getInstance()->saveScene(path);
 
-            SceneManager::getInstance()->setIsEditor(false);
             m_bIsPlaying = true;
-            Editor::getInstance()->loadScene(path);
-
             SceneManager::getInstance()->setIsPlaying(m_bIsPlaying);
-            SceneManager::getInstance()->dispathEvent((int)EventType::RunEditor);
+            Editor::getInstance()->loadScene(path);
 
             clear();
         }
@@ -245,7 +240,6 @@ namespace ige::creator
     void GameScene::pause()
     {
         m_bIsPausing = true;
-        SceneManager::getInstance()->dispathEvent((int)EventType::PauseEditor);
     }
 
     void GameScene::stop()
@@ -253,7 +247,6 @@ namespace ige::creator
         if (m_bIsPlaying)
         {
             clear();
-            SceneManager::getInstance()->setIsEditor(true);
 
             if (Editor::getCurrentScene()) {
                 if (Editor::getCurrentScene()->getCanvas())
@@ -266,7 +259,6 @@ namespace ige::creator
             m_bIsPausing = false;
             m_bIsPlaying = false;
             SceneManager::getInstance()->setIsPlaying(m_bIsPlaying);
-            SceneManager::getInstance()->dispathEvent((int)EventType::StopEditor);
 
             startWatcherThread();
         }

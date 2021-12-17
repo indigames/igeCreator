@@ -155,8 +155,6 @@ namespace ige::creator
                 m_HandleCameraTouchId = -1;
                 m_bInitialized = true;
             }
-
-            SceneManager::getInstance()->setIsIgeEditor(true);
         }
     }
 
@@ -362,7 +360,6 @@ namespace ige::creator
             return;
         }
 
-        SceneManager::getInstance()->setIsEditor(true);
         if (Editor::getCurrentScene()) {
             Editor::getCurrentScene()->setWindowPosition({ getPosition().x, getPosition().y + 25.f });
             Editor::getCurrentScene()->setWindowSize({ getSize().x, getSize().y });
@@ -391,7 +388,7 @@ namespace ige::creator
             ShapeDrawer::setViewProjectionMatrix(renderContext->GetRenderViewProjectionMatrix());
 
             // Render scene
-            SceneManager::getInstance()->render(m_fbo, true);
+            SceneManager::getInstance()->render(nullptr, true);
 
             // Render bounding box
             renderBoundingBoxes();
