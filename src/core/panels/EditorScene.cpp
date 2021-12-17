@@ -391,7 +391,7 @@ namespace ige::creator
             ShapeDrawer::setViewProjectionMatrix(renderContext->GetRenderViewProjectionMatrix());
 
             // Render scene
-            SceneManager::getInstance()->render();
+            SceneManager::getInstance()->render(m_fbo, true);
 
             // Render bounding box
             renderBoundingBoxes();
