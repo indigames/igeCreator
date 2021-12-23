@@ -164,7 +164,6 @@ void EditableFigureEditorComponent::drawFigureComponent()
                                                 if (figureComp) {
                                                     figureComp->setMaterialParams(idx, hash, GetRelativePath(path));
                                                 }
-                                                setDirty();
                                             }
                                         });
                                     }
