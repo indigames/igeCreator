@@ -251,25 +251,26 @@ bool FigureMeta::loadModel() {
         pyxieColladaLoader colladaloader;
         auto efig = ResourceCreator::Instance().NewEditableFigure(m_path.c_str(), true);
         auto embeddedAnim = m_options["EMBEDDED_ANIMATION"].get<bool>();
-        if (embeddedAnim) {
-            if (isFbx && fbxLoader.LoadModel(relPath.c_str(), efig)
-                || !isFbx && colladaloader.LoadCollada(relPath.c_str(), efig)) {
-                if (m_options["OPTIMIZE_VERTEX"]) {
-                    efig->RemoveUnreferencedVertices();
-                }
-                if (m_options["OPTIMIZE_MESH"]) {
-                    efig->MergeSameMaterialMesh();
-                }
-                replaceTextures(*efig);
-                return efig->SaveFigure((fsPath.parent_path().append(fsPath.stem().string() + ".pyxf")).c_str());
+        bool result = false;
+
+        if (isFbx && fbxLoader.LoadModel(relPath.c_str(), efig)
+            || !isFbx && colladaloader.LoadCollada(relPath.c_str(), efig)) {
+            if (m_options["OPTIMIZE_VERTEX"]) {
+                efig->RemoveUnreferencedVertices();
+            }
+            if (m_options["OPTIMIZE_MESH"]) {
+                efig->MergeSameMaterialMesh();
+            }
+            replaceTextures(*efig);
+            result = efig->SaveFigure((fsPath.parent_path().append(fsPath.stem().string() + ".pyxf")).c_str());
+        }
+        if (!embeddedAnim && result) {
+            if (isFbx && fbxLoader.LoadAnimation(relPath.c_str(), efig)
+                || !isFbx && colladaloader.LoadColladaAnimation(relPath.c_str(), efig)) {
+                result =  efig->SaveAnimation((fsPath.parent_path().append(fsPath.stem().string() + ".pyxa")).c_str());
             }
         }
-        else {
-            if (isFbx && fbxLoader.LoadModel(relPath.c_str(), efig)
-                || !isFbx && colladaloader.LoadCollada(relPath.c_str(), efig)) {
-                return efig->SaveAnimation((fsPath.parent_path().append(fsPath.stem().string() + ".pyxa")).c_str());
-            }
-        }        
+        return result;
     }
     return false;
 }
