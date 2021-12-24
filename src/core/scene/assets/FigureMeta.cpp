@@ -25,6 +25,7 @@ FigureMeta::FigureMeta(const std::string& path)
         {"SHADER_MAKE_SHADOW", false},
         {"SHADER_RECEIVE_SHADOW", false},
         {"SHADER_DEPTH_SHADOW", true},
+        {"SHADER_VERTEX_COLOR", false},
         {"MATERIAL_PARAM_SPARE", 8},
         {"SHADER_NUM_DIR_LAMP", 3},
         {"SHADER_NUM_POINT_LAMP", 7},
