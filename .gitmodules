@@ -26,3 +26,6 @@
 	path = libs/igeCore
 	url = git@github.com:indigames/igeCore.git
 	branch = master
+[submodule "3rd-party/imgui-node-editor"]
+	path = 3rd-party/imgui-node-editor
+	url = https://github.com/indigames/imgui-node-editor.git
