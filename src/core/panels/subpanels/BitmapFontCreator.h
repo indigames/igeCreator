@@ -15,6 +15,7 @@ USING_NS_IGE_SCENE
 namespace ige::creator
 {
     class Image;
+    class TextArea;
 
     class BitmapGlyphEditor
     {
@@ -69,6 +70,7 @@ namespace ige::creator
         std::shared_ptr<Group> m_GroupLeft = nullptr;
         std::shared_ptr<Group> m_GroupRight = nullptr;
         std::shared_ptr<Image> m_imgWidget = nullptr;
+        std::shared_ptr<TextArea> m_txtChars = nullptr;
 
         std::vector<std::shared_ptr<BitmapGlyphEditor>> m_glyphList;
 
