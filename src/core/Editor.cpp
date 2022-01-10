@@ -51,7 +51,7 @@ namespace ige::creator
 
         PoolManager::destroyInstance();
         SceneManager::destroy();
-        m_app = nullptr;        
+        m_app = nullptr;
 
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplSDL2_Shutdown();

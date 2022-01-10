@@ -39,6 +39,7 @@ namespace ige::creator
         createPanel<Profiler>("Profiler", settings);
         createPanel<Inspector>("Inspector", settings);
         createPanel<AssetViewer>("Asset", settings);
+        createPanel<AnimatorEditor>("Animator", settings);
         auto bitmapPanel = createPanel<BitmapFontCreator>("BitmapFontCreator", settings);
         bitmapPanel->close();
     }
@@ -106,6 +107,7 @@ namespace ige::creator
                     ImGui::DockBuilderDockWindow("Assets", dock_id_bottom);
                     ImGui::DockBuilderDockWindow("Scene", dock_main_id);
                     ImGui::DockBuilderDockWindow("Preview", dock_main_id);
+                    ImGui::DockBuilderDockWindow("Animator", dock_main_id);
                     ImGui::DockBuilderDockWindow("Profiler", dock_id_left_bottom);
                     ImGui::DockBuilderFinish(dockspace_id);
                 }
