@@ -1,8 +1,13 @@
 #include "core/panels/AnimatorEditor.h"
 
-# include <imgui_node_editor.h>
-namespace ed = ax::NodeEditor;
+#include <components/animation/AnimatorStateMachine.h>
+#include <components/animation/AnimatorState.h>
+#include <components/animation/AnimatorTransition.h>
 
+#include "core/plugin/DragDropPlugin.h"
+
+#include <imgui_node_editor.h>
+namespace ed = ax::NodeEditor;
 
 namespace ige::creator
 {
@@ -53,12 +58,43 @@ namespace ige::creator
     {
         ed::DestroyEditor(g_Context);
         g_Context = nullptr;
+
+        m_controller = nullptr;
+        m_path.clear();
     }
 
     void AnimatorEditor::initialize()
     {
+        clear();
+
         if (!m_bInitialized) {
 			
+            m_dragDropPlugin = std::make_shared<DDTargetPlugin<std::string>>(".pyxa");
+            std::dynamic_pointer_cast<DDTargetPlugin<std::string>>(m_dragDropPlugin)->getOnDataReceivedEvent().addListener([](const auto& path) {
+                //  TODO: catch drag drop target to create new state
+                pyxie_printf(path.c_str());
+            });
+
+            if (m_controller)
+                m_controller = nullptr;
+            m_controller = std::make_shared<AnimatorController>(m_path);
+
+            // States -> nodes
+            // Transitions -> Links
+
+            //1. Add/remove/update nodes
+            // - Drag & Drop
+            // - Right click menu
+
+
+            //2. Add/remove/update links
+            //  drag
+            // info
+
+
+            
+            m_uniqueId = 1;
+
             // Init Node Editor
             ed::Config config;
             config.SettingsFile = "AnimatorLayout.ini";
@@ -68,15 +104,12 @@ namespace ige::creator
         }
     }
 
-    void AnimatorEditor::update(float dt)
+    void AnimatorEditor::openAnimator(const std::string& path)
     {
-
-        // Ensure initialization
-        initialize();
-
-        if (!m_bInitialized)
-            return;
-
+        if (m_path.compare(path) != 0) {
+            m_path = path;
+            initialize();
+        }
     }
 
     void AnimatorEditor::drawWidgets()
@@ -89,56 +122,46 @@ namespace ige::creator
         // Start interaction with editor.
         ed::Begin("Canvas", ImVec2(0.0, 0.0f));
 
-        int uniqueId = 1;
+        m_dragDropPlugin->execute();
 
-        //
-        // 1) Commit known data to editor
-        //
+        for (const auto& state : m_controller->getStateMachine()->getStates()) {
+            // Submit Node A
+            ed::NodeId nodeId = state->getId();
+            ed::PinId inputPinId = state->getInputId();
+            ed::PinId outputPinId = state->getOutputId();
 
-        // Submit Node A
-        ed::NodeId nodeA_Id = uniqueId++;
-        ed::PinId  nodeA_InputPinId = uniqueId++;
-        ed::PinId  nodeA_OutputPinId = uniqueId++;
+            if (g_FirstFrame) {
+                auto pos = state->getPosition();
+                ed::SetNodePosition(nodeId, ImVec2(pos.X(), pos.Y()));
+            }
 
-        if (g_FirstFrame)
-            ed::SetNodePosition(nodeA_Id, ImVec2(10, 10));
-        ed::BeginNode(nodeA_Id);
-        ImGuiEx_BeginColumn();
-        //ed::BeginPin(nodeA_InputPinId, ed::PinKind::Input);
-        //    ImGui::Text("");
-        //ed::EndPin();
-        //ImGuiEx_NextColumn();
-        ImGui::Text("Enter");
-        ImGuiEx_NextColumn();
-        ed::BeginPin(nodeA_OutputPinId, ed::PinKind::Output);
-        ImGui::Text(">");
-        ed::EndPin();
-        ImGuiEx_EndColumn();
-        ed::EndNode();
+            ed::BeginNode(nodeId);
+            ImGuiEx_BeginColumn();
 
-        // Submit Node B
-        ed::NodeId nodeB_Id = uniqueId++;
-        ed::PinId  nodeB_InputPinId1 = uniqueId++;
-        ed::PinId  nodeB_InputPinId2 = uniqueId++;
-        ed::PinId  nodeB_OutputPinId = uniqueId++;
+            if (!state->isEnter()) {
+                ed::BeginPin(inputPinId, ed::PinKind::Input);
+                ImGui::Text(">");
+                ed::EndPin();
+                ImGuiEx_NextColumn();
+            }
+            
+            ImGui::Text(state->getName().c_str());
 
-        if (g_FirstFrame)
-            ed::SetNodePosition(nodeB_Id, ImVec2(210, 60));
-        ed::BeginNode(nodeB_Id);
-        ImGui::Text("Node B");
-        ImGuiEx_BeginColumn();
-        ed::BeginPin(nodeB_InputPinId1, ed::PinKind::Input);
-        ImGui::Text(">");
-        ed::EndPin();
-        ed::BeginPin(nodeB_InputPinId2, ed::PinKind::Input);
-        ImGui::Text(">");
-        ed::EndPin();
-        ImGuiEx_NextColumn();
-        ed::BeginPin(nodeB_OutputPinId, ed::PinKind::Output);
-        ImGui::Text(">");
-        ed::EndPin();
-        ImGuiEx_EndColumn();
-        ed::EndNode();
+            if (!state->isExit()) {
+                ImGuiEx_NextColumn();
+                ed::BeginPin(outputPinId, ed::PinKind::Output);
+                ImGui::Text(">");
+                ed::EndPin();
+            }
+
+            ImGuiEx_EndColumn();
+            ed::EndNode();
+
+            //for (const auto& transition : state->transitions) {
+
+            //}
+        }
+
 
         // Submit Links
         for (auto& linkInfo : g_Links)
@@ -213,8 +236,6 @@ namespace ige::creator
             }
         }
         ed::EndDelete(); // Wrap up deletion action
-
-
 
         // End of interaction with editor.
         ed::End();
