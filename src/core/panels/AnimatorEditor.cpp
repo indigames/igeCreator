@@ -4,7 +4,10 @@
 #include <components/animation/AnimatorState.h>
 #include <components/animation/AnimatorTransition.h>
 
+#include "core/Editor.h"
 #include "core/plugin/DragDropPlugin.h"
+#include "core/dialog/SaveFileDialog.h"
+#include "core/task/TaskManager.h"
 
 #include <utils/filesystem.h>
 namespace fs = ghc::filesystem;
@@ -201,24 +204,71 @@ namespace ige::creator
 
     void AnimatorEditor::clear()
     {
+        m_pyxaDragDropPlugin = nullptr;
+        m_animDragDropPlugin = nullptr;
+
+        m_nodes.clear();
+        m_links.clear();
+
         ed::DestroyEditor(m_editor);
         m_editor = nullptr;
 
+        try {
+            fs::remove(fs::path("AnimatorLayout.ini"));
+        }
+        catch (std::exception e) {}
+
         m_controller = nullptr;
-        m_path.clear();
+        m_bInitialized = false;
     }
 
     void AnimatorEditor::initialize()
     {
         clear();
 
+        // States -> nodes
+        // Transitions -> Links
+
+        //1. Add/remove/update nodes
+        // - Drag & Drop
+        // - Right click menu
+
+
+        //2. Add/remove/update links
+        //  drag
+        // info
+
         if (!m_bInitialized) {
-            if (m_controller)
-                m_controller = nullptr;
+            // Init Node Editor
+            m_uniqueId = 1;
+            ed::Config config;
+            config.SettingsFile = "AnimatorLayout.ini";
+            m_editor = ed::CreateEditor(&config);
+            ed::SetCurrentEditor(m_editor);
+
             m_controller = std::make_shared<AnimatorController>(m_path);
 
-            m_dragDropPlugin = std::make_shared<DDTargetPlugin<std::string>>(".pyxa");
-            std::dynamic_pointer_cast<DDTargetPlugin<std::string>>(m_dragDropPlugin)->getOnDataReceivedEvent().addListener([this](const auto& path) {
+            if (m_controller->getStateMachine()->getStates().size() > 0) {
+                for (const auto& state : m_controller->getStateMachine()->getStates()) {
+                    auto* node = createNode(state->getName(), (NodeType)state->getType(), ImVec2(state->getPosition().X(), state->getPosition().Y()));
+                    node->userPtr = state.get();
+                }
+                for (const auto& node : m_nodes) {
+                    auto state = (AnimatorState*)node.userPtr;
+                    for (const auto& transition : state->getTransitions()) {
+                        if (!transition->destState.expired()) {
+                            auto dstNode = findNode(transition->destState.lock().get());
+                            if (dstNode) {
+                                m_links.push_back(Link(getNextId(), node.outPin->id, dstNode->inPin->id));
+                                m_links.back().color = ImColor(147, 226, 74);
+                            }
+                        }
+                    }
+                }
+            }
+
+            m_pyxaDragDropPlugin = std::make_shared<DDTargetPlugin<std::string>>(".pyxa");
+            std::dynamic_pointer_cast<DDTargetPlugin<std::string>>(m_pyxaDragDropPlugin)->getOnDataReceivedEvent().addListener([this](const auto& path) {
                 auto fsPath = fs::path(path);
                 if (!m_controller->getStateMachine()->hasState(fsPath.stem().string())) {
                     m_controller->getStateMachine()->addState(fsPath.stem().string());
@@ -226,33 +276,15 @@ namespace ige::creator
                 }
             });
 
-            // States -> nodes
-            // Transitions -> Links
+            m_animDragDropPlugin = std::make_shared<DDTargetPlugin<std::string>>(".anim");
+            std::dynamic_pointer_cast<DDTargetPlugin<std::string>>(m_animDragDropPlugin)->getOnDataReceivedEvent().addListener([this](const auto& path) {
+                TaskManager::getInstance()->addTask([this, path]() {
+                    m_path = path;
+                    initialize();
+                });
+            });
 
-            //1. Add/remove/update nodes
-            // - Drag & Drop
-            // - Right click menu
-
-
-            //2. Add/remove/update links
-            //  drag
-            // info
-
-
-            
-            m_uniqueId = 1;
-
-            // Init Node Editor
-            ed::Config config;
-            config.SettingsFile = "AnimatorLayout.ini";
-            m_editor = ed::CreateEditor(&config);
-            ed::SetCurrentEditor(m_editor);
-
-            createNode("Start", NodeType::Entry, ImVec2(0, 100));
-            createNode("Any", NodeType::Any, ImVec2(300, 100));
-            createNode("End", NodeType::Exit, ImVec2(600, 100));
             ed::NavigateToContent();
-
             m_bInitialized = true;
         }
     }
@@ -263,6 +295,24 @@ namespace ige::creator
             m_path = path;
             initialize();
         }
+    }
+
+    bool AnimatorEditor::save()
+    {
+        if (!m_controller)
+            return false;
+
+        auto path = m_path;
+        if (path.empty()) {
+            path = SaveFileDialog("Save", "", { "anim", "*.anim" }).result();
+        }
+
+        if (!path.empty()) {
+            m_path = path;
+            m_controller->save(m_path);
+            return true;
+        }
+        return false;
     }
 
     Node* AnimatorEditor::findNode(ed::NodeId id)
@@ -370,12 +420,22 @@ namespace ige::creator
     Node* AnimatorEditor::createNode(const std::string& name, NodeType nodeType, const ImVec2& position)
     {
         m_nodes.emplace_back(getNextId(), name, position);
+        auto& node = m_nodes.back();
         if (nodeType != NodeType::Entry)
-            m_nodes.back().inPin = new Pin(getNextId(), ed::PinKind::Input, &m_nodes.back());       
+            node.inPin = new Pin(getNextId(), ed::PinKind::Input, &node);
         if (nodeType != NodeType::Exit)
-            m_nodes.back().outPin = new Pin(getNextId(), ed::PinKind::Output, &m_nodes.back());
-        ed::SetNodePosition(m_nodes.back().id, position);
-        return &m_nodes.back();
+            node.outPin = new Pin(getNextId(), ed::PinKind::Output, &node);
+        ed::SetNodePosition(node.id, position);
+        return &node;
+    }
+
+    Node* AnimatorEditor::findNode(AnimatorState* state) {
+        if (state == nullptr) return nullptr;
+        auto itr = std::find_if(m_nodes.begin(), m_nodes.end(), [&](const auto& node) {
+            return node.userPtr == (void*)state;
+        });
+        if (itr != m_nodes.end()) return &(*itr);
+        return nullptr;
     }
 
     void AnimatorEditor::drawWidgets()
@@ -388,7 +448,8 @@ namespace ige::creator
         // Start interaction with editor.
         ed::Begin("Canvas", ImVec2(0.0, 0.0f));
         {
-            m_dragDropPlugin->execute();
+            m_pyxaDragDropPlugin->execute();
+            m_animDragDropPlugin->execute();
 
             auto cursorTopLeft = ImGui::GetCursorScreenPos();
 
@@ -490,6 +551,10 @@ namespace ige::creator
                             {
                                 m_links.emplace_back(Link(getNextId(), startPinId, endPinId));
                                 m_links.back().color = ImColor(147, 226, 74);
+                                auto state = (AnimatorState*)startPin->node->userPtr;
+                                auto dstState = (AnimatorState*)endPin->node->userPtr;
+                                state->addTransition(dstState->getSharedPtr());
+                                save();
                             }
                         }
                     }

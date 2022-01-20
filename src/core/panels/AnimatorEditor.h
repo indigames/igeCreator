@@ -3,6 +3,7 @@
 #include "core/Panel.h"
 
 #include <components/animation/AnimatorController.h>
+#include <components/animation/AnimatorState.h>
 using namespace ige::scene;
 
 #include <imgui_node_editor.h>
@@ -36,9 +37,10 @@ namespace ige::creator
         ImColor color;
         ImVec2 position;
         ImVec2 size;
+        void* userPtr;
 
         Node(ed::NodeId id, const std::string& name, ImVec2 position = {}, ImColor color = ImColor(255, 255, 255))
-            : id(id), name(name), color(color), inPin(nullptr), outPin(nullptr)
+            : id(id), name(name), color(color), inPin(nullptr), outPin(nullptr), userPtr(nullptr)
         {}
     };
 
@@ -99,6 +101,7 @@ namespace ige::creator
         virtual ~AnimatorEditor();
 
         void openAnimator(const std::string& path);
+        bool save();
 
     protected:
         virtual void initialize() override;
@@ -106,6 +109,7 @@ namespace ige::creator
         virtual void drawWidgets() override;
 
         Node* createNode(const std::string& name, NodeType type = NodeType::Normal, const ImVec2& position = {});
+        Node* findNode(AnimatorState* state);
 
         int getNextId() { return m_uniqueId++; }
         Node* findNode(ed::NodeId id);
@@ -121,7 +125,8 @@ namespace ige::creator
     protected:
         std::string m_path;
         std::shared_ptr<AnimatorController> m_controller = nullptr;
-        std::shared_ptr<IPlugin> m_dragDropPlugin = nullptr;
+        std::shared_ptr<IPlugin> m_pyxaDragDropPlugin = nullptr;
+        std::shared_ptr<IPlugin> m_animDragDropPlugin = nullptr;
         int m_uniqueId = 0;
 
         std::vector<Node> m_nodes;
