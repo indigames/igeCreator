@@ -459,6 +459,7 @@ namespace ige::creator
 
             for (auto& node : m_nodes) 
             {
+                auto* state = (AnimatorState*)node.userPtr;
                 builder.Begin(node.id);
                 {
                     // Input
@@ -556,7 +557,6 @@ namespace ige::creator
                                 auto state = (AnimatorState*)startPin->node->userPtr;
                                 auto dstState = (AnimatorState*)endPin->node->userPtr;
                                 state->addTransition(dstState->getSharedPtr());
-                                save();
                             }
                         }
                     }
@@ -571,9 +571,15 @@ namespace ige::creator
                 {
                     if (ed::AcceptDeletedItem())
                     {
-                        auto id = std::find_if(m_links.begin(), m_links.end(), [linkId](auto& link) { return link.id == linkId; });
-                        if (id != m_links.end())
-                            m_links.erase(id);
+                        auto itr = std::find_if(m_links.begin(), m_links.end(), [linkId](auto& link) { return link.id == linkId; });
+                        if (itr != m_links.end()) {
+                            auto startPin = findPin((*itr).startPinID);
+                            auto endPin = findPin((*itr).endPinID);
+                            auto state = (AnimatorState*)startPin->node->userPtr;
+                            auto dstState = (AnimatorState*)endPin->node->userPtr;
+                            state->removeTransition(state->findTransition(dstState->getSharedPtr()));
+                            m_links.erase(itr);
+                        }
                     }
                 }
 
@@ -582,9 +588,12 @@ namespace ige::creator
                 {
                     if (ed::AcceptDeletedItem())
                     {
-                        auto id = std::find_if(m_nodes.begin(), m_nodes.end(), [nodeId](auto& node) { return node.id == nodeId; });
-                        if (id != m_nodes.end())
-                            m_nodes.erase(id);
+                        auto itr = std::find_if(m_nodes.begin(), m_nodes.end(), [nodeId](auto& node) { return node.id == nodeId; });
+                        if (itr != m_nodes.end()) {
+                            auto* state = (AnimatorState*)((*itr).userPtr);
+                            m_controller->getStateMachine()->removeState(state->getSharedPtr());
+                            m_nodes.erase(itr);
+                        }
                     }
                 }
             }
