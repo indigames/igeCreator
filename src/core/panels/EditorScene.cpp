@@ -10,6 +10,7 @@
 #include "core/shortcut/ShortcutController.h"
 #include "core/scene/TargetObject.h"
 #include "core/layout/Columns.h"
+#include "core/CommandManager.h"
 
 #include "utils/GraphicsHelper.h"
 #include "scene/Scene.h"
@@ -191,6 +192,12 @@ namespace ige::creator
 
         ASSIGN_COMMAND_TO_DICT(ShortcutDictionary::FILE_SAVE_SCENE_AS_SELECTED, CALLBACK_0(Editor::saveSceneAs, Editor::getInstance().get()));
         ASSIGN_KEY_TO_COMMAND(ShortcutDictionary::FILE_SAVE_SCENE_AS_SELECTED, KeyCode::KEY_S, false, true, true);
+
+        ASSIGN_COMMAND_TO_DICT(ShortcutDictionary::EDIT_UNDO, CALLBACK_0(EditorScene::undo, this));
+        ASSIGN_KEY_TO_COMMAND(ShortcutDictionary::EDIT_UNDO, KeyCode::KEY_Z, false, true, false);
+
+        ASSIGN_COMMAND_TO_DICT(ShortcutDictionary::EDIT_REDO, CALLBACK_0(EditorScene::redo, this));
+        ASSIGN_KEY_TO_COMMAND(ShortcutDictionary::EDIT_REDO, KeyCode::KEY_Y, false, true, false);
     }
 
     void EditorScene::unregisterShortcut() {
@@ -202,7 +209,9 @@ namespace ige::creator
         REMOVE_COMMAND(ShortcutDictionary::FILE_OPEN_PROJECT_SELECTED);
         REMOVE_COMMAND(ShortcutDictionary::FILE_NEW_SCENE_SELECTED);
         REMOVE_COMMAND(ShortcutDictionary::FILE_SAVE_SCENE_SELECTED);
-        REMOVE_COMMAND(ShortcutDictionary::FILE_SAVE_SCENE_SELECTED);
+        REMOVE_COMMAND(ShortcutDictionary::FILE_SAVE_SCENE_AS_SELECTED);
+        REMOVE_COMMAND(ShortcutDictionary::EDIT_UNDO);
+        REMOVE_COMMAND(ShortcutDictionary::EDIT_REDO);
     }
 
     void EditorScene::initDragDrop()
@@ -782,6 +791,20 @@ namespace ige::creator
         const auto& target = Editor::getInstance()->getFirstTarget();
         if (target && m_currCamera)
             lookAtObject(target.get());
+    }
+
+    void EditorScene::undo() {
+        if (!Editor::getCanvas()->getGameScene()->isPlaying())
+        {
+            CommandManager::getInstance()->Undo();
+        }
+    }
+
+    void EditorScene::redo() {
+        if (!Editor::getCanvas()->getGameScene()->isPlaying())
+        {
+            CommandManager::getInstance()->Redo();
+        }
     }
 
     void EditorScene::lookAtObject(SceneObject* object) {

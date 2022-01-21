@@ -29,6 +29,9 @@ public:
 	const static char* COPY_SCENE_OBJECT_SELECTED;
 	const static char* PASTE_SCENE_OBJECT_SELECTED;
 	const static char* DUPLICATE_SCENE_OBJECT_SELECTED;
+	const static char* EDIT_UNDO;
+	const static char* EDIT_REDO;
+
 
 	//! File
 	const static char* FILE_NEW_PROJECT_SELECTED;

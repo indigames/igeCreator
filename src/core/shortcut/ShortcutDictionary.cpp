@@ -20,6 +20,8 @@ const char* ShortcutDictionary::DELETE_SCENE_OBJECT_SELECTED = "Edit/Delete Obje
 const char* ShortcutDictionary::COPY_SCENE_OBJECT_SELECTED = "Edit/Copy Object Selected";
 const char* ShortcutDictionary::PASTE_SCENE_OBJECT_SELECTED = "Edit/Paste Object Selected";
 const char* ShortcutDictionary::DUPLICATE_SCENE_OBJECT_SELECTED = "Edit/Duplicate Object Selected";
+const char* ShortcutDictionary::EDIT_UNDO = "Edit/Undo (Ctrl + Z)";
+const char* ShortcutDictionary::EDIT_REDO = "Edit/Redo (Ctrl + Y)";
 
 const char* ShortcutDictionary::FILE_NEW_PROJECT_SELECTED = "File/New Project";
 const char* ShortcutDictionary::FILE_OPEN_PROJECT_SELECTED = "File/Open Project";

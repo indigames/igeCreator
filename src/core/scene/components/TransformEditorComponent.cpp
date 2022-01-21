@@ -11,6 +11,9 @@
 
 #include "core/Editor.h"
 #include "core/Canvas.h"
+
+#include "core/CommandManager.h"
+
 NS_IGE_BEGIN
 
 TransformEditorComponent::TransformEditorComponent() {
@@ -233,7 +236,8 @@ void TransformEditorComponent::onTransformChanged(SceneObject& sceneObject)
     if (!m_component.expired()) {
         auto comp = getComponent<CompoundComponent>();
         if (comp) {
-            comp->setDirty(); setDirty();
+            comp->setDirty(); 
+            setDirty();
         }
     }
     if (Editor::getCanvas()->getEditorScene()->getGizmo())

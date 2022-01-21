@@ -16,6 +16,7 @@
 #include "core/panels/subpanels/BitmapFontCreator.h"
 #include "core/scene/TargetObject.h"
 #include "core/filesystem/FileSystem.h"
+#include "core/CommandManager.h"
 
 #include <scene/SceneManager.h>
 #include <scene/Scene.h>
@@ -752,6 +753,7 @@ class %s(Script):\n\
 
         for (auto& target : Editor::getInstance()->getTarget()->getAllTargets()) {
             if (!target.expired()) {
+                CommandManager::getInstance()->PushCommand(target.lock(), ige::creator::COMMAND_TYPE::DELETE_OBJECT);
                 removeTarget(target.lock());
                 Editor::getCurrentScene()->removeObject(target.lock());
             }
@@ -787,6 +789,8 @@ class %s(Script):\n\
             newObject->setPrefabId(prefabId);
             auto parent = Editor::getInstance()->getFirstTarget()->getSharedPtr();
             newObject->setParent(parent);
+
+            CommandManager::getInstance()->PushCommand(newObject, ige::creator::COMMAND_TYPE::ADD_OBJECT);
         }
 
         if (getCanvas())
