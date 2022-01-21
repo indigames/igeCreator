@@ -18,19 +18,16 @@ namespace ed = ax::NodeEditor;
 
 namespace ige::creator
 {
-    static inline ImRect ImGui_GetItemRect()
+    static bool ImGui_Splitter(bool split_vertically, float thickness, float* size1, float* size2, float min_size1, float min_size2, float splitter_long_axis_size = -1.0f)
     {
-        return ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
-    }
-
-    static inline ImRect ImRect_Expanded(const ImRect& rect, float x, float y)
-    {
-        auto result = rect;
-        result.Min.x -= x;
-        result.Min.y -= y;
-        result.Max.x += x;
-        result.Max.y += y;
-        return result;
+        using namespace ImGui;
+        ImGuiContext& g = *GImGui;
+        ImGuiWindow* window = g.CurrentWindow;
+        ImGuiID id = window->GetID("##Splitter");
+        ImRect bb;
+        bb.Min = window->DC.CursorPos + (split_vertically ? ImVec2(*size1, 0.0f) : ImVec2(0.0f, *size1));
+        bb.Max = bb.Min + CalcItemSize(split_vertically ? ImVec2(thickness, splitter_long_axis_size) : ImVec2(splitter_long_axis_size, thickness), 0.0f, 0.0f);
+        return SplitterBehavior(bb, id, split_vertically ? ImGuiAxis_X : ImGuiAxis_Y, size1, size2, min_size1, min_size2, 0.0f);
     }
 
 #pragma region NodeBuilder
@@ -458,7 +455,7 @@ namespace ige::creator
     {
         m_nodes.emplace_back(getNextId(), name, position);
         auto& node = m_nodes.back();
-        if (nodeType != NodeType::Entry)
+        if (nodeType != NodeType::Entry && nodeType != NodeType::Any)
             node.inPin = new Pin(getNextId(), ed::PinKind::Input, &node);
         if (nodeType != NodeType::Exit)
             node.outPin = new Pin(getNextId(), ed::PinKind::Output, &node);
@@ -475,18 +472,66 @@ namespace ige::creator
         return nullptr;
     }
 
+    void AnimatorEditor::showLeftPanel(float paneWidth)
+    {
+        auto& io = ImGui::GetIO();
+        static bool selected = false;
+        ImGui::BeginChild("LeftPanel", ImVec2(paneWidth, 0));
+        {
+            ImGui::BeginGroup();
+            {
+                ImGui::BeginChild("LeftPanelContent", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()));
+                {
+                    if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
+                    {
+                        if (ImGui::BeginTabItem("Parameters"))
+                        {
+                            ImGui::Text("ID: 0123456789");
+                            ImGui::EndTabItem();
+                        }
+                        if (ImGui::BeginTabItem("Layers"))
+                        {
+
+                            ImGui::TextWrapped("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ");
+                            ImGui::EndTabItem();
+                        }
+                        ImGui::EndTabBar();
+                    }
+                }
+                ImGui::EndChild();
+                ImGui::BeginHorizontal("###Bottom#Buttons", ImVec2(paneWidth, 0));
+                ImGui::Spring();                
+                if (ImGui::Button("Expand")) { ed::NavigateToContent(); }
+                ImGui::Spring(0, 12.f);
+                if (ImGui::Button("Save")) { if(isDirty()) save(); }
+                ImGui::EndHorizontal();
+            }
+            ImGui::EndGroup();
+        }        
+        ImGui::EndChild();
+        ImGui::SameLine(0.0f, 12.0f);
+    }
+
     void AnimatorEditor::drawWidgets()
     {
         if (!m_bInitialized)
             return;
 
+        static float leftPaneWidth = 400.0f;
+        static float rightPaneWidth = 800.0f;
+        ImGui_Splitter(true, 4.0f, &leftPaneWidth, &rightPaneWidth, 50.0f, 50.0f);
+
+        // Show left panel
+        showLeftPanel(leftPaneWidth - 4.0f);
+        
+
         // Start interaction with editor.
-        ed::Begin("Canvas", ImVec2(0.0, 0.0f));
+        ed::Begin("Canvas");
         {
+            auto cursorTopLeft = ImGui::GetCursorScreenPos();
+
             m_pyxaDragDropPlugin->execute();
             m_animDragDropPlugin->execute();
-
-            auto cursorTopLeft = ImGui::GetCursorScreenPos();
 
             auto builder = NodeBuilder();
 

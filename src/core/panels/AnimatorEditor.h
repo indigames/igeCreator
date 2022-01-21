@@ -108,6 +108,8 @@ namespace ige::creator
         virtual void clear();
         virtual void drawWidgets() override;
 
+        void showLeftPanel(float paneWidth);
+
         bool isDirty() { return m_bDirty; }
         void setDirty(bool dirty = true);
 
