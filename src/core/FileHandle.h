@@ -12,7 +12,8 @@ enum class E_FileExts {
     Audio,
     Prefab,
     Scene,
-    Particle
+    Particle,
+    Animator
 };
 
 // Useful when iterate though all supported file types
@@ -25,7 +26,8 @@ const auto AllFileExts =  {
     E_FileExts::Audio,
     E_FileExts::Prefab,
     E_FileExts::Scene,
-    E_FileExts::Particle
+    E_FileExts::Particle,
+    E_FileExts::Animator
 };
 
 inline std::vector<std::string> GetFileExtensionSuported(E_FileExts fileExt) {
@@ -59,6 +61,9 @@ inline std::vector<std::string> GetFileExtensionSuported(E_FileExts fileExt) {
         break;
     case E_FileExts::Particle:
         return { ".efk", ".EFK" };
+        break;
+    case E_FileExts::Animator:
+        return { ".anim", ".ANIM" };
         break;
     default:
         break;

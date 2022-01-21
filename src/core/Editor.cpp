@@ -582,6 +582,28 @@ namespace ige::creator
         return false;
     }
 
+    bool Editor::openAnimator(const std::string& path)
+    {
+        if (SceneManager::getInstance()->isPlaying())
+            return false;
+
+        auto fsPath = fs::path(path);
+        if (!fs::exists(fsPath))
+            return false;
+
+        auto ext = fsPath.extension().string();
+        std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+        if (fsPath.extension().string() != ".anim")
+            return false;
+
+        if (getCanvas() && getCanvas()->getAnimatorEditor()) {
+            getCanvas()->getAnimatorEditor()->openAnimator(path);
+            return true;
+        }
+
+        return false;
+    }
+
     bool Editor::buildRom()
     {
         auto buildCmd = [](void*)

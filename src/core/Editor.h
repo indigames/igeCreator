@@ -64,6 +64,8 @@ namespace ige::creator
         bool savePrefab();
         bool savePrefabAs();
 
+        bool openAnimator(const std::string& path);
+
         bool cloneObject();
         void copyObject();
         void pasteObject();

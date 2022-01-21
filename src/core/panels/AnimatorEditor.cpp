@@ -5,6 +5,7 @@
 #include <components/animation/AnimatorTransition.h>
 
 #include "core/Editor.h"
+#include "core/dialog/MsgBox.h"
 #include "core/plugin/DragDropPlugin.h"
 #include "core/dialog/SaveFileDialog.h"
 #include "core/task/TaskManager.h"
@@ -195,10 +196,22 @@ namespace ige::creator
  
     AnimatorEditor::AnimatorEditor(const std::string& name, const Panel::Settings& settings)
         : Panel(name, settings)
-    {}
+    {
+        getOnClosedEvent().addListener([this]() {
+            if (isDirty()) {
+                auto btn = MsgBox("Save", "Animator has changed, do you want to save?", MsgBox::EBtnLayout::yes_no, MsgBox::EMsgType::question).result();
+                if (btn == MsgBox::EButton::yes) {
+                    save();
+                }
+            }
+            m_path.clear();
+            clear();
+        });
+    }
 
     AnimatorEditor::~AnimatorEditor()
     {
+        m_path.clear();
         clear(); 
     }
 
@@ -313,6 +326,7 @@ namespace ige::creator
         if (m_path.compare(path) != 0) {
             m_path = path;
             initialize();
+            open();
         }
     }
 

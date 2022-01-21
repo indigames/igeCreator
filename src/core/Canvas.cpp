@@ -39,9 +39,13 @@ namespace ige::creator
         createPanel<Profiler>("Profiler", settings);
         createPanel<Inspector>("Inspector", settings);
         createPanel<AssetViewer>("Asset", settings);
-        createPanel<AnimatorEditor>("Animator", settings);
+
         auto bitmapPanel = createPanel<BitmapFontCreator>("BitmapFontCreator", settings);
         bitmapPanel->close();
+
+        settings.closable = true;
+        auto animatorPanel = createPanel<AnimatorEditor>("Animator", settings);
+        animatorPanel->close();
     }
 
     Canvas::~Canvas()
