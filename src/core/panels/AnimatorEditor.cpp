@@ -220,6 +220,7 @@ namespace ige::creator
         catch (std::exception e) {}
 
         m_controller = nullptr;
+        m_bDirty = false;
         m_bInitialized = false;
     }
 
@@ -290,6 +291,23 @@ namespace ige::creator
         }
     }
 
+    void AnimatorEditor::setDirty(bool dirty) {
+        if (m_bDirty != dirty) {
+            m_bDirty = dirty;
+
+            TaskManager::getInstance()->addTask([this]() {
+                if (isDirty()) {
+                    setName(getName() + "*");
+                }
+                else {
+                    auto name = getName();
+                    name.erase(name.end() - 1);
+                    setName(name);
+                }
+            });
+        }
+    }
+
     void AnimatorEditor::openAnimator(const std::string& path)
     {
         if (m_path.compare(path) != 0) {
@@ -314,6 +332,7 @@ namespace ige::creator
                 }
             }
             m_controller->save(m_path);
+            setDirty(false);
             return true;
         }
         return false;
@@ -557,6 +576,7 @@ namespace ige::creator
                                 auto state = (AnimatorState*)startPin->node->userPtr;
                                 auto dstState = (AnimatorState*)endPin->node->userPtr;
                                 state->addTransition(dstState->getSharedPtr());
+                                setDirty();
                             }
                         }
                     }
@@ -579,6 +599,7 @@ namespace ige::creator
                             auto dstState = (AnimatorState*)endPin->node->userPtr;
                             state->removeTransition(state->findTransition(dstState->getSharedPtr()));
                             m_links.erase(itr);
+                            setDirty();
                         }
                     }
                 }
@@ -593,6 +614,7 @@ namespace ige::creator
                             auto* state = (AnimatorState*)((*itr).userPtr);
                             m_controller->getStateMachine()->removeState(state->getSharedPtr());
                             m_nodes.erase(itr);
+                            setDirty();
                         }
                     }
                 }

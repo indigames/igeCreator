@@ -108,6 +108,9 @@ namespace ige::creator
         virtual void clear();
         virtual void drawWidgets() override;
 
+        bool isDirty() { return m_bDirty; }
+        void setDirty(bool dirty = true);
+
         Node* createNode(const std::string& name, NodeType type = NodeType::Normal, const ImVec2& position = {});
         Node* findNode(AnimatorState* state);
 
@@ -132,5 +135,6 @@ namespace ige::creator
         std::vector<Node> m_nodes;
         std::vector<Link> m_links;
         ed::EditorContext* m_editor = nullptr;
+        bool m_bDirty = false;
     };
 }

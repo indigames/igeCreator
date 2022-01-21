@@ -108,6 +108,7 @@ namespace ige::creator
                     ImGui::DockBuilderDockWindow("Scene", dock_main_id);
                     ImGui::DockBuilderDockWindow("Preview", dock_main_id);
                     ImGui::DockBuilderDockWindow("Animator", dock_main_id);
+                    ImGui::DockBuilderDockWindow("Animator*", dock_main_id); // With indicator
                     ImGui::DockBuilderDockWindow("Profiler", dock_id_left_bottom);
                     ImGui::DockBuilderFinish(dockspace_id);
                 }

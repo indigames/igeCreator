@@ -46,6 +46,8 @@ namespace ige::creator
         bool isHovered() const { return m_bIsHovered; }
 
         std::string getName() const { return m_name; }
+        void setName(const std::string& name) { m_name = name; }
+
         std::string getId() const { return m_id; }
         
         void setEnable(bool enable) { m_bEnabled = enable; }
