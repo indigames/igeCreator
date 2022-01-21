@@ -210,6 +210,7 @@ namespace ige::creator
         m_nodes.clear();
         m_links.clear();
 
+        ed::SetCurrentEditor(nullptr);
         ed::DestroyEditor(m_editor);
         m_editor = nullptr;
 
@@ -301,14 +302,17 @@ namespace ige::creator
     {
         if (!m_controller)
             return false;
-
-        auto path = m_path;
-        if (path.empty()) {
-            path = SaveFileDialog("Save", "", { "anim", "*.anim" }).result();
+        if (m_path.empty()) {
+            m_path = SaveFileDialog("Save", "", { "anim", "*.anim" }).result();
         }
-
-        if (!path.empty()) {
-            m_path = path;
+        if (!m_path.empty()) {
+            for (const auto& node : m_nodes) {
+                auto* state = (AnimatorState*)node.userPtr;
+                if (state) {
+                    auto pos = ed::GetNodePosition(node.id);
+                    state->setPosition({ pos.x, pos.y });
+                }
+            }
             m_controller->save(m_path);
             return true;
         }
@@ -442,8 +446,6 @@ namespace ige::creator
     {
         if (!m_bInitialized)
             return;
-
-        ed::SetCurrentEditor(m_editor);
 
         // Start interaction with editor.
         ed::Begin("Canvas", ImVec2(0.0, 0.0f));
@@ -590,6 +592,5 @@ namespace ige::creator
             ImGui::SetCursorScreenPos(cursorTopLeft);
         }
         ed::End();
-        ed::SetCurrentEditor(nullptr);
     }
 }
