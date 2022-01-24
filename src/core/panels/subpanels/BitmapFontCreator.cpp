@@ -121,7 +121,7 @@ namespace ige::creator
             });
 
         std::array offsetD = { data->xoffset, data->yoffset};
-        m_glyphGroup->createWidget<Drag<float, 2>>("Offset", ImGuiDataType_Float, offsetD, 1.0f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        m_glyphGroup->createWidget<Drag<float, 2>>("Offset", ImGuiDataType_Float, offsetD, 1.0f)->getOnDataChangedEvent().addListener([this](auto val) {
             auto data = this->getData();
             data->xoffset = val[0];
             data->yoffset = val[1];
@@ -253,6 +253,7 @@ namespace ige::creator
         
         if (m_GroupLeft)
         {
+            m_txtChars = nullptr;
             m_GroupLeft->removeAllWidgets();
             m_GroupLeft->removeAllPlugins();
             m_GroupLeft = nullptr;
@@ -325,6 +326,7 @@ namespace ige::creator
         {
             m_GroupLeft->removeAllWidgets();
             m_GroupLeft->removeAllPlugins();
+            m_txtChars = nullptr;
             m_GroupLeft = nullptr;
         }
 
@@ -379,6 +381,8 @@ namespace ige::creator
         btnB1->setEndOfLine(true);
 
         m_GroupLeft->createWidget<Button>("Generate Character Set", ImVec2(256.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
+            if (m_txtChars != nullptr)
+                this->setChacterCode(m_txtChars->getText());
             auto s = this->getChacterCode();
             this->generateCode(s);
             });
@@ -400,11 +404,10 @@ namespace ige::creator
             });
 
         m_GroupLeft->createWidget<Label>("Character set");
-        auto txtChars = m_GroupLeft->createWidget<TextArea>("", "", ImVec2(256.f, 128.f));
-        txtChars->getOnDataChangedEvent().addListener([this](auto text) {
+        m_txtChars = m_GroupLeft->createWidget<TextArea>("", "", ImVec2(256.f, 128.f));
+        m_txtChars->getOnDataChangedEvent().addListener([this](auto text) {
             this->setChacterCode(text);
             });
-
         m_fontPageGroup = m_GroupLeft->createWidget<Group>("Page", false, false);
     }
 
