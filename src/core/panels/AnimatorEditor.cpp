@@ -18,6 +18,7 @@
 #include "core/widgets/Button.h"
 #include "core/widgets/Separator.h"
 #include "core/widgets/Drag.h"
+#include "core/layout/Columns.h"
 
 #include <utils/filesystem.h>
 namespace fs = ghc::filesystem;
@@ -563,19 +564,22 @@ namespace ige::creator
                 selectCombo->addChoice((int)AnimatorParameterType::Int, "Int");
                 selectCombo->addChoice((int)AnimatorParameterType::Float, "Float");
                 selectCombo->addChoice((int)AnimatorParameterType::Trigger, "Trigger");
-                m_parameterGroup->createWidget<Button>("Add", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](const auto& widget) {
+                m_parameterGroup->createWidget<Button>("+", ImVec2(ImGui::GetFrameHeight(), 0))->getOnClickEvent().addListener([this](const auto& widget) {
                     auto name = std::string("Parameter") + std::to_string(m_controller->getParameters().size() + 1);
                     m_controller->setParameter(name, m_selectedType, 0.f);
                     setParametersDirty();
                 });
 
+                auto columns = m_parameterGroup->createWidget<Columns<3>>();
+                auto width = (ImGui::GetWindowContentRegionWidth() - 32.f) / 3;
+                columns->setColumnWidth(0, 2 * width);
+                columns->setColumnWidth(1, width);
+                columns->setColumnWidth(2, 32.f);
                 for (const auto& param : m_controller->getParameters()) {
                     auto name = param.first;
                     auto type = param.second.first;
                     auto val = param.second.second;
-                    auto nameTxt = m_parameterGroup->createWidget<TextField>("", name, false, true);
-                    nameTxt->setEndOfLine(false);
-                    nameTxt->getOnDataChangedEvent().addListener([name, type, val, this](const auto& txt) {
+                    auto nameTxt = columns->createWidget<TextField>("", name, false, true)->getOnDataChangedEvent().addListener([name, type, val, this](const auto& txt) {
                         m_controller->removeParameter(name);
                         m_controller->setParameter(txt, (int)type, val);
                         setParametersDirty();
@@ -584,20 +588,23 @@ namespace ige::creator
                     {
                     case AnimatorParameterType::Bool:
                     {
-                        m_parameterGroup->createWidget<CheckBox>("", val)->getOnDataChangedEvent().addListener([name, type, this](bool val) {
+                        columns->createWidget<CheckBox>("", val)->getOnDataChangedEvent().addListener([name, type, this](bool val) {
                             m_controller->setParameter(name, (int)type, val);
                         });
                         break;
                     }
                     case AnimatorParameterType::Trigger:
                     {
-                        m_parameterGroup->createWidget<CheckBox>("", false);
+                        columns->createWidget<CheckBox>("", false)->getOnDataChangedEvent().addListener([name, type, this](bool val) {
+                            m_controller->setParameter(name, (int)type, false);
+                            setParametersDirty();
+                        });
                         break;
                     }
                     case AnimatorParameterType::Int:
                     {
                         std::array vals = { val };
-                        m_parameterGroup->createWidget<Drag<float>>("", ImGuiDataType_S32, vals)->getOnDataChangedEvent().addListener([name, type, this](auto val) {
+                        columns->createWidget<Drag<float>>("", ImGuiDataType_S32, vals)->getOnDataChangedEvent().addListener([name, type, this](auto val) {
                             m_controller->setParameter(name, (int)type, val[0]);
                         });
                         break;
@@ -605,7 +612,7 @@ namespace ige::creator
                     case AnimatorParameterType::Float:
                     {
                         std::array vals = { val };
-                        m_parameterGroup->createWidget<Drag<float>>("", ImGuiDataType_Float, vals)->getOnDataChangedEvent().addListener([name, type, this](auto val) {
+                        columns->createWidget<Drag<float>>("", ImGuiDataType_Float, vals)->getOnDataChangedEvent().addListener([name, type, this](auto val) {
                             m_controller->setParameter(name, (int)type, val[0]);
                         });
                         break;
@@ -613,6 +620,11 @@ namespace ige::creator
                     default:
                         break;
                     }
+
+                    columns->createWidget<Button>("-", ImVec2(ImGui::GetFrameHeight(), 0))->getOnClickEvent().addListener([name, this](const auto& widget) {
+                        m_controller->removeParameter(name);
+                        setParametersDirty();
+                    });
                 }
                 m_bParameterDirty = false;
             }
@@ -632,7 +644,11 @@ namespace ige::creator
         ImGui_Splitter(true, 4.0f, &leftPaneWidth, &rightPaneWidth, 50.0f, 50.0f);
 
         // Show left panel
-        m_leftPanelWidth = leftPaneWidth - 4.f;
+        if (m_leftPanelWidth != leftPaneWidth - 4.f) {
+            m_leftPanelWidth = leftPaneWidth - 4.f;
+            setLayersDirty();
+            setParametersDirty();
+        }
         showLeftPanel();
 
         // Start interaction with editor.
