@@ -10,6 +10,15 @@
 #include "core/dialog/SaveFileDialog.h"
 #include "core/task/TaskManager.h"
 
+
+#include "core/widgets/Label.h"
+#include "core/widgets/TextField.h"
+#include "core/widgets/CheckBox.h"
+#include "core/widgets/ComboBox.h"
+#include "core/widgets/Button.h"
+#include "core/widgets/Separator.h"
+#include "core/widgets/Drag.h"
+
 #include <utils/filesystem.h>
 namespace fs = ghc::filesystem;
 
@@ -220,6 +229,14 @@ namespace ige::creator
         m_nodes.clear();
         m_links.clear();
 
+        if(m_layerGroup)
+            m_layerGroup->removeAllWidgets();
+        m_layerGroup = nullptr;
+
+        if(m_parameterGroup)
+            m_parameterGroup->removeAllWidgets();
+        m_parameterGroup = nullptr;
+
         ed::SetCurrentEditor(nullptr);
         ed::DestroyEditor(m_editor);
         m_editor = nullptr;
@@ -297,6 +314,10 @@ namespace ige::creator
             });
 
             ed::NavigateToContent();
+
+            m_bLayerDirty = true;
+            m_bParameterDirty = true;
+
             m_bInitialized = true;
         }
     }
@@ -472,11 +493,11 @@ namespace ige::creator
         return nullptr;
     }
 
-    void AnimatorEditor::showLeftPanel(float paneWidth)
+    void AnimatorEditor::showLeftPanel()
     {
         auto& io = ImGui::GetIO();
         static bool selected = false;
-        ImGui::BeginChild("LeftPanel", ImVec2(paneWidth, 0));
+        ImGui::BeginChild("LeftPanel", ImVec2(m_leftPanelWidth, 0));
         {
             ImGui::BeginGroup();
             {
@@ -484,32 +505,121 @@ namespace ige::creator
                 {
                     if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
                     {
-                        if (ImGui::BeginTabItem("Parameters"))
-                        {
-                            ImGui::Text("ID: 0123456789");
-                            ImGui::EndTabItem();
-                        }
-                        if (ImGui::BeginTabItem("Layers"))
-                        {
-
-                            ImGui::TextWrapped("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ");
-                            ImGui::EndTabItem();
-                        }
+                        // Draw layers
+                        // drawLayers();
+                         
+                        // Draw parameters
+                        drawParameters();
+                            
                         ImGui::EndTabBar();
                     }
                 }
                 ImGui::EndChild();
-                ImGui::BeginHorizontal("###Bottom#Buttons", ImVec2(paneWidth, 0));
-                ImGui::Spring();                
-                if (ImGui::Button("Expand")) { ed::NavigateToContent(); }
-                ImGui::Spring(0, 12.f);
-                if (ImGui::Button("Save")) { if(isDirty()) save(); }
-                ImGui::EndHorizontal();
+                //ImGui::BeginHorizontal("###Bottom#Buttons", ImVec2(m_leftPanelWidth, 0));
+                //ImGui::Spring();
+                //if (ImGui::Button("Expand")) { ed::NavigateToContent(); }
+                //ImGui::Spring(0, 12.f);
+                //if (ImGui::Button("Save")) { if(isDirty()) save(); }
+                //ImGui::EndHorizontal();
             }
             ImGui::EndGroup();
         }        
         ImGui::EndChild();
         ImGui::SameLine(0.0f, 12.0f);
+    }
+
+    void AnimatorEditor::drawLayers()
+    {
+        if (ImGui::BeginTabItem("Layers"))
+        {
+            if (m_bLayerDirty) {
+                if (m_layerGroup == nullptr)
+                    m_layerGroup = std::make_shared<Group>("Layers", false);
+                m_layerGroup->removeAllWidgets();
+                m_layerGroup->createWidget<Label>("");
+                m_bLayerDirty = false;
+            }
+            if (m_layerGroup)
+                m_layerGroup->drawWidgets();
+            ImGui::EndTabItem();
+        }
+    }
+
+    void AnimatorEditor::drawParameters()
+    {
+        if (ImGui::BeginTabItem("Parameters"))
+        {
+            if (m_bParameterDirty) {
+                if (m_parameterGroup == nullptr)
+                    m_parameterGroup = std::make_shared<Group>("Layers", false);
+                m_parameterGroup->removeAllWidgets();
+
+                auto selectCombo = m_parameterGroup->createWidget<ComboBox>("", m_selectedType);
+                selectCombo->getOnDataChangedEvent().addListener([this](auto val) {
+                    m_selectedType = val;
+                });
+                selectCombo->setEndOfLine(false);
+                selectCombo->addChoice((int)AnimatorParameterType::Bool, "Bool");
+                selectCombo->addChoice((int)AnimatorParameterType::Int, "Int");
+                selectCombo->addChoice((int)AnimatorParameterType::Float, "Float");
+                selectCombo->addChoice((int)AnimatorParameterType::Trigger, "Trigger");
+                m_parameterGroup->createWidget<Button>("Add", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](const auto& widget) {
+                    auto name = std::string("Parameter") + std::to_string(m_controller->getParameters().size() + 1);
+                    m_controller->setParameter(name, m_selectedType, 0.f);
+                    setParametersDirty();
+                });
+
+                for (const auto& param : m_controller->getParameters()) {
+                    auto name = param.first;
+                    auto type = param.second.first;
+                    auto val = param.second.second;
+                    auto nameTxt = m_parameterGroup->createWidget<TextField>("", name, false, true);
+                    nameTxt->setEndOfLine(false);
+                    nameTxt->getOnDataChangedEvent().addListener([name, type, val, this](const auto& txt) {
+                        m_controller->removeParameter(name);
+                        m_controller->setParameter(txt, (int)type, val);
+                        setParametersDirty();
+                    });
+                    switch (type)
+                    {
+                    case AnimatorParameterType::Bool:
+                    {
+                        m_parameterGroup->createWidget<CheckBox>("", val)->getOnDataChangedEvent().addListener([name, type, this](bool val) {
+                            m_controller->setParameter(name, (int)type, val);
+                        });
+                        break;
+                    }
+                    case AnimatorParameterType::Trigger:
+                    {
+                        m_parameterGroup->createWidget<CheckBox>("", false);
+                        break;
+                    }
+                    case AnimatorParameterType::Int:
+                    {
+                        std::array vals = { val };
+                        m_parameterGroup->createWidget<Drag<float>>("", ImGuiDataType_S32, vals)->getOnDataChangedEvent().addListener([name, type, this](auto val) {
+                            m_controller->setParameter(name, (int)type, val[0]);
+                        });
+                        break;
+                    }
+                    case AnimatorParameterType::Float:
+                    {
+                        std::array vals = { val };
+                        m_parameterGroup->createWidget<Drag<float>>("", ImGuiDataType_Float, vals)->getOnDataChangedEvent().addListener([name, type, this](auto val) {
+                            m_controller->setParameter(name, (int)type, val[0]);
+                        });
+                        break;
+                    }
+                    default:
+                        break;
+                    }
+                }
+                m_bParameterDirty = false;
+            }
+            if(m_parameterGroup)
+                m_parameterGroup->drawWidgets();
+            ImGui::EndTabItem();
+        }
     }
 
     void AnimatorEditor::drawWidgets()
@@ -522,8 +632,8 @@ namespace ige::creator
         ImGui_Splitter(true, 4.0f, &leftPaneWidth, &rightPaneWidth, 50.0f, 50.0f);
 
         // Show left panel
-        showLeftPanel(leftPaneWidth - 4.0f);
-        
+        m_leftPanelWidth = leftPaneWidth - 4.f;
+        showLeftPanel();
 
         // Start interaction with editor.
         ed::Begin("Canvas");

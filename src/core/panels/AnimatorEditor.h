@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/Panel.h"
+#include "core/layout/Group.h"
 
 #include <components/animation/AnimatorController.h>
 #include <components/animation/AnimatorState.h>
@@ -108,7 +109,13 @@ namespace ige::creator
         virtual void clear();
         virtual void drawWidgets() override;
 
-        void showLeftPanel(float paneWidth);
+        void showLeftPanel();
+
+        void drawLayers();
+        void setLayersDirty(bool dirty = true) { m_bLayerDirty = dirty; }
+
+        void drawParameters();
+        void setParametersDirty(bool dirty = true) { m_bParameterDirty = dirty; }
 
         bool isDirty() { return m_bDirty; }
         void setDirty(bool dirty = true);
@@ -133,10 +140,18 @@ namespace ige::creator
         std::shared_ptr<IPlugin> m_pyxaDragDropPlugin = nullptr;
         std::shared_ptr<IPlugin> m_animDragDropPlugin = nullptr;
         int m_uniqueId = 0;
+        float m_leftPanelWidth = 0.f;
 
         std::vector<Node> m_nodes;
         std::vector<Link> m_links;
         ed::EditorContext* m_editor = nullptr;
         bool m_bDirty = false;
+
+        std::shared_ptr<Group> m_layerGroup = nullptr;
+        bool m_bLayerDirty = false;
+
+        std::shared_ptr<Group> m_parameterGroup = nullptr;
+        bool m_bParameterDirty = false;
+        int m_selectedType = 0;
     };
 }

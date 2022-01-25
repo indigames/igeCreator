@@ -45,7 +45,7 @@ namespace ige::creator
 
         settings.closable = true;
         auto animatorPanel = createPanel<AnimatorEditor>("Animator", settings);
-        animatorPanel->close();
+        // animatorPanel->close();
     }
 
     Canvas::~Canvas()
