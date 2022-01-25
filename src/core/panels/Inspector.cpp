@@ -13,6 +13,8 @@
 #include "core/menu/MenuItem.h"
 #include "core/panels/Inspector.h"
 #include "core/Editor.h"
+#include "core/Canvas.h"
+#include "core/panels/AnimatorEditor.h"
 #include "core/FileHandle.h"
 #include "core/task/TaskManager.h"
 #include "core/scene/CompoundComponent.h"
@@ -345,6 +347,12 @@ namespace ige::creator
 
     void Inspector::_drawImpl()
     {
+        // Inspect animator editor first
+        if (Editor::getCanvas()->getAnimatorEditor()->drawInspector()) {
+            Panel::_drawImpl();
+            return;
+        }
+
         if (m_bNeedRedraw)
         {
             initialize();

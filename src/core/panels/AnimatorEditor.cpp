@@ -5,11 +5,12 @@
 #include <components/animation/AnimatorTransition.h>
 
 #include "core/Editor.h"
+#include "core/Canvas.h"
 #include "core/dialog/MsgBox.h"
 #include "core/plugin/DragDropPlugin.h"
 #include "core/dialog/SaveFileDialog.h"
 #include "core/task/TaskManager.h"
-
+#include "core/panels/Inspector.h"
 
 #include "core/widgets/Label.h"
 #include "core/widgets/TextField.h"
@@ -19,9 +20,6 @@
 #include "core/widgets/Separator.h"
 #include "core/widgets/Drag.h"
 #include "core/layout/Columns.h"
-
-#include <utils/filesystem.h>
-namespace fs = ghc::filesystem;
 
 #include <imgui_node_editor.h>
 namespace ed = ax::NodeEditor;
@@ -280,17 +278,20 @@ namespace ige::creator
 
             if (m_controller->getStateMachine()->getStates().size() > 0) {
                 for (const auto& state : m_controller->getStateMachine()->getStates()) {
-                    auto* node = createNode(state->getName(), (NodeType)state->getType(), ImVec2(state->getPosition().X(), state->getPosition().Y()));
-                    node->userPtr = state.get();
+                    auto& node = createNode(state->getName(), (NodeType)state->getType(), ImVec2(state->getPosition().X(), state->getPosition().Y()));
+                    node->state = state;
                 }
                 for (const auto& node : m_nodes) {
-                    auto state = (AnimatorState*)node.userPtr;
+                    if (node->state.expired()) continue;
+                    auto state = node->state.lock();
                     for (const auto& transition : state->getTransitions()) {
                         if (!transition->destState.expired()) {
-                            auto dstNode = findNode(transition->destState.lock().get());
+                            const auto& dstNode = findNode(transition->destState.lock());
                             if (dstNode) {
-                                m_links.push_back(Link(getNextId(), node.outPin->id, dstNode->inPin->id));
-                                m_links.back().color = ImColor(147, 226, 74);
+                                auto link = std::make_shared<Link>(getNextId(), node->outPin->id, dstNode->inPin->id);
+                                link->color = ImColor(147, 226, 74);
+                                link->transition = transition;
+                                m_links.push_back(link);
                             }
                         }
                     }
@@ -358,9 +359,10 @@ namespace ige::creator
         }
         if (!m_path.empty()) {
             for (const auto& node : m_nodes) {
-                auto* state = (AnimatorState*)node.userPtr;
+                if (node->state.expired()) continue;
+                auto state = node->state.lock();
                 if (state) {
-                    auto pos = ed::GetNodePosition(node.id);
+                    auto pos = ed::GetNodePosition(node->id);
                     state->setPosition({ pos.x, pos.y });
                 }
             }
@@ -371,29 +373,49 @@ namespace ige::creator
         return false;
     }
 
-    Node* AnimatorEditor::findNode(ed::NodeId id)
+    std::shared_ptr<Node> AnimatorEditor::findNode(ed::NodeId id)
     {
         auto itr = std::find_if(m_nodes.begin(), m_nodes.end(), [&](const auto& node) {
-            return node.id == id;
+            return node->id == id;
         });
-        return itr != m_nodes.end() ? &(*itr) : nullptr;
+        return itr != m_nodes.end() ? *itr : nullptr;
     }
 
-    Link* AnimatorEditor::findLink(ed::LinkId id)
+    void AnimatorEditor::removeNode(ed::NodeId id)
+    {
+        auto itr = std::find_if(m_nodes.begin(), m_nodes.end(), [&](const auto& node) {
+            return node->id == id;
+        });
+        if (itr != m_nodes.end()) {
+            m_nodes.erase(itr);
+        }
+    }
+
+    std::shared_ptr<Link> AnimatorEditor::findLink(ed::LinkId id)
     {
         auto itr = std::find_if(m_links.begin(), m_links.end(), [&](const auto& link) {
-            return link.id == id;
+            return link->id == id;
         });
-        return itr != m_links.end() ? &(*itr) : nullptr;
+        return itr != m_links.end() ? *itr : nullptr;
     }
 
-    Pin* AnimatorEditor::findPin(ed::PinId id)
+    void AnimatorEditor::removeLink(ed::LinkId id)
     {
-        for (auto& node : m_nodes) {
-            if(node.inPin && node.inPin->id == id)
-                return node.inPin;
-            if (node.outPin && node.outPin->id == id)
-                return node.outPin;
+        auto itr = std::find_if(m_links.begin(), m_links.end(), [&](const auto& link) {
+            return link->id == id;
+        });
+        if (itr != m_links.end()) {
+            m_links.erase(itr);
+        }
+    }
+
+    std::shared_ptr<Pin> AnimatorEditor::findPin(ed::PinId id)
+    {
+        for (const auto& node : m_nodes) {
+            if(node->inPin && node->inPin->id == id)
+                return node->inPin;
+            if (node->outPin && node->outPin->id == id)
+                return node->outPin;
         }
         return nullptr;
     }
@@ -402,7 +424,7 @@ namespace ige::creator
     {
         if (!id) return false;
         for (const auto& link : m_links)
-            if (link.startPinID == id || link.endPinID == id)
+            if (link->startPinID == id || link->endPinID == id)
                 return true;
         return false;
     }
@@ -411,20 +433,20 @@ namespace ige::creator
     {
         if (!id1 || !id2) return false;
         for (const auto& link : m_links)
-            if ((link.startPinID == id1 && link.endPinID == id2)
-                || (link.startPinID == id2 && link.endPinID == id1))
+            if ((link->startPinID == id1 && link->endPinID == id2)
+                || (link->startPinID == id2 && link->endPinID == id1))
                 return true;
         return false;
     }
 
-    bool AnimatorEditor::canCreateLink(Pin* p1, Pin* p2)
+    bool AnimatorEditor::canCreateLink(const std::shared_ptr<Pin>& p1, const std::shared_ptr<Pin>& p2)
     {
-        if (!p1 || !p2 || p1 == p2 || p1->type == p2->type || p1->node == p2->node)
+        if (!p1 || !p2 || p1 == p2 || p1->type == p2->type || p1->node.lock() == p2->node.lock())
             return false;
         return true;
     }
 
-    void AnimatorEditor::drawPinIcon(const Pin& pin, bool connected, int alpha)
+    void AnimatorEditor::drawPinIcon(bool connected, int alpha)
     {
         const auto size = ImVec2(24.f, 24.f);
         const auto color = ImColor(147, 226, 74, alpha);
@@ -473,24 +495,24 @@ namespace ige::creator
         ImGui::Dummy(size);
     }
 
-    Node* AnimatorEditor::createNode(const std::string& name, NodeType nodeType, const ImVec2& position)
+    std::shared_ptr<Node> AnimatorEditor::createNode(const std::string& name, NodeType nodeType, const ImVec2& position)
     {
-        m_nodes.emplace_back(getNextId(), name, position);
-        auto& node = m_nodes.back();
+        auto node = std::make_shared<Node>(getNextId(), name, position);
         if (nodeType != NodeType::Entry && nodeType != NodeType::Any)
-            node.inPin = new Pin(getNextId(), ed::PinKind::Input, &node);
+            node->inPin = std::make_shared<Pin>(getNextId(), ed::PinKind::Input, node);
         if (nodeType != NodeType::Exit)
-            node.outPin = new Pin(getNextId(), ed::PinKind::Output, &node);
-        ed::SetNodePosition(node.id, position);
-        return &node;
+            node->outPin = std::make_shared<Pin>(getNextId(), ed::PinKind::Output, node);
+        ed::SetNodePosition(node->id, position);
+        m_nodes.push_back(node);
+        return node;
     }
 
-    Node* AnimatorEditor::findNode(AnimatorState* state) {
+    std::shared_ptr<Node> AnimatorEditor::findNode(const std::shared_ptr<AnimatorState>& state) {
         if (state == nullptr) return nullptr;
         auto itr = std::find_if(m_nodes.begin(), m_nodes.end(), [&](const auto& node) {
-            return node.userPtr == (void*)state;
+            return !node->state.expired() && node->state.lock() == state;
         });
-        if (itr != m_nodes.end()) return &(*itr);
+        if (itr != m_nodes.end()) return *itr;
         return nullptr;
     }
 
@@ -570,6 +592,7 @@ namespace ige::creator
                     setParametersDirty();
                 });
 
+                m_parameterGroup->createWidget<Separator>();
                 auto columns = m_parameterGroup->createWidget<Columns<3>>();
                 auto width = (ImGui::GetWindowContentRegionWidth() - 32.f) / 3;
                 columns->setColumnWidth(0, 2 * width);
@@ -661,17 +684,17 @@ namespace ige::creator
 
             auto builder = NodeBuilder();
 
-            for (auto& node : m_nodes) 
-            {
-                auto* state = (AnimatorState*)node.userPtr;
-                builder.Begin(node.id);
+            for (auto& node : m_nodes) {
+                if (node->state.expired()) continue;
+                auto state = node->state.lock();
+                builder.Begin(node->id);
                 {
                     // Input
                     {
-                        auto input = node.inPin;
+                        auto input = node->inPin;
                         if (input) {
                             builder.Input(input->id);
-                            drawPinIcon(*input, isPinLinked(input->id), (int)(ImGui::GetStyle().Alpha * 255));
+                            drawPinIcon(isPinLinked(input->id), (int)(ImGui::GetStyle().Alpha * 255));
                             ImGui::Spring(0);
                             builder.EndInput();
                         }
@@ -681,17 +704,17 @@ namespace ige::creator
                     {
                         builder.Middle();
                         ImGui::Spring(1, 0);
-                        ImGui::ProgressBar(0.f, {150, 18}, node.name.c_str());
+                        ImGui::ProgressBar(0.f, {150, 18}, node->name.c_str());
                         ImGui::Spring(1, 0);
                     }
 
                     // Output
                     {
-                        auto output = node.outPin;
+                        auto output = node->outPin;
                         if (output) {
                             builder.Output(output->id);
                             ImGui::Spring(0);
-                            drawPinIcon(*output, isPinLinked(output->id), (int)(ImGui::GetStyle().Alpha * 255));
+                            drawPinIcon(isPinLinked(output->id), (int)(ImGui::GetStyle().Alpha * 255));
                             builder.EndOutput();
                         }
                     }
@@ -701,7 +724,7 @@ namespace ige::creator
 
             for (auto& link : m_links)
             {
-                ed::Link(link.id, link.startPinID, link.endPinID, link.color, 2.0f);
+                ed::Link(link->id, link->startPinID, link->endPinID, link->color, 2.0f);
             }
 
             if (ed::BeginCreate(ImColor(255, 255, 255), 2.0f))
@@ -728,16 +751,16 @@ namespace ige::creator
                 if (ed::QueryNewLink(&startPinId, &endPinId))
                 {
                     auto startPin = findPin(startPinId);
-                    auto endPin = findPin(endPinId);
-
-                    if (startPin && endPin)
+                    if (startPin)
                     {
                         if (startPin->type == ed::PinKind::Input)
                         {
-                            std::swap(startPin, endPin);
                             std::swap(startPinId, endPinId);
+                            startPin = findPin(startPinId);
                         }
-                        if (endPin == startPin || hasLink(startPin->id, endPin->id))
+                        
+                        auto endPin = findPin(endPinId);
+                        if (startPinId == endPinId || startPin->node.expired() || endPin->node.expired() || hasLink(startPinId, endPinId))
                         {
                             ed::RejectNewItem(ImColor(255, 0, 0), 2.0f);
                         }
@@ -746,7 +769,7 @@ namespace ige::creator
                             showLabel("x Incompatible Pin Kind", ImColor(45, 32, 32, 180));
                             ed::RejectNewItem(ImColor(255, 0, 0), 2.0f);
                         }
-                        else if (endPin->node == startPin->node)
+                        else if (endPin->node.lock() == startPin->node.lock())
                         {
                             showLabel("x Cannot connect to self", ImColor(45, 32, 32, 180));
                             ed::RejectNewItem(ImColor(255, 0, 0), 1.0f);
@@ -756,12 +779,16 @@ namespace ige::creator
                             showLabel("+ Create Link", ImColor(32, 45, 32, 180));
                             if (ed::AcceptNewItem(ImColor(128, 255, 128), 4.0f))
                             {
-                                m_links.emplace_back(Link(getNextId(), startPinId, endPinId));
-                                m_links.back().color = ImColor(147, 226, 74);
-                                auto state = (AnimatorState*)startPin->node->userPtr;
-                                auto dstState = (AnimatorState*)endPin->node->userPtr;
-                                state->addTransition(dstState->getSharedPtr());
-                                setDirty();
+                                auto link = std::make_shared<Link>(getNextId(), startPinId, endPinId);
+                                link->color = ImColor(147, 226, 74);
+                                m_links.push_back(link);
+                                auto state = startPin->node.lock()->state;
+                                auto dstState = endPin->node.lock()->state;
+                                if (!state.expired() && !dstState.expired()) {
+                                    auto transition = state.lock()->addTransition(dstState.lock());
+                                    link->transition = transition;
+                                    setDirty();
+                                }
                             }
                         }
                     }
@@ -776,16 +803,21 @@ namespace ige::creator
                 {
                     if (ed::AcceptDeletedItem())
                     {
-                        auto itr = std::find_if(m_links.begin(), m_links.end(), [linkId](auto& link) { return link.id == linkId; });
-                        if (itr != m_links.end()) {
-                            auto startPin = findPin((*itr).startPinID);
-                            auto endPin = findPin((*itr).endPinID);
-                            auto state = (AnimatorState*)startPin->node->userPtr;
-                            auto dstState = (AnimatorState*)endPin->node->userPtr;
-                            state->removeTransition(state->findTransition(dstState->getSharedPtr()));
-                            m_links.erase(itr);
-                            setDirty();
+                        const auto& link = findLink(linkId);
+                        if (link != nullptr) {
+                            const auto& startPin = findPin(link->startPinID);
+                            const auto& endPin = findPin(link->endPinID);
+                            if (!startPin->node.expired() && !startPin->node.expired()) {
+                                auto state = startPin->node.lock()->state;
+                                auto dstState = endPin->node.lock()->state;
+                                if (!state.expired() && !dstState.expired()) {
+                                    auto transition = state.lock()->findTransition(dstState.lock());
+                                    state.lock()->removeTransition(transition);
+                                    setDirty();
+                                }
+                            }
                         }
+                        removeLink(linkId);
                     }
                 }
 
@@ -794,19 +826,94 @@ namespace ige::creator
                 {
                     if (ed::AcceptDeletedItem())
                     {
-                        auto itr = std::find_if(m_nodes.begin(), m_nodes.end(), [nodeId](auto& node) { return node.id == nodeId; });
-                        if (itr != m_nodes.end()) {
-                            auto* state = (AnimatorState*)((*itr).userPtr);
-                            m_controller->getStateMachine()->removeState(state->getSharedPtr());
-                            m_nodes.erase(itr);
-                            setDirty();
+                        auto node = findNode(nodeId);
+                        if (node != nullptr) {
+                            if (!node->state.expired()) {
+                                m_controller->getStateMachine()->removeState(node->state.lock());
+                                setDirty();
+                            }
                         }
+                        removeNode(nodeId);
                     }
                 }
             }
             ed::EndDelete();
+
+            if (ed::GetSelectedObjectCount() > 0) {
+                if (ed::NodeId node; ed::GetSelectedNodes(&node, 1) == 1) {
+                    if (m_node != node) {
+                        m_bInspectDirty = true;
+                        m_node = node;
+                    }
+                    m_link = -1;
+                }
+                else if (ed::LinkId link; ed::GetSelectedLinks(&link, 1) == 1) {
+                    if (m_link != link) {
+                        m_bInspectDirty = true;
+                        m_link = link;
+                    }
+                    m_node = -1;
+                }
+            }
+            else {
+                m_link = -1;
+                m_node = -1;
+            }
+
             ImGui::SetCursorScreenPos(cursorTopLeft);
         }
         ed::End();
+    }
+
+    bool AnimatorEditor::drawInspector()
+    {
+        if (m_node == (ed::NodeId)-1 && m_link == (ed::LinkId)-1)
+            return false;
+
+        if (m_bInspectDirty) {
+            if (m_inspectGroup == nullptr)
+                m_inspectGroup = Editor::getCanvas()->getInspector()->createWidget<Group>("Animator_Inspector_Group", false);
+            m_inspectGroup->removeAllWidgets();
+
+            // Draw node         
+            drawNode();
+
+            // Draw link
+            drawLink();
+
+            m_bInspectDirty = false;
+        }
+
+        if (m_inspectGroup)
+            m_inspectGroup->draw();
+
+        return true;
+    }
+
+    void AnimatorEditor::drawNode() {
+        auto node = findNode(m_node);
+        if (node != nullptr && !node->state.expired()) {
+            auto state = node->state.lock();
+            m_inspectGroup->createWidget<TextField>("Name", state->getName(), false, true)->getOnDataChangedEvent().addListener([this](const auto& txt) {
+                auto node = findNode(m_node);
+                if (node != nullptr && !node->state.expired()) {
+                    node->state.lock()->setName(txt);
+                }
+            });
+
+        }
+    }
+
+    void AnimatorEditor::drawLink() {
+        auto link = findLink(m_link);
+        if (link != nullptr && !link->transition.expired()) {
+            auto transition = link->transition.lock();
+            m_inspectGroup->createWidget<TextField>("Name", transition->getName(), false, true)->getOnDataChangedEvent().addListener([this](const auto& txt) {
+                auto link = findLink(m_link);
+                if (link != nullptr && !link->transition.expired()) {
+                    link->transition.lock()->setName(txt);
+                }
+            });
+        }
     }
 }

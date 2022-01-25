@@ -24,8 +24,8 @@ namespace ige::creator
     struct Pin {
         ed::PinId   id;
         ed::PinKind type;
-        Node* node;
-        Pin(ed::PinId id, ed::PinKind type, Node* node = nullptr)
+        std::weak_ptr<Node> node;
+        Pin(ed::PinId id, ed::PinKind type, std::shared_ptr<Node> node = nullptr)
             : id(id), type(type), node(node)
         {}
     };
@@ -33,15 +33,15 @@ namespace ige::creator
     struct Node {
         ed::NodeId id;
         std::string name;
-        Pin* inPin;
-        Pin* outPin;
         ImColor color;
         ImVec2 position;
         ImVec2 size;
-        void* userPtr;
+        std::shared_ptr<Pin> inPin;
+        std::shared_ptr <Pin> outPin;
+        std::weak_ptr<AnimatorState> state;
 
-        Node(ed::NodeId id, const std::string& name, ImVec2 position = {}, ImColor color = ImColor(255, 255, 255))
-            : id(id), name(name), color(color), inPin(nullptr), outPin(nullptr), userPtr(nullptr)
+        Node(ed::NodeId id, const std::string& name, ImVec2 position = {}, ImColor color = ImColor(255, 255, 255), std::shared_ptr<AnimatorState> state = nullptr)
+            : id(id), name(name), color(color), inPin(nullptr), outPin(nullptr), state(state)
         {}
     };
 
@@ -50,8 +50,9 @@ namespace ige::creator
         ed::PinId startPinID;
         ed::PinId endPinID;
         ImColor color;
-        Link(ed::LinkId id, ed::PinId startPinID, ed::PinId endPinID)
-            : id(id), startPinID(startPinID), endPinID(endPinID)
+        std::weak_ptr<AnimatorTransition> transition;
+        Link(ed::LinkId id, ed::PinId startPinID, ed::PinId endPinID, std::shared_ptr<AnimatorTransition> tran = nullptr)
+            : id(id), startPinID(startPinID), endPinID(endPinID), transition(tran)
         {}
     };
 
@@ -104,6 +105,8 @@ namespace ige::creator
         void openAnimator(const std::string& path);
         bool save();
 
+        bool drawInspector();
+
     protected:
         virtual void initialize() override;
         virtual void clear();
@@ -117,22 +120,30 @@ namespace ige::creator
         void drawParameters();
         void setParametersDirty(bool dirty = true) { m_bParameterDirty = dirty; }
 
+        void drawNode();
+        void drawLink();
+
         bool isDirty() { return m_bDirty; }
         void setDirty(bool dirty = true);
 
-        Node* createNode(const std::string& name, NodeType type = NodeType::Normal, const ImVec2& position = {});
-        Node* findNode(AnimatorState* state);
+        std::shared_ptr<Node> createNode(const std::string& name, NodeType type = NodeType::Normal, const ImVec2& position = {});
+        std::shared_ptr<Node> findNode(const std::shared_ptr<AnimatorState>& state);
 
         int getNextId() { return m_uniqueId++; }
-        Node* findNode(ed::NodeId id);
-        Link* findLink(ed::LinkId id);
-        Pin* findPin(ed::PinId id);
+
+        std::shared_ptr<Node> findNode(ed::NodeId id);
+        void removeNode(ed::NodeId id);
+        
+        std::shared_ptr<Pin> findPin(ed::PinId id);
+
+        std::shared_ptr<Link> findLink(ed::LinkId id);
+        void removeLink(ed::LinkId id);
 
         bool isPinLinked(ed::PinId id);
         bool hasLink(ed::PinId id1, ed::PinId id2);
-        bool canCreateLink(Pin* p1, Pin* p2);
+        bool canCreateLink(const std::shared_ptr<Pin>& p1, const std::shared_ptr<Pin>& p2);
 
-        void drawPinIcon(const Pin& pin, bool connected, int alpha);
+        void drawPinIcon(bool connected, int alpha);
 
     protected:
         std::string m_path;
@@ -142,8 +153,8 @@ namespace ige::creator
         int m_uniqueId = 0;
         float m_leftPanelWidth = 0.f;
 
-        std::vector<Node> m_nodes;
-        std::vector<Link> m_links;
+        std::vector<std::shared_ptr<Node>> m_nodes;
+        std::vector<std::shared_ptr<Link>> m_links;
         ed::EditorContext* m_editor = nullptr;
         bool m_bDirty = false;
 
@@ -153,5 +164,10 @@ namespace ige::creator
         std::shared_ptr<Group> m_parameterGroup = nullptr;
         bool m_bParameterDirty = false;
         int m_selectedType = 0;
+
+        std::shared_ptr<Group> m_inspectGroup = nullptr;
+        bool m_bInspectDirty = false;
+        ed::NodeId m_node = -1;
+        ed::LinkId m_link = -1;
     };
 }
