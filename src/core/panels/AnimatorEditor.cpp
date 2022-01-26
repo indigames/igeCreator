@@ -807,7 +807,7 @@ namespace ige::creator
                         if (link != nullptr) {
                             const auto& startPin = findPin(link->startPinID);
                             const auto& endPin = findPin(link->endPinID);
-                            if (!startPin->node.expired() && !startPin->node.expired()) {
+                            if (!startPin->node.expired() && !endPin->node.expired()) {
                                 auto state = startPin->node.lock()->state;
                                 auto dstState = endPin->node.lock()->state;
                                 if (!state.expired() && !dstState.expired()) {
@@ -865,10 +865,13 @@ namespace ige::creator
         ed::End();
     }
 
-    bool AnimatorEditor::drawInspector()
+    bool AnimatorEditor::shouldDrawInspector() {
+        return !(m_node == (ed::NodeId)-1 && m_link == (ed::LinkId)-1);
+    }
+
+    void AnimatorEditor::drawInspector()
     {
-        if (m_node == (ed::NodeId)-1 && m_link == (ed::LinkId)-1)
-            return false;
+        if (!shouldDrawInspector()) return;
 
         if (m_bInspectDirty) {
             if (m_inspectGroup == nullptr)
@@ -886,25 +889,26 @@ namespace ige::creator
 
         if (m_inspectGroup)
             m_inspectGroup->draw();
-
-        return true;
     }
 
     void AnimatorEditor::drawNode() {
         auto node = findNode(m_node);
         if (node != nullptr && !node->state.expired()) {
             auto state = node->state.lock();
+            m_inspectGroup->createWidget<TextField>("UUID", state->getUUID(), true);
             m_inspectGroup->createWidget<TextField>("Name", state->getName(), false, true)->getOnDataChangedEvent().addListener([this](const auto& txt) {
                 auto node = findNode(m_node);
                 if (node != nullptr && !node->state.expired()) {
                     node->state.lock()->setName(txt);
+                    setInspectorDirty();
                 }
             });
-            auto animTxt = m_inspectGroup->createWidget<TextField>("Animation", state->getPath(), false, true);
+            auto animTxt = m_inspectGroup->createWidget<TextField>("AnimClip", state->getPath(), false, true);
             animTxt->getOnDataChangedEvent().addListener([this](const auto& txt) {
                 auto node = findNode(m_node);
                 if (node != nullptr && !node->state.expired()) {
                     node->state.lock()->setPath(txt);
+                    setInspectorDirty();
                 }
             });
             animTxt->addPlugin<DDTargetPlugin<std::string>>(".pyxa")->getOnDataReceivedEvent().addListener([this](const auto& path) {
@@ -914,7 +918,36 @@ namespace ige::creator
                     setInspectorDirty();
                 }
             });
-
+            if (state->getAnimator() != nullptr) {
+                auto animClipGroup = m_inspectGroup->createWidget<Group>("AnimationClip");
+                std::array startTimes = { state->getStartTime() };
+                animClipGroup->createWidget<Drag<float>>("StartTime", ImGuiDataType_Float, startTimes)->getOnDataChangedEvent().addListener([this](auto val) {
+                    auto node = findNode(m_node);
+                    if (node != nullptr && !node->state.expired()) {
+                        node->state.lock()->setStartTime(val[0]);
+                    }
+                });
+                std::array evalTimes = { state->getEvalTime() };
+                animClipGroup->createWidget<Drag<float>>("EvalTime", ImGuiDataType_Float, evalTimes)->getOnDataChangedEvent().addListener([this](auto val) {
+                    auto node = findNode(m_node);
+                    if (node != nullptr && !node->state.expired()) {
+                        node->state.lock()->setEvalTime(val[0]);
+                    }
+                });
+                std::array speeds = { state->getSpeed() };
+                animClipGroup->createWidget<Drag<float>>("Speed", ImGuiDataType_Float, speeds)->getOnDataChangedEvent().addListener([this](auto val) {
+                    auto node = findNode(m_node);
+                    if (node != nullptr && !node->state.expired()) {
+                        node->state.lock()->setSpeed(val[0]);
+                    }
+                });
+                animClipGroup->createWidget<CheckBox>("Loop", state->isLoop())->getOnDataChangedEvent().addListener([this](bool val) {
+                    auto node = findNode(m_node);
+                    if (node != nullptr && !node->state.expired()) {
+                        node->state.lock()->setLoop(val);
+                    }
+                });
+            }
         }
     }
 
@@ -928,6 +961,112 @@ namespace ige::creator
                     link->transition.lock()->setName(txt);
                 }
             });
+            m_inspectGroup->createWidget<CheckBox>("Loop", transition->isMute)->getOnDataChangedEvent().addListener([this](bool val) {
+                auto link = findLink(m_link);
+                if (link != nullptr && !link->transition.expired()) {
+                    link->transition.lock()->isMute = val;
+                }
+            });
+            m_inspectGroup->createWidget<CheckBox>("HasExitTime", transition->hasExitTime)->getOnDataChangedEvent().addListener([this](bool val) {
+                auto link = findLink(m_link);
+                if (link != nullptr && !link->transition.expired()) {
+                    link->transition.lock()->hasExitTime = val;
+                    setInspectorDirty();
+                }
+            });
+            if (transition->hasExitTime) {
+                std::array exitTimes = { transition->exitTime };
+                m_inspectGroup->createWidget<Drag<float>>("ExitTime", ImGuiDataType_Float, exitTimes)->getOnDataChangedEvent().addListener([this](auto val) {
+                    auto link = findLink(m_link);
+                    if (link != nullptr && !link->transition.expired()) {
+                        link->transition.lock()->exitTime = val[0];
+                    }
+                });
+            }
+            m_inspectGroup->createWidget<CheckBox>("FixedDuration", transition->hasFixedDuration)->getOnDataChangedEvent().addListener([this](bool val) {
+                auto link = findLink(m_link);
+                if (link != nullptr && !link->transition.expired()) {
+                    link->transition.lock()->hasFixedDuration = val;
+                    setInspectorDirty();
+                }
+            });
+            if (transition->hasFixedDuration) {
+                std::array durations = { transition->duration };
+                m_inspectGroup->createWidget<Drag<float>>("Duration", ImGuiDataType_Float, durations)->getOnDataChangedEvent().addListener([this](auto val) {
+                    auto link = findLink(m_link);
+                    if (link != nullptr && !link->transition.expired()) {
+                        link->transition.lock()->duration = val[0];
+                    }
+                });
+            }
+
+            auto conditionGroup = m_inspectGroup->createWidget<Group>("ConditionGroup");
+            auto columns = conditionGroup->createWidget<Columns<4>>();
+            for (const auto& cond : transition->conditions) {
+                auto param = cond->parameter;
+                auto [type, defaultValue] = m_controller->getParameter(cond->parameter);
+                columns->createWidget<TextField>("", cond->parameter, true);
+                columns->createWidget<TextField>("", AnimatorCondition::getMode((AnimatorCondition::Mode)cond->mode), true);
+                std::array thresholds = { cond->threshold };
+                columns->createWidget<Drag<float>>("", ImGuiDataType_Float, thresholds)->getOnDataChangedEvent().addListener([param, this](auto val) {
+                    auto link = findLink(m_link);
+                    if (link != nullptr && !link->transition.expired()) {
+                        link->transition.lock()->getCondition(param)->threshold = val[0];
+                    }
+                });
+                columns->createWidget<Button>("-", ImVec2(ImGui::GetFrameHeight(), 0))->getOnClickEvent().addListener([param, this](const auto& widget) {
+                    auto link = findLink(m_link);
+                    if (link != nullptr && !link->transition.expired()) {
+                        link->transition.lock()->removeCondition(param);
+                    }
+                    setInspectorDirty();
+                });
+            }
+
+            static std::vector<std::string> params; params.clear();
+            for (const auto& param : m_controller->getParameters()) {
+                params.push_back(param.first);
+            }
+
+            if (params.size() > 0) {
+                static int selectedParmeter = 0;
+                conditionGroup->createWidget<Separator>();
+                auto columns = conditionGroup->createWidget<Columns<4>>();
+                auto selectCombo = columns->createWidget<ComboBox>("", selectedParmeter);
+                selectCombo->getOnDataChangedEvent().addListener([this](auto val) {
+                    selectedParmeter = val;
+                });
+                for (int i = 0; i < params.size(); ++i) {
+                    selectCombo->addChoice(i, params[i]);
+                }
+
+                static int selectedMode = 0;
+                auto modeCombo = columns->createWidget<ComboBox>("", selectedMode);
+                modeCombo->getOnDataChangedEvent().addListener([this](auto val) {
+                    selectedMode = val;
+                });
+                for (auto mode = (int)AnimatorCondition::Mode::If; mode < (int)AnimatorCondition::Mode::Count; ++mode) {
+                    modeCombo->addChoice(mode, AnimatorCondition::getMode((AnimatorCondition::Mode)mode));
+                }
+
+
+                static float threshold = 0.f;
+                auto param = params[selectedParmeter];
+                auto [type, defaultValue] = m_controller->getParameter(param);
+                threshold = defaultValue;
+                std::array thresholds = { threshold };
+                columns->createWidget<Drag<float>>("", ImGuiDataType_Float, thresholds)->getOnDataChangedEvent().addListener([this](auto val) {
+                    threshold = val[0];
+                });
+
+                columns->createWidget<Button>("+", ImVec2(ImGui::GetFrameHeight(), 0))->getOnClickEvent().addListener([this](const auto& widget) {
+                    auto link = findLink(m_link);
+                    if (link != nullptr && !link->transition.expired()) {
+                        link->transition.lock()->addCondition(params[selectedParmeter], AnimatorCondition::Mode(selectedMode), threshold);
+                    }
+                    setInspectorDirty();
+                });
+            }
         }
     }
 }

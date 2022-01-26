@@ -105,7 +105,8 @@ namespace ige::creator
         void openAnimator(const std::string& path);
         bool save();
 
-        bool drawInspector();
+        bool shouldDrawInspector();
+        void drawInspector();
 
     protected:
         virtual void initialize() override;

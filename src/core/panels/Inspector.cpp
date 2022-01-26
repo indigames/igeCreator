@@ -348,8 +348,9 @@ namespace ige::creator
     void Inspector::_drawImpl()
     {
         // Inspect animator editor first
-        if (Editor::getCanvas()->getAnimatorEditor()->drawInspector()) {
+        if (Editor::getCanvas()->getAnimatorEditor()->shouldDrawInspector()) {
             Panel::_drawImpl();
+            Editor::getCanvas()->getAnimatorEditor()->drawInspector();
             return;
         }
 
