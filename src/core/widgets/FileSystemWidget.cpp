@@ -250,20 +250,17 @@ namespace ige::creator
         }
 
         if (!m_bShowHidden) {
-            if (!m_cache.isProcessed()) {
-                auto itr = m_cache.entries().begin();
-                while (itr != m_cache.entries().end()) {
-                    const auto& name = (*itr).stem;
-                    const auto& ext = (*itr).extension;
-                    if (IsFormat(E_FileExts::Hidden, name) || IsFormat(E_FileExts::Hidden, ext)) {
-                        m_cache.entries().erase(itr);
-                    }
-                    else {
-                        ++itr;
-                    }
+            auto itr = m_cache.entries().begin();
+            while (itr != m_cache.entries().end()) {
+                const auto& name = (*itr).stem;
+                const auto& ext = (*itr).extension;
+                if (IsFormat(E_FileExts::Hidden, name) || IsFormat(E_FileExts::Hidden, ext)) {
+                    m_cache.entries().erase(itr);
                 }
-                m_cache.setProcessed(true);
-            }            
+                else {
+                    ++itr;
+                }
+            }
         }
 
         if (ImGui::BeginPopupContextWindow())
