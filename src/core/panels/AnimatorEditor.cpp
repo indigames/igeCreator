@@ -900,6 +900,20 @@ namespace ige::creator
                     node->state.lock()->setName(txt);
                 }
             });
+            auto animTxt = m_inspectGroup->createWidget<TextField>("Animation", state->getPath(), false, true);
+            animTxt->getOnDataChangedEvent().addListener([this](const auto& txt) {
+                auto node = findNode(m_node);
+                if (node != nullptr && !node->state.expired()) {
+                    node->state.lock()->setPath(txt);
+                }
+            });
+            animTxt->addPlugin<DDTargetPlugin<std::string>>(".pyxa")->getOnDataReceivedEvent().addListener([this](const auto& path) {
+                auto node = findNode(m_node);
+                if (node != nullptr && !node->state.expired()) {
+                    node->state.lock()->setPath(path);
+                    setInspectorDirty();
+                }
+            });
 
         }
     }

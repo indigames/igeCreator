@@ -122,6 +122,7 @@ namespace ige::creator
 
         void drawNode();
         void drawLink();
+        void setInspectorDirty(bool dirty = true) { m_bInspectDirty = dirty; }
 
         bool isDirty() { return m_bDirty; }
         void setDirty(bool dirty = true);

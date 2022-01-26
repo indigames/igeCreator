@@ -16,6 +16,8 @@
 #include <window.h>
 #endif
 
+constexpr int ICON_SIZE = 64.f;
+
 namespace ImGui
 {
     void RenderFrameEx(ImVec2 p_min, ImVec2 p_max, bool border, float rounding, float thickness)
@@ -180,6 +182,9 @@ namespace ige::creator
         m_iconTextures["model"] = ResourceCreator::Instance().NewTexture(GetEnginePath("icons/file_model").c_str());
         m_iconTextures["font"] = ResourceCreator::Instance().NewTexture(GetEnginePath("icons/file_font").c_str());
         m_iconTextures["audio"] = ResourceCreator::Instance().NewTexture(GetEnginePath("icons/file_audio").c_str());
+        m_iconTextures["effect"] = ResourceCreator::Instance().NewTexture(GetEnginePath("icons/file_effect").c_str());
+        m_iconTextures["animation_clip"] = ResourceCreator::Instance().NewTexture(GetEnginePath("icons/file_animation_clip").c_str());
+        m_iconTextures["animator"] = ResourceCreator::Instance().NewTexture(GetEnginePath("icons/file_animator").c_str());
 
         m_cache.set_scan_frequency(std::chrono::milliseconds(1000));
     }
@@ -215,7 +220,7 @@ namespace ige::creator
             m_isDirty = false;
         }
 
-        const float size = ImGui::GetFrameHeight() * 3.33f;
+        const float size = ICON_SIZE;
 
         int id = 0;
         for (const auto &dir : m_hierarchy)
@@ -348,6 +353,22 @@ namespace ige::creator
                 else if (IsFormat(E_FileExts::Audio, file_ext))
                 {
                     icon = m_iconTextures["audio"];
+                }
+                else if (IsFormat(E_FileExts::Prefab, file_ext))
+                {
+                    icon = m_iconTextures["prefab"];
+                }
+                else if (IsFormat(E_FileExts::Particle, file_ext))
+                {
+                    icon = m_iconTextures["effect"];
+                }
+                else if (IsFormat(E_FileExts::AnimationClip, file_ext))
+                {
+                    icon = m_iconTextures["animation_clip"];
+                }
+                else if (IsFormat(E_FileExts::Animator, file_ext))
+                {
+                    icon = m_iconTextures["animator"];
                 }
 
                 const auto on_double_click = [&]() {
@@ -487,7 +508,7 @@ namespace ige::creator
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(col.x, col.y, col.z, 0.86f));
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(col.x, col.y, col.z, 1.0f));
 
-        const int padding = 0;
+        const int padding = 1.f;
         auto pos = ImGui::GetCursorScreenPos();
         pos.y += item_size.y + padding * 2.0f;
 
@@ -508,6 +529,7 @@ namespace ige::creator
             {
                 action = entry_action::double_clicked;
             }
+            ImGui::SetTooltip(name.c_str());
         }
 
         if (is_selected && ImGui::GetNavInputAmount(ImGuiNavInput_Input, ImGuiInputReadMode_Pressed) > 0.0f)
@@ -660,23 +682,20 @@ namespace ige::creator
         return is_popup_opened;
     }
 
-    bool FileSystemWidget::ProcessDragDropSource(pyxieTexture *preview, const fs::path &absolute_path)
+    bool FileSystemWidget::ProcessDragDropSource(pyxieTexture *preview, const fs::path &path)
     {
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
         {
-            const auto filename = absolute_path.filename();
-            const std::string extension = filename.has_extension() ? filename.extension().string() : "folder";
-            const std::string id = absolute_path.string();
-            const std::string strfilename = filename.string();
-
-            ImGui::TextUnformatted(strfilename.c_str());
+            const auto filename = path.filename();
+            std::string extension = filename.has_extension() ? filename.extension().string() : "folder";
+            std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+            ImGui::TextUnformatted(filename.string().c_str());
             static std::string relative; // Keep content in memory
-            relative = fs::relative(absolute_path).string();
+            relative = fs::relative(path).string();
             ImGui::SetDragDropPayload(extension.c_str(), &relative, sizeof(relative));
             ImGui::EndDragDropSource();
             return true;
         }
-
         return false;
     }
 

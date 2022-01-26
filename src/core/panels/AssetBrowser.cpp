@@ -22,6 +22,8 @@
 #include <utils/GraphicsHelper.h>
 #include <SDL.h>
 #include <imgui.h>
+#include <string>
+#include <algorithm>
 
 namespace ige::creator
 {
@@ -62,6 +64,7 @@ namespace ige::creator
 
                     auto hidden = false;
                     auto path = fsPath.string();
+                    std::transform(path.begin(), path.end(), path.begin(), ::tolower);
                     const auto& hiddenItems = GetFileExtensionSuported(E_FileExts::Hidden);
                     for (const auto& item : hiddenItems) {
                         if (path.find(item) != std::string::npos) {
