@@ -590,6 +590,7 @@ namespace ige::creator
                     auto name = std::string("Parameter") + std::to_string(m_controller->getParameters().size() + 1);
                     m_controller->setParameter(name, m_selectedType, 0.f);
                     setParametersDirty();
+                    setInspectorDirty();
                 });
 
                 m_parameterGroup->createWidget<Separator>();
@@ -609,44 +610,40 @@ namespace ige::creator
                     });
                     switch (type)
                     {
-                    case AnimatorParameterType::Bool:
-                    {
-                        columns->createWidget<CheckBox>("", val)->getOnDataChangedEvent().addListener([name, type, this](bool val) {
-                            m_controller->setParameter(name, (int)type, val);
-                        });
-                        break;
-                    }
-                    case AnimatorParameterType::Trigger:
-                    {
-                        columns->createWidget<CheckBox>("", false)->getOnDataChangedEvent().addListener([name, type, this](bool val) {
-                            m_controller->setParameter(name, (int)type, false);
-                            setParametersDirty();
-                        });
-                        break;
-                    }
-                    case AnimatorParameterType::Int:
-                    {
-                        std::array vals = { val };
-                        columns->createWidget<Drag<float>>("", ImGuiDataType_S32, vals)->getOnDataChangedEvent().addListener([name, type, this](auto val) {
-                            m_controller->setParameter(name, (int)type, val[0]);
-                        });
-                        break;
-                    }
-                    case AnimatorParameterType::Float:
-                    {
-                        std::array vals = { val };
-                        columns->createWidget<Drag<float>>("", ImGuiDataType_Float, vals)->getOnDataChangedEvent().addListener([name, type, this](auto val) {
-                            m_controller->setParameter(name, (int)type, val[0]);
-                        });
-                        break;
-                    }
-                    default:
-                        break;
+                        case AnimatorParameterType::Bool:
+                        {
+                            auto selectCombo = columns->createWidget<ComboBox>("");
+                            selectCombo->getOnDataChangedEvent().addListener([name, type, this](auto val) {
+                                m_controller->setParameter(name, (int)type, val);
+                            });
+                            selectCombo->setEndOfLine(false);
+                            selectCombo->addChoice(0, "False");
+                            selectCombo->addChoice(1, "True");
+                            break;
+                        }
+                        case AnimatorParameterType::Trigger:
+                        {
+                            columns->createWidget<CheckBox>("", false)->getOnDataChangedEvent().addListener([name, type, this](bool val) {
+                                m_controller->setParameter(name, (int)type, false);
+                                setParametersDirty();
+                            });
+                            break;
+                        }
+                        case AnimatorParameterType::Int:
+                        case AnimatorParameterType::Float:
+                        {
+                            std::array vals = { val };
+                            columns->createWidget<Drag<float>>("", (type == AnimatorParameterType::Int) ? ImGuiDataType_S32 : ImGuiDataType_Float, vals)->getOnDataChangedEvent().addListener([name, type, this](auto val) {
+                                m_controller->setParameter(name, (int)type, val[0]);
+                            });
+                            break;
+                        }
                     }
 
                     columns->createWidget<Button>("-", ImVec2(ImGui::GetFrameHeight(), 0))->getOnClickEvent().addListener([name, this](const auto& widget) {
                         m_controller->removeParameter(name);
                         setParametersDirty();
+                        setInspectorDirty();
                     });
                 }
                 m_bParameterDirty = false;
@@ -1002,19 +999,45 @@ namespace ige::creator
 
             auto conditionGroup = m_inspectGroup->createWidget<Group>("ConditionGroup");
             auto columns = conditionGroup->createWidget<Columns<4>>();
+            columns->setColumnWidth(3, 32.f);
             for (const auto& cond : transition->conditions) {
                 auto param = cond->parameter;
                 auto [type, defaultValue] = m_controller->getParameter(cond->parameter);
                 columns->createWidget<TextField>("", cond->parameter, true);
                 columns->createWidget<TextField>("", AnimatorCondition::getMode((AnimatorCondition::Mode)cond->mode), true);
-                std::array thresholds = { cond->threshold };
-                columns->createWidget<Drag<float>>("", ImGuiDataType_Float, thresholds)->getOnDataChangedEvent().addListener([param, this](auto val) {
-                    auto link = findLink(m_link);
-                    if (link != nullptr && !link->transition.expired()) {
-                        link->transition.lock()->getCondition(param)->threshold = val[0];
+                
+                switch (type)
+                {
+                    case AnimatorParameterType::Bool: {
+                        auto selectCombo = columns->createWidget<ComboBox>("");
+                        selectCombo->getOnDataChangedEvent().addListener([param, this](auto val) {
+                            auto link = findLink(m_link);
+                            if (link != nullptr && !link->transition.expired()) {
+                                link->transition.lock()->getCondition(param)->threshold = val;
+                            }
+                        });
+                        selectCombo->setEndOfLine(false);
+                        selectCombo->addChoice(0, "False");
+                        selectCombo->addChoice(1, "True");
+                        break;
                     }
-                });
-                columns->createWidget<Button>("-", ImVec2(ImGui::GetFrameHeight(), 0))->getOnClickEvent().addListener([param, this](const auto& widget) {
+                    case AnimatorParameterType::Trigger: {
+                        columns->createWidget<CheckBox>("", false);
+                        break;
+                    }
+                    case AnimatorParameterType::Int:
+                    case AnimatorParameterType::Float: {
+                        std::array thresholds = { cond->threshold };
+                        columns->createWidget<Drag<float>>("", (type == AnimatorParameterType::Int) ? ImGuiDataType_S32 : ImGuiDataType_Float, thresholds)->getOnDataChangedEvent().addListener([param, this](auto val) {
+                            auto link = findLink(m_link);
+                            if (link != nullptr && !link->transition.expired()) {
+                                link->transition.lock()->getCondition(param)->threshold = val[0];
+                            }
+                        });
+                        break;
+                    }
+                }
+                columns->createWidget<Button>("-", ImVec2(ImGui::GetFrameHeight(), ImGui::GetFrameHeight()))->getOnClickEvent().addListener([param, this](const auto& widget) {
                     auto link = findLink(m_link);
                     if (link != nullptr && !link->transition.expired()) {
                         link->transition.lock()->removeCondition(param);
@@ -1032,34 +1055,59 @@ namespace ige::creator
                 static int selectedParmeter = 0;
                 conditionGroup->createWidget<Separator>();
                 auto columns = conditionGroup->createWidget<Columns<4>>();
+                columns->setColumnWidth(3, 32.f);
+
                 auto selectCombo = columns->createWidget<ComboBox>("", selectedParmeter);
                 selectCombo->getOnDataChangedEvent().addListener([this](auto val) {
                     selectedParmeter = val;
+                    setInspectorDirty();
                 });
                 for (int i = 0; i < params.size(); ++i) {
                     selectCombo->addChoice(i, params[i]);
                 }
 
+                auto param = params[selectedParmeter];
+                auto [type, val] = m_controller->getParameter(param);
+
                 static int selectedMode = 0;
                 auto modeCombo = columns->createWidget<ComboBox>("", selectedMode);
                 modeCombo->getOnDataChangedEvent().addListener([this](auto val) {
                     selectedMode = val;
+                    setInspectorDirty();
                 });
-                for (auto mode = (int)AnimatorCondition::Mode::If; mode < (int)AnimatorCondition::Mode::Count; ++mode) {
-                    modeCombo->addChoice(mode, AnimatorCondition::getMode((AnimatorCondition::Mode)mode));
+                for (auto mode: AnimatorCondition::getValidModes(type)) {
+                    modeCombo->addChoice((int)mode, AnimatorCondition::getMode(mode));
                 }
 
-
                 static float threshold = 0.f;
-                auto param = params[selectedParmeter];
-                auto [type, defaultValue] = m_controller->getParameter(param);
-                threshold = defaultValue;
-                std::array thresholds = { threshold };
-                columns->createWidget<Drag<float>>("", ImGuiDataType_Float, thresholds)->getOnDataChangedEvent().addListener([this](auto val) {
-                    threshold = val[0];
-                });
+                threshold = val;
+                switch (type)
+                {
+                case AnimatorParameterType::Bool: {
+                    auto selectCombo = columns->createWidget<ComboBox>("");
+                    selectCombo->getOnDataChangedEvent().addListener([this](auto val) {
+                        threshold = val;
+                    });
+                    selectCombo->setEndOfLine(false);
+                    selectCombo->addChoice(0, "False");
+                    selectCombo->addChoice(1, "True");
+                    break;
+                }
+                case AnimatorParameterType::Trigger: {
+                    columns->createWidget<CheckBox>("", false);
+                    break;
+                }
+                case AnimatorParameterType::Int:
+                case AnimatorParameterType::Float: {
+                    std::array vals = { val };
+                    columns->createWidget<Drag<float>>("", (type == AnimatorParameterType::Int) ? ImGuiDataType_S32 : ImGuiDataType_Float, vals)->getOnDataChangedEvent().addListener([](auto val) {
+                        threshold = val[0];
+                    });
+                    break;
+                }                
+                }
 
-                columns->createWidget<Button>("+", ImVec2(ImGui::GetFrameHeight(), 0))->getOnClickEvent().addListener([this](const auto& widget) {
+                columns->createWidget<Button>("+", ImVec2(ImGui::GetFrameHeight(), ImGui::GetFrameHeight()))->getOnClickEvent().addListener([this](const auto& widget) {
                     auto link = findLink(m_link);
                     if (link != nullptr && !link->transition.expired()) {
                         link->transition.lock()->addCondition(params[selectedParmeter], AnimatorCondition::Mode(selectedMode), threshold);
