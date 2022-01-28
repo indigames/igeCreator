@@ -763,7 +763,7 @@ namespace ige::creator
                         }
                         else if (endPin->type == startPin->type)
                         {
-                            showLabel("x Incompatible Pin Kind", ImColor(45, 32, 32, 180));
+                            showLabel("x Incompatible Pin", ImColor(45, 32, 32, 180));
                             ed::RejectNewItem(ImColor(255, 0, 0), 2.0f);
                         }
                         else if (endPin->node.lock() == startPin->node.lock())
@@ -773,7 +773,7 @@ namespace ige::creator
                         }
                         else
                         {
-                            showLabel("+ Create Link", ImColor(32, 45, 32, 180));
+                            showLabel("+ Create Transition", ImColor(32, 45, 32, 180));
                             if (ed::AcceptNewItem(ImColor(128, 255, 128), 4.0f))
                             {
                                 auto link = std::make_shared<Link>(getNextId(), startPinId, endPinId);
@@ -863,19 +863,28 @@ namespace ige::creator
     }
 
     bool AnimatorEditor::shouldDrawInspector() {
-        return !(m_node == (ed::NodeId)-1 && m_link == (ed::LinkId)-1);
+        return m_bFocus && (m_node != (ed::NodeId)-1 || m_link != (ed::LinkId)-1);
+    }
+
+    void AnimatorEditor::setFocus(bool focus) {
+        if (m_bFocus != focus) {
+            m_bFocus = focus;
+            setInspectorDirty();
+
+            if (!focus)
+                Editor::getCanvas()->getInspector()->redraw();
+        }
     }
 
     void AnimatorEditor::drawInspector()
     {
         if (!shouldDrawInspector()) return;
-
         if (m_bInspectDirty) {
-            if (m_inspectGroup == nullptr)
-                m_inspectGroup = Editor::getCanvas()->getInspector()->createWidget<Group>("Animator_Inspector_Group", false);
-            m_inspectGroup->removeAllWidgets();
+            m_inspectGroup = nullptr;
+            Editor::getCanvas()->getInspector()->clear();
+            m_inspectGroup = Editor::getCanvas()->getInspector()->createWidget<Group>("Animator_Inspector_Group", false);
 
-            // Draw node         
+            // Draw node
             drawNode();
 
             // Draw link
@@ -883,9 +892,6 @@ namespace ige::creator
 
             m_bInspectDirty = false;
         }
-
-        if (m_inspectGroup)
-            m_inspectGroup->draw();
     }
 
     void AnimatorEditor::drawNode() {

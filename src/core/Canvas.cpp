@@ -45,7 +45,10 @@ namespace ige::creator
 
         settings.closable = true;
         auto animatorPanel = createPanel<AnimatorEditor>("Animator", settings);
-        // animatorPanel->close();
+        animatorPanel->close();
+
+        getEditorScene()->getOnFocusEvent().addListener(std::bind(&Canvas::onPanelFocus, this, std::placeholders::_1));
+        getAnimatorEditor()->getOnFocusEvent().addListener(std::bind(&Canvas::onPanelFocus, this, std::placeholders::_1));
     }
 
     Canvas::~Canvas()
@@ -136,6 +139,16 @@ namespace ige::creator
 
         ImGui::End();
         ImGui::Render();
+    }
+
+    void Canvas::onPanelFocus(Panel& panel)
+    {
+        if (panel.getName().find("Scene") != std::string::npos) {
+            getAnimatorEditor()->setFocus(false);
+        }
+            
+        if (panel.getName().find("Animator") != std::string::npos)
+            getAnimatorEditor()->setFocus(true);
     }
 
     void Canvas::removePanel(std::shared_ptr<Panel> panel)

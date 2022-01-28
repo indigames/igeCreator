@@ -42,6 +42,9 @@ namespace ige::creator
         bool isOpened() const { return m_bIsOpened; }
 
         void setFocus();
+
+        ige::scene::Event<Panel&>& getOnFocusEvent() { return m_focusEvent; }
+
         bool isFocused() const { return m_bIsFocused; }
         bool isHovered() const { return m_bIsHovered; }
 
@@ -79,6 +82,8 @@ namespace ige::creator
         ige::scene::Event<ImVec2&> m_positionChangedEvent;
 
     protected:
+        ige::scene::Event<Panel&> m_focusEvent;
+
         std::string m_name;
         Settings m_settings;
         static uint64_t s_idCounter;

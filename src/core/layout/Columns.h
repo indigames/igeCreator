@@ -22,6 +22,7 @@ namespace ige::creator
 
         std::array<float, N> m_columnWidths;
         float m_defaultWidth = -1.f;
+        float m_regionWidth = -1.f;
 
         // Set to true if this is a column inside other column
         // https://github.com/ocornut/imgui/issues/1028
@@ -51,7 +52,7 @@ namespace ige::creator
     template <size_t N>
     void Columns<N>::_drawImpl()
     {
-        if (m_defaultWidth < 0.f) {
+        if (m_regionWidth != ImGui::GetWindowContentRegionWidth()) {
             int devider = 0;
             float deductor = 0.f;
             for (int i = 0; i < N; ++i) {
@@ -60,8 +61,9 @@ namespace ige::creator
                 else
                     deductor += m_columnWidths[i];
             }
+            m_defaultWidth = devider > 0 ? (ImGui::GetWindowContentRegionWidth() - deductor) / devider : 0.f;
+            m_regionWidth = ImGui::GetWindowContentRegionWidth();
         }
-        m_defaultWidth = devider > 0 ? (ImGui::GetWindowContentRegionWidth() - deductor) / devider : 0.f;
 
         if (m_bIsChild) ImGui::BeginChild(("##" + getIdAsString()).c_str(), ImVec2(0.f, m_childTotalHeight));
         {

@@ -72,6 +72,7 @@
 #include <components/navigation/DynamicNavMesh.h>
 #include <components/navigation/NavObstacle.h>
 #include <components/navigation/OffMeshLink.h>
+#include <components/animation/AnimatorComponent.h>
 
 #include <scene/Scene.h>
 using namespace ige::scene;
@@ -158,6 +159,7 @@ namespace ige::creator
         {
             m_createCompCombo->addChoice((int)Component::Type::Figure, "Figure");
             m_createCompCombo->addChoice((int)Component::Type::EditableFigure, "EditableFigure");
+            m_createCompCombo->addChoice((int)Component::Type::Animator, "Animator");
             m_createCompCombo->addChoice((int)Component::Type::Sprite, "Sprite");
             m_createCompCombo->addChoice((int)Component::Type::Text, "Text");
             m_createCompCombo->addChoice((int)Component::Type::TextBitmap, "TextBitmap");
@@ -235,6 +237,9 @@ namespace ige::creator
                     break;
                 case (int)Component::Type::EditableFigure:
                     m_targetObject->addComponent<EditableFigureComponent>();
+                    break;
+                case (int)Component::Type::Animator:
+                    m_targetObject->addComponent<AnimatorComponent>();
                     break;
                 case (int)Component::Type::Sprite:
                     m_targetObject->addComponent<SpriteComponent>();
@@ -349,8 +354,8 @@ namespace ige::creator
     {
         // Inspect animator editor first
         if (Editor::getCanvas()->getAnimatorEditor()->shouldDrawInspector()) {
-            Panel::_drawImpl();
             Editor::getCanvas()->getAnimatorEditor()->drawInspector();
+            Panel::_drawImpl();
             return;
         }
 

@@ -263,15 +263,39 @@ namespace ige::creator
             }
         }
 
-        if (ImGui::BeginPopupContextWindow())
-        {
-            if (ImGui::MenuItem(("Create Folder" + getIdAsString()).c_str(), nullptr, nullptr, true))
-            {
-                try {
-                    auto path = fs::path(m_cache.get_path()).append("0_NewFolder");
-                    fs::create_directory(path);
+        static char inputName[256] = {};
+        memset(inputName, 0, 256);
+        if (ImGui::BeginPopupContextWindow()) {               
+            if (ImGui::BeginMenu(("New Folder" + getIdAsString()).c_str())) {
+                if (ImGui::InputText(("##NAME_0" + getIdAsString()).c_str(), inputName, 256,
+                    ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll)) {
+                    try {
+                        if (strlen(inputName) > 0) {
+                            auto path = fs::path(m_cache.get_path()).append(inputName);
+                            fs::create_directory(path);
+                        }
+                    } catch (std::exception e) {}
+                    ImGui::CloseCurrentPopup();
                 }
-                catch (std::exception e) {}
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu(("New Script" + getIdAsString()).c_str())) {
+                if (ImGui::InputText(("##NAME_1" + getIdAsString()).c_str(), inputName, 256,
+                    ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll)) {
+                    if (strlen(inputName) > 0)
+                        Editor::getInstance()->createScript(m_cache.get_path().string(), std::string(inputName));
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu(("New Animator" + getIdAsString()).c_str())) {
+                if (ImGui::InputText(("##NAME_2" + getIdAsString()).c_str(), inputName, 256,
+                    ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll)) {
+                    if (strlen(inputName) > 0)
+                        Editor::getInstance()->createAnimator(m_cache.get_path().string(), std::string(inputName));
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::EndMenu();
             }
             ImGui::EndPopup();
         }

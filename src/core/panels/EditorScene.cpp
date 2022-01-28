@@ -100,6 +100,8 @@ namespace ige::creator
             m_3dCamera->SetNearPlane(1.f);
             m_3dCamera->SetFarPlane(10000.f);
 
+            m_currCamera = m_3dCamera;
+
             auto size = getSize();
             if (size.x > 0 && size.y > 0)
             {
@@ -284,6 +286,7 @@ namespace ige::creator
 
     void EditorScene::set2DMode(bool is2D)
     {
+        if (!m_bInitialized) return;
         if (is2D)
         {
             m_currCamera = m_2dCamera;
@@ -432,7 +435,7 @@ namespace ige::creator
 
     void EditorScene::updateTouch()
     {
-        if (!isOpened() || m_gizmo->isUsing() || m_currCamera == nullptr)
+        if (!isOpened() || m_currCamera == nullptr || m_gizmo->isUsing())
             return;
 
         auto touch = Editor::getApp()->getInputHandler()->getTouchDevice();

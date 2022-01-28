@@ -108,6 +108,8 @@ namespace ige::creator
         bool shouldDrawInspector();
         void drawInspector();
 
+        void setFocus(bool focus);
+
     protected:
         virtual void initialize() override;
         virtual void clear();
@@ -171,5 +173,6 @@ namespace ige::creator
         bool m_bInspectDirty = false;
         ed::NodeId m_node = -1;
         ed::LinkId m_link = -1;
+        bool m_bFocus = false;
     };
 }

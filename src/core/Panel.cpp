@@ -94,9 +94,13 @@ namespace ige::creator
             if (ImGui::Begin((m_name).c_str(), m_settings.closable ? &m_bIsOpened : nullptr, windowFlags))
             {
                 m_bIsHovered = ImGui::IsWindowHovered();
-                m_bIsFocused = ImGui::IsWindowFocused();
+                auto focus = ImGui::IsWindowFocused();
+                if (m_bIsFocused != focus) {
+                    m_bIsFocused = focus;
+                    if(m_bIsFocused) getOnFocusEvent().invoke(*this);
+                }
 
-                if (!m_bIsOpened) m_closeEvent.invoke();
+                if (!m_bIsOpened) getOnClosedEvent().invoke();
 
                 auto windowPos = ImGui::GetWindowPos();
                 if (m_position.x != windowPos.x || m_position.y != windowPos.y)
@@ -116,8 +120,6 @@ namespace ige::creator
                 {
                     drawWidgets();
                 }
-
-                
             }
 
             auto scrollX = ImGui::GetScrollX();
