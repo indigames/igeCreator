@@ -30,7 +30,7 @@ FigureMeta::FigureMeta(const std::string& path)
         {"SHADER_NUM_DIR_LAMP", 3},
         {"SHADER_NUM_POINT_LAMP", 7},
         {"SHADER_NUM_SPOT_LAMP", 7},
-        {"EMBEDDED_ANIMATION", true},
+        {"EMBEDDED_ANIMATION", false},
     };
     loadOptions();
 }
@@ -44,8 +44,7 @@ void FigureMeta::draw(std::shared_ptr<Group> group) {
 
 bool FigureMeta::isFolderRule() {
     auto fsPath = fs::path(m_path);
-    auto relPath = fsPath.is_absolute() ? fs::relative(fsPath, fs::current_path()) : fsPath;
-    auto parentPath = relPath.parent_path();
+    auto parentPath = fsPath.parent_path();
 
     auto ext = fsPath.extension().string();
     std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
@@ -62,29 +61,13 @@ bool FigureMeta::isFolderRule() {
 }
 
 bool FigureMeta::isBaseModel() {
+    if(!isFolderRule()) return true;
     auto fsPath = fs::path(m_path);
-    auto relPath = fsPath.is_absolute() ? fs::relative(fsPath, fs::current_path()) : fsPath;
-    auto parentPath = relPath.parent_path();
-
-    auto ext = fsPath.extension().string();
-    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-    bool isFbx = ext.compare(".fbx") == 0;
-
-    // Load model data and binded animation
-    auto parentName = parentPath.filename();
-    auto baseModelPath = parentPath;
-    if (isFbx)
-        baseModelPath.append(parentName.string() + ".fbx");
-    else
-        baseModelPath.append(parentName.string() + ".dae");
-    auto folderRule = fs::exists(baseModelPath);
-    if (!folderRule)
-        return true;
 
     auto filename = fsPath.filename().string();
     std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
 
-    auto basename = baseModelPath.filename().string();
+    auto basename = fsPath.parent_path().filename().string();
     std::transform(basename.begin(), basename.end(), basename.begin(), ::tolower);
 
     return (filename.compare(basename) == 0);
@@ -92,9 +75,9 @@ bool FigureMeta::isBaseModel() {
 
 std::string FigureMeta::baseModelPath()
 {
+    if(!isFolderRule()) return m_path;
     auto fsPath = fs::path(m_path);
-    auto relPath = fsPath.is_absolute() ? fs::relative(fsPath, fs::current_path()) : fsPath;
-    auto parentPath = relPath.parent_path();
+    auto parentPath = fsPath.parent_path();
 
     auto ext = fsPath.extension().string();
     std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
@@ -176,16 +159,18 @@ bool FigureMeta::loadModel() {
     }
 
     auto fsPath = fs::path(m_path);
-    auto relPath = fsPath.is_absolute() ? fs::relative(fsPath, fs::current_path()) : fsPath;
-    auto parentPath = relPath.parent_path();    
+    auto curPath = fs::current_path();
+    auto relPath = fsPath.is_absolute() ? fs::relative(fsPath, curPath) : fsPath;
+    auto modelPath = relPath.string();
+    std::replace(modelPath.begin(), modelPath.end(), '\\', '/');
 
     auto ext = fsPath.extension().string();
     std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
     bool isFbx = ext.compare(".fbx") == 0;
 
     // Load model data and binded animation
-    auto parentName = parentPath.filename();
-    auto baseModelPath = parentPath;
+    auto parentName = fsPath.parent_path().filename();
+    auto baseModelPath = relPath.parent_path();
     if(isFbx)
         baseModelPath.append(parentName.string() + ".fbx");
     else
@@ -204,31 +189,46 @@ bool FigureMeta::loadModel() {
             pyxieFbxLoader fbxLoader;
             pyxieColladaLoader colladaloader;
             auto embeddedAnim = m_options["EMBEDDED_ANIMATION"].get<bool>();
-            auto efig = ResourceCreator::Instance().NewEditableFigure(m_path.c_str(), true);
-            if (isFbx && fbxLoader.LoadModel(relPath.c_str(), efig)
-                || !isFbx && colladaloader.LoadCollada(relPath.c_str(), efig)) {
-                for (const auto& entry : fs::directory_iterator(parentPath)) {
+
+            // Clean-up
+            auto baseFigurePath = fsPath.parent_path().append(fsPath.stem().string() + ".pyxf");
+            safeDelete(baseFigurePath.string());
+
+            auto baseAnimPath = fsPath.parent_path().append(fsPath.stem().string() + ".pyxa");
+            safeDelete(baseAnimPath.string());
+
+            auto efig = ResourceCreator::Instance().NewEditableFigure(modelPath.c_str(), true);
+
+            if (isFbx && fbxLoader.LoadModel(modelPath.c_str(), efig)
+                || !isFbx && colladaloader.LoadCollada(modelPath.c_str(), efig)) {
+                for (const auto& entry : fs::directory_iterator(relPath.parent_path())) {
                     if (entry.is_regular_file()) {
                         auto ext = entry.path().extension().string();
                         std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
                         if (entry.path().filename().compare(baseModelPath.filename()) == 0 || (isFbx && ext.compare(".fbx") != 0) || (!isFbx && ext.compare(".dae") != 0))
                             continue;
-                        auto relPath = entry.path().is_absolute() ? fs::relative(entry.path(), fs::current_path()).string() : entry.path().string();
-                        std::replace(relPath.begin(), relPath.end(), '\\', '/');
+
+                        // Clean-up
+                        auto animPath = entry.path().parent_path().append(entry.path().stem().string() + ".pyxa").string();
+                        safeDelete(animPath);
+
+                        auto figurePath = entry.path().parent_path().append(entry.path().stem().string() + ".pyxf").string();
+                        safeDelete(figurePath);
+
+                        auto entryRelPath = entry.path().is_absolute() ? fs::relative(entry.path(), fs::current_path()).string() : entry.path().string();
+                        std::replace(entryRelPath.begin(), entryRelPath.end(), '\\', '/');
                         if (embeddedAnim) {
                             if (isFbx)
-                                fbxLoader.LoadAnimation(relPath.c_str(), efig);
+                                fbxLoader.LoadAnimation(entryRelPath.c_str(), efig);
                             else
-                                colladaloader.LoadColladaAnimation(relPath.c_str(), efig);
+                                colladaloader.LoadColladaAnimation(entryRelPath.c_str(), efig);
                         }
                         else {
                             pyxieFbxLoader fbxAnimLoader;
                             pyxieColladaLoader colladaAnimLoader;
-                            auto animFig = ResourceCreator::Instance().NewEditableFigure(relPath.c_str(), true);
-                            if (isFbx && fbxLoader.LoadModel(relPath.c_str(), animFig)
-                                || !isFbx && colladaloader.LoadCollada(relPath.c_str(), animFig)) {
-                                auto path = fs::path(relPath);
-                                auto animPath = path.parent_path().append(path.stem().string() + ".pyxa").string();
+                            auto animFig = ResourceCreator::Instance().NewEditableFigure(entryRelPath.c_str(), true);
+                            if (isFbx && fbxLoader.LoadModel(entryRelPath.c_str(), animFig)
+                                || !isFbx && colladaloader.LoadCollada(entryRelPath.c_str(), animFig)) {
                                 std::replace(animPath.begin(), animPath.end(), '\\', '/');
                                 animFig->SaveAnimation(animPath.c_str());
                             }
@@ -243,19 +243,26 @@ bool FigureMeta::loadModel() {
                 efig->MergeSameMaterialMesh();
             }
             replaceTextures(*efig);
-            auto rv = efig->SaveFigure((fsPath.parent_path().append(fsPath.stem().string() + ".pyxf")).c_str());
+            auto rv = efig->SaveFigure(baseFigurePath.string().c_str());
             return rv;
         }
     }
     else {
         pyxieFbxLoader fbxLoader;
         pyxieColladaLoader colladaloader;
-        auto efig = ResourceCreator::Instance().NewEditableFigure(m_path.c_str(), true);
+        auto efig = ResourceCreator::Instance().NewEditableFigure(modelPath.c_str(), true);
         auto embeddedAnim = m_options["EMBEDDED_ANIMATION"].get<bool>();
         bool result = false;
 
-        if (isFbx && fbxLoader.LoadModel(relPath.c_str(), efig)
-            || !isFbx && colladaloader.LoadCollada(relPath.c_str(), efig)) {
+        // Clean
+        auto animPath = fsPath.parent_path().append(fsPath.stem().string() + ".pyxa").string();
+        safeDelete(animPath);
+
+        auto figurePath = fsPath.parent_path().append(fsPath.stem().string() + ".pyxf").string();
+        safeDelete(figurePath);
+
+        if (isFbx && fbxLoader.LoadModel(modelPath.c_str(), efig)
+            || !isFbx && colladaloader.LoadCollada(modelPath.c_str(), efig)) {
             if (m_options["OPTIMIZE_VERTEX"]) {
                 efig->RemoveUnreferencedVertices();
             }
@@ -263,12 +270,12 @@ bool FigureMeta::loadModel() {
                 efig->MergeSameMaterialMesh();
             }
             replaceTextures(*efig);
-            result = efig->SaveFigure((fsPath.parent_path().append(fsPath.stem().string() + ".pyxf")).c_str());
+            result = efig->SaveFigure(figurePath.c_str());
         }
         if (!embeddedAnim && result) {
-            if (isFbx && fbxLoader.LoadAnimation(relPath.c_str(), efig)
-                || !isFbx && colladaloader.LoadColladaAnimation(relPath.c_str(), efig)) {
-                result =  efig->SaveAnimation((fsPath.parent_path().append(fsPath.stem().string() + ".pyxa")).c_str());
+            if (isFbx && fbxLoader.LoadAnimation(modelPath.c_str(), efig)
+                || !isFbx && colladaloader.LoadColladaAnimation(modelPath.c_str(), efig)) {
+                result =  efig->SaveAnimation(animPath.c_str());
             }
         }
         return result;
