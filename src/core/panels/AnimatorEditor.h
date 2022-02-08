@@ -133,7 +133,7 @@ namespace ige::creator
         std::shared_ptr<Node> createNode(const std::string& name, NodeType type = NodeType::Normal, const ImVec2& position = {});
         std::shared_ptr<Node> findNode(const std::shared_ptr<AnimatorState>& state);
 
-        int getNextId() { return m_uniqueId++; }
+        uint64_t getNextId() { return m_uniqueId++; }
 
         std::shared_ptr<Node> findNode(ed::NodeId id);
         void removeNode(ed::NodeId id);
@@ -154,7 +154,7 @@ namespace ige::creator
         std::shared_ptr<AnimatorController> m_controller = nullptr;
         std::shared_ptr<IPlugin> m_pyxaDragDropPlugin = nullptr;
         std::shared_ptr<IPlugin> m_animDragDropPlugin = nullptr;
-        int m_uniqueId = 0;
+        uint64_t m_uniqueId = 0;
         float m_leftPanelWidth = 0.f;
 
         std::vector<std::shared_ptr<Node>> m_nodes;

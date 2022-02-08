@@ -282,7 +282,8 @@ namespace ige::creator
                         if (!transition->destState.expired()) {
                             const auto& dstNode = findNode(transition->destState.lock());
                             if (dstNode) {
-                                auto link = std::make_shared<Link>(getNextId(), node->outPin->id, dstNode->inPin->id);
+                                transition->linkId = getNextId();
+                                auto link = std::make_shared<Link>(transition->linkId, node->outPin->id, dstNode->inPin->id);
                                 link->color = transition->isMute ? ImColor(LINK_MUTE_COLOR) : (transition->isSolo ? ImColor(LINK_SOLO_COLOR) : ImColor(LINK_NORMAL_COLOR));
                                 link->transition = transition;
                                 m_links.push_back(link);
@@ -771,7 +772,8 @@ namespace ige::creator
                             showLabel("+ Create Transition", ImColor(32, 45, 32, 180));
                             if (ed::AcceptNewItem(ImColor(128, 255, 128), 4.0f))
                             {
-                                auto link = std::make_shared<Link>(getNextId(), startPinId, endPinId);
+                                auto linkId = getNextId();
+                                auto link = std::make_shared<Link>(linkId, startPinId, endPinId);
                                 link->color = LINK_NORMAL_COLOR;
                                 m_links.push_back(link);
                                 auto state = startPin->node.lock()->state;
@@ -780,6 +782,7 @@ namespace ige::creator
                                     auto transition = state.lock()->addTransition(dstState.lock());
                                     transition->setName(state.lock()->getName() + "_" + dstState.lock()->getName());
                                     link->transition = transition;
+                                    transition->linkId = linkId;
                                     setDirty();
                                 }
                             }
@@ -937,6 +940,10 @@ namespace ige::creator
                                 auto tran = node->state.lock()->findTransition(dstState);
                                 if (tran) {
                                     tran->isSolo = val;
+                                    auto link = findLink(tran->linkId);
+                                    if (link) {
+                                        link->color = tran->isMute ? ImColor(LINK_MUTE_COLOR) : (tran->isSolo ? ImColor(LINK_SOLO_COLOR) : ImColor(LINK_NORMAL_COLOR));
+                                    }
                                     setDirty();
                                 }
                             }
@@ -950,6 +957,10 @@ namespace ige::creator
                                 auto tran = node->state.lock()->findTransition(dstState);
                                 if (tran) {
                                     tran->isMute = val;
+                                    auto link = findLink(tran->linkId);
+                                    if (link) {
+                                        link->color = tran->isMute ? ImColor(LINK_MUTE_COLOR) : (tran->isSolo ? ImColor(LINK_SOLO_COLOR) : ImColor(LINK_NORMAL_COLOR));
+                                    }
                                     setDirty();
                                 }
                             }
