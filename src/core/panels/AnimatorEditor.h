@@ -147,7 +147,7 @@ namespace ige::creator
         bool hasLink(ed::PinId id1, ed::PinId id2);
         bool canCreateLink(const std::shared_ptr<Pin>& p1, const std::shared_ptr<Pin>& p2);
 
-        void drawPinIcon(bool connected, int alpha);
+        void drawPinIcon(bool connected, ImColor color, int alpha);
 
     protected:
         std::string m_path;

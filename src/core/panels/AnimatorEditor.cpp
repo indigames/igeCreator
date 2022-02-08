@@ -24,6 +24,12 @@
 #include <imgui_node_editor.h>
 namespace ed = ax::NodeEditor;
 
+#define PIN_START_COLOR     {51, 150, 215}
+#define PIN_END_COLOR       {220,  48,  48}
+#define LINK_NORMAL_COLOR   {147, 226, 74}
+#define LINK_MUTE_COLOR     {128, 128, 128}
+#define LINK_SOLO_COLOR     {124,  21, 153}
+
 namespace ige::creator
 {
     static bool ImGui_Splitter(bool split_vertically, float thickness, float* size1, float* size2, float min_size1, float min_size2, float splitter_long_axis_size = -1.0f)
@@ -254,18 +260,6 @@ namespace ige::creator
     {
         clear();
 
-        // States -> nodes
-        // Transitions -> Links
-
-        //1. Add/remove/update nodes
-        // - Drag & Drop
-        // - Right click menu
-
-
-        //2. Add/remove/update links
-        //  drag
-        // info
-
         if (!m_bInitialized) {
             // Init Node Editor
             m_uniqueId = 1;
@@ -289,7 +283,7 @@ namespace ige::creator
                             const auto& dstNode = findNode(transition->destState.lock());
                             if (dstNode) {
                                 auto link = std::make_shared<Link>(getNextId(), node->outPin->id, dstNode->inPin->id);
-                                link->color = ImColor(147, 226, 74);
+                                link->color = transition->isMute ? ImColor(LINK_MUTE_COLOR) : (transition->isSolo ? ImColor(LINK_SOLO_COLOR) : ImColor(LINK_NORMAL_COLOR));
                                 link->transition = transition;
                                 m_links.push_back(link);
                             }
@@ -301,9 +295,11 @@ namespace ige::creator
             m_pyxaDragDropPlugin = std::make_shared<DDTargetPlugin<std::string>>(".pyxa");
             std::dynamic_pointer_cast<DDTargetPlugin<std::string>>(m_pyxaDragDropPlugin)->getOnDataReceivedEvent().addListener([this](const auto& path) {
                 auto fsPath = fs::path(path);
-                if (!m_controller->getStateMachine()->hasState(fsPath.stem().string())) {
-                    m_controller->getStateMachine()->addState(fsPath.stem().string());
-                    createNode(fsPath.stem().string(), NodeType::Normal, ImVec2(0, 0));
+                auto name = fsPath.stem().string();
+                if (!m_controller->getStateMachine()->hasState(name)) {
+                    auto& node = createNode(name, NodeType::Normal, ImGui::GetIO().MousePos);
+                    node->state = m_controller->getStateMachine()->addState(name);
+                    node->state.lock()->setPath(path);
                 }
             });
 
@@ -446,10 +442,9 @@ namespace ige::creator
         return true;
     }
 
-    void AnimatorEditor::drawPinIcon(bool connected, int alpha)
+    void AnimatorEditor::drawPinIcon(bool connected, ImColor color, int alpha)
     {
         const auto size = ImVec2(24.f, 24.f);
-        const auto color = ImColor(147, 226, 74, alpha);
         const auto innerColor = ImColor(32, 32, 32, alpha);
 
         if (ImGui::IsRectVisible(size)) {
@@ -691,7 +686,7 @@ namespace ige::creator
                         auto input = node->inPin;
                         if (input) {
                             builder.Input(input->id);
-                            drawPinIcon(isPinLinked(input->id), (int)(ImGui::GetStyle().Alpha * 255));
+                            drawPinIcon(isPinLinked(input->id), PIN_END_COLOR, (int)(ImGui::GetStyle().Alpha * 255));
                             ImGui::Spring(0);
                             builder.EndInput();
                         }
@@ -711,7 +706,7 @@ namespace ige::creator
                         if (output) {
                             builder.Output(output->id);
                             ImGui::Spring(0);
-                            drawPinIcon(isPinLinked(output->id), (int)(ImGui::GetStyle().Alpha * 255));
+                            drawPinIcon(isPinLinked(output->id), PIN_START_COLOR, (int)(ImGui::GetStyle().Alpha * 255));
                             builder.EndOutput();
                         }
                     }
@@ -777,12 +772,13 @@ namespace ige::creator
                             if (ed::AcceptNewItem(ImColor(128, 255, 128), 4.0f))
                             {
                                 auto link = std::make_shared<Link>(getNextId(), startPinId, endPinId);
-                                link->color = ImColor(147, 226, 74);
+                                link->color = LINK_NORMAL_COLOR;
                                 m_links.push_back(link);
                                 auto state = startPin->node.lock()->state;
                                 auto dstState = endPin->node.lock()->state;
                                 if (!state.expired() && !dstState.expired()) {
                                     auto transition = state.lock()->addTransition(dstState.lock());
+                                    transition->setName(state.lock()->getName() + "_" + dstState.lock()->getName());
                                     link->transition = transition;
                                     setDirty();
                                 }
@@ -921,6 +917,47 @@ namespace ige::creator
                     setInspectorDirty();
                 }
             });
+
+            auto transitionGroup = m_inspectGroup->createWidget<Group>("Transitions");
+            auto columns = transitionGroup->createWidget<Columns<3>>();
+            columns->setColumnWidth(1, 40.f);
+            columns->setColumnWidth(2, 40.f);
+            columns->createWidget<Label>("Name");
+            columns->createWidget<Label>("Solo");
+            columns->createWidget<Label>("Mute");
+            for (const auto& tran : state->getTransitions()) {
+                if (tran && !tran->destState.expired()) {
+                    auto dstStateUUID = tran->destState.lock()->getUUID();
+                    columns->createWidget<Label>(tran->getName());
+                    columns->createWidget<CheckBox>("", tran->isSolo)->getOnDataChangedEvent().addListener([this, dstStateUUID](bool val) {
+                        auto node = findNode(m_node);
+                        if (node != nullptr && !node->state.expired()) {
+                            auto dstState = node->state.lock()->stateMachine.lock()->findState(dstStateUUID);
+                            if (dstState != nullptr) {
+                                auto tran = node->state.lock()->findTransition(dstState);
+                                if (tran) {
+                                    tran->isSolo = val;
+                                    setDirty();
+                                }
+                            }
+                        }
+                    });
+                    columns->createWidget<CheckBox>("", tran->isMute)->getOnDataChangedEvent().addListener([this, dstStateUUID](bool val) {
+                        auto node = findNode(m_node);
+                        if (node != nullptr && !node->state.expired()) {
+                            auto dstState = node->state.lock()->stateMachine.lock()->findState(dstStateUUID);
+                            if (dstState != nullptr) {
+                                auto tran = node->state.lock()->findTransition(dstState);
+                                if (tran) {
+                                    tran->isMute = val;
+                                    setDirty();
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+
             if (state->getAnimator() != nullptr) {
                 auto animClipGroup = m_inspectGroup->createWidget<Group>("AnimationClip");
                 std::array startTimes = { state->getStartTime() };
@@ -1003,7 +1040,7 @@ namespace ige::creator
                 });
             }
 
-            auto conditionGroup = m_inspectGroup->createWidget<Group>("ConditionGroup");
+            auto conditionGroup = m_inspectGroup->createWidget<Group>("Conditions");
             auto columns = conditionGroup->createWidget<Columns<4>>();
             columns->setColumnWidth(3, 32.f);
             for (const auto& cond : transition->conditions) {
