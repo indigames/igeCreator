@@ -19,6 +19,7 @@ using namespace ige::scene;
 #include "core/panels/AssetViewer.h"
 #include "core/panels/AssetBrowser.h"
 #include "core/panels/ProjectSetting.h"
+#include "core/panels/AnimatorEditor.h"
 
 namespace ige::creator
 {
@@ -30,6 +31,8 @@ namespace ige::creator
 
         virtual void update(float dt);
         virtual void draw() override;
+
+        void onPanelFocus(Panel& panel);
 
         template<typename T, typename... Args>
         std::shared_ptr<T> createPanel(const std::string& id, Args&&... args)
@@ -65,6 +68,7 @@ namespace ige::creator
         std::shared_ptr<Console> getConsole() { return getPanelAs<Console>("Console"); }
         std::shared_ptr<AssetBrowser> getAssetBrowser() { return getPanelAs<AssetBrowser>("Assets"); }
         std::shared_ptr<ProjectSetting> getProjectSetting() { return getPanelAs<ProjectSetting>("Settings"); }
+        std::shared_ptr<AnimatorEditor> getAnimatorEditor() { return getPanelAs<AnimatorEditor>("Animator"); }
 
     protected:
         bool m_bDockable = false;

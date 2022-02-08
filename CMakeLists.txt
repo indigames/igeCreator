@@ -160,12 +160,17 @@ file(GLOB_RECURSE SRC_FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/pfd/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/ImGuizmo/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/ImGuizmo/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui-node-editor/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui-node-editor/*.inl"
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui-node-editor/*.cpp"
 )
 
 set (EXCLUDE_DIR
     "/examples"
     "/example"
+    "/external"
     "/bin"
+    "/build"
     "/misc"
     "/docs"
 )
@@ -183,6 +188,7 @@ set(SRC_FILES ${SRC_FILES}
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui/imgui_draw.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui/imgui_tables.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui/imgui_widgets.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui/imgui_stacklayout.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui/backends/imgui_impl_opengl3.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui/backends/imgui_impl_sdl.cpp"
 )
@@ -265,6 +271,7 @@ target_include_directories(${TARGET_NAME} PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/pfd"
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/ImGuizmo"
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui"
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui-node-editor"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/pyxcore"

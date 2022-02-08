@@ -30,6 +30,9 @@ public:
 	virtual json getOption(const std::string& key);
 	virtual void setOption(const std::string& key, json val);
 
+	//! Util to delete file + meta
+	static bool safeDelete(const std::string& path);
+
 protected:
 	//! Path to the asset file
 	std::string m_path;

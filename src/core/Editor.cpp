@@ -51,7 +51,7 @@ namespace ige::creator
 
         PoolManager::destroyInstance();
         SceneManager::destroy();
-        m_app = nullptr;        
+        m_app = nullptr;
 
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplSDL2_Shutdown();
@@ -408,23 +408,29 @@ namespace ige::creator
         if (getCanvas() && (getCanvas()->getGameScene()->isPlaying() || getCanvas()->getGameScene()->isPausing()))
             return false;
         
-        // If this is prefab, save prefab instead
-        if (SceneManager::getInstance()->getCurrentScene()->isPrefab())
-            return savePrefab();
-
-        if (Editor::getCurrentScene()->getPath().empty())
+        if (getCanvas() && getCanvas()->getAnimatorEditor()->isFocused())
         {
-            auto selectedFile = SaveFileDialog("Save Scene", "scenes", { "scene", "*.scene" }).result();
-            if (!selectedFile.empty())
-            {
-                SceneManager::getInstance()->saveScene(selectedFile);
-            }
+            return  getCanvas()->getAnimatorEditor()->save();
         }
         else
         {
-            SceneManager::getInstance()->saveScene();
-        }
+            // If this is prefab, save prefab instead
+            if (SceneManager::getInstance()->getCurrentScene()->isPrefab())
+                return savePrefab();
 
+            if (Editor::getCurrentScene()->getPath().empty())
+            {
+                auto selectedFile = SaveFileDialog("Save Scene", "scenes", { "scene", "*.scene" }).result();
+                if (!selectedFile.empty())
+                {
+                    SceneManager::getInstance()->saveScene(selectedFile);
+                }
+            }
+            else
+            {
+                SceneManager::getInstance()->saveScene();
+            }
+        }
         return true;
     }
 
@@ -574,6 +580,65 @@ namespace ige::creator
             }
         }
         return false;
+    }
+
+    bool Editor::openAnimator(const std::string& path)
+    {
+        if (SceneManager::getInstance()->isPlaying())
+            return false;
+
+        auto fsPath = fs::path(path);
+        if (!fs::exists(fsPath))
+            return false;
+
+        auto ext = fsPath.extension().string();
+        std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+        if (fsPath.extension().string() != ".anim")
+            return false;
+
+        if (getCanvas() && getCanvas()->getAnimatorEditor()) {
+            getCanvas()->getAnimatorEditor()->openAnimator(path);
+            return true;
+        }
+
+        return false;
+    }
+
+    void Editor::createAnimator(const std::string& parent, const std::string& name)
+    {
+        auto fileName = name;
+        if (fileName.empty() || fileName.length() <= 0)
+            fileName = "0_NewAnimator";
+        auto fsPath = fs::path(parent).append(fileName).replace_extension(".anim");
+        auto controller = std::make_shared<AnimatorController>();
+        controller->save(fsPath.string());
+    }
+
+    void Editor::createScript(const std::string& parent, const std::string& name)
+    {
+       static const auto script_template =
+"from igeScene import Script\n\
+\n\
+class %s(Script):\n\
+    def __init__(self, owner):\n\
+        super().__init__(owner)\n\
+\n\
+    def onUpdate(self, dt):\n\
+        pass\n\
+\n";
+       auto fileName = name;
+       if (fileName.empty() || fileName.length() <= 0)
+           fileName = "0_NewScript";
+
+       char script[512] = { 0 };
+       char* className = (char*)fileName.c_str();
+       className[0] = std::toupper(className[0]);
+       sprintf(script, script_template, className);
+
+       auto path = fs::path(parent).append(name).replace_extension(".py");
+       std::ofstream ofs(path);
+       ofs << script;
+       ofs.close();
     }
 
     bool Editor::buildRom()

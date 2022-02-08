@@ -22,6 +22,8 @@
 #include <utils/GraphicsHelper.h>
 #include <SDL.h>
 #include <imgui.h>
+#include <string>
+#include <algorithm>
 
 namespace ige::creator
 {
@@ -62,6 +64,7 @@ namespace ige::creator
 
                     auto hidden = false;
                     auto path = fsPath.string();
+                    std::transform(path.begin(), path.end(), path.begin(), ::tolower);
                     const auto& hiddenItems = GetFileExtensionSuported(E_FileExts::Hidden);
                     for (const auto& item : hiddenItems) {
                         if (path.find(item) != std::string::npos) {
@@ -103,16 +106,27 @@ namespace ige::creator
                         // check figure dirty
                         if (!dirty) {
                             if (IsFormat(E_FileExts::Figure, file_ext)) {
-                                auto figureMeta = std::make_unique<FigureMeta>(path);
-                                if(figureMeta->isAnim()) {
-                                    if (!fs::exists(fsPath.parent_path().append(fsPath.stem().string() + ".pyxa"))) {
-                                        dirty = true;
+                                auto figureMeta = std::make_unique<FigureMeta>(fsPath.string());
+                                if (figureMeta->isFolderRule())
+                                {
+                                    if (figureMeta->isBaseModel()) {
+                                        auto basePath = fs::path(figureMeta->baseModelPath());
+                                        if (!fs::exists(basePath.parent_path().append(basePath.stem().string() + ".pyxf"))) {
+                                            dirty = true;
+                                        }
                                     }
                                 }
-                                else if (figureMeta->isBaseModel()) {
-                                    auto basePath = fs::path(figureMeta->baseModelPath());
-                                    if (!fs::exists(basePath.parent_path().append(basePath.stem().string() + ".pyxf"))) {
-                                        dirty = true;
+                                else {
+                                    if (figureMeta->isAnim()) {
+                                        if (!fs::exists(fsPath.parent_path().append(fsPath.stem().string() + ".pyxa"))) {
+                                            dirty = true;
+                                        }
+                                    }
+                                    else if (figureMeta->isBaseModel()) {
+                                        auto basePath = fs::path(figureMeta->baseModelPath());
+                                        if (!fs::exists(basePath.parent_path().append(basePath.stem().string() + ".pyxf"))) {
+                                            dirty = true;
+                                        }
                                     }
                                 }
                             }
@@ -121,13 +135,13 @@ namespace ige::creator
                         // resave
                         if (dirty) {
                             if (IsFormat(E_FileExts::Figure, file_ext)) {
-                                std::make_unique<FigureMeta>(path)->save();
+                                std::make_unique<FigureMeta>(fsPath.string())->save();
                             }
                             else if (IsFormat(E_FileExts::Sprite, file_ext)) {
-                                std::make_unique<TextureMeta>(path)->save();
+                                std::make_unique<TextureMeta>(fsPath.string())->save();
                             }
                             else {
-                                std::make_unique<AssetMeta>(path)->save();
+                                std::make_unique<AssetMeta>(fsPath.string())->save();
                             }
                         }
                     }

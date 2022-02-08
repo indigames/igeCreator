@@ -143,4 +143,18 @@ bool AssetMeta::save() {
     return false;
 }
 
+bool AssetMeta::safeDelete(const std::string& path)
+{
+    auto fsPath = fs::path(path);
+    if (fs::exists(fsPath)) {
+        try {
+            fs::remove(fsPath);
+            fs::remove(fsPath.append(".meta"));
+            return true;
+        }
+        catch (std::exception e) {}
+    }
+    return false;
+}
+
 NS_IGE_END

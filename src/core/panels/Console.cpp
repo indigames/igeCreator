@@ -168,10 +168,12 @@ namespace ige::creator
         auto msg = std::string(buffer) + "\t" + std::string(message) + "\n";
 
         m_logBuffer += msg;
+        auto bufferSize = m_logBuffer.size();
 
-        if (m_logBuffer.length() > m_maxLogSize)
-            m_logBuffer = m_logBuffer.substr(m_logBuffer.length() - m_maxLogSize, m_maxLogSize);
-        
+        if (bufferSize > m_maxLogSize) {
+            m_logBuffer.erase(0, bufferSize - m_maxLogSize);
+        }
+
         if(m_logTextWidget)
             m_logTextWidget->setText(m_logBuffer);
     }
