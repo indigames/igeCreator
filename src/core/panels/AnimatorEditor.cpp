@@ -268,7 +268,8 @@ namespace ige::creator
             m_editor = ed::CreateEditor(&config);
             ed::SetCurrentEditor(m_editor);
 
-            m_controller = std::make_shared<AnimatorController>(m_path);
+            m_controller = std::make_shared<AnimatorController>();
+            m_controller->setPath(m_path);
 
             if (m_controller->getStateMachine()->getStates().size() > 0) {
                 for (const auto& state : m_controller->getStateMachine()->getStates()) {
@@ -603,6 +604,7 @@ namespace ige::creator
                         m_controller->removeParameter(name);
                         m_controller->setParameter(txt, (int)type, val);
                         setParametersDirty();
+                        setInspectorDirty();
                     });
                     switch (type)
                     {
@@ -1012,10 +1014,23 @@ namespace ige::creator
                     link->transition.lock()->setName(txt);
                 }
             });
-            m_inspectGroup->createWidget<CheckBox>("Loop", transition->isMute)->getOnDataChangedEvent().addListener([this](bool val) {
+            m_inspectGroup->createWidget<CheckBox>("Mute", transition->isMute)->getOnDataChangedEvent().addListener([this](bool val) {
                 auto link = findLink(m_link);
                 if (link != nullptr && !link->transition.expired()) {
                     link->transition.lock()->isMute = val;
+                }
+            });
+            m_inspectGroup->createWidget<CheckBox>("Solo", transition->isSolo)->getOnDataChangedEvent().addListener([this](bool val) {
+                auto link = findLink(m_link);
+                if (link != nullptr && !link->transition.expired()) {
+                    link->transition.lock()->isSolo = val;
+                }
+            });
+            std::array offsets = { transition->offset };
+            m_inspectGroup->createWidget<Drag<float>>("Offset", ImGuiDataType_Float, offsets)->getOnDataChangedEvent().addListener([this](auto val) {
+                auto link = findLink(m_link);
+                if (link != nullptr && !link->transition.expired()) {
+                    link->transition.lock()->offset = val[0];
                 }
             });
             m_inspectGroup->createWidget<CheckBox>("HasExitTime", transition->hasExitTime)->getOnDataChangedEvent().addListener([this](bool val) {
@@ -1033,22 +1048,22 @@ namespace ige::creator
                         link->transition.lock()->exitTime = val[0];
                     }
                 });
-            }
-            m_inspectGroup->createWidget<CheckBox>("FixedDuration", transition->hasFixedDuration)->getOnDataChangedEvent().addListener([this](bool val) {
-                auto link = findLink(m_link);
-                if (link != nullptr && !link->transition.expired()) {
-                    link->transition.lock()->hasFixedDuration = val;
-                    setInspectorDirty();
-                }
-            });
-            if (transition->hasFixedDuration) {
-                std::array durations = { transition->duration };
-                m_inspectGroup->createWidget<Drag<float>>("Duration", ImGuiDataType_Float, durations)->getOnDataChangedEvent().addListener([this](auto val) {
+                m_inspectGroup->createWidget<CheckBox>("FixedDuration", transition->hasFixedDuration)->getOnDataChangedEvent().addListener([this](bool val) {
                     auto link = findLink(m_link);
                     if (link != nullptr && !link->transition.expired()) {
-                        link->transition.lock()->duration = val[0];
+                        link->transition.lock()->hasFixedDuration = val;
+                        setInspectorDirty();
                     }
                 });
+                if (transition->hasFixedDuration) {
+                    std::array durations = { transition->duration };
+                    m_inspectGroup->createWidget<Drag<float>>("Duration", ImGuiDataType_Float, durations)->getOnDataChangedEvent().addListener([this](auto val) {
+                        auto link = findLink(m_link);
+                        if (link != nullptr && !link->transition.expired()) {
+                            link->transition.lock()->duration = val[0];
+                        }
+                    });
+                }
             }
 
             auto conditionGroup = m_inspectGroup->createWidget<Group>("Conditions");
