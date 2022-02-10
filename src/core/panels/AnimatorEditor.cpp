@@ -28,7 +28,6 @@ namespace ed = ax::NodeEditor;
 #define PIN_END_COLOR       {220,  48,  48}
 #define LINK_NORMAL_COLOR   {147, 226, 74}
 #define LINK_MUTE_COLOR     {128, 128, 128}
-#define LINK_SOLO_COLOR     {124,  21, 153}
 
 namespace ige::creator
 {
@@ -285,7 +284,7 @@ namespace ige::creator
                             if (dstNode) {
                                 transition->linkId = getNextId();
                                 auto link = std::make_shared<Link>(transition->linkId, node->outPin->id, dstNode->inPin->id);
-                                link->color = transition->isMute ? ImColor(LINK_MUTE_COLOR) : (transition->isSolo ? ImColor(LINK_SOLO_COLOR) : ImColor(LINK_NORMAL_COLOR));
+                                link->color = transition->isMute ? ImColor(LINK_MUTE_COLOR) : ImColor(LINK_NORMAL_COLOR);
                                 link->transition = transition;
                                 m_links.push_back(link);
                             }
@@ -905,6 +904,7 @@ namespace ige::creator
                 if (node != nullptr && !node->state.expired()) {
                     node->state.lock()->setName(txt);
                     setInspectorDirty();
+                    setDirty();
                 }
             });
             auto animTxt = m_inspectGroup->createWidget<TextField>("AnimClip", state->getPath(), false, true);
@@ -913,6 +913,7 @@ namespace ige::creator
                 if (node != nullptr && !node->state.expired()) {
                     node->state.lock()->setPath(txt);
                     setInspectorDirty();
+                    setDirty();
                 }
             });
             animTxt->addPlugin<DDTargetPlugin<std::string>>(".pyxa")->getOnDataReceivedEvent().addListener([this](const auto& path) {
@@ -920,56 +921,40 @@ namespace ige::creator
                 if (node != nullptr && !node->state.expired()) {
                     node->state.lock()->setPath(path);
                     setInspectorDirty();
+                    setDirty();
                 }
             });
 
-            auto transitionGroup = m_inspectGroup->createWidget<Group>("Transitions");
-            auto columns = transitionGroup->createWidget<Columns<3>>();
-            columns->setColumnWidth(1, 40.f);
-            columns->setColumnWidth(2, 40.f);
-            columns->createWidget<Label>("Name");
-            columns->createWidget<Label>("Solo");
-            columns->createWidget<Label>("Mute");
-            for (const auto& tran : state->getTransitions()) {
-                if (tran && !tran->destState.expired()) {
-                    auto dstStateUUID = tran->destState.lock()->getUUID();
-                    columns->createWidget<Label>(tran->getName());
-                    columns->createWidget<CheckBox>("", tran->isSolo)->getOnDataChangedEvent().addListener([this, dstStateUUID](bool val) {
-                        auto node = findNode(m_node);
-                        if (node != nullptr && !node->state.expired()) {
-                            auto dstState = node->state.lock()->stateMachine.lock()->findState(dstStateUUID);
-                            if (dstState != nullptr) {
-                                auto tran = node->state.lock()->findTransition(dstState);
-                                if (tran) {
-                                    tran->isSolo = val;
-                                    auto link = findLink(tran->linkId);
-                                    if (link) {
-                                        link->color = tran->isMute ? ImColor(LINK_MUTE_COLOR) : (tran->isSolo ? ImColor(LINK_SOLO_COLOR) : ImColor(LINK_NORMAL_COLOR));
+            if (state->getTransitions().size() > 0) {
+                auto transitionGroup = m_inspectGroup->createWidget<Group>("Transitions");
+                auto columns = transitionGroup->createWidget<Columns<2>>();
+                columns->setColumnWidth(1, 40.f);
+                columns->createWidget<Label>("Transition");
+                columns->createWidget<Label>("Mute");
+                for (const auto& tran : state->getTransitions()) {
+                    if (tran && !tran->destState.expired()) {
+                        auto dstStateUUID = tran->destState.lock()->getUUID();
+                        columns->createWidget<Label>(tran->getName());
+                        columns->createWidget<CheckBox>("", tran->isMute)->getOnDataChangedEvent().addListener([this, dstStateUUID](bool val) {
+                            auto node = findNode(m_node);
+                            if (node != nullptr && !node->state.expired()) {
+                                auto dstState = node->state.lock()->stateMachine.lock()->findState(dstStateUUID);
+                                if (dstState != nullptr) {
+                                    auto tran = node->state.lock()->findTransition(dstState);
+                                    if (tran) {
+                                        tran->isMute = val;
+                                        auto link = findLink(tran->linkId);
+                                        if (link) {
+                                            link->color = tran->isMute ? ImColor(LINK_MUTE_COLOR) : ImColor(LINK_NORMAL_COLOR);
+                                        }
+                                        setDirty();
                                     }
-                                    setDirty();
                                 }
                             }
-                        }
-                    });
-                    columns->createWidget<CheckBox>("", tran->isMute)->getOnDataChangedEvent().addListener([this, dstStateUUID](bool val) {
-                        auto node = findNode(m_node);
-                        if (node != nullptr && !node->state.expired()) {
-                            auto dstState = node->state.lock()->stateMachine.lock()->findState(dstStateUUID);
-                            if (dstState != nullptr) {
-                                auto tran = node->state.lock()->findTransition(dstState);
-                                if (tran) {
-                                    tran->isMute = val;
-                                    auto link = findLink(tran->linkId);
-                                    if (link) {
-                                        link->color = tran->isMute ? ImColor(LINK_MUTE_COLOR) : (tran->isSolo ? ImColor(LINK_SOLO_COLOR) : ImColor(LINK_NORMAL_COLOR));
-                                    }
-                                    setDirty();
-                                }
-                            }
-                        }
-                    });
+                        });
+                    }
                 }
-            }
+            }            
 
             if (state->getAnimator() != nullptr) {
                 auto animClipGroup = m_inspectGroup->createWidget<Group>("AnimationClip");
@@ -978,6 +963,7 @@ namespace ige::creator
                     auto node = findNode(m_node);
                     if (node != nullptr && !node->state.expired()) {
                         node->state.lock()->setStartTime(val[0]);
+                        setDirty();
                     }
                 });
                 std::array evalTimes = { state->getEvalTime() };
@@ -985,6 +971,7 @@ namespace ige::creator
                     auto node = findNode(m_node);
                     if (node != nullptr && !node->state.expired()) {
                         node->state.lock()->setEvalTime(val[0]);
+                        setDirty();
                     }
                 });
                 std::array speeds = { state->getSpeed() };
@@ -992,12 +979,14 @@ namespace ige::creator
                     auto node = findNode(m_node);
                     if (node != nullptr && !node->state.expired()) {
                         node->state.lock()->setSpeed(val[0]);
+                        setDirty();
                     }
                 });
                 animClipGroup->createWidget<CheckBox>("Loop", state->isLoop())->getOnDataChangedEvent().addListener([this](bool val) {
                     auto node = findNode(m_node);
                     if (node != nullptr && !node->state.expired()) {
                         node->state.lock()->setLoop(val);
+                        setDirty();
                     }
                 });
             }
@@ -1012,18 +1001,15 @@ namespace ige::creator
                 auto link = findLink(m_link);
                 if (link != nullptr && !link->transition.expired()) {
                     link->transition.lock()->setName(txt);
+                    setDirty();
                 }
             });
             m_inspectGroup->createWidget<CheckBox>("Mute", transition->isMute)->getOnDataChangedEvent().addListener([this](bool val) {
                 auto link = findLink(m_link);
                 if (link != nullptr && !link->transition.expired()) {
                     link->transition.lock()->isMute = val;
-                }
-            });
-            m_inspectGroup->createWidget<CheckBox>("Solo", transition->isSolo)->getOnDataChangedEvent().addListener([this](bool val) {
-                auto link = findLink(m_link);
-                if (link != nullptr && !link->transition.expired()) {
-                    link->transition.lock()->isSolo = val;
+                    link->color = val ? ImColor(LINK_MUTE_COLOR) : ImColor(LINK_NORMAL_COLOR);
+                    setDirty();
                 }
             });
             std::array offsets = { transition->offset };
@@ -1031,6 +1017,7 @@ namespace ige::creator
                 auto link = findLink(m_link);
                 if (link != nullptr && !link->transition.expired()) {
                     link->transition.lock()->offset = val[0];
+                    setDirty();
                 }
             });
             m_inspectGroup->createWidget<CheckBox>("HasExitTime", transition->hasExitTime)->getOnDataChangedEvent().addListener([this](bool val) {
@@ -1038,6 +1025,7 @@ namespace ige::creator
                 if (link != nullptr && !link->transition.expired()) {
                     link->transition.lock()->hasExitTime = val;
                     setInspectorDirty();
+                    setDirty();
                 }
             });
             if (transition->hasExitTime) {
@@ -1046,6 +1034,7 @@ namespace ige::creator
                     auto link = findLink(m_link);
                     if (link != nullptr && !link->transition.expired()) {
                         link->transition.lock()->exitTime = val[0];
+                        setDirty();
                     }
                 });
                 m_inspectGroup->createWidget<CheckBox>("FixedDuration", transition->hasFixedDuration)->getOnDataChangedEvent().addListener([this](bool val) {
@@ -1053,6 +1042,7 @@ namespace ige::creator
                     if (link != nullptr && !link->transition.expired()) {
                         link->transition.lock()->hasFixedDuration = val;
                         setInspectorDirty();
+                        setDirty();
                     }
                 });
                 if (transition->hasFixedDuration) {
@@ -1061,6 +1051,7 @@ namespace ige::creator
                         auto link = findLink(m_link);
                         if (link != nullptr && !link->transition.expired()) {
                             link->transition.lock()->duration = val[0];
+                            setDirty();
                         }
                     });
                 }
@@ -1085,6 +1076,7 @@ namespace ige::creator
                         if (link != nullptr && !link->transition.expired()) {
                             link->transition.lock()->getCondition(condId)->mode = (AnimatorCondition::Mode)val;
                             setInspectorDirty();
+                            setDirty();
                         }
                     });
                     for (auto mode : AnimatorCondition::getValidModes(type)) {
@@ -1104,6 +1096,7 @@ namespace ige::creator
                                 auto link = findLink(m_link);
                                 if (link != nullptr && !link->transition.expired()) {
                                     link->transition.lock()->getCondition(condId)->threshold = val;
+                                    setDirty();
                                 }
                             });
                             selectCombo->setEndOfLine(false);
@@ -1118,6 +1111,7 @@ namespace ige::creator
                                 auto link = findLink(m_link);
                                 if (link != nullptr && !link->transition.expired()) {
                                     link->transition.lock()->getCondition(condId)->threshold = val[0];
+                                    setDirty();
                                 }
                             });
                             break;
@@ -1130,6 +1124,7 @@ namespace ige::creator
                         link->transition.lock()->removeCondition(condId);
                     }
                     setInspectorDirty();
+                    setDirty();
                 });
             }
 
@@ -1210,6 +1205,7 @@ namespace ige::creator
                         link->transition.lock()->addCondition(params[selectedParmeter], AnimatorCondition::Mode(selectedMode), threshold);
                     }
                     setInspectorDirty();
+                    setDirty();
                 });
             }
         }
