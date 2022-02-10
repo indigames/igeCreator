@@ -268,7 +268,8 @@ namespace ige::creator
             m_editor = ed::CreateEditor(&config);
             ed::SetCurrentEditor(m_editor);
 
-            m_controller = std::make_shared<AnimatorController>(m_path);
+            m_controller = std::make_shared<AnimatorController>();
+            m_controller->setPath(m_path);
 
             if (m_controller->getStateMachine()->getStates().size() > 0) {
                 for (const auto& state : m_controller->getStateMachine()->getStates()) {
@@ -603,6 +604,7 @@ namespace ige::creator
                         m_controller->removeParameter(name);
                         m_controller->setParameter(txt, (int)type, val);
                         setParametersDirty();
+                        setInspectorDirty();
                     });
                     switch (type)
                     {
@@ -1012,10 +1014,23 @@ namespace ige::creator
                     link->transition.lock()->setName(txt);
                 }
             });
-            m_inspectGroup->createWidget<CheckBox>("Loop", transition->isMute)->getOnDataChangedEvent().addListener([this](bool val) {
+            m_inspectGroup->createWidget<CheckBox>("Mute", transition->isMute)->getOnDataChangedEvent().addListener([this](bool val) {
                 auto link = findLink(m_link);
                 if (link != nullptr && !link->transition.expired()) {
                     link->transition.lock()->isMute = val;
+                }
+            });
+            m_inspectGroup->createWidget<CheckBox>("Solo", transition->isSolo)->getOnDataChangedEvent().addListener([this](bool val) {
+                auto link = findLink(m_link);
+                if (link != nullptr && !link->transition.expired()) {
+                    link->transition.lock()->isSolo = val;
+                }
+            });
+            std::array offsets = { transition->offset };
+            m_inspectGroup->createWidget<Drag<float>>("Offset", ImGuiDataType_Float, offsets)->getOnDataChangedEvent().addListener([this](auto val) {
+                auto link = findLink(m_link);
+                if (link != nullptr && !link->transition.expired()) {
+                    link->transition.lock()->offset = val[0];
                 }
             });
             m_inspectGroup->createWidget<CheckBox>("HasExitTime", transition->hasExitTime)->getOnDataChangedEvent().addListener([this](bool val) {
@@ -1033,29 +1048,29 @@ namespace ige::creator
                         link->transition.lock()->exitTime = val[0];
                     }
                 });
-            }
-            m_inspectGroup->createWidget<CheckBox>("FixedDuration", transition->hasFixedDuration)->getOnDataChangedEvent().addListener([this](bool val) {
-                auto link = findLink(m_link);
-                if (link != nullptr && !link->transition.expired()) {
-                    link->transition.lock()->hasFixedDuration = val;
-                    setInspectorDirty();
-                }
-            });
-            if (transition->hasFixedDuration) {
-                std::array durations = { transition->duration };
-                m_inspectGroup->createWidget<Drag<float>>("Duration", ImGuiDataType_Float, durations)->getOnDataChangedEvent().addListener([this](auto val) {
+                m_inspectGroup->createWidget<CheckBox>("FixedDuration", transition->hasFixedDuration)->getOnDataChangedEvent().addListener([this](bool val) {
                     auto link = findLink(m_link);
                     if (link != nullptr && !link->transition.expired()) {
-                        link->transition.lock()->duration = val[0];
+                        link->transition.lock()->hasFixedDuration = val;
+                        setInspectorDirty();
                     }
                 });
+                if (transition->hasFixedDuration) {
+                    std::array durations = { transition->duration };
+                    m_inspectGroup->createWidget<Drag<float>>("Duration", ImGuiDataType_Float, durations)->getOnDataChangedEvent().addListener([this](auto val) {
+                        auto link = findLink(m_link);
+                        if (link != nullptr && !link->transition.expired()) {
+                            link->transition.lock()->duration = val[0];
+                        }
+                    });
+                }
             }
 
             auto conditionGroup = m_inspectGroup->createWidget<Group>("Conditions");
             auto columns = conditionGroup->createWidget<Columns<4>>();
             columns->setColumnWidth(3, 32.f);
             for (const auto& cond : transition->conditions) {
-                auto param = cond->parameter;
+                auto condId = cond->id;
                 auto [type, value] = m_controller->getParameter(cond->parameter);
 
                 columns->createWidget<Label>(cond->parameter);
@@ -1065,10 +1080,10 @@ namespace ige::creator
                 }
                 else {
                     auto modeCombo = columns->createWidget<ComboBox>("", (int)cond->mode);
-                    modeCombo->getOnDataChangedEvent().addListener([this, param](auto val) {
+                    modeCombo->getOnDataChangedEvent().addListener([this, condId](auto val) {
                         auto link = findLink(m_link);
                         if (link != nullptr && !link->transition.expired()) {
-                            link->transition.lock()->getCondition(param)->mode = (AnimatorCondition::Mode)val;
+                            link->transition.lock()->getCondition(condId)->mode = (AnimatorCondition::Mode)val;
                             setInspectorDirty();
                         }
                     });
@@ -1085,10 +1100,10 @@ namespace ige::creator
                     {
                         case AnimatorParameterType::Bool: {
                             auto selectCombo = columns->createWidget<ComboBox>("", (int)cond->threshold);
-                            selectCombo->getOnDataChangedEvent().addListener([this, param](auto val) {
+                            selectCombo->getOnDataChangedEvent().addListener([this, condId](auto val) {
                                 auto link = findLink(m_link);
                                 if (link != nullptr && !link->transition.expired()) {
-                                    link->transition.lock()->getCondition(param)->threshold = val;
+                                    link->transition.lock()->getCondition(condId)->threshold = val;
                                 }
                             });
                             selectCombo->setEndOfLine(false);
@@ -1099,20 +1114,20 @@ namespace ige::creator
                         case AnimatorParameterType::Int:
                         case AnimatorParameterType::Float: {
                             std::array vals = { cond->threshold };
-                            columns->createWidget<Drag<float>>("", (type == AnimatorParameterType::Int) ? ImGuiDataType_S32 : ImGuiDataType_Float, vals)->getOnDataChangedEvent().addListener([this, param](auto val) {
+                            columns->createWidget<Drag<float>>("", (type == AnimatorParameterType::Int) ? ImGuiDataType_S32 : ImGuiDataType_Float, vals)->getOnDataChangedEvent().addListener([this, condId](auto val) {
                                 auto link = findLink(m_link);
                                 if (link != nullptr && !link->transition.expired()) {
-                                    link->transition.lock()->getCondition(param)->threshold = val[0];
+                                    link->transition.lock()->getCondition(condId)->threshold = val[0];
                                 }
                             });
                             break;
                         }
                     }
                 }
-                columns->createWidget<Button>("-", ImVec2(ImGui::GetFrameHeight(), ImGui::GetFrameHeight()))->getOnClickEvent().addListener([param, this](const auto& widget) {
+                columns->createWidget<Button>("-", ImVec2(ImGui::GetFrameHeight(), ImGui::GetFrameHeight()))->getOnClickEvent().addListener([condId, this](const auto& widget) {
                     auto link = findLink(m_link);
                     if (link != nullptr && !link->transition.expired()) {
-                        link->transition.lock()->removeCondition(param);
+                        link->transition.lock()->removeCondition(condId);
                     }
                     setInspectorDirty();
                 });
@@ -1120,13 +1135,7 @@ namespace ige::creator
 
             static std::vector<std::string> params; params.clear();
             for (const auto& param : m_controller->getParameters()) {
-                auto used = false;
-                for (const auto& cond : transition->conditions) {
-                    if (cond && cond->parameter.compare(param.first) == 0) {
-                        used = true; break;
-                    }
-                }
-                if(!used) params.push_back(param.first);
+                params.push_back(param.first);
             }
 
             if (params.size() > 0) {
