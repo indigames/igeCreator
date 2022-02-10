@@ -1070,7 +1070,7 @@ namespace ige::creator
             auto columns = conditionGroup->createWidget<Columns<4>>();
             columns->setColumnWidth(3, 32.f);
             for (const auto& cond : transition->conditions) {
-                auto param = cond->parameter;
+                auto condId = cond->id;
                 auto [type, value] = m_controller->getParameter(cond->parameter);
 
                 columns->createWidget<Label>(cond->parameter);
@@ -1080,10 +1080,10 @@ namespace ige::creator
                 }
                 else {
                     auto modeCombo = columns->createWidget<ComboBox>("", (int)cond->mode);
-                    modeCombo->getOnDataChangedEvent().addListener([this, param](auto val) {
+                    modeCombo->getOnDataChangedEvent().addListener([this, condId](auto val) {
                         auto link = findLink(m_link);
                         if (link != nullptr && !link->transition.expired()) {
-                            link->transition.lock()->getCondition(param)->mode = (AnimatorCondition::Mode)val;
+                            link->transition.lock()->getCondition(condId)->mode = (AnimatorCondition::Mode)val;
                             setInspectorDirty();
                         }
                     });
@@ -1100,10 +1100,10 @@ namespace ige::creator
                     {
                         case AnimatorParameterType::Bool: {
                             auto selectCombo = columns->createWidget<ComboBox>("", (int)cond->threshold);
-                            selectCombo->getOnDataChangedEvent().addListener([this, param](auto val) {
+                            selectCombo->getOnDataChangedEvent().addListener([this, condId](auto val) {
                                 auto link = findLink(m_link);
                                 if (link != nullptr && !link->transition.expired()) {
-                                    link->transition.lock()->getCondition(param)->threshold = val;
+                                    link->transition.lock()->getCondition(condId)->threshold = val;
                                 }
                             });
                             selectCombo->setEndOfLine(false);
@@ -1114,20 +1114,20 @@ namespace ige::creator
                         case AnimatorParameterType::Int:
                         case AnimatorParameterType::Float: {
                             std::array vals = { cond->threshold };
-                            columns->createWidget<Drag<float>>("", (type == AnimatorParameterType::Int) ? ImGuiDataType_S32 : ImGuiDataType_Float, vals)->getOnDataChangedEvent().addListener([this, param](auto val) {
+                            columns->createWidget<Drag<float>>("", (type == AnimatorParameterType::Int) ? ImGuiDataType_S32 : ImGuiDataType_Float, vals)->getOnDataChangedEvent().addListener([this, condId](auto val) {
                                 auto link = findLink(m_link);
                                 if (link != nullptr && !link->transition.expired()) {
-                                    link->transition.lock()->getCondition(param)->threshold = val[0];
+                                    link->transition.lock()->getCondition(condId)->threshold = val[0];
                                 }
                             });
                             break;
                         }
                     }
                 }
-                columns->createWidget<Button>("-", ImVec2(ImGui::GetFrameHeight(), ImGui::GetFrameHeight()))->getOnClickEvent().addListener([param, this](const auto& widget) {
+                columns->createWidget<Button>("-", ImVec2(ImGui::GetFrameHeight(), ImGui::GetFrameHeight()))->getOnClickEvent().addListener([condId, this](const auto& widget) {
                     auto link = findLink(m_link);
                     if (link != nullptr && !link->transition.expired()) {
-                        link->transition.lock()->removeCondition(param);
+                        link->transition.lock()->removeCondition(condId);
                     }
                     setInspectorDirty();
                 });
@@ -1135,13 +1135,7 @@ namespace ige::creator
 
             static std::vector<std::string> params; params.clear();
             for (const auto& param : m_controller->getParameters()) {
-                auto used = false;
-                for (const auto& cond : transition->conditions) {
-                    if (cond && cond->parameter.compare(param.first) == 0) {
-                        used = true; break;
-                    }
-                }
-                if(!used) params.push_back(param.first);
+                params.push_back(param.first);
             }
 
             if (params.size() > 0) {
