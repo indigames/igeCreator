@@ -62,7 +62,7 @@ bool FigureMeta::isBaseModel() {
     if(!isFolderRule()) return true;
     auto fsPath = fs::path(m_path);
 
-    auto filename = fsPath.filename().string();
+    auto filename = fsPath.filename().stem().string();
     std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
 
     auto basename = fsPath.parent_path().filename().string();
