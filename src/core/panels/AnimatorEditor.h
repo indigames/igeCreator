@@ -117,6 +117,7 @@ namespace ige::creator
 
         void showLeftPanel();
 
+        void setLayer(int layer);
         void drawLayers();
         void setLayersDirty(bool dirty = true) { m_bLayerDirty = dirty; }
 
@@ -164,6 +165,7 @@ namespace ige::creator
 
         std::shared_ptr<Group> m_layerGroup = nullptr;
         bool m_bLayerDirty = false;
+        int m_currLayer = -1;
 
         std::shared_ptr<Group> m_parameterGroup = nullptr;
         bool m_bParameterDirty = false;

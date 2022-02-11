@@ -215,14 +215,24 @@ namespace ige::creator
                 }
             }
             m_path.clear();
+            m_currLayer = -1;
             clear();
         });
     }
 
     AnimatorEditor::~AnimatorEditor()
     {
+        if (m_layerGroup)
+            m_layerGroup->removeAllWidgets();
+        m_layerGroup = nullptr;
+
+        if (m_parameterGroup)
+            m_parameterGroup->removeAllWidgets();
+        m_parameterGroup = nullptr;
+
+        m_controller = nullptr;
         m_path.clear();
-        clear(); 
+        clear();
     }
 
     void AnimatorEditor::clear()
@@ -233,14 +243,6 @@ namespace ige::creator
         m_nodes.clear();
         m_links.clear();
 
-        if(m_layerGroup)
-            m_layerGroup->removeAllWidgets();
-        m_layerGroup = nullptr;
-
-        if(m_parameterGroup)
-            m_parameterGroup->removeAllWidgets();
-        m_parameterGroup = nullptr;
-
         ed::SetCurrentEditor(nullptr);
         ed::DestroyEditor(m_editor);
         m_editor = nullptr;
@@ -250,13 +252,16 @@ namespace ige::creator
         }
         catch (std::exception e) {}
 
-        m_controller = nullptr;
-        m_bDirty = false;
+        setDirty(false);
+
         m_bInitialized = false;
     }
 
     void AnimatorEditor::initialize()
     {
+        if (m_path.empty() || m_currLayer < 0)
+            return Panel::initialize();
+
         clear();
 
         if (!m_bInitialized) {
@@ -267,11 +272,10 @@ namespace ige::creator
             m_editor = ed::CreateEditor(&config);
             ed::SetCurrentEditor(m_editor);
 
-            m_controller = std::make_shared<AnimatorController>();
-            m_controller->setPath(m_path);
+            auto stateMachine = m_controller->getStateMachine(m_currLayer);
 
-            if (m_controller->getStateMachine()->getStates().size() > 0) {
-                for (const auto& state : m_controller->getStateMachine()->getStates()) {
+            if (stateMachine->getStates().size() > 0) {
+                for (const auto& state : stateMachine->getStates()) {
                     auto& node = createNode(state->getName(), (NodeType)state->getType(), ImVec2(state->getPosition().X(), state->getPosition().Y()));
                     node->state = state;
                 }
@@ -297,9 +301,9 @@ namespace ige::creator
             std::dynamic_pointer_cast<DDTargetPlugin<std::string>>(m_pyxaDragDropPlugin)->getOnDataReceivedEvent().addListener([this](const auto& path) {
                 auto fsPath = fs::path(path);
                 auto name = fsPath.stem().string();
-                if (!m_controller->getStateMachine()->hasState(name)) {
+                if (!m_controller->getStateMachine(m_currLayer)->hasState(name)) {
                     auto& node = createNode(name, NodeType::Normal, ImGui::GetIO().MousePos);
-                    node->state = m_controller->getStateMachine()->addState(name);
+                    node->state = m_controller->getStateMachine(m_currLayer)->addState(name);
                     node->state.lock()->setPath(path);
                 }
             });
@@ -324,17 +328,14 @@ namespace ige::creator
     void AnimatorEditor::setDirty(bool dirty) {
         if (m_bDirty != dirty) {
             m_bDirty = dirty;
-
-            TaskManager::getInstance()->addTask([this]() {
-                if (isDirty()) {
-                    setName(getName() + "*");
-                }
-                else {
-                    auto name = getName();
-                    name.erase(name.end() - 1);
-                    setName(name);
-                }
-            });
+            if (isDirty()) {
+                setName(getName() + "*");
+            }
+            else {
+                auto name = getName();
+                name.erase(name.end() - 1);
+                setName(name);
+            }
         }
     }
 
@@ -342,7 +343,9 @@ namespace ige::creator
     {
         if (m_path.compare(path) != 0) {
             m_path = path;
-            initialize();
+            m_controller = std::make_shared<AnimatorController>();
+            m_controller->setPath(m_path);
+            setLayer(0);
             open();
         }
     }
@@ -525,7 +528,7 @@ namespace ige::creator
                     if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
                     {
                         // Draw layers
-                        // drawLayers();
+                        drawLayers();
                          
                         // Draw parameters
                         drawParameters();
@@ -534,17 +537,24 @@ namespace ige::creator
                     }
                 }
                 ImGui::EndChild();
-                //ImGui::BeginHorizontal("###Bottom#Buttons", ImVec2(m_leftPanelWidth, 0));
-                //ImGui::Spring();
-                //if (ImGui::Button("Expand")) { ed::NavigateToContent(); }
-                //ImGui::Spring(0, 12.f);
-                //if (ImGui::Button("Save")) { if(isDirty()) save(); }
-                //ImGui::EndHorizontal();
+                ImGui::BeginHorizontal("###Bottom#Buttons", ImVec2(m_leftPanelWidth, 0));
+                ImGui::Spring();
+                if (ImGui::Button("Expand")) { ed::NavigateToContent(); }
+                ImGui::Spring(0, 12.f);
+                if (ImGui::Button("Save")) { if(isDirty()) save(); }
+                ImGui::EndHorizontal();
             }
             ImGui::EndGroup();
         }        
         ImGui::EndChild();
         ImGui::SameLine(0.0f, 12.0f);
+    }
+
+    void AnimatorEditor::setLayer(int layer) {
+        if (m_controller != nullptr && m_currLayer != layer) {
+            m_currLayer = layer;
+            initialize();
+        }
     }
 
     void AnimatorEditor::drawLayers()
@@ -555,7 +565,38 @@ namespace ige::creator
                 if (m_layerGroup == nullptr)
                     m_layerGroup = std::make_shared<Group>("Layers", false);
                 m_layerGroup->removeAllWidgets();
-                m_layerGroup->createWidget<Label>("");
+                
+                if (m_controller != nullptr) {
+
+                    auto headerCols = m_layerGroup->createWidget<Columns<2>>();
+                    headerCols->setColumnWidth(1, 32.f);
+                    headerCols->createWidget<Label>("Layers");
+                    headerCols->createWidget<Button>("+", ImVec2(ImGui::GetTextLineHeight(), ImGui::GetTextLineHeight()))->getOnClickEvent().addListener([this](const auto& widget) {
+                        if (m_controller->addLayer()) {
+                            setLayer(m_controller->getStateMachines().size() - 1);
+                            setLayersDirty();
+                            setDirty();
+                        }
+                    });
+                    m_layerGroup->createWidget<Separator>();
+
+                    auto columns = m_layerGroup->createWidget<Columns<2>>();
+                    columns->setColumnWidth(1, 32.f);
+                    for (int i = 0; i < m_controller->getStateMachines().size(); ++i) {
+                        m_controller->getStateMachines()[i]->setLayer(i);
+                        auto layer = i;
+                        auto label = layer == 0 ? "Layer A" : layer == 1 ? "Layer B" : "Layer C";
+                        columns->createWidget<TreeNode>(label, m_currLayer == i, true)->getOnClickEvent().addListener([this, layer](const auto& widget) {
+                            setLayer(layer);
+                        });
+                        columns->createWidget<Button>("-", ImVec2(ImGui::GetTextLineHeight(), ImGui::GetTextLineHeight()))->getOnClickEvent().addListener([this, layer](const auto& widget) {
+                            m_controller->removeLayer(layer);
+                            if (m_currLayer == layer) setLayer(layer - 1);
+                            setLayersDirty();
+                        });
+                    }
+                }
+
                 m_bLayerDirty = false;
             }
             if (m_layerGroup)
@@ -653,7 +694,7 @@ namespace ige::creator
 
     void AnimatorEditor::drawWidgets()
     {
-        if (!m_bInitialized)
+        if (!m_bInitialized || !m_editor)
             return;
 
         static float leftPaneWidth = 400.0f;
@@ -826,7 +867,7 @@ namespace ige::creator
                         auto node = findNode(nodeId);
                         if (node != nullptr) {
                             if (!node->state.expired()) {
-                                m_controller->getStateMachine()->removeState(node->state.lock());
+                                m_controller->getStateMachine(m_currLayer)->removeState(node->state.lock());
                                 setDirty();
                             }
                         }
