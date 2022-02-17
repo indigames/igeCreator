@@ -40,6 +40,7 @@ void SpriteEditorComponent::drawSpriteComponent()
     auto txtPath = m_spriteCompGroup->createWidget<TextField>("Path", comp->getProperty<std::string>("path", ""), false, true);
     txtPath->setEndOfLine(false);
     txtPath->getOnDataChangedEvent().addListener([this](const auto& txt) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("path", txt);
         getComponent<CompoundComponent>()->setDirty();
     });
@@ -47,6 +48,7 @@ void SpriteEditorComponent::drawSpriteComponent()
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
     {
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
+            storeUndo();
             getComponent<CompoundComponent>()->setProperty("path", GetRelativePath(path));
             getComponent<CompoundComponent>()->setDirty();
             setDirty();
@@ -56,6 +58,7 @@ void SpriteEditorComponent::drawSpriteComponent()
     m_spriteCompGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](const auto& widget) {
         auto files = OpenFileDialog("Import Assets", "", { "Texture (*.pyxi)", "*.pyxi" }).result();
         if (files.size() > 0) {
+            storeUndo();
             getComponent<CompoundComponent>()->setProperty("path", GetRelativePath(files[0]));
             getComponent<CompoundComponent>()->setDirty();
             setDirty();
@@ -64,7 +67,11 @@ void SpriteEditorComponent::drawSpriteComponent()
 
     auto size = comp->getProperty<Vec2>("size", { NAN, NAN });
     std::array sizeArr = { size.X(), size.Y() };
-    m_spriteCompGroup->createWidget<Drag<float, 2>>("Size", ImGuiDataType_Float, sizeArr, 1.f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto s1 = m_spriteCompGroup->createWidget<Drag<float, 2>>("Size", ImGuiDataType_Float, sizeArr, 1.f, 0.f, 16384.f); 
+    s1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    s1->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("size", { val[0], val[1] });
     });
 
@@ -74,6 +81,7 @@ void SpriteEditorComponent::drawSpriteComponent()
     });
 
     m_spriteCompGroup->createWidget<CheckBox>("Billboard", comp->getProperty<bool>("billboard", false))->getOnDataChangedEvent().addListener([this](bool val) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("billboard", val);
     });
 
@@ -81,6 +89,7 @@ void SpriteEditorComponent::drawSpriteComponent()
     auto spriteTypeCombo = m_spriteCompGroup->createWidget<ComboBox>("Sprite Type", spriteType);
     spriteTypeCombo->getOnDataChangedEvent().addListener([this](auto val) {
         if (val != -1) {
+            storeUndo();
             getComponent<CompoundComponent>()->setProperty("spritetype", val);
             setDirty();
         }
@@ -94,28 +103,44 @@ void SpriteEditorComponent::drawSpriteComponent()
     if (spriteType == (int)SpriteType::Sliced) {
         auto border = comp->getProperty<Vec4>("border", { NAN, NAN, NAN, NAN });
         std::array borderLeft = { border[0] };
-        m_spriteCompGroup->createWidget<Drag<float, 1>>("Border Left", ImGuiDataType_Float, borderLeft, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        auto b1 = m_spriteCompGroup->createWidget<Drag<float, 1>>("Border Left", ImGuiDataType_Float, borderLeft, 1.0f, 0.f, 16384.f);
+        b1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            });
+        b1->getOnDataChangedEvent().addListener([this](auto val) {
             auto comp = getComponent<CompoundComponent>();
             auto border = comp->getProperty<Vec4>("border", { NAN, NAN, NAN, NAN });
             border[0] = val[0];
             comp->setProperty("border", border);
         });
         std::array borderRight = { border[1]};
-        m_spriteCompGroup->createWidget<Drag<float, 1>>("Border Right", ImGuiDataType_Float, borderRight, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        auto b2 = m_spriteCompGroup->createWidget<Drag<float, 1>>("Border Right", ImGuiDataType_Float, borderRight, 1.0f, 0.f, 16384.f);
+        b2->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            });
+        b2->getOnDataChangedEvent().addListener([this](auto val) {
             auto comp = getComponent<CompoundComponent>();
             auto border = comp->getProperty<Vec4>("border", { NAN, NAN, NAN, NAN });
             border[1] = val[0];
             comp->setProperty("border", border);
         });
         std::array borderTop = { border[2]};
-        m_spriteCompGroup->createWidget<Drag<float, 1>>("Border Top", ImGuiDataType_Float, borderTop, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        auto b3 = m_spriteCompGroup->createWidget<Drag<float, 1>>("Border Top", ImGuiDataType_Float, borderTop, 1.0f, 0.f, 16384.f);
+        b3->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            });
+        b3->getOnDataChangedEvent().addListener([this](auto val) {
             auto comp = getComponent<CompoundComponent>();
             auto border = comp->getProperty<Vec4>("border", { NAN, NAN, NAN, NAN });
             border[2] = val[0];
             comp->setProperty("border", border);
         });
         std::array borderBottom = { border[3]};
-        m_spriteCompGroup->createWidget<Drag<float, 1>>("Border Bottom", ImGuiDataType_Float, borderBottom, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        auto b4 = m_spriteCompGroup->createWidget<Drag<float, 1>>("Border Bottom", ImGuiDataType_Float, borderBottom, 1.0f, 0.f, 16384.f);
+        b4->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            });
+        b4->getOnDataChangedEvent().addListener([this](auto val) {
             auto comp = getComponent<CompoundComponent>();
             auto border = comp->getProperty<Vec4>("border", { NAN, NAN, NAN, NAN });
             border[3] = val[0];
@@ -128,6 +153,7 @@ void SpriteEditorComponent::drawSpriteComponent()
         auto fillMethodCombo = m_spriteCompGroup->createWidget<ComboBox>("Fill Method", (int)fillMethod);
         fillMethodCombo->getOnDataChangedEvent().addListener([this](auto val) {
             if (val != -1) {
+                storeUndo();
                 getComponent<CompoundComponent>()->setProperty("fillmethod", val);
                 setDirty();
             }
@@ -147,6 +173,7 @@ void SpriteEditorComponent::drawSpriteComponent()
             auto fillOriginCombo = m_spriteCompGroup->createWidget<ComboBox>("Fill Origin", fillOrigin);
             fillOriginCombo->getOnDataChangedEvent().addListener([this](auto val) {
                 if (val != -1) {
+                    storeUndo();
                     getComponent<CompoundComponent>()->setProperty("fillorigin", val);
                     setDirty();
                 }
@@ -176,12 +203,17 @@ void SpriteEditorComponent::drawSpriteComponent()
             fillOriginCombo->setEndOfLine(true);
 
             std::array fillAmount = { comp->getProperty<float>("fillamount", NAN) };
-            m_spriteCompGroup->createWidget<Drag<float, 1>>("Fill Amount", ImGuiDataType_Float, fillAmount, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto f1 = m_spriteCompGroup->createWidget<Drag<float, 1>>("Fill Amount", ImGuiDataType_Float, fillAmount, 0.01f, 0.f, 1.f);
+            f1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+                storeUndo();
+                });
+            f1->getOnDataChangedEvent().addListener([this](auto val) {
                 getComponent<CompoundComponent>()->setProperty("fillamount", val[0]);
                 });
 
             if (fillMethod == (int)FillMethod::Radial90 || fillMethod == (int)FillMethod::Radial180 || fillMethod == (int)FillMethod::Radial360) {
                 m_spriteCompGroup->createWidget<CheckBox>("Clockwise", comp->getProperty<bool>("clockwise", false))->getOnDataChangedEvent().addListener([this](bool val) {
+                    storeUndo();
                     getComponent<CompoundComponent>()->setProperty("clockwise", val);
                     });
             }
@@ -203,6 +235,7 @@ void SpriteEditorComponent::drawSpriteComponent()
             auto compCombo = m_spriteCompGroup->createWidget<ComboBox>("WrapMode", wrapMode);
             compCombo->getOnDataChangedEvent().addListener([this](auto val) {
                 if (val != -1) {
+                    storeUndo();
                     getComponent<CompoundComponent>()->setProperty("wrapmode", val);
                     setDirty();
                 }
@@ -218,6 +251,7 @@ void SpriteEditorComponent::drawSpriteComponent()
     }
 
     m_spriteCompGroup->createWidget<CheckBox>("Alpha Blend", comp->getProperty<bool>("aBlend", false))->getOnDataChangedEvent().addListener([this](bool val) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("aBlend", val);
         setDirty();
     });
@@ -228,6 +262,7 @@ void SpriteEditorComponent::drawSpriteComponent()
         auto alphaCombo = m_spriteCompGroup->createWidget<ComboBox>("Blend OP", blendOp);
         alphaCombo->getOnDataChangedEvent().addListener([this](auto val) {
             if (val != -1) {
+                storeUndo();
                 getComponent<CompoundComponent>()->setProperty("aBlendOp", val);
                 setDirty();
             }

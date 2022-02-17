@@ -1,6 +1,7 @@
 #include "core/gizmo/Gizmo.h"
 #include "core/Editor.h"
 #include "core/scene/TargetObject.h"
+#include "core/CommandManager.h"
 
 #include <components/TransformComponent.h>
 #include <components/gui/RectTransform.h>
@@ -10,7 +11,7 @@
 namespace ige::creator
 {
     Gizmo::Gizmo()
-        : Widget(true, false), m_camera(nullptr)
+        : Widget(true, false), m_camera(nullptr), m_bIsDragging(false)
     {
         m_operation = gizmo::OPERATION::TRANSLATE;
         m_mode = gizmo::MODE::LOCAL;
@@ -117,8 +118,14 @@ namespace ige::creator
         m_bIsUsing = gizmo::IsUsing() || isManipulating;
         if (!gizmo::IsUsing())
         {
+            m_bIsDragging = false;
             ImGui::PopStyleColor();
             return;
+        }
+
+        if (!m_bIsDragging) {
+            m_bIsDragging = true;
+            storeUndo();
         }
 
         if(m_operation == gizmo::TRANSLATE)
@@ -274,6 +281,21 @@ namespace ige::creator
     const Quat& Gizmo::getRotation() const
     {
         return m_rotation;
+    }
+
+    void Gizmo::storeUndo() {
+        for (auto& target : m_targets) {
+            if (!target.expired()) {
+                auto comp = target.lock()->getTransform();
+                if (comp == nullptr) return;
+                json j = json{};
+                auto jComponents = json::array();
+                jComponents.push_back({ comp->getName(), json(*comp.get()) });
+                j["comps"] = jComponents;
+                CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::EDIT_COMPONENT, Editor::getInstance()->getTarget(), j);
+                break;
+            }
+        }
     }
 
     //! Translate

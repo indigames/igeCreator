@@ -35,13 +35,21 @@ void CanvasEditorComponent::drawCanvas()
         return;
 
     std::array size = { canvas->getDesignCanvasSize().X(), canvas->getDesignCanvasSize().Y() };
-    m_canvasGroup->createWidget<Drag<float, 2>>("DesignSize", ImGuiDataType_Float, size)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto d1 = m_canvasGroup->createWidget<Drag<float, 2>>("DesignSize", ImGuiDataType_Float, size);
+    d1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    d1->getOnDataChangedEvent().addListener([this](auto val) {
         auto canvas = std::dynamic_pointer_cast<Canvas>(getComponent<CompoundComponent>()->getComponents()[0]);
         canvas->setDesignCanvasSize({ val[0], val[1] });
     });
 
     std::array targetSize = { canvas->getTargetCanvasSize().X(), canvas->getTargetCanvasSize().Y() };
-    m_canvasGroup->createWidget<Drag<float, 2>>("TargetSize", ImGuiDataType_Float, targetSize)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto t1 = m_canvasGroup->createWidget<Drag<float, 2>>("TargetSize", ImGuiDataType_Float, targetSize);
+    t1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    t1->getOnDataChangedEvent().addListener([this](auto val) {
         auto canvas = std::dynamic_pointer_cast<Canvas>(getComponent<CompoundComponent>()->getComponents()[0]);
         canvas->setTargetCanvasSize({ val[0], val[1] });
     });
@@ -50,6 +58,7 @@ void CanvasEditorComponent::drawCanvas()
     auto modeCombo = m_canvasGroup->createWidget<ComboBox>("Screen Match Mode", (int)mode);
     modeCombo->getOnDataChangedEvent().addListener([this](auto val) {
         if (val != -1) {
+            storeUndo();
             auto canvas = std::dynamic_pointer_cast<Canvas>(getComponent<CompoundComponent>()->getComponents()[0]);
             canvas->setScreenMatchMode((int)val);
             setDirty();
@@ -62,7 +71,11 @@ void CanvasEditorComponent::drawCanvas()
     modeCombo->setEndOfLine(true);
     if (mode == ScreenMatchMode::MatchWidthOrHeight) {
         std::array matchValue = { canvas->getMatchWidthOrHeight() };
-        m_canvasGroup->createWidget<Drag<float>>("Size", ImGuiDataType_Float, matchValue, 0.001f, 0, 1)->getOnDataChangedEvent().addListener([this](auto& val) {
+        auto s1 = m_canvasGroup->createWidget<Drag<float>>("Size", ImGuiDataType_Float, matchValue, 0.001f, 0, 1);
+        s1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            });
+        s1->getOnDataChangedEvent().addListener([this](auto& val) {
             auto canvas = std::dynamic_pointer_cast<Canvas>(getComponent<CompoundComponent>()->getComponents()[0]);
             canvas->setMatchWidthOrHeight(val[0]);
             });

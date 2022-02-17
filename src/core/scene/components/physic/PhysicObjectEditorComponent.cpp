@@ -38,15 +38,18 @@ void PhysicObjectEditorComponent::drawPhysicObject() {
 
     auto columns = m_physicGroup->createWidget<Columns<2>>();
     columns->createWidget<CheckBox>("Continous", comp->getProperty<bool>("ccd", false))->getOnDataChangedEvent().addListener([this](bool val) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("ccd", val);
     });
 
     columns->createWidget<CheckBox>("Kinematic", comp->getProperty<bool>("isKinematic", false))->getOnDataChangedEvent().addListener([this](bool val) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("isKinematic", val);
         setDirty();
     });
 
     columns->createWidget<CheckBox>("Trigger", comp->getProperty<bool>("isTrigger", false))->getOnDataChangedEvent().addListener([this](bool val) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("isTrigger", val);
     });
 
@@ -54,6 +57,7 @@ void PhysicObjectEditorComponent::drawPhysicObject() {
     auto activeStateCombo = m_physicGroup->createWidget<ComboBox>("activeState", activeState);
     activeStateCombo->getOnDataChangedEvent().addListener([this](auto val) {
         if (val != -1) {
+            storeUndo();
             getComponent<CompoundComponent>()->setProperty("activeState", val);
             setDirty();
         }
@@ -68,73 +72,125 @@ void PhysicObjectEditorComponent::drawPhysicObject() {
 
     auto group = comp->getProperty<float>("group", NAN);
     std::array filterGroup = { group };
-    m_physicGroup->createWidget<Drag<float>>("Collision Group", ImGuiDataType_S32, filterGroup, 1, -1)->getOnDataChangedEvent().addListener([this](auto& val) {
+    auto c1 = m_physicGroup->createWidget<Drag<float>>("Collision Group", ImGuiDataType_S32, filterGroup, 1, -1);
+    c1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    c1->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("group", (int)val[0]);
     });
 
     auto mask = comp->getProperty<float>("mask", NAN);
     std::array filterMask = { mask };
-    m_physicGroup->createWidget<Drag<float>>("Collision Mask", ImGuiDataType_S32, filterMask, 1, -1)->getOnDataChangedEvent().addListener([this](auto& val) {
+    auto c2 = m_physicGroup->createWidget<Drag<float>>("Collision Mask", ImGuiDataType_S32, filterMask, 1, -1);
+    c2->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    c2->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("mask", (int)val[0]);
     });
 
     std::array mass = { comp->getProperty<float>("mass", NAN) };
-    m_physicGroup->createWidget<Drag<float>>("Mass", ImGuiDataType_Float, mass, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
+    auto m1 = m_physicGroup->createWidget<Drag<float>>("Mass", ImGuiDataType_Float, mass, 0.001f, 0.0f);
+    m1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    m1->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("mass", val[0]);
     });
 
     std::array friction = { comp->getProperty<float>("friction", NAN) };
-    m_physicGroup->createWidget<Drag<float>>("Friction", ImGuiDataType_Float, friction, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
+    auto f1 = m_physicGroup->createWidget<Drag<float>>("Friction", ImGuiDataType_Float, friction, 0.001f, 0.0f);
+    f1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    f1->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("friction", val[0]);
     });
 
     std::array restitution = { comp->getProperty<float>("restitution", NAN) };
-    m_physicGroup->createWidget<Drag<float>>("Restitution", ImGuiDataType_Float, restitution, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
+    auto r1 = m_physicGroup->createWidget<Drag<float>>("Restitution", ImGuiDataType_Float, restitution, 0.001f, 0.0f);
+    r1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    r1->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("restitution", val[0]);
     });
 
     auto lVel = comp->getProperty<Vec3>("linearVelocity", { NAN, NAN, NAN });
     std::array linearVelocity = { lVel.X(), lVel.Y(), lVel.Z() };
-    m_physicGroup->createWidget<Drag<float, 3>>("Linear Velocity", ImGuiDataType_Float, linearVelocity)->getOnDataChangedEvent().addListener([this](auto& val) {
+    auto l1 = m_physicGroup->createWidget<Drag<float, 3>>("Linear Velocity", ImGuiDataType_Float, linearVelocity);
+    l1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    l1->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("linearVelocity", { val[0], val[1], val[2] });
     });
 
     auto aVel = comp->getProperty<Vec3>("angularVelocity", { NAN, NAN, NAN });
     std::array angularVelocity = { aVel.X(), aVel.Y(), aVel.Z() };
-    m_physicGroup->createWidget<Drag<float, 3>>("Angular Velocity", ImGuiDataType_Float, angularVelocity)->getOnDataChangedEvent().addListener([this](auto& val) {
+    auto a1 = m_physicGroup->createWidget<Drag<float, 3>>("Angular Velocity", ImGuiDataType_Float, angularVelocity);
+    a1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    a1->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("angularVelocity", { val[0], val[1], val[2] });
     });
 
     auto lFactor = comp->getProperty<Vec3>("linearFactor", { NAN, NAN, NAN });
     std::array linearFactor = { lFactor.X(), lFactor.Y(), lFactor.Z() };
-    m_physicGroup->createWidget<Drag<float, 3>>("Linear Factor", ImGuiDataType_Float, linearFactor)->getOnDataChangedEvent().addListener([this](auto& val) {
+    auto l2 = m_physicGroup->createWidget<Drag<float, 3>>("Linear Factor", ImGuiDataType_Float, linearFactor);
+    l2->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    l2->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("linearFactor", { val[0], val[1], val[2] });
     });
 
     auto aFactor = comp->getProperty<Vec3>("angularFactor", { NAN, NAN, NAN });
     std::array angularFactor = { aFactor.X(), aFactor.Y(), aFactor.Z() };
-    m_physicGroup->createWidget<Drag<float, 3>>("Angular Factor", ImGuiDataType_Float, angularFactor)->getOnDataChangedEvent().addListener([this](auto& val) {
+    auto a2 = m_physicGroup->createWidget<Drag<float, 3>>("Angular Factor", ImGuiDataType_Float, angularFactor);
+    a2->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    a2->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("angularFactor", { val[0], val[1], val[2] });
     });
 
     std::array margin = { comp->getProperty<float>("margin", NAN) };
-    m_physicGroup->createWidget<Drag<float>>("Margin", ImGuiDataType_Float, margin, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
+    auto m2 = m_physicGroup->createWidget<Drag<float>>("Margin", ImGuiDataType_Float, margin, 0.001f, 0.0f);
+    m2->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    m2->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("margin", val[0]);
     });
 
     std::array linearSleepThreshold = { comp->getProperty<float>("linearSleepingThreshold", NAN) };
-    m_physicGroup->createWidget<Drag<float>>("Linear Sleeping Threshold", ImGuiDataType_Float, linearSleepThreshold, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
+    auto l3 = m_physicGroup->createWidget<Drag<float>>("Linear Sleeping Threshold", ImGuiDataType_Float, linearSleepThreshold, 0.001f, 0.0f);
+    l3->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    l3->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("linearSleepingThreshold", val[0]);
         });
 
     std::array angularSleepThreshold = { comp->getProperty<float>("angularSleepingThreshold", NAN) };
-    m_physicGroup->createWidget<Drag<float>>("Angular Sleeping Threshold", ImGuiDataType_Float, angularSleepThreshold, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
+    auto a3 = m_physicGroup->createWidget<Drag<float>>("Angular Sleeping Threshold", ImGuiDataType_Float, angularSleepThreshold, 0.001f, 0.0f);
+    a3->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    a3->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("angularSleepingThreshold", val[0]);
         });
 
     auto aPosOffset = comp->getProperty<Vec3>("offset", { NAN, NAN, NAN });
     std::array posOffset = { aPosOffset.X(), aPosOffset.Y(), aPosOffset.Z() };
-    m_physicGroup->createWidget<Drag<float, 3>>("Pos Offset", ImGuiDataType_Float, posOffset)->getOnDataChangedEvent().addListener([this](auto& val) {
+    auto p1 = m_physicGroup->createWidget<Drag<float, 3>>("Pos Offset", ImGuiDataType_Float, posOffset);
+    p1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    p1->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("offset", { val[0], val[1], val[2] });
     });
 }
@@ -223,10 +279,12 @@ void PhysicObjectEditorComponent::drawPhysicConstraint(std::shared_ptr<PhysicCon
     // Other body
     auto otherBodyTxt = constraintGroup->createWidget<TextField>("Other body", constraint->getOther() ? constraint->getOther()->getOwner()->getName() : std::string());
     otherBodyTxt->getOnDataChangedEvent().addListener([&](const auto& val) {
+        storeUndo();
         auto obj = Editor::getCurrentScene()->findObjectByName(val);
         constraint->setOtherUUID(obj->getUUID());
     });
     otherBodyTxt->addPlugin<DDTargetPlugin<int>>(EDragDropID::OBJECT)->getOnDataReceivedEvent().addListener([constraint, this](auto val) {
+        storeUndo();
         auto obj = Editor::getCurrentScene()->findObjectById(val);
         constraint->setOtherUUID(obj->getUUID());
         setDirty();
@@ -244,6 +302,7 @@ void PhysicObjectEditorComponent::drawFixedConstraint(std::shared_ptr<PhysicCons
 {
     auto constraintGroup = m_constraintGroup->createWidget<Group>("FixedConstraint", true, true);
     constraintGroup->getOnClosedEvent().addListener([constraint, this]() {
+        storeUndo();
         std::dynamic_pointer_cast<PhysicObject>(getComponent<CompoundComponent>()->getComponents()[0])->removeConstraint(constraint);
         setDirty();
     });
@@ -257,6 +316,7 @@ void PhysicObjectEditorComponent::drawHingeConstraint(std::shared_ptr<PhysicCons
 {
     auto constraintGroup = m_constraintGroup->createWidget<Group>("HingeConstraint", true, true);
     constraintGroup->getOnClosedEvent().addListener([constraint, this]() {
+        storeUndo();
         std::dynamic_pointer_cast<PhysicObject>(getComponent<CompoundComponent>()->getComponents()[0])->removeConstraint(constraint);
         setDirty();
     });
@@ -273,31 +333,51 @@ void PhysicObjectEditorComponent::drawHingeConstraint(std::shared_ptr<PhysicCons
 
     // Anchor
     std::array anchor = { hingeConstraint->getAnchor().x(), hingeConstraint->getAnchor().y(), hingeConstraint->getAnchor().z() };
-    constraintGroup->createWidget<Drag<float, 3>>("Anchor", ImGuiDataType_Float, anchor)->getOnDataChangedEvent().addListener([hingeConstraint](const auto& val) {
+    auto a1 = constraintGroup->createWidget<Drag<float, 3>>("Anchor", ImGuiDataType_Float, anchor);
+    a1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    a1->getOnDataChangedEvent().addListener([hingeConstraint](const auto& val) {
         hingeConstraint->setAnchor({ val[0], val[1], val[2] });
     });
 
     // Axis1
     std::array axis1 = { hingeConstraint->getAxis1().x(), hingeConstraint->getAxis1().y(), hingeConstraint->getAxis1().z() };
-    constraintGroup->createWidget<Drag<float, 3>>("Axis1", ImGuiDataType_Float, axis1)->getOnDataChangedEvent().addListener([hingeConstraint](const auto& val) {
+    auto a2 = constraintGroup->createWidget<Drag<float, 3>>("Axis1", ImGuiDataType_Float, axis1);
+    a2->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    a2->getOnDataChangedEvent().addListener([hingeConstraint](const auto& val) {
         hingeConstraint->setAxis1({ val[0], val[1], val[2] });
     });
 
     // Axis 2
     std::array axis2 = { hingeConstraint->getAxis2().x(), hingeConstraint->getAxis2().y(), hingeConstraint->getAxis2().z() };
-    constraintGroup->createWidget<Drag<float, 3>>("Axis2", ImGuiDataType_Float, axis2)->getOnDataChangedEvent().addListener([hingeConstraint](const auto& val) {
+    auto a3 = constraintGroup->createWidget<Drag<float, 3>>("Axis2", ImGuiDataType_Float, axis2);
+    a3->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    a3->getOnDataChangedEvent().addListener([hingeConstraint](const auto& val) {
         hingeConstraint->setAxis2({ val[0], val[1], val[2] });
     });
 
     // Lower limit
     std::array lowerLimit = { hingeConstraint->getLowerLimit() };
-    constraintGroup->createWidget<Drag<float>>("Lower Limit", ImGuiDataType_Float, lowerLimit, 0.001f, -SIMD_PI, SIMD_PI)->getOnDataChangedEvent().addListener([hingeConstraint](const auto& val) {
+    auto l1 = constraintGroup->createWidget<Drag<float>>("Lower Limit", ImGuiDataType_Float, lowerLimit, 0.001f, -SIMD_PI, SIMD_PI);
+    l1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    l1->getOnDataChangedEvent().addListener([hingeConstraint](const auto& val) {
         hingeConstraint->setLowerLimit(val[0]);
     });
 
     // Upper limit
     std::array upperLimit = { hingeConstraint->getUpperLimit() };
-    constraintGroup->createWidget<Drag<float>>("Upper Limit", ImGuiDataType_Float, upperLimit, 0.001f, -SIMD_PI, SIMD_PI)->getOnDataChangedEvent().addListener([hingeConstraint](const auto& val) {
+    auto u1 = constraintGroup->createWidget<Drag<float>>("Upper Limit", ImGuiDataType_Float, upperLimit, 0.001f, -SIMD_PI, SIMD_PI);
+    u1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    u1->getOnDataChangedEvent().addListener([hingeConstraint](const auto& val) {
         hingeConstraint->setUpperLimit(val[0]);
     });
 }
@@ -322,13 +402,21 @@ void PhysicObjectEditorComponent::drawSliderConstraint(std::shared_ptr<PhysicCon
 
     // Lower limit
     std::array lowerLimit = { sliderConstraint->getLowerLimit().x(), sliderConstraint->getLowerLimit().y(), sliderConstraint->getLowerLimit().z() };
-    constraintGroup->createWidget<Drag<float, 3>>("Lower Limit", ImGuiDataType_Float, lowerLimit, 0.001f)->getOnDataChangedEvent().addListener([sliderConstraint](const auto& val) {
+    auto l1 = constraintGroup->createWidget<Drag<float, 3>>("Lower Limit", ImGuiDataType_Float, lowerLimit, 0.001f);
+    l1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    l1->getOnDataChangedEvent().addListener([sliderConstraint](const auto& val) {
         sliderConstraint->setLowerLimit({ val[0], val[1], val[2] });
     });
 
     // Upper limit
     std::array upperLimit = { sliderConstraint->getUpperLimit().x(), sliderConstraint->getUpperLimit().y(), sliderConstraint->getUpperLimit().z() };
-    constraintGroup->createWidget<Drag<float, 3>>("Upper Limit", ImGuiDataType_Float, upperLimit, 0.001f)->getOnDataChangedEvent().addListener([sliderConstraint](const auto& val) {
+    auto u1 = constraintGroup->createWidget<Drag<float, 3>>("Upper Limit", ImGuiDataType_Float, upperLimit, 0.001f);
+    u1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    u1->getOnDataChangedEvent().addListener([sliderConstraint](const auto& val) {
         sliderConstraint->setUpperLimit({ val[0], val[1], val[2] });
     });
 }
@@ -353,31 +441,51 @@ void PhysicObjectEditorComponent::drawSpringConstraint(std::shared_ptr<PhysicCon
 
     // Enable
     std::array enable = { springConstraint->getEnable().x(), springConstraint->getEnable().y(), springConstraint->getEnable().z() };
-    constraintGroup->createWidget<Drag<float, 3>>("Enable", ImGuiDataType_Float, enable, 1.f, 0.f, 1.f)->getOnDataChangedEvent().addListener([springConstraint](const auto& val) {
+    auto e1 = constraintGroup->createWidget<Drag<float, 3>>("Enable", ImGuiDataType_Float, enable, 1.f, 0.f, 1.f);
+    e1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    e1->getOnDataChangedEvent().addListener([springConstraint](const auto& val) {
         springConstraint->setEnable({ val[0], val[1], val[2] });
     });
 
     // Stiffness
     std::array stiffness = { springConstraint->getStiffness().x(), springConstraint->getStiffness().y(), springConstraint->getStiffness().z() };
-    constraintGroup->createWidget<Drag<float, 3>>("Stiffness", ImGuiDataType_Float, stiffness, 0.001f, 0.f)->getOnDataChangedEvent().addListener([springConstraint](const auto& val) {
+    auto s1 = constraintGroup->createWidget<Drag<float, 3>>("Stiffness", ImGuiDataType_Float, stiffness, 0.001f, 0.f);
+    s1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    s1->getOnDataChangedEvent().addListener([springConstraint](const auto& val) {
         springConstraint->setStiffness({ val[0], val[1], val[2] });
     });
 
     // Damping
     std::array damping = { springConstraint->getDamping().x(), springConstraint->getDamping().y(), springConstraint->getDamping().z() };
-    constraintGroup->createWidget<Drag<float, 3>>("Damping", ImGuiDataType_Float, damping, 0.001f, 0.f)->getOnDataChangedEvent().addListener([springConstraint](const auto& val) {
+    auto d1 = constraintGroup->createWidget<Drag<float, 3>>("Damping", ImGuiDataType_Float, damping, 0.001f, 0.f);
+    d1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    d1->getOnDataChangedEvent().addListener([springConstraint](const auto& val) {
         springConstraint->setDamping({ val[0], val[1], val[2] });
     });
 
     // Lower limit
     std::array lowerLimit = { springConstraint->getLowerLimit().x(), springConstraint->getLowerLimit().y(), springConstraint->getLowerLimit().z() };
-    constraintGroup->createWidget<Drag<float, 3>>("Lower Limit", ImGuiDataType_Float, lowerLimit, 0.001f, -SIMD_PI, SIMD_PI)->getOnDataChangedEvent().addListener([springConstraint](const auto& val) {
+    auto l1 = constraintGroup->createWidget<Drag<float, 3>>("Lower Limit", ImGuiDataType_Float, lowerLimit, 0.001f, -SIMD_PI, SIMD_PI);
+    l1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    l1->getOnDataChangedEvent().addListener([springConstraint](const auto& val) {
         springConstraint->setLowerLimit({ val[0], val[1], val[2] });
     });
 
     // Upper limit
     std::array upperLimit = { springConstraint->getUpperLimit().x(), springConstraint->getUpperLimit().y(), springConstraint->getUpperLimit().z() };
-    constraintGroup->createWidget<Drag<float, 3>>("Upper Limit", ImGuiDataType_Float, upperLimit, 0.001f, -SIMD_PI, SIMD_PI)->getOnDataChangedEvent().addListener([springConstraint](const auto& val) {
+    auto u1 = constraintGroup->createWidget<Drag<float, 3>>("Upper Limit", ImGuiDataType_Float, upperLimit, 0.001f, -SIMD_PI, SIMD_PI);
+    u1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    u1->getOnDataChangedEvent().addListener([springConstraint](const auto& val) {
         springConstraint->setUpperLimit({ val[0], val[1], val[2] });
     });
 }
@@ -403,69 +511,113 @@ void PhysicObjectEditorComponent::drawDof6SpringConstraint(std::shared_ptr<Physi
     {
         // Lower limit
         std::array lowerLimit = { dof6Constraint->getLinearLowerLimit().x(), dof6Constraint->getLinearLowerLimit().y(), dof6Constraint->getLinearLowerLimit().z() };
-        linearGroup->createWidget<Drag<float, 3>>("Lower Limit", ImGuiDataType_Float, lowerLimit, 0.001f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+        auto l1 = linearGroup->createWidget<Drag<float, 3>>("Lower Limit", ImGuiDataType_Float, lowerLimit, 0.001f);
+        l1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            });
+        l1->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
             dof6Constraint->setLinearLowerLimit({ val[0], val[1], val[2] });
         });
 
         // Upper limit
         std::array upperLimit = { dof6Constraint->getLinearUpperLimit().x(), dof6Constraint->getLinearUpperLimit().y(), dof6Constraint->getLinearUpperLimit().z() };
-        linearGroup->createWidget<Drag<float, 3>>("Upper Limit", ImGuiDataType_Float, upperLimit, 0.001f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+        auto l2 = linearGroup->createWidget<Drag<float, 3>>("Upper Limit", ImGuiDataType_Float, upperLimit, 0.001f);
+        l2->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            });
+        l2->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
             dof6Constraint->setLinearUpperLimit({ val[0], val[1], val[2] });
             });
 
         // Velocity target
         std::array targetVelocity = { dof6Constraint->getLinearTargetVelocity().x(), dof6Constraint->getLinearTargetVelocity().y(), dof6Constraint->getLinearTargetVelocity().z() };
-        linearGroup->createWidget<Drag<float, 3>>("Target Velocity", ImGuiDataType_Float, targetVelocity, 0.001f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+        auto l3 = linearGroup->createWidget<Drag<float, 3>>("Target Velocity", ImGuiDataType_Float, targetVelocity, 0.001f);
+        l3->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            });
+        l3->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
             dof6Constraint->setLinearTargetVelocity({ val[0], val[1], val[2] });
         });
 
         // Bounce
         std::array bounce = { dof6Constraint->getLinearBounce().x(), dof6Constraint->getLinearBounce().y(), dof6Constraint->getLinearBounce().z() };
-        linearGroup->createWidget<Drag<float, 3>>("Bounce", ImGuiDataType_Float, bounce, 1.f, 0.f, 1.f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+        auto l4 = linearGroup->createWidget<Drag<float, 3>>("Bounce", ImGuiDataType_Float, bounce, 1.f, 0.f, 1.f);
+        l4->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            });
+        l4->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
             dof6Constraint->setLinearBounce({ val[0], val[1], val[2] });
         });
 
         linearGroup->createWidget<Separator>();
         // Spring
         std::array spring = { dof6Constraint->getLinearSpringEnabled().x(), dof6Constraint->getLinearSpringEnabled().y(), dof6Constraint->getLinearSpringEnabled().z() };
-        linearGroup->createWidget<Drag<float, 3>>("Enable Spring", ImGuiDataType_Float, spring, 1.f, 0.f, 1.f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+        auto l5 = linearGroup->createWidget<Drag<float, 3>>("Enable Spring", ImGuiDataType_Float, spring, 1.f, 0.f, 1.f);
+        l5->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            }); 
+        l5->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
             dof6Constraint->setLinearSpringEnabled({ val[0], val[1], val[2] });
         });
 
         // Stiffness
         std::array stiffness = { dof6Constraint->getLinearStiffness().x(), dof6Constraint->getLinearStiffness().y(), dof6Constraint->getLinearStiffness().z() };
-        linearGroup->createWidget<Drag<float, 3>>("Stiffness", ImGuiDataType_Float, stiffness, 0.001f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+        auto l6 = linearGroup->createWidget<Drag<float, 3>>("Stiffness", ImGuiDataType_Float, stiffness, 0.001f);
+        l6->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            }); 
+        l6->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
             dof6Constraint->setLinearStiffness({ val[0], val[1], val[2] });
         });
 
         // Damping
         std::array damping = { dof6Constraint->getLinearDamping().x(), dof6Constraint->getLinearDamping().y(), dof6Constraint->getLinearDamping().z() };
-        linearGroup->createWidget<Drag<float, 3>>("Damping", ImGuiDataType_Float, damping, 0.001f, 0.f, 1.f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+        auto l7 = linearGroup->createWidget<Drag<float, 3>>("Damping", ImGuiDataType_Float, damping, 0.001f, 0.f, 1.f);
+        l7->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            });
+        l7->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
             dof6Constraint->setLinearDamping({ val[0], val[1], val[2] });
         });
 
         linearGroup->createWidget<Separator>();
         // Motor
         std::array motor = { dof6Constraint->getLinearMotorEnabled().x(), dof6Constraint->getLinearMotorEnabled().y(), dof6Constraint->getLinearMotorEnabled().z() };
-        linearGroup->createWidget<Drag<float, 3>>("Enable Motor", ImGuiDataType_Float, motor, 1.f, 0.f, 1.f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+        auto l8 = linearGroup->createWidget<Drag<float, 3>>("Enable Motor", ImGuiDataType_Float, motor, 1.f, 0.f, 1.f);
+        l8->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            }); 
+        l8->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
             dof6Constraint->setLinearMotorEnabled({ val[0], val[1], val[2] });
         });
 
         // Max motor force
         std::array motorMaxForce = { dof6Constraint->getLinearMaxMotorForce().x(), dof6Constraint->getLinearMaxMotorForce().y(), dof6Constraint->getLinearMaxMotorForce().z() };
-        linearGroup->createWidget<Drag<float, 3>>("Max Motor Force", ImGuiDataType_Float, motorMaxForce, 0.001f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+        auto l9 = linearGroup->createWidget<Drag<float, 3>>("Max Motor Force", ImGuiDataType_Float, motorMaxForce, 0.001f);
+        l9->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            }); 
+        l9->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
             dof6Constraint->setLinearMaxMotorForce({ val[0], val[1], val[2] });
         });
 
         // Servo
         std::array servo = { dof6Constraint->getLinearServoEnabled().x(), dof6Constraint->getLinearServoEnabled().y(), dof6Constraint->getLinearServoEnabled().z() };
-        linearGroup->createWidget<Drag<float, 3>>("Enable Servo", ImGuiDataType_Float, servo, 1.f, 0.f, 1.f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+        auto l10 = linearGroup->createWidget<Drag<float, 3>>("Enable Servo", ImGuiDataType_Float, servo, 1.f, 0.f, 1.f);
+        l10->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            }); 
+        l10->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
             dof6Constraint->setLinearServoEnabled({ val[0], val[1], val[2] });
         });
 
         // Servo target
         std::array servoTarget = { dof6Constraint->getLinearServoTarget().x(), dof6Constraint->getLinearServoTarget().y(), dof6Constraint->getLinearServoTarget().z() };
-        linearGroup->createWidget<Drag<float, 3>>("Servo Target", ImGuiDataType_Float, servoTarget, 0.001f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+        auto l11 = linearGroup->createWidget<Drag<float, 3>>("Servo Target", ImGuiDataType_Float, servoTarget, 0.001f);
+        l11->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            }); 
+        l11->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
             dof6Constraint->setLinearServoTarget({ val[0], val[1], val[2] });
         });
     }
@@ -476,69 +628,113 @@ void PhysicObjectEditorComponent::drawDof6SpringConstraint(std::shared_ptr<Physi
     {
         // Lower limit
         std::array lowerLimit = { dof6Constraint->getAngularLowerLimit().x(), dof6Constraint->getAngularLowerLimit().y(), dof6Constraint->getAngularLowerLimit().z() };
-        angularGroup->createWidget<Drag<float, 3>>("Lower Limit", ImGuiDataType_Float, lowerLimit, 0.001f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+        auto l1 = angularGroup->createWidget<Drag<float, 3>>("Lower Limit", ImGuiDataType_Float, lowerLimit, 0.001f);
+        l1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            }); 
+        l1->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
             dof6Constraint->setAngularLowerLimit({ val[0], val[1], val[2] });
         });
 
         // Upper limit
         std::array upperLimit = { dof6Constraint->getAngularUpperLimit().x(), dof6Constraint->getAngularUpperLimit().y(), dof6Constraint->getAngularUpperLimit().z() };
-        angularGroup->createWidget<Drag<float, 3>>("Upper Limit", ImGuiDataType_Float, upperLimit, 0.001f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+        auto l2 = angularGroup->createWidget<Drag<float, 3>>("Upper Limit", ImGuiDataType_Float, upperLimit, 0.001f);
+        l2->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            }); 
+        l2->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
             dof6Constraint->setAngularUpperLimit({ val[0], val[1], val[2] });
         });
 
         // Velocity target
         std::array targetVelocity = { dof6Constraint->getAngularTargetVelocity().x(), dof6Constraint->getAngularTargetVelocity().y(), dof6Constraint->getAngularTargetVelocity().z() };
-        angularGroup->createWidget<Drag<float, 3>>("Target Velocity", ImGuiDataType_Float, targetVelocity, 0.001f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+        auto l3 = angularGroup->createWidget<Drag<float, 3>>("Target Velocity", ImGuiDataType_Float, targetVelocity, 0.001f);
+        l3->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            }); 
+        l3->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
             dof6Constraint->setAngularTargetVelocity({ val[0], val[1], val[2] });
         });
 
         // Bounce
         std::array bounce = { dof6Constraint->getAngularBounce().x(), dof6Constraint->getAngularBounce().y(), dof6Constraint->getAngularBounce().z() };
-        angularGroup->createWidget<Drag<float, 3>>("Bounce", ImGuiDataType_Float, bounce, 1.f, 0.f, 1.f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+        auto l4 = angularGroup->createWidget<Drag<float, 3>>("Bounce", ImGuiDataType_Float, bounce, 1.f, 0.f, 1.f);
+        l4->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            });
+        l4->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
             dof6Constraint->setAngularBounce({ val[0], val[1], val[2] });
         });
 
         angularGroup->createWidget<Separator>();
         // Spring
         std::array spring = { dof6Constraint->getAngularSpringEnabled().x(), dof6Constraint->getAngularSpringEnabled().y(), dof6Constraint->getAngularSpringEnabled().z() };
-        angularGroup->createWidget<Drag<float, 3>>("Enable Spring", ImGuiDataType_Float, spring, 1.f, 0.f, 1.f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+        auto l5 = angularGroup->createWidget<Drag<float, 3>>("Enable Spring", ImGuiDataType_Float, spring, 1.f, 0.f, 1.f);
+        l5->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            });
+        l5->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
             dof6Constraint->setAngularSpringEnabled({ val[0], val[1], val[2] });
         });
 
         // Stiffness
         std::array stiffness = { dof6Constraint->getAngularStiffness().x(), dof6Constraint->getAngularStiffness().y(), dof6Constraint->getAngularStiffness().z() };
-        angularGroup->createWidget<Drag<float, 3>>("Stiffness", ImGuiDataType_Float, stiffness, 0.001f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+        auto l6 = angularGroup->createWidget<Drag<float, 3>>("Stiffness", ImGuiDataType_Float, stiffness, 0.001f);
+        l6->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            });
+        l6->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
             dof6Constraint->setAngularStiffness({ val[0], val[1], val[2] });
         });
 
         // Damping
         std::array damping = { dof6Constraint->getAngularDamping().x(), dof6Constraint->getAngularDamping().y(), dof6Constraint->getAngularDamping().z() };
-        angularGroup->createWidget<Drag<float, 3>>("Damping", ImGuiDataType_Float, damping, 0.001f, 0.f, 1.f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+        auto l7 = angularGroup->createWidget<Drag<float, 3>>("Damping", ImGuiDataType_Float, damping, 0.001f, 0.f, 1.f);
+        l7->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            });
+        l7->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
             dof6Constraint->setAngularDamping({ val[0], val[1], val[2] });
             });
 
         angularGroup->createWidget<Separator>();
         // Motor
         std::array motor = { dof6Constraint->getAngularMotorEnabled().x(), dof6Constraint->getAngularMotorEnabled().y(), dof6Constraint->getAngularMotorEnabled().z() };
-        angularGroup->createWidget<Drag<float, 3>>("Enable Motor", ImGuiDataType_Float, motor, 1.f, 0.f, 1.f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+        auto l8 = angularGroup->createWidget<Drag<float, 3>>("Enable Motor", ImGuiDataType_Float, motor, 1.f, 0.f, 1.f);
+        l8->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            });
+        l8->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
             dof6Constraint->setAngularMotorEnabled({ val[0], val[1], val[2] });
         });
 
         // Max motor force
         std::array motorMaxForce = { dof6Constraint->getAngularMaxMotorForce().x(), dof6Constraint->getAngularMaxMotorForce().y(), dof6Constraint->getAngularMaxMotorForce().z() };
-        angularGroup->createWidget<Drag<float, 3>>("Max Motor Force", ImGuiDataType_Float, motorMaxForce, 0.001f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+        auto l9 = angularGroup->createWidget<Drag<float, 3>>("Max Motor Force", ImGuiDataType_Float, motorMaxForce, 0.001f);
+        l9->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            });
+        l9->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
             dof6Constraint->setAngularMaxMotorForce({ val[0], val[1], val[2] });
         });
 
         // Servo
         std::array servo = { dof6Constraint->getAngularServoEnabled().x(), dof6Constraint->getAngularServoEnabled().y(), dof6Constraint->getAngularServoEnabled().z() };
-        angularGroup->createWidget<Drag<float, 3>>("Enable Servo", ImGuiDataType_Float, servo, 1.f, 0.f, 1.f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+        auto l10 = angularGroup->createWidget<Drag<float, 3>>("Enable Servo", ImGuiDataType_Float, servo, 1.f, 0.f, 1.f);
+        l10->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            });
+        l10->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
             dof6Constraint->setAngularServoEnabled({ val[0], val[1], val[2] });
         });
 
         // Servo target
         std::array servoTarget = { dof6Constraint->getAngularServoTarget().x(), dof6Constraint->getAngularServoTarget().y(), dof6Constraint->getAngularServoTarget().z() };
-        angularGroup->createWidget<Drag<float, 3>>("Servo Target", ImGuiDataType_Float, servoTarget, 0.001f)->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
+        auto l11 = angularGroup->createWidget<Drag<float, 3>>("Servo Target", ImGuiDataType_Float, servoTarget, 0.001f);
+        l11->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            });
+        l11->getOnDataChangedEvent().addListener([dof6Constraint](const auto& val) {
             dof6Constraint->setAngularServoTarget({ val[0], val[1], val[2] });
         });
     }

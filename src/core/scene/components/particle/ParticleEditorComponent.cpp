@@ -37,52 +37,80 @@ void ParticleEditorComponent::drawParticle() {
 
     auto column = m_particleGroup->createWidget<Columns<2>>();
     column->createWidget<CheckBox>("Loop", comp->getProperty<bool>("loop", false))->getOnDataChangedEvent().addListener([this](bool val) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("loop", val);
     });
     column->createWidget<CheckBox>("AutoDraw", comp->getProperty<bool>("autoDraw", false))->getOnDataChangedEvent().addListener([this](bool val) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("autoDraw", val);
     });
 
     std::array mask = { comp->getProperty<float>("mask", NAN) };
-    m_particleGroup->createWidget<Drag<float>>("GroupMask", ImGuiDataType_U32, mask, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto g1 = m_particleGroup->createWidget<Drag<float>>("GroupMask", ImGuiDataType_U32, mask, 1, 0);
+    g1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    g1->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("mask", (int)val[0]);
     });
 
     std::array speed = { comp->getProperty<float>("speed", NAN) };
-    m_particleGroup->createWidget<Drag<float>>("Speed", ImGuiDataType_Float, speed, 0.01f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto s1 = m_particleGroup->createWidget<Drag<float>>("Speed", ImGuiDataType_Float, speed, 0.01f, 0.f);
+    s1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    s1->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("speed", val[0]);
     });
 
     std::array timeScale = { comp->getProperty<float>("timeScale", NAN) };
-    m_particleGroup->createWidget<Drag<float>>("TimeScale", ImGuiDataType_Float, timeScale, 0.01f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto t1 = m_particleGroup->createWidget<Drag<float>>("TimeScale", ImGuiDataType_Float, timeScale, 0.01f, 0.f);
+    t1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    t1->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("timeScale", val[0]);
     });
 
     auto target = comp->getProperty<Vec3>("target", { NAN, NAN, NAN });
     std::array targetArr = { target.X(), target.Y(), target.Z() };
-    m_particleGroup->createWidget<Drag<float, 3>>("TargetPos", ImGuiDataType_Float, targetArr, 0.01f)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto t2 = m_particleGroup->createWidget<Drag<float, 3>>("TargetPos", ImGuiDataType_Float, targetArr, 0.01f);
+    t2->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    t2->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("target", { val[0], val[1], val[2] });
     });
 
     auto params = comp->getProperty<Vec4>("param", { NAN, NAN, NAN, NAN });
     std::array paramArr = { params.X(), params.Y(), params.Z(), params.W() };
-    m_particleGroup->createWidget<Drag<float, 4>>("Parameters", ImGuiDataType_Float, paramArr, 0.01f)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto p1 = m_particleGroup->createWidget<Drag<float, 4>>("Parameters", ImGuiDataType_Float, paramArr, 0.01f);
+    p1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    p1->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("param", { val[0], val[1], val[2], val[3] });
     });
 
     auto col = comp->getProperty<Vec4>("color", { NAN, NAN, NAN, NAN });
     std::array color = { col.X(), col.Y(), col.Z(), col.W() };
-    m_particleGroup->createWidget<Drag<float, 4>>("Color", ImGuiDataType_Float, color, 0.001f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto c1 = m_particleGroup->createWidget<Drag<float, 4>>("Color", ImGuiDataType_Float, color, 0.001f, 0.f, 1.f);
+    c1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    c1->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("color", { val[0], val[1], val[2], val[3] });
     });
 
     auto txtPath = m_particleGroup->createWidget<TextField>("Path", comp->getProperty<std::string>("path", ""), false, true);
     txtPath->getOnDataChangedEvent().addListener([this](auto val) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("path", val);
     });
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Particle))
     {
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
+            storeUndo();
             getComponent<CompoundComponent>()->setProperty("path", GetRelativePath(path));
             setDirty();
         });
@@ -90,6 +118,7 @@ void ParticleEditorComponent::drawParticle() {
     m_particleGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
         auto files = OpenFileDialog("Import Particle Assets", "", { "Particle (*.efk)", "*.efk" }).result();
         if (files.size() > 0) {
+            storeUndo();
             getComponent<CompoundComponent>()->setProperty("path", GetRelativePath(files[0]));
             setDirty();
         }

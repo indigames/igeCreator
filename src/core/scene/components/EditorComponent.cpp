@@ -1,6 +1,8 @@
 #include "core/scene/components/EditorComponent.h"
 #include "core/panels/InspectorEditor.h"
 #include "core/scene/CompoundComponent.h"
+#include "core/CommandManager.h"
+#include "core/Editor.h"
 
 #include <core/layout/Group.h>
 #include <core/widgets/CheckBox.h>
@@ -49,6 +51,16 @@ bool EditorComponent::setComponent(std::shared_ptr<Component> component)
 		return true;
 	}
 	return false;
+}
+
+void EditorComponent::storeUndo() {
+	auto comp = getComponent<CompoundComponent>();
+	if (comp == nullptr) return;
+	json j = json{};
+	auto jComponents = json::array();
+	jComponents.push_back({ comp->getName(), json(*comp.get()) });
+	j["comps"] = jComponents;
+	CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::EDIT_COMPONENT, Editor::getInstance()->getTarget(), j);
 }
 
 NS_IGE_END

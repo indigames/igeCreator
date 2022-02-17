@@ -24,6 +24,8 @@
 #include "core/dialog/OpenFileDialog.h"
 #include "core/panels/InspectorEditor.h"
 
+#include "core/CommandManager.h"
+
 #include <components/CameraComponent.h>
 #include <components/TransformComponent.h>
 #include <components/EnvironmentComponent.h>
@@ -204,123 +206,249 @@ namespace ige::creator
                 switch (m_createCompCombo->getSelectedIndex())
                 {
                 case (int)Component::Type::Camera:
-                    m_targetObject->addComponent<CameraComponent>("camera");
-                    if (!m_targetObject->getComponent<FigureComponent>())
-                        m_targetObject->addComponent<FigureComponent>(GetEnginePath("figures/camera"))->setSkipSerialize(true);
+                {
+                    std::vector<std::shared_ptr<Component>> comps;
+                    comps.push_back(m_targetObject->addComponent<CameraComponent>("camera"));
+                    if (!m_targetObject->getComponent<FigureComponent>()) {
+                        auto comp = m_targetObject->addComponent<FigureComponent>(GetEnginePath("figures/camera"));
+                        comp->setSkipSerialize(true);
+                        comps.push_back(comp);
+                    }
+                    onAddComponents(comps);
+                }
                     break;
                 case (int)Component::Type::Environment:
-                    m_targetObject->addComponent<EnvironmentComponent>();
+                {
+                    auto comp = m_targetObject->addComponent<EnvironmentComponent>();
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::Script:
-                    m_targetObject->addComponent<ScriptComponent>();
+                {
+                    auto comp = m_targetObject->addComponent<ScriptComponent>();
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::AmbientLight:
-                    m_targetObject->addComponent<AmbientLight>();
+                {
+                    auto comp = m_targetObject->addComponent<AmbientLight>();
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::DirectionalLight:
-                    m_targetObject->addComponent<DirectionalLight>();
-                    if (!m_targetObject->getComponent<FigureComponent>() && !m_targetObject->getComponent<SpriteComponent>())
-                        m_targetObject->addComponent<SpriteComponent>(GetEnginePath("sprites/direct-light"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
+                {  
+                    std::vector<std::shared_ptr<Component>> comps;
+                    comps.push_back(m_targetObject->addComponent<DirectionalLight>());
+                    if (!m_targetObject->getComponent<FigureComponent>() && !m_targetObject->getComponent<SpriteComponent>()) {
+                        auto comp = m_targetObject->addComponent<SpriteComponent>(GetEnginePath("sprites/direct-light"), Vec2(0.5f, 0.5f), true);
+                        comp->setSkipSerialize(true);
+                        comps.push_back(comp);
+                    }
+                    onAddComponents(comps);
+                }
                     break;
                 case (int)Component::Type::PointLight:
-                    m_targetObject->addComponent<PointLight>();
+                {
+                    std::vector<std::shared_ptr<Component>> comps;
+                    comps.push_back(m_targetObject->addComponent<PointLight>());
                     if (!m_targetObject->getComponent<FigureComponent>() && !m_targetObject->getComponent<SpriteComponent>())
-                        m_targetObject->addComponent<SpriteComponent>(GetEnginePath("sprites/point-light"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
+                    {
+                        auto comp = m_targetObject->addComponent<SpriteComponent>(GetEnginePath("sprites/point-light"), Vec2(0.5f, 0.5f), true);
+                        comp->setSkipSerialize(true);
+                        comps.push_back(comp);
+                    }
+                    onAddComponents(comps);
+                }
                     break;
                 case (int)Component::Type::SpotLight:
-                    m_targetObject->addComponent<SpotLight>();
+                {
+                    std::vector<std::shared_ptr<Component>> comps;
+                    comps.push_back(m_targetObject->addComponent<SpotLight>());
                     if (!m_targetObject->getComponent<FigureComponent>() && !m_targetObject->getComponent<SpriteComponent>())
-                        m_targetObject->addComponent<SpriteComponent>(GetEnginePath("sprites/spot-light"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
+                    {
+                        auto comp = m_targetObject->addComponent<SpriteComponent>(GetEnginePath("sprites/spot-light"), Vec2(0.5f, 0.5f), true);
+                        comp->setSkipSerialize(true);
+                        comps.push_back(comp);
+                    }
+                    onAddComponents(comps);
+                }
                     break;
                 case (int)Component::Type::Figure:
-                    m_targetObject->addComponent<FigureComponent>();
+                {
+                    auto comp = m_targetObject->addComponent<FigureComponent>();
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::EditableFigure:
-                    m_targetObject->addComponent<EditableFigureComponent>();
+                {
+                    auto comp = m_targetObject->addComponent<EditableFigureComponent>();
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::Animator:
                     m_targetObject->addComponent<AnimatorComponent>();
                     break;
                 case (int)Component::Type::Sprite:
-                    m_targetObject->addComponent<SpriteComponent>();
+                {
+                    auto comp = m_targetObject->addComponent<SpriteComponent>();
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::Text:
-                    m_targetObject->addComponent<TextComponent>("Text", "fonts/Manjari-Regular.ttf");
+                {
+                    auto comp = m_targetObject->addComponent<TextComponent>("Text", "fonts/Manjari-Regular.ttf");
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::TextBitmap:
-                    m_targetObject->addComponent<TextBitmapComponent>("Text");
+                {
+                    auto comp = m_targetObject->addComponent<TextBitmapComponent>("Text");
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::BoneTransform:
-                    m_targetObject->addComponent<BoneTransform>();
+                {
+                    auto comp = m_targetObject->addComponent<BoneTransform>();
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::UIImage:
-                    m_targetObject->addComponent<UIImage>();
+                {
+                    auto comp = m_targetObject->addComponent<UIImage>();
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::UIText:
-                    m_targetObject->addComponent<UIText>("Text", "fonts/Manjari-Regular.ttf");
+                {
+                    auto comp = m_targetObject->addComponent<UIText>("Text", "fonts/Manjari-Regular.ttf");
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::UITextBitmap:
-                    m_targetObject->addComponent<UITextBitmap>("Text");
+                {
+                    auto comp = m_targetObject->addComponent<UITextBitmap>("Text");
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::UITextField:
-                    m_targetObject->addComponent<UITextField>("TextField");
+                {
+                    auto comp = m_targetObject->addComponent<UITextField>("TextField");
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::UIButton:
-                    m_targetObject->addComponent<UIButton>();
+                {
+                    auto comp = m_targetObject->addComponent<UIButton>();
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::UISlider:
-                    m_targetObject->addComponent<UISlider>();
+                {
+                    auto comp = m_targetObject->addComponent<UISlider>();
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::UIScrollView:
-                    m_targetObject->addComponent<UIScrollView>();
+                {
+                    auto comp = m_targetObject->addComponent<UIScrollView>();
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::UIScrollBar:
-                    m_targetObject->addComponent<UIScrollBar>();
+                {
+                    auto comp = m_targetObject->addComponent<UIScrollBar>();
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::UIMask:
-                    m_targetObject->addComponent<UIMask>();
+                {
+                    auto comp = m_targetObject->addComponent<UIMask>();
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::PhysicBox:
-                    m_targetObject->addComponent<PhysicBox>();
+                {
+                    auto comp = m_targetObject->addComponent<PhysicBox>();
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::PhysicSphere:
-                    m_targetObject->addComponent<PhysicSphere>();
+                {
+                    auto comp = m_targetObject->addComponent<PhysicSphere>();
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::PhysicCapsule:
-                    m_targetObject->addComponent<PhysicCapsule>();
+                {
+                    auto comp = m_targetObject->addComponent<PhysicCapsule>();
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::PhysicMesh:
-                    m_targetObject->addComponent<PhysicMesh>();
+                {
+                    auto comp = m_targetObject->addComponent<PhysicMesh>();
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::PhysicSoftBody:
-                    m_targetObject->addComponent<PhysicSoftBody>();
+                {
+                    auto comp  = m_targetObject->addComponent<PhysicSoftBody>();
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::AudioSource:
-                    m_targetObject->addComponent<AudioSource>();
+                {
+                    auto comp = m_targetObject->addComponent<AudioSource>();
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::AudioListener:
-                    m_targetObject->addComponent<AudioListener>();
+                {
+                    auto comp = m_targetObject->addComponent<AudioListener>();
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::Particle:
-                    m_targetObject->addComponent<Particle>();
+                {
+                    auto comp = m_targetObject->addComponent<Particle>();
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::Navigable:
-                    m_targetObject->addComponent<Navigable>();
+                {
+                    auto comp = m_targetObject->addComponent<Navigable>();
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::NavMesh:
-                    m_targetObject->addComponent<NavMesh>();
+                {
+                    auto comp = m_targetObject->addComponent<NavMesh>();
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::NavAgent:
-                    m_targetObject->addComponent<NavAgent>();
+                {
+                    auto comp = m_targetObject->addComponent<NavAgent>();
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::DynamicNavMesh:
-                    m_targetObject->addComponent<DynamicNavMesh>();
+                {
+                    auto comp = m_targetObject->addComponent<DynamicNavMesh>();
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::NavObstacle:
-                    m_targetObject->addComponent<NavObstacle>();
+                {
+                    auto comp = m_targetObject->addComponent<NavObstacle>();
+                    onAddComponent(comp);
+                }
                     break;
                 case (int)Component::Type::OffMeshLink:
-                    m_targetObject->addComponent<OffMeshLink>();
+                {
+                    auto comp = m_targetObject->addComponent<OffMeshLink>();
+                    onAddComponent(comp);
+                }
                     break;
                 }
                 redraw();
@@ -336,11 +464,45 @@ namespace ige::creator
             auto compId = component->getInstanceId();
             header->getOnClosedEvent().addListener([this, compId]() {
                 m_inspectorEditor->removeComponent(compId);
+                auto comp = m_targetObject->getComponent(compId);
+                if (comp) {
+                    onRemoveComponent(comp);
+                }
                 m_targetObject->removeComponent(compId);
                 redraw();
             });
             m_inspectorEditor->addComponent((int)component->getType(), component, header);
         }
+    }
+
+    void Inspector::onAddComponent(std::shared_ptr<Component> comp)
+    {
+        json j = json{};
+        auto jComponents = json::array();
+        jComponents.push_back({ comp->getName(), json(*comp.get()) });
+        j["comps"] = jComponents;
+        CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_COMPONENT, Editor::getInstance()->getTarget(), j);
+    }
+
+    void Inspector::onAddComponents(std::vector<std::shared_ptr<Component>> comps)
+    {
+        json j = json{};
+        auto jComponents = json::array();
+        for (const auto& comp : comps)
+        {
+            jComponents.push_back({ comp->getName(), json(*comp.get()) });
+        }
+        j["comps"] = jComponents;
+        CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_COMPONENT, Editor::getInstance()->getTarget(), j);
+    }
+
+    void Inspector::onRemoveComponent(std::shared_ptr<Component> comp)
+    {
+        json j = json{};
+        auto jComponents = json::array();
+        jComponents.push_back({ comp->getName(), json(*comp.get()) });
+        j["comps"] = jComponents;
+        CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::DELETE_COMPONENT, Editor::getInstance()->getTarget(), j);
     }
 
     void Inspector::update(float dt)

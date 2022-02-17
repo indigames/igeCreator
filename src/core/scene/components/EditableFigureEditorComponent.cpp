@@ -38,6 +38,7 @@ void EditableFigureEditorComponent::drawFigureComponent()
     auto txtPath = m_figureCompGroup->createWidget<TextField>("Path", comp->getProperty<std::string>("path", ""), false, true);
     txtPath->setEndOfLine(false);
     txtPath->getOnDataChangedEvent().addListener([this](const auto& txt) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("path", txt);
         setDirty();
     });
@@ -45,6 +46,7 @@ void EditableFigureEditorComponent::drawFigureComponent()
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Figure))
     {
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
+            storeUndo();
             getComponent<CompoundComponent>()->setProperty("path", GetRelativePath(path));
             setDirty();
         });
@@ -53,6 +55,7 @@ void EditableFigureEditorComponent::drawFigureComponent()
     m_figureCompGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
         auto files = OpenFileDialog("Import Assets", "", { "Figure", "*.dae", "FBX file (*.fbx)", "*.fbx" }).result();
         if (files.size() > 0) {
+            storeUndo();
             getComponent<CompoundComponent>()->setProperty("path", GetRelativePath(files[0]));
             setDirty();
         }
@@ -60,37 +63,44 @@ void EditableFigureEditorComponent::drawFigureComponent()
 
     auto figColumn = m_figureCompGroup->createWidget<Columns<2>>();
     figColumn->createWidget<CheckBox>("Fog", comp->getProperty<bool>("fog", false))->getOnDataChangedEvent().addListener([this](bool val) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("fog", val);
         setDirty();
     });
 
     figColumn->createWidget<CheckBox>("DoubleSide", comp->getProperty<bool>("doubleSide", false))->getOnDataChangedEvent().addListener([this](bool val) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("doubleSide", val);
         setDirty();
     });
 
     figColumn->createWidget<CheckBox>("FFCulling", comp->getProperty<bool>("cull", false))->getOnDataChangedEvent().addListener([this](bool val) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("cull", val);
         setDirty();
     });
 
     figColumn->createWidget<CheckBox>("Z-Test", comp->getProperty<bool>("zTest", false))->getOnDataChangedEvent().addListener([this](bool val) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("zTest", val);
         setDirty();
     });
 
     figColumn->createWidget<CheckBox>("Z-Write", comp->getProperty<bool>("zWrite", false))->getOnDataChangedEvent().addListener([this](bool val) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("zWrite", val);
         setDirty();
     });
 
     figColumn->createWidget<CheckBox>("ScissorTest", comp->getProperty<bool>("scissor", false))->getOnDataChangedEvent().addListener([this](bool val) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("scissor", val);
         setDirty();
     });
 
     std::array ratio = { comp->getProperty<float>("updateRatio", NAN) };
     m_figureCompGroup->createWidget<Drag<float>>("Update Ratio", ImGuiDataType_Float, ratio, 0.01f, 0.01f)->getOnDataChangedEvent().addListener([this](auto& val) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("updateRatio", (float)val[0]);
     });
 
@@ -116,6 +126,7 @@ void EditableFigureEditorComponent::drawFigureComponent()
                         meshColumn->createWidget<CheckBox>("", figureComp->isMeshEnable(i))->getOnDataChangedEvent().addListener([this, i](auto val) {
                             auto figureComp = std::dynamic_pointer_cast<EditableFigureComponent>(getComponent<CompoundComponent>()->getComponents()[0]);
                             if (figureComp) {
+                                storeUndo();
                                 figureComp->setMeshEnable(i, val);
                             }
                         });

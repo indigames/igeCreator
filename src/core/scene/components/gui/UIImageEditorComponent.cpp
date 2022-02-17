@@ -34,11 +34,13 @@ void UIImageEditorComponent::drawUIImage() {
 
     auto txtPath = m_uiImageGroup->createWidget<TextField>("Path", comp->getProperty<std::string>("path", ""), false, true);
     txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("path", txt);
         getComponent<CompoundComponent>()->setDirty();
     });
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite)) {
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
+            storeUndo();
             getComponent<CompoundComponent>()->setProperty("path", GetRelativePath(path));
             getComponent<CompoundComponent>()->setDirty();
             setDirty();
@@ -46,6 +48,7 @@ void UIImageEditorComponent::drawUIImage() {
     }
 
     m_uiImageGroup->createWidget<CheckBox>("Interactable", comp->getProperty<bool>("interactable", true))->getOnDataChangedEvent().addListener([this](bool val) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("interactable", val);
     });
 
@@ -53,6 +56,7 @@ void UIImageEditorComponent::drawUIImage() {
     auto spriteTypeCombo = m_uiImageGroup->createWidget<ComboBox>("Sprite Type", spriteType);
     spriteTypeCombo->getOnDataChangedEvent().addListener([this](auto val) {
         if (val != -1) {
+            storeUndo();
             getComponent<CompoundComponent>()->setProperty("spritetype", val);
             setDirty();
         }
@@ -66,25 +70,41 @@ void UIImageEditorComponent::drawUIImage() {
     if (spriteType == (int)SpriteType::Sliced) {
         auto border = comp->getProperty<Vec4>("border", { NAN, NAN, NAN, NAN });
         std::array borderLeft = { border.X() };
-        m_uiImageGroup->createWidget<Drag<float, 1>>("Border Left", ImGuiDataType_Float, borderLeft, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        auto b1 = m_uiImageGroup->createWidget<Drag<float, 1>>("Border Left", ImGuiDataType_Float, borderLeft, 1.0f, 0.f, 16384.f);
+        b1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            });
+        b1->getOnDataChangedEvent().addListener([this](auto val) {
             auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", { NAN, NAN, NAN, NAN });
             border.X(val[0]);
             getComponent<CompoundComponent>()->setProperty("border", border);
         });
         std::array borderRight = { border.Y() };
-        m_uiImageGroup->createWidget<Drag<float, 1>>("Border Right", ImGuiDataType_Float, borderRight, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        auto b2 = m_uiImageGroup->createWidget<Drag<float, 1>>("Border Right", ImGuiDataType_Float, borderRight, 1.0f, 0.f, 16384.f);
+        b2->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            });
+        b2->getOnDataChangedEvent().addListener([this](auto val) {
             auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", { NAN, NAN, NAN, NAN });
             border.Y(val[0]);
             getComponent<CompoundComponent>()->setProperty("border", border);
         });
         std::array borderTop = { border.Z() };
-        m_uiImageGroup->createWidget<Drag<float, 1>>("Border Top", ImGuiDataType_Float, borderTop, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        auto b3 = m_uiImageGroup->createWidget<Drag<float, 1>>("Border Top", ImGuiDataType_Float, borderTop, 1.0f, 0.f, 16384.f);
+        b3->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            });
+        b3->getOnDataChangedEvent().addListener([this](auto val) {
             auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", { NAN, NAN, NAN, NAN });
             border.Z(val[0]);
             getComponent<CompoundComponent>()->setProperty("border", border);
         });
         std::array borderBottom = { border.W() };
-        m_uiImageGroup->createWidget<Drag<float, 1>>("Border Bottom", ImGuiDataType_Float, borderBottom, 1.0f, 0.f, 16384.f)->getOnDataChangedEvent().addListener([this](auto val) {
+        auto b4 = m_uiImageGroup->createWidget<Drag<float, 1>>("Border Bottom", ImGuiDataType_Float, borderBottom, 1.0f, 0.f, 16384.f);
+        b4->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            });
+        b4->getOnDataChangedEvent().addListener([this](auto val) {
             auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", { NAN, NAN, NAN, NAN });
             border.W(val[0]);
             getComponent<CompoundComponent>()->setProperty("border", border);
@@ -94,6 +114,7 @@ void UIImageEditorComponent::drawUIImage() {
         auto fillMethodCombo = m_uiImageGroup->createWidget<ComboBox>("Fill Method", (int)fillMethod);
         fillMethodCombo->getOnDataChangedEvent().addListener([this](auto val) {
             if (val != -1) {
+                storeUndo();
                 getComponent<CompoundComponent>()->setProperty("fillmethod", val);
                 setDirty();
             }
@@ -113,6 +134,7 @@ void UIImageEditorComponent::drawUIImage() {
             auto fillOriginCombo = m_uiImageGroup->createWidget<ComboBox>("Fill Origin", fillOrigin);
             fillOriginCombo->getOnDataChangedEvent().addListener([this](auto val) {
                 if (val != -1) {
+                    storeUndo();
                     getComponent<CompoundComponent>()->setProperty("fillorigin", val);
                     setDirty();
                 }
@@ -139,18 +161,24 @@ void UIImageEditorComponent::drawUIImage() {
             fillOriginCombo->setEndOfLine(true);
 
             std::array fillAmount = { comp->getProperty<float>("fillamount", NAN) };
-            m_uiImageGroup->createWidget<Drag<float, 1>>("Fill Amount", ImGuiDataType_Float, fillAmount, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+            auto f1 = m_uiImageGroup->createWidget<Drag<float, 1>>("Fill Amount", ImGuiDataType_Float, fillAmount, 0.01f, 0.f, 1.f);
+            f1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+                storeUndo();
+                });
+            f1->getOnDataChangedEvent().addListener([this](auto val) {
                 getComponent<CompoundComponent>()->setProperty("fillamount", val[0]);
             });
 
             if (fillMethod == (int)FillMethod::Radial90 || fillMethod == (int)FillMethod::Radial180 || fillMethod == (int)FillMethod::Radial360) {
                 m_uiImageGroup->createWidget<CheckBox>("Clockwise", comp->getProperty<bool>("clockwise", false))->getOnDataChangedEvent().addListener([this](bool val) {
+                    storeUndo();
                     getComponent<CompoundComponent>()->setProperty("clockwise", val);
                 });
             }
         }
     }
     m_uiImageGroup->createWidget<Color>("Color", comp->getProperty<Vec4>("color", { NAN, NAN, NAN, NAN }))->getOnDataChangedEvent().addListener([this](auto val) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("color", { val[0], val[1], val[2], val[3] });
     });
 }

@@ -44,6 +44,10 @@ namespace ige::creator
 
         void _drawBaseInfo();
 
+        void onAddComponent(std::shared_ptr<Component> comp);
+        void onAddComponents(std::vector<std::shared_ptr<Component>> comps);
+        void onRemoveComponent(std::shared_ptr<Component> comp);
+
     public:
         std::shared_ptr<InspectorEditor> getInspectorEditor() { return m_inspectorEditor; }
 

@@ -31,12 +31,20 @@ void NavAreaEditorComponent::drawNavArea()
     if (comp == nullptr) return;
 
     std::array id = { comp->getProperty<float>("id", NAN) };
-    m_navAreaGroup->createWidget<Drag<float>>("AreaID", ImGuiDataType_S32, id, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto a1 = m_navAreaGroup->createWidget<Drag<float>>("AreaID", ImGuiDataType_S32, id, 1, 0);
+    a1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    a1->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("id", (int)val[0]);
     });
 
     std::array cost = { comp->getProperty<float>("cost", NAN) };
-    m_navAreaGroup->createWidget<Drag<float>>("AreaCost", ImGuiDataType_S32, cost, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto a2 = m_navAreaGroup->createWidget<Drag<float>>("AreaCost", ImGuiDataType_S32, cost, 1, 0);
+    a2->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    a2->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("cost", (int)val[0]);
     });
 }

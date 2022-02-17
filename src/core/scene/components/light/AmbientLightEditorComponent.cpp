@@ -30,17 +30,24 @@ void AmbientLightEditorComponent::drawAmbientLight() {
 
     auto color = Vec4(comp->getProperty<Vec3>("sky", { NAN, NAN, NAN }), 1.f);
     m_ambientLightGroup->createWidget<Color>("SkyColor", color)->getOnDataChangedEvent().addListener([this](auto val) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("sky", { val[0], val[1], val[2] });
     });
 
     color = Vec4(comp->getProperty<Vec3>("gnd", { NAN, NAN, NAN }), 1.f);
-    m_ambientLightGroup->createWidget<Color>("GroundColor", color)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto g1 = m_ambientLightGroup->createWidget<Color>("GroundColor", color);
+    g1->getOnDataChangedEvent().addListener([this](auto val) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("gnd", { val[0], val[1], val[2] });
     });
 
     auto dir = comp->getProperty<Vec3>("dir", { NAN, NAN, NAN });
     std::array direction = { dir.X(), dir.Y(), dir.Z() };
-    m_ambientLightGroup->createWidget<Drag<float, 3>>("Direction", ImGuiDataType_Float, direction)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto d1 = m_ambientLightGroup->createWidget<Drag<float, 3>>("Direction", ImGuiDataType_Float, direction);
+    d1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    d1->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("dir", { val[0], val[1], val[2] });
     });
 }
