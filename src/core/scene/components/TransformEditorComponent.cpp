@@ -113,7 +113,11 @@ void TransformEditorComponent::drawLocalTransformComponent() {
 
     auto position = comp->getProperty<Vec3>("pos", Vec3(NAN, NAN, NAN));
     std::array pos = { position.X(), position.Y(), position.Z() };
-    m_localTransformGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto posE = m_localTransformGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos);
+    posE->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+    });
+    posE->getOnDataChangedEvent().addListener([this](auto val) {
         m_dirtyFlag = 2;
         auto pos = getComponent<CompoundComponent>()->getProperty<Vec3>("pos", Vec3(NAN, NAN, NAN));
         if ((std::isnan(pos[0]) && !std::isnan(val[0]))
@@ -131,7 +135,11 @@ void TransformEditorComponent::drawLocalTransformComponent() {
 
     auto euler = comp->getProperty<Vec3>("rot", Vec3(NAN, NAN, NAN));
     std::array rotArr = { RADIANS_TO_DEGREES(euler.X()), RADIANS_TO_DEGREES(euler.Y()), RADIANS_TO_DEGREES(euler.Z()) };
-    m_localTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rotArr)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto rotE = m_localTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rotArr);
+    rotE->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    rotE->getOnDataChangedEvent().addListener([this](auto val) {
         IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
         m_dirtyFlag = 2;
         auto euler = getComponent<CompoundComponent>()->getProperty<Vec3>("rot", Vec3(NAN, NAN, NAN));
@@ -149,7 +157,11 @@ void TransformEditorComponent::drawLocalTransformComponent() {
 
     auto scale = comp->getProperty<Vec3>("scale", Vec3(NAN, NAN, NAN));
     std::array scaleArr = { scale.X(), scale.Y(), scale.Z() };
-    m_localTransformGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scaleArr)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto scaleE = m_localTransformGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scaleArr);
+    scaleE->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    scaleE->getOnDataChangedEvent().addListener([this](auto val) {
         IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
         m_dirtyFlag = 2;
         auto scale = getComponent<CompoundComponent>()->getProperty<Vec3>("scale", Vec3(NAN, NAN, NAN));
@@ -176,7 +188,11 @@ void TransformEditorComponent::drawWorldTransformComponent() {
     auto comp = getComponent<CompoundComponent>();
     auto position = comp->getProperty<Vec3>("wpos", Vec3(NAN, NAN, NAN));
     std::array pos = { position.X(), position.Y(), position.Z() };
-    m_worldTransformGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto posE = m_worldTransformGroup->createWidget<Drag<float, 3>>("Position", ImGuiDataType_Float, pos);
+    posE->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    posE->getOnDataChangedEvent().addListener([this](auto val) {
         m_dirtyFlag = 1;
         auto pos = getComponent<CompoundComponent>()->getProperty<Vec3>("wpos", Vec3(NAN, NAN, NAN));
         if ((std::isnan(pos[0]) && !std::isnan(val[0]))
@@ -194,7 +210,11 @@ void TransformEditorComponent::drawWorldTransformComponent() {
 
     auto euler = comp->getProperty<Vec3>("wrot", Vec3(NAN, NAN, NAN));
     std::array rotArr = { RADIANS_TO_DEGREES(euler.X()), RADIANS_TO_DEGREES(euler.Y()), RADIANS_TO_DEGREES(euler.Z()) };
-    m_worldTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rotArr)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto rotE = m_worldTransformGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rotArr);
+    rotE->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    rotE->getOnDataChangedEvent().addListener([this](auto val) {
         IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
         m_dirtyFlag = 1;
         auto euler = getComponent<CompoundComponent>()->getProperty<Vec3>("wrot", Vec3(NAN, NAN, NAN));
@@ -212,7 +232,11 @@ void TransformEditorComponent::drawWorldTransformComponent() {
 
     auto scale = comp->getProperty<Vec3>("wscale", Vec3(NAN, NAN, NAN));
     std::array scaleArr = { scale.X(), scale.Y(), scale.Z() };
-    m_worldTransformGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scaleArr)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto scaleE = m_worldTransformGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scaleArr);
+    scaleE->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    scaleE->getOnDataChangedEvent().addListener([this](auto val) {
         IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(TransformEditorComponent::onTransformChanged, this));
         m_dirtyFlag = 1;
         auto scale = getComponent<CompoundComponent>()->getProperty<Vec3>("wscale", Vec3(NAN, NAN, NAN));

@@ -31,7 +31,7 @@ namespace ige::creator
 {
     template <typename T, size_t N>
     Drag<T, N>::Drag(const std::string& label, ImGuiDataType type, const std::array<T, N>& val, float speed, const T& minVal, const T& maxVal)
-        : DataWidget(val), m_label(label), m_dataType(type), m_speed(speed), m_min(minVal), m_max(maxVal)
+        : DataWidget(val), m_label(label), m_dataType(type), m_speed(speed), m_min(minVal), m_max(maxVal), m_dragging(false)
     {
         m_label.append(getIdAsString());
     }
@@ -64,6 +64,8 @@ namespace ige::creator
         ImGui::PushID(label);
         ImGui::PushMultiItemsWidths(N, ImGui::CalcItemWidth());
         auto type_size = ImGui::DataTypeInfo[m_dataType].Size;
+        bool begin = false;
+        bool finish = false;
         for (int i = 0; i < N; i++)
         {
             ImGui::PushID(i);
@@ -71,8 +73,17 @@ namespace ige::creator
                 ImGui::SameLine(0, g.Style.ItemInnerSpacing.x);
 
             // Notice: to show NAN the data type must be Float, so to present Int type we use %.0f format here
-            if(ImGui::DragScalar("", ImGuiDataType_Float, p_data, m_speed, &m_min, &m_max, m_dataType == ImGuiDataType_Float ? "%.4f" : "%.0f"))
+            if (ImGui::DragScalar("", ImGuiDataType_Float, p_data, m_speed, &m_min, &m_max, m_dataType == ImGuiDataType_Float ? "%.4f" : "%.0f")) {
                 changedIdx = i;
+                if (!m_dragging) begin = true;
+                m_dragging = true;
+            }
+            else if (m_dragging) {
+                if (ImGui::IsMouseReleased(0)) {
+                    m_dragging = false;
+                    finish = true;
+                }
+            }
 
             ImGui::PopID();
             ImGui::PopItemWidth();
@@ -91,9 +102,25 @@ namespace ige::creator
 
         if (changedIdx != -1)
         {
+            if (begin) {
+                notifyBeginChange(m_data);
+            }
             if (std::isnan((float)m_data[changedIdx]))
                 m_data[changedIdx] = 0;
             notifyChange(m_data);
         }
+        if (finish) {
+            notifyFinishChange(m_data);
+        }
+    }
+
+    template <typename T, size_t N>
+    void Drag<T, N>::notifyFinishChange(const std::array<T, N>& data) {
+        m_onDataFinishChangedEvent.invoke(data);
+    }
+
+    template <typename T, size_t N>
+    void Drag<T, N>::notifyBeginChange(const std::array<T, N>& data) {
+        m_onDataBeginChangedEvent.invoke(data);
     }
 }

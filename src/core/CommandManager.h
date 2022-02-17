@@ -14,12 +14,15 @@ namespace ige::creator
 	public:
 		CommandManager();
 		virtual ~CommandManager();
-		void PushCommand(std::shared_ptr<SceneObject> target, COMMAND_TYPE type = COMMAND_TYPE::NONE);
+		void PushCommand(COMMAND_TYPE type, std::shared_ptr<SceneObject> target);
+		void PushCommand(COMMAND_TYPE type, std::shared_ptr<SceneObject> target, json& jObj);
 		void Undo();
 		void Redo();
 	protected:
-		
-		void activeCommand(std::shared_ptr<Command> command);
+		std::shared_ptr<Command> generateComponent(std::shared_ptr<Command> command);
+
+		void activeUndoCommand(std::shared_ptr<Command> command);
+		void activeRedoCommand(std::shared_ptr<Command> command);
 	protected:
 		std::vector<std::shared_ptr<Command>> m_undo;
 		std::vector<std::shared_ptr<Command>> m_redo;

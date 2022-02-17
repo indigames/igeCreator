@@ -753,7 +753,7 @@ class %s(Script):\n\
 
         for (auto& target : Editor::getInstance()->getTarget()->getAllTargets()) {
             if (!target.expired()) {
-                CommandManager::getInstance()->PushCommand(target.lock(), ige::creator::COMMAND_TYPE::DELETE_OBJECT);
+                CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::DELETE_OBJECT, target.lock());
                 removeTarget(target.lock());
                 Editor::getCurrentScene()->removeObject(target.lock());
             }
@@ -790,7 +790,7 @@ class %s(Script):\n\
             auto parent = Editor::getInstance()->getFirstTarget()->getSharedPtr();
             newObject->setParent(parent);
 
-            CommandManager::getInstance()->PushCommand(newObject, ige::creator::COMMAND_TYPE::ADD_OBJECT);
+            CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
         }
 
         if (getCanvas())

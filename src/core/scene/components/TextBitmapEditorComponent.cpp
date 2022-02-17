@@ -39,30 +39,40 @@ void TextBitmapEditorComponent::drawComponent()
 
     auto txtText = m_textCompGroup->createWidget<TextField>("Text", comp->getProperty<std::string>("text", ""));
     txtText->getOnDataChangedEvent().addListener([this](auto txt) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("text", txt);
         });
 
     auto txtFontPath = m_textCompGroup->createWidget<TextField>("Font", comp->getProperty<std::string>("font", ""), false, true);
     txtFontPath->getOnDataChangedEvent().addListener([this](auto txt) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("font", txt);
         });
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Font)) {
         txtFontPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
+            storeUndo();
             getComponent<CompoundComponent>()->setProperty("font", GetRelativePath(path));
             setDirty();
             });
     }
 
     std::array size = { comp->getProperty<float>("size", NAN) };
-    m_textCompGroup->createWidget<Drag<float>>("Size", ImGuiDataType_S32, size, 1, 4, 300)->getOnDataChangedEvent().addListener([this](auto& val) {
+    auto s1 = m_textCompGroup->createWidget<Drag<float>>("Size", ImGuiDataType_S32, size, 1, 4, 300);
+    s1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    s1->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("size", (int)val[0]);
         });
 
-    m_textCompGroup->createWidget<Color>("Color", comp->getProperty<Vec4>("color", { NAN, NAN, NAN, NAN }))->getOnDataChangedEvent().addListener([this](auto& color) {
+    auto c1 = m_textCompGroup->createWidget<Color>("Color", comp->getProperty<Vec4>("color", { NAN, NAN, NAN, NAN }));
+    c1->getOnDataChangedEvent().addListener([this](auto& color) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("color", { color[0], color[1], color[2], color[3] });
         });
 
     m_textCompGroup->createWidget<CheckBox>("Billboard", comp->getProperty<bool>("billboard", false))->getOnDataChangedEvent().addListener([this](bool val) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("billboard", val);
     });
 }

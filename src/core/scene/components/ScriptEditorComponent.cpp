@@ -1,5 +1,6 @@
 #include "core/scene/components/ScriptEditorComponent.h"
 #include "core/scene/CompoundComponent.h"
+#include "core/CommandManager.h"
 
 #include "core/layout/Group.h"
 #include "core/widgets/Widgets.h"
@@ -48,6 +49,7 @@ void ScriptEditorComponent::drawScriptComponent() {
     txtPath->setEndOfLine(false);
     txtPath->getOnDataChangedEvent().addListener([this](const auto& txt) {
         auto comp = getComponent<CompoundComponent>();
+        storeUndo();
         comp->setProperty("path", txt);
         comp->setDirty();
         setDirty();
@@ -55,6 +57,7 @@ void ScriptEditorComponent::drawScriptComponent() {
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Script)) {
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
             auto comp = getComponent<CompoundComponent>();
+            storeUndo();
             comp->setProperty("path", GetRelativePath(path));
             comp->setDirty();
             setDirty();
@@ -65,6 +68,7 @@ void ScriptEditorComponent::drawScriptComponent() {
         if (files.size() > 0)
         {
             auto comp = getComponent<CompoundComponent>();
+            storeUndo();
             comp->setProperty("path", GetRelativePath(files[0]));
             comp->setDirty();
             setDirty();
@@ -81,6 +85,7 @@ void ScriptEditorComponent::drawScriptComponent() {
     if (!SceneManager::getInstance()->isPlaying() &&  path.length() > 0)
     {
         m_watchId = fs::watcher::watch(fs::path(path), false, false, std::chrono::milliseconds(1000), [this](const auto&, bool) {
+            storeUndo();
             auto comp = getComponent<CompoundComponent>();
             comp->setProperty("path", comp->getProperty<std::string>("path", ""));
             comp->setDirty();

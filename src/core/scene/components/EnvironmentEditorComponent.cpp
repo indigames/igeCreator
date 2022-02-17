@@ -40,31 +40,49 @@ void EnvironmentEditorComponent::drawEnvironmentComponent() {
     // Shadow
     auto shadowGroup = m_environmentCompGroup->createWidget<Group>("Shadow");
     auto shadowColor = Vec4(environment->getShadowColor(), 1.f);
-    shadowGroup->createWidget<Color>("Color", shadowColor)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto shadowColorE = shadowGroup->createWidget<Color>("Color", shadowColor);
+    shadowColorE->getOnDataChangedEvent().addListener([this](auto val) {
+        storeUndo();
         auto environment = std::dynamic_pointer_cast<EnvironmentComponent>(getComponent<CompoundComponent>()->getComponents()[0]);
         environment->setShadowColor({ val[0], val[1], val[2] });
     });
 
     std::array size = { environment->getShadowTextureSize()[0], environment->getShadowTextureSize()[1] };
-    shadowGroup->createWidget<Drag<float, 2>>("Size", ImGuiDataType_Float, size, 1, 512, 4096)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto sizeE = shadowGroup->createWidget<Drag<float, 2>>("Size", ImGuiDataType_Float, size, 1, 512, 4096);
+    sizeE->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    sizeE->getOnDataChangedEvent().addListener([this](auto val) {
         auto environment = std::dynamic_pointer_cast<EnvironmentComponent>(getComponent<CompoundComponent>()->getComponents()[0]);
         environment->setShadowTextureSize(Vec2(val[0], val[1]));
     });
 
     std::array density = { environment->getShadowDensity() };
-    shadowGroup->createWidget<Drag<float>>("Density", ImGuiDataType_Float, density, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto densityE = shadowGroup->createWidget<Drag<float>>("Density", ImGuiDataType_Float, density, 0.01f, 0.f, 1.f);
+    densityE->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    densityE->getOnDataChangedEvent().addListener([this](auto val) {
         auto environment = std::dynamic_pointer_cast<EnvironmentComponent>(getComponent<CompoundComponent>()->getComponents()[0]);
         environment->setShadowDensity(val[0]);
     });
 
     std::array wideness = { environment->getShadowWideness() };
-    shadowGroup->createWidget<Drag<float>>("Wideness", ImGuiDataType_Float, wideness, 0.01f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto widenessE = shadowGroup->createWidget<Drag<float>>("Wideness", ImGuiDataType_Float, wideness, 0.01f, 0.f);
+    widenessE->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    widenessE->getOnDataChangedEvent().addListener([this](auto val) {
         auto environment = std::dynamic_pointer_cast<EnvironmentComponent>(getComponent<CompoundComponent>()->getComponents()[0]);
         environment->setShadowWideness(val[0]);
     });
 
     std::array bias = { environment->getShadowBias() };
-    shadowGroup->createWidget<Drag<float>>("Bias", ImGuiDataType_Float, bias, 0.0001f, 0.f)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto biasE = shadowGroup->createWidget<Drag<float>>("Bias", ImGuiDataType_Float, bias, 0.0001f, 0.f);
+    biasE->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    biasE->getOnDataChangedEvent().addListener([this](auto val) {
         auto environment = std::dynamic_pointer_cast<EnvironmentComponent>(getComponent<CompoundComponent>()->getComponents()[0]);
         environment->setShadowBias(val[0]);
     });
@@ -73,6 +91,7 @@ void EnvironmentEditorComponent::drawEnvironmentComponent() {
     auto fogGroup = m_environmentCompGroup->createWidget<Group>("Fog");
     auto fogColor = Vec4(environment->getDistanceFogColor(), environment->getDistanceFogAlpha());
     fogGroup->createWidget<Color>("Color", fogColor)->getOnDataChangedEvent().addListener([this](auto val) {
+        storeUndo();
         auto environment = std::dynamic_pointer_cast<EnvironmentComponent>(getComponent<CompoundComponent>()->getComponents()[0]);
         environment->setDistanceFogColor({ val[0], val[1], val[2] });
         environment->setDistanceFogAlpha(val[3]);
@@ -80,13 +99,21 @@ void EnvironmentEditorComponent::drawEnvironmentComponent() {
 
     auto fogColumn = fogGroup->createWidget<Columns<2>>(120.f);
     std::array fogNear = { environment->getDistanceFogNear() };
-    fogColumn->createWidget<Drag<float>>("Near", ImGuiDataType_Float, fogNear, 0.01f, 0.1f)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto nearE = fogColumn->createWidget<Drag<float>>("Near", ImGuiDataType_Float, fogNear, 0.01f, 0.1f);
+    nearE->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    nearE->getOnDataChangedEvent().addListener([this](auto val) {
         auto environment = std::dynamic_pointer_cast<EnvironmentComponent>(getComponent<CompoundComponent>()->getComponents()[0]);
         environment->setDistanceFogNear(val[0]);
     });
 
     std::array fogFar = { environment->getDistanceFogFar() };
-    fogColumn->createWidget<Drag<float>>("Far", ImGuiDataType_Float, fogFar, 0.01f, 0.1f)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto farE = fogColumn->createWidget<Drag<float>>("Far", ImGuiDataType_Float, fogFar, 0.01f, 0.1f);
+    farE->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    farE->getOnDataChangedEvent().addListener([this](auto val) {
         auto environment = std::dynamic_pointer_cast<EnvironmentComponent>(getComponent<CompoundComponent>()->getComponents()[0]);
         environment->setDistanceFogFar(val[0]);
     });

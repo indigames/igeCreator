@@ -500,7 +500,7 @@ namespace ige::creator
             TaskManager::getInstance()->addTask([&]() {
                 auto target = Editor::getInstance()->getFirstTarget();
                 auto newObject = Editor::getCurrentScene()->createObject("New Object", target);
-                CommandManager::getInstance()->PushCommand(newObject, ige::creator::COMMAND_TYPE::ADD_OBJECT);
+                CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
             });
         });
 
@@ -511,7 +511,7 @@ namespace ige::creator
                 auto newObject = Editor::getCurrentScene()->createObject("Camera", target);
                 newObject->addComponent<CameraComponent>("camera");
                 newObject->addComponent<FigureComponent>(GetEnginePath("figures/camera"))->setSkipSerialize(true);
-                CommandManager::getInstance()->PushCommand(newObject, ige::creator::COMMAND_TYPE::ADD_OBJECT);
+                CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
             });
         });
 
@@ -523,7 +523,7 @@ namespace ige::creator
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObject = Editor::getCurrentScene()->createObject("Cube", target);
                     newObject->addComponent<FigureComponent>("figures/cube.dae");
-                    CommandManager::getInstance()->PushCommand(newObject, ige::creator::COMMAND_TYPE::ADD_OBJECT);
+                    CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
 
@@ -532,7 +532,7 @@ namespace ige::creator
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObject = Editor::getCurrentScene()->createObject("Plane", target);
                     newObject->addComponent<FigureComponent>("figures/plane.dae");
-                    CommandManager::getInstance()->PushCommand(newObject, ige::creator::COMMAND_TYPE::ADD_OBJECT);
+                    CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
 
@@ -541,7 +541,7 @@ namespace ige::creator
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObject = Editor::getCurrentScene()->createObject("Sphere", target);
                     newObject->addComponent<FigureComponent>("figures/sphere.dae");
-                    CommandManager::getInstance()->PushCommand(newObject, ige::creator::COMMAND_TYPE::ADD_OBJECT);
+                    CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
 
@@ -550,7 +550,7 @@ namespace ige::creator
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObject = Editor::getCurrentScene()->createObject("Cone", target);
                     newObject->addComponent<FigureComponent>("figures/cone.dae");
-                    CommandManager::getInstance()->PushCommand(newObject, ige::creator::COMMAND_TYPE::ADD_OBJECT);
+                    CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
 
@@ -559,7 +559,7 @@ namespace ige::creator
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObject = Editor::getCurrentScene()->createObject("Cylinder", target);
                     newObject->addComponent<FigureComponent>("figures/cylinder.dae");
-                    CommandManager::getInstance()->PushCommand(newObject, ige::creator::COMMAND_TYPE::ADD_OBJECT);
+                    CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
 
@@ -568,7 +568,7 @@ namespace ige::creator
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObject = Editor::getCurrentScene()->createObject("Torus", target);
                     newObject->addComponent<FigureComponent>("figures/torus.dae");
-                    CommandManager::getInstance()->PushCommand(newObject, ige::creator::COMMAND_TYPE::ADD_OBJECT);
+                    CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
         }
@@ -590,7 +590,7 @@ namespace ige::creator
                     newObject->getTransform()->setLocalPosition({ 0.f, 5.f, 0.f });
                     newObject->getTransform()->setLocalRotation({ DEGREES_TO_RADIANS(90.f), 0.f, .0f });
                     newObject->addComponent<SpriteComponent>(GetEnginePath("sprites/direct-light"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
-                    CommandManager::getInstance()->PushCommand(newObject, ige::creator::COMMAND_TYPE::ADD_OBJECT);
+                    CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
 
@@ -606,7 +606,7 @@ namespace ige::creator
                     auto newObject = Editor::getCurrentScene()->createObject("Point Light", target);
                     newObject->addComponent<PointLight>();
                     newObject->addComponent<SpriteComponent>(GetEnginePath("sprites/point-light"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
-                    CommandManager::getInstance()->PushCommand(newObject, ige::creator::COMMAND_TYPE::ADD_OBJECT);
+                    CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
 
@@ -622,7 +622,7 @@ namespace ige::creator
                     auto newObject = Editor::getCurrentScene()->createObject("Spot Light", target);
                     newObject->addComponent<SpotLight>();
                     newObject->addComponent<SpriteComponent>(GetEnginePath("sprites/spot-light"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
-                    CommandManager::getInstance()->PushCommand(newObject, ige::creator::COMMAND_TYPE::ADD_OBJECT);
+                    CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
         }
@@ -635,7 +635,7 @@ namespace ige::creator
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObject = Editor::getCurrentScene()->createObject("Audio Source", target);
                     newObject->addComponent<AudioSource>();
-                    CommandManager::getInstance()->PushCommand(newObject, ige::creator::COMMAND_TYPE::ADD_OBJECT);
+                    CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
 
@@ -644,7 +644,7 @@ namespace ige::creator
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObject = Editor::getCurrentScene()->createObject("Audio Listener", target);
                     newObject->addComponent<AudioListener>();
-                    CommandManager::getInstance()->PushCommand(newObject, ige::creator::COMMAND_TYPE::ADD_OBJECT);
+                    CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
         }
@@ -657,7 +657,7 @@ namespace ige::creator
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObject = Editor::getCurrentScene()->createObject("Text", target);
                     newObject->addComponent<TextComponent>();
-                    CommandManager::getInstance()->PushCommand(newObject, ige::creator::COMMAND_TYPE::ADD_OBJECT);
+                    CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                     });
                 });
 
@@ -666,7 +666,7 @@ namespace ige::creator
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObject = Editor::getCurrentScene()->createObject("TextBitmap", target);
                     newObject->addComponent<TextBitmapComponent>();
-                    CommandManager::getInstance()->PushCommand(newObject, ige::creator::COMMAND_TYPE::ADD_OBJECT);
+                    CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                     });
                 });
         }
@@ -679,7 +679,7 @@ namespace ige::creator
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObject = Editor::getCurrentScene()->createObject("Particle", target);
                     newObject->addComponent<Particle>();
-                    CommandManager::getInstance()->PushCommand(newObject, ige::creator::COMMAND_TYPE::ADD_OBJECT);
+                    CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
         }
@@ -695,7 +695,7 @@ namespace ige::creator
                     if (rect) {
                         newObject->addComponent<UIImage>("sprites/background", rect->getSize());
                     }
-                    CommandManager::getInstance()->PushCommand(newObject, ige::creator::COMMAND_TYPE::ADD_OBJECT);
+                    CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
 
@@ -705,7 +705,7 @@ namespace ige::creator
                     auto newObject = Editor::getCurrentScene()->createObject("UIText", target, true);
                     auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
                     newObject->addComponent<UIText>("Text");
-                    CommandManager::getInstance()->PushCommand(newObject, ige::creator::COMMAND_TYPE::ADD_OBJECT);
+                    CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
 
@@ -726,7 +726,7 @@ namespace ige::creator
                     newObject->addComponent<UIImage>("sprites/background", rect->getSize());
                     auto newLabel = Editor::getCurrentScene()->createObject("Label", newObject, true, Vec2());
                     newLabel->addComponent<UITextField>("TextField");
-                    CommandManager::getInstance()->PushCommand(newObject, ige::creator::COMMAND_TYPE::ADD_OBJECT);
+                    CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
 
@@ -737,7 +737,7 @@ namespace ige::creator
                     auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
                     newObject->addComponent<UIButton>("sprites/background", rect->getSize());
                     Editor::getCurrentScene()->createObject("Label", newObject, true, Vec2())->addComponent<UIText>("Button");
-                    CommandManager::getInstance()->PushCommand(newObject, ige::creator::COMMAND_TYPE::ADD_OBJECT);
+                    CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
 
@@ -793,7 +793,7 @@ namespace ige::creator
                     sliderComp->setFillObject(newFill);
                     sliderComp->setHandleObject(newHandle);
 
-                    CommandManager::getInstance()->PushCommand(newObject, ige::creator::COMMAND_TYPE::ADD_OBJECT);
+                    CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
 
@@ -927,7 +927,7 @@ namespace ige::creator
 
                     uiVerticalBar->setValue(0.0f);
 
-                    CommandManager::getInstance()->PushCommand(newObject, ige::creator::COMMAND_TYPE::ADD_OBJECT);
+                    CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
 
@@ -940,7 +940,7 @@ namespace ige::creator
                     // Create Mask
                     auto uiMask = newObject->addComponent<UIMask>("sprites/background", rect->getSize());
                     uiMask->setAlpha(0);
-                    CommandManager::getInstance()->PushCommand(newObject, ige::creator::COMMAND_TYPE::ADD_OBJECT);
+                    CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
         }

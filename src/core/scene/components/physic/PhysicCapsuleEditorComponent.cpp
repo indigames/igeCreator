@@ -31,12 +31,20 @@ void PhysicCapsuleEditorComponent::drawPhysicCapsule() {
     if (comp == nullptr) return;
 
     std::array height = { comp->getProperty<float>("height", NAN) };
-    m_physicGroup->createWidget<Drag<float>>("Height", ImGuiDataType_Float, height, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
+    auto h1 = m_physicGroup->createWidget<Drag<float>>("Height", ImGuiDataType_Float, height, 0.001f, 0.0f);
+    h1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    h1->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("height", val[0]);
     });
 
     std::array radius = { comp->getProperty<float>("radius", NAN) };
-    m_physicGroup->createWidget<Drag<float>>("Radius", ImGuiDataType_Float, radius, 0.001f, 0.0f)->getOnDataChangedEvent().addListener([this](auto& val) {
+    auto r1 = m_physicGroup->createWidget<Drag<float>>("Radius", ImGuiDataType_Float, radius, 0.001f, 0.0f);
+    r1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    r1->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("radius", val[0]);
     });
 

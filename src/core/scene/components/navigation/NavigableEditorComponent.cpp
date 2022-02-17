@@ -31,6 +31,7 @@ void NavigableEditorComponent::drawNavigable()
     if (comp == nullptr) return;
 
     m_navigableGroup->createWidget<CheckBox>("Recursive", comp->getProperty<bool>("recursive", false))->getOnDataChangedEvent().addListener([this](bool val) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("recursive", val);
     });
 }
