@@ -20,6 +20,7 @@ using namespace ige::scene;
 #include "core/panels/AssetBrowser.h"
 #include "core/panels/ProjectSetting.h"
 #include "core/panels/AnimatorEditor.h"
+#include "core/panels/AnimatorPreview.h"
 
 namespace ige::creator
 {
@@ -49,7 +50,7 @@ namespace ige::creator
         template<typename T>
         std::shared_ptr<T> getPanelAs(const std::string& id)
         {
-            return std::dynamic_pointer_cast<T>(m_panels[id]);
+            return m_panels.find(id) != m_panels.end() ? std::dynamic_pointer_cast<T>(m_panels[id]) : nullptr;
         }
 
         void removePanel(std::shared_ptr<Panel> panel);
@@ -69,6 +70,7 @@ namespace ige::creator
         std::shared_ptr<AssetBrowser> getAssetBrowser() { return getPanelAs<AssetBrowser>("Assets"); }
         std::shared_ptr<ProjectSetting> getProjectSetting() { return getPanelAs<ProjectSetting>("Settings"); }
         std::shared_ptr<AnimatorEditor> getAnimatorEditor() { return getPanelAs<AnimatorEditor>("Animator"); }
+        std::shared_ptr<AnimatorPreview> getAnimatorPreview() { return getPanelAs<AnimatorPreview>("AnimatorPreview"); }
 
     protected:
         bool m_bDockable = false;

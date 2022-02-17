@@ -20,6 +20,9 @@
 #include "core/widgets/Separator.h"
 #include "core/widgets/Drag.h"
 #include "core/layout/Columns.h"
+#include "core/FileHandle.h"
+#include "core/Canvas.h"
+#include "core/panels/AnimatorPreview.h"
 
 #include <imgui_node_editor.h>
 namespace ed = ax::NodeEditor;
@@ -214,6 +217,8 @@ namespace ige::creator
                     save();
                 }
             }
+            if(Editor::getCanvas() && Editor::getCanvas()->getAnimatorPreview())
+                Editor::getCanvas()->getAnimatorPreview()->close();
             m_path.clear();
             m_currLayer = -1;
             clear();
@@ -253,6 +258,7 @@ namespace ige::creator
         catch (std::exception e) {}
 
         setDirty(false);
+        m_currState = nullptr;
 
         m_bInitialized = false;
     }
@@ -342,12 +348,16 @@ namespace ige::creator
     void AnimatorEditor::openAnimator(const std::string& path)
     {
         if (m_path.compare(path) != 0) {
+            clear();
             m_path = path;
             m_controller = std::make_shared<AnimatorController>();
             m_controller->setPath(m_path);
             setLayer(0);
-            open();
+            Editor::getCanvas()->getAnimatorPreview()->clear();
+            Editor::getCanvas()->getAnimatorPreview()->setModelPath(m_controller->getBaseModelPath());
         }
+        open();
+        Editor::getCanvas()->getAnimatorPreview()->open();
     }
 
     bool AnimatorEditor::save()
@@ -567,11 +577,45 @@ namespace ige::creator
                 m_layerGroup->removeAllWidgets();
                 
                 if (m_controller != nullptr) {
+                    auto modelPath = m_controller->getBaseModelPath();
+                    auto txtBaseModel = m_layerGroup->createWidget<TextField>("Base Model", modelPath, false, true);
+                    txtBaseModel->getOnDataChangedEvent().addListener([this](const auto& txt) {
+                        auto basePath = m_controller->getBaseModelPath();
+                        if (basePath.compare(txt) != 0) {
+                            m_controller->setBaseModelPath(txt);
+                            if (Editor::getCanvas() && Editor::getCanvas()->getAnimatorPreview()) {
+                                Editor::getCanvas()->getAnimatorPreview()->setModelPath(txt);
+                            }
+                            setDirty();
+                        }
+                    });
+
+                    for (const auto& type : GetFileExtensionSuported(E_FileExts::Figure)) {
+                        txtBaseModel->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
+                            auto basePath = m_controller->getBaseModelPath();
+                            if (basePath.compare(path) != 0) {
+                                m_controller->setBaseModelPath(path);
+                                if (Editor::getCanvas() && Editor::getCanvas()->getAnimatorPreview()) {
+                                    Editor::getCanvas()->getAnimatorPreview()->setModelPath(path);
+                                }
+                                setDirty();
+                            }
+                        });
+                    }
+
+                    txtBaseModel->addPlugin<DDTargetPlugin<std::string>>(".pyxa")->getOnDataReceivedEvent().addListener([this](const auto& path) {
+                        auto node = findNode(m_node);
+                        if (node != nullptr && !node->state.expired()) {
+                            node->state.lock()->setPath(path);
+                            setInspectorDirty();
+                            setDirty();
+                        }
+                    });
 
                     auto headerCols = m_layerGroup->createWidget<Columns<2>>();
                     headerCols->setColumnWidth(1, 32.f);
                     headerCols->createWidget<Label>("Layers");
-                    headerCols->createWidget<Button>("+", ImVec2(ImGui::GetTextLineHeight(), ImGui::GetTextLineHeight()))->getOnClickEvent().addListener([this](const auto& widget) {
+                    headerCols->createWidget<Button>("+", ImVec2(ImGui::GetFrameHeight(), 0))->getOnClickEvent().addListener([this](const auto& widget) {
                         if (m_controller->addLayer()) {
                             setLayer(m_controller->getStateMachines().size() - 1);
                             setLayersDirty();
@@ -589,7 +633,7 @@ namespace ige::creator
                         columns->createWidget<TreeNode>(label, m_currLayer == i, true)->getOnClickEvent().addListener([this, layer](const auto& widget) {
                             setLayer(layer);
                         });
-                        columns->createWidget<Button>("-", ImVec2(ImGui::GetTextLineHeight(), ImGui::GetTextLineHeight()))->getOnClickEvent().addListener([this, layer](const auto& widget) {
+                        columns->createWidget<Button>("-", ImVec2(ImGui::GetFrameHeight(), 0))->getOnClickEvent().addListener([this, layer](const auto& widget) {
                             m_controller->removeLayer(layer);
                             if (m_currLayer == layer) setLayer(layer - 1);
                             setLayersDirty();
@@ -692,6 +736,35 @@ namespace ige::creator
         }
     }
 
+    void AnimatorEditor::update(float dt)
+    {
+        Panel::update(dt);
+
+        if (!m_editor) return;
+        
+        if (m_controller) {
+            m_controller->update(dt);
+
+            auto currState = m_controller->getStateMachine(m_currLayer)->getCurrentState();
+            if (currState != nullptr) {
+                auto node = findNode(currState);
+                if (node != nullptr) {
+                    node->percentage = currState->getEndTime() > 0.f ? currState->getEvalTime() / currState->getEndTime() : 0.f;                     
+                }
+                if (m_currState != currState) {
+                    if (m_currState != nullptr) {
+                        auto node = findNode(m_currState);
+                        if (node) {
+                            node->percentage = 0.f;
+                        }
+                    }
+                    m_currState = currState;
+                }
+            }
+
+        }   
+    }
+
     void AnimatorEditor::drawWidgets()
     {
         if (!m_bInitialized || !m_editor)
@@ -739,7 +812,7 @@ namespace ige::creator
                     {
                         builder.Middle();
                         ImGui::Spring(1, 0);
-                        ImGui::ProgressBar(0.f, {150, 18}, node->name.c_str());
+                        ImGui::ProgressBar(node->percentage, {150, 18}, node->name.c_str());
                         ImGui::Spring(1, 0);
                     }
 
@@ -914,6 +987,15 @@ namespace ige::creator
 
             if (!focus)
                 Editor::getCanvas()->getInspector()->redraw();
+        }
+    }
+
+    void AnimatorEditor::setFigure(Figure* figure)
+    {
+        if (m_controller && m_currLayer >= 0) {
+            m_controller->setFigure(figure);
+            auto enterState = m_controller->getStateMachine(m_currLayer)->getEnterState();
+            m_controller->getStateMachine(m_currLayer)->setCurrentState(enterState);
         }
     }
 

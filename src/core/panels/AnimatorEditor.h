@@ -39,9 +39,10 @@ namespace ige::creator
         std::shared_ptr<Pin> inPin;
         std::shared_ptr <Pin> outPin;
         std::weak_ptr<AnimatorState> state;
+        float percentage;
 
         Node(ed::NodeId id, const std::string& name, ImVec2 position = {}, ImColor color = ImColor(255, 255, 255), std::shared_ptr<AnimatorState> state = nullptr)
-            : id(id), name(name), color(color), inPin(nullptr), outPin(nullptr), state(state)
+            : id(id), name(name), color(color), inPin(nullptr), outPin(nullptr), state(state), percentage(0.f)
         {}
     };
 
@@ -109,10 +110,12 @@ namespace ige::creator
         void drawInspector();
 
         void setFocus(bool focus);
+        void setFigure(Figure* figure);
 
     protected:
         virtual void initialize() override;
         virtual void clear();
+        virtual void update(float dt) override;
         virtual void drawWidgets() override;
 
         void showLeftPanel();
@@ -153,6 +156,7 @@ namespace ige::creator
     protected:
         std::string m_path;
         std::shared_ptr<AnimatorController> m_controller = nullptr;
+        std::shared_ptr<AnimatorState> m_currState = nullptr;
         std::shared_ptr<IPlugin> m_pyxaDragDropPlugin = nullptr;
         std::shared_ptr<IPlugin> m_animDragDropPlugin = nullptr;
         uint64_t m_uniqueId = 0;

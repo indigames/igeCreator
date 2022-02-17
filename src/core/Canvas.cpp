@@ -47,6 +47,9 @@ namespace ige::creator
         auto animatorPanel = createPanel<AnimatorEditor>("Animator", settings);
         animatorPanel->close();
 
+        auto animatorPreviewPanel = createPanel<AnimatorPreview>("AnimatorPreview", settings);
+        animatorPreviewPanel->close();
+
         getEditorScene()->getOnFocusEvent().addListener(std::bind(&Canvas::onPanelFocus, this, std::placeholders::_1));
         getAnimatorEditor()->getOnFocusEvent().addListener(std::bind(&Canvas::onPanelFocus, this, std::placeholders::_1));
     }
@@ -110,6 +113,7 @@ namespace ige::creator
                     ImGui::DockBuilderDockWindow("Settings", dock_id_right);
                     ImGui::DockBuilderDockWindow("Inspector", dock_id_right);
                     ImGui::DockBuilderDockWindow("Asset", dock_id_right_bottom);
+                    ImGui::DockBuilderDockWindow("AnimatorPreview", dock_id_right_bottom);
                     ImGui::DockBuilderDockWindow("Console", dock_id_bottom);
                     ImGui::DockBuilderDockWindow("Assets", dock_id_bottom);
                     ImGui::DockBuilderDockWindow("Scene", dock_main_id);
