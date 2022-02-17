@@ -37,6 +37,7 @@ namespace ige::creator
 
         //! Update keyboard
         void updateKeyboard();
+
         //! Update mouse & touch
         void updateTouch();
 

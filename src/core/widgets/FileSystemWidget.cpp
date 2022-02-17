@@ -713,6 +713,7 @@ namespace ige::creator
             ImGui::TextUnformatted(filename.string().c_str());
             static std::string relative; // Keep content in memory
             relative = fs::relative(path).string();
+            std::replace(relative.begin(), relative.end(), '\\', '/');
             ImGui::SetDragDropPayload(extension.c_str(), &relative, sizeof(relative));
             ImGui::EndDragDropSource();
             return true;
@@ -727,7 +728,9 @@ namespace ige::creator
             ImGuiDragDropFlags flags = 0;
             if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(std::to_string((int)EDragDropID::OBJECT).c_str(), flags))
             {
-                Editor::getInstance()->savePrefab(*(uint64_t*)payload->Data, absolute_path.string());
+                auto relative = fs::relative(absolute_path).string();
+                std::replace(relative.begin(), relative.end(), '\\', '/');
+                Editor::getInstance()->savePrefab(*(uint64_t*)payload->Data, relative);
             }
             ImGui::EndDragDropTarget();
         }
