@@ -39,40 +39,62 @@ void PhysicManagerEditorComponent::drawPhysicManager()
 
     auto columns = m_physicManagerGroup->createWidget<Columns<2>>();
     columns->createWidget<CheckBox>("Deformable", physicComp->isDeformable())->getOnDataChangedEvent().addListener([this](bool val) {
+        storeUndo();
         auto physicComp = std::dynamic_pointer_cast<PhysicManager>(getComponent<CompoundComponent>()->getComponents()[0]);
         physicComp->setDeformable(val);
     });
     columns->createWidget<CheckBox>("Debug", physicComp->isShowDebug())->getOnDataChangedEvent().addListener([this](bool val) {
+        storeUndo();
         auto physicComp = std::dynamic_pointer_cast<PhysicManager>(getComponent<CompoundComponent>()->getComponents()[0]);
         physicComp->setShowDebug(val);
     });
 
     std::array numItr = { (float)physicComp->getNumIteration() };
-    m_physicManagerGroup->createWidget<Drag<float>>("Iterations Number", ImGuiDataType_S32, numItr, 1, 1, 32)->getOnDataChangedEvent().addListener([this](auto& val) {
+    auto i1 = m_physicManagerGroup->createWidget<Drag<float>>("Iterations Number", ImGuiDataType_S32, numItr, 1, 1, 32);
+    i1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    i1->getOnDataChangedEvent().addListener([this](auto& val) {
         auto physicComp = std::dynamic_pointer_cast<PhysicManager>(getComponent<CompoundComponent>()->getComponents()[0]);
         physicComp->setNumIteration((int)val[0]);
     });
 
     std::array subSteps = { (float)physicComp->getFrameMaxSubStep() };
-    m_physicManagerGroup->createWidget<Drag<float>>("Max Substeps Number", ImGuiDataType_S32, subSteps, 1, 1, 32)->getOnDataChangedEvent().addListener([this](auto& val) {
+    auto m1 = m_physicManagerGroup->createWidget<Drag<float>>("Max Substeps Number", ImGuiDataType_S32, subSteps, 1, 1, 32);
+    m1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    m1->getOnDataChangedEvent().addListener([this](auto& val) {
         auto physicComp = std::dynamic_pointer_cast<PhysicManager>(getComponent<CompoundComponent>()->getComponents()[0]);
         physicComp->setFrameMaxSubStep((int)val[0]);
     });
 
     std::array timeStep = { physicComp->getFixedTimeStep() };
-    m_physicManagerGroup->createWidget<Drag<float>>("Time Step", ImGuiDataType_Float, timeStep, 0.001f, 0.001f)->getOnDataChangedEvent().addListener([this](auto& val) {
+    auto t1 = m_physicManagerGroup->createWidget<Drag<float>>("Time Step", ImGuiDataType_Float, timeStep, 0.001f, 0.001f);
+    t1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    t1->getOnDataChangedEvent().addListener([this](auto& val) {
         auto physicComp = std::dynamic_pointer_cast<PhysicManager>(getComponent<CompoundComponent>()->getComponents()[0]);
         physicComp->setFixedTimeStep(val[0]);
     });
 
     std::array frameRatio = { physicComp->getFrameUpdateRatio() };
-    m_physicManagerGroup->createWidget<Drag<float>>("Update Ratio", ImGuiDataType_Float, frameRatio, 0.001f, 0.001f)->getOnDataChangedEvent().addListener([this](auto& val) {
+    auto u1 = m_physicManagerGroup->createWidget<Drag<float>>("Update Ratio", ImGuiDataType_Float, frameRatio, 0.001f, 0.001f);
+    u1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    u1->getOnDataChangedEvent().addListener([this](auto& val) {
         auto physicComp = std::dynamic_pointer_cast<PhysicManager>(getComponent<CompoundComponent>()->getComponents()[0]);
         physicComp->setFrameUpdateRatio(val[0]);
     });
 
     std::array gravity = { physicComp->getGravity().x(), physicComp->getGravity().y(), physicComp->getGravity().z() };
-    m_physicManagerGroup->createWidget<Drag<float, 3>>("Gravity", ImGuiDataType_Float, gravity, 0.001f)->getOnDataChangedEvent().addListener([this](auto& val) {
+    auto g1 = m_physicManagerGroup->createWidget<Drag<float, 3>>("Gravity", ImGuiDataType_Float, gravity, 0.001f);
+    g1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    g1->getOnDataChangedEvent().addListener([this](auto& val) {
         auto physicComp = std::dynamic_pointer_cast<PhysicManager>(getComponent<CompoundComponent>()->getComponents()[0]);
         physicComp->setGravity({ val[0], val[1], val[2] });
     });

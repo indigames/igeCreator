@@ -41,26 +41,34 @@ void UITextBitmapEditorComponent::drawUIText()
 
     auto txtText = m_uiTextGroup->createWidget<TextField>("Text", comp->getProperty<std::string>("text", ""));
     txtText->getOnDataChangedEvent().addListener([this](auto txt) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("text", txt);
     });
 
     auto txtFontPath = m_uiTextGroup->createWidget<TextField>("Font", comp->getProperty<std::string>("font", ""), false, true);
     txtFontPath->getOnDataChangedEvent().addListener([this](auto txt) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("font", txt);
     });
     for (const auto& type : GetFileExtensionSuported(E_FileExts::FontBitmap)) {
         txtFontPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
+            storeUndo();
             getComponent<CompoundComponent>()->setProperty("font", GetRelativePath(path));
             setDirty();
         });
     }
 
     std::array size = { comp->getProperty<float>("size", NAN) };
-    m_uiTextGroup->createWidget<Drag<float>>("Size", ImGuiDataType_S32, size, 1, 4, 1024)->getOnDataChangedEvent().addListener([this](auto& val) {
+    auto s1 = m_uiTextGroup->createWidget<Drag<float>>("Size", ImGuiDataType_S32, size, 1, 4, 1024);
+    s1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    s1->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("size", (int)val[0]);
     });
 
     m_uiTextGroup->createWidget<Color>("Color", comp->getProperty<Vec4>("color", { NAN, NAN, NAN, NAN }))->getOnDataChangedEvent().addListener([this](auto& color) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("color", { color[0], color[1], color[2], color[3] });
     });
 
@@ -68,6 +76,7 @@ void UITextBitmapEditorComponent::drawUIText()
     auto horizontalCombo = m_uiTextGroup->createWidget<ComboBox>("AlignHorizontal", horizontal);
     horizontalCombo->getOnDataChangedEvent().addListener([this](auto val) {
         if (val != -1) {
+            storeUndo();
             getComponent<CompoundComponent>()->setProperty("alignhorizontal", val);
             setDirty();
         }
@@ -82,6 +91,7 @@ void UITextBitmapEditorComponent::drawUIText()
     auto verticalCombo = m_uiTextGroup->createWidget<ComboBox>("Text Align Horizontal", vertical);
     verticalCombo->getOnDataChangedEvent().addListener([this](auto val) {
         if (val != -1) {
+            storeUndo();
             getComponent<CompoundComponent>()->setProperty("alignvertical", val);
             setDirty();
         }

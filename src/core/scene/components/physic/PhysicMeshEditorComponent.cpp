@@ -43,11 +43,13 @@ void PhysicMeshEditorComponent::drawPhysicMesh()
     auto concaveChk = m_physicGroup->createWidget<CheckBox>("TriangleMesh", !convex);
 
     convexChk->getOnDataChangedEvent().addListener([this, convexChk, concaveChk](bool convex) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("convex", convex);
         convexChk->setSelected(convex);
         concaveChk->setSelected(!convex);
     });
     concaveChk->getOnDataChangedEvent().addListener([this, convexChk, concaveChk](bool concave) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("convex", !concave);
         convexChk->setSelected(!concave);
         concaveChk->setSelected(concave);
@@ -55,10 +57,14 @@ void PhysicMeshEditorComponent::drawPhysicMesh()
 
     std::array meshIdx = { comp->getProperty<float>("meshIdx", NAN) };
     auto meshIdxWg = m_physicGroup->createWidget<Drag<float>>("MeshIndex", ImGuiDataType_S32, meshIdx, 1, 0);
+    meshIdxWg->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
     meshIdxWg->getOnDataChangedEvent().addListener([this](const auto& val) {
         getComponent<CompoundComponent>()->setProperty("meshIdx", (int)val[0]);
     });
     meshIdxWg->addPlugin<DDTargetPlugin<int>>(EDragDropID::MESH)->getOnDataReceivedEvent().addListener([this](auto val) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("meshIdx", val);
         setDirty();
     });
@@ -66,10 +72,12 @@ void PhysicMeshEditorComponent::drawPhysicMesh()
     auto txtPath = m_physicGroup->createWidget<TextField>("Path", comp->getProperty<std::string>("path", ""), false, true);
     txtPath->setEndOfLine(false);
     txtPath->getOnDataChangedEvent().addListener([this](const auto& txt) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("path", txt);
     });
     for (const auto& type : GetFileExtensionSuported(E_FileExts::Figure)) {
         txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
+            storeUndo();
             getComponent<CompoundComponent>()->setProperty("path", GetRelativePath(path));
             setDirty();
         });
@@ -77,6 +85,7 @@ void PhysicMeshEditorComponent::drawPhysicMesh()
     m_physicGroup->createWidget<Button>("Browse", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](const auto& widget) {
         auto files = OpenFileDialog("Import Assets", "", { "Figure", "*.dae", "*.fbx" }).result();
         if (files.size() > 0) {
+            storeUndo();
             getComponent<CompoundComponent>()->setProperty("path", GetRelativePath(files[0]));
             setDirty();
         }

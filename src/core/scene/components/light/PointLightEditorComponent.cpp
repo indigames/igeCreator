@@ -30,16 +30,25 @@ void PointLightEditorComponent::drawPointLight() {
 
     auto color = Vec4(comp->getProperty<Vec3>("col", { NAN, NAN, NAN }), 1.f);
     m_pointLightGroup->createWidget<Color>("Color", color)->getOnDataChangedEvent().addListener([this](auto val) {
+        storeUndo();
         getComponent<CompoundComponent>()->setProperty("col", { val[0], val[1], val[2] });
     });
 
     std::array its = { comp->getProperty<float>("its", NAN) };
-    m_pointLightGroup->createWidget<Drag<float>>("Intensity", ImGuiDataType_Float, its)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto i1 = m_pointLightGroup->createWidget<Drag<float>>("Intensity", ImGuiDataType_Float, its);
+    i1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    i1->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("its", val[0]);
     });
 
     std::array rng = { comp->getProperty<float>("rng", NAN) };
-    m_pointLightGroup->createWidget<Drag<float>>("Range", ImGuiDataType_Float, rng)->getOnDataChangedEvent().addListener([this](auto val) {
+    auto r1 = m_pointLightGroup->createWidget<Drag<float>>("Range", ImGuiDataType_Float, rng);
+    r1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        });
+    r1->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("rng", val[0]);
     });
 }

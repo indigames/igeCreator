@@ -15,14 +15,23 @@ namespace ige::creator
         Drag(const std::string& label, ImGuiDataType type, const std::array<T, N>& val, float speed = 0.05f, const T& minVal = std::numeric_limits<T>::lowest(), const T& maxVal = std::numeric_limits<T>::max());
         virtual ~Drag();
 
+        ige::scene::Event<const std::array<T, N>&>& getOnDataFinishChangedEvent() { return m_onDataFinishChangedEvent; }
+        ige::scene::Event<const std::array<T, N>&>& getOnDataBeginChangedEvent() { return m_onDataBeginChangedEvent; }
+
     protected:
         virtual void _drawImpl() override;
+        virtual void notifyFinishChange(const std::array<T, N>& data);
+        virtual void notifyBeginChange(const std::array<T, N>& data);
+
 
         std::string m_label;
         ImGuiDataType m_dataType;
         float m_speed;
         T m_min;
         T m_max;
+        bool m_dragging;
+        ige::scene::Event<const std::array<T, N>&> m_onDataBeginChangedEvent;
+        ige::scene::Event<const std::array<T, N>&> m_onDataFinishChangedEvent;
     };
 }
 

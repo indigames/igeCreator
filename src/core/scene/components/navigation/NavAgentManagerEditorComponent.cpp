@@ -34,13 +34,21 @@ void NavAgentManagerEditorComponent::drawNavAgentManager()
             return;
 
         std::array maxAgents = { (float)navAgentManager->getMaxAgentNumber() };
-        m_navAgentManagerGroup->createWidget<Drag<float>>("Max Agents", ImGuiDataType_S32, maxAgents, 1, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+        auto m1 = m_navAgentManagerGroup->createWidget<Drag<float>>("Max Agents", ImGuiDataType_S32, maxAgents, 1, 0);
+        m1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            });
+        m1->getOnDataChangedEvent().addListener([this](auto val) {
             auto navAgentManager = std::dynamic_pointer_cast<NavAgentManager>(getComponent<CompoundComponent>()->getComponents()[0]);
             navAgentManager->setMaxAgentNumber((int)val[0]);
         });
 
         std::array maxRadius = { navAgentManager->getMaxAgentRadius() };
-        m_navAgentManagerGroup->createWidget<Drag<float>>("Max Agent Radius", ImGuiDataType_Float, maxRadius, 0.001f, 0)->getOnDataChangedEvent().addListener([this](auto val) {
+        auto m2 = m_navAgentManagerGroup->createWidget<Drag<float>>("Max Agent Radius", ImGuiDataType_Float, maxRadius, 0.001f, 0);
+        m2->getOnDataBeginChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            });
+        m2->getOnDataChangedEvent().addListener([this](auto val) {
             auto navAgentManager = std::dynamic_pointer_cast<NavAgentManager>(getComponent<CompoundComponent>()->getComponents()[0]);
             navAgentManager->setMaxAgentRadius(val[0]);
         });

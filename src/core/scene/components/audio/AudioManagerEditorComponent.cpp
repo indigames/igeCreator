@@ -37,6 +37,7 @@ void AudioManagerEditorComponent::drawAudioManager()
 
     std::array volume = { audioMngComp->getGlobalVolume() };
     m_audioManagerGroup->createWidget<Drag<float>>("Global Volume", ImGuiDataType_Float, volume, 0.01f, 0.f, 1.f)->getOnDataChangedEvent().addListener([this](auto& val) {
+        storeUndo();
         auto audioMngComp = std::dynamic_pointer_cast<AudioManager>(getComponent<CompoundComponent>()->getComponents()[0]);
         audioMngComp->setGlobalVolume(val[0]);
     });

@@ -46,6 +46,8 @@ protected:
 	//! Internal inspector update
 	virtual void onInspectorUpdate() = 0;
 
+	virtual void storeUndo();
+
 protected:
 	std::weak_ptr<Component> m_component;
 	std::shared_ptr<Group> m_group = nullptr;

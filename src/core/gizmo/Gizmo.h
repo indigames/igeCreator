@@ -81,6 +81,8 @@ namespace ige::creator
         //! Scale
         void scale(const Vec3& scale);
 
+        void storeUndo();
+
         Camera* m_camera;
         
         gizmo::OPERATION m_operation;
@@ -102,5 +104,7 @@ namespace ige::creator
 
         //! Targeted objects
         std::vector<std::weak_ptr<SceneObject>> m_targets = {};
+
+        bool m_bIsDragging;
     };
 }
