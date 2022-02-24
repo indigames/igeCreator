@@ -1136,7 +1136,7 @@ namespace ige::creator
                 }
             });
             std::array offsets = { transition->offset };
-            m_inspectGroup->createWidget<Drag<float>>("Offset", ImGuiDataType_Float, offsets)->getOnDataChangedEvent().addListener([this](auto val) {
+            m_inspectGroup->createWidget<Drag<float>>("Transit Time", ImGuiDataType_Float, offsets)->getOnDataChangedEvent().addListener([this](auto val) {
                 auto link = findLink(m_link);
                 if (link != nullptr && !link->transition.expired()) {
                     link->transition.lock()->offset = val[0];
