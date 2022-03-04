@@ -12,15 +12,15 @@ Platforms: # Platforms config
         arm64-v8a: true
         x86_64: false
         MinSdkVersion: 21
-        TargetSdkVersion: 30
+        TargetSdkVersion: 31
         ScreenOrientation: portrait
         Permissions:
             - android.permission.INTERNET  # Access internet
             - android.permission.ACCESS_NETWORK_STATE # Access network state
             - android.permission.ACCESS_WIFI_STATE # Access WIFI state
             - android.permission.WRITE_EXTERNAL_STORAGE # R/W access to external storage
-            # - android.permission.CAMERA # Camera permission
             - android.permission.VIBRATE # Vibration permission
+            # - android.permission.CAMERA # Camera permission
             # - android.permission.BLUETOOTH # Bluetooth permission
             # - add more here
         Features:
@@ -39,8 +39,8 @@ Platforms: # Platforms config
         DeploymentTarget: '11.0'
         DeviveFamily: 1,2
         DevelopmentTeamID: R2TWY42MN5
-        CodeSignIdentity: iPhone Development
-        ProvisioningProfile: Automatic # use 'Automatic' for development
+        CodeSignIdentity: iPhone Development # use 'iPhone Development' for debug, 'iPhone Distribution' for release
+        ProvisioningProfile: Automatic # use 'Automatic' for debug, 'igeSample-Adhoc-IOS' for release
     macos:
         RomDir: rom/pc
         ConfigDir: ''
@@ -63,7 +63,7 @@ Requires: # Modules config
     - igeNavigation/[>=0.0.2]@ige/test
     - igeScene/[>=0.0.6]@ige/test
     - igeSound/[>=0.1.0]@ige/test
-    - igeGameAnalytics/[>=0.0.3]@ige/test
+    - igeSdk/[>=0.0.1]@ige/test
     # - pyimgui/[>=1.2.0]@ige/test
     # - dlib/[>=19.19.99]@ige/test
     # - igeDlibExt/[>=0.0.1]@ige/test
@@ -71,9 +71,7 @@ Requires: # Modules config
     # - pybox2d/[>=2.3.8]@ige/test
     # - pillow/[>=8.2.0]@ige/test
     # - tensorflow/[>=2.5.0]@ige/test
-    # - igeAdjust/[>=0.0.5]@ige/test
     # - igeAds/[>=0.0.3]@ige/test
-    # - igeAppsFlyer/[>=0.0.2]@ige/test
     # - igeAutoTest/[>=0.0.4]@ige/test
     # - igeCamera/[>=0.0.1]@ige/test
     # - igeFirebase/[>=0.0.33]@ige/test
