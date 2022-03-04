@@ -8,6 +8,10 @@ struct _inittab g_customInitTabs[] = {
     {"igeScene", PyInit_igeScene},
 #endif
 
+#ifdef USE_IGESDK
+    {"igeSdk", PyInit_igeSdk},
+#endif
+
 #ifdef USE_NUMPY
     {"numpy.core._multiarray_umath", PyInit__multiarray_umath},
     {"numpy.core._multiarray_tests", PyInit__multiarray_tests},
@@ -77,10 +81,6 @@ struct _inittab g_customInitTabs[] = {
     {"igeInAppPurchase", PyInit_igeInAppPurchase},
 #endif
 
-#ifdef USE_IGEAPPSFLYER
-    {"igeAppsFlyer", PyInit_igeAppsFlyer},
-#endif
-
 #ifdef USE_IGESOUND
     {"igeSound", PyInit_igeSound},
 #endif
@@ -99,14 +99,6 @@ struct _inittab g_customInitTabs[] = {
 
 #ifdef USE_IGEPAL
     {"igePAL", PyInit__igePAL},
-#endif
-
-#ifdef USE_IGEADJUST
-    {"igeAdjust", PyInit_igeAdjust},
-#endif
-
-#ifdef USE_IGEGAMEANALYTICS
-    {"igeGameAnalytics", PyInit_igeGameAnalytics},
 #endif
 
 #ifdef USE_IGEAUTOTEST

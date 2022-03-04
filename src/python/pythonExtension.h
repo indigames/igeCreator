@@ -9,6 +9,10 @@ extern PyObject *PyInit_igeVmath(void);
 extern PyObject* PyInit_igeScene();
 #endif
 
+#ifdef USE_IGESDK
+extern PyObject* PyInit_igeSdk();
+#endif
+
 #ifdef USE_PYIMGUI
 extern PyObject *PyInit_core(void);
 #endif
@@ -57,10 +61,6 @@ extern PyObject *PyInit_igeGamesServices(void);
 extern PyObject *PyInit_igeInAppPurchase(void);
 #endif
 
-#ifdef USE_IGEAPPSFLYER
-extern PyObject *PyInit_igeAppsFlyer(void);
-#endif
-
 #ifdef USE_IGESOUND
 extern PyObject *PyInit_igeSound(void);
 #endif
@@ -79,14 +79,6 @@ extern PyObject *PyInit_igeCamera(void);
 
 #ifdef USE_IGEPAL
 extern PyObject *PyInit__igePAL(void);
-#endif
-
-#ifdef USE_IGEADJUST
-extern PyObject *PyInit_igeAdjust(void);
-#endif
-
-#ifdef USE_IGEGAMEANALYTICS
-extern PyObject *PyInit_igeGameAnalytics(void);
 #endif
 
 #ifdef USE_IGEAUTOTEST
