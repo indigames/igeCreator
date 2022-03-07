@@ -116,14 +116,14 @@ find_package(SDL REQUIRED)
 find_package(openssl REQUIRED)
 find_package(taskflow REQUIRED)
 find_package(tracy REQUIRED)
+find_package(zlib)
+find_package(json)
 find_package(igeBullet REQUIRED)
 find_package(bullet REQUIRED)
 find_package(igeSound REQUIRED)
 find_package(igeEffekseer REQUIRED)
 find_package(igeNavigation REQUIRED)
-find_package(igeGameAnalytics)
-find_package(zlib)
-find_package(json)
+find_package(igeSdk REQUIRED)
 
 include_directories(
     "${zlib_INCLUDE_DIRS}"
@@ -147,7 +147,7 @@ include_directories(
     "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/DetourCrowd/Include"
     "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/DetourTileCache/Include"
     "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/Recast/Include"
-    "${igeGameAnalytics_INCLUDE_DIRS}"
+    "${igeSdk_INCLUDE_DIRS}"
 )
 
 # Source files
@@ -235,7 +235,7 @@ target_link_libraries(${TARGET_NAME}
     ${igeSound_LIBRARIES}
     ${igeEffekseer_LIBRARIES}
     ${igeNavigation_LIBRARIES}
-    ${igeGameAnalytics_LIBRARIES}
+    ${igeSdk_LIBRARIES}
     Crypt32
     opengl32
     glu32
@@ -300,7 +300,7 @@ set(COMPILE_DEFINITIONS
     ${igeEffekseer_COMPILE_DEFINITIONS}
     ${igeNavigation_COMPILE_DEFINITIONS}
     ${igeNavigation_COMPILE_DEFINITIONS}
-    ${igeGameAnalytics_COMPILE_DEFINITIONS}
+    ${igeSdk_COMPILE_DEFINITIONS}
 )
 
 target_compile_definitions(${TARGET_NAME} PUBLIC ${COMPILE_DEFINITIONS} Py_NO_ENABLE_SHARED USE_PYXCORE USE_IGECORE USE_IGESCENE USE_IGEVMATH)
