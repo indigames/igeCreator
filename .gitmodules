@@ -30,3 +30,7 @@
 	path = 3rd-party/imgui-node-editor
 	url = https://github.com/indigames/imgui-node-editor.git
 	branch = develop
+[submodule "libs/igeSdk"]
+	path = libs/igeSdk
+	url = git@github.com:indigames/igeSdk.git
+	branch = dev

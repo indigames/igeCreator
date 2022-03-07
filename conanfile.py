@@ -35,7 +35,6 @@ class IgeConan(ConanFile):
         self.requires("igeGameAnalytics/[>=0.0.3]@ige/test")
         self.requires("igeCore/[>=0.5.70]@ige/test")
         self.requires("pyxCore/[>=0.5.70]@ige/test")
-        self.requires("igeSdk/[>=0.0.1]@ige/test")
 
     def build(self):
         self._generateCMakeProject()

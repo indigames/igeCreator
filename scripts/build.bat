@@ -6,7 +6,7 @@ set PROJECT_DIR=%~dp0..
 
 if [%CONAN_USER_HOME%]==[] (
     set CONAN_REVISIONS_ENABLED=1
-    set CONAN_USER_HOME=%PROJECT_DIR%
+    set CONAN_USER_HOME=D:\DevTools\.conan_igeCreator
     conan config set storage.download_cache="%APPDATA%\indigames\.conan_cache"
     conan remote add ige-center http://10.1.0.222:8081/artifactory/api/conan/conan --force
     conan remote disable "*"

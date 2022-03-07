@@ -101,6 +101,7 @@ add_subdirectory(libs/pyxCore ${CMAKE_BINARY_DIR}/pyxCore EXCLUDE_FROM_ALL)
 add_subdirectory(libs/igeCore ${CMAKE_BINARY_DIR}/igeCore EXCLUDE_FROM_ALL)
 add_subdirectory(libs/igeVMath ${CMAKE_BINARY_DIR}/igeVMath EXCLUDE_FROM_ALL)
 add_subdirectory(libs/igeScene ${CMAKE_BINARY_DIR}/igeScene EXCLUDE_FROM_ALL)
+add_subdirectory(libs/igeSdk ${CMAKE_BINARY_DIR}/igeSdk EXCLUDE_FROM_ALL)
 
 if(${APP_STYLE} MATCHES "SHARED")
     find_package (Python3 ${PYTHON_VERSION} EXACT REQUIRED COMPONENTS Development)
@@ -123,7 +124,6 @@ find_package(bullet REQUIRED)
 find_package(igeSound REQUIRED)
 find_package(igeEffekseer REQUIRED)
 find_package(igeNavigation REQUIRED)
-find_package(igeSdk REQUIRED)
 
 include_directories(
     "${zlib_INCLUDE_DIRS}"
@@ -219,6 +219,7 @@ endforeach()
 
 target_link_libraries(${TARGET_NAME} 
     igeScene-static
+    igeSdk-static
     pyxcore
     pyxtools
     igeCore-static
@@ -234,7 +235,6 @@ target_link_libraries(${TARGET_NAME}
     ${igeSound_LIBRARIES}
     ${igeEffekseer_LIBRARIES}
     ${igeNavigation_LIBRARIES}
-    ${igeSdk_LIBRARIES}
     Crypt32
     opengl32
     glu32
@@ -272,6 +272,7 @@ target_include_directories(${TARGET_NAME} PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui"
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui-node-editor"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeSdk"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/pyxcore"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/GLEW"
@@ -284,7 +285,6 @@ target_include_directories(${TARGET_NAME} PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/spdlog/include/spdlog"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeCore"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeVMath"
-    "${igeSdk_INCLUDE_DIRS}"
 )
 
 set(COMPILE_DEFINITIONS
@@ -300,10 +300,9 @@ set(COMPILE_DEFINITIONS
     ${igeEffekseer_COMPILE_DEFINITIONS}
     ${igeNavigation_COMPILE_DEFINITIONS}
     ${igeNavigation_COMPILE_DEFINITIONS}
-    ${igeSdk_COMPILE_DEFINITIONS}
 )
 
-target_compile_definitions(${TARGET_NAME} PUBLIC ${COMPILE_DEFINITIONS} Py_NO_ENABLE_SHARED USE_PYXCORE USE_IGECORE USE_IGESCENE USE_IGEVMATH)
+target_compile_definitions(${TARGET_NAME} PUBLIC ${COMPILE_DEFINITIONS} Py_NO_ENABLE_SHARED USE_PYXCORE USE_IGECORE USE_IGESCENE USE_IGEVMATH USE_IGESDK)
 
 set_target_properties(
     ${TARGET_NAME} PROPERTIES
