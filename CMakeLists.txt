@@ -147,7 +147,6 @@ include_directories(
     "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/DetourCrowd/Include"
     "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/DetourTileCache/Include"
     "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/Recast/Include"
-    "${igeSdk_INCLUDE_DIRS}"
 )
 
 # Source files
@@ -285,6 +284,7 @@ target_include_directories(${TARGET_NAME} PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/spdlog/include/spdlog"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeCore"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeVMath"
+    "${igeSdk_INCLUDE_DIRS}"
 )
 
 set(COMPILE_DEFINITIONS
