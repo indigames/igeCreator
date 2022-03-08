@@ -106,7 +106,7 @@ namespace ige::creator
             auto size = getSize();
             if (size.x > 0 && size.y > 0)
             {
-                m_rtTexture = ResourceCreator::Instance().NewTexture("Editor_RTTexture", nullptr, size.x, size.y, GL_RGB);
+                m_rtTexture = ResourceCreator::Instance().NewTexture("Editor_RTTexture", nullptr, size.x, size.y, GL_RGBA);
                 m_rtTexture->WaitInitialize();
 
                 m_fbo = ResourceCreator::Instance().NewRenderTarget(m_rtTexture, true, true);
