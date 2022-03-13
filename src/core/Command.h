@@ -26,7 +26,16 @@ namespace ige::creator
 	public:
 		std::string uuid;
 		std::string uuid_parent;
+		
+		std::vector<std::string> uuids;
+		std::vector<std::string> uuid_parents;
+		
 		json jObj;
+		std::vector<json> jObjs;
+
+		bool isMultiObject = false;
+
 		COMMAND_TYPE type;
+
 	};
 }

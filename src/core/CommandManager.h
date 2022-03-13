@@ -16,6 +16,10 @@ namespace ige::creator
 		virtual ~CommandManager();
 		void PushCommand(COMMAND_TYPE type, std::shared_ptr<SceneObject> target);
 		void PushCommand(COMMAND_TYPE type, std::shared_ptr<SceneObject> target, json& jObj);
+		
+		void PushCommand(COMMAND_TYPE type, std::vector<std::shared_ptr<SceneObject>> targets);
+		void PushCommand(COMMAND_TYPE type, std::vector<std::shared_ptr<SceneObject>> targets, std::vector<json> jObjs);
+
 		void Undo();
 		void Redo();
 	protected:

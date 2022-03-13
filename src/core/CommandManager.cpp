@@ -53,6 +53,52 @@ void CommandManager::PushCommand(COMMAND_TYPE type, std::shared_ptr<SceneObject>
     m_redo.clear();
 }
 
+void CommandManager::PushCommand(COMMAND_TYPE type, std::vector<std::shared_ptr<SceneObject>> targets)
+{
+    int currentSize = m_undo.size();
+    if (currentSize == m_maxSize)
+    {
+        //Remove the oldest 
+        m_undo.erase(m_undo.begin());
+    }
+    std::shared_ptr<Command> cmd = std::make_shared<Command>();
+    cmd->isMultiObject = true;
+    int size = targets.size();
+    for (int i = 0; i < size; i++) {
+        cmd->uuids.push_back(targets[i]->getUUID());
+        auto uuid_parent = targets[i]->getParent() != nullptr ? targets[i]->getParent()->getUUID() : "";
+        cmd->uuid_parents.push_back(uuid_parent);
+        json jObj;
+        targets[i]->to_json(jObj);
+        cmd->jObjs.push_back(jObj);
+    }
+    cmd->type = type;
+    m_undo.push_back(cmd);
+    m_redo.clear();
+}
+
+void CommandManager::PushCommand(COMMAND_TYPE type, std::vector<std::shared_ptr<SceneObject>> targets, std::vector<json> jObjs)
+{
+    int currentSize = m_undo.size();
+    if (currentSize == m_maxSize)
+    {
+        //Remove the oldest 
+        m_undo.erase(m_undo.begin());
+    }
+    std::shared_ptr<Command> cmd = std::make_shared<Command>();
+    cmd->isMultiObject = true;
+    int size = targets.size();
+    for (int i = 0; i < size; i++) {
+        cmd->uuids.push_back(targets[i]->getUUID());
+        auto pa_id = targets[i]->getParent() != nullptr ? targets[i]->getParent()->getUUID() : "";
+        cmd->uuid_parents.push_back(pa_id);
+        cmd->jObjs.push_back(jObjs[i]);
+    }
+    cmd->type = type;
+    m_undo.push_back(cmd);
+    m_redo.clear();
+}
+
 void CommandManager::Undo()
 {
     if (m_undo.size() == 0) return;
@@ -87,73 +133,163 @@ std::shared_ptr<Command> CommandManager::generateComponent(std::shared_ptr<Comma
 {
     std::shared_ptr<Command> cmd = std::make_shared<Command>();
     auto scene = SceneManager::getInstance()->getCurrentScene();
-    auto target = scene->findObjectByUUID(command->uuid);
-    json jObj;
-    target->to_json(jObj);
-
-    cmd->uuid = command->uuid;
-    cmd->uuid_parent = command->uuid_parent;
-    cmd->jObj = jObj;
+    if (!command->isMultiObject) {
+        auto target = scene->findObjectByUUID(command->uuid);
+        json jObj;
+        target->to_json(jObj);
+        cmd->uuid = command->uuid;
+        cmd->uuid_parent = command->uuid_parent;
+        cmd->jObj = jObj;
+    }
+    else {
+        int size = cmd->uuids.size();
+        for (int i = 0; i < size; i++)
+        {
+            auto uuid = command->uuids[i];
+            auto target = scene->findObjectByUUID(uuid);
+            json jObj;
+            target->to_json(jObj);
+            cmd->jObjs.push_back(jObj);
+            cmd->uuids.push_back(uuid);
+            cmd->uuid_parents.push_back(command->uuid_parents[i]);
+        }
+        cmd->isMultiObject = command->isMultiObject;
+    }
     cmd->type = command->type;  
     return cmd;
 }
 
-
 void CommandManager::activeUndoCommand(std::shared_ptr<Command> command)
 {
-    auto scene = SceneManager::getInstance()->getCurrentScene();
-    auto target = scene->findObjectByUUID(command->uuid);
-    auto parent = scene->findObjectByUUID(command->uuid_parent);
-    
+    auto scene = SceneManager::getInstance()->getCurrentScene();    
     auto type = command->type;
     switch (type) {
     case COMMAND_TYPE::ADD_OBJECT:
     {
-        if (target != nullptr)
+        if (command->isMultiObject)
         {
-            Editor::getInstance()->removeTarget(target);
-            Editor::getCurrentScene()->removeObject(target);
+            int size = command->uuids.size();
+            for (int i = 0; i < size; i++) {
+                auto target = scene->findObjectByUUID(command->uuids[i]);
+                if (target != nullptr)
+                {
+                    Editor::getInstance()->removeTarget(target);
+                    Editor::getCurrentScene()->removeObject(target);
+                }
+            }
+        }
+        else
+        {
+            auto target = scene->findObjectByUUID(command->uuid);
+            if (target != nullptr)
+            {
+                Editor::getInstance()->removeTarget(target);
+                Editor::getCurrentScene()->removeObject(target);
+            }
         }
     }
     break;
     case COMMAND_TYPE::DELETE_OBJECT:
     {
-        auto newObject = scene->createObject(command->jObj.value("name", std::string()), nullptr, command->jObj.value("gui", false));
-        newObject->from_json(command->jObj);
-        newObject->setParent(parent);
+        if (command->isMultiObject)
+        {
+            int size = command->uuids.size();
+            for (int i = 0; i < size; i++) {
+                auto newObject = scene->createObject(command->jObjs[i].value("name", std::string()), nullptr, command->jObjs[i].value("gui", false));
+                newObject->from_json(command->jObjs[i]);
+                auto parentx = scene->findObjectByUUID(command->uuid_parents[i]);
+                newObject->setParent(parentx);
+            }
+        }
+        else
+        {
+            auto target = scene->findObjectByUUID(command->uuid);
+            auto parent = scene->findObjectByUUID(command->uuid_parent);
+
+            auto newObject = scene->createObject(command->jObj.value("name", std::string()), nullptr, command->jObj.value("gui", false));
+            newObject->from_json(command->jObj);
+            newObject->setParent(parent);
+        }
     }
     break;
     case COMMAND_TYPE::SELECT_OBJECT:
         break;
     case COMMAND_TYPE::ADD_COMPONENT:
     {
-        if (target != nullptr)
+        if (command->isMultiObject)
         {
-            auto j = command->jObj;
-            auto jComps = j.at("comps");
-            for (auto it : jComps)
+            int size = command->uuids.size();
+            for (int i = 0; i < size; i++) {
+                auto target = scene->findObjectByUUID(command->uuids[i]);
+                if (target != nullptr) {
+                    auto j = command->jObjs[i];
+                    auto jComps = j.at("comps");
+                    for (auto it : jComps)
+                    {
+                        std::string key = it.at(0);
+                        target->removeComponent(key);
+                    }
+                }
+            }
+        }
+        else
+        {
+            auto target = scene->findObjectByUUID(command->uuid);
+            auto parent = scene->findObjectByUUID(command->uuid_parent);
+            if (target != nullptr)
             {
-                std::string key = it.at(0);
-                target->removeComponent(key);
+                auto j = command->jObj;
+                auto jComps = j.at("comps");
+                for (auto it : jComps)
+                {
+                    std::string key = it.at(0);
+                    target->removeComponent(key);
+                }
             }
         }
     }
     break;
     case COMMAND_TYPE::DELETE_COMPONENT:
     {
-        if (target != nullptr)
-        {
-            auto j = command->jObj;
-            auto jComps = j.at("comps");
-            for (auto it : jComps)
+        if (command->isMultiObject) {
+            int size = command->uuids.size();
+            for (int i = 0; i < size; i++) {
+                auto target = scene->findObjectByUUID(command->uuids[i]);
+                if (target != nullptr)
+                {
+                    auto j = command->jObjs[i];
+                    auto jComps = j.at("comps");
+                    for (auto it : jComps)
+                    {
+                        std::string key = it.at(0);
+                        auto val = it.at(1);
+                        std::shared_ptr<Component> comp = target->getComponent(key);
+                        if (comp == nullptr)
+                            comp = target->createComponent(key);
+                        if (comp) {
+                            val.get_to(*comp);
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            auto target = scene->findObjectByUUID(command->uuid);
+            auto parent = scene->findObjectByUUID(command->uuid_parent);
+            if (target != nullptr)
             {
-                std::string key = it.at(0);
-                auto val = it.at(1);
-                std::shared_ptr<Component> comp = target->getComponent(key);
-                if (comp == nullptr)
-                    comp = target->createComponent(key);
-                if (comp) {
-                    val.get_to(*comp);
+                auto j = command->jObj;
+                auto jComps = j.at("comps");
+                for (auto it : jComps)
+                {
+                    std::string key = it.at(0);
+                    auto val = it.at(1);
+                    std::shared_ptr<Component> comp = target->getComponent(key);
+                    if (comp == nullptr)
+                        comp = target->createComponent(key);
+                    if (comp) {
+                        val.get_to(*comp);
+                    }
                 }
             }
         }
@@ -161,19 +297,46 @@ void CommandManager::activeUndoCommand(std::shared_ptr<Command> command)
     break;
     case COMMAND_TYPE::EDIT_COMPONENT:
     {
-        if (target != nullptr)
+        if (command->isMultiObject) {
+            int size = command->uuids.size();
+            for (int i = 0; i < size; i++) {
+                auto target = scene->findObjectByUUID(command->uuids[i]);
+                if (target != nullptr)
+                {
+                    auto j = command->jObjs[i];
+                    auto jComps = j.at("comps");
+                    for (auto it : jComps)
+                    {
+                        std::string key = it.at(0);
+                        auto val = it.at(1);
+                        std::shared_ptr<Component> comp = target->getComponent(key);
+                        if (comp == nullptr)
+                            comp = target->createComponent(key);
+                        if (comp) {
+                            val.get_to(*comp);
+                        }
+                    }
+                }
+            }
+        }
+        else
         {
-            auto j = command->jObj;
-            auto jComps = j.at("comps");
-            for (auto it : jComps)
+            auto target = scene->findObjectByUUID(command->uuid);
+            auto parent = scene->findObjectByUUID(command->uuid_parent);
+            if (target != nullptr)
             {
-                std::string key = it.at(0);
-                auto val = it.at(1);
-                std::shared_ptr<Component> comp = target->getComponent(key);
-                if (comp == nullptr)
-                    comp = target->createComponent(key);
-                if (comp) {
-                    val.get_to(*comp);
+                auto j = command->jObj;
+                auto jComps = j.at("comps");
+                for (auto it : jComps)
+                {
+                    std::string key = it.at(0);
+                    auto val = it.at(1);
+                    std::shared_ptr<Component> comp = target->getComponent(key);
+                    if (comp == nullptr)
+                        comp = target->createComponent(key);
+                    if (comp) {
+                        val.get_to(*comp);
+                    }
                 }
             }
         }
@@ -189,24 +352,54 @@ void CommandManager::activeUndoCommand(std::shared_ptr<Command> command)
 void CommandManager::activeRedoCommand(std::shared_ptr<Command> command)
 {
     auto scene = SceneManager::getInstance()->getCurrentScene();
-    auto target = scene->findObjectByUUID(command->uuid);
-    auto parent = scene->findObjectByUUID(command->uuid_parent);
-
+    
     auto type = command->type;
     switch (type) {
     case COMMAND_TYPE::ADD_OBJECT:
     {
-        auto newObject = scene->createObject(command->jObj.value("name", std::string()), nullptr, command->jObj.value("gui", false));
-        newObject->from_json(command->jObj);
-        newObject->setParent(parent);
+        if (command->isMultiObject) {
+            int size = command->uuids.size();
+            for (int i = 0; i < size; i++) {
+                auto target = scene->findObjectByUUID(command->uuids[i]);
+                auto parent = scene->findObjectByUUID(command->uuid_parents[i]);
+
+                auto newObject = scene->createObject(command->jObjs[i].value("name", std::string()), nullptr, command->jObjs[i].value("gui", false));
+                newObject->from_json(command->jObj);
+                newObject->setParent(parent);
+            }
+        }
+        else {
+            auto target = scene->findObjectByUUID(command->uuid);
+            auto parent = scene->findObjectByUUID(command->uuid_parent);
+
+            auto newObject = scene->createObject(command->jObj.value("name", std::string()), nullptr, command->jObj.value("gui", false));
+            newObject->from_json(command->jObj);
+            newObject->setParent(parent);
+        }
     }
     break;
     case COMMAND_TYPE::DELETE_OBJECT:
     {
-        if (target != nullptr)
+        if(command->isMultiObject)
         {
-            Editor::getInstance()->removeTarget(target);
-            Editor::getCurrentScene()->removeObject(target);
+            int size = command->uuids.size();
+            for (int i = 0; i < size; i++) {
+                auto target = scene->findObjectByUUID(command->uuids[i]);
+                if (target != nullptr)
+                {
+                    Editor::getInstance()->removeTarget(target);
+                    Editor::getCurrentScene()->removeObject(target);
+                }
+            }
+        }
+        else
+        {
+            auto target = scene->findObjectByUUID(command->uuid);
+            if (target != nullptr)
+            {
+                Editor::getInstance()->removeTarget(target);
+                Editor::getCurrentScene()->removeObject(target);
+            }
         }
     }
     break;
@@ -214,19 +407,46 @@ void CommandManager::activeRedoCommand(std::shared_ptr<Command> command)
         break;
     case COMMAND_TYPE::ADD_COMPONENT:
     {
-        if (target != nullptr)
+        if(command->isMultiObject)
         {
-            auto j = command->jObj;
-            auto jComps = j.at("comps");
-            for (auto it : jComps)
+            int size = command->uuids.size();
+            for (int i = 0; i < size; i++) {
+                auto target = scene->findObjectByUUID(command->uuids[i]);
+                if (target != nullptr)
+                {
+                    auto j = command->jObjs[i];
+                    auto jComps = j.at("comps");
+                    for (auto it : jComps)
+                    {
+                        std::string key = it.at(0);
+                        auto val = it.at(1);
+                        std::shared_ptr<Component> comp = target->getComponent(key);
+                        if (comp == nullptr)
+                            comp = target->createComponent(key);
+                        if (comp) {
+                            val.get_to(*comp);
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            auto target = scene->findObjectByUUID(command->uuid);
+            if (target != nullptr)
             {
-                std::string key = it.at(0);
-                auto val = it.at(1);
-                std::shared_ptr<Component> comp = target->getComponent(key);
-                if (comp == nullptr)
-                    comp = target->createComponent(key);
-                if (comp) {
-                    val.get_to(*comp);
+                auto j = command->jObj;
+                auto jComps = j.at("comps");
+                for (auto it : jComps)
+                {
+                    std::string key = it.at(0);
+                    auto val = it.at(1);
+                    std::shared_ptr<Component> comp = target->getComponent(key);
+                    if (comp == nullptr)
+                        comp = target->createComponent(key);
+                    if (comp) {
+                        val.get_to(*comp);
+                    }
                 }
             }
         }
@@ -234,31 +454,80 @@ void CommandManager::activeRedoCommand(std::shared_ptr<Command> command)
     break;
     case COMMAND_TYPE::DELETE_COMPONENT:
     {
-        if (target != nullptr)
+        if (command->isMultiObject)
         {
-            auto j = command->jObj;
-            auto jComps = j.at("comps");
-            for (auto it : jComps)
+            int size = command->uuids.size();
+            for (int i = 0; i < size; i++) {
+                auto target = scene->findObjectByUUID(command->uuids[i]);
+                if (target != nullptr)
+                {
+                    auto j = command->jObjs[i];
+                    auto jComps = j.at("comps");
+                    for (auto it : jComps)
+                    {
+                        std::string key = it.at(0);
+                        target->removeComponent(key);
+                    }
+                }
+            }
+        }
+        else
+        {
+            auto target = scene->findObjectByUUID(command->uuid);
+            if (target != nullptr)
             {
-                std::string key = it.at(0);
-                target->removeComponent(key);
+                auto j = command->jObj;
+                auto jComps = j.at("comps");
+                for (auto it : jComps)
+                {
+                    std::string key = it.at(0);
+                    target->removeComponent(key);
+                }
             }
         }
     }
     break;
     case COMMAND_TYPE::EDIT_COMPONENT:
     {
-        auto j = command->jObj;
-        auto jComps = j.at("comps");
-        for (auto it : jComps)
+        if (command->isMultiObject)
         {
-            std::string key = it.at(0);
-            auto val = it.at(1);
-            std::shared_ptr<Component> comp = target->getComponent(key);
-            if (comp == nullptr)
-                comp = target->createComponent(key);
-            if (comp) {
-                val.get_to(*comp);
+            int size = command->uuids.size();
+            for (int i = 0; i < size; i++) {
+                auto target = scene->findObjectByUUID(command->uuids[i]);
+                if (target != nullptr) {
+                    auto j = command->jObjs[i];
+                    auto jComps = j.at("comps");
+                    for (auto it : jComps)
+                    {
+                        std::string key = it.at(0);
+                        auto val = it.at(1);
+                        std::shared_ptr<Component> comp = target->getComponent(key);
+                        if (comp == nullptr)
+                            comp = target->createComponent(key);
+                        if (comp) {
+                            val.get_to(*comp);
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            auto target = scene->findObjectByUUID(command->uuid);
+            if (target != nullptr) {
+                auto j = command->jObj;
+                auto jComps = j.at("comps");
+                for (auto it : jComps)
+                {
+                    std::string key = it.at(0);
+                    auto val = it.at(1);
+                    std::shared_ptr<Component> comp = target->getComponent(key);
+                    if (comp == nullptr)
+                        comp = target->createComponent(key);
+                    if (comp) {
+                        val.get_to(*comp);
+                    }
+                }
             }
         }
     }
