@@ -107,11 +107,9 @@ bool FigureMeta::replaceTextures(EditableFigure& efig)
     auto relPath = fsPath.is_absolute() ? fs::relative(fsPath, fs::current_path()) : fsPath;
     auto texSrcs = efig.GetTextureSources();
     pyxie::ImageConv imgConv;
-    bool alpha = false;
 
     for (const auto& texSrc : texSrcs) {
         auto texName = fs::path(texSrc.path).filename();
-        auto newTexSrc = TextureSource(texSrc);
         for (const auto& entry : fs::recursive_directory_iterator(relPath.parent_path())) {
             if (entry.is_regular_file()) {
                 if (entry.path().filename().compare(texName) == 0) {
@@ -119,19 +117,21 @@ bool FigureMeta::replaceTextures(EditableFigure& efig)
                     auto path = entry.path().string();
                     std::replace(path.begin(), path.end(), '\\', '/');
                     imgConv.SetInputFile(path.c_str());
-                    alpha = imgConv.DoConvert(true);
+                    auto alpha = imgConv.DoConvert(true);
 
                     // Replace texture
+                    auto newTexSrc = TextureSource(texSrc);
                     auto newPath = entry.path().relative_path().replace_extension(".pyxi").string();
                     std::replace(newPath.begin(), newPath.end(), '\\', '/');
                     memset(newTexSrc.path, 0, MAX_PATH);
                     memcpy(newTexSrc.path, newPath.c_str(), newPath.length());
+
+                    efig.ReplaceTextureSource(texSrc, newTexSrc);
+                    if (alpha) efig.EnableAlphaModeByTexture(newTexSrc.path);
                     break;
                 }
             }
         }
-        efig.ReplaceTextureSource(texSrc, newTexSrc);
-        if(alpha) efig.EnableAlphaModeByTexture(newTexSrc.path);
     }
     return true;
 }
