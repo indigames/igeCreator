@@ -16,6 +16,13 @@ namespace ige::creator
 		ADD_COMPONENT,
 		DELETE_COMPONENT,
 		EDIT_COMPONENT,
+
+		//ANIMATOR EDITOR
+		ANIMATOR,
+		ANIMATOR_ADD,
+		ANIMATOR_REMOVE,
+		ANIMATOR_EDIT,
+
 	};
 
 	class Command
@@ -24,9 +31,19 @@ namespace ige::creator
 		Command() {}
 		virtual ~Command() {}
 	public:
+		int objType = 0;
 		std::string uuid;
 		std::string uuid_parent;
+		
+		std::vector<std::string> uuids;
+		std::vector<std::string> uuid_parents;
+		
 		json jObj;
+		std::vector<json> jObjs;
+
+		bool isMultiObject = false;
+
 		COMMAND_TYPE type;
+
 	};
 }

@@ -583,6 +583,18 @@ namespace ige::creator
         return false;
     }
 
+    std::shared_ptr<AnimatorController> Editor::getCurrentAnimator()
+    {
+        if (SceneManager::getInstance()->isPlaying())
+            return nullptr;
+
+        if (getCanvas() && getCanvas()->getAnimatorEditor()) {
+            return getCanvas()->getAnimatorEditor()->getController();
+        }
+
+        return nullptr;
+    }
+
     bool Editor::openAnimator(const std::string& path)
     {
         if (SceneManager::getInstance()->isPlaying())
@@ -751,9 +763,19 @@ class %s(Script):\n\
         if (getCanvas())
             getCanvas()->getInspector()->clear();
 
+        std::vector<std::shared_ptr<SceneObject>> targets;
         for (auto& target : Editor::getInstance()->getTarget()->getAllTargets()) {
             if (!target.expired()) {
-                CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::DELETE_OBJECT, target.lock());
+                targets.push_back(target.lock());
+            }
+        }
+        if(targets.size() > 1)
+            CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::DELETE_OBJECT, targets);
+        else if (targets.size() == 1)
+            CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::DELETE_OBJECT, targets[0]);
+
+        for (auto& target : Editor::getInstance()->getTarget()->getAllTargets()) {
+            if (!target.expired()) {
                 removeTarget(target.lock());
                 Editor::getCurrentScene()->removeObject(target.lock());
             }
@@ -779,7 +801,7 @@ class %s(Script):\n\
     void Editor::pasteObject()
     {
         if (m_selectedJsons.empty()) return;
-
+        std::vector<std::shared_ptr<SceneObject>> objs;
         for (const auto& jObj : m_selectedJsons)
         {
             auto prefabId = jObj.value("prefabId", std::string());
@@ -789,9 +811,13 @@ class %s(Script):\n\
             newObject->setPrefabId(prefabId);
             auto parent = Editor::getInstance()->getFirstTarget()->getSharedPtr();
             newObject->setParent(parent);
-
-            CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
+            objs.push_back(newObject);
+            
         }
+        if(objs.size() == 1)
+            CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, objs[0]);
+        else 
+            CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, objs);
 
         if (getCanvas())
             getCanvas()->getHierarchy()->rebuildHierarchy();

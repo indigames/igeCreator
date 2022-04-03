@@ -24,6 +24,8 @@
 #include "core/Canvas.h"
 #include "core/panels/AnimatorPreview.h"
 
+#include "core/CommandManager.h"
+
 #include <imgui_node_editor.h>
 namespace ed = ax::NodeEditor;
 
@@ -580,6 +582,7 @@ namespace ige::creator
                     auto modelPath = m_controller->getBaseModelPath();
                     auto txtBaseModel = m_layerGroup->createWidget<TextField>("Base Model", modelPath, false, true);
                     txtBaseModel->getOnDataChangedEvent().addListener([this](const auto& txt) {
+                        CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                         auto basePath = m_controller->getBaseModelPath();
                         if (basePath.compare(txt) != 0) {
                             m_controller->setBaseModelPath(txt);
@@ -592,6 +595,7 @@ namespace ige::creator
 
                     for (const auto& type : GetFileExtensionSuported(E_FileExts::Figure)) {
                         txtBaseModel->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
+                            CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                             auto basePath = m_controller->getBaseModelPath();
                             if (basePath.compare(path) != 0) {
                                 m_controller->setBaseModelPath(path);
@@ -604,6 +608,7 @@ namespace ige::creator
                     }
 
                     txtBaseModel->addPlugin<DDTargetPlugin<std::string>>(".pyxa")->getOnDataReceivedEvent().addListener([this](const auto& path) {
+                        CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                         auto node = findNode(m_node);
                         if (node != nullptr && !node->state.expired()) {
                             node->state.lock()->setPath(path);
@@ -616,6 +621,7 @@ namespace ige::creator
                     headerCols->setColumnWidth(1, 32.f);
                     headerCols->createWidget<Label>("Layers");
                     headerCols->createWidget<Button>("+", ImVec2(ImGui::GetFrameHeight(), 0))->getOnClickEvent().addListener([this](const auto& widget) {
+                        CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                         if (m_controller->addLayer()) {
                             setLayer(m_controller->getStateMachines().size() - 1);
                             setLayersDirty();
@@ -631,9 +637,11 @@ namespace ige::creator
                         auto layer = i;
                         auto label = layer == 0 ? "Layer A" : layer == 1 ? "Layer B" : "Layer C";
                         columns->createWidget<TreeNode>(label, m_currLayer == i, true)->getOnClickEvent().addListener([this, layer](const auto& widget) {
+                            CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                             setLayer(layer);
                         });
                         columns->createWidget<Button>("-", ImVec2(ImGui::GetFrameHeight(), 0))->getOnClickEvent().addListener([this, layer](const auto& widget) {
+                            CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                             m_controller->removeLayer(layer);
                             if (m_currLayer == layer) setLayer(layer - 1);
                             setLayersDirty();
@@ -668,6 +676,7 @@ namespace ige::creator
                 selectCombo->addChoice((int)AnimatorParameterType::Float, "Float");
                 selectCombo->addChoice((int)AnimatorParameterType::Trigger, "Trigger");
                 m_parameterGroup->createWidget<Button>("+", ImVec2(ImGui::GetFrameHeight(), 0))->getOnClickEvent().addListener([this](const auto& widget) {
+                    CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                     auto name = std::string("Parameter") + std::to_string(m_controller->getParameters().size() + 1);
                     m_controller->setParameter(name, m_selectedType, 0.f);
                     setParametersDirty();
@@ -685,6 +694,7 @@ namespace ige::creator
                     auto type = param.second.first;
                     auto val = param.second.second;
                     auto nameTxt = columns->createWidget<TextField>("", name, false, true)->getOnDataChangedEvent().addListener([name, type, val, this](const auto& txt) {
+                        CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                         m_controller->removeParameter(name);
                         m_controller->setParameter(txt, (int)type, val);
                         setParametersDirty();
@@ -696,6 +706,7 @@ namespace ige::creator
                         {
                             auto selectCombo = columns->createWidget<ComboBox>("");
                             selectCombo->getOnDataChangedEvent().addListener([name, type, this](auto val) {
+                                CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                                 m_controller->setParameter(name, (int)type, val);
                             });
                             selectCombo->setEndOfLine(false);
@@ -706,6 +717,7 @@ namespace ige::creator
                         case AnimatorParameterType::Trigger:
                         {
                             columns->createWidget<CheckBox>("", false)->getOnDataChangedEvent().addListener([name, type, this](bool val) {
+                                CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                                 m_controller->setParameter(name, (int)type, false);
                                 setParametersDirty();
                             });
@@ -716,6 +728,7 @@ namespace ige::creator
                         {
                             std::array vals = { val };
                             columns->createWidget<Drag<float>>("", (type == AnimatorParameterType::Int) ? ImGuiDataType_S32 : ImGuiDataType_Float, vals)->getOnDataChangedEvent().addListener([name, type, this](auto val) {
+                                CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                                 m_controller->setParameter(name, (int)type, val[0]);
                             });
                             break;
@@ -723,6 +736,7 @@ namespace ige::creator
                     }
 
                     columns->createWidget<Button>("-", ImVec2(ImGui::GetFrameHeight(), 0))->getOnClickEvent().addListener([name, this](const auto& widget) {
+                        CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                         m_controller->removeParameter(name);
                         setParametersDirty();
                         setInspectorDirty();
@@ -743,6 +757,17 @@ namespace ige::creator
         if (!m_editor) return;
         
         if (m_controller) {
+            if (m_controller->isDirty()) {
+                setDirty();
+                setLayersDirty();
+                setParametersDirty();
+                setInspectorDirty();
+                setLayer(0);
+                clear();
+                m_controller->resetDirty();
+                return;
+            }
+
             m_controller->update(dt);
 
             auto currState = m_controller->getStateMachine(m_currLayer)->getCurrentState();
@@ -761,7 +786,6 @@ namespace ige::creator
                     m_currState = currState;
                 }
             }
-
         }   
     }
 
@@ -887,6 +911,7 @@ namespace ige::creator
                             showLabel("+ Create Transition", ImColor(32, 45, 32, 180));
                             if (ed::AcceptNewItem(ImColor(128, 255, 128), 4.0f))
                             {
+                                CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR_ADD, m_controller);
                                 auto linkId = getNextId();
                                 auto link = std::make_shared<Link>(linkId, startPinId, endPinId);
                                 link->color = LINK_NORMAL_COLOR;
@@ -914,6 +939,7 @@ namespace ige::creator
                 {
                     if (ed::AcceptDeletedItem())
                     {
+                        CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR_ADD, m_controller);
                         const auto& link = findLink(linkId);
                         if (link != nullptr) {
                             const auto& startPin = findPin(link->startPinID);
@@ -937,6 +963,7 @@ namespace ige::creator
                 {
                     if (ed::AcceptDeletedItem())
                     {
+                        CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR_ADD, m_controller);
                         auto node = findNode(nodeId);
                         if (node != nullptr) {
                             if (!node->state.expired()) {
@@ -1023,6 +1050,7 @@ namespace ige::creator
             auto state = node->state.lock();
             m_inspectGroup->createWidget<TextField>("UUID", state->getUUID(), true);
             m_inspectGroup->createWidget<TextField>("Name", state->getName(), false, true)->getOnDataChangedEvent().addListener([this](const auto& txt) {
+                CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                 auto node = findNode(m_node);
                 if (node != nullptr && !node->state.expired()) {
                     node->state.lock()->setName(txt);
@@ -1032,6 +1060,7 @@ namespace ige::creator
             });
             auto animTxt = m_inspectGroup->createWidget<TextField>("AnimClip", state->getPath(), false, true);
             animTxt->getOnDataChangedEvent().addListener([this](const auto& txt) {
+                CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                 auto node = findNode(m_node);
                 if (node != nullptr && !node->state.expired()) {
                     node->state.lock()->setPath(txt);
@@ -1040,6 +1069,7 @@ namespace ige::creator
                 }
             });
             animTxt->addPlugin<DDTargetPlugin<std::string>>(".pyxa")->getOnDataReceivedEvent().addListener([this](const auto& path) {
+                CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                 auto node = findNode(m_node);
                 if (node != nullptr && !node->state.expired()) {
                     node->state.lock()->setPath(path);
@@ -1059,6 +1089,7 @@ namespace ige::creator
                         auto dstStateUUID = tran->destState.lock()->getUUID();
                         columns->createWidget<Label>(tran->getName());
                         columns->createWidget<CheckBox>("", tran->isMute)->getOnDataChangedEvent().addListener([this, dstStateUUID](bool val) {
+                            CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                             auto node = findNode(m_node);
                             if (node != nullptr && !node->state.expired()) {
                                 auto dstState = node->state.lock()->stateMachine.lock()->findState(dstStateUUID);
@@ -1083,6 +1114,7 @@ namespace ige::creator
                 auto animClipGroup = m_inspectGroup->createWidget<Group>("AnimationClip");
                 std::array startTimes = { state->getStartTime() };
                 animClipGroup->createWidget<Drag<float>>("StartTime", ImGuiDataType_Float, startTimes)->getOnDataChangedEvent().addListener([this](auto val) {
+                    CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                     auto node = findNode(m_node);
                     if (node != nullptr && !node->state.expired()) {
                         node->state.lock()->setStartTime(val[0]);
@@ -1091,6 +1123,7 @@ namespace ige::creator
                 });
                 std::array evalTimes = { state->getEvalTime() };
                 animClipGroup->createWidget<Drag<float>>("EvalTime", ImGuiDataType_Float, evalTimes)->getOnDataChangedEvent().addListener([this](auto val) {
+                    CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                     auto node = findNode(m_node);
                     if (node != nullptr && !node->state.expired()) {
                         node->state.lock()->setEvalTime(val[0]);
@@ -1099,6 +1132,7 @@ namespace ige::creator
                 });
                 std::array speeds = { state->getSpeed() };
                 animClipGroup->createWidget<Drag<float>>("Speed", ImGuiDataType_Float, speeds)->getOnDataChangedEvent().addListener([this](auto val) {
+                    CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                     auto node = findNode(m_node);
                     if (node != nullptr && !node->state.expired()) {
                         node->state.lock()->setSpeed(val[0]);
@@ -1106,6 +1140,7 @@ namespace ige::creator
                     }
                 });
                 animClipGroup->createWidget<CheckBox>("Loop", state->isLoop())->getOnDataChangedEvent().addListener([this](bool val) {
+                    CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                     auto node = findNode(m_node);
                     if (node != nullptr && !node->state.expired()) {
                         node->state.lock()->setLoop(val);
@@ -1121,6 +1156,7 @@ namespace ige::creator
         if (link != nullptr && !link->transition.expired()) {
             auto transition = link->transition.lock();
             m_inspectGroup->createWidget<TextField>("Name", transition->getName(), false, true)->getOnDataChangedEvent().addListener([this](const auto& txt) {
+                CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                 auto link = findLink(m_link);
                 if (link != nullptr && !link->transition.expired()) {
                     link->transition.lock()->setName(txt);
@@ -1128,6 +1164,7 @@ namespace ige::creator
                 }
             });
             m_inspectGroup->createWidget<CheckBox>("Mute", transition->isMute)->getOnDataChangedEvent().addListener([this](bool val) {
+                CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                 auto link = findLink(m_link);
                 if (link != nullptr && !link->transition.expired()) {
                     link->transition.lock()->isMute = val;
@@ -1137,6 +1174,7 @@ namespace ige::creator
             });
             std::array offsets = { transition->offset };
             m_inspectGroup->createWidget<Drag<float>>("Transit Time", ImGuiDataType_Float, offsets)->getOnDataChangedEvent().addListener([this](auto val) {
+                CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                 auto link = findLink(m_link);
                 if (link != nullptr && !link->transition.expired()) {
                     link->transition.lock()->offset = val[0];
@@ -1144,6 +1182,7 @@ namespace ige::creator
                 }
             });
             m_inspectGroup->createWidget<CheckBox>("HasExitTime", transition->hasExitTime)->getOnDataChangedEvent().addListener([this](bool val) {
+                CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                 auto link = findLink(m_link);
                 if (link != nullptr && !link->transition.expired()) {
                     link->transition.lock()->hasExitTime = val;
@@ -1154,6 +1193,7 @@ namespace ige::creator
             if (transition->hasExitTime) {
                 std::array exitTimes = { transition->exitTime };
                 m_inspectGroup->createWidget<Drag<float>>("ExitTime", ImGuiDataType_Float, exitTimes)->getOnDataChangedEvent().addListener([this](auto val) {
+                    CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                     auto link = findLink(m_link);
                     if (link != nullptr && !link->transition.expired()) {
                         link->transition.lock()->exitTime = val[0];
@@ -1161,6 +1201,7 @@ namespace ige::creator
                     }
                 });
                 m_inspectGroup->createWidget<CheckBox>("FixedDuration", transition->hasFixedDuration)->getOnDataChangedEvent().addListener([this](bool val) {
+                    CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                     auto link = findLink(m_link);
                     if (link != nullptr && !link->transition.expired()) {
                         link->transition.lock()->hasFixedDuration = val;
@@ -1169,6 +1210,7 @@ namespace ige::creator
                     }
                 });
                 if (transition->hasFixedDuration) {
+                    CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                     std::array durations = { transition->duration };
                     m_inspectGroup->createWidget<Drag<float>>("Duration", ImGuiDataType_Float, durations)->getOnDataChangedEvent().addListener([this](auto val) {
                         auto link = findLink(m_link);
@@ -1195,6 +1237,7 @@ namespace ige::creator
                 else {
                     auto modeCombo = columns->createWidget<ComboBox>("", (int)cond->mode);
                     modeCombo->getOnDataChangedEvent().addListener([this, condId](auto val) {
+                        CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                         auto link = findLink(m_link);
                         if (link != nullptr && !link->transition.expired()) {
                             link->transition.lock()->getCondition(condId)->mode = (AnimatorCondition::Mode)val;
@@ -1216,6 +1259,7 @@ namespace ige::creator
                         case AnimatorParameterType::Bool: {
                             auto selectCombo = columns->createWidget<ComboBox>("", (int)cond->threshold);
                             selectCombo->getOnDataChangedEvent().addListener([this, condId](auto val) {
+                                CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                                 auto link = findLink(m_link);
                                 if (link != nullptr && !link->transition.expired()) {
                                     link->transition.lock()->getCondition(condId)->threshold = val;
@@ -1231,6 +1275,7 @@ namespace ige::creator
                         case AnimatorParameterType::Float: {
                             std::array vals = { cond->threshold };
                             columns->createWidget<Drag<float>>("", (type == AnimatorParameterType::Int) ? ImGuiDataType_S32 : ImGuiDataType_Float, vals)->getOnDataChangedEvent().addListener([this, condId](auto val) {
+                                CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                                 auto link = findLink(m_link);
                                 if (link != nullptr && !link->transition.expired()) {
                                     link->transition.lock()->getCondition(condId)->threshold = val[0];
@@ -1242,6 +1287,7 @@ namespace ige::creator
                     }
                 }
                 columns->createWidget<Button>("-", ImVec2(ImGui::GetFrameHeight(), ImGui::GetFrameHeight()))->getOnClickEvent().addListener([condId, this](const auto& widget) {
+                    CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                     auto link = findLink(m_link);
                     if (link != nullptr && !link->transition.expired()) {
                         link->transition.lock()->removeCondition(condId);
@@ -1281,6 +1327,7 @@ namespace ige::creator
                 else {
                     auto modeCombo = columns->createWidget<ComboBox>("", selectedMode);
                     modeCombo->getOnDataChangedEvent().addListener([this](auto val) {
+                        CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                         selectedMode = val;
                         setInspectorDirty();
                     });
@@ -1300,6 +1347,7 @@ namespace ige::creator
                         case AnimatorParameterType::Bool: {
                             auto selectCombo = columns->createWidget<ComboBox>("");
                             selectCombo->getOnDataChangedEvent().addListener([this](auto val) {
+                                CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                                 threshold = val;
                             });
                             selectCombo->setEndOfLine(false);
@@ -1314,15 +1362,20 @@ namespace ige::creator
                         case AnimatorParameterType::Int:
                         case AnimatorParameterType::Float: {
                             std::array vals = { val };
-                            columns->createWidget<Drag<float>>("", (type == AnimatorParameterType::Int) ? ImGuiDataType_S32 : ImGuiDataType_Float, vals)->getOnDataChangedEvent().addListener([](auto val) {
+                            auto drag = columns->createWidget<Drag<float>>("", (type == AnimatorParameterType::Int) ? ImGuiDataType_S32 : ImGuiDataType_Float, vals);
+                            drag->getOnDataChangedEvent().addListener([](auto val) {
                                 threshold = val[0];
                             });
+                            drag->getOnDataFinishChangedEvent().addListener([this](auto val) {
+                                CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
+                                });
                             break;
                         }
                     }
                 }
 
                 columns->createWidget<Button>("+", ImVec2(ImGui::GetFrameHeight(), ImGui::GetFrameHeight()))->getOnClickEvent().addListener([this](const auto& widget) {
+                    CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                     auto link = findLink(m_link);
                     if (link != nullptr && !link->transition.expired()) {
                         link->transition.lock()->addCondition(params[selectedParmeter], AnimatorCondition::Mode(selectedMode), threshold);

@@ -11,6 +11,7 @@
 #include "core/Macros.h"
 
 #include "core/scene/TargetObject.h"
+#include "components/animation/AnimatorController.h"
 
 using namespace pyxie;
 using namespace ige::scene;
@@ -122,6 +123,8 @@ namespace ige::creator
 
         //! Get targeted objects
         std::shared_ptr<TargetObject>& getTarget() { return m_target; }
+
+        std::shared_ptr<AnimatorController> getCurrentAnimator();
 
         static ige::scene::Event<const std::shared_ptr<SceneObject>&>& getTargetAddedEvent() { return m_targetAddedEvent; }
         static ige::scene::Event<const std::shared_ptr<SceneObject>&>& getTargetRemovedEvent() { return m_targetRemovedEvent; }

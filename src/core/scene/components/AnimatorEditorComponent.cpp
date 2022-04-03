@@ -42,12 +42,14 @@ void AnimatorEditorComponent ::drawComponent()
             auto txtPath = m_compGroup->createWidget<TextField>("Animator", comp->getProperty<std::string>("path", ""), false, true);
             txtPath->setEndOfLine(false);
             txtPath->getOnDataChangedEvent().addListener([this](const auto& txt) {
+                storeUndo();
                 getComponent<CompoundComponent>()->setProperty("path", txt);
                 setDirty();
             });
             for (const auto& type : GetFileExtensionSuported(E_FileExts::Animator))
             {
                 txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
+                    storeUndo();
                     getComponent<CompoundComponent>()->setProperty("path", GetRelativePath(path));
                     setDirty();
                 });

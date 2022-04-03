@@ -54,13 +54,38 @@ bool EditorComponent::setComponent(std::shared_ptr<Component> component)
 }
 
 void EditorComponent::storeUndo() {
-	auto comp = getComponent<CompoundComponent>();
-	if (comp == nullptr) return;
-	json j = json{};
-	auto jComponents = json::array();
-	jComponents.push_back({ comp->getName(), json(*comp.get()) });
-	j["comps"] = jComponents;
-	CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::EDIT_COMPONENT, Editor::getInstance()->getTarget(), j);
+	std::vector<std::shared_ptr<SceneObject>> targets;
+	for (auto& target : Editor::getInstance()->getTarget()->getAllTargets()) {
+		if (!target.expired()) {
+			targets.push_back(target.lock());
+		}
+	}
+	if (targets.empty()) return;
+	int size = targets.size();
+	if (size == 1) {
+		auto comp = getComponent<CompoundComponent>();
+		if (comp == nullptr) return;
+		json j = json{};
+		auto jComponents = json::array();
+		jComponents.push_back({ comp->getName(), json(*comp.get()) });
+		j["comps"] = jComponents;
+		CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::EDIT_COMPONENT, Editor::getInstance()->getTarget(), j);
+	}
+	else
+	{
+		std::vector<json> jsons;
+		for (int i = 0; i < size; i++) {
+			auto comp = targets[i]->getComponent<CompoundComponent>();
+			if (comp == nullptr) return;
+			json j = json{};
+			auto jComponents = json::array();
+			jComponents.push_back({ comp->getName(), json(*comp.get()) });
+			j["comps"] = jComponents;
+			jsons.push_back(j);
+		}
+		pyxie_printf("Add EDIT_COMPONENT \n ");
+		CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::EDIT_COMPONENT, targets, jsons);
+	}
 }
 
 NS_IGE_END

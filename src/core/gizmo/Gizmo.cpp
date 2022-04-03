@@ -284,8 +284,12 @@ namespace ige::creator
     }
 
     void Gizmo::storeUndo() {
-        for (auto& target : m_targets) {
-            if (!target.expired()) {
+        auto size = m_targets.size();
+        if (size == 0) return;
+        if (size == 1) {
+            auto target = m_targets[0];
+            if (!target.expired())
+            {
                 auto comp = target.lock()->getTransform();
                 if (comp == nullptr) return;
                 json j = json{};
@@ -293,8 +297,24 @@ namespace ige::creator
                 jComponents.push_back({ comp->getName(), json(*comp.get()) });
                 j["comps"] = jComponents;
                 CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::EDIT_COMPONENT, Editor::getInstance()->getTarget(), j);
-                break;
             }
+        }
+        else {
+            std::vector<json> jsons;
+            std::vector<std::shared_ptr<SceneObject>> objs;
+            for (auto& target : m_targets) {
+                if (!target.expired()) {
+                    auto comp = target.lock()->getTransform();
+                    if (comp == nullptr) return;
+                    json j = json{};
+                    auto jComponents = json::array();
+                    jComponents.push_back({ comp->getName(), json(*comp.get()) });
+                    j["comps"] = jComponents;
+                    jsons.push_back(j);
+                    objs.push_back(target.lock());
+                }
+            }
+            CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::EDIT_COMPONENT, objs, jsons);
         }
     }
 
