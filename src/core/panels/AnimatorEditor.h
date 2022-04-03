@@ -112,6 +112,8 @@ namespace ige::creator
         void setFocus(bool focus);
         void setFigure(Figure* figure);
 
+        std::shared_ptr<AnimatorController> getController() const { return m_controller; }
+
     protected:
         virtual void initialize() override;
         virtual void clear();

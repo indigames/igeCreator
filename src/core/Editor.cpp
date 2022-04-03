@@ -583,6 +583,18 @@ namespace ige::creator
         return false;
     }
 
+    std::shared_ptr<AnimatorController> Editor::getCurrentAnimator()
+    {
+        if (SceneManager::getInstance()->isPlaying())
+            return nullptr;
+
+        if (getCanvas() && getCanvas()->getAnimatorEditor()) {
+            return getCanvas()->getAnimatorEditor()->getController();
+        }
+
+        return nullptr;
+    }
+
     bool Editor::openAnimator(const std::string& path)
     {
         if (SceneManager::getInstance()->isPlaying())
