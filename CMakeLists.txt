@@ -101,7 +101,6 @@ add_subdirectory(libs/pyxCore ${CMAKE_BINARY_DIR}/pyxCore EXCLUDE_FROM_ALL)
 add_subdirectory(libs/igeCore ${CMAKE_BINARY_DIR}/igeCore EXCLUDE_FROM_ALL)
 add_subdirectory(libs/igeVMath ${CMAKE_BINARY_DIR}/igeVMath EXCLUDE_FROM_ALL)
 add_subdirectory(libs/igeScene ${CMAKE_BINARY_DIR}/igeScene EXCLUDE_FROM_ALL)
-add_subdirectory(libs/igeSdk ${CMAKE_BINARY_DIR}/igeSdk EXCLUDE_FROM_ALL)
 
 if(${APP_STYLE} MATCHES "SHARED")
     find_package (Python3 ${PYTHON_VERSION} EXACT REQUIRED COMPONENTS Development)
@@ -124,6 +123,7 @@ find_package(bullet REQUIRED)
 find_package(igeSound REQUIRED)
 find_package(igeEffekseer REQUIRED)
 find_package(igeNavigation REQUIRED)
+find_package(igeSdk REQUIRED)
 
 include_directories(
     "${zlib_INCLUDE_DIRS}"
@@ -135,18 +135,6 @@ include_directories(
     "${openssl_INCLUDE_DIRS}"
     "${taskflow_INCLUDE_DIRS}"
     "${tracy_INCLUDE_DIRS}"
-    "${igeBullet_INCLUDE_DIRS}"
-    "${bullet_INCLUDE_DIRS}"
-    "${igeSound_INCLUDE_DIRS}"
-    "${igeSound_INCLUDE_DIRS}/ThirdParty/soloud/include"
-    "${igeEffekseer_INCLUDE_DIRS}"
-    "${igeEffekseer_INCLUDE_DIRS}/ThirdParty/Effekseer/Dev/Cpp"
-    "${igeEffekseer_INCLUDE_DIRS}/ThirdParty/Effekseer/Dev/Cpp/Effekseer"
-    "${igeNavigation_INCLUDE_DIRS}"
-    "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/Detour/Include"
-    "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/DetourCrowd/Include"
-    "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/DetourTileCache/Include"
-    "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/Recast/Include"
 )
 
 # Source files
@@ -219,11 +207,9 @@ endforeach()
 
 target_link_libraries(${TARGET_NAME} 
     igeScene-static
-    igeSdk-static
     pyxcore
     pyxtools
     igeCore-static
-    igeVmath-static
     ${Python3_LIBRARIES}
     ${numpy_LIBRARIES}
     ${tracy_LIBRARIES}
@@ -235,6 +221,7 @@ target_link_libraries(${TARGET_NAME}
     ${igeSound_LIBRARIES}
     ${igeEffekseer_LIBRARIES}
     ${igeNavigation_LIBRARIES}
+    ${igeSdk_LIBRARIES}
     Crypt32
     opengl32
     glu32
@@ -272,7 +259,6 @@ target_include_directories(${TARGET_NAME} PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui"
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui-node-editor"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeSdk"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/pyxcore"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/GLEW"
@@ -285,6 +271,19 @@ target_include_directories(${TARGET_NAME} PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/spdlog/include/spdlog"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeCore"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeVMath"
+    "${igeBullet_INCLUDE_DIRS}"
+    "${bullet_INCLUDE_DIRS}"
+    "${igeSound_INCLUDE_DIRS}"
+    "${igeSound_INCLUDE_DIRS}/ThirdParty/soloud/include"
+    "${igeEffekseer_INCLUDE_DIRS}"
+    "${igeEffekseer_INCLUDE_DIRS}/ThirdParty/Effekseer/Dev/Cpp"
+    "${igeEffekseer_INCLUDE_DIRS}/ThirdParty/Effekseer/Dev/Cpp/Effekseer"
+    "${igeNavigation_INCLUDE_DIRS}"
+    "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/Detour/Include"
+    "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/DetourCrowd/Include"
+    "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/DetourTileCache/Include"
+    "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/Recast/Include"
+    "${igeSdk_INCLUDE_DIRS}"
 )
 
 set(COMPILE_DEFINITIONS
@@ -299,7 +298,7 @@ set(COMPILE_DEFINITIONS
     ${igeSound_COMPILE_DEFINITIONS}
     ${igeEffekseer_COMPILE_DEFINITIONS}
     ${igeNavigation_COMPILE_DEFINITIONS}
-    ${igeNavigation_COMPILE_DEFINITIONS}
+    ${igeSdk_COMPILE_DEFINITIONS}
 )
 
 target_compile_definitions(${TARGET_NAME} PUBLIC ${COMPILE_DEFINITIONS} Py_NO_ENABLE_SHARED USE_PYXCORE USE_IGECORE USE_IGESCENE USE_IGEVMATH USE_IGESDK)
