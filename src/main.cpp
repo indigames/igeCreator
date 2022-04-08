@@ -27,6 +27,8 @@ int main(void* data) {
 	CreateConsole();
 #endif
 	FileIO::Instance().SetRoot(".");
+	SystemInfo::Instance().UseNativeSize(true);
+	SystemInfo::Instance().SetGemeScreenSize(SCREEN_WIDTH);
 
 	// Create window
 	gApp = std::make_shared<Application>();
@@ -36,9 +38,7 @@ int main(void* data) {
 	if (gApp->isInitialized())
 	{
 		// Show window
-		SystemInfo::Instance().UseNativeSize(true);
-		SystemInfo::Instance().SetGemeScreenSize(SCREEN_WIDTH);
-		gApp->showAppWindow(true, SCREEN_WIDTH, SCREEN_HEIGHT, true, true);
+		gApp->showAppWindow(true, -1, -1, true, true);
 
 		// Create editor instance
 		auto& editor = Editor::getInstance();
