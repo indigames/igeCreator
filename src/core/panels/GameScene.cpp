@@ -277,23 +277,26 @@ namespace ige::creator
         auto delta = (wSize - m_windowSize) * 0.5f;
 
         auto touch = Editor::getApp()->getInputHandler()->getTouchDevice();
-        if (touch->isFingerPressed(0))
-        {
-            float touchX, touchY;
-            touch->getFingerPosition(0, touchX, touchY);
-            m_inputProcessor->touchDown(0, touchX - delta.X(), touchY + delta.Y());
-        }
-        if (touch->isFingerMoved(0)) 
-        {
-            float touchX, touchY;
-            touch->getFingerPosition(0, touchX, touchY);
-            m_inputProcessor->touchMove(0, touchX - delta.X(), touchY + delta.Y());
-        }
-        if (touch->isFingerReleased(0))
-        {
-            float touchX, touchY;
-            touch->getFingerPosition(0, touchX, touchY);
-            m_inputProcessor->touchUp(0, touchX - delta.X(), touchY + delta.Y());
+        for (int i = 0; i < touch->getFingersCount(); ++i) {
+            auto fingerId = touch->getFingerID(i);
+            if (touch->isFingerPressed(i))
+            {
+                float touchX, touchY;
+                touch->getFingerPosition(i, touchX, touchY);
+                m_inputProcessor->touchDown(fingerId, touchX - delta.X(), touchY + delta.Y());
+            }
+            if (touch->isFingerMoved(i))
+            {
+                float touchX, touchY;
+                touch->getFingerPosition(i, touchX, touchY);
+                m_inputProcessor->touchMove(fingerId, touchX - delta.X(), touchY + delta.Y());
+            }
+            if (touch->isFingerReleased(i))
+            {
+                float touchX, touchY;
+                touch->getFingerPosition(i, touchX, touchY);
+                m_inputProcessor->touchUp(fingerId, touchX - delta.X(), touchY + delta.Y());
+            }
         }
     }
 }
