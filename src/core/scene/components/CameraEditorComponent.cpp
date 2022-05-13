@@ -39,34 +39,13 @@ void CameraEditorComponent::drawCameraComponent() {
 
     m_cameraCompGroup->createWidget<TextField>("Name", comp->getProperty<std::string>("name", ""), true);
 
-    // Orthographic
-    m_cameraCompGroup->createWidget<CheckBox>("Ortho", comp->getProperty<bool>("ortho", false))->getOnDataChangedEvent().addListener([this](auto val) {
-        storeUndo();
-        getComponent<CompoundComponent>()->setProperty("ortho", val);
-        setDirty();
-    });
-    if (comp->getProperty<bool>("ortho", false))
-    {
-        auto ortColumn = m_cameraCompGroup->createWidget<Columns<2>>(180.f);
-        std::array orthorW = { comp->getProperty<float>("orthoW", NAN) };
-        ortColumn->createWidget<Drag<float>>("OrtW", ImGuiDataType_Float, orthorW)->getOnDataChangedEvent().addListener([this](auto val) {
-            storeUndo();
-            getComponent<CompoundComponent>()->setProperty("orthoW", val[0]);
-        });
-
-        std::array orthorH = { comp->getProperty<float>("orthoH", NAN) };
-        ortColumn->createWidget<Drag<float>>("OrtH", ImGuiDataType_Float, orthorH)->getOnDataChangedEvent().addListener([this](auto val) {
-            storeUndo();
-            getComponent<CompoundComponent>()->setProperty("orthoH", val[0]);
-        });
-    }
 
     // FOV - Near - Far
     std::array fov = { comp->getProperty<float>("fov", NAN) };
     auto fovE = m_cameraCompGroup->createWidget<Drag<float>>("FOV", ImGuiDataType_Float, fov);
     fovE->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+    });
     fovE->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("fov", val[0]);
     });
@@ -75,7 +54,7 @@ void CameraEditorComponent::drawCameraComponent() {
     auto camNearE = m_cameraCompGroup->createWidget<Drag<float>>("Near", ImGuiDataType_Float, camNear);
     camNearE->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+    });
     camNearE->getOnDataChangedEvent().addListener([this](auto val) {
         storeUndo();
         getComponent<CompoundComponent>()->setProperty("near", val[0]);
@@ -85,27 +64,59 @@ void CameraEditorComponent::drawCameraComponent() {
     auto camFarE = m_cameraCompGroup->createWidget<Drag<float>>("Far", ImGuiDataType_Float, camFar);
     camFarE->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+    });
     camFarE->getOnDataChangedEvent().addListener([this](auto val) {
         storeUndo();
         getComponent<CompoundComponent>()->setProperty("far", val[0]);
     });
 
+    // Aspect Ratio
+    std::array ratio = { comp->getProperty<float>("aspect", NAN) };
+    auto ratioE = m_cameraCompGroup->createWidget<Drag<float>>("Aspect", ImGuiDataType_Float, ratio);
+    ratioE->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+     });
+    ratioE->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("aspect", val[0]);
+    });
+
+    // Up vector
+    std::array upArr = { comp->getProperty<float>("up", NAN) };
+    auto upArrE = m_cameraCompGroup->createWidget<Drag<float>>("Up", ImGuiDataType_S32, upArr, 1, 0, 2);
+    upArrE->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+    });
+    upArrE->getOnDataChangedEvent().addListener([this](auto val) {
+        getComponent<CompoundComponent>()->setProperty("up", (int)val[0]);
+    });
+
+    // Orthographic
+    m_cameraCompGroup->createWidget<CheckBox>("Ortho", comp->getProperty<bool>("ortho", false))->getOnDataChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        getComponent<CompoundComponent>()->setProperty("ortho", val);
+        setDirty();
+    });
+    if (comp->getProperty<bool>("ortho", false))
+    {
+        std::array orthorW = { comp->getProperty<float>("orthoW", NAN) };
+        m_cameraCompGroup->createWidget<Drag<float>>("OrtW", ImGuiDataType_Float, orthorW)->getOnDataChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            getComponent<CompoundComponent>()->setProperty("orthoW", val[0]);
+        });
+
+        std::array orthorH = { comp->getProperty<float>("orthoH", NAN) };
+        m_cameraCompGroup->createWidget<Drag<float>>("OrtH", ImGuiDataType_Float, orthorH)->getOnDataChangedEvent().addListener([this](auto val) {
+            storeUndo();
+            getComponent<CompoundComponent>()->setProperty("orthoH", val[0]);
+        });
+    }
 
     // Target    
     m_cameraCompGroup->createWidget<CheckBox>("LockTarget", comp->getProperty<bool>("lock", false))->getOnDataChangedEvent().addListener([this](auto val) {
         auto comp = getComponent<CompoundComponent>();
         if (comp == nullptr) return;
         storeUndo();
-        comp->setProperty("lock", val);
-        if (val) {
-            auto transform = comp->getOwner()->getTransform();
-            comp->setProperty("target", transform->getLocalPosition() + Vec3(0.f, 0.f, -1.f));
-        } else {
-            comp->setProperty("pan", 0.f);
-            comp->setProperty("tilt", 0.f);
-            comp->setProperty("roll", 0.f);          
-        }
+        comp->setProperty("lock", val);        
         comp->setDirty();
         setDirty();
     });
@@ -117,41 +128,10 @@ void CameraEditorComponent::drawCameraComponent() {
         auto targetGroup = m_cameraCompGroup->createWidget<Drag<float, 3>>("Target", ImGuiDataType_Float, target);
         targetGroup->getOnDataBeginChangedEvent().addListener([this](auto val) {
             storeUndo();
-            });
+        });
         targetGroup->getOnDataChangedEvent().addListener([this](auto val) {
             storeUndo();
             getComponent<CompoundComponent>()->setProperty("target", { val[0], val[1], val[2] });
-            onTransformChanged();
-        });
-    }
-    else
-    {
-        // Pan - Tilt - Roll
-        std::array pan = { RADIANS_TO_DEGREES(comp->getProperty<float>("pan", NAN)) };
-        auto panE = m_cameraCompGroup->createWidget<Drag<float>>("Pan", ImGuiDataType_Float, pan);
-        panE->getOnDataBeginChangedEvent().addListener([this](auto val) {
-            storeUndo();
-            });
-        panE->getOnDataChangedEvent().addListener([this](auto val) {
-            getComponent<CompoundComponent>()->setProperty("pan", DEGREES_TO_RADIANS(val[0]));
-            onTransformChanged();
-        });
-        std::array tilt = { RADIANS_TO_DEGREES(comp->getProperty<float>("tilt", NAN)) };
-        auto tiltE = m_cameraCompGroup->createWidget<Drag<float>>("Tilt", ImGuiDataType_Float, tilt);
-        tiltE->getOnDataBeginChangedEvent().addListener([this](auto val) {
-            storeUndo();
-            });
-        tiltE->getOnDataChangedEvent().addListener([this](auto val) {
-            getComponent<CompoundComponent>()->setProperty("tilt", DEGREES_TO_RADIANS(val[0]));
-            onTransformChanged();
-        });
-        std::array roll = { RADIANS_TO_DEGREES(comp->getProperty<float>("roll", NAN)) };
-        auto rollE = m_cameraCompGroup->createWidget<Drag<float>>("Roll", ImGuiDataType_Float, roll);
-        rollE->getOnDataBeginChangedEvent().addListener([this](auto val) {
-            storeUndo();
-            });
-        rollE->getOnDataChangedEvent().addListener([this](auto val) {
-            getComponent<CompoundComponent>()->setProperty("roll", DEGREES_TO_RADIANS(val[0]));
             onTransformChanged();
         });
     }
@@ -162,33 +142,13 @@ void CameraEditorComponent::drawCameraComponent() {
         getComponent<CompoundComponent>()->setProperty("wBase", val);
     });
 
-    // Aspect Ratio
-    std::array ratio = { comp->getProperty<float>("aspect", NAN) };
-    auto ratioE = m_cameraCompGroup->createWidget<Drag<float>>("Aspect", ImGuiDataType_Float, ratio);
-    ratioE->getOnDataBeginChangedEvent().addListener([this](auto val) {
-        storeUndo();
-        });
-    ratioE->getOnDataChangedEvent().addListener([this](auto val) {
-        getComponent<CompoundComponent>()->setProperty("aspect", val[0]);
-    });
-
-    // Up vector
-    std::array upArr = { comp->getProperty<float>("up", NAN) };
-    auto upArrE = m_cameraCompGroup->createWidget<Drag<float>>("Up", ImGuiDataType_S32, upArr, 1, 0, 2);
-    upArrE->getOnDataBeginChangedEvent().addListener([this](auto val) {
-        storeUndo();
-        });
-    upArrE->getOnDataChangedEvent().addListener([this](auto val) {
-        getComponent<CompoundComponent>()->setProperty("up", (int)val[0]);
-    });
-
     // Screen scale
     auto sScale = comp->getProperty<Vec2>("scrScale", {NAN, NAN});
     std::array scrScale = { sScale[0], sScale[1] };
     auto srcScaleE = m_cameraCompGroup->createWidget<Drag<float, 2>>("ScrScale", ImGuiDataType_Float, scrScale);
     srcScaleE->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+    });
     srcScaleE->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("scrScale", Vec2(val[0], val[1]));
     });
@@ -196,10 +156,10 @@ void CameraEditorComponent::drawCameraComponent() {
     // Screen offset
     auto sOff = comp->getProperty<Vec2>("scrOff", { NAN, NAN });
     std::array scrOffset = { sOff[0], sOff[1] };
-    auto srcOffsetE = m_cameraCompGroup->createWidget<Drag<float, 2>>("scrOffset", ImGuiDataType_Float, scrOffset);
+    auto srcOffsetE = m_cameraCompGroup->createWidget<Drag<float, 2>>("ScrOffset", ImGuiDataType_Float, scrOffset);
     srcOffsetE->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+     });
     srcOffsetE->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("scrOff", Vec2(val[0], val[1]));
     });
@@ -207,20 +167,19 @@ void CameraEditorComponent::drawCameraComponent() {
     // Screen radian
     auto sRad = comp->getProperty<float>("scrRad", NAN);
     std::array scrRad = { sRad };
-    auto srcRadE = m_cameraCompGroup->createWidget<Drag<float>>("scrRad", ImGuiDataType_Float, scrRad);
+    auto srcRadE = m_cameraCompGroup->createWidget<Drag<float>>("ScrRot", ImGuiDataType_Float, scrRad);
     srcRadE->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+    });
     srcRadE->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("scrRad", val[0]);
     });
 
+
+
     auto color = comp->getProperty<Vec4>("clearColor", Vec4(1.f, 1.f, 1.f, 1.f));
     auto colorVec = Vec4(color[0], color[1], color[2], color[3]);
-    auto cColorE = m_cameraCompGroup->createWidget<Color>("Clear Color", colorVec);
-    /*cColorE->getOnDataBeginChangedEvent().addListener([this](auto val) {
-        storeUndo();
-        });*/
+    auto cColorE = m_cameraCompGroup->createWidget<Color>("ClearColor", colorVec);
     cColorE->getOnDataChangedEvent().addListener([this](const auto& val) {
         storeUndo();
         getComponent<CompoundComponent>()->setProperty("clearColor", { val[0], val[1], val[2], val[3] });
