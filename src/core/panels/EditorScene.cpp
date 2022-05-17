@@ -631,50 +631,35 @@ namespace ige::creator
         }
         else
         {
-            auto canvas = target->getComponent<ige::scene::Canvas>();
-            if (canvas)
-            {
-                const auto& designSize = canvas->getTargetCanvasSize();
-                auto position = transform->getLocalPosition();
-                Vec2 halfSize = designSize * 0.5f;
-                ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 1.f });
-                ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 1.f });
-                ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], -halfSize[1], 0 }, { 1.f, 0.f, 1.f });
-                ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], -halfSize[1], 0 }, { 1.f, 0.f, 1.f });
+            //! Draw canvas
+            bool canvasDrawn = false;
+            if(!canvasDrawn) {
+                auto canvas = target->getCanvas();
+                if (canvas) {
+                    const auto& designSize = canvas->getTargetCanvasSize();
+                    auto position = canvas->getOwner()->getTransform()->getLocalPosition();
+                    Vec2 halfSize = designSize * 0.5f;
+                    ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 1.f });
+                    ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 1.f });
+                    ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], -halfSize[1], 0 }, { 1.f, 0.f, 1.f });
+                    ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], -halfSize[1], 0 }, { 1.f, 0.f, 1.f });
+                }
+                canvasDrawn = true;
             }
-            else
+
+            //! Draw RectTransform
+            auto rectTransform = target->getComponent<RectTransform>();
+            if (rectTransform)
             {
-                //! Draw Canvas Parent
-                auto canvasParent = target->getCanvas();
-                if (canvasParent)
-                {
-                    const auto& designSize = canvasParent->getTargetCanvasSize();
-                    auto canvasTransform = canvasParent->getOwner()->getTransform();
-                    if (canvasTransform) {
-                        const auto& position = canvasTransform->getLocalPosition();
-                        Vec2 halfSize = designSize * 0.5f;
-                        ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 1.f });
-                        ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 1.f });
-                        ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], -halfSize[1], 0 }, { 1.f, 0.f, 1.f });
-                        ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], -halfSize[1], 0 }, { 1.f, 0.f, 1.f });
-                    }
-                }
+                const auto& aabb = target->getWorldAABB();
+                if (aabb.getVolume() <= 0) return;
+                auto position = aabb.getCenter();
+                Vec3 halfSize = aabb.getExtent() * 0.5f;
 
-                //! Draw RectTransform
-                auto rectTransform = target->getComponent<RectTransform>();
-                if (rectTransform)
-                {
-                    const auto& aabb = target->getWorldAABB();
-                    if (aabb.getVolume() <= 0) return;
-                    auto position = aabb.getCenter();
-                    Vec3 halfSize = aabb.getExtent() * 0.5f;
-
-                    ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 0.f });
-                    ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 0.f });
-                    ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], -halfSize[1], 0 }, { 1.f, 0.f, 0.f });
-                    ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], -halfSize[1], 0 }, { 1.f, 0.f, 0.f });
-                }
-
+                ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 0.f });
+                ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 0.f });
+                ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], -halfSize[1], 0 }, { 1.f, 0.f, 0.f });
+                ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], -halfSize[1], 0 }, { 1.f, 0.f, 0.f });
             }
         }
     }

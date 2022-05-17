@@ -100,8 +100,8 @@ namespace ige::creator
             m_playBtn->setTextureId(ResourceCreator::Instance().NewTexture(GetEnginePath("icons/btn_play").c_str())->GetTextureHandle());
         });
 
-        auto serviceGroup = columns->createWidget<Group>("ServiceGroup", false, false, Group::E_Align::RIGHT);
-        serviceGroup->createWidget<Label>("Service (coming soon...)");
+        // auto serviceGroup = columns->createWidget<Group>("ServiceGroup", false, false, Group::E_Align::RIGHT);
+        // serviceGroup->createWidget<Label>("Service (coming soon...)");
     }
 
     void ToolBar::_drawImpl()

@@ -83,7 +83,7 @@ void UITextEditorComponent::drawUIText()
     horizontalCombo->setEndOfLine(true);
 
     auto vertical = comp->getProperty<int>("alignvertical", -1);
-    auto verticalCombo = m_uiTextGroup->createWidget<ComboBox>("Text Align Horizontal", vertical);
+    auto verticalCombo = m_uiTextGroup->createWidget<ComboBox>("AlignVertical", vertical);
     verticalCombo->getOnDataChangedEvent().addListener([this](auto val) {
         if (val != -1) {
             storeUndo();

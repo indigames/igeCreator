@@ -30,6 +30,12 @@ FigureMeta::FigureMeta(const std::string& path)
         {"SHADER_NUM_SPOT_LAMP", 7},
         {"EMBEDDED_ANIMATION", false},
     };
+
+    auto ext = fs::path(path).extension().string();
+    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+    if (ext.compare(".fbx") == 0)
+        m_options["BASE_SCALE"] = 100.f;
+
     loadOptions();
 }
 

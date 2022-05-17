@@ -67,6 +67,13 @@ namespace ige::creator
         if (m_showcase == nullptr) {
             m_showcase = ResourceCreator::Instance().NewShowcase("animator_preview_showcase");
 
+            auto environment = ResourceCreator::Instance().NewEnvironmentSet(m_name.c_str(), nullptr);
+            environment->WaitBuild();
+            environment->SetShadowDensity(1.f);
+            environment->SetShadowWideness(100.f);
+            environment->SetDirectionalLampDirection(0, {-30, 0, 0});
+            m_showcase->Add(environment);
+
             auto grid = GraphicsHelper::getInstance()->createGridMesh({ 10000, 10000 }, GetEnginePath("sprites/grid"));
             grid->SetPosition(Vec3(0.f, -0.01f, -0.01f));
             grid->SetRotation(Quat::RotationX(PI / 2.f));
@@ -74,7 +81,7 @@ namespace ige::creator
         }
 
         if (m_rtTexture == nullptr) {
-            m_rtTexture = ResourceCreator::Instance().NewTexture("animator_preview_RTTexture", nullptr, size.x, size.y, GL_RGBA);
+            m_rtTexture = ResourceCreator::Instance().NewTexture("animator_preview_RTTexture", nullptr, size.x, size.y, GL_RGB, true);
             m_rtTexture->WaitInitialize();
         }
 
@@ -102,6 +109,13 @@ namespace ige::creator
                 m_bDirty = true;
             });
         }
+
+        // Size changed event
+        getOnSizeChangedEvent().addListener([this](auto size) {
+            m_camera->SetAspectRate(size.x / size.y);
+            m_fbo->Resize(size.x, size.y);
+            m_imageWidget->setSize(size);
+        });
 
         m_bDirty = false;
         m_bInitialized = true;
@@ -134,7 +148,6 @@ namespace ige::creator
         if (m_camera) {
             m_camera->Step(dt);
             m_showcase->Update(dt);
-            m_showcase->ZSort(m_camera);           
             m_camera->Render();
         }
 

@@ -590,6 +590,7 @@ namespace ige::creator
                                 Editor::getCanvas()->getAnimatorPreview()->setModelPath(txt);
                             }
                             setDirty();
+                            setLayersDirty();
                         }
                     });
 
@@ -603,6 +604,7 @@ namespace ige::creator
                                     Editor::getCanvas()->getAnimatorPreview()->setModelPath(path);
                                 }
                                 setDirty();
+                                setLayersDirty();
                             }
                         });
                     }
@@ -614,6 +616,7 @@ namespace ige::creator
                             node->state.lock()->setPath(path);
                             setInspectorDirty();
                             setDirty();
+                            setLayersDirty();
                         }
                     });
 
@@ -1173,7 +1176,7 @@ namespace ige::creator
                 }
             });
             std::array offsets = { transition->offset };
-            m_inspectGroup->createWidget<Drag<float>>("Transit Time", ImGuiDataType_Float, offsets)->getOnDataChangedEvent().addListener([this](auto val) {
+            m_inspectGroup->createWidget<Drag<float>>("Offset", ImGuiDataType_Float, offsets)->getOnDataChangedEvent().addListener([this](auto val) {
                 CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                 auto link = findLink(m_link);
                 if (link != nullptr && !link->transition.expired()) {
@@ -1209,17 +1212,15 @@ namespace ige::creator
                         setDirty();
                     }
                 });
-                if (transition->hasFixedDuration) {
-                    CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
-                    std::array durations = { transition->duration };
-                    m_inspectGroup->createWidget<Drag<float>>("Duration", ImGuiDataType_Float, durations)->getOnDataChangedEvent().addListener([this](auto val) {
-                        auto link = findLink(m_link);
-                        if (link != nullptr && !link->transition.expired()) {
-                            link->transition.lock()->duration = val[0];
-                            setDirty();
-                        }
-                    });
-                }
+                CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
+                std::array durations = { transition->duration };
+                m_inspectGroup->createWidget<Drag<float>>("Duration", ImGuiDataType_Float, durations)->getOnDataChangedEvent().addListener([this](auto val) {
+                    auto link = findLink(m_link);
+                    if (link != nullptr && !link->transition.expired()) {
+                        link->transition.lock()->duration = val[0];
+                        setDirty();
+                    }
+                });
             }
 
             auto conditionGroup = m_inspectGroup->createWidget<Group>("Conditions");
