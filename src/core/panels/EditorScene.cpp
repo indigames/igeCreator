@@ -597,8 +597,24 @@ namespace ige::creator
     {
         if (Editor::getInstance() == nullptr || Editor::getInstance()->getTarget() == nullptr) return;
         auto targets = Editor::getInstance()->getTarget()->getAllTargets();
-        for (auto& target : targets)
+        bool canvasDrawn = false;
+        for (auto& target : targets) {
+            if (!canvasDrawn && !target.expired() && target.lock()->isGUIObject()) {               
+                auto canvas = target.lock()->getCanvas();
+                if (canvas) {
+                    const auto& designSize = canvas->getTargetCanvasSize();
+                    auto position = canvas->getOwner()->getTransform()->getLocalPosition();
+                    Vec2 halfSize = designSize * 0.5f;
+                    ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 1.f });
+                    ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 1.f });
+                    ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], -halfSize[1], 0 }, { 1.f, 0.f, 1.f });
+                    ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], -halfSize[1], 0 }, { 1.f, 0.f, 1.f });
+                }
+                canvasDrawn = true;
+            }
             renderBoundingBox(target.lock().get());
+        }
+            
     }
 
     void EditorScene::renderBoundingBox(SceneObject* target)
@@ -631,22 +647,6 @@ namespace ige::creator
         }
         else
         {
-            //! Draw canvas
-            bool canvasDrawn = false;
-            if(!canvasDrawn) {
-                auto canvas = target->getCanvas();
-                if (canvas) {
-                    const auto& designSize = canvas->getTargetCanvasSize();
-                    auto position = canvas->getOwner()->getTransform()->getLocalPosition();
-                    Vec2 halfSize = designSize * 0.5f;
-                    ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 1.f });
-                    ShapeDrawer::drawLine(position + Vec3{ -halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], +halfSize[1], 0 }, { 1.f, 0.f, 1.f });
-                    ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], +halfSize[1], 0 }, position + Vec3{ +halfSize[0], -halfSize[1], 0 }, { 1.f, 0.f, 1.f });
-                    ShapeDrawer::drawLine(position + Vec3{ +halfSize[0], -halfSize[1], 0 }, position + Vec3{ -halfSize[0], -halfSize[1], 0 }, { 1.f, 0.f, 1.f });
-                }
-                canvasDrawn = true;
-            }
-
             //! Draw RectTransform
             auto rectTransform = target->getComponent<RectTransform>();
             if (rectTransform)
