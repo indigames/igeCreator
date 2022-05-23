@@ -34,6 +34,11 @@ void UITextEditorComponent::drawUIText()
     auto comp = getComponent<CompoundComponent>();
     if (comp == nullptr) return;
 
+    m_uiTextGroup->createWidget<CheckBox>("RectAutoScale", comp->getProperty<bool>("rectScale", false))->getOnDataChangedEvent().addListener([this](auto& scale) {
+        storeUndo();
+        getComponent<CompoundComponent>()->setProperty("rectScale", scale);
+    });
+
     auto txtText = m_uiTextGroup->createWidget<TextField>("Text", comp->getProperty<std::string>("text", ""));
     txtText->getOnDataChangedEvent().addListener([this](auto txt) {
         storeUndo();

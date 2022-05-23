@@ -703,7 +703,6 @@ namespace ige::creator
                 TaskManager::getInstance()->addTask([&]() {
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObject = Editor::getCurrentScene()->createObject("UIText", target, true);
-                    auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
                     newObject->addComponent<UIText>("Text");
                     CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
@@ -713,7 +712,6 @@ namespace ige::creator
                 TaskManager::getInstance()->addTask([&]() {
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObject = Editor::getCurrentScene()->createObject("UITextBitmap", target, true);
-                    auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
                     newObject->addComponent<UITextBitmap>("Text");
                 });
             });
@@ -722,10 +720,7 @@ namespace ige::creator
                 TaskManager::getInstance()->addTask([&]() {
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObject = Editor::getCurrentScene()->createObject("UITextField", target, true);
-                    auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
-                    newObject->addComponent<UIImage>("sprites/background", rect->getSize());
-                    auto newLabel = Editor::getCurrentScene()->createObject("Label", newObject, true, Vec2());
-                    newLabel->addComponent<UITextField>("TextField");
+                    newObject->addComponent<UITextField>("TextField");
                     CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
