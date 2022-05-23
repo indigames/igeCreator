@@ -32,21 +32,6 @@ void UIMaskEditorComponent::drawUIMask() {
     auto comp = getComponent<CompoundComponent>();
     if (comp == nullptr) return;
 
-    auto txtPath = m_uiMaskGroup->createWidget<TextField>("Path", comp->getProperty<std::string>("path", ""), false, true);
-    txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
-        storeUndo();
-        getComponent<CompoundComponent>()->setProperty("path", txt);
-        getComponent<CompoundComponent>()->setDirty();
-    });
-    for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite)) {
-        txtPath->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
-            storeUndo();
-            getComponent<CompoundComponent>()->setProperty("path", GetRelativePath(path));
-            getComponent<CompoundComponent>()->setDirty();
-            setDirty();
-        });
-    }
-
     m_uiMaskGroup->createWidget<CheckBox>("Use Mask", comp->getProperty<bool>("usemask", false))->getOnDataChangedEvent().addListener([this](bool val) {
         storeUndo();
         getComponent<CompoundComponent>()->setProperty("usemask", val);
@@ -185,9 +170,5 @@ void UIMaskEditorComponent::drawUIMask() {
             }
         }
     }
-    m_uiMaskGroup->createWidget<Color>("Color", comp->getProperty<Vec4>("color", { NAN, NAN, NAN, NAN }))->getOnDataChangedEvent().addListener([this](auto val) {
-        storeUndo();
-        getComponent<CompoundComponent>()->setProperty("color", { val[0], val[1], val[2], val[3] });
-    });
 }
 NS_IGE_END

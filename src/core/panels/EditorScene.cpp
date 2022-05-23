@@ -599,7 +599,7 @@ namespace ige::creator
         auto targets = Editor::getInstance()->getTarget()->getAllTargets();
         bool canvasDrawn = false;
         for (auto& target : targets) {
-            if (!canvasDrawn && !target.expired() && target.lock()->isGUIObject()) {               
+            if (!canvasDrawn && !target.expired() && target.lock()->isGUIObject()) {
                 auto canvas = target.lock()->getCanvas();
                 if (canvas) {
                     const auto& designSize = canvas->getTargetCanvasSize();

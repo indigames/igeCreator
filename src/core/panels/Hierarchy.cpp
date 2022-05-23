@@ -905,8 +905,8 @@ namespace ige::creator
                         rectMask->setAnchor(Vec4(0, 0, 1, 1));
                         rectMask->setOffset(Vec4(0, 20, 20, 0));
                     }
-                    auto uiMask = newMask->addComponent<UIMask>("sprites/background", rectMask->getSize());
-                    uiMask->setAlpha(0);
+                    auto uiMask = newMask->addComponent<UIMask>("", rectMask->getSize());
+                    uiMask->setAlpha(3); // big enough to pass alpha test
 
                     // // Create Content
                     auto newContent = Editor::getCurrentScene()->createObject("Content", newMask, true, rectMask->getSize());
@@ -938,8 +938,8 @@ namespace ige::creator
                     auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
 
                     // Create Mask
-                    auto uiMask = newObject->addComponent<UIMask>("sprites/background", rect->getSize());
-                    uiMask->setAlpha(0);
+                    auto uiMask = newObject->addComponent<UIMask>("", rect->getSize());
+                    uiMask->setAlpha(3);  // big enough to pass alpha test
                     CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
