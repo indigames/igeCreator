@@ -12,7 +12,7 @@
 
 namespace ige::creator
 {
-    static const int LIMIT_GLYPH_PER_PAGE = 5;
+    static const int LIMIT_GLYPH_PER_PAGE = 3;
 
     static std::wstring utf8toUtf16(const std::string& str)
     {
@@ -354,12 +354,27 @@ namespace ige::creator
         m_GroupLeft = m_columns->createWidget<Group>("G1", false, false);
         m_GroupRight = m_columns->createWidget<Group>("G2", false, false);
 
+        m_GroupLeft->createWidget<Button>("Load FontBitmap", ImVec2(256.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
+            auto files = OpenFileDialog("Import Font Bitmap", "", { "Bitmap (*.pybm)", "*.pybm" }).result();
+            if (files.size() > 0)
+            {
+                bool kq = this->loadBitmapFont(files[0]);
+                if (kq) {
+                    this->onLoadImg(m_path);
+                    dirty();
+                }
+            }
+        });
 
-        auto txtPath = m_GroupLeft->createWidget<TextField>("Path", m_path, false, true);
+        m_GroupLeft->createWidget<Button>("Save FontBitmap", ImVec2(256.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
+            this->saveBitmapFont();
+        });
+
+        auto txtPath = m_GroupLeft->createWidget<TextField>("", m_path, false, true);
         txtPath->setEndOfLine(false);
         txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
             this->onLoadImg(txt);
-            });
+        });
 
         for (const auto& type : GetFileExtensionSuported(E_FileExts::Sprite))
         {
@@ -369,7 +384,7 @@ namespace ige::creator
             });
         }
 
-        auto btnB1 = m_GroupLeft->createWidget<Button>("Browse", ImVec2(64.f, 0.f));
+        auto btnB1 = m_GroupLeft->createWidget<Button>("Image", ImVec2(52.f, 0.f));
         btnB1->getOnClickEvent().addListener([this](auto widget) {
             auto files = OpenFileDialog("Import Assets", "", { "Texture (*.pyxi)", "*.pyxi" }).result();
             if (files.size() > 0)
@@ -377,37 +392,21 @@ namespace ige::creator
                 this->onLoadImg(files[0]);
                 dirty();
             }
-            });
+        });
         btnB1->setEndOfLine(true);
 
-        m_GroupLeft->createWidget<Button>("Generate Character Set", ImVec2(256.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
-            if (m_txtChars != nullptr)
-                this->setChacterCode(m_txtChars->getText());
-            auto s = this->getChacterCode();
-            this->generateCode(s);
-            });
-
-        m_GroupLeft->createWidget<Button>("Load Bitmap Font", ImVec2(256.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
-            auto files = OpenFileDialog("Import Bitmap Font", "", { "Bitmap (*.pybm)", "*.pybm" }).result();
-            if (files.size() > 0)
-            {
-                bool kq = this->loadBitmapFont(files[0]);
-                if (kq) {
-                    this->onLoadImg(m_path);
-                    dirty();
-                }
-            }
-            });
-
-        m_GroupLeft->createWidget<Button>("Save FontBitmap", ImVec2(256.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
-            this->saveBitmapFont();
-            });
-
-        m_GroupLeft->createWidget<Label>("Character set");
-        m_txtChars = m_GroupLeft->createWidget<TextArea>("", "", ImVec2(256.f, 128.f));
+        m_GroupLeft->createWidget<Label>("Characters Set");
+        m_txtChars = m_GroupLeft->createWidget<TextArea>("", m_CharacterCode, ImVec2(256.f, 128.f));
         m_txtChars->getOnDataChangedEvent().addListener([this](auto text) {
             this->setChacterCode(text);
-            });
+        });
+
+        m_GroupLeft->createWidget<Button>("Generate Glyphs", ImVec2(256.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {
+            if (m_txtChars != nullptr) this->setChacterCode(m_txtChars->getText());
+            auto s = this->getChacterCode();
+            this->generateCode(s);
+        });
+
         m_fontPageGroup = m_GroupLeft->createWidget<Group>("Page", false, false);
     }
 
@@ -574,23 +573,36 @@ namespace ige::creator
     {
         int len = code.length();
         if (len == 0) return;
-        m_font = std::make_shared<BitmapFont>(m_path);
-        m_numGlyph = len;
+        if (m_font == nullptr)
+            m_font = std::make_shared<BitmapFont>(m_path);
+        
+        int numGlyph = m_font->getGlyphCount();
         wchar_t dest[512];
         int lenW =  mbstowcs(dest, code.c_str(), 512);
         if (dest != nullptr)
         {
             for (int i = 0; i < lenW; i++)
             {
-                auto glyph = std::make_shared<BitmapGlyph>();
-                glyph->ID = i;
-                glyph->Unicode = dest[i];
-                glyph->Name = "";
-                m_font->addGlyph(glyph);
+                bool containChar = false;
+                for (int j = 0; j < numGlyph; ++j) {
+                    auto glyph = m_font->getGlyph(i);
+                    if (glyph->Unicode == dest[i]) {
+                        containChar = true;
+                        break;
+                    }
+                }
+                if (!containChar) {
+                    auto glyph = std::make_shared<BitmapGlyph>();
+                    glyph->ID = i;
+                    glyph->Unicode = dest[i];
+                    glyph->Name = "";
+                    m_font->addGlyph(glyph);
+                }                
             }
             m_bPageFlag = true;
             m_CurrentPageIndex = 0;
         }
+        m_numGlyph = m_font->getGlyphCount();
     }
 
     bool BitmapFontCreator::saveBitmapFont()
@@ -622,6 +634,12 @@ namespace ige::creator
             m_numGlyph = m_font->getGlyphCount();
             m_path = m_font->getName();
             m_CurrentPageIndex = 0;
+            m_CharacterCode.clear();
+            for (int i = 0; i < m_numGlyph; ++i) {
+                auto glyph = m_font->getGlyph(i);
+                m_CharacterCode += ((char)glyph->Unicode);
+            }
+
             return true;
         }
         return false;
