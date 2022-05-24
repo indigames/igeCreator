@@ -34,7 +34,6 @@
 #include <components/BoneTransform.h>
 #include <components/SpriteComponent.h>
 #include <components/TextComponent.h>
-#include <components/TextBitmapComponent.h>
 #include <components/ScriptComponent.h>
 #include <components/light/AmbientLight.h>
 #include <components/light/DirectionalLight.h>
@@ -44,7 +43,6 @@
 #include <components/gui/Canvas.h>
 #include <components/gui/UIImage.h>
 #include <components/gui/UIText.h>
-#include <components/gui/UITextBitmap.h>
 #include <components/gui/UITextField.h>
 #include <components/gui/UIButton.h>
 #include <components/gui/UISlider.h>
@@ -149,7 +147,6 @@ namespace ige::creator
         {
             m_createCompCombo->addChoice((int)Component::Type::UIImage, "UIImage");
             m_createCompCombo->addChoice((int)Component::Type::UIText, "UIText");
-            m_createCompCombo->addChoice((int)Component::Type::UITextBitmap, "UITextBitmap");
             m_createCompCombo->addChoice((int)Component::Type::UITextField, "UITextField");
             m_createCompCombo->addChoice((int)Component::Type::UIButton, "UIButton");
             m_createCompCombo->addChoice((int)Component::Type::UIButton, "UISlider");
@@ -300,12 +297,6 @@ namespace ige::creator
                     onAddComponent(comp);
                 }
                     break;
-                case (int)Component::Type::TextBitmap:
-                {
-                    auto comp = m_targetObject->addComponent<TextBitmapComponent>("Text");
-                    onAddComponent(comp);
-                }
-                    break;
                 case (int)Component::Type::BoneTransform:
                 {
                     auto comp = m_targetObject->addComponent<BoneTransform>();
@@ -324,12 +315,7 @@ namespace ige::creator
                     onAddComponent(comp);
                 }
                     break;
-                case (int)Component::Type::UITextBitmap:
-                {
-                    auto comp = m_targetObject->addComponent<UITextBitmap>("Text");
-                    onAddComponent(comp);
-                }
-                    break;
+
                 case (int)Component::Type::UITextField:
                 {
                     auto comp = m_targetObject->addComponent<UITextField>("TextField");

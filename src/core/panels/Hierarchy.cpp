@@ -21,7 +21,6 @@
 #include "components/gui/Canvas.h"
 #include "components/gui/UIImage.h"
 #include "components/gui/UIText.h"
-#include "components/gui/UITextBitmap.h"
 #include "components/gui/UITextField.h"
 #include "components/gui/UIButton.h"
 #include "components/gui/UISlider.h"
@@ -31,7 +30,6 @@
 #include "components/audio/AudioSource.h"
 #include "components/audio/AudioListener.h"
 #include "components/TextComponent.h"
-#include "components/TextBitmapComponent.h"
 #include "components/particle/Particle.h"
 
 #include <scene/Scene.h>
@@ -660,15 +658,6 @@ namespace ige::creator
                     CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                     });
                 });
-
-            textMenu->createWidget<MenuItem>("Text Bitmap")->getOnClickEvent().addListener([](auto widget) {
-                TaskManager::getInstance()->addTask([&]() {
-                    auto target = Editor::getInstance()->getFirstTarget();
-                    auto newObject = Editor::getCurrentScene()->createObject("TextBitmap", target);
-                    newObject->addComponent<TextBitmapComponent>();
-                    CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
-                    });
-                });
         }
 
         // Effects
@@ -708,14 +697,6 @@ namespace ige::creator
                 });
             });
 
-            guiMenu->createWidget<MenuItem>("UITextBitmap")->getOnClickEvent().addListener([](auto widget) {
-                TaskManager::getInstance()->addTask([&]() {
-                    auto target = Editor::getInstance()->getFirstTarget();
-                    auto newObject = Editor::getCurrentScene()->createObject("UITextBitmap", target, true);
-                    newObject->addComponent<UITextBitmap>("Text");
-                });
-            });
-
             guiMenu->createWidget<MenuItem>("UITextField")->getOnClickEvent().addListener([](auto widget) {
                 TaskManager::getInstance()->addTask([&]() {
                     auto target = Editor::getInstance()->getFirstTarget();
@@ -731,7 +712,9 @@ namespace ige::creator
                     auto newObject = Editor::getCurrentScene()->createObject("UIButton", target, true);
                     auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
                     newObject->addComponent<UIButton>("sprites/background", rect->getSize());
-                    Editor::getCurrentScene()->createObject("Label", newObject, true, Vec2())->addComponent<UIText>("Button");
+                    auto labelObject = Editor::getCurrentScene()->createObject("Label", newObject, true, Vec2());
+                    labelObject->addComponent<UIText>("Button");
+                    labelObject->getRectTransform()->translate({0.f, 0.f, 0.01f});
                     CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });

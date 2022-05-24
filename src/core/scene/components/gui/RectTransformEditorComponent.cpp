@@ -246,7 +246,7 @@ void RectTransformEditorComponent::drawRect() {
     });
 
     std::array posZ = { getComponent<CompoundComponent>()->getProperty<Vec3>("pos", { NAN, NAN, NAN }).Z() };
-    auto anchor3 = anchorGroupColums->createWidget<Drag<float>>("Z", ImGuiDataType_Float, posZ, 1.f);
+    auto anchor3 = anchorGroupColums->createWidget<Drag<float>>("Z", ImGuiDataType_Float, posZ, 0.01f);
     anchor3->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
         });

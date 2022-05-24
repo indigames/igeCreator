@@ -367,7 +367,7 @@ namespace ige::creator
                 {
                     icon = m_iconTextures["image"];
                 }
-                else if (IsFormat(E_FileExts::Font, file_ext) || IsFormat(E_FileExts::FontBitmap, file_ext))
+                else if (IsFormat(E_FileExts::Font, file_ext))
                 {
                     icon = m_iconTextures["font"];
                 }
