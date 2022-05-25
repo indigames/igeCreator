@@ -714,7 +714,8 @@ namespace ige::creator
                     newObject->addComponent<UIButton>("sprites/background", rect->getSize());
                     auto labelObject = Editor::getCurrentScene()->createObject("Label", newObject, true, Vec2());
                     labelObject->addComponent<UIText>("Button");
-                    labelObject->getRectTransform()->translate({0.f, 0.f, 0.01f});
+                    auto pos = labelObject->getRectTransform()->getLocalPosition();
+                    labelObject->getRectTransform()->setLocalPosition({ pos[0], pos[1], 0.01f });
                     CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
@@ -734,7 +735,8 @@ namespace ige::creator
                     if (rectBG) {
                         rectBG->setAnchor(Vec4(0.f, 0.f, 1.f, 1.f));
                         rectBG->setAnchoredPosition(Vec2(0, 0));
-                        rectBG->translate({ 0.f, 0.f, 0.01f });
+                        auto pos = rectBG->getLocalPosition();
+                        rectBG->setLocalPosition({ pos[0], pos[1], 0.01f });
                     }
                     // Create Fill
                     auto newFillArea = Editor::getCurrentScene()->createObject("fillArea", newObject, true, Vec2(158.f, 14.f));
@@ -742,7 +744,8 @@ namespace ige::creator
                     auto rectFillArea = std::dynamic_pointer_cast<RectTransform>(newFillArea->getTransform());
                     if (rectFillArea) {
                         rectFillArea->setAnchor(Vec4(0.f, 0.f, 1.f, 1.f));
-                        rectFillArea->translate({ 0.f, 0.f, 0.02f });
+                        auto pos = rectFillArea->getLocalPosition();
+                        rectFillArea->setLocalPosition({ pos[0], pos[1], 0.02f });
                     }
 
                     auto newFill = Editor::getCurrentScene()->createObject("fill", newFillArea, true, Vec2(1.f, 14.f));
@@ -750,7 +753,8 @@ namespace ige::creator
                     if (rectFill) {
                         rectFill->setAnchor(Vec4(0.f, 0.f, 0.f, 1.f));
                         rectFill->setAnchoredPosition(Vec2(0, 0));
-                        rectFill->translate({ 0.f, 0.f, 0.03f });
+                        auto pos = rectFill->getLocalPosition();
+                        rectFill->setLocalPosition({ pos[0], pos[1], 0.03f });
                     }
                     auto imgFill = newFill->addComponent<UIImage>("sprites/background", rectFill->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
                     newFill->setIsRaycastTarget(false);
@@ -761,14 +765,16 @@ namespace ige::creator
                     if (rectHandleArea) {
                         rectHandleArea->setAnchor(Vec4(0.f, 0.f, 1.f, 1.f));
                         rectHandleArea->setAnchoredPosition(Vec2(0, 0));
-                        rectHandleArea->translate({ 0.f, 0.f, 0.02f });
+                        auto pos = rectHandleArea->getLocalPosition();
+                        rectHandleArea->setLocalPosition({ pos[0], pos[1], 0.02f });
                     }
                     auto newHandle = Editor::getCurrentScene()->createObject("handle", newHandleArea, true, Vec2(30.f, 30.f));
                     auto rectHandle = std::dynamic_pointer_cast<RectTransform>(newHandle->getTransform());
                     if (rectHandle) {
                         rectHandle->setAnchor(Vec4(0.f, 0.f, 0.f, 1.f));
                         rectHandle->setAnchoredPosition(Vec2(0, 0));
-                        rectHandle->translate({ 0.f, 0.f, 0.03f });
+                        auto pos = rectHandle->getLocalPosition();
+                        rectHandle->setLocalPosition({ pos[0], pos[1], 0.03f });
                     }
                     newHandle->addComponent<UIImage>("sprites/background", rectHandle->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
                     newHandle->setIsRaycastTarget(false);
@@ -796,7 +802,8 @@ namespace ige::creator
                     auto rectHorizontalSliding = std::dynamic_pointer_cast<RectTransform>(newHorizontalSliding->getTransform());
                     rectHorizontalSliding->setAnchor(Vec4(0, 0, 1, 1));
                     rectHorizontalSliding->setOffset(Vec4(10, 10, 10, 10));
-                    rectHorizontalSliding->translate({ 0.f, 0.f, 0.02f });
+                    auto pos = rectHorizontalSliding->getLocalPosition();
+                    rectHorizontalSliding->setLocalPosition({ pos[0], pos[1], 0.02f });
 
                     // Create Horizontal Handle
                     auto newHorizontalHandle = Editor::getCurrentScene()->createObject("Handle", newHorizontalSliding, true, rectHorizontalSliding->getSize());
@@ -805,7 +812,8 @@ namespace ige::creator
                     {
                         rectHorizontalHandle->setAnchor(Vec4(0.f, 0.f, 1.f, 1.f));
                         rectHorizontalHandle->setOffset(Vec4(-10, -10, -10, -10));
-                        rectHorizontalHandle->translate({ 0.f, 0.f, 0.03f });
+                        pos = rectHorizontalHandle->getLocalPosition();
+                        rectHorizontalHandle->setLocalPosition({ pos[0], pos[1], 0.03f });
                     }
                     auto horizontalImg = newHorizontalHandle->addComponent<UIImage>("sprites/background", rectHorizontalHandle->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
                     uiHorizontalBar->setHandle(newHorizontalHandle);
@@ -821,7 +829,8 @@ namespace ige::creator
                     auto newObject = Editor::getCurrentScene()->createObject("UIScrollView", target, true);
                     auto rect = std::dynamic_pointer_cast<RectTransform>(newObject->getTransform());
                     rect->setSize(Vec2(200, 200));
-                    rect->translate({ 0.f, 0.f, 0.01f });
+                    auto pos = rect->getLocalPosition();
+                    rect->setLocalPosition({ pos[0], pos[1], 0.01f});
 
                     // Create ScrollView
                     auto uiScrollView = newObject->addComponent<UIScrollView>("sprites/background", rect->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
@@ -846,7 +855,8 @@ namespace ige::creator
                         auto anchoredPosH = rectHorizontalBar->getAnchoredPosition();
                         anchoredPosH[1] = 0;
                         rectHorizontalBar->setAnchoredPosition(anchoredPosH);
-                        rectHorizontalBar->translate({ 0.f, 0.f, 0.01f });
+                        auto pos = rectHorizontalBar->getLocalPosition();
+                        rectHorizontalBar->setLocalPosition({ pos[0], pos[1], 0.01f });                        
                     }
                     auto uiHorizontalBar = newHorizontalBar->addComponent<UIScrollBar>("sprites/background", rectHorizontalBar->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
                     if (uiHorizontalBar)
@@ -860,7 +870,8 @@ namespace ige::creator
                     auto rectHorizontalSliding = std::dynamic_pointer_cast<RectTransform>(newHorizontalSliding->getTransform());
                     rectHorizontalSliding->setAnchor(Vec4(0, 0, 1, 1));
                     rectHorizontalSliding->setOffset(Vec4(10, 10, 10, 10));
-                    rectHorizontalSliding->translate({ 0.f, 0.f, 0.02f });
+                    pos = rectHorizontalSliding->getLocalPosition();
+                    rectHorizontalSliding->setLocalPosition({ pos[0], pos[1], 0.02f });
 
                     // Create Horizontal Handle
                     auto newHorizontalHandle = Editor::getCurrentScene()->createObject("Handle", newHorizontalSliding, true, rectHorizontalSliding->getSize());
@@ -869,7 +880,8 @@ namespace ige::creator
                     {
                         rectHorizontalHandle->setAnchor(Vec4(0, 0, 1, 1));
                         rectHorizontalHandle->setOffset(Vec4(-10, -10, -10, -10));
-                        rectHorizontalHandle->translate({ 0.f, 0.f, 0.03f });
+                        pos = rectHorizontalHandle->getLocalPosition();
+                        rectHorizontalHandle->setLocalPosition({ pos[0], pos[1], 0.03f });
                     }
                     auto horizontalImg = newHorizontalHandle->addComponent<UIImage>("sprites/background", rectHorizontalHandle->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
                     uiHorizontalBar->setHandle(newHorizontalHandle);
@@ -891,7 +903,8 @@ namespace ige::creator
                         auto anchoredPosV = rectVerticalBar->getAnchoredPosition();
                         anchoredPosV[0] = 0;
                         rectVerticalBar->setAnchoredPosition(anchoredPosV);
-                        rectVerticalBar->translate({ 0.f, 0.f, 0.01f });
+                        pos = rectVerticalBar->getLocalPosition();
+                        rectVerticalBar->setLocalPosition({ pos[0], pos[1], 0.01f });
                     }
                     auto uiVerticalBar = newVerticalBar->addComponent<UIScrollBar>("sprites/background", rectVerticalBar->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
                     if (uiVerticalBar)
@@ -905,7 +918,8 @@ namespace ige::creator
                     auto rectVerticalSliding = std::dynamic_pointer_cast<RectTransform>(newVerticalSliding->getTransform());
                     rectVerticalSliding->setAnchor(Vec4(0, 0, 1, 1));
                     rectVerticalSliding->setOffset(Vec4(10, 10, 10, 10));
-                    rectVerticalSliding->translate({ 0.f, 0.f, 0.02f });
+                    pos = rectVerticalSliding->getLocalPosition();
+                    rectVerticalSliding->setLocalPosition({ pos[0], pos[1], 0.02f });
 
                     // Create Vertical Handle
                     auto newVerticalHandle = Editor::getCurrentScene()->createObject("Handle", newVerticalSliding, true, rectVerticalSliding->getSize());
@@ -914,8 +928,8 @@ namespace ige::creator
                     {
                         rectVerticalHandle->setAnchor(Vec4(0, 0, 1, 1));
                         rectVerticalHandle->setOffset(Vec4(-10, -10, -10, -10));
-                        //rectVerticalHandle->setPivot(Vec2(1, 1));
-                        rectVerticalHandle->translate({ 0.f, 0.f, 0.03f });
+                        pos = rectVerticalHandle->getLocalPosition();
+                        rectVerticalHandle->setLocalPosition({ pos[0], pos[1], 0.03f });
                     }
                     auto verticalImg = newVerticalHandle->addComponent<UIImage>("sprites/background", rectVerticalHandle->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
 
@@ -929,7 +943,8 @@ namespace ige::creator
                     {
                         rectMask->setAnchor(Vec4(0, 0, 1, 1));
                         rectMask->setOffset(Vec4(0, 20, 20, 0));
-                        rectMask->translate({ 0.f, 0.f, 0.01f });
+                        pos = rectMask->getLocalPosition();
+                        rectMask->setLocalPosition({ pos[0], pos[1], 0.01f });
                     }
 
                     // Create Content Mask
@@ -944,7 +959,8 @@ namespace ige::creator
                         rectContent->setPivot(Vec2(0, 1));
                         rectContent->setPosition({ 0, 0, 0});
                         rectContent->setSize({300, 300});
-                        rectContent->translate({ 0.f, 0.f, 0.02f });
+                        pos = rectContent->getLocalPosition();
+                        rectContent->setLocalPosition({ pos[0], pos[1], 0.02f });
                     }
 
                     uiScrollView->setContent(newContent);
