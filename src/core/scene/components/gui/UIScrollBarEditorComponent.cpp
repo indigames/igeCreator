@@ -78,7 +78,7 @@ void UIScrollBarEditorComponent::drawUIScrollBar() {
         b1->getOnDataChangedEvent().addListener([this](auto val) {
             auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", { NAN, NAN, NAN, NAN });
             border.X(val[0]);
-            getComponent<CompoundComponent>()->setProperty("border", val);
+            getComponent<CompoundComponent>()->setProperty("border", border);
         });
         std::array borderRight = { border.Y() };
         auto b2 = m_uiScrollBarGroup->createWidget<Drag<float, 1>>("Border Right", ImGuiDataType_Float, borderRight, 1.0f, 0.f, 16384.f);
@@ -88,7 +88,7 @@ void UIScrollBarEditorComponent::drawUIScrollBar() {
         b2->getOnDataChangedEvent().addListener([this](auto val) {
             auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", { NAN, NAN, NAN, NAN });
             border.Y(val[0]);
-            getComponent<CompoundComponent>()->setProperty("border", val);
+            getComponent<CompoundComponent>()->setProperty("border", border);
         });
         std::array borderTop = { border.Z() };
         auto b3 = m_uiScrollBarGroup->createWidget<Drag<float, 1>>("Border Top", ImGuiDataType_Float, borderTop, 1.0f, 0.f, 16384.f);
@@ -98,7 +98,7 @@ void UIScrollBarEditorComponent::drawUIScrollBar() {
         b3->getOnDataChangedEvent().addListener([this](auto val) {
             auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", { NAN, NAN, NAN, NAN });
             border.Z(val[0]);
-            getComponent<CompoundComponent>()->setProperty("border", val);
+            getComponent<CompoundComponent>()->setProperty("border", border);
         });
         std::array borderBottom = { border.W() };
         auto b4 = m_uiScrollBarGroup->createWidget<Drag<float, 1>>("Border Bottom", ImGuiDataType_Float, borderBottom, 1.0f, 0.f, 16384.f);
@@ -108,7 +108,7 @@ void UIScrollBarEditorComponent::drawUIScrollBar() {
         b4->getOnDataChangedEvent().addListener([this](auto val) {
             auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", { NAN, NAN, NAN, NAN });
             border.W(val[0]);
-            getComponent<CompoundComponent>()->setProperty("border", val);
+            getComponent<CompoundComponent>()->setProperty("border", border);
         });
     }
     else {

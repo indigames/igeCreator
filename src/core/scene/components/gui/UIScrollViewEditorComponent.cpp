@@ -76,7 +76,7 @@ void UIScrollViewEditorComponent::drawUIScrollView() {
         b1->getOnDataChangedEvent().addListener([this](auto val) {
             auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", { NAN, NAN, NAN, NAN });
             border.X(val[0]);
-            getComponent<CompoundComponent>()->setProperty("border", val);
+            getComponent<CompoundComponent>()->setProperty("border", border);
         });
         
         std::array borderRight = { border.Y() };
@@ -87,7 +87,7 @@ void UIScrollViewEditorComponent::drawUIScrollView() {
         b2->getOnDataChangedEvent().addListener([this](auto val) {
             auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", { NAN, NAN, NAN, NAN });
             border.Y(val[0]);
-            getComponent<CompoundComponent>()->setProperty("border", val);
+            getComponent<CompoundComponent>()->setProperty("border", border);
         });
         
         std::array borderTop = { border.Z() };
@@ -98,7 +98,7 @@ void UIScrollViewEditorComponent::drawUIScrollView() {
         b3->getOnDataChangedEvent().addListener([this](auto val) {
             auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", { NAN, NAN, NAN, NAN });
             border.Z(val[0]);
-            getComponent<CompoundComponent>()->setProperty("border", val);
+            getComponent<CompoundComponent>()->setProperty("border", border);
         });
         
         std::array borderBottom = { border.W() };
@@ -109,7 +109,7 @@ void UIScrollViewEditorComponent::drawUIScrollView() {
         b4->getOnDataChangedEvent().addListener([this](auto val) {
             auto border = getComponent<CompoundComponent>()->getProperty<Vec4>("border", { NAN, NAN, NAN, NAN });
             border.W(val[0]);
-            getComponent<CompoundComponent>()->setProperty("border", val);
+            getComponent<CompoundComponent>()->setProperty("border", border);
         });
     }
     else {

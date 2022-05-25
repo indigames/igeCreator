@@ -100,5 +100,9 @@ void UIMaskEditorComponent::drawUIMask() {
             });
         }
     }
+    m_uiMaskGroup->createWidget<Color>("Color", comp->getProperty<Vec4>("color", { NAN, NAN, NAN, NAN }))->getOnDataChangedEvent().addListener([this](auto val) {
+        storeUndo();
+        getComponent<CompoundComponent>()->setProperty("color", { val[0], val[1], val[2], val[3] });
+    });
 }
 NS_IGE_END
