@@ -778,6 +778,43 @@ namespace ige::creator
                 });
             });
 
+            guiMenu->createWidget<MenuItem>("UIScrollBar")->getOnClickEvent().addListener([](auto widget) {
+                TaskManager::getInstance()->addTask([&]() {
+                    auto target = Editor::getInstance()->getFirstTarget();
+                    auto newHorizontalBar = Editor::getCurrentScene()->createObject("Scrollbar", target, true, Vec2(160.f, 20.f));
+                    auto rectHorizontalBar = std::dynamic_pointer_cast<RectTransform>(newHorizontalBar->getTransform());
+                    auto uiHorizontalBar = newHorizontalBar->addComponent<UIScrollBar>("sprites/background", rectHorizontalBar->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
+                    if (uiHorizontalBar)
+                    {
+                        uiHorizontalBar->setSize(0.1f);
+                        uiHorizontalBar->setDirection(UIScrollBar::Direction::LeftToRight, false);
+                        uiHorizontalBar->setColor(Vec4(0.8392158f, 0.8392158f, 0.8392158f, 1.f));
+                    }
+
+                    // Create Horizontal Sliding Area
+                    auto newHorizontalSliding = Editor::getCurrentScene()->createObject("Sliding Area", newHorizontalBar, true, rectHorizontalBar->getSize());
+                    auto rectHorizontalSliding = std::dynamic_pointer_cast<RectTransform>(newHorizontalSliding->getTransform());
+                    rectHorizontalSliding->setAnchor(Vec4(0, 0, 1, 1));
+                    rectHorizontalSliding->setOffset(Vec4(10, 10, 10, 10));
+                    rectHorizontalSliding->translate({ 0.f, 0.f, 0.02f });
+
+                    // Create Horizontal Handle
+                    auto newHorizontalHandle = Editor::getCurrentScene()->createObject("Handle", newHorizontalSliding, true, rectHorizontalSliding->getSize());
+                    auto rectHorizontalHandle = std::dynamic_pointer_cast<RectTransform>(newHorizontalHandle->getTransform());
+                    if (rectHorizontalHandle)
+                    {
+                        rectHorizontalHandle->setAnchor(Vec4(0.f, 0.f, 1.f, 1.f));
+                        rectHorizontalHandle->setOffset(Vec4(-10, -10, -10, -10));
+                        rectHorizontalHandle->translate({ 0.f, 0.f, 0.03f });
+                    }
+                    auto horizontalImg = newHorizontalHandle->addComponent<UIImage>("sprites/background", rectHorizontalHandle->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
+                    uiHorizontalBar->setHandle(newHorizontalHandle);
+                    uiHorizontalBar->setValue(1.f);
+
+                    CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newHorizontalBar);
+                });
+            });
+
             guiMenu->createWidget<MenuItem>("UIScrollView")->getOnClickEvent().addListener([](auto widget) {
                 TaskManager::getInstance()->addTask([&]() {
                     auto target = Editor::getInstance()->getFirstTarget();
@@ -903,8 +940,9 @@ namespace ige::creator
                     auto rectContent = std::dynamic_pointer_cast<RectTransform>(newContent->getTransform());
                     if (rectContent)
                     {
-                        rectContent->setAnchor(Vec4(0.5f, 0.5f, 0.5f, 0.5f));
+                        rectContent->setAnchor(Vec4(0.f, 1.f, 0.f, 1.f));
                         rectContent->setPivot(Vec2(0, 1));
+                        rectContent->setPosition({ 0, 0, 0});
                         rectContent->setSize({300, 300});
                         rectContent->translate({ 0.f, 0.f, 0.02f });
                     }
@@ -914,7 +952,8 @@ namespace ige::creator
                     uiScrollView->setHorizontalScrollBar(uiHorizontalBar);
                     uiScrollView->setVerticalScrollBar(uiVerticalBar);
 
-                    uiVerticalBar->setValue(0.0f);
+                    uiHorizontalBar->setValue(1.f);
+                    uiVerticalBar->setValue(0.f);
 
                     CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
