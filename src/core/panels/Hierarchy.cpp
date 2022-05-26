@@ -784,45 +784,6 @@ namespace ige::creator
                 });
             });
 
-            guiMenu->createWidget<MenuItem>("UIScrollBar")->getOnClickEvent().addListener([](auto widget) {
-                TaskManager::getInstance()->addTask([&]() {
-                    auto target = Editor::getInstance()->getFirstTarget();
-                    auto newHorizontalBar = Editor::getCurrentScene()->createObject("Scrollbar", target, true, Vec2(160.f, 20.f));
-                    auto rectHorizontalBar = std::dynamic_pointer_cast<RectTransform>(newHorizontalBar->getTransform());
-                    auto uiHorizontalBar = newHorizontalBar->addComponent<UIScrollBar>("sprites/background", rectHorizontalBar->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
-                    if (uiHorizontalBar)
-                    {
-                        uiHorizontalBar->setSize(0.1f);
-                        uiHorizontalBar->setDirection(UIScrollBar::Direction::LeftToRight, false);
-                        uiHorizontalBar->setColor(Vec4(0.8392158f, 0.8392158f, 0.8392158f, 1.f));
-                    }
-
-                    // Create Horizontal Sliding Area
-                    auto newHorizontalSliding = Editor::getCurrentScene()->createObject("Sliding Area", newHorizontalBar, true, rectHorizontalBar->getSize());
-                    auto rectHorizontalSliding = std::dynamic_pointer_cast<RectTransform>(newHorizontalSliding->getTransform());
-                    rectHorizontalSliding->setAnchor(Vec4(0, 0, 1, 1));
-                    rectHorizontalSliding->setOffset(Vec4(10, 10, 10, 10));
-                    auto pos = rectHorizontalSliding->getLocalPosition();
-                    rectHorizontalSliding->setLocalPosition({ pos[0], pos[1], 0.02f });
-
-                    // Create Horizontal Handle
-                    auto newHorizontalHandle = Editor::getCurrentScene()->createObject("Handle", newHorizontalSliding, true, rectHorizontalSliding->getSize());
-                    auto rectHorizontalHandle = std::dynamic_pointer_cast<RectTransform>(newHorizontalHandle->getTransform());
-                    if (rectHorizontalHandle)
-                    {
-                        rectHorizontalHandle->setAnchor(Vec4(0.f, 0.f, 1.f, 1.f));
-                        rectHorizontalHandle->setOffset(Vec4(-10, -10, -10, -10));
-                        pos = rectHorizontalHandle->getLocalPosition();
-                        rectHorizontalHandle->setLocalPosition({ pos[0], pos[1], 0.03f });
-                    }
-                    auto horizontalImg = newHorizontalHandle->addComponent<UIImage>("sprites/background", rectHorizontalHandle->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
-                    uiHorizontalBar->setHandle(newHorizontalHandle);
-                    uiHorizontalBar->setValue(1.f);
-
-                    CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newHorizontalBar);
-                });
-            });
-
             guiMenu->createWidget<MenuItem>("UIScrollView")->getOnClickEvent().addListener([](auto widget) {
                 TaskManager::getInstance()->addTask([&]() {
                     auto target = Editor::getInstance()->getFirstTarget();
@@ -839,34 +800,34 @@ namespace ige::creator
                     }
 
                     // Create Horizontal ScrollBar
-                    auto newHorizontalBar = Editor::getCurrentScene()->createObject("Scrollbar Horizontal", newObject, true, rect->getSize());
-                    auto rectHorizontalBar = std::dynamic_pointer_cast<RectTransform>(newHorizontalBar->getTransform());
-                    if (rectHorizontalBar)
+                    auto newScrollBar  = Editor::getCurrentScene()->createObject("Scrollbar Horizontal", newObject, true, rect->getSize());
+                    auto rectScrollBar  = std::dynamic_pointer_cast<RectTransform>(newScrollBar ->getTransform());
+                    if (rectScrollBar )
                     {
-                        rectHorizontalBar->setAnchor(Vec4(0, 0, 1, 0));
-                        auto offsetH = rectHorizontalBar->getOffset();
+                        rectScrollBar ->setAnchor(Vec4(0, 0, 1, 0));
+                        auto offsetH = rectScrollBar ->getOffset();
                         offsetH[0] = 0;
                         offsetH[2] = 17;
-                        rectHorizontalBar->setOffset(offsetH);
-                        auto sizeH = rectHorizontalBar->getSize();
+                        rectScrollBar ->setOffset(offsetH);
+                        auto sizeH = rectScrollBar ->getSize();
                         sizeH[1] = 20;
-                        rectHorizontalBar->setSize(sizeH);
-                        rectHorizontalBar->setPivot(Vec2(0, 0));
-                        auto anchoredPosH = rectHorizontalBar->getAnchoredPosition();
+                        rectScrollBar ->setSize(sizeH);
+                        rectScrollBar ->setPivot(Vec2(0, 0));
+                        auto anchoredPosH = rectScrollBar ->getAnchoredPosition();
                         anchoredPosH[1] = 0;
-                        rectHorizontalBar->setAnchoredPosition(anchoredPosH);
-                        auto pos = rectHorizontalBar->getLocalPosition();
-                        rectHorizontalBar->setLocalPosition({ pos[0], pos[1], 0.01f });                        
+                        rectScrollBar ->setAnchoredPosition(anchoredPosH);
+                        auto pos = rectScrollBar ->getLocalPosition();
+                        rectScrollBar ->setLocalPosition({ pos[0], pos[1], 0.01f });                        
                     }
-                    auto uiHorizontalBar = newHorizontalBar->addComponent<UIScrollBar>("sprites/background", rectHorizontalBar->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
-                    if (uiHorizontalBar)
+                    auto uiScrollBar  = newScrollBar ->addComponent<UIScrollBar>("sprites/background", rectScrollBar ->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
+                    if (uiScrollBar )
                     {
-                        uiHorizontalBar->setDirection(UIScrollBar::Direction::LeftToRight, false);
-                        uiHorizontalBar->setColor(Vec4(0.8392158f, 0.8392158f, 0.8392158f, 1.f));
+                        uiScrollBar ->setDirection(UIScrollBar::Direction::LeftToRight, false);
+                        uiScrollBar ->setColor(Vec4(0.8392158f, 0.8392158f, 0.8392158f, 1.f));
                     }
 
                     // Create Horizontal Sliding Area
-                    auto newHorizontalSliding = Editor::getCurrentScene()->createObject("Sliding Area", newHorizontalBar, true, rectHorizontalBar->getSize());
+                    auto newHorizontalSliding = Editor::getCurrentScene()->createObject("Sliding Area", newScrollBar , true, rectScrollBar ->getSize());
                     auto rectHorizontalSliding = std::dynamic_pointer_cast<RectTransform>(newHorizontalSliding->getTransform());
                     rectHorizontalSliding->setAnchor(Vec4(0, 0, 1, 1));
                     rectHorizontalSliding->setOffset(Vec4(10, 10, 10, 10));
@@ -884,7 +845,7 @@ namespace ige::creator
                         rectHorizontalHandle->setLocalPosition({ pos[0], pos[1], 0.03f });
                     }
                     auto horizontalImg = newHorizontalHandle->addComponent<UIImage>("sprites/background", rectHorizontalHandle->getSize(), true, Vec4(10.f, 10.f, 10.f, 10.f));
-                    uiHorizontalBar->setHandle(newHorizontalHandle);
+                    uiScrollBar ->setHandle(newHorizontalHandle);
 
                     // Create Vertical ScrollBar
                     auto newVerticalBar = Editor::getCurrentScene()->createObject("Scrollbar Vertical", newObject, true, rect->getSize());
@@ -965,10 +926,10 @@ namespace ige::creator
 
                     uiScrollView->setContent(newContent);
                     uiScrollView->setViewport(newMask);
-                    uiScrollView->setHorizontalScrollBar(uiHorizontalBar);
+                    uiScrollView->setHorizontalScrollBar(uiScrollBar );
                     uiScrollView->setVerticalScrollBar(uiVerticalBar);
 
-                    uiHorizontalBar->setValue(1.f);
+                    uiScrollBar ->setValue(1.f);
                     uiVerticalBar->setValue(0.f);
 
                     CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);

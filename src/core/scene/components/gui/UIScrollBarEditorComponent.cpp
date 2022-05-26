@@ -32,7 +32,12 @@ void UIScrollBarEditorComponent::drawUIScrollBar() {
     auto comp = getComponent<CompoundComponent>();
     if (comp == nullptr) return;
 
-    auto txtPath = m_uiScrollBarGroup->createWidget<TextField>("Path", comp->getProperty<std::string>("path", ""), false, true);
+    m_uiScrollBarGroup->createWidget<CheckBox>("Interactable", comp->getProperty<bool>("interactable", true))->getOnDataChangedEvent().addListener([this](bool val) {
+        storeUndo();
+        getComponent<CompoundComponent>()->setProperty("interactable", val);
+    });
+
+    auto txtPath = m_uiScrollBarGroup->createWidget<TextField>("Background", comp->getProperty<std::string>("path", ""), false, true);
     txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
         storeUndo();
         getComponent<CompoundComponent>()->setProperty("path", txt);
@@ -47,11 +52,6 @@ void UIScrollBarEditorComponent::drawUIScrollBar() {
             setDirty();
         });
     }
-
-    m_uiScrollBarGroup->createWidget<CheckBox>("Interactable", comp->getProperty<bool>("interactable", true))->getOnDataChangedEvent().addListener([this](bool val) {
-        storeUndo();
-        getComponent<CompoundComponent>()->setProperty("interactable", val);
-    });
 
     auto spriteType = comp->getProperty<int>("spritetype", -1);
     auto spriteTypeCombo = m_uiScrollBarGroup->createWidget<ComboBox>("Sprite Type", spriteType);

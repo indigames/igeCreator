@@ -32,7 +32,11 @@ void UIScrollViewEditorComponent::drawUIScrollView() {
     auto comp = getComponent<CompoundComponent>();
     if (comp == nullptr) return;
 
-    auto txtPath = m_uiScrollViewGroup->createWidget<TextField>("Path", comp->getProperty<std::string>("path", ""), false, true);
+    m_uiScrollViewGroup->createWidget<CheckBox>("Interactable", comp->getProperty<bool>("interactable", true))->getOnDataChangedEvent().addListener([this](bool val) {
+        getComponent<CompoundComponent>()->setProperty("interactable", val);
+    });
+
+    auto txtPath = m_uiScrollViewGroup->createWidget<TextField>("Background", comp->getProperty<std::string>("path", ""), false, true);
     txtPath->getOnDataChangedEvent().addListener([this](auto txt) {
         storeUndo();
         getComponent<CompoundComponent>()->setProperty("path", txt);
@@ -46,10 +50,6 @@ void UIScrollViewEditorComponent::drawUIScrollView() {
             setDirty();
         });
     }
-
-    m_uiScrollViewGroup->createWidget<CheckBox>("Interactable", comp->getProperty<bool>("interactable", true))->getOnDataChangedEvent().addListener([this](bool val) {
-        getComponent<CompoundComponent>()->setProperty("interactable", val);
-    });
 
     auto spriteType = comp->getProperty<int>("spritetype", -1);
     auto spriteTypeCombo = m_uiScrollViewGroup->createWidget<ComboBox>("Sprite Type", spriteType);
