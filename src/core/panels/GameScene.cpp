@@ -262,6 +262,7 @@ namespace ige::creator
 
             startWatcherThread();
         }
+        Editor::getCanvas()->getEditorScene()->set2DMode(!Editor::getInstance()->is3DCamera());
         Editor::getCanvas()->getEditorScene()->setFocus();
     }
 
