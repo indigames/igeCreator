@@ -192,7 +192,7 @@ void CameraEditorComponent::onTransformChanged()
     if (camera != nullptr)
     {
         auto m_transformComponent = camera->getOwner()->getTransform();
-        Editor::getCanvas()->getInspector()->getInspectorEditor()->makeDirty(m_transformComponent->getInstanceId());
+        Editor::getCanvas()->getInspector()->getInspectorEditor()->makeDirty(Component::Type::Transform);
     }
 }
 

@@ -6,20 +6,21 @@
 #include "core/scene/components/EditorComponent.h"
 #include "components/Component.h"
 
-#include "core/scene/components/physic/PhysicObjectEditorComponent.h"
-
 USING_NS_IGE_SCENE
 NS_IGE_BEGIN
 
-class PhysicCapsuleEditorComponent : public PhysicObjectEditorComponent
+class CapsuleColliderEditorComponent : public EditorComponent
 {
 public:
-	PhysicCapsuleEditorComponent();
-	~PhysicCapsuleEditorComponent();
+	CapsuleColliderEditorComponent();
+	~CapsuleColliderEditorComponent();
 
 protected:	
 	virtual void onInspectorUpdate() override;
-	void drawPhysicCapsule();
+	void drawCapsuleCollider();
+
+protected:
+	std::shared_ptr<Group> m_physicGroup = nullptr;
 };
 
 NS_IGE_END

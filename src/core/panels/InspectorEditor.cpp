@@ -2,6 +2,7 @@
 
 #include "core/widgets/Widgets.h"
 
+#include "core/scene/CompoundComponent.h"
 #include "core/scene/components/CameraEditorComponent.h"
 #include "core/scene/components/EnvironmentEditorComponent.h"
 #include "core/scene/components/FigureEditorComponent.h"
@@ -30,11 +31,11 @@
 #include "core/scene/components/gui/UIMaskEditorComponent.h"
 
 #include "core/scene/components/physic/PhysicManagerEditorComponent.h"
-#include "core/scene/components/physic/PhysicBoxEditorComponent.h"
-#include "core/scene/components/physic/PhysicSphereEditorComponent.h"
-#include "core/scene/components/physic/PhysicCapsuleEditorComponent.h"
-#include "core/scene/components/physic/PhysicMeshEditorComponent.h"
-#include "core/scene/components/physic/PhysicSoftBodyEditorComponent.h"
+#include "core/scene/components/physic/BoxColliderEditorComponent.h"
+#include "core/scene/components/physic/SphereColliderEditorComponent.h"
+#include "core/scene/components/physic/CapsuleColliderEditorComponent.h"
+#include "core/scene/components/physic/MeshColliderEditorComponent.h"
+#include "core/scene/components/physic/SoftbodyEditorComponent.h"
 
 #include "core/scene/components/audio/AudioManagerEditorComponent.h"
 #include "core/scene/components/audio/AudioSourceEditorComponent.h"
@@ -152,20 +153,23 @@ std::shared_ptr<EditorComponent> InspectorEditor::addComponent(int type, std::sh
 	case Component::Type::PhysicManager:
 		view = std::make_shared<PhysicManagerEditorComponent>();
 	break;
-	case Component::Type::PhysicBox:
-		view = std::make_shared<PhysicBoxEditorComponent>();
+	case Component::Type::BoxCollider:
+		view = std::make_shared<BoxColliderEditorComponent>();
 	break;
-	case Component::Type::PhysicSphere:
-		view = std::make_shared<PhysicSphereEditorComponent>();
+	case Component::Type::SphereCollider:
+		view = std::make_shared<SphereColliderEditorComponent>();
 	break;
-	case Component::Type::PhysicCapsule:
-		view = std::make_shared<PhysicCapsuleEditorComponent>();	
+	case Component::Type::CapsuleCollider:
+		view = std::make_shared<CapsuleColliderEditorComponent>();	
 	break;
-	case Component::Type::PhysicMesh:
-		view = std::make_shared<PhysicMeshEditorComponent>();
+	case Component::Type::MeshCollider:
+		view = std::make_shared<MeshColliderEditorComponent>();
 	break;
-	case Component::Type::PhysicSoftBody:
-		view = std::make_shared<PhysicSoftBodyEditorComponent>();
+	case Component::Type::Rigidbody:
+		view = std::make_shared<RigidbodyEditorComponent>();
+	break;
+	case Component::Type::Softbody:
+		view = std::make_shared<SoftbodyEditorComponent>();
 	break;
 	case Component::Type::AudioManager:
 		view = std::make_shared<AudioManagerEditorComponent>();
@@ -217,8 +221,8 @@ std::shared_ptr<EditorComponent> InspectorEditor::addComponent(int type, std::sh
 	}
 	if (view == nullptr) return nullptr;
 	view->setComponent(comp);
-	m_groups[comp->getInstanceId()] = header;
-	m_components[comp->getInstanceId()] = view;
+	m_groups[type] = header;
+	m_components[type] = view;
 	view->draw(header);
 	return view;
 }
@@ -253,16 +257,20 @@ void InspectorEditor::update(float dt) {
 	}*/
 }
 
-void InspectorEditor::makeDirty(uint64_t componentInstanceId) {
+void InspectorEditor::makeDirty(Component::Type componentType) {
 	std::shared_ptr<EditorComponent> view = nullptr;
 	for (auto obj : m_components) {
-		if (obj.second != nullptr && obj.second->getComponent()->getInstanceId() == componentInstanceId) {
+		if (obj.second != nullptr && obj.second->getComponent()->getType() == componentType) {
 			view = obj.second;
 			break;
 		}
 	}
 	if (view == nullptr) return;
 	view->setDirty(true);
+	auto compound = view->getComponent<CompoundComponent>();
+	if (compound) {
+		compound->setDirty();
+	}
 }
 
 void InspectorEditor::addWatcherValue(uint64_t componentInstanceId, std::type_index _typeId, void* address, std::any value)

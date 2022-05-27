@@ -50,11 +50,11 @@
 #include <components/gui/UIScrollBar.h>
 #include <components/gui/UIMask.h>
 #include <components/physic/PhysicManager.h>
-#include <components/physic/PhysicBox.h>
-#include <components/physic/PhysicSphere.h>
-#include <components/physic/PhysicCapsule.h>
-#include <components/physic/PhysicMesh.h>
-#include <components/physic/PhysicSoftBody.h>
+#include <components/physic/BoxCollider.h>
+#include <components/physic/SphereCollider.h>
+#include <components/physic/CapsuleCollider.h>
+#include <components/physic/MeshCollider.h>
+#include <components/physic/Softbody.h>
 #include <components/physic/FixedConstraint.h>
 #include <components/physic/HingeConstraint.h>
 #include <components/physic/SliderConstraint.h>
@@ -120,6 +120,7 @@ namespace ige::creator
         m_inspectorEditor = std::make_shared<InspectorEditor>();
         m_targetObject = Editor::getInstance()->getTarget().get();
         m_headerGroup = createWidget<Group>("Inspector_Header", false);
+        auto* firstTarget = Editor::getInstance()->getTarget()->getFirstTarget().get();
 
         // Object info
         _drawBaseInfo();
@@ -163,21 +164,28 @@ namespace ige::creator
             m_createCompCombo->addChoice((int)Component::Type::Text, "Text");
             m_createCompCombo->addChoice((int)Component::Type::TextBitmap, "TextBitmap");
 
-            if (!m_targetObject->hasComponent<BoneTransform>())
+            if (!firstTarget->hasComponent<BoneTransform>())
                 m_createCompCombo->addChoice((int)Component::Type::BoneTransform, "BoneTransform");
 
-            if (m_targetObject->getComponent<PhysicObject>() == nullptr && m_targetObject->getComponent<PhysicSoftBody>() == nullptr)
+            if (firstTarget->getComponent<Rigidbody>() == nullptr && firstTarget->getComponent<Softbody>() == nullptr && firstTarget->getComponent<Collider>() != nullptr) {
+                m_createCompCombo->addChoice((int)Component::Type::Rigidbody, "Rigidbody");
+            }
+
+            if (firstTarget->getComponent<Collider>() == nullptr && firstTarget->getComponent<Softbody>() == nullptr)
             {
-                m_createCompCombo->addChoice((int)Component::Type::PhysicBox, "PhysicBox");
-                m_createCompCombo->addChoice((int)Component::Type::PhysicSphere, "PhysicSphere");
-                m_createCompCombo->addChoice((int)Component::Type::PhysicCapsule, "PhysicCapsule");
-                m_createCompCombo->addChoice((int)Component::Type::PhysicMesh, "PhysicMesh");
-                if (m_targetObject->getComponent<FigureComponent>())
-                    m_createCompCombo->addChoice((int)Component::Type::PhysicSoftBody, "PhysicSoftBody");
+                m_createCompCombo->addChoice((int)Component::Type::BoxCollider, "BoxCollider");
+                m_createCompCombo->addChoice((int)Component::Type::SphereCollider, "SphereCollider");
+                m_createCompCombo->addChoice((int)Component::Type::CapsuleCollider, "CapsuleCollider");
+                
+                // Mesh based physic
+                if (firstTarget->getComponent<FigureComponent>()) {
+                    m_createCompCombo->addChoice((int)Component::Type::MeshCollider, "MeshCollider");
+                    m_createCompCombo->addChoice((int)Component::Type::Softbody, "Softbody");
+                }
             }
 
             // Navigation
-            if (!m_targetObject->getComponent<NavMesh>() && !m_targetObject->getComponent<DynamicNavMesh>())
+            if (!firstTarget->getComponent<NavMesh>() && !firstTarget->getComponent<DynamicNavMesh>())
             {
                 m_createCompCombo->addChoice((int)Component::Type::NavMesh, "NavMesh");
                 m_createCompCombo->addChoice((int)Component::Type::DynamicNavMesh, "DynamicNavMesh");
@@ -202,240 +210,225 @@ namespace ige::creator
             TaskManager::getInstance()->addTask([this]() {
                 switch (m_createCompCombo->getSelectedIndex())
                 {
-                case (int)Component::Type::Camera:
-                {
-                    std::vector<std::shared_ptr<Component>> comps;
-                    comps.push_back(m_targetObject->addComponent<CameraComponent>("camera"));
-                    if (!m_targetObject->getComponent<FigureComponent>()) {
-                        auto comp = m_targetObject->addComponent<FigureComponent>(GetEnginePath("figures/camera"));
-                        comp->setSkipSerialize(true);
-                        comps.push_back(comp);
-                    }
-                    onAddComponents(comps);
-                }
-                    break;
-                case (int)Component::Type::Environment:
-                {
-                    auto comp = m_targetObject->addComponent<EnvironmentComponent>();
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::Script:
-                {
-                    auto comp = m_targetObject->addComponent<ScriptComponent>();
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::AmbientLight:
-                {
-                    auto comp = m_targetObject->addComponent<AmbientLight>();
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::DirectionalLight:
-                {  
-                    std::vector<std::shared_ptr<Component>> comps;
-                    comps.push_back(m_targetObject->addComponent<DirectionalLight>());
-                    if (!m_targetObject->getComponent<FigureComponent>() && !m_targetObject->getComponent<SpriteComponent>()) {
-                        auto comp = m_targetObject->addComponent<SpriteComponent>(GetEnginePath("sprites/direct-light"), Vec2(0.5f, 0.5f), true);
-                        comp->setSkipSerialize(true);
-                        comps.push_back(comp);
-                    }
-                    onAddComponents(comps);
-                }
-                    break;
-                case (int)Component::Type::PointLight:
-                {
-                    std::vector<std::shared_ptr<Component>> comps;
-                    comps.push_back(m_targetObject->addComponent<PointLight>());
-                    if (!m_targetObject->getComponent<FigureComponent>() && !m_targetObject->getComponent<SpriteComponent>())
+                    case (int)Component::Type::Camera:
                     {
-                        auto comp = m_targetObject->addComponent<SpriteComponent>(GetEnginePath("sprites/point-light"), Vec2(0.5f, 0.5f), true);
-                        comp->setSkipSerialize(true);
-                        comps.push_back(comp);
+                        std::vector<std::shared_ptr<Component>> comps;
+                        comps.push_back(m_targetObject->addComponent<CameraComponent>("camera"));
+                        onAddComponents(comps);
+                        break;
                     }
-                    onAddComponents(comps);
-                }
-                    break;
-                case (int)Component::Type::SpotLight:
-                {
-                    std::vector<std::shared_ptr<Component>> comps;
-                    comps.push_back(m_targetObject->addComponent<SpotLight>());
-                    if (!m_targetObject->getComponent<FigureComponent>() && !m_targetObject->getComponent<SpriteComponent>())
+                    case (int)Component::Type::Environment:
                     {
-                        auto comp = m_targetObject->addComponent<SpriteComponent>(GetEnginePath("sprites/spot-light"), Vec2(0.5f, 0.5f), true);
-                        comp->setSkipSerialize(true);
-                        comps.push_back(comp);
+                        auto comp = m_targetObject->addComponent<EnvironmentComponent>();
+                        onAddComponent(comp);
+                        break;
                     }
-                    onAddComponents(comps);
-                }
-                    break;
-                case (int)Component::Type::Figure:
-                {
-                    auto comp = m_targetObject->addComponent<FigureComponent>();
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::EditableFigure:
-                {
-                    auto comp = m_targetObject->addComponent<EditableFigureComponent>();
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::Animator:
-                    m_targetObject->addComponent<AnimatorComponent>();
-                    break;
-                case (int)Component::Type::Sprite:
-                {
-                    auto comp = m_targetObject->addComponent<SpriteComponent>();
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::Text:
-                {
-                    auto comp = m_targetObject->addComponent<TextComponent>("Text", "fonts/Manjari-Regular.ttf");
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::BoneTransform:
-                {
-                    auto comp = m_targetObject->addComponent<BoneTransform>();
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::UIImage:
-                {
-                    auto comp = m_targetObject->addComponent<UIImage>();
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::UIText:
-                {
-                    auto comp = m_targetObject->addComponent<UIText>("Text", "fonts/Manjari-Regular.ttf");
-                    onAddComponent(comp);
-                }
-                    break;
-
-                case (int)Component::Type::UITextField:
-                {
-                    auto comp = m_targetObject->addComponent<UITextField>("TextField");
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::UIButton:
-                {
-                    auto comp = m_targetObject->addComponent<UIButton>();
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::UISlider:
-                {
-                    auto comp = m_targetObject->addComponent<UISlider>();
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::UIScrollView:
-                {
-                    auto comp = m_targetObject->addComponent<UIScrollView>();
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::UIScrollBar:
-                {
-                    auto comp = m_targetObject->addComponent<UIScrollBar>();
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::UIMask:
-                {
-                    auto comp = m_targetObject->addComponent<UIMask>();
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::PhysicBox:
-                {
-                    auto comp = m_targetObject->addComponent<PhysicBox>();
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::PhysicSphere:
-                {
-                    auto comp = m_targetObject->addComponent<PhysicSphere>();
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::PhysicCapsule:
-                {
-                    auto comp = m_targetObject->addComponent<PhysicCapsule>();
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::PhysicMesh:
-                {
-                    auto comp = m_targetObject->addComponent<PhysicMesh>();
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::PhysicSoftBody:
-                {
-                    auto comp  = m_targetObject->addComponent<PhysicSoftBody>();
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::AudioSource:
-                {
-                    auto comp = m_targetObject->addComponent<AudioSource>();
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::AudioListener:
-                {
-                    auto comp = m_targetObject->addComponent<AudioListener>();
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::Particle:
-                {
-                    auto comp = m_targetObject->addComponent<Particle>();
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::Navigable:
-                {
-                    auto comp = m_targetObject->addComponent<Navigable>();
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::NavMesh:
-                {
-                    auto comp = m_targetObject->addComponent<NavMesh>();
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::NavAgent:
-                {
-                    auto comp = m_targetObject->addComponent<NavAgent>();
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::DynamicNavMesh:
-                {
-                    auto comp = m_targetObject->addComponent<DynamicNavMesh>();
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::NavObstacle:
-                {
-                    auto comp = m_targetObject->addComponent<NavObstacle>();
-                    onAddComponent(comp);
-                }
-                    break;
-                case (int)Component::Type::OffMeshLink:
-                {
-                    auto comp = m_targetObject->addComponent<OffMeshLink>();
-                    onAddComponent(comp);
-                }
-                    break;
+                    case (int)Component::Type::Script:
+                    {
+                        auto comp = m_targetObject->addComponent<ScriptComponent>();
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::AmbientLight:
+                    {
+                        auto comp = m_targetObject->addComponent<AmbientLight>();
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::DirectionalLight:
+                    {  
+                        std::vector<std::shared_ptr<Component>> comps;
+                        comps.push_back(m_targetObject->addComponent<DirectionalLight>());
+                        onAddComponents(comps);
+                        break;
+                    }
+                    case (int)Component::Type::PointLight:
+                    {
+                        std::vector<std::shared_ptr<Component>> comps;
+                        comps.push_back(m_targetObject->addComponent<PointLight>());
+                        onAddComponents(comps);
+                        break;
+                    }
+                    case (int)Component::Type::SpotLight:
+                    {
+                        std::vector<std::shared_ptr<Component>> comps;
+                        comps.push_back(m_targetObject->addComponent<SpotLight>());
+                        onAddComponents(comps);
+                        break;
+                    }
+                    case (int)Component::Type::Figure:
+                    {
+                        auto comp = m_targetObject->addComponent<FigureComponent>();
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::EditableFigure:
+                    {
+                        auto comp = m_targetObject->addComponent<EditableFigureComponent>();
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::Animator:
+                    {
+                        m_targetObject->addComponent<AnimatorComponent>();
+                        break;
+                    }
+                    case (int)Component::Type::Sprite:
+                    {
+                        auto comp = m_targetObject->addComponent<SpriteComponent>();
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::Text:
+                    {
+                        auto comp = m_targetObject->addComponent<TextComponent>("Text", "fonts/Manjari-Regular.ttf");
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::BoneTransform:
+                    {
+                        auto comp = m_targetObject->addComponent<BoneTransform>();
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::UIImage:
+                    {
+                        auto comp = m_targetObject->addComponent<UIImage>();
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::UIText:
+                    {
+                        auto comp = m_targetObject->addComponent<UIText>("Text", "fonts/Manjari-Regular.ttf");
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::UITextField:
+                    {
+                        auto comp = m_targetObject->addComponent<UITextField>("TextField");
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::UIButton:
+                    {
+                        auto comp = m_targetObject->addComponent<UIButton>();
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::UISlider:
+                    {
+                        auto comp = m_targetObject->addComponent<UISlider>();
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::UIScrollView:
+                    {
+                        auto comp = m_targetObject->addComponent<UIScrollView>();
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::UIScrollBar:
+                    {
+                        auto comp = m_targetObject->addComponent<UIScrollBar>();
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::UIMask:
+                    {
+                        auto comp = m_targetObject->addComponent<UIMask>();
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::BoxCollider:
+                    {
+                        auto comp = m_targetObject->addComponent<BoxCollider>();
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::SphereCollider:
+                    {
+                        auto comp = m_targetObject->addComponent<SphereCollider>();
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::CapsuleCollider:
+                    {
+                        auto comp = m_targetObject->addComponent<CapsuleCollider>();
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::MeshCollider:
+                    {
+                        auto comp = m_targetObject->addComponent<MeshCollider>();
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::Rigidbody:
+                    {
+                        auto comp  = m_targetObject->addComponent<Rigidbody>();
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::Softbody:
+                    {
+                        auto comp  = m_targetObject->addComponent<Softbody>();
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::AudioSource:
+                    {
+                        auto comp = m_targetObject->addComponent<AudioSource>();
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::AudioListener:
+                    {
+                        auto comp = m_targetObject->addComponent<AudioListener>();
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::Particle:
+                    {
+                        auto comp = m_targetObject->addComponent<Particle>();
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::Navigable:
+                    {
+                        auto comp = m_targetObject->addComponent<Navigable>();
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::NavMesh:
+                    {
+                        auto comp = m_targetObject->addComponent<NavMesh>();
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::NavAgent:
+                    {
+                        auto comp = m_targetObject->addComponent<NavAgent>();
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::DynamicNavMesh:
+                    {
+                        auto comp = m_targetObject->addComponent<DynamicNavMesh>();
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::NavObstacle:
+                    {
+                        auto comp = m_targetObject->addComponent<NavObstacle>();
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::OffMeshLink:
+                    {
+                        auto comp = m_targetObject->addComponent<OffMeshLink>();
+                        onAddComponent(comp);
+                        break;
+                    }
                 }
                 redraw();
             });

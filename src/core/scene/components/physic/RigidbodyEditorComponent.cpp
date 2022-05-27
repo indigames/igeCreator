@@ -1,9 +1,10 @@
-#include "core/scene/components/physic/PhysicObjectEditorComponent.h"
+#include "core/scene/components/physic/RigidbodyEditorComponent.h"
 #include "core/scene/CompoundComponent.h"
 
 #include <core/layout/Group.h>
 
-#include "components/physic/PhysicObject.h"
+#include "components/physic/Rigidbody.h"
+#include "components/physic/MeshCollider.h"
 #include "core/widgets/Widgets.h"
 #include "core/layout/Columns.h"
 
@@ -12,23 +13,31 @@
 #include <core/dialog/OpenFileDialog.h>
 
 #include "core/Editor.h"
+#include "core/Canvas.h"
+#include "core/panels/Inspector.h"
+#include "core/panels/InspectorEditor.h"
+
 
 NS_IGE_BEGIN
 
-PhysicObjectEditorComponent::PhysicObjectEditorComponent() {
+RigidbodyEditorComponent::RigidbodyEditorComponent() {
     m_physicGroup = nullptr;
 }
 
-PhysicObjectEditorComponent::~PhysicObjectEditorComponent() {
+RigidbodyEditorComponent::~RigidbodyEditorComponent() {
     m_constraintGroup = nullptr;
     m_physicGroup = nullptr;
 }
 
-void PhysicObjectEditorComponent::onInspectorUpdate() {
-    drawPhysicObject();
+void RigidbodyEditorComponent::onInspectorUpdate() {
+    // Draw inspector
+    drawRigidbody();
+
+    // Draw constraints
+    drawPhysicConstraints();
 }
 
-void PhysicObjectEditorComponent::drawPhysicObject() {
+void RigidbodyEditorComponent::drawRigidbody() {
     if (m_physicGroup == nullptr)
         m_physicGroup = m_group->createWidget<Group>("PhysicGroup", false);;
     m_physicGroup->removeAllWidgets();
@@ -46,6 +55,9 @@ void PhysicObjectEditorComponent::drawPhysicObject() {
         storeUndo();
         getComponent<CompoundComponent>()->setProperty("isKinematic", val);
         setDirty();
+        if (!val) {
+             Editor::getCanvas()->getInspector()->getInspectorEditor()->makeDirty(Component::Type::MeshCollider);
+        }
     });
 
     columns->createWidget<CheckBox>("Trigger", comp->getProperty<bool>("isTrigger", false))->getOnDataChangedEvent().addListener([this](bool val) {
@@ -195,7 +207,7 @@ void PhysicObjectEditorComponent::drawPhysicObject() {
     });
 }
 
-void PhysicObjectEditorComponent::drawPhysicConstraints() {
+void RigidbodyEditorComponent::drawPhysicConstraints() {
     // Only inspect single target
     if (getComponent<CompoundComponent>()->empty()
         || getComponent<CompoundComponent>()->size() > 1) {
@@ -219,7 +231,7 @@ void PhysicObjectEditorComponent::drawPhysicConstraints() {
     // Add button
     auto createCompButton = m_constraintGroup->createWidget<Button>("Add", ImVec2(64.f, 0.f));
     createCompButton->getOnClickEvent().addListener([this](auto widget) {
-        auto comp = std::dynamic_pointer_cast<PhysicObject>(getComponent<CompoundComponent>()->getComponents()[0]);
+        auto comp = std::dynamic_pointer_cast<Rigidbody>(getComponent<CompoundComponent>()->getComponents()[0]);
         switch (m_constraintCreateCombo->getSelectedIndex())
         {
         case (int)PhysicConstraint::ConstraintType::Fixed:
@@ -242,7 +254,7 @@ void PhysicObjectEditorComponent::drawPhysicConstraints() {
     });
     m_constraintGroup->createWidget<Separator>();
 
-    auto physicComp = std::dynamic_pointer_cast<PhysicObject>(getComponent<CompoundComponent>()->getComponents()[0]);    
+    auto physicComp = std::dynamic_pointer_cast<Rigidbody>(getComponent<CompoundComponent>()->getComponents()[0]);    
     if (physicComp)
     {
         for (auto constraint : physicComp->getContraints())
@@ -262,7 +274,7 @@ void PhysicObjectEditorComponent::drawPhysicConstraints() {
 }
 
 //! Draw Physic Constraint
-void PhysicObjectEditorComponent::drawPhysicConstraint(std::shared_ptr<PhysicConstraint> constraint, std::shared_ptr<Group> constraintGroup)
+void RigidbodyEditorComponent::drawPhysicConstraint(std::shared_ptr<PhysicConstraint> constraint, std::shared_ptr<Group> constraintGroup)
 {
     auto columns = constraintGroup->createWidget<Columns<2>>();
 
@@ -298,12 +310,12 @@ void PhysicObjectEditorComponent::drawPhysicConstraint(std::shared_ptr<PhysicCon
 }
 
 //! Draw Fixed Constraint
-void PhysicObjectEditorComponent::drawFixedConstraint(std::shared_ptr<PhysicConstraint> constraint)
+void RigidbodyEditorComponent::drawFixedConstraint(std::shared_ptr<PhysicConstraint> constraint)
 {
     auto constraintGroup = m_constraintGroup->createWidget<Group>("FixedConstraint", true, true);
     constraintGroup->getOnClosedEvent().addListener([constraint, this]() {
         storeUndo();
-        std::dynamic_pointer_cast<PhysicObject>(getComponent<CompoundComponent>()->getComponents()[0])->removeConstraint(constraint);
+        std::dynamic_pointer_cast<Rigidbody>(getComponent<CompoundComponent>()->getComponents()[0])->removeConstraint(constraint);
         setDirty();
     });
 
@@ -312,12 +324,12 @@ void PhysicObjectEditorComponent::drawFixedConstraint(std::shared_ptr<PhysicCons
 }
 
 //! draw Hinge Constraint
-void PhysicObjectEditorComponent::drawHingeConstraint(std::shared_ptr<PhysicConstraint> constraint)
+void RigidbodyEditorComponent::drawHingeConstraint(std::shared_ptr<PhysicConstraint> constraint)
 {
     auto constraintGroup = m_constraintGroup->createWidget<Group>("HingeConstraint", true, true);
     constraintGroup->getOnClosedEvent().addListener([constraint, this]() {
         storeUndo();
-        std::dynamic_pointer_cast<PhysicObject>(getComponent<CompoundComponent>()->getComponents()[0])->removeConstraint(constraint);
+        std::dynamic_pointer_cast<Rigidbody>(getComponent<CompoundComponent>()->getComponents()[0])->removeConstraint(constraint);
         setDirty();
     });
 
@@ -383,11 +395,11 @@ void PhysicObjectEditorComponent::drawHingeConstraint(std::shared_ptr<PhysicCons
 }
 
 //! draw Slider Constraint
-void PhysicObjectEditorComponent::drawSliderConstraint(std::shared_ptr<PhysicConstraint> constraint)
+void RigidbodyEditorComponent::drawSliderConstraint(std::shared_ptr<PhysicConstraint> constraint)
 {
     auto constraintGroup = m_constraintGroup->createWidget<Group>("SliderConstraint", true, true);
     constraintGroup->getOnClosedEvent().addListener([constraint, this]() {
-        std::dynamic_pointer_cast<PhysicObject>(getComponent<CompoundComponent>()->getComponents()[0])->removeConstraint(constraint);
+        std::dynamic_pointer_cast<Rigidbody>(getComponent<CompoundComponent>()->getComponents()[0])->removeConstraint(constraint);
         setDirty();
     });
 
@@ -422,11 +434,11 @@ void PhysicObjectEditorComponent::drawSliderConstraint(std::shared_ptr<PhysicCon
 }
 
 //! draw Spring Constraint
-void PhysicObjectEditorComponent::drawSpringConstraint(std::shared_ptr<PhysicConstraint> constraint)
+void RigidbodyEditorComponent::drawSpringConstraint(std::shared_ptr<PhysicConstraint> constraint)
 {
     auto constraintGroup = m_constraintGroup->createWidget<Group>("SpringConstraint", true, true);
     constraintGroup->getOnClosedEvent().addListener([constraint, this]() {
-        std::dynamic_pointer_cast<PhysicObject>(getComponent<CompoundComponent>()->getComponents()[0])->removeConstraint(constraint);
+        std::dynamic_pointer_cast<Rigidbody>(getComponent<CompoundComponent>()->getComponents()[0])->removeConstraint(constraint);
         setDirty();
     });
 
@@ -491,11 +503,11 @@ void PhysicObjectEditorComponent::drawSpringConstraint(std::shared_ptr<PhysicCon
 }
 
 //! draw Dof6 Spring Constraint
-void PhysicObjectEditorComponent::drawDof6SpringConstraint(std::shared_ptr<PhysicConstraint> constraint)
+void RigidbodyEditorComponent::drawDof6SpringConstraint(std::shared_ptr<PhysicConstraint> constraint)
 {
     auto constraintGroup = m_constraintGroup->createWidget<Group>("Dof6Constraint", true, true);
     constraintGroup->getOnClosedEvent().addListener([constraint, this]() {
-        std::dynamic_pointer_cast<PhysicObject>(getComponent<CompoundComponent>()->getComponents()[0])->removeConstraint(constraint);
+        std::dynamic_pointer_cast<Rigidbody>(getComponent<CompoundComponent>()->getComponents()[0])->removeConstraint(constraint);
         setDirty();
     });
 

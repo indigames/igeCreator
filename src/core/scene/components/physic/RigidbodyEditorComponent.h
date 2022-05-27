@@ -17,16 +17,16 @@ NS_IGE_BEGIN
 
 class ComboBox;
 
-class PhysicObjectEditorComponent : public EditorComponent
+class RigidbodyEditorComponent : public EditorComponent
 {
 public:
-	PhysicObjectEditorComponent();
-	virtual ~PhysicObjectEditorComponent();
+	RigidbodyEditorComponent();
+	virtual ~RigidbodyEditorComponent();
 
 protected:	
 	virtual void onInspectorUpdate() override;
 
-	void drawPhysicObject();
+	void drawRigidbody();
 	void drawPhysicConstraints();
 
 	void drawPhysicConstraint(std::shared_ptr<PhysicConstraint> constraint, std::shared_ptr<Group> constraintGroup);

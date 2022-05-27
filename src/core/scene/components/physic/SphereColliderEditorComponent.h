@@ -6,20 +6,21 @@
 #include "core/scene/components/EditorComponent.h"
 #include "components/Component.h"
 
-#include "core/scene/components/physic/PhysicObjectEditorComponent.h"
-
 USING_NS_IGE_SCENE
 NS_IGE_BEGIN
 
-class PhysicSphereEditorComponent : public PhysicObjectEditorComponent
+class SphereColliderEditorComponent : public EditorComponent
 {
 public:
-	PhysicSphereEditorComponent();
-	~PhysicSphereEditorComponent();
+	SphereColliderEditorComponent();
+	~SphereColliderEditorComponent();
 
 protected:	
 	virtual void onInspectorUpdate() override;
-	void drawPhysicSphere();
+	void drawSphereCollider();
+
+protected:
+	std::shared_ptr<Group> m_physicGroup = nullptr;
 };
 
 NS_IGE_END

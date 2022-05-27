@@ -42,7 +42,7 @@ public:
 	std::shared_ptr<EditorComponent> addComponent(int type, std::shared_ptr<Component> component, std::shared_ptr<Group> header);
 	void removeComponent(uint64_t componentInstanceId);
 
-	void makeDirty(uint64_t componentInstanceId);
+	void makeDirty(Component::Type componentType);
 	void addWatcherValue(uint64_t componentInstanceId, std::type_index _typeId, void* address, std::any value);
 
 protected:

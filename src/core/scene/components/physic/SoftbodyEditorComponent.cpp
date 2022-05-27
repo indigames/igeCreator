@@ -1,9 +1,9 @@
-#include "core/scene/components/physic/PhysicSoftBodyEditorComponent.h"
+#include "core/scene/components/physic/SoftbodyEditorComponent.h"
 #include "core/scene/CompoundComponent.h"
 
 #include <core/layout/Group.h>
 
-#include "components/physic/PhysicSoftBody.h"
+#include "components/physic/Softbody.h"
 #include "components/FigureComponent.h"
 #include "core/widgets/Widgets.h"
 #include "core/layout/Columns.h"
@@ -13,21 +13,25 @@
 #include <core/dialog/OpenFileDialog.h>
 NS_IGE_BEGIN
 
-PhysicSoftBodyEditorComponent::PhysicSoftBodyEditorComponent() {
+SoftbodyEditorComponent::SoftbodyEditorComponent() {
     m_physicGroup = nullptr;
 }
 
-PhysicSoftBodyEditorComponent::~PhysicSoftBodyEditorComponent() {
+SoftbodyEditorComponent::~SoftbodyEditorComponent() {
     m_physicGroup = nullptr;
 }
 
-void PhysicSoftBodyEditorComponent::onInspectorUpdate() {
-    drawPhysicSoftBody();
+void SoftbodyEditorComponent::onInspectorUpdate() {    
+    // Draw inspector
+    drawSoftbody();
+
+    // Draw constraints
+    drawPhysicConstraints();
 }
 
-void PhysicSoftBodyEditorComponent::drawPhysicSoftBody()
+void SoftbodyEditorComponent::drawSoftbody()
 {
-    drawPhysicObject();
+    drawRigidbody();
 
     // Draw physic box properties
     m_physicGroup->createWidget<Separator>();
@@ -203,7 +207,7 @@ void PhysicSoftBodyEditorComponent::drawPhysicSoftBody()
     if (comp->size() == 1)
     {
         int maxMeshIdx = 0;
-        auto physicComp = std::dynamic_pointer_cast<PhysicSoftBody>(comp->getComponents()[0]);
+        auto physicComp = std::dynamic_pointer_cast<Softbody>(comp->getComponents()[0]);
         auto figureComp = physicComp->getOwner()->getComponent<FigureComponent>();
         if (figureComp && figureComp->getFigure())
             maxMeshIdx = figureComp->getFigure()->NumMeshes() - 1;
@@ -221,8 +225,5 @@ void PhysicSoftBodyEditorComponent::drawPhysicSoftBody()
             redraw();
         });
     }
-    
-    // Draw constraints
-    drawPhysicConstraints();
 }
 NS_IGE_END

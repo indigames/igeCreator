@@ -6,20 +6,20 @@
 #include "core/scene/components/EditorComponent.h"
 #include "components/Component.h"
 
-#include "core/scene/components/physic/PhysicObjectEditorComponent.h"
+#include "core/scene/components/physic/RigidbodyEditorComponent.h"
 
 USING_NS_IGE_SCENE
 NS_IGE_BEGIN
 
-class PhysicSoftBodyEditorComponent : public PhysicObjectEditorComponent
+class SoftbodyEditorComponent : public RigidbodyEditorComponent
 {
 public:
-	PhysicSoftBodyEditorComponent();
-	~PhysicSoftBodyEditorComponent();
+	SoftbodyEditorComponent();
+	~SoftbodyEditorComponent();
 
 protected:	
 	virtual void onInspectorUpdate() override;
-	void drawPhysicSoftBody();
+	void drawSoftbody();
 };
 
 NS_IGE_END
