@@ -59,7 +59,7 @@ void MeshColliderEditorComponent::drawMeshCollider()
     });
 
     std::array meshIdx = { comp->getProperty<float>("meshIdx", NAN) };
-    auto meshIdxWg = m_physicGroup->createWidget<Drag<float>>("MeshIndex", ImGuiDataType_S32, meshIdx, 1, 0);
+    auto meshIdxWg = m_physicGroup->createWidget<Drag<float>>("MeshIndex", ImGuiDataType_S32, meshIdx, 1, -1, comp->getProperty<float>("maxIdx", 0) - 1);
     meshIdxWg->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
     });
