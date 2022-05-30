@@ -3,7 +3,7 @@
 
 #include <core/layout/Group.h>
 
-#include "components/physic/SphereCollider.h"
+#include "components/physic/collider/SphereCollider.h"
 #include "core/widgets/Widgets.h"
 #include "core/layout/Columns.h"
 

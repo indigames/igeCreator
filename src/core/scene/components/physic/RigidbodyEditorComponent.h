@@ -6,11 +6,11 @@
 #include "core/scene/components/EditorComponent.h"
 #include "components/Component.h"
 
-#include <components/physic/FixedConstraint.h>
-#include <components/physic/HingeConstraint.h>
-#include <components/physic/SliderConstraint.h>
-#include <components/physic/SpringConstraint.h>
-#include <components/physic/Dof6SpringConstraint.h>
+#include <components/physic/constraint/FixedConstraint.h>
+#include <components/physic/constraint/HingeConstraint.h>
+#include <components/physic/constraint/SliderConstraint.h>
+#include <components/physic/constraint/SpringConstraint.h>
+#include <components/physic/constraint/Dof6SpringConstraint.h>
 
 USING_NS_IGE_SCENE
 NS_IGE_BEGIN

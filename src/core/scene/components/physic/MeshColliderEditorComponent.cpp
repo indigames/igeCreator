@@ -4,7 +4,7 @@
 
 #include <core/layout/Group.h>
 
-#include "components/physic/MeshCollider.h"
+#include "components/physic/collider/MeshCollider.h"
 #include "core/widgets/Widgets.h"
 #include "core/layout/Columns.h"
 
