@@ -38,5 +38,14 @@ void BoxColliderEditorComponent::drawBoxCollider() {
     s1->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("size", { val[0], val[1], val[2] });
     });
+
+    std::array margin = { comp->getProperty<float>("margin", NAN) };
+    auto m2 = m_physicGroup->createWidget<Drag<float>>("Margin", ImGuiDataType_Float, margin, 0.001f, 0.0f);
+    m2->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+    });
+    m2->getOnDataChangedEvent().addListener([this](auto& val) {
+        getComponent<CompoundComponent>()->setProperty("margin", val[0]);
+    });
 }
 NS_IGE_END

@@ -45,8 +45,8 @@ void RigidbodyEditorComponent::drawRigidbody() {
     auto comp = getComponent<CompoundComponent>();
     if (comp == nullptr) return;
 
-    auto columns = m_physicGroup->createWidget<Columns<2>>();
-    columns->createWidget<CheckBox>("Continous", comp->getProperty<bool>("ccd", false))->getOnDataChangedEvent().addListener([this](bool val) {
+    auto columns = m_physicGroup->createWidget<Columns<3>>();
+    columns->createWidget<CheckBox>("CCD", comp->getProperty<bool>("ccd", false))->getOnDataChangedEvent().addListener([this](bool val) {
         storeUndo();
         getComponent<CompoundComponent>()->setProperty("ccd", val);
     });
@@ -66,7 +66,7 @@ void RigidbodyEditorComponent::drawRigidbody() {
     });
 
     auto activeState = comp->getProperty<int>("activeState", 1);
-    auto activeStateCombo = m_physicGroup->createWidget<ComboBox>("activeState", activeState);
+    auto activeStateCombo = m_physicGroup->createWidget<ComboBox>("ActiveState", activeState);
     activeStateCombo->getOnDataChangedEvent().addListener([this](auto val) {
         if (val != -1) {
             storeUndo();
@@ -84,7 +84,7 @@ void RigidbodyEditorComponent::drawRigidbody() {
 
     auto group = comp->getProperty<float>("group", NAN);
     std::array filterGroup = { group };
-    auto c1 = m_physicGroup->createWidget<Drag<float>>("Collision Group", ImGuiDataType_S32, filterGroup, 1, -1);
+    auto c1 = m_physicGroup->createWidget<Drag<float>>("CollisionGroup", ImGuiDataType_S32, filterGroup, 1, -1);
     c1->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
         });
@@ -94,7 +94,7 @@ void RigidbodyEditorComponent::drawRigidbody() {
 
     auto mask = comp->getProperty<float>("mask", NAN);
     std::array filterMask = { mask };
-    auto c2 = m_physicGroup->createWidget<Drag<float>>("Collision Mask", ImGuiDataType_S32, filterMask, 1, -1);
+    auto c2 = m_physicGroup->createWidget<Drag<float>>("CollisionMask", ImGuiDataType_S32, filterMask, 1, -1);
     c2->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
         });
@@ -131,7 +131,7 @@ void RigidbodyEditorComponent::drawRigidbody() {
 
     auto lVel = comp->getProperty<Vec3>("linearVelocity", { NAN, NAN, NAN });
     std::array linearVelocity = { lVel.X(), lVel.Y(), lVel.Z() };
-    auto l1 = m_physicGroup->createWidget<Drag<float, 3>>("Linear Velocity", ImGuiDataType_Float, linearVelocity);
+    auto l1 = m_physicGroup->createWidget<Drag<float, 3>>("LinearVelocity", ImGuiDataType_Float, linearVelocity);
     l1->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
         });
@@ -139,69 +139,60 @@ void RigidbodyEditorComponent::drawRigidbody() {
         getComponent<CompoundComponent>()->setProperty("linearVelocity", { val[0], val[1], val[2] });
     });
 
-    auto aVel = comp->getProperty<Vec3>("angularVelocity", { NAN, NAN, NAN });
-    std::array angularVelocity = { aVel.X(), aVel.Y(), aVel.Z() };
-    auto a1 = m_physicGroup->createWidget<Drag<float, 3>>("Angular Velocity", ImGuiDataType_Float, angularVelocity);
-    a1->getOnDataBeginChangedEvent().addListener([this](auto val) {
-        storeUndo();
-        });
-    a1->getOnDataChangedEvent().addListener([this](auto& val) {
-        getComponent<CompoundComponent>()->setProperty("angularVelocity", { val[0], val[1], val[2] });
-    });
-
     auto lFactor = comp->getProperty<Vec3>("linearFactor", { NAN, NAN, NAN });
     std::array linearFactor = { lFactor.X(), lFactor.Y(), lFactor.Z() };
-    auto l2 = m_physicGroup->createWidget<Drag<float, 3>>("Linear Factor", ImGuiDataType_Float, linearFactor);
+    auto l2 = m_physicGroup->createWidget<Drag<float, 3>>("LinearFactor", ImGuiDataType_Float, linearFactor);
     l2->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+    });
     l2->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("linearFactor", { val[0], val[1], val[2] });
     });
 
+    std::array linearSleepThreshold = { comp->getProperty<float>("linearSleepingThreshold", NAN) };
+    auto l3 = m_physicGroup->createWidget<Drag<float>>("LinearSleepThreshold", ImGuiDataType_Float, linearSleepThreshold, 0.001f, 0.0f);
+    l3->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+    });
+    l3->getOnDataChangedEvent().addListener([this](auto& val) {
+        getComponent<CompoundComponent>()->setProperty("linearSleepingThreshold", val[0]);
+    });
+
+    auto aVel = comp->getProperty<Vec3>("angularVelocity", { NAN, NAN, NAN });
+    std::array angularVelocity = { aVel.X(), aVel.Y(), aVel.Z() };
+    auto a1 = m_physicGroup->createWidget<Drag<float, 3>>("AngularVelocity", ImGuiDataType_Float, angularVelocity);
+    a1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+    });
+    a1->getOnDataChangedEvent().addListener([this](auto& val) {
+        getComponent<CompoundComponent>()->setProperty("angularVelocity", { val[0], val[1], val[2] });
+    });
+
     auto aFactor = comp->getProperty<Vec3>("angularFactor", { NAN, NAN, NAN });
     std::array angularFactor = { aFactor.X(), aFactor.Y(), aFactor.Z() };
-    auto a2 = m_physicGroup->createWidget<Drag<float, 3>>("Angular Factor", ImGuiDataType_Float, angularFactor);
+    auto a2 = m_physicGroup->createWidget<Drag<float, 3>>("AngularFactor", ImGuiDataType_Float, angularFactor);
     a2->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+    });
     a2->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("angularFactor", { val[0], val[1], val[2] });
     });
 
-    std::array margin = { comp->getProperty<float>("margin", NAN) };
-    auto m2 = m_physicGroup->createWidget<Drag<float>>("Margin", ImGuiDataType_Float, margin, 0.001f, 0.0f);
-    m2->getOnDataBeginChangedEvent().addListener([this](auto val) {
-        storeUndo();
-        });
-    m2->getOnDataChangedEvent().addListener([this](auto& val) {
-        getComponent<CompoundComponent>()->setProperty("margin", val[0]);
-    });
-
-    std::array linearSleepThreshold = { comp->getProperty<float>("linearSleepingThreshold", NAN) };
-    auto l3 = m_physicGroup->createWidget<Drag<float>>("Linear Sleeping Threshold", ImGuiDataType_Float, linearSleepThreshold, 0.001f, 0.0f);
-    l3->getOnDataBeginChangedEvent().addListener([this](auto val) {
-        storeUndo();
-        });
-    l3->getOnDataChangedEvent().addListener([this](auto& val) {
-        getComponent<CompoundComponent>()->setProperty("linearSleepingThreshold", val[0]);
-        });
-
     std::array angularSleepThreshold = { comp->getProperty<float>("angularSleepingThreshold", NAN) };
-    auto a3 = m_physicGroup->createWidget<Drag<float>>("Angular Sleeping Threshold", ImGuiDataType_Float, angularSleepThreshold, 0.001f, 0.0f);
+    auto a3 = m_physicGroup->createWidget<Drag<float>>("AngularSleepThreshold", ImGuiDataType_Float, angularSleepThreshold, 0.001f, 0.0f);
     a3->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+    });
     a3->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("angularSleepingThreshold", val[0]);
-        });
+    });
 
     auto aPosOffset = comp->getProperty<Vec3>("offset", { NAN, NAN, NAN });
     std::array posOffset = { aPosOffset.X(), aPosOffset.Y(), aPosOffset.Z() };
-    auto p1 = m_physicGroup->createWidget<Drag<float, 3>>("Pos Offset", ImGuiDataType_Float, posOffset);
+    auto p1 = m_physicGroup->createWidget<Drag<float, 3>>("PositionOffset", ImGuiDataType_Float, posOffset);
     p1->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+    });
     p1->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("offset", { val[0], val[1], val[2] });
     });
