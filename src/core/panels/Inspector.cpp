@@ -53,6 +53,7 @@
 #include <components/physic/collider/BoxCollider.h>
 #include <components/physic/collider/SphereCollider.h>
 #include <components/physic/collider/CapsuleCollider.h>
+#include <components/physic/collider/CompoundCollider.h>
 #include <components/physic/collider/MeshCollider.h>
 #include <components/physic/Softbody.h>
 #include <components/physic/constraint/FixedConstraint.h>
@@ -176,6 +177,7 @@ namespace ige::creator
                 m_createCompCombo->addChoice((int)Component::Type::BoxCollider, "BoxCollider");
                 m_createCompCombo->addChoice((int)Component::Type::SphereCollider, "SphereCollider");
                 m_createCompCombo->addChoice((int)Component::Type::CapsuleCollider, "CapsuleCollider");
+                m_createCompCombo->addChoice((int)Component::Type::CompoundCollider, "CompoundCollider");
                 
                 // Mesh based physic
                 if (firstTarget->getComponent<FigureComponent>()) {
@@ -343,36 +345,56 @@ namespace ige::creator
                     {
                         auto comp = m_targetObject->addComponent<BoxCollider>();
                         onAddComponent(comp);
+                        auto* target = dynamic_cast<TargetObject*>(m_targetObject);
+                        if (target) target->getFirstTarget()->getComponent<BoxCollider>()->init();
                         break;
                     }
                     case (int)Component::Type::SphereCollider:
                     {
                         auto comp = m_targetObject->addComponent<SphereCollider>();
                         onAddComponent(comp);
+                        auto* target = dynamic_cast<TargetObject*>(m_targetObject);
+                        if (target) target->getFirstTarget()->getComponent<SphereCollider>()->init();
                         break;
                     }
                     case (int)Component::Type::CapsuleCollider:
                     {
                         auto comp = m_targetObject->addComponent<CapsuleCollider>();
                         onAddComponent(comp);
+                        auto* target = dynamic_cast<TargetObject*>(m_targetObject);
+                        if (target) target->getFirstTarget()->getComponent<CapsuleCollider>()->init();
+                        break;
+                    }
+                    case (int)Component::Type::CompoundCollider:
+                    {
+                        auto comp = m_targetObject->addComponent<CompoundCollider>();
+                        onAddComponent(comp);
+                        auto* target = dynamic_cast<TargetObject*>(m_targetObject);
+                        if (target) target->getFirstTarget()->getComponent<CompoundCollider>()->init();
                         break;
                     }
                     case (int)Component::Type::MeshCollider:
                     {
                         auto comp = m_targetObject->addComponent<MeshCollider>();
                         onAddComponent(comp);
+                        auto* target = dynamic_cast<TargetObject*>(m_targetObject);
+                        if (target) target->getFirstTarget()->getComponent<MeshCollider>()->init();
                         break;
                     }
                     case (int)Component::Type::Rigidbody:
                     {
                         auto comp  = m_targetObject->addComponent<Rigidbody>();
                         onAddComponent(comp);
+                        auto* target = dynamic_cast<TargetObject*>(m_targetObject);
+                        if (target) target->getFirstTarget()->getComponent<Rigidbody>()->init();
                         break;
                     }
                     case (int)Component::Type::Softbody:
                     {
                         auto comp  = m_targetObject->addComponent<Softbody>();
                         onAddComponent(comp);
+                        auto* target = dynamic_cast<TargetObject*>(m_targetObject);
+                        if(target) target->getFirstTarget()->getComponent<Softbody>()->init();
                         break;
                     }
                     case (int)Component::Type::AudioSource:

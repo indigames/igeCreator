@@ -34,6 +34,7 @@
 #include "core/scene/components/physic/BoxColliderEditorComponent.h"
 #include "core/scene/components/physic/SphereColliderEditorComponent.h"
 #include "core/scene/components/physic/CapsuleColliderEditorComponent.h"
+#include "core/scene/components/physic/CompoundColliderEditorComponent.h"
 #include "core/scene/components/physic/MeshColliderEditorComponent.h"
 #include "core/scene/components/physic/SoftbodyEditorComponent.h"
 
@@ -160,7 +161,10 @@ std::shared_ptr<EditorComponent> InspectorEditor::addComponent(int type, std::sh
 		view = std::make_shared<SphereColliderEditorComponent>();
 	break;
 	case Component::Type::CapsuleCollider:
-		view = std::make_shared<CapsuleColliderEditorComponent>();	
+		view = std::make_shared<CapsuleColliderEditorComponent>();
+	break;
+	case Component::Type::CompoundCollider:
+		view = std::make_shared<CompoundColliderEditorComponent>();
 	break;
 	case Component::Type::MeshCollider:
 		view = std::make_shared<MeshColliderEditorComponent>();
