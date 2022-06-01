@@ -49,6 +49,60 @@ void SoftbodyEditorComponent::drawSoftbody()
         getComponent<CompoundComponent>()->setProperty("isSoftCol", val);
     });
 
+    std::array repStiff = { comp->getProperty<float>("repStiff", NAN) };
+    auto d2 = m_physicGroup->createWidget<Drag<float>>("SpringStiffness", ImGuiDataType_Float, repStiff, 0.001f, 0.f);
+    d2->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+    });
+    d2->getOnDataChangedEvent().addListener([this](auto& val) {
+        getComponent<CompoundComponent>()->setProperty("repStiff", val[0]);
+    });
+
+    std::array restLS = { comp->getProperty<float>("restLS", NAN) };
+    auto d15 = m_physicGroup->createWidget<Drag<float>>("RestLengthScale", ImGuiDataType_Float, restLS, 0.001f, 0.0f);
+    d15->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+    });
+    d15->getOnDataChangedEvent().addListener([this](auto& val) {
+        getComponent<CompoundComponent>()->setProperty("restLS", val[0]);
+    });
+
+    std::array pItrNum = { comp->getProperty<float>("pItrNum", NAN) };
+    auto d13 = m_physicGroup->createWidget<Drag<float>>("NumIterations", ImGuiDataType_S32, pItrNum, 1, 1);
+    d13->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+    });
+    d13->getOnDataChangedEvent().addListener([this](auto& val) {
+        getComponent<CompoundComponent>()->setProperty("pItrNum", (int)val[0]);
+    });
+
+    std::array sleepThr = { comp->getProperty<float>("sleepThr", NAN) };
+    auto d14 = m_physicGroup->createWidget<Drag<float>>("SleepThreshold", ImGuiDataType_Float, sleepThr, 0.001f, 0.0f);
+    d14->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+    });
+    d14->getOnDataChangedEvent().addListener([this](auto& val) {
+        getComponent<CompoundComponent>()->setProperty("sleepThr", val[0]);
+    });
+
+    std::array graF = { comp->getProperty<float>("graF", NAN) };
+    auto d7 = m_physicGroup->createWidget<Drag<float>>("GravityFactor", ImGuiDataType_Float, graF, 0.001f, 0.f);
+    d7->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+    });
+    d7->getOnDataChangedEvent().addListener([this](auto& val) {
+        getComponent<CompoundComponent>()->setProperty("graF", val[0]);
+    });
+
+    std::array velF = { comp->getProperty<float>("velF", NAN) };
+    auto d8 = m_physicGroup->createWidget<Drag<float>>("VelocityFactor", ImGuiDataType_Float, velF, 0.001f, 0.f);
+    d8->getOnDataBeginChangedEvent().addListener([this](auto val) {
+        storeUndo();
+    });
+    d8->getOnDataChangedEvent().addListener([this](auto& val) {
+        getComponent<CompoundComponent>()->setProperty("velF", val[0]);
+    });
+
     std::array dampCoeff = { comp->getProperty<float>("dampCoeff", NAN) };
     auto d1 = m_physicGroup->createWidget<Drag<float>>("DampingCoeff", ImGuiDataType_Float, dampCoeff, 0.001f, 0.f, 1.f);
     d1->getOnDataBeginChangedEvent().addListener([this](auto val) {
@@ -56,15 +110,6 @@ void SoftbodyEditorComponent::drawSoftbody()
     });
     d1->getOnDataChangedEvent().addListener([this](auto& val) {
         getComponent<CompoundComponent>()->setProperty("dampCoeff", val[0]);
-    });
-
-    std::array repStiff = { comp->getProperty<float>("repStiff", NAN) };
-    auto d2 = m_physicGroup->createWidget<Drag<float>>("LinearStiffness", ImGuiDataType_Float, repStiff, 0.001f, 0.f);
-    d2->getOnDataBeginChangedEvent().addListener([this](auto val) {
-        storeUndo();
-    });
-    d2->getOnDataChangedEvent().addListener([this](auto& val) {
-        getComponent<CompoundComponent>()->setProperty("repStiff", val[0]);
     });
 
     std::array presCoeff = { comp->getProperty<float>("presCoeff", NAN) };
@@ -103,24 +148,6 @@ void SoftbodyEditorComponent::drawSoftbody()
         getComponent<CompoundComponent>()->setProperty("poseCoeff", val[0]);
     });
 
-    std::array graF = { comp->getProperty<float>("graF", NAN) };
-    auto d7 = m_physicGroup->createWidget<Drag<float>>("GravityFactor", ImGuiDataType_Float, graF, 0.001f, 0.f);
-    d7->getOnDataBeginChangedEvent().addListener([this](auto val) {
-        storeUndo();
-    });
-    d7->getOnDataChangedEvent().addListener([this](auto& val) {
-        getComponent<CompoundComponent>()->setProperty("graF", val[0]);
-    });
-
-    std::array velF = { comp->getProperty<float>("velF", NAN) };
-    auto d8 = m_physicGroup->createWidget<Drag<float>>("VelocityCorFactor", ImGuiDataType_Float, velF, 0.001f, 0.f);
-    d8->getOnDataBeginChangedEvent().addListener([this](auto val) {
-        storeUndo();
-    });
-    d8->getOnDataChangedEvent().addListener([this](auto& val) {
-        getComponent<CompoundComponent>()->setProperty("velF", val[0]);
-    });
-
     std::array rch = { comp->getProperty<float>("rch", NAN) };
     auto d9 = m_physicGroup->createWidget<Drag<float>>("RigidHardness", ImGuiDataType_Float, rch, 0.001f, 0.f, 1.f);
     d9->getOnDataBeginChangedEvent().addListener([this](auto val) {
@@ -157,41 +184,24 @@ void SoftbodyEditorComponent::drawSoftbody()
         getComponent<CompoundComponent>()->setProperty("ahr", val[0]);
     });
 
-    std::array pItrNum = { comp->getProperty<float>("pItrNum", NAN) };
-    auto d13 = m_physicGroup->createWidget<Drag<float>>("PosIterations", ImGuiDataType_S32, pItrNum, 1, 1);
-    d13->getOnDataBeginChangedEvent().addListener([this](auto val) {
-        storeUndo();
+    auto aero = comp->getProperty<int>("aero", 0);
+    auto aeroCombo = m_physicGroup->createWidget<ComboBox>("AeroModel", aero);
+    aeroCombo->getOnDataChangedEvent().addListener([this](auto val) {
+        if (val != -1) {
+            storeUndo();
+            getComponent<CompoundComponent>()->setProperty("aero", val);
+            setDirty();
+        }
     });
-    d13->getOnDataChangedEvent().addListener([this](auto& val) {
-        getComponent<CompoundComponent>()->setProperty("pItrNum", (int)val[0]);
-    });
-
-    std::array sleepThr = { comp->getProperty<float>("sleepThr", NAN) };
-    auto d14 = m_physicGroup->createWidget<Drag<float>>("SleepThreshold", ImGuiDataType_Float, sleepThr, 0.001f, 0.0f);
-    d14->getOnDataBeginChangedEvent().addListener([this](auto val) {
-        storeUndo();
-    });
-    d14->getOnDataChangedEvent().addListener([this](auto& val) {
-        getComponent<CompoundComponent>()->setProperty("sleepThr", val[0]);
-    });
-
-    std::array restLS = { comp->getProperty<float>("restLS", NAN) };
-    auto d15 = m_physicGroup->createWidget<Drag<float>>("RestLengthScale", ImGuiDataType_Float, restLS, 0.001f, 0.0f);
-    d15->getOnDataBeginChangedEvent().addListener([this](auto val) {
-        storeUndo();
-    }); 
-    d15->getOnDataChangedEvent().addListener([this](auto& val) {
-        getComponent<CompoundComponent>()->setProperty("restLS", val[0]);
-    });
-
-    std::array aero = { comp->getProperty<float>("aero", NAN) };
-    auto d16 = m_physicGroup->createWidget<Drag<float>>("AeroModel", ImGuiDataType_S32, aero, 1, 0, 6);
-    d16->getOnDataBeginChangedEvent().addListener([this](auto val) {
-        storeUndo();
-    });
-    d16->getOnDataChangedEvent().addListener([this](auto& val) {
-        getComponent<CompoundComponent>()->setProperty("aero", (int)val[0]);
-    });
+    aeroCombo->setEndOfLine(false);
+    aeroCombo->addChoice(0, "V_Point");
+    aeroCombo->addChoice(1, "V_TwoSided");
+    aeroCombo->addChoice(2, "V_TwoSidedLiftDrag");
+    aeroCombo->addChoice(3, "V_OneSided");
+    aeroCombo->addChoice(4, "F_TwoSided");
+    aeroCombo->addChoice(5, "F_TwoSidedLiftDrag");
+    aeroCombo->addChoice(6, "F_OneSided");
+    aeroCombo->setEndOfLine(true);
 
     auto windVel = comp->getProperty<Vec3>("windVel", { NAN, NAN, NAN });
     std::array windVelocity = { windVel.X(), windVel.Y(), windVel.Z() };

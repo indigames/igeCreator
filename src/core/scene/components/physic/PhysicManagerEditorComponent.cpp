@@ -24,7 +24,7 @@ void PhysicManagerEditorComponent::onInspectorUpdate() {
 void PhysicManagerEditorComponent::drawPhysicManager()
 {
     if (m_physicManagerGroup == nullptr)
-        m_physicManagerGroup = m_group->createWidget<Group>("PhysicManagerGroup", false);;
+        m_physicManagerGroup = m_group->createWidget<Group>("PhysicManagerGroup", false);
     m_physicManagerGroup->removeAllWidgets();
 
     auto comp = getComponent<CompoundComponent>();
@@ -50,40 +50,40 @@ void PhysicManagerEditorComponent::drawPhysicManager()
     });
 
     std::array numItr = { (float)physicComp->getNumIteration() };
-    auto i1 = m_physicManagerGroup->createWidget<Drag<float>>("Iterations Number", ImGuiDataType_S32, numItr, 1, 1, 32);
+    auto i1 = m_physicManagerGroup->createWidget<Drag<float>>("NumIterations", ImGuiDataType_S32, numItr, 1, 1, 32);
     i1->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+    });
     i1->getOnDataChangedEvent().addListener([this](auto& val) {
         auto physicComp = std::dynamic_pointer_cast<PhysicManager>(getComponent<CompoundComponent>()->getComponents()[0]);
         physicComp->setNumIteration((int)val[0]);
     });
 
     std::array subSteps = { (float)physicComp->getFrameMaxSubStep() };
-    auto m1 = m_physicManagerGroup->createWidget<Drag<float>>("Max Substeps Number", ImGuiDataType_S32, subSteps, 1, 1, 32);
+    auto m1 = m_physicManagerGroup->createWidget<Drag<float>>("NumSubsteps", ImGuiDataType_S32, subSteps, 1, 1, 32);
     m1->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+    });
     m1->getOnDataChangedEvent().addListener([this](auto& val) {
         auto physicComp = std::dynamic_pointer_cast<PhysicManager>(getComponent<CompoundComponent>()->getComponents()[0]);
         physicComp->setFrameMaxSubStep((int)val[0]);
     });
 
     std::array timeStep = { physicComp->getFixedTimeStep() };
-    auto t1 = m_physicManagerGroup->createWidget<Drag<float>>("Time Step", ImGuiDataType_Float, timeStep, 0.001f, 0.001f);
+    auto t1 = m_physicManagerGroup->createWidget<Drag<float>>("TimeStep", ImGuiDataType_Float, timeStep, 0.001f, 0.001f);
     t1->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+    });
     t1->getOnDataChangedEvent().addListener([this](auto& val) {
         auto physicComp = std::dynamic_pointer_cast<PhysicManager>(getComponent<CompoundComponent>()->getComponents()[0]);
         physicComp->setFixedTimeStep(val[0]);
     });
 
     std::array frameRatio = { physicComp->getFrameUpdateRatio() };
-    auto u1 = m_physicManagerGroup->createWidget<Drag<float>>("Update Ratio", ImGuiDataType_Float, frameRatio, 0.001f, 0.001f);
+    auto u1 = m_physicManagerGroup->createWidget<Drag<float>>("UpdateRatio", ImGuiDataType_Float, frameRatio, 0.001f, 0.001f);
     u1->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+    });
     u1->getOnDataChangedEvent().addListener([this](auto& val) {
         auto physicComp = std::dynamic_pointer_cast<PhysicManager>(getComponent<CompoundComponent>()->getComponents()[0]);
         physicComp->setFrameUpdateRatio(val[0]);
@@ -93,7 +93,7 @@ void PhysicManagerEditorComponent::drawPhysicManager()
     auto g1 = m_physicManagerGroup->createWidget<Drag<float, 3>>("Gravity", ImGuiDataType_Float, gravity, 0.001f);
     g1->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+    });
     g1->getOnDataChangedEvent().addListener([this](auto& val) {
         auto physicComp = std::dynamic_pointer_cast<PhysicManager>(getComponent<CompoundComponent>()->getComponents()[0]);
         physicComp->setGravity({ val[0], val[1], val[2] });

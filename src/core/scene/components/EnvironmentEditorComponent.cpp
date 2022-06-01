@@ -97,22 +97,21 @@ void EnvironmentEditorComponent::drawEnvironmentComponent() {
         environment->setDistanceFogAlpha(val[3]);
     });
 
-    auto fogColumn = fogGroup->createWidget<Columns<2>>(120.f);
     std::array fogNear = { environment->getDistanceFogNear() };
-    auto nearE = fogColumn->createWidget<Drag<float>>("Near", ImGuiDataType_Float, fogNear, 0.01f, 0.1f);
+    auto nearE = fogGroup->createWidget<Drag<float>>("Near", ImGuiDataType_Float, fogNear, 0.01f, 0.1f);
     nearE->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+    });
     nearE->getOnDataChangedEvent().addListener([this](auto val) {
         auto environment = std::dynamic_pointer_cast<EnvironmentComponent>(getComponent<CompoundComponent>()->getComponents()[0]);
         environment->setDistanceFogNear(val[0]);
     });
 
     std::array fogFar = { environment->getDistanceFogFar() };
-    auto farE = fogColumn->createWidget<Drag<float>>("Far", ImGuiDataType_Float, fogFar, 0.01f, 0.1f);
+    auto farE = fogGroup->createWidget<Drag<float>>("Far", ImGuiDataType_Float, fogFar, 0.01f, 0.1f);
     farE->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+    });
     farE->getOnDataChangedEvent().addListener([this](auto val) {
         auto environment = std::dynamic_pointer_cast<EnvironmentComponent>(getComponent<CompoundComponent>()->getComponents()[0]);
         environment->setDistanceFogFar(val[0]);
