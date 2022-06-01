@@ -169,13 +169,18 @@ void NavMeshEditorComponent::drawNavMesh()
         getComponent<CompoundComponent>()->setProperty("padding", { val[0], val[1], val[2] });
     });
 
-    std::array partitionType = { comp->getProperty<float>("partType", NAN) };
-    auto p2 = m_navMeshGroup->createWidget<Drag<float>>("PartitionType", ImGuiDataType_S32, partitionType, 1, (int)(NavMesh::EPartitionType::WATERSHED), (int)(NavMesh::EPartitionType::MONOTONE));
-    p2->getOnDataBeginChangedEvent().addListener([this](auto val) {
-        storeUndo();
-        });
-    p2->getOnDataChangedEvent().addListener([this](auto val) {
-        getComponent<CompoundComponent>()->setProperty("partType", (int)val[0]);
+    auto partitionType = comp->getProperty<int>("partType", 0);
+    auto partitionCombo = m_navMeshGroup->createWidget<ComboBox>("PartitionType", partitionType);
+    partitionCombo->getOnDataChangedEvent().addListener([this](auto val) {
+        if (val != -1) {
+            storeUndo();
+            getComponent<CompoundComponent>()->setProperty("partType", val);
+            setDirty();
+        }
     });
+    partitionCombo->setEndOfLine(false);
+    partitionCombo->addChoice(0, "Watershed");
+    partitionCombo->addChoice(1, "Monotone");
+    partitionCombo->setEndOfLine(true);
 }
 NS_IGE_END

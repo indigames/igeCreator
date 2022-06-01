@@ -193,6 +193,9 @@ std::shared_ptr<EditorComponent> InspectorEditor::addComponent(int type, std::sh
 	case Component::Type::Navigable:
 		view = std::make_shared<NavigableEditorComponent>();
 	break;
+	case Component::Type::NavArea:
+		view = std::make_shared<NavAreaEditorComponent>();
+	break;
 	case Component::Type::NavMesh:
 		view = std::make_shared<NavMeshEditorComponent>();
 	break;
@@ -204,9 +207,6 @@ std::shared_ptr<EditorComponent> InspectorEditor::addComponent(int type, std::sh
 	break;
 	case Component::Type::DynamicNavMesh:
 		view = std::make_shared<DynamicNavMeshEditorComponent>();
-	break;
-	case Component::Type::NavArea:
-		view = std::make_shared<NavAgentManagerEditorComponent>();
 	break;
 	case Component::Type::NavObstacle:
 		view = std::make_shared<NavObstacleEditorComponent>();

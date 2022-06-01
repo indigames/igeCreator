@@ -70,6 +70,7 @@
 #include <components/navigation/NavAgent.h>
 #include <components/navigation/NavAgentManager.h>
 #include <components/navigation/Navigable.h>
+#include <components/navigation/NavArea.h>
 #include <components/navigation/DynamicNavMesh.h>
 #include <components/navigation/NavObstacle.h>
 #include <components/navigation/OffMeshLink.h>
@@ -193,6 +194,7 @@ namespace ige::creator
                 m_createCompCombo->addChoice((int)Component::Type::DynamicNavMesh, "DynamicNavMesh");
             }
             m_createCompCombo->addChoice((int)Component::Type::Navigable, "Navigable");
+            m_createCompCombo->addChoice((int)Component::Type::NavArea, "NavArea");
             m_createCompCombo->addChoice((int)Component::Type::NavAgent, "NavAgent");
             m_createCompCombo->addChoice((int)Component::Type::NavObstacle, "NavObstacle");
             m_createCompCombo->addChoice((int)Component::Type::OffMeshLink, "OffMeshLink");
@@ -418,6 +420,12 @@ namespace ige::creator
                     case (int)Component::Type::Navigable:
                     {
                         auto comp = m_targetObject->addComponent<Navigable>();
+                        onAddComponent(comp);
+                        break;
+                    }
+                    case (int)Component::Type::NavArea:
+                    {
+                        auto comp = m_targetObject->addComponent<NavArea>();
                         onAddComponent(comp);
                         break;
                     }
