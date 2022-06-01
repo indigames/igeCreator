@@ -200,7 +200,7 @@ void SoftbodyEditorComponent::drawSoftbody()
         storeUndo();
     });
     d17->getOnDataChangedEvent().addListener([this](auto& val) {
-        getComponent<CompoundComponent>()->setProperty("windVel", val[0]);
+        getComponent<CompoundComponent>()->setProperty("windVel", val);
     });
 
     // Only show if single target
