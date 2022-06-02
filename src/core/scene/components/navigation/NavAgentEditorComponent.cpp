@@ -90,31 +90,41 @@ void NavAgentEditorComponent::drawNavAgent()
         getComponent<CompoundComponent>()->setProperty("filter", (int)val[0]);
     });
 
-    std::array obstacleAvoidanceType = { comp->getProperty<float>("obsAvoid", NAN) };
-    auto o1 = m_navAgentGroup->createWidget<Drag<float>>("ObsAvoidType", ImGuiDataType_S32, obstacleAvoidanceType, 1, 0);
-    o1->getOnDataBeginChangedEvent().addListener([this](auto val) {
-        storeUndo();
-        });
-    o1->getOnDataChangedEvent().addListener([this](auto val) {
-        getComponent<CompoundComponent>()->setProperty("obsAvoid", (int)val[0]);
-    });
+    /// [IGE]: Simplify, not show this option
+    //std::array obstacleAvoidanceType = { comp->getProperty<float>("obsAvoid", NAN) };
+    //auto o1 = m_navAgentGroup->createWidget<Drag<float>>("ObsAvoidType", ImGuiDataType_S32, obstacleAvoidanceType, 1, 0);
+    //o1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+    //    storeUndo();
+    //    });
+    //o1->getOnDataChangedEvent().addListener([this](auto val) {
+    //    getComponent<CompoundComponent>()->setProperty("obsAvoid", (int)val[0]);
+    //});
 
-    std::array navigationQuality = { comp->getProperty<float>("navQuality", NAN) };
-    auto n1 = m_navAgentGroup->createWidget<Drag<float>>("NavQuality", ImGuiDataType_S32, navigationQuality, 1, (int)NavAgent::NavQuality::LOW, (int)NavAgent::NavQuality::HIGH);
-    n1->getOnDataBeginChangedEvent().addListener([this](auto val) {
+    auto navQuality = comp->getProperty<int>("navQuality", (int)NavAgent::NavQuality::HIGH);
+    auto navQualityCombo = m_navAgentGroup->createWidget<ComboBox>("NavQuality", navQuality);
+    navQualityCombo->getOnDataChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
-    n1->getOnDataChangedEvent().addListener([this](auto val) {
-        getComponent<CompoundComponent>()->setProperty("navQuality", (int)val[0]);
+        getComponent<CompoundComponent>()->setProperty("navQuality", val);
+        setDirty();
     });
-
-    std::array navigationPushiness = { comp->getProperty<float>("navPushiness", NAN) };
-    auto n2 = m_navAgentGroup->createWidget<Drag<float>>("NavPushiness", ImGuiDataType_S32, navigationPushiness, 1, (int)NavAgent::NavPushiness::LOW, (int)NavAgent::NavPushiness::HIGH);
-    n2->getOnDataBeginChangedEvent().addListener([this](auto val) {
+    navQualityCombo->setEndOfLine(false);
+    navQualityCombo->addChoice((int)NavAgent::NavQuality::LOW, "Low");
+    navQualityCombo->addChoice((int)NavAgent::NavQuality::MEDIUM, "Medium");
+    navQualityCombo->addChoice((int)NavAgent::NavQuality::HIGH, "High");
+    navQualityCombo->setEndOfLine(true);
+    
+    auto navPushiness = comp->getProperty<int>("navPushiness", (int)NavAgent::NavPushiness::HIGH);
+    auto navPushinessCombo = m_navAgentGroup->createWidget<ComboBox>("NavPushiness", navPushiness);
+    navPushinessCombo->getOnDataChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
-    n2->getOnDataChangedEvent().addListener([this](auto val) {
-        getComponent<CompoundComponent>()->setProperty("navPushiness", (int)val[0]);
+        getComponent<CompoundComponent>()->setProperty("navPushiness", val);
+        setDirty();
     });
+    navPushinessCombo->setEndOfLine(false);
+    navPushinessCombo->addChoice((int)NavAgent::NavPushiness::NONE, "None");
+    navPushinessCombo->addChoice((int)NavAgent::NavPushiness::LOW, "Low");
+    navPushinessCombo->addChoice((int)NavAgent::NavPushiness::MEDIUM, "Medium");
+    navPushinessCombo->addChoice((int)NavAgent::NavPushiness::HIGH, "High");
+    navPushinessCombo->setEndOfLine(true);
 }
 NS_IGE_END

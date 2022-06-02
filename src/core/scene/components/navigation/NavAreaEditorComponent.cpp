@@ -31,7 +31,7 @@ void NavAreaEditorComponent::drawNavArea()
     if (comp == nullptr) return;
 
     std::array id = { comp->getProperty<float>("id", NAN) };
-    auto a1 = m_navAreaGroup->createWidget<Drag<float>>("AreaID", ImGuiDataType_S32, id, 1, 0);
+    auto a1 = m_navAreaGroup->createWidget<Drag<float>>("ID", ImGuiDataType_S32, id, 1, 0, 62);
     a1->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
     });
