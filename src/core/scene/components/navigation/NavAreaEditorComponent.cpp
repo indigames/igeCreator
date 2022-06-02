@@ -38,14 +38,5 @@ void NavAreaEditorComponent::drawNavArea()
     a1->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("id", (int)val[0]);
     });
-
-    std::array cost = { comp->getProperty<float>("cost", NAN) };
-    auto a2 = m_navAreaGroup->createWidget<Drag<float>>("AreaCost", ImGuiDataType_Float, cost);
-    a2->getOnDataBeginChangedEvent().addListener([this](auto val) {
-        storeUndo();
-    });
-    a2->getOnDataChangedEvent().addListener([this](auto val) {
-        getComponent<CompoundComponent>()->setProperty("cost", (int)val[0]);
-    });
 }
 NS_IGE_END
