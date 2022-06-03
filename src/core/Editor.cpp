@@ -313,10 +313,7 @@ namespace ige::creator
         else
         {
             auto btn = MsgBox("Project Does Not Exist", "Do you want to create?", MsgBox::EBtnLayout::ok_cancel, MsgBox::EMsgType::question).result();
-            if (btn == MsgBox::EButton::ok)
-            {
-                auto fsPath = fs::path(path);
-                fs::remove_all(fsPath);
+            if (btn == MsgBox::EButton::ok) {
                 return createProjectInternal(path);
             }
         }
