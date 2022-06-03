@@ -520,7 +520,7 @@ namespace ige::creator
                 TaskManager::getInstance()->addTask([&]() {
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObject = Editor::getCurrentScene()->createObject("Cube", target);
-                    newObject->addComponent<FigureComponent>("figures/cube.dae");
+                    newObject->addComponent<FigureComponent>("figures/primitives/cube.dae");
                     CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
@@ -529,7 +529,7 @@ namespace ige::creator
                 TaskManager::getInstance()->addTask([&]() {
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObject = Editor::getCurrentScene()->createObject("Plane", target);
-                    newObject->addComponent<FigureComponent>("figures/plane.dae");
+                    newObject->addComponent<FigureComponent>("figures/primitives/plane.dae");
                     CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
@@ -538,7 +538,7 @@ namespace ige::creator
                 TaskManager::getInstance()->addTask([&]() {
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObject = Editor::getCurrentScene()->createObject("Sphere", target);
-                    newObject->addComponent<FigureComponent>("figures/sphere.dae");
+                    newObject->addComponent<FigureComponent>("figures/primitives/sphere.dae");
                     CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
@@ -547,7 +547,7 @@ namespace ige::creator
                 TaskManager::getInstance()->addTask([&]() {
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObject = Editor::getCurrentScene()->createObject("Cone", target);
-                    newObject->addComponent<FigureComponent>("figures/cone.dae");
+                    newObject->addComponent<FigureComponent>("figures/primitives/cone.dae");
                     CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
@@ -556,7 +556,7 @@ namespace ige::creator
                 TaskManager::getInstance()->addTask([&]() {
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObject = Editor::getCurrentScene()->createObject("Cylinder", target);
-                    newObject->addComponent<FigureComponent>("figures/cylinder.dae");
+                    newObject->addComponent<FigureComponent>("figures/primitives/cylinder.dae");
                     CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
@@ -565,7 +565,7 @@ namespace ige::creator
                 TaskManager::getInstance()->addTask([&]() {
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObject = Editor::getCurrentScene()->createObject("Torus", target);
-                    newObject->addComponent<FigureComponent>("figures/torus.dae");
+                    newObject->addComponent<FigureComponent>("figures/primitives/torus.dae");
                     CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
@@ -633,6 +633,7 @@ namespace ige::creator
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObject = Editor::getCurrentScene()->createObject("Audio Source", target);
                     newObject->addComponent<AudioSource>();
+                    newObject->addComponent<SpriteComponent>(GetEnginePath("sprites/speaker"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
                     CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
@@ -642,6 +643,7 @@ namespace ige::creator
                     auto target = Editor::getInstance()->getFirstTarget();
                     auto newObject = Editor::getCurrentScene()->createObject("Audio Listener", target);
                     newObject->addComponent<AudioListener>();
+                    newObject->addComponent<SpriteComponent>(GetEnginePath("sprites/micro"), Vec2(0.5f, 0.5f), true)->setSkipSerialize(true);
                     CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, newObject);
                 });
             });
