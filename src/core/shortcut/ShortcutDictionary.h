@@ -20,9 +20,6 @@ public:
 	const static char* TOOL_PIVOT_POSITION;
 	const static char* TOOL_PIVOT_ORIENTATION;
 
-	//! Asset
-	const static char* ASSET_RELOAD_SOURCE;
-
 	//! Edit
 	const static char* EDIT_SCENE_OBJECT_SELECTED;
 	const static char* DELETE_SCENE_OBJECT_SELECTED;
@@ -32,7 +29,6 @@ public:
 	const static char* EDIT_UNDO;
 	const static char* EDIT_REDO;
 
-
 	//! File
 	const static char* FILE_NEW_PROJECT_SELECTED;
 	const static char* FILE_OPEN_PROJECT_SELECTED;
@@ -41,10 +37,10 @@ public:
 	const static char* FILE_SAVE_SCENE_AS_SELECTED;
 
 	static void initShortcuts();
+
 protected:
 	static void initDefaultShortcutCommand();
 	static void assignDefaultShortcut();
-	
 };
 
 NS_IGE_END

@@ -99,28 +99,19 @@ namespace ige::creator
             });
         });
 
-        auto toolMenu = createWidget<Menu>("Tool");
+        auto toolMenu = createWidget<Menu>("Tools");
         toolMenu->createWidget<MenuItem>("Bitmap Font Creator")->getOnClickEvent().addListener([](auto widget) {
             TaskManager::getInstance()->addTask([]() {
                 Editor::getInstance()->toggleBitmapFontCreator();
                 });
             });
-
-        //Asset
-        auto assetMenu = createWidget<Menu>("Asset");
-        assetMenu->createWidget<MenuItem>("Convert Texture")->getOnClickEvent().addListener([](auto widget) {
+        toolMenu->createWidget<MenuItem>("Convert Texture")->getOnClickEvent().addListener([](auto widget) {
             TaskManager::getInstance()->addTask([]() {
                 Editor::getInstance()->convertAssets();
                 });
             });
-        assetMenu->createWidget<MenuItem>("Refresh", "CTRL + R ")->getOnClickEvent().addListener([](auto widget) {
-            TaskManager::getInstance()->addTask([]() {
-                Editor::getInstance()->toggleReloadSource();
-                });
-            });
 
         auto buildMenu = createWidget<Menu>("Build");
-
         buildMenu->createWidget<MenuItem>("ROM")->getOnClickEvent().addListener([](auto widget) {
             TaskManager::getInstance()->addTask([]() {
                 Editor::getInstance()->buildRom();
@@ -136,6 +127,7 @@ namespace ige::creator
                 Editor::getInstance()->buildAndroid();
             });
         });
+
         auto helpMenu = createWidget<Menu>("Help");
         helpMenu->createWidget<MenuItem>("Document", "CTRL + F1 ")->getOnClickEvent().addListener([](auto widget) {
             TaskManager::getInstance()->addTask([]() {

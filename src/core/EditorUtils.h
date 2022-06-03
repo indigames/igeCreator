@@ -15,8 +15,6 @@ public:
 	static void Tools_Scale();
 	static void Tools_TogglePivotPosition();
 	static void Tools_TogglePivotOrientation();
-
-	static void Assets_ToggleReloadSource();
 };
 
 NS_IGE_END

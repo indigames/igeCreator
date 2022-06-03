@@ -73,8 +73,4 @@ void EditorUtils::Tools_TogglePivotOrientation()
     Editor::getInstance()->toggleLocalGizmo();
 }
 
-void EditorUtils::Assets_ToggleReloadSource() {
-    Editor::getInstance()->toggleReloadSource();
-}
-
 NS_IGE_END

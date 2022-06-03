@@ -200,17 +200,6 @@ namespace ige::creator
         SDL_DetachThread(buildThread);
     }
 
-    void Editor::toggleReloadSource()
-    {
-        auto scene = SceneManager::getInstance()->getCurrentScene();
-        if (scene != nullptr) {
-            auto root = scene->getRoot();
-            if (root != nullptr) {
-                root->reloadScripts();
-            }
-        }
-    }
-
     bool Editor::handleEventImGUI(const SDL_Event* event)
     {
         return ImGui_ImplSDL2_ProcessEvent(event);
@@ -694,7 +683,7 @@ class %s(Script):\n\
     bool Editor::openDocument()
     {
 #ifdef WIN32
-        ShellExecute(0, 0, "https://indigames.net", 0, 0, SW_SHOW);
+        ShellExecute(0, 0, "http://ige-docs.readthedocs.io", 0, 0, SW_SHOW);
 #else
         system("open https://indigames.net");
 #endif
@@ -703,7 +692,7 @@ class %s(Script):\n\
 
     bool Editor::openAbout()
     {
-        auto msgBox = MsgBox("About", "igeCreator \n Version: " + std::string(VERSION) + "\n Indi Games © 2020", MsgBox::EBtnLayout::ok, MsgBox::EMsgType::info);
+        auto msgBox = MsgBox("About", "igeCreator \n Version: " + std::string(VERSION) + "\n Indi Games © 2022", MsgBox::EBtnLayout::ok, MsgBox::EMsgType::info);
         while (!msgBox.ready(1000));
         return true;
     }

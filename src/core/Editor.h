@@ -76,9 +76,7 @@ namespace ige::creator
         bool deleteObject();
 
         void toggleBitmapFontCreator();
-
         void convertAssets();
-        void toggleReloadSource();
 
         void registerApp(std::shared_ptr<Application> app) { m_app = app; }
 
