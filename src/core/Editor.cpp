@@ -240,27 +240,16 @@ namespace ige::creator
         auto prjFile = prjPath.append(prjName + ".igeproj");
         auto loaded = false;
 
-        if (fs::exists(prjFile))
-        {
+        if (fs::exists(prjFile)) {
             auto btn = MsgBox("Project Exist", "Do you want to overwrite?", MsgBox::EBtnLayout::ok_cancel, MsgBox::EMsgType::question).result();
-            if (btn == MsgBox::EButton::cancel)
-            {
+            if (btn == MsgBox::EButton::cancel) {
                 return false;
             }
         }
-
-        if (path.compare(getEnginePath()) != 0)
-        {
-            try
-            {
-                fs::remove_all(path);
-            }
-            catch (std::exception& ex) {}
-
+        if (path.compare(getEnginePath()) != 0) {
             const auto copyOptions = fs::copy_options::overwrite_existing | fs::copy_options::recursive;
             fs::copy(GetEnginePath("project_template"), path, copyOptions);
         }
-
         setProjectPath(path);
         createScene();
         SceneManager::getInstance()->saveScene(prjFile.parent_path().append("scenes").append("main.scene"));
