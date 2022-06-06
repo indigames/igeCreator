@@ -50,6 +50,21 @@ namespace ige::creator
             return nullptr;
         }
 
+        template<typename T>
+        bool removePlugin() {
+            auto it = m_plugins.begin();
+            for (; it != m_plugins.end(); ++it) {
+                auto result = std::dynamic_pointer_cast<T>(*it);
+                if (result) break;
+            }
+            if (it != m_plugins.end()) {
+                m_plugins.erase(it);
+                *it = nullptr;
+                return true;
+            }
+            return false;
+        }
+
         /**
         * Execute every plugins
         */

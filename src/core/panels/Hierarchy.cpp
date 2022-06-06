@@ -326,6 +326,23 @@ namespace ige::creator
             }
             auto color = sceneObject.isInPrefab() ? (sceneObject.isActive() ? ImVec4(PREFAB_COLOR) : ImVec4(PREFAB_DISABLED_COLOR)): (sceneObject.isActive() ? ImVec4(NORMAL_COLOR) : ImVec4(DISABLED_COLOR));            
             widget->setColor(color);
+
+            if (!sceneObject.isInPrefab()) {
+                auto ctx = widget->getPlugin<ContextMenu>();
+                if (ctx) {
+                    auto widgets = ctx->getWidgets();
+                    auto it = std::find_if(widgets.begin(), widgets.end(), [](const auto& widget) {
+                        auto menu = std::dynamic_pointer_cast<MenuItem>(widget);
+                        return menu && menu->getName().find("Prefab") != std::string::npos;
+                    });
+                    if (it != widgets.end()) {
+                        widgets.clear();
+                        widget->removePlugin<ContextMenu>();
+                        auto ctxMenu = widget->addPlugin<ContextMenu>(sceneObject.getName() + "_Context");
+                        addCreationContextMenu(sceneObject, ctxMenu);
+                    }
+                }
+            }
         }
     }
 
@@ -460,8 +477,12 @@ namespace ige::creator
             initialize();
             for (const auto& obj : scene->getObjects()) {
                 onSceneObjectCreated(*obj);
-                if (obj->getParent())
+                if (obj->getParent()) {
+                    auto nodePair = m_objectNodeMap.find(obj->getParent()->getId());
+                    if (nodePair == m_objectNodeMap.end())
+                        onSceneObjectCreated(*obj->getParent().get());
                     onSceneObjectAttached(*obj);
+                }
             }
             return true;
         }

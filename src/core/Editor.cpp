@@ -475,12 +475,13 @@ namespace ige::creator
             auto prefabRoot = sceneObject->getPrefabRoot();
             if (prefabRoot != nullptr) {
                 auto prefabId = sceneObject->getPrefabRootId();
+                sceneObject = nullptr;
                 auto parentObject = prefabRoot->getParent();
+                if(parentObject) parentObject->removeChild(prefabRoot);
                 getCurrentScene()->removeObject(prefabRoot);
                 prefabRoot = nullptr;
                 if (parentObject != nullptr) {
                     getCurrentScene()->loadPrefab(parentObject->getId(), SceneManager::getInstance()->getPrefabPath(prefabId));
-                    if(getCanvas()) getCanvas()->getHierarchy()->rebuildHierarchy();
                 }
                 return true;
             }
@@ -495,7 +496,6 @@ namespace ige::creator
             auto prefabRoot = sceneObject->getPrefabRoot();
             if (prefabRoot != nullptr) {
                 prefabRoot->unpackPrefab();
-                if(getCanvas()) getCanvas()->getHierarchy()->rebuildHierarchy();
                 return true;
             }
         }
@@ -716,16 +716,10 @@ class %s(Script):\n\
 
             for (auto& jObj : clonedJson)
             {
-                auto prefabId = jObj.value("prefabId", std::string());
                 auto newObject = Editor::getCurrentScene()->createObject(jObj.value("name", std::string()) + "_cp", nullptr, jObj.value("gui", false));
-                newObject->setPrefabId(!prefabId.empty() ? prefabId : "cloning"); // hack, avoid using same uuid for cloning childs
                 newObject->from_json(jObj);
-                newObject->setPrefabId(prefabId);
                 newObject->setParent(targets[0].lock()->getParent());
             }
-
-            if (getCanvas())
-                getCanvas()->getHierarchy()->rebuildHierarchy();
             return true;
         }
         return false;
@@ -779,11 +773,8 @@ class %s(Script):\n\
         std::vector<std::shared_ptr<SceneObject>> objs;
         for (const auto& jObj : m_selectedJsons)
         {
-            auto prefabId = jObj.value("prefabId", std::string());
             auto newObject = Editor::getCurrentScene()->createObject(jObj.value("name", std::string()) + "_cp", nullptr, jObj.value("gui", false));
-            newObject->setPrefabId(!prefabId.empty() ? prefabId : "cloning"); // hack, avoid using same uuid for cloning childs
             newObject->from_json(jObj);
-            newObject->setPrefabId(prefabId);
             auto parent = Editor::getInstance()->getFirstTarget()->getSharedPtr();
             newObject->setParent(parent);
             objs.push_back(newObject);
@@ -793,9 +784,6 @@ class %s(Script):\n\
             CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, objs[0]);
         else 
             CommandManager::getInstance()->PushCommand(ige::creator::COMMAND_TYPE::ADD_OBJECT, objs);
-
-        if (getCanvas())
-            getCanvas()->getHierarchy()->rebuildHierarchy();
     }
 
     void Editor::toggleLocalGizmo()

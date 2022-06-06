@@ -9,6 +9,7 @@ namespace ige::creator
     public:
         MenuItem(const std::string& name, const std::string& shortcut = "", bool enable = true);
         virtual ~MenuItem();
+        const std::string& getName() const { return m_name; }
 
     protected:
         virtual void _drawImpl() override;

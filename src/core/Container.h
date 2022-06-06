@@ -34,6 +34,8 @@ namespace ige::creator
 
         virtual void drawWidgets();
 
+        std::vector<std::shared_ptr<Widget>>& getWidgets() { return m_widgets; }
+
     protected:
         std::vector<std::shared_ptr<Widget>> m_widgets = {};
     };    

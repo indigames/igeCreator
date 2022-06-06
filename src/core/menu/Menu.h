@@ -12,6 +12,8 @@ namespace ige::creator
         Menu(const std::string& name, bool enable = true);
         virtual ~Menu();
 
+        const std::string& getName() const { return m_name; }
+
     protected:
         virtual void _drawImpl() override;
 
