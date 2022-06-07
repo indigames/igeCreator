@@ -1,4 +1,3 @@
-#include "core/Version.h"
 #include "core/Editor.h"
 #include "core/Canvas.h"
 #include "core/panels/Inspector.h"
@@ -692,7 +691,7 @@ class %s(Script):\n\
 
     bool Editor::openAbout()
     {
-        auto msgBox = MsgBox("About", "igeCreator \n Version: " + std::string(VERSION) + "\n Indi Games © 2022", MsgBox::EBtnLayout::ok, MsgBox::EMsgType::info);
+        auto msgBox = MsgBox("About", "igeCreator \n Version: " + std::string(VERSION_NAME) + "\n Indi Games © 2022", MsgBox::EBtnLayout::ok, MsgBox::EMsgType::info);
         while (!msgBox.ready(1000));
         return true;
     }
