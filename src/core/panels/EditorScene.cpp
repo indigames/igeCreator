@@ -237,8 +237,7 @@ namespace ige::creator
         {
             m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
                 if (Editor::getCurrentScene() && !path.empty()) {
-                    auto target = Editor::getInstance()->getFirstTarget();
-                    auto newObj = Editor::getCurrentScene()->createObject(fs::path(path).stem(), target);
+                    auto newObj = Editor::getCurrentScene()->createObject(fs::path(path).stem(), nullptr);
                     newObj->addComponent<FigureComponent>(path);
                 }
             });
@@ -249,8 +248,7 @@ namespace ige::creator
         {
             m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
                 if (Editor::getCurrentScene() && !path.empty()) {
-                    auto target = Editor::getInstance()->getFirstTarget();
-                    auto newObj = Editor::getCurrentScene()->createObject(fs::path(path).stem(), target);
+                    auto newObj = Editor::getCurrentScene()->createObject(fs::path(path).stem(), nullptr);
                     newObj->addComponent<SpriteComponent>(path);
                 }
             });
@@ -261,8 +259,7 @@ namespace ige::creator
         {
             m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
                 if (Editor::getCurrentScene() && !path.empty()) {
-                    auto target = Editor::getInstance()->getFirstTarget();
-                    auto newObj = Editor::getCurrentScene()->createObject(fs::path(path).stem(), target);
+                    auto newObj = Editor::getCurrentScene()->createObject(fs::path(path).stem(), nullptr);
                     newObj->addComponent<AudioSource>(path);
                 }
             });
@@ -285,8 +282,7 @@ namespace ige::creator
         {
             m_imageWidget->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([this](const auto& path) {
                 if (Editor::getCurrentScene() && !path.empty()) {
-                    auto target = Editor::getInstance()->getFirstTarget();
-                    auto newObj = Editor::getCurrentScene()->createObject(fs::path(path).stem(), target);
+                    auto newObj = Editor::getCurrentScene()->createObject(fs::path(path).stem(), nullptr);
                     newObj->addComponent<Particle>(path);
                 }
             });
