@@ -184,6 +184,10 @@ namespace ige::creator
                     auto comp = m_targetObject->addComponent<UIScrollView>();
                     onAddComponent(comp);
                 });
+                guiMenu->createWidget<MenuItem>("UIScrollBar")->getOnClickEvent().addListener([this](auto widget) {
+                    auto comp = m_targetObject->addComponent<UIScrollBar>();
+                    onAddComponent(comp);
+                });
             }
             else
             {
@@ -348,6 +352,12 @@ namespace ige::creator
             // Particle
             ctx->createWidget<MenuItem>("Particle")->getOnClickEvent().addListener([this](auto widget) {
                 auto comp = m_targetObject->addComponent<Particle>();
+                onAddComponent(comp);
+            });
+
+            // Script
+            ctx->createWidget<MenuItem>("Script")->getOnClickEvent().addListener([this](auto widget) {
+                auto comp = m_targetObject->addComponent<ScriptComponent>();
                 onAddComponent(comp);
             });
          });
