@@ -15,7 +15,7 @@ namespace ige::scene
     {
     public:
         //! Constructor
-        CompoundComponent(SceneObject &owner);
+        CompoundComponent(SceneObject& owner);
 
         //! Destructor
         virtual ~CompoundComponent();

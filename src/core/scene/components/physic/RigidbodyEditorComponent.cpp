@@ -45,7 +45,12 @@ void RigidbodyEditorComponent::drawRigidbody() {
     auto comp = getComponent<CompoundComponent>();
     if (comp == nullptr) return;
 
-    auto columns = m_physicGroup->createWidget<Columns<3>>();
+    auto columns = m_physicGroup->createWidget<Columns<2>>();
+    columns->createWidget<CheckBox>("Gravity", comp->getProperty<bool>("gravity", false))->getOnDataChangedEvent().addListener([this](bool val) {
+        storeUndo();
+        getComponent<CompoundComponent>()->setProperty("gravity", val);
+    });
+
     columns->createWidget<CheckBox>("CCD", comp->getProperty<bool>("ccd", false))->getOnDataChangedEvent().addListener([this](bool val) {
         storeUndo();
         getComponent<CompoundComponent>()->setProperty("ccd", val);

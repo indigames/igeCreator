@@ -248,6 +248,10 @@ namespace ige::creator
         {
             clear();
 
+            m_bIsPausing = false;
+            m_bIsPlaying = false;
+            SceneManager::getInstance()->setIsPlaying(m_bIsPlaying);
+
             if (Editor::getCurrentScene()) {
                 if (Editor::getCurrentScene()->getCanvas())
                     Editor::getCurrentScene()->getCanvas()->getOnTargetSizeChanged().removeAllListeners();
@@ -256,9 +260,6 @@ namespace ige::creator
                 auto fsPath = fs::path(name + ".scene.tmp");
                 fs::remove(fsPath);
             }
-            m_bIsPausing = false;
-            m_bIsPlaying = false;
-            SceneManager::getInstance()->setIsPlaying(m_bIsPlaying);
 
             startWatcherThread();
         }

@@ -6,7 +6,7 @@
 namespace ige::scene
 {
     //! Constructor
-    CompoundComponent::CompoundComponent(SceneObject &owner)
+    CompoundComponent::CompoundComponent(SceneObject& owner)
         : Component(owner) 
     { }
 
