@@ -38,7 +38,10 @@ void NavMeshEditorComponent::drawNavMesh()
     column->createWidget<Button>("Build", ImVec2(64.f, 0.f))->getOnClickEvent().addListener([this](auto widget) {        
         for (auto comp : getComponent<CompoundComponent>()->getComponents()) {
             auto navMesh = std::dynamic_pointer_cast<NavMesh>(comp);
-            if(navMesh) navMesh->build();
+            if (navMesh) {
+                navMesh->releaseNavMesh();
+                navMesh->build();
+            }
         }
     });
 
