@@ -201,22 +201,30 @@ void RectTransformEditorComponent::drawRect() {
     auto anchor1 = anchorGroupColums->createWidget<Drag<float>>(showPosX ? "X" : "L", ImGuiDataType_Float, A, 1.f);
     anchor1->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+    });
     anchor1->getOnDataChangedEvent().addListener([this](auto val) {
         IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
         auto comp = getComponent<CompoundComponent>();
-        auto anchor = comp->getProperty<Vec4>("anchor", { NAN, NAN, NAN, NAN });
-        bool showPosX = (anchor[0] == anchor[2]);
-        if (showPosX) {
-            auto anchoredPos = comp->getProperty<Vec2>("anchorposition", { NAN, NAN });
-            anchoredPos.X(val[0]);
-            comp->setProperty("anchorposition", anchoredPos);
-        } else {
-            auto offset = comp->getProperty<Vec4>("offset", { NAN, NAN });
-            offset[0] = val[0];
-            comp->setProperty("offset", offset);
+        auto transform = std::dynamic_pointer_cast<TransformComponent>(comp->getComponents()[0]);
+        if (transform && transform->isLockMove()) {
+            m_dirtyFlagSupport = 3;
+            setDirty();
         }
-        getComponent<CompoundComponent>()->setDirty();
+        else {
+            auto anchor = comp->getProperty<Vec4>("anchor", { NAN, NAN, NAN, NAN });
+            bool showPosX = (anchor[0] == anchor[2]);
+            if (showPosX) {
+                auto anchoredPos = comp->getProperty<Vec2>("anchorposition", { NAN, NAN });
+                anchoredPos.X(val[0]);
+                comp->setProperty("anchorposition", anchoredPos);
+            }
+            else {
+                auto offset = comp->getProperty<Vec4>("offset", { NAN, NAN });
+                offset[0] = val[0];
+                comp->setProperty("offset", offset);
+            }
+        }
+        comp->setDirty();
         if (Editor::getCanvas()->getEditorScene()->getGizmo())
             Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
     });
@@ -225,22 +233,30 @@ void RectTransformEditorComponent::drawRect() {
     auto anchor2 = anchorGroupColums->createWidget<Drag<float>>(showPosY ? "Y" : "T", ImGuiDataType_Float, B, 1.f);
     anchor2->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+    });
     anchor2->getOnDataChangedEvent().addListener([this](auto val) {
         IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
         auto comp = getComponent<CompoundComponent>();
-        auto anchor = comp->getProperty<Vec4>("anchor", { NAN, NAN, NAN, NAN });
-        bool showPosY = (anchor[1] == anchor[3]);
-        if (showPosY) {
-            auto anchoredPos = comp->getProperty<Vec2>("anchorposition", { NAN, NAN });
-            anchoredPos.Y(val[0]);
-            comp->setProperty("anchorposition", anchoredPos);
-        } else {
-            auto offset = comp->getProperty<Vec4>("offset", { NAN, NAN });
-            offset[3] = val[0];
-            comp->setProperty("offset", offset);
+        auto transform = std::dynamic_pointer_cast<TransformComponent>(comp->getComponents()[0]);
+        if (transform && transform->isLockMove()) {
+            m_dirtyFlagSupport = 3;
+            setDirty();
         }
-        getComponent<CompoundComponent>()->setDirty();
+        else {
+            auto anchor = comp->getProperty<Vec4>("anchor", { NAN, NAN, NAN, NAN });
+            bool showPosY = (anchor[1] == anchor[3]);
+            if (showPosY) {
+                auto anchoredPos = comp->getProperty<Vec2>("anchorposition", { NAN, NAN });
+                anchoredPos.Y(val[0]);
+                comp->setProperty("anchorposition", anchoredPos);
+            }
+            else {
+                auto offset = comp->getProperty<Vec4>("offset", { NAN, NAN });
+                offset[3] = val[0];
+                comp->setProperty("offset", offset);
+            }
+        }
+        comp->setDirty();
         if (Editor::getCanvas()->getEditorScene()->getGizmo())
             Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
     });
@@ -249,14 +265,21 @@ void RectTransformEditorComponent::drawRect() {
     auto anchor3 = anchorGroupColums->createWidget<Drag<float>>("Z", ImGuiDataType_Float, posZ, 0.01f);
     anchor3->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+    });
     anchor3->getOnDataChangedEvent().addListener([this](auto val) {
         IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
         auto comp = getComponent<CompoundComponent>();
-        auto position = comp->getProperty<Vec3>("pos", { NAN, NAN, NAN });
-        position.Z(val[0]);
-        comp->setProperty("pos", position);
-        getComponent<CompoundComponent>()->setDirty();
+        auto transform = std::dynamic_pointer_cast<TransformComponent>(comp->getComponents()[0]);
+        if (transform && transform->isLockMove()) {
+            m_dirtyFlagSupport = 3;
+            setDirty();
+        }
+        else {
+            auto position = comp->getProperty<Vec3>("pos", { NAN, NAN, NAN });
+            position.Z(val[0]);
+            comp->setProperty("pos", position);
+        }
+        comp->setDirty();
         if (Editor::getCanvas()->getEditorScene()->getGizmo())
             Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
     });
@@ -265,22 +288,30 @@ void RectTransformEditorComponent::drawRect() {
     auto anchor4 = anchorGroupColums->createWidget<Drag<float>>(showPosX ? "W" : "R", ImGuiDataType_Float, C, 1.f);
     anchor4->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+    });
     anchor4->getOnDataChangedEvent().addListener([this](auto val) {
         IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
-        auto comp = getComponent<CompoundComponent>();
-        auto anchor = comp->getProperty<Vec4>("anchor", { NAN, NAN, NAN, NAN });
-        bool showPosX = (anchor[0] == anchor[2]);
-        if (showPosX) {
-            auto size = comp->getProperty<Vec2>("size", { NAN, NAN });
-            size.X(val[0]);
-            comp->setProperty("size", size);
-        } else {
-            auto offset = comp->getProperty<Vec4>("offset", { NAN, NAN });
-            offset[2] = val[0];
-            comp->setProperty("offset", offset);
+        auto comp = getComponent<CompoundComponent>();        
+        auto transform = std::dynamic_pointer_cast<TransformComponent>(comp->getComponents()[0]);
+        if (transform && transform->isLockMove()) {
+            m_dirtyFlagSupport = 3;
+            setDirty();
         }
-        getComponent<CompoundComponent>()->setDirty();
+        else {
+            auto anchor = comp->getProperty<Vec4>("anchor", { NAN, NAN, NAN, NAN });
+            bool showPosX = (anchor[0] == anchor[2]);
+            if (showPosX) {
+                auto size = comp->getProperty<Vec2>("size", { NAN, NAN });
+                size.X(val[0]);
+                comp->setProperty("size", size);
+            }
+            else {
+                auto offset = comp->getProperty<Vec4>("offset", { NAN, NAN });
+                offset[2] = val[0];
+                comp->setProperty("offset", offset);
+            }
+        }
+        comp->setDirty();
         if (Editor::getCanvas()->getEditorScene()->getGizmo())
             Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
     });
@@ -289,22 +320,30 @@ void RectTransformEditorComponent::drawRect() {
     auto anchor5 = anchorGroupColums->createWidget<Drag<float>>(showPosY ? "H" : "B", ImGuiDataType_Float, D, 1.f);
     anchor5->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+    });
     anchor5->getOnDataChangedEvent().addListener([this](auto val) {
         IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
         auto comp = getComponent<CompoundComponent>();
-        auto anchor = comp->getProperty<Vec4>("anchor", { NAN, NAN, NAN, NAN });
-        bool showPosY = (anchor[1] == anchor[3]);
-        if (showPosY) {
-            auto size = comp->getProperty<Vec2>("size", { NAN, NAN });
-            size.Y(val[0]);
-            comp->setProperty("size", size);
-        } else {
-            auto offset = comp->getProperty<Vec4>("offset", { NAN, NAN });
-            offset[1] = val[0];
-            comp->setProperty("offset", offset);
+        auto transform = std::dynamic_pointer_cast<TransformComponent>(comp->getComponents()[0]);
+        if (transform && transform->isLockMove()) {
+            m_dirtyFlagSupport = 3;
+            setDirty();
         }
-        getComponent<CompoundComponent>()->setDirty();
+        else {
+            auto anchor = comp->getProperty<Vec4>("anchor", { NAN, NAN, NAN, NAN });
+            bool showPosY = (anchor[1] == anchor[3]);
+            if (showPosY) {
+                auto size = comp->getProperty<Vec2>("size", { NAN, NAN });
+                size.Y(val[0]);
+                comp->setProperty("size", size);
+            }
+            else {
+                auto offset = comp->getProperty<Vec4>("offset", { NAN, NAN });
+                offset[1] = val[0];
+                comp->setProperty("offset", offset);
+            }
+        }
+        comp->setDirty();
         if (Editor::getCanvas()->getEditorScene()->getGizmo())
             Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
     });
@@ -338,7 +377,7 @@ void RectTransformEditorComponent::drawAnchorMinMax() {
     auto anchor2 = m_anchorMinMaxGroup->createWidget<Drag<float, 2>>("Anchor Max", ImGuiDataType_Float, anchorMax, 0.01f, 0.f, 1.f);
     anchor2->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+    });
     anchor2->getOnDataChangedEvent().addListener([this](auto val) {
         IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
         auto anchor = getComponent<CompoundComponent>()->getProperty<Vec4>("anchor", { NAN, NAN, NAN, NAN });
@@ -379,13 +418,20 @@ void RectTransformEditorComponent::drawPivot() {
     auto r1 = m_pivotGroup->createWidget<Drag<float, 3>>("Rotation", ImGuiDataType_Float, rot);
     r1->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+    });
     r1->getOnDataChangedEvent().addListener([this](auto val) {
         IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
-        getComponent<CompoundComponent>()->setProperty("rot", Vec3(DEGREES_TO_RADIANS(val[0]), DEGREES_TO_RADIANS(val[1]), DEGREES_TO_RADIANS(val[2])));
-        m_dirtyFlagSupport = 3;
+        auto compound = getComponent<CompoundComponent>();
+        auto transform = std::dynamic_pointer_cast<TransformComponent>(compound->getComponents()[0]);
+        if (transform && transform->isLockRotate()) {
+            m_dirtyFlagSupport = 2;
+        }
+        else {
+            compound->setProperty("rot", Vec3(DEGREES_TO_RADIANS(val[0]), DEGREES_TO_RADIANS(val[1]), DEGREES_TO_RADIANS(val[2])));
+            m_dirtyFlagSupport = 3;
+        }
         setDirty();
-        getComponent<CompoundComponent>()->setDirty();
+        compound->setDirty();
         if (Editor::getCanvas()->getEditorScene()->getGizmo())
             Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
     });
@@ -395,13 +441,20 @@ void RectTransformEditorComponent::drawPivot() {
     auto s1 = m_pivotGroup->createWidget<Drag<float, 3>>("Scale", ImGuiDataType_Float, scaleArr);
     s1->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+    });
     s1->getOnDataChangedEvent().addListener([this](auto val) {
         IgnoreTransformEventScope scope(m_lastTarget.lock().get(), m_listenerId, CALLBACK_1(RectTransformEditorComponent::onTransformChanged, this));
-        getComponent<CompoundComponent>()->setProperty("scale", { val[0], val[1], val[2] });
-        m_dirtyFlagSupport = 3;
+        auto compound = getComponent<CompoundComponent>();
+        auto transform = std::dynamic_pointer_cast<TransformComponent>(compound->getComponents()[0]);
+        if (transform && transform->isLockScale()) {
+            m_dirtyFlagSupport = 2;
+        }
+        else {
+            compound->setProperty("scale", { val[0], val[1], val[2] });
+            m_dirtyFlagSupport = 3;
+        }
         setDirty();
-        getComponent<CompoundComponent>()->setDirty();
+        compound->setDirty();
         if (Editor::getCanvas()->getEditorScene()->getGizmo())
             Editor::getCanvas()->getEditorScene()->getGizmo()->updateTargetNode();
     });

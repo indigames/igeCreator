@@ -62,6 +62,7 @@ namespace ige::creator
                     deductor += m_columnWidths[i];
             }
             m_defaultWidth = devider > 0 ? (ImGui::GetWindowContentRegionWidth() - deductor) / devider : 0.f;
+            if (m_defaultWidth <= 0) { m_defaultWidth = 4.f; }
             m_regionWidth = ImGui::GetWindowContentRegionWidth();
         }
 
