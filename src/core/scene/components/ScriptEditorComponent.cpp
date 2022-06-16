@@ -109,10 +109,12 @@ void ScriptEditorComponent::drawScriptComponent() {
                 std::array val = { (float)value.get<int>() };
                 m_scriptCompGroup->createWidget<Drag<float>>(key, ImGuiDataType_S32, val)->getOnDataChangedEvent().addListener([key, this](auto& val) {
                     auto comp = getComponent<CompoundComponent>();
-                    auto members = comp->getProperty<json>("members", json::array());
-                    if (members.contains(key)) {
-                        members[key] = (int)val[0];
-                        comp->setProperty("members", members);
+                    if (comp) {
+                        auto members = comp->getProperty<json>("members", json::array());
+                        if (members.contains(key)) {
+                            members[key] = (int)val[0];
+                            comp->setProperty("members", members);
+                        }
                     }
                 });
             }
@@ -123,10 +125,12 @@ void ScriptEditorComponent::drawScriptComponent() {
                 std::array val = { value.get<float>() };
                 m_scriptCompGroup->createWidget<Drag<float>>(key, ImGuiDataType_Float, val)->getOnDataChangedEvent().addListener([key, this](auto& val) {                   
                     auto comp = getComponent<CompoundComponent>();
-                    auto members = comp->getProperty<json>("members", json::array());
-                    if (members.contains(key)) {
-                        members[key] = val[0];
-                        comp->setProperty("members", members);
+                    if (comp) {
+                        auto members = comp->getProperty<json>("members", json::array());
+                        if (members.contains(key)) {
+                            members[key] = val[0];
+                            comp->setProperty("members", members);
+                        }
                     }
                 });
             }
@@ -136,11 +140,13 @@ void ScriptEditorComponent::drawScriptComponent() {
             {
                 m_scriptCompGroup->createWidget<CheckBox>(key, value.get<bool>())->getOnDataChangedEvent().addListener([key, this](bool val) {
                     auto comp = getComponent<CompoundComponent>();
-                    auto members = comp->getProperty<json>("members", json::array());
-                    if (members.contains(key)) {
-                        members[key] = val;
-                        comp->setProperty("members", members);
-                    }
+                    if (comp) {
+                        auto members = comp->getProperty<json>("members", json::array());
+                        if (members.contains(key)) {
+                            members[key] = val;
+                            comp->setProperty("members", members);
+                        }
+                    }                    
                 });
             }
             break;
@@ -154,10 +160,12 @@ void ScriptEditorComponent::drawScriptComponent() {
                         std::array vecArr = { vec.X(), vec.Y() };
                         m_scriptCompGroup->createWidget<Drag<float, 2>>(key, ImGuiDataType_Float, vecArr)->getOnDataChangedEvent().addListener([key, this](auto& val) {
                             auto comp = getComponent<CompoundComponent>();
-                            auto members = comp->getProperty<json>("members", json::array());
-                            if (members.contains(key)) {
-                                members[key] = Vec2(val[0], val[1]);
-                                comp->setProperty("members", members);
+                            if (comp) {
+                                auto members = comp->getProperty<json>("members", json::array());
+                                if (members.contains(key)) {
+                                    members[key] = Vec2(val[0], val[1]);
+                                    comp->setProperty("members", members);
+                                }
                             }
                         });
                     }
@@ -170,10 +178,12 @@ void ScriptEditorComponent::drawScriptComponent() {
                         std::array vecArr = { vec.X(), vec.Y(), vec.Z() };
                         m_scriptCompGroup->createWidget<Drag<float, 3>>(key, ImGuiDataType_Float, vecArr)->getOnDataChangedEvent().addListener([key, this](auto& val) {
                             auto comp = getComponent<CompoundComponent>();
-                            auto members = comp->getProperty<json>("members", json::array());
-                            if (members.contains(key)) {
-                                members[key] = Vec3(val[0], val[1], val[2]);
-                                comp->setProperty("members", members);
+                            if (comp) {
+                                auto members = comp->getProperty<json>("members", json::array());
+                                if (members.contains(key)) {
+                                    members[key] = Vec3(val[0], val[1], val[2]);
+                                    comp->setProperty("members", members);
+                                }
                             }
                         });
                     }
@@ -186,10 +196,12 @@ void ScriptEditorComponent::drawScriptComponent() {
                         std::array vecArr = { vec.X(), vec.Y(), vec.Z(), vec.W() };
                         m_scriptCompGroup->createWidget<Drag<float, 4>>(key, ImGuiDataType_Float, vecArr)->getOnDataChangedEvent().addListener([key, this](auto& val) {
                             auto comp = getComponent<CompoundComponent>();
-                            auto members = comp->getProperty<json>("members", json::array());
-                            if (members.contains(key)) {
-                                members[key] = Vec4(val[0], val[1], val[2], val[3]);
-                                comp->setProperty("members", members);
+                            if (comp) {
+                                auto members = comp->getProperty<json>("members", json::array());
+                                if (members.contains(key)) {
+                                    members[key] = Vec4(val[0], val[1], val[2], val[3]);
+                                    comp->setProperty("members", members);
+                                }
                             }
                         });
                     }
@@ -221,10 +233,12 @@ void ScriptEditorComponent::drawScriptComponent() {
 
                 txtField->getOnDataChangedEvent().addListener([key, this](auto val) {
                     auto comp = getComponent<CompoundComponent>();
-                    auto members = comp->getProperty<json>("members", json::array());
-                    if (members.contains(key)) {
-                        members[key] = val;
-                        comp->setProperty("members", members);
+                    if (comp) {
+                        auto members = comp->getProperty<json>("members", json::array());
+                        if (members.contains(key)) {
+                            members[key] = val;
+                            comp->setProperty("members", members);
+                        }
                     }
                 });
 
@@ -247,12 +261,14 @@ void ScriptEditorComponent::drawScriptComponent() {
                                 {"comp", std::string()},
                         };
                         auto comp = getComponent<CompoundComponent>();
-                        auto members = comp->getProperty<json>("members", json::array());
-                        if (members.contains(key)) {
-                            members[key] = jVal;
-                            comp->setProperty("members", members);
+                        if (comp) {
+                            auto members = comp->getProperty<json>("members", json::array());
+                            if (members.contains(key)) {
+                                members[key] = jVal;
+                                comp->setProperty("members", members);
+                            }
+                            setDirty();
                         }
-                        setDirty();
                     });
 
                     for (const auto& comp : sceneObject->getComponents())
@@ -266,12 +282,14 @@ void ScriptEditorComponent::drawScriptComponent() {
                                         {"comp", compName},
                                 };
                                 auto comp = getComponent<CompoundComponent>();
-                                auto members = comp->getProperty<json>("members", json::array());
-                                if (members.contains(key)) {
-                                    members[key] = jVal;
-                                    comp->setProperty("members", members);
+                                if (comp) {
+                                    auto members = comp->getProperty<json>("members", json::array());
+                                    if (members.contains(key)) {
+                                        members[key] = jVal;
+                                        comp->setProperty("members", members);
+                                    }
+                                    setDirty();
                                 }
-                                setDirty();
                             });
                         }
                     }
@@ -293,12 +311,14 @@ void ScriptEditorComponent::drawScriptComponent() {
                                     {"comp", std::string()},
                             };
                             auto comp = getComponent<CompoundComponent>();
-                            auto members = comp->getProperty<json>("members", json::array());
-                            if (members.contains(key)) {
-                                members[key] = jVal;
-                                comp->setProperty("members", members);
+                            if (comp) {
+                                auto members = comp->getProperty<json>("members", json::array());
+                                if (members.contains(key)) {
+                                    members[key] = jVal;
+                                    comp->setProperty("members", members);
+                                }
+                                setDirty();
                             }
-                            setDirty();
                         });
 
                         for (const auto& comp : obj->getComponents())
@@ -312,12 +332,14 @@ void ScriptEditorComponent::drawScriptComponent() {
                                             {"comp", compName},
                                     };
                                     auto comp = getComponent<CompoundComponent>();
-                                    auto members = comp->getProperty<json>("members", json::array());
-                                    if (members.contains(key)) {
-                                        members[key] = jVal;
-                                        comp->setProperty("members", members);
+                                    if (comp) {
+                                        auto members = comp->getProperty<json>("members", json::array());
+                                        if (members.contains(key)) {
+                                            members[key] = jVal;
+                                            comp->setProperty("members", members);
+                                        }
+                                        setDirty();
                                     }
-                                    setDirty();
                                 });
                             }
                         }
@@ -327,12 +349,14 @@ void ScriptEditorComponent::drawScriptComponent() {
                
                 txtField->addPlugin<DDTargetPlugin<std::string>>(EDragDropID::FILE)->getOnDataReceivedEvent().addListener([key, this](const auto& path) {
                     auto comp = getComponent<CompoundComponent>();
-                    auto members = comp->getProperty<json>("members", json::array());
-                    if (members.contains(key)) {
-                        members[key] = GetRelativePath(path);
-                        comp->setProperty("members", members);
+                    if (comp) {
+                        auto members = comp->getProperty<json>("members", json::array());
+                        if (members.contains(key)) {
+                            members[key] = GetRelativePath(path);
+                            comp->setProperty("members", members);
+                        }
+                        setDirty();
                     }
-                    setDirty();
                 });
 
                 for (auto ext : AllFileExts)
@@ -341,12 +365,14 @@ void ScriptEditorComponent::drawScriptComponent() {
                     {
                         txtField->addPlugin<DDTargetPlugin<std::string>>(type)->getOnDataReceivedEvent().addListener([key, this](const auto& path) {
                             auto comp = getComponent<CompoundComponent>();
-                            auto members = comp->getProperty<json>("members", json::array());
-                            if (members.contains(key)) {
-                                members[key] = GetRelativePath(path);
-                                comp->setProperty("members", members);
+                            if (comp) {
+                                auto members = comp->getProperty<json>("members", json::array());
+                                if (members.contains(key)) {
+                                    members[key] = GetRelativePath(path);
+                                    comp->setProperty("members", members);
+                                }
+                                setDirty();
                             }
-                            setDirty();
                         });
                     }
                 }

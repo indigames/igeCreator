@@ -77,12 +77,11 @@ void InspectorEditor::clear() {
 	m_components.clear();
 }
 
-std::shared_ptr<EditorComponent> InspectorEditor::addComponent(int type, std::shared_ptr<Component> comp, std::shared_ptr<Group> header) {
+std::shared_ptr<EditorComponent> InspectorEditor::addComponent(uint64_t componentInstanceId, std::shared_ptr<Component> comp, std::shared_ptr<Group> header) {
 	if (comp == nullptr)
 		return nullptr;
 
-	auto m_type = (Component::Type)type;
-
+	auto m_type = comp->getType();
 	std::shared_ptr<EditorComponent> view = nullptr;
 	switch (m_type) {
 	case Component::Type::Camera:
@@ -225,8 +224,8 @@ std::shared_ptr<EditorComponent> InspectorEditor::addComponent(int type, std::sh
 	}
 	if (view == nullptr) return nullptr;
 	view->setComponent(comp);
-	m_groups[type] = header;
-	m_components[type] = view;
+	m_groups[componentInstanceId] = header;
+	m_components[componentInstanceId] = view;
 	view->draw(header);
 	return view;
 }

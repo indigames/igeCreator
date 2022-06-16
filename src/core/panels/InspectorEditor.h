@@ -39,7 +39,7 @@ public:
 	void clear();
 	void update(float dt);
 
-	std::shared_ptr<EditorComponent> addComponent(int type, std::shared_ptr<Component> component, std::shared_ptr<Group> header);
+	std::shared_ptr<EditorComponent> addComponent(uint64_t componentInstanceId, std::shared_ptr<Component> component, std::shared_ptr<Group> header);
 	void removeComponent(uint64_t componentInstanceId);
 
 	void makeDirty(Component::Type componentType);

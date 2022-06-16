@@ -143,7 +143,7 @@ namespace ige::creator
                 m_targetObject->removeComponent(compId);
                 redraw();
             });
-            m_inspectorEditor->addComponent((int)component->getType(), component, header);
+            m_inspectorEditor->addComponent(compId, component, header);
         }
         auto createCompButton = m_componentGroup->createWidget<Button>("Add Component", ImVec2(128.f, 0.f));
         createCompButton->getOnClickEvent().addListener([this](auto widget) {
