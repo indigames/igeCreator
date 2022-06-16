@@ -120,9 +120,10 @@ void UISliderEditorComponent::drawMin() {
     auto m = m_uiSliderMinGroup->createWidget<Drag<float>>("Min ", ImGuiDataType_Float, min, 0.01f, 0.0f, comp->getProperty<float>("max", 1.f));
     m->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+    });
     m->getOnDataChangedEvent().addListener([this](auto val) {
-        getComponent<CompoundComponent>()->setProperty("min", val[0]); 
+        getComponent<CompoundComponent>()->setProperty("min", val[0]);
+        getComponent<CompoundComponent>()->setDirty();
         m_dirtyFlag = 1;
     });
 }
@@ -139,9 +140,10 @@ void UISliderEditorComponent::drawMax() {
     auto m = m_uiSliderMaxGroup->createWidget<Drag<float>>("Max ", ImGuiDataType_Float, max, 0.01f, comp->getProperty<float>("min", 0.f));
     m->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+    });
     m->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("max", val[0]);
+        getComponent<CompoundComponent>()->setDirty();
     });
 }
 
@@ -157,9 +159,10 @@ void UISliderEditorComponent::drawValue() {
     auto m = m_uiSliderValueGroup->createWidget<Drag<float>>("Value ", ImGuiDataType_Float, value, 0.01f, comp->getProperty<float>("min", 0.f), comp->getProperty<float>("max", 1.f));
     m->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
-        });
+    });
     m->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("value", val[0]);
+        getComponent<CompoundComponent>()->setDirty();
     });
 }
 NS_IGE_END
