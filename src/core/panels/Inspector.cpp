@@ -131,6 +131,8 @@ namespace ige::creator
         createWidget<Separator>();
         m_componentGroup = createWidget<Group>("Inspector_Components", false);
         for(const auto& component : m_targetObject->getComponents()) {
+            auto cComp = std::dynamic_pointer_cast<CompoundComponent>(component);
+            if (cComp) cComp->setDirty();
             auto closable = (component->getType() != Component::Type::Transform && component->getType() != Component::Type::RectTransform);
             auto header = m_componentGroup->createWidget<Group>(component->getName(), true, closable);
             auto compId = component->getInstanceId();
