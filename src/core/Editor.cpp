@@ -292,9 +292,12 @@ namespace ige::creator
                 file >> settingsJson;
                 file.close();
                 auto scenePath = fs::path(getProjectPath()).append(settingsJson.value("startScene", "scenes/main.scene"));
-                if (fs::exists(scenePath))
-                {
+                if (fs::exists(scenePath)) {
                     loaded = loadScene(scenePath.string());
+                }
+                else {
+                    loaded = createScene();
+                    SceneManager::getInstance()->saveScene(prjFile.parent_path().append("scenes").append("main.scene"));
                 }
             }
         }
@@ -831,8 +834,9 @@ class %s(Script):\n\
 
     bool Editor::loadPrefab(uint64_t parentId, const std::string& file)
     {
-        if (Editor::getCurrentScene())
+        if (Editor::getCurrentScene()) {
             return Editor::getCurrentScene()->loadPrefab(parentId, file) != nullptr;
+        }
         return false;
     }
 

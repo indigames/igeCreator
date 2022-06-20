@@ -248,36 +248,42 @@ namespace ige::creator
 
         auto prefabTarget = node->addPlugin<DDTargetTopBottomPlugin<std::string>>(GetFileExtensionSuported(E_FileExts::Prefab)[0]);
         prefabTarget->getOnDataReceivedEvent().addListener([objId](auto path) {
-            auto parent = Editor::getCurrentScene()->findObjectById(objId);
-            if (parent) {
-                if (!parent->isInPrefab()) {
-                    Editor::getCurrentScene()->loadPrefab(objId, path);
+            TaskManager::getInstance()->addTask([objId, path]() {
+                auto parent = Editor::getCurrentScene()->findObjectById(objId);
+                if (parent) {
+                    if (!parent->isInPrefab()) {
+                        Editor::getCurrentScene()->loadPrefab(objId, path);
+                    }
                 }
-            }
+            });
         });
         prefabTarget->getOnTopDataReceivedEvent().addListener([objId](auto path) {
-            auto currObject = Editor::getCurrentScene()->findObjectById(objId);
-            auto parent = currObject->getParent();
-            if (parent == nullptr) return; // Skip root nodes
-            if (parent) {
-                if (!parent->isInPrefab()) {
-                    auto prefabObj = Editor::getCurrentScene()->loadPrefab(parent->getId(), path);
-                    auto idx = parent->getChildIndex(currObject);
-                    parent->setChildIndex(prefabObj, idx);
+            TaskManager::getInstance()->addTask([objId, path]() {
+                auto currObject = Editor::getCurrentScene()->findObjectById(objId);
+                auto parent = currObject->getParent();
+                if (parent == nullptr) return; // Skip root nodes
+                if (parent) {
+                    if (!parent->isInPrefab()) {
+                        auto prefabObj = Editor::getCurrentScene()->loadPrefab(parent->getId(), path);
+                        auto idx = parent->getChildIndex(currObject);
+                        parent->setChildIndex(prefabObj, idx);
+                    }
                 }
-            }
+            });
         });
         prefabTarget->getOnBottomDataReceivedEvent().addListener([objId](auto path) {
-            auto currObject = Editor::getCurrentScene()->findObjectById(objId);
-            auto parent = currObject->getParent();
-            if (parent == nullptr) return; // Skip root nodes
-            if (parent) {
-                if (!parent->isInPrefab()) {
-                    auto prefabObj = Editor::getCurrentScene()->loadPrefab(parent->getId(), path);
-                    auto idx = parent->getChildIndex(currObject);
-                    parent->setChildIndex(prefabObj, idx + 1);
+            TaskManager::getInstance()->addTask([objId, path]() {
+                auto currObject = Editor::getCurrentScene()->findObjectById(objId);
+                auto parent = currObject->getParent();
+                if (parent == nullptr) return; // Skip root nodes
+                if (parent) {
+                    if (!parent->isInPrefab()) {
+                        auto prefabObj = Editor::getCurrentScene()->loadPrefab(parent->getId(), path);
+                        auto idx = parent->getChildIndex(currObject);
+                        parent->setChildIndex(prefabObj, idx + 1);
+                    }
                 }
-            }
+            });
         });
 
 
