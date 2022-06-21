@@ -118,7 +118,6 @@ find_package(taskflow REQUIRED)
 find_package(tracy REQUIRED)
 find_package(zlib)
 find_package(json)
-find_package(igeBullet REQUIRED)
 find_package(bullet REQUIRED)
 find_package(igeSound REQUIRED)
 find_package(igeEffekseer REQUIRED)
@@ -191,7 +190,6 @@ message(STATUS "Python3_LIBRARIES: ${Python3_LIBRARIES}")
 message(STATUS "numpy_LIBRARIES: ${numpy_LIBRARIES}")
 message(STATUS "tracy_LIBRARIES: ${tracy_LIBRARIES}")
 message(STATUS "bullet_LIBRARIES: ${bullet_LIBRARIES}")
-message(STATUS "igeBullet_LIBRARIES: ${igeBullet_LIBRARIES}")
 message(STATUS "stb_LIBRARIES: ${stb_LIBRARIES}")
 message(STATUS "SDL_LIBRARIES: ${SDL_LIBRARIES}")
 message(STATUS "openssl_LIBRARIES: ${openssl_LIBRARIES}")
@@ -201,8 +199,10 @@ message(STATUS "igeNavigation_LIBRARIES: ${igeNavigation_LIBRARIES}")
 
 set (LIBS_TO_REMOVE "igeVmath::igeVmath" "pyxCore::pyxCore" )
 foreach(elem ${LIBS_TO_REMOVE})
-    list(REMOVE_ITEM igeBullet_LIBRARIES ${elem})
+    list(REMOVE_ITEM igeSound_LIBRARIES ${elem})
     list(REMOVE_ITEM igeEffekseer_LIBRARIES ${elem})
+    list(REMOVE_ITEM igeNavigation_LIBRARIES ${elem})
+    list(REMOVE_ITEM igeSdk_LIBRARIES ${elem})
 endforeach()
 
 target_link_libraries(${TARGET_NAME} 
@@ -210,11 +210,11 @@ target_link_libraries(${TARGET_NAME}
     pyxcore
     pyxtools
     igeCore-static
+    igeVmath-static
     ${Python3_LIBRARIES}
     ${numpy_LIBRARIES}
     ${tracy_LIBRARIES}
     ${bullet_LIBRARIES}
-    ${igeBullet_LIBRARIES}
     ${stb_LIBRARIES}
     ${SDL_LIBRARIES}
     ${openssl_LIBRARIES}
@@ -271,7 +271,6 @@ target_include_directories(${TARGET_NAME} PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/spdlog/include/spdlog"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeCore"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeVMath"
-    "${igeBullet_INCLUDE_DIRS}"
     "${bullet_INCLUDE_DIRS}"
     "${igeSound_INCLUDE_DIRS}"
     "${igeSound_INCLUDE_DIRS}/ThirdParty/soloud/include"
@@ -291,7 +290,6 @@ set(COMPILE_DEFINITIONS
     ${numpy_COMPILE_DEFINITIONS}
     ${tracy_COMPILE_DEFINITIONS}
     ${bullet_COMPILE_DEFINITIONS}
-    ${igeBullet_COMPILE_DEFINITIONS}
     ${stb_COMPILE_DEFINITIONS}
     ${SDL_COMPILE_DEFINITIONS}
     ${openssl_COMPILE_DEFINITIONS}

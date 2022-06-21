@@ -31,10 +31,7 @@ class IgeConan(ConanFile):
         self.requires("igeSound/[>=0.1.0]@ige/test")
         self.requires("igeEffekseer/[>=0.1.6]@ige/test")
         self.requires("igeNavigation/[>=0.0.2]@ige/test")
-        self.requires("igeNavigation/[>=0.0.2]@ige/test")
-        self.requires("igeGameAnalytics/[>=0.0.3]@ige/test")
         self.requires("igeCore/[>=0.5.70]@ige/test")
-        self.requires("pyxCore/[>=0.5.70]@ige/test")
         self.requires("igeSdk/[>=0.0.2]@ige/test")
 
     def build(self):
