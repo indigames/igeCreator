@@ -248,51 +248,6 @@ void ScriptEditorComponent::drawScriptComponent() {
                     txtField->getOnHoveredEvent().addListener([id, this](auto widget) {
                         if(widget->isHovered()) Editor::getCanvas()->getHierarchy()->setNodeHighlight(id, true);
                     });
-                    auto objUUID = sceneObject->getUUID();
-                    auto createMenu = m_scriptCompGroup->getPlugin<ContextMenu>();
-                    if (createMenu)
-                        createMenu->removeAllWidgets();
-                    else
-                        createMenu = m_scriptCompGroup->addPlugin<ContextMenu>("Component_Select_Menu");
-
-                    createMenu->createWidget<MenuItem>("SceneObject")->getOnClickEvent().addListener([key, objUUID, this](auto widget) {
-                        json jVal = json{
-                                {"uuid", objUUID},
-                                {"comp", std::string()},
-                        };
-                        auto comp = getComponent<CompoundComponent>();
-                        if (comp) {
-                            auto members = comp->getProperty<json>("members", json::array());
-                            if (members.contains(key)) {
-                                members[key] = jVal;
-                                comp->setProperty("members", members);
-                            }
-                            setDirty();
-                        }
-                    });
-
-                    for (const auto& comp : sceneObject->getComponents())
-                    {
-                        if (!comp->isSkipSerialize())
-                        {
-                            auto compName = comp->getName();
-                            createMenu->createWidget<MenuItem>(comp->getName())->getOnClickEvent().addListener([key, objUUID, compName, this](auto widget) {
-                                json jVal = json{
-                                        {"uuid", objUUID},
-                                        {"comp", compName},
-                                };
-                                auto comp = getComponent<CompoundComponent>();
-                                if (comp) {
-                                    auto members = comp->getProperty<json>("members", json::array());
-                                    if (members.contains(key)) {
-                                        members[key] = jVal;
-                                        comp->setProperty("members", members);
-                                    }
-                                    setDirty();
-                                }
-                            });
-                        }
-                    }
                 }
 
                 txtField->addPlugin<DDTargetPlugin<uint64_t>>(EDragDropID::OBJECT)->getOnDataReceivedEvent().addListener([key, this](auto val) {
@@ -304,7 +259,7 @@ void ScriptEditorComponent::drawScriptComponent() {
                         if (createMenu)
                             createMenu->removeAllWidgets();
                         else 
-                            createMenu = m_scriptCompGroup->addPlugin<ContextMenu>("Component_Select_Menu");
+                            createMenu = m_scriptCompGroup->addPlugin<ContextMenu>("Script_Component_Select_Menu");
                         createMenu->createWidget<MenuItem>("SceneObject")->getOnClickEvent().addListener([key, objUUID, this](auto widget) {
                             json jVal = json{
                                     {"uuid", objUUID},
