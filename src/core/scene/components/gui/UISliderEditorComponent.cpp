@@ -124,7 +124,11 @@ void UISliderEditorComponent::drawMin() {
     m->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("min", val[0]);
         getComponent<CompoundComponent>()->setDirty();
+        auto value = getComponent<CompoundComponent>()->getProperty<float>("value", 0.f);
+        if(value < val[0])
+            getComponent<CompoundComponent>()->setProperty("value", val[0]);
         m_dirtyFlag = 1;
+        setDirty();
     });
 }
 
@@ -144,6 +148,11 @@ void UISliderEditorComponent::drawMax() {
     m->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("max", val[0]);
         getComponent<CompoundComponent>()->setDirty();
+        auto value = getComponent<CompoundComponent>()->getProperty<float>("value", 0.f);
+        if (value > val[0])
+            getComponent<CompoundComponent>()->setProperty("value", val[0]);
+        m_dirtyFlag = 2;
+        setDirty();
     });
 }
 
@@ -155,14 +164,19 @@ void UISliderEditorComponent::drawValue() {
     auto comp = getComponent<CompoundComponent>();
     if (comp == nullptr) return;
 
+    auto minVal = comp->getProperty<float>("min", 0.f);
+    auto maxVal = comp->getProperty<float>("max", 1.f);
+    auto step = (maxVal - minVal) / 100.f;
     std::array value = { comp->getProperty<float>("value", NAN) };
-    auto m = m_uiSliderValueGroup->createWidget<Drag<float>>("Value ", ImGuiDataType_Float, value, 0.01f, comp->getProperty<float>("min", 0.f), comp->getProperty<float>("max", 1.f));
+
+    auto m = m_uiSliderValueGroup->createWidget<Drag<float>>("Value ", ImGuiDataType_Float, value, step, minVal, maxVal);
     m->getOnDataBeginChangedEvent().addListener([this](auto val) {
         storeUndo();
     });
     m->getOnDataChangedEvent().addListener([this](auto val) {
         getComponent<CompoundComponent>()->setProperty("value", val[0]);
         getComponent<CompoundComponent>()->setDirty();
+        m_dirtyFlag = 0;
     });
 }
 NS_IGE_END

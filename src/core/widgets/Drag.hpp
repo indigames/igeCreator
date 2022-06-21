@@ -73,7 +73,7 @@ namespace ige::creator
                 ImGui::SameLine(0, g.Style.ItemInnerSpacing.x);
 
             // Notice: to show NAN the data type must be Float, so to present Int type we use %.0f format here
-            if (ImGui::DragScalar("", ImGuiDataType_Float, p_data, m_speed, &m_min, &m_max, m_dataType == ImGuiDataType_Float ? "%.4f" : "%.0f")) {
+            if (ImGui::DragScalar("", ImGuiDataType_Float, p_data, m_speed, &m_min, &m_max, m_dataType == ImGuiDataType_Float ? "%.4f" : "%.0f", ImGuiSliderFlags_ClampOnInput)) {
                 changedIdx = i;
                 if (!m_dragging) begin = true;
                 m_dragging = true;
