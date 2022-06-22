@@ -75,6 +75,12 @@ namespace ige::creator
 
     void Hierarchy::onSceneObjectCreated(SceneObject& sceneObject)
     {
+        // If scene reloaded, clear and initialise again
+        if (sceneObject.getId() == 1) {
+            clear();
+            initialize();
+        }
+
         if (m_groupLayout == nullptr) return;
         auto objId = sceneObject.getId();
         auto name = sceneObject.getName();
@@ -325,10 +331,14 @@ namespace ige::creator
             {
                 auto obj = sceneObject.getSharedPtr();
                 auto idx = parent->getChildIndex(obj);
-                auto parentWidget = m_objectNodeMap.at(parent->getId());
-                parentWidget->setIsLeaf(false);
-                parentWidget->addWidget(widget, idx);
-                parentWidget->open();
+
+                auto parentPair = m_objectNodeMap.find(parent->getId());
+                if (parentPair != m_objectNodeMap.end()) {
+                    auto parentWidget = parentPair->second;
+                    parentWidget->setIsLeaf(false);
+                    parentWidget->addWidget(widget, idx);
+                    parentWidget->open();
+                }
             }
             auto color = sceneObject.isInPrefab() ? (sceneObject.isActive() ? ImVec4(PREFAB_COLOR) : ImVec4(PREFAB_DISABLED_COLOR)): (sceneObject.isActive() ? ImVec4(NORMAL_COLOR) : ImVec4(DISABLED_COLOR));            
             widget->setColor(color);
@@ -362,12 +372,11 @@ namespace ige::creator
             {
                 if (m_objectNodeMap.count(sceneObject.getParent()->getId()) > 0)
                 {
-                    auto parentWidget = m_objectNodeMap.at(sceneObject.getParent()->getId());
-                    parentWidget->setIsLeaf(true);
-
-                    auto widget = nodePair->second;
-                    if (widget->hasContainer())
-                        widget->getContainer()->removeWidget(widget);
+                    auto parentPair = m_objectNodeMap.find(sceneObject.getParent()->getId());
+                    if (parentPair != m_objectNodeMap.end()) {
+                        auto parentWidget = parentPair->second;
+                        parentWidget->setIsLeaf(true);
+                    }
                 }
             }
         }
@@ -410,10 +419,12 @@ namespace ige::creator
             auto parent = object->getParent();
             while (parent != nullptr)
             {
-                auto parentWidget = m_objectNodeMap.at(parent->getId());
-                if (parentWidget->isOpened())
-                    break;
-                parentWidget->open();
+                auto parentPair = m_objectNodeMap.find(parent->getId());
+                if (parentPair != m_objectNodeMap.end()) {
+                    auto parentWidget = parentPair->second;
+                    if (parentWidget->isOpened()) break;
+                    parentWidget->open();
+                }
                 parent = parent->getParent();
             }
 
