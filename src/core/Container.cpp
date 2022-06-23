@@ -37,9 +37,7 @@ namespace ige::creator
     {
         if (widget == nullptr) return;
         auto found = std::find(m_widgets.begin(), m_widgets.end(), widget);
-        if (found != m_widgets.end())
-        {
-            widget->setContainer(nullptr);
+        if (found != m_widgets.end()) {
             m_widgets.erase(found);
         }
     }

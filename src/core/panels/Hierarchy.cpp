@@ -309,7 +309,7 @@ namespace ige::creator
         auto nodePair = m_objectNodeMap.find(sceneObject.getId());
         if (nodePair != m_objectNodeMap.end())
         {
-            if(nodePair->second->hasContainer())
+            if(nodePair->second && nodePair->second->hasContainer())
                 nodePair->second->getContainer()->removeWidget(nodePair->second);
             nodePair->second = nullptr;
             m_objectNodeMap.erase(nodePair);
