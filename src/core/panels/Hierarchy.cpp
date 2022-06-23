@@ -306,14 +306,7 @@ namespace ige::creator
 
     void Hierarchy::onSceneObjectDeleted(SceneObject& sceneObject)
     {
-        auto nodePair = m_objectNodeMap.find(sceneObject.getId());
-        if (nodePair != m_objectNodeMap.end())
-        {
-            if(nodePair->second && nodePair->second->hasContainer())
-                nodePair->second->getContainer()->removeWidget(nodePair->second);
-            nodePair->second = nullptr;
-            m_objectNodeMap.erase(nodePair);
-        }
+        
     }
 
     void Hierarchy::onSceneObjectAttached(SceneObject& sceneObject)
@@ -366,19 +359,16 @@ namespace ige::creator
     {
         auto nodePair = m_objectNodeMap.find(sceneObject.getId());
 
-        if (nodePair != m_objectNodeMap.end())
-        {
-            if (sceneObject.getParent() && sceneObject.getParent()->getChildren().size() == 0)
-            {
-                if (m_objectNodeMap.count(sceneObject.getParent()->getId()) > 0)
-                {
-                    auto parentPair = m_objectNodeMap.find(sceneObject.getParent()->getId());
-                    if (parentPair != m_objectNodeMap.end()) {
-                        auto parentWidget = parentPair->second;
-                        parentWidget->setIsLeaf(true);
-                    }
+        if (nodePair != m_objectNodeMap.end()) {
+            auto parentPair = m_objectNodeMap.find(sceneObject.getParent()->getId());
+            if (parentPair != m_objectNodeMap.end()) {
+                auto parentWidget = parentPair->second;
+                parentWidget->removeWidget(nodePair->second);
+                if (sceneObject.getParent() && sceneObject.getParent()->getChildren().size() == 0) {
+                    parentWidget->setIsLeaf(true);
                 }
             }
+            m_objectNodeMap.erase(nodePair);
         }
     }
 
