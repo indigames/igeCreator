@@ -12,7 +12,7 @@ set(CMAKE_PROJECT_VERSION ${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION
 
 # Modules and install path (required by conan)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
-set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR} ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene/cmake ${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene/libs/pyxCore/cmake ${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene/libs/pyxCore/pyxtools/cmake ${CMAKE_BINARY_DIR} ${CMAKE_MODULE_PATH})
 set(CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR} ${CMAKE_PREFIX_PATH})
 
 # Set the Relative Path Configurations
@@ -80,33 +80,14 @@ elseif(IOS)
     endif()
 endif()
 
-include_directories(
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/pyxcore"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/pyxtools"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/GLEW"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/edge/include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/vectormath/scalar/cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/doboz"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/simplecpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/tokenizer"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/spdlog/include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/spdlog/include/spdlog"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeCore"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeVMath"
-)
-
-add_compile_definitions(VERSION_NAME="${CMAKE_PROJECT_VERSION}" EDITOR_MODE=1 IMGUI_DEFINE_MATH_OPERATORS=1)
-add_subdirectory(libs/pyxCore ${CMAKE_BINARY_DIR}/pyxCore EXCLUDE_FROM_ALL)
-add_subdirectory(libs/igeCore ${CMAKE_BINARY_DIR}/igeCore EXCLUDE_FROM_ALL)
-add_subdirectory(libs/igeVMath ${CMAKE_BINARY_DIR}/igeVMath EXCLUDE_FROM_ALL)
-add_subdirectory(libs/igeScene ${CMAKE_BINARY_DIR}/igeScene EXCLUDE_FROM_ALL)
+OPTION(USE_PREBUILT_LIBS "Use prebuilt libraries" OFF)
 
 if(${APP_STYLE} MATCHES "SHARED")
     find_package (Python3 ${PYTHON_VERSION} EXACT REQUIRED COMPONENTS Development)
 else()
     find_package(Python REQUIRED)
     set (Python3_INCLUDE_DIRS ${Python_INCLUDE_DIRS})
+    set (Python3_LIB_DIRS ${Python_LIB_DIRS})
     set (Python3_LIBRARIES ${Python_LIBRARIES})
 endif()
 
@@ -115,14 +96,12 @@ find_package(stb REQUIRED)
 find_package(SDL REQUIRED)
 find_package(openssl REQUIRED)
 find_package(taskflow REQUIRED)
-find_package(tracy REQUIRED)
 find_package(zlib)
 find_package(json)
 find_package(bullet REQUIRED)
 find_package(igeSound REQUIRED)
 find_package(igeEffekseer REQUIRED)
 find_package(igeNavigation REQUIRED)
-find_package(igeSdk REQUIRED)
 
 include_directories(
     "${zlib_INCLUDE_DIRS}"
@@ -133,7 +112,6 @@ include_directories(
     "${SDL_INCLUDE_DIRS}"
     "${openssl_INCLUDE_DIRS}"
     "${taskflow_INCLUDE_DIRS}"
-    "${tracy_INCLUDE_DIRS}"
 )
 
 # Source files
@@ -197,13 +175,26 @@ message(STATUS "igeSound_LIBRARIES: ${igeSound_LIBRARIES}")
 message(STATUS "igeEffekseer_LIBRARIES: ${igeEffekseer_LIBRARIES}")
 message(STATUS "igeNavigation_LIBRARIES: ${igeNavigation_LIBRARIES}")
 
-set (LIBS_TO_REMOVE "igeVmath::igeVmath" "pyxCore::pyxCore" )
-foreach(elem ${LIBS_TO_REMOVE})
-    list(REMOVE_ITEM igeSound_LIBRARIES ${elem})
-    list(REMOVE_ITEM igeEffekseer_LIBRARIES ${elem})
-    list(REMOVE_ITEM igeNavigation_LIBRARIES ${elem})
-    list(REMOVE_ITEM igeSdk_LIBRARIES ${elem})
-endforeach()
+add_compile_definitions(VERSION_NAME="${CMAKE_PROJECT_VERSION}" EDITOR_MODE=1 IMGUI_DEFINE_MATH_OPERATORS=1)
+add_subdirectory(libs/igeScene ${CMAKE_BINARY_DIR}/igeScene EXCLUDE_FROM_ALL)
+add_subdirectory(libs/igeSdk ${CMAKE_BINARY_DIR}/igeSdk EXCLUDE_FROM_ALL)
+
+target_link_directories(${TARGET_NAME} PRIVATE
+    ${Python3_LIB_DIRS}
+    ${numpy_LIB_DIRS}
+    ${igeVmath_LIB_DIRS}
+    ${bullet_LIB_DIRS}
+    ${igeBullet_LIB_DIRS}
+    ${pyxCore_LIB_DIRS}
+    ${stb_LIB_DIRS}
+    ${SDL_LIB_DIRS}
+    ${openssl_LIB_DIRS}
+    ${igePAL_LIB_DIRS}
+    ${igeSound_LIB_DIRS}
+    ${igeEffekseer_LIB_DIRS}
+    ${igeNavigation_LIB_DIRS}
+    ${zlib_LIB_DIRS}
+)
 
 target_link_libraries(${TARGET_NAME} 
     igeScene-static
@@ -211,9 +202,9 @@ target_link_libraries(${TARGET_NAME}
     pyxtools
     igeCore-static
     igeVmath-static
+    igeSdk-static
     ${Python3_LIBRARIES}
     ${numpy_LIBRARIES}
-    ${tracy_LIBRARIES}
     ${bullet_LIBRARIES}
     ${stb_LIBRARIES}
     ${SDL_LIBRARIES}
@@ -221,7 +212,8 @@ target_link_libraries(${TARGET_NAME}
     ${igeSound_LIBRARIES}
     ${igeEffekseer_LIBRARIES}
     ${igeNavigation_LIBRARIES}
-    ${igeSdk_LIBRARIES}
+    ${igePAL_LIBRARIES}
+    ${zlib_LIBRARIES}
     Crypt32
     opengl32
     glu32
@@ -259,30 +251,29 @@ target_include_directories(${TARGET_NAME} PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui"
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui-node-editor"
     "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/pyxcore"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/GLEW"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/edge/include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/vectormath/scalar/cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/doboz"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/simplecpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/tokenizer"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/spdlog/include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/spdlog/include/spdlog"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeCore"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeVMath"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene/src"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene/libs/pyxCore"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene/libs/pyxCore/pyxcore"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene/libs/pyxCore/pyxtools"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene/libs/pyxCore/ThirdParty/GLEW"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene/libs/pyxCore/ThirdParty/edge/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene/libs/pyxCore/ThirdParty/vectormath/scalar/cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene/libs/pyxCore/ThirdParty/doboz"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene/libs/pyxCore/ThirdParty/simplecpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene/libs/pyxCore/ThirdParty/tokenizer"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene/libs/pyxCore/ThirdParty/spdlog/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene/libs/pyxCore/ThirdParty/spdlog/include/spdlog"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene/libs/igeCore"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene/libs/igeVMath"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeSdk"
     "${bullet_INCLUDE_DIRS}"
     "${igeSound_INCLUDE_DIRS}"
-    "${igeSound_INCLUDE_DIRS}/ThirdParty/soloud/include"
+    "${igeSound_INCLUDE_DIRS}/soloud"
     "${igeEffekseer_INCLUDE_DIRS}"
-    "${igeEffekseer_INCLUDE_DIRS}/ThirdParty/Effekseer/Dev/Cpp"
-    "${igeEffekseer_INCLUDE_DIRS}/ThirdParty/Effekseer/Dev/Cpp/Effekseer"
+    "${igeEffekseer_INCLUDE_DIRS}/Effekseer/Dev/Cpp"
+    "${igeEffekseer_INCLUDE_DIRS}/Effekseer/Dev/Cpp/Effekseer"
     "${igeNavigation_INCLUDE_DIRS}"
-    "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/Detour/Include"
-    "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/DetourCrowd/Include"
-    "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/DetourTileCache/Include"
-    "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/Recast/Include"
-    "${igeSdk_INCLUDE_DIRS}"
+    "${igeNavigation_INCLUDE_DIRS}/recastnavigation"
 )
 
 set(COMPILE_DEFINITIONS
@@ -296,7 +287,6 @@ set(COMPILE_DEFINITIONS
     ${igeSound_COMPILE_DEFINITIONS}
     ${igeEffekseer_COMPILE_DEFINITIONS}
     ${igeNavigation_COMPILE_DEFINITIONS}
-    ${igeSdk_COMPILE_DEFINITIONS}
 )
 
 target_compile_definitions(${TARGET_NAME} PUBLIC ${COMPILE_DEFINITIONS} Py_NO_ENABLE_SHARED USE_PYXCORE USE_IGECORE USE_IGESCENE USE_IGEVMATH USE_IGESDK)
@@ -317,6 +307,7 @@ install(TARGETS
   RUNTIME DESTINATION bin
 )
 
+FIND_PACKAGE(PVRTexLib REQUIRED)
 get_filename_component(PVRTEXLIB_LIB_DIR ${PVRTEXLIB_LIB} DIRECTORY)
 install(DIRECTORY
     ${PVRTEXLIB_LIB_DIR}/
@@ -327,6 +318,7 @@ install(DIRECTORY
         PATTERN "*.dylib"
 )
 
+FIND_PACKAGE(fbx REQUIRED)
 get_filename_component(FBX_LIB_DIR ${FBX_LIB} DIRECTORY)
 install(DIRECTORY
     ${FBX_LIB_DIR}/

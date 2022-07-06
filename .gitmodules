@@ -10,23 +10,14 @@
 	path = 3rd-party/imgui
 	url = git@github.com:indigames/imgui.git
 	branch = docking
-[submodule "libs/igeScene"]
-	path = libs/igeScene
-	url = git@github.com:indigames/igeScene.git
-	branch = ige-dev
-[submodule "libs/pyxCore"]
-	path = libs/pyxCore
-	url = git@github.com:indigames/pyxCore.git
-	branch = master
-[submodule "libs/igeVMath"]
-	path = libs/igeVMath
-	url = git@github.com:indigames/igeVMath.git
-	branch = master
-[submodule "libs/igeCore"]
-	path = libs/igeCore
-	url = git@github.com:indigames/igeCore.git
-	branch = master
 [submodule "3rd-party/imgui-node-editor"]
 	path = 3rd-party/imgui-node-editor
 	url = https://github.com/indigames/imgui-node-editor.git
 	branch = develop
+[submodule "libs/igeScene"]
+	path = libs/igeScene
+	url = git@github.com:indigames/igeScene.git
+	branch = ige-dev
+[submodule "libs/igeSdk"]
+	path = libs/igeSdk
+	url = https://github.com/indigames/igeSdk.git
