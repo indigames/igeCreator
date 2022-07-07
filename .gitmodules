@@ -21,3 +21,6 @@
 [submodule "libs/igeSdk"]
 	path = libs/igeSdk
 	url = https://github.com/indigames/igeSdk.git
+[submodule "libs/igeGameBuilder"]
+	path = libs/igeGameBuilder
+	url = https://github.com/indigames/igeGameBuilder.git
