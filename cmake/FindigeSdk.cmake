@@ -3,7 +3,7 @@
 # igeSdk_INCLUDE_DIRS
 
 set(igeSdk_FOUND 1)
-set(igeSdk_COMPILE_DEFINITIONS "-DUSE_igeSdk")
+set(igeSdk_COMPILE_DEFINITIONS "-DUSE_IGESDK")
 set(igeSdk_BASE_DIR "${CMAKE_CURRENT_LIST_DIR}/../libs/igeSdk")
 
 if(USE_PREBUILT_LIBS)

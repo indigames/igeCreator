@@ -6,6 +6,7 @@ set(TARGET_NAME igeCreator)
 project(${TARGET_NAME})
 
 option(USE_PREBUILT_LIBS "Use prebuilt libraries" ON)
+option(FORCE_BUILD_IGE "Force build IGE libraries" ON)
 
 if(USE_PREBUILT_LIBS)
     set(USE_MSVC_RELEASE_RUNTIME_ALWAYS ON)
@@ -114,6 +115,8 @@ if(USE_MSVC_RELEASE_RUNTIME_ALWAYS)
     endforeach()
 endif()
 
+add_compile_definitions($<$<CONFIG:Debug>:_ITERATOR_DEBUG_LEVEL=0>)
+
 # Source files
 file(GLOB_RECURSE SRC_FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
@@ -161,7 +164,7 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SRC_FILES})
 add_executable(${TARGET_NAME} WIN32 "${CMAKE_CURRENT_SOURCE_DIR}/src/igeCreator.rc" ${SRC_FILES})
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ignore:4099 /ignore:4286 /ignore:4127") # Disable linker warning
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:libvcruntime")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:libvcruntime$<$<CONFIG:Debug>:d>")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:python37")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:python39")
 
@@ -270,7 +273,14 @@ target_include_directories(${TARGET_NAME} PUBLIC
 
 set(COMPILE_DEFINITIONS
     ${Python3_COMPILE_DEFINITIONS}
+    ${pyxCore_COMPILE_DEFINITIONS}
+    ${igeCore_COMPILE_DEFINITIONS}
     ${igeScene_COMPILE_DEFINITIONS}
+    ${igeBullet_COMPILE_DEFINITIONS}
+    ${igeEffekseer_COMPILE_DEFINITIONS}
+    ${igeNavigation_COMPILE_DEFINITIONS}
+    ${igeSound_COMPILE_DEFINITIONS}
+    ${igeVmath_COMPILE_DEFINITIONS}
     ${igeSdk_COMPILE_DEFINITIONS}
 )
 

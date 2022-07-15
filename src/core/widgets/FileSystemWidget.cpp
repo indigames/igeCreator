@@ -249,23 +249,23 @@ namespace ige::creator
             m_cache.refresh();
         }
 
+        auto entries = m_cache.entries();
         if (!m_bShowHidden) {
-            auto itr = m_cache.entries().begin();
-            while (itr != m_cache.entries().end()) {
+            for (auto itr = entries.begin(); itr != entries.end();) {
                 const auto& name = (*itr).stem;
                 const auto& ext = (*itr).extension;
                 if (IsFormat(E_FileExts::Hidden, name) || IsFormat(E_FileExts::Hidden, ext)) {
-                    m_cache.entries().erase(itr);
+                    itr = entries.erase(itr);
                 }
                 else {
-                    ++itr;
+                    itr++;
                 }
             }
         }
 
         static char inputName[256] = {};
         memset(inputName, 0, 256);
-        if (ImGui::BeginPopupContextWindow()) {               
+        if (ImGui::BeginPopupContextWindow()) {
             if (ImGui::BeginMenu(("New Folder" + getIdAsString()).c_str())) {
                 if (ImGui::InputText(("##NAME_0" + getIdAsString()).c_str(), inputName, 256,
                     ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll)) {
@@ -432,7 +432,7 @@ namespace ige::creator
         auto item_size = size + style.ItemSpacing.x;
         auto items_per_line_exact = avail / item_size;
         auto items_per_line_floor = ImFloor(items_per_line_exact);
-        auto count = m_cache.entries().size();
+        auto count = entries.size();
         auto items_per_line = std::min(size_t(items_per_line_floor), count);
         auto extra = ((items_per_line_exact - items_per_line_floor) * item_size) /
                      std::max(1.0f, items_per_line_floor - 1);
@@ -447,7 +447,7 @@ namespace ige::creator
                 auto end = start + std::min(count - start, items_per_line);
                 for (int j = start; j < end; ++j)
                 {
-                    const auto &cache_entry = m_cache.entries()[j];
+                    const auto &cache_entry = entries[j];
 
                     ImGui::PushID(int(j));
                     process_cache_entry(cache_entry);

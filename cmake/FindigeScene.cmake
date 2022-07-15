@@ -2,11 +2,13 @@
 # igeScene_LIBRARIES
 # igeScene_INCLUDE_DIRS
 
+option(FORCE_BUILD_IGE "Force build IGE libraries" ON)
+
 set(igeScene_FOUND 1)
-set(igeScene_COMPILE_DEFINITIONS "-DUSE_igeScene")
+set(igeScene_COMPILE_DEFINITIONS "-DUSE_IGESCENE")
 set(igeScene_BASE_DIR "${CMAKE_CURRENT_LIST_DIR}/../libs/igeScene")
 
-if(USE_PREBUILT_LIBS)
+if(NOT FORCE_BUILD_IGE AND USE_PREBUILT_LIBS)
     set(PLATFORM "windows")
     set(ARCH "x86_64")
     if(DEFINED ANDROID_PLATFORM)

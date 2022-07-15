@@ -211,7 +211,7 @@ public:
 		std::string protocol_path;
 	};
 
-	std::vector<cache_entry>& entries() {
+	const std::vector<cache_entry>& entries() {
 		if (should_refresh())
 		{
 			refresh();
