@@ -5,6 +5,14 @@ set(TARGET_NAME igeCreator)
 
 project(${TARGET_NAME})
 
+option(USE_PREBUILT_LIBS "Use prebuilt libraries" ON)
+
+if(USE_PREBUILT_LIBS)
+    set(USE_MSVC_RELEASE_RUNTIME_ALWAYS ON)
+else()
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
+
 set(CMAKE_PROJECT_VERSION_MAJOR 0)
 set(CMAKE_PROJECT_VERSION_MINOR 1)
 set(CMAKE_PROJECT_VERSION_PATCH 0)
@@ -16,6 +24,10 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene/libs/igeCore/cmake
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene/libs/igeCore/libs/pyxCore/cmake
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene/libs/igeCore/libs/pyxCore/pyxtools/cmake
+    ${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene/libs/igeBullet/cmake
+    ${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene/libs/igeEffekseer/cmake
+    ${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene/libs/igeNavigation/cmake
+    ${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene/libs/igeSound/cmake
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/igeSdk/cmake
     ${CMAKE_BINARY_DIR}
     ${CMAKE_MODULE_PATH}
@@ -29,7 +41,6 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
 
 #####################################
 # CMake Module Imports
@@ -87,8 +98,21 @@ elseif(IOS)
     endif()
 endif()
 
-OPTION(USE_PREBUILT_LIBS "Use prebuilt libraries" ON)
 add_compile_definitions(VERSION_NAME="${CMAKE_PROJECT_VERSION}" EDITOR_MODE=1 IMGUI_DEFINE_MATH_OPERATORS=1)
+
+if(USE_MSVC_RELEASE_RUNTIME_ALWAYS)
+    foreach(flag_var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO )
+        if(${flag_var} MATCHES "/MDd")
+            STRING(REGEX REPLACE "/MDd" "/MD" ${flag_var} "${${flag_var}}")
+        endif(${flag_var} MATCHES "/MDd")
+        if(${flag_var} MATCHES "/MTd")
+            STRING(REGEX REPLACE "/MTd" "/MT" ${flag_var} "${${flag_var}}")
+        endif(${flag_var} MATCHES "/MTd")
+        if(${flag_var} MATCHES "-D_DEBUG")
+            STRING(REGEX REPLACE "-D_DEBUG" "" ${flag_var} "${${flag_var}}")
+        endif(${flag_var} MATCHES "-D_DEBUG")
+    endforeach()
+endif()
 
 # Source files
 file(GLOB_RECURSE SRC_FILES
@@ -137,8 +161,9 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SRC_FILES})
 add_executable(${TARGET_NAME} WIN32 "${CMAKE_CURRENT_SOURCE_DIR}/src/igeCreator.rc" ${SRC_FILES})
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ignore:4099 /ignore:4286 /ignore:4127") # Disable linker warning
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT") # Disable LIBCMT, avoid conflict definition
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:python37") # Disable python37, avoid conflict definition
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:libvcruntime")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:python37")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:python39")
 
 if(${APP_STYLE} MATCHES "SHARED")
     find_package (Python3 ${PYTHON_VERSION} EXACT REQUIRED COMPONENTS Development)
@@ -162,20 +187,20 @@ include(FindigeSdk)
 include(FindSDL)
 include(FindPython)
 
-include_directories(
-    "${pyxCore_INCLUDE_DIRS}"
-    "${igeCore_INCLUDE_DIRS}"
-    "${igeScene_INCLUDE_DIRS}"
-    "${bullet_INCLUDE_DIRS}"
-    "${igeBullet_INCLUDE_DIRS}"
-    "${igeEffekseer_INCLUDE_DIRS}"
-    "${igeNavigation_INCLUDE_DIRS}"
-    "${igeSound_INCLUDE_DIRS}"
-    "${igeSdk_INCLUDE_DIRS}"
-    "${igeVmath_INCLUDE_DIRS}"
-    "${SDL_INCLUDE_DIRS}"
-    "${stb_INCLUDE_DIRS}"
-    "${Python_INCLUDE_DIRS}"
+target_include_directories(${TARGET_NAME} PRIVATE
+    ${pyxCore_INCLUDE_DIRS}
+    ${igeCore_INCLUDE_DIRS}
+    ${igeScene_INCLUDE_DIRS}
+    ${bullet_INCLUDE_DIRS}
+    ${igeBullet_INCLUDE_DIRS}
+    ${igeEffekseer_INCLUDE_DIRS}
+    ${igeNavigation_INCLUDE_DIRS}
+    ${igeSound_INCLUDE_DIRS}
+    ${igeSdk_INCLUDE_DIRS}
+    ${igeVmath_INCLUDE_DIRS}
+    ${SDL_INCLUDE_DIRS}
+    ${stb_INCLUDE_DIRS}
+    ${Python_INCLUDE_DIRS}
 )
 
 target_link_directories(${TARGET_NAME} PRIVATE
@@ -228,11 +253,6 @@ target_link_libraries(${TARGET_NAME}
     ws2_32
     Psapi
     Kernel32
-    doboz
-    edgeanim
-    simplecpp
-    tokenizer
-    GLEW
     Iphlpapi
     Pathcch
 )
