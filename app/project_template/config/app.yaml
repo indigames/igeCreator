@@ -47,22 +47,22 @@ Platforms: # Platforms config
         x64: true
 
 Requires: # Modules config
-    - igePAL/[>=0.0.6]@ige/test
-    - igeBullet/[>=0.4.61]@ige/test 
-    - igeEffekseer/[>=0.1.6]@ige/test
-    - igeNavigation/[>=0.0.2]@ige/test
-    - igeScene/[>=0.0.6]@ige/test
-    - igeSound/[>=0.1.0]@ige/test
-    - igeSdk/[>=0.0.1]@ige/test
-    - igeGamesServices/[>=0.0.1]@ige/test
-    - igeSocial/[>=0.0.5]@ige/test
-    - igeWebview/[>=0.0.3]@ige/test
-    - igeFirebase/[>=0.0.33]@ige/test
-    - igeNotify/[>=0.0.1]@ige/test
-    - pyimgui/[>=1.2.0]@ige/test
-    - dlib/[>=19.19.99]@ige/test
-    - opencv/[>=4.1.2]@ige/test
-    - pybox2d/[>=2.3.8]@ige/test
-    - pillow/[>=8.2.0]@ige/test
-    - tensorflow/[>=2.5.0]@ige/test
+    - igePAL
+    - igeBullet
+    - igeEffekseer
+    - igeNavigation
+    - igeScene
+    - igeSound
+    - igeSdk
+    - igeGamesServices
+    - igeSocial
+    - igeWebview
+    - igeFirebase
+    - igeNotify
+    - pyimgui
+    - dlib
+    - opencv
+    - pybox2d
+    - pillow
+    - tensorflow
 

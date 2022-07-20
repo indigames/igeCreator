@@ -2,7 +2,7 @@
 # igeScene_LIBRARIES
 # igeScene_INCLUDE_DIRS
 
-option(FORCE_BUILD_IGE "Force build IGE libraries" ON)
+option(FORCE_BUILD_IGE "Force build IGE libraries" OFF)
 
 set(igeScene_FOUND 1)
 set(igeScene_COMPILE_DEFINITIONS "-DUSE_IGESCENE")

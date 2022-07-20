@@ -1,0 +1,41 @@
+# Uncomment the next line to define a global platform for your project
+platform :ios, '11.0'
+project 'igeLauncher.xcodeproj'
+source 'https://cdn.cocoapods.org'
+use_frameworks!
+
+#IGE_SDK_TARGET#
+
+target 'igeLauncher' do
+    # Use dynamic frameworks
+    use_frameworks!
+
+    #IGE_SDK_PODS#
+
+    #IGE_ADS_PODS#
+
+    #IGE_SOCIAL_PODS#
+
+    #IGE_FIREBASE_PODS#    
+  end
+
+  post_install do |installer_representation|
+    installer_representation.pods_project.build_configurations.each do |config|
+      config.build_settings['ARCHS'] = 'arm64'
+      config.build_settings['VALID_ARCHS'] = 'arm64'
+      config.build_settings['SDKROOT'] = 'iphoneos'
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '11.0'
+      config.build_settings['TARGETED_DEVICE_FAMILY'] = '1,2'
+      config.build_settings['ENABLE_BITCODE'] = 'NO'
+    end
+    installer_representation.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['ARCHS'] = 'arm64'
+        config.build_settings['VALID_ARCHS'] = 'arm64'
+        config.build_settings['SDKROOT'] = 'iphoneos'
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '11.0'
+        config.build_settings['TARGETED_DEVICE_FAMILY'] = '1,2'
+        config.build_settings['ENABLE_BITCODE'] = 'NO'
+      end
+    end
+  end

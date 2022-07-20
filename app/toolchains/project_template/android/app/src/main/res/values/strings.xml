@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    <string name="app_name">#APP_NAME#</string>
+
+    <!-- Ads meta-data -->
+    <string name="gms_ads_APP_ID">#GAD_APP_ID#</string>
+
+    <!-- AppLovin meta-data -->
+    <string name="applovin_sdk_key">XDR-I587S56BifVA8eIFJ-nMGONq4LqIvCHmrBpMHIQP74OKS0rl2WV1X68Vpbu2hlIBe7-zBIRDTtxo-yiJcm</string>
+
+    <!-- Social meta-data -->
+    <string name="gms_games_APP_ID">#GGAME_APP_ID#</string>
+
+    <!-- Facebook meta-data -->
+    <string name="facebook_app_id">#FACEBOOK_APP_ID#</string>
+    <string name="facebook_app_authorities">com.facebook.app.FacebookContentProvider#FACEBOOK_APP_ID#</string>
+    <string name="fb_login_protocol_scheme">fb#FACEBOOK_APP_ID#</string>
+    <string name="fb_auto_applink_scheme">fb#FACEBOOK_APP_ID#</string>
+    <string name="fb_client_token">#FACEBOOK_CLIENT_TOKEN#</string>
+
+    <string name="tt_request_permission_descript_external_storage">The app need external storage access, please enable permission in Setting.</string>
+    <string name="tt_request_permission_descript_location">The app need location access, please enable permission in Setting.</string>
+    <string name="tt_request_permission_descript_read_phone_state">The app need phone state access, please enable permission in Setting.</string>
+
+</resources>

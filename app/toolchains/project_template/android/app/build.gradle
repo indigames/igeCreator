@@ -1,0 +1,117 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    ndkVersion  "23.2.8568313"
+    signingConfigs {
+        MyKeyConfig {
+            storeFile file('igeLauncherAndroid.jks')
+            storePassword 'hp200lx'
+            keyPassword 'hp200lx'
+            keyAlias = 'MyKey'
+        }
+    }
+    compileSdk 31
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    defaultConfig {
+        applicationId "#PACKAGE_NAME#"
+        minSdk #MIN_SDK_VERSION#
+        targetSdk #TARGET_SDK_VERSION#
+        versionCode #VERSION_CODE#
+        versionName "#VERSION_NAME#"
+        externalNativeBuild {
+            cmake {
+                arguments "-DANDROID_ARM_MODE=arm", "-DANDROID_ARM_NEON=ON"
+                cppFlags  "-std=c++17"
+            }
+        }
+        ndk {
+            abiFilters #ANDROID_ABI_FILTERS#
+        }
+        signingConfig signingConfigs.MyKeyConfig
+    }
+    buildTypes {
+        release {
+            // Enables code shrinking, obfuscation, and optimization
+            minifyEnabled true
+
+            // Enables resource shrinking
+            shrinkResources true
+
+            // ProGuard rules files
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            // Disables code shrinking, obfuscation, and optimization
+            minifyEnabled false
+
+            // Disables resource shrinking
+            shrinkResources false
+
+            // Enable debug
+            debuggable true
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+            version "3.10.2+"
+        }
+    }
+    bundle {
+        abi {
+            // Different APKs are generated for devices with different CPU architectures; true by default.
+            enableSplit true
+        }
+        density {
+            // Different APKs are generated for devices with different screen densities; true by default.
+            enableSplit false
+        }
+        language {
+            // This is disabled so that the App Bundle does NOT split the APK for each language.
+            // We're gonna use the same APK for all languages.
+            enableSplit false
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation files('libs/lib.aar') // Ketchapp SDK
+    implementation 'androidx.appcompat:appcompat:1.3.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation 'com.getkeepsafe.relinker:relinker:1.4.4'
+    implementation 'com.google.android.material:material:1.5.0'
+
+    #IGE_SDK_GRADLE_IMPL#
+
+    #IGE_SOCIAL_GRADLE_IMPL#
+
+    #IGE_NOTIFY_GRADLE_IMPL#
+
+    #IGE_WEBVIEW_GRADLE_IMPL#
+
+    #IGE_CAMERA_GRADLE_IMPL#
+}
+
+allprojects {
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+        }
+    }
+    repositories {
+        google()
+        mavenCentral()
+        #IGE_SDK_GRADLE_REPOS#
+    }
+}
+
+
+#IGE_FIREBASE_GRADLE_PLUGIN#
+
+#IGE_SOCIAL_GRADLE_PLUGIN#

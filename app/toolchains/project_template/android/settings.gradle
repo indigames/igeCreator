@@ -1,0 +1,39 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+include ':app'
+
+// Try environment variable first
+def firebase_cpp_sdk_dir = System.getenv('FIREBASE_CPP_SDK_DIR')
+if (firebase_cpp_sdk_dir == null || firebase_cpp_sdk_dir.isEmpty()) {
+    // If not found in environment, try system setting
+    firebase_cpp_sdk_dir = new File(System.getProperty('firebase_cpp_sdk.dir')).getAbsolutePath()
+    if (firebase_cpp_sdk_dir == null || firebase_cpp_sdk_dir.isEmpty()) {
+        // If still not found, look for current directory
+        if ((new File('firebase_cpp_sdk')).exists()) {
+            firebase_cpp_sdk_dir = 'firebase_cpp_sdk'
+        } else {
+            // Then it's not found, throw an exception
+            throw new StopActionException(
+                    'firebase_cpp_sdk.dir property or the FIREBASE_CPP_SDK_DIR ' +
+                            'environment variable must be set to reference the Firebase C++ ' +
+                            'SDK install directory.  This is used to configure static library ' +
+                            'and C/C++ include paths for the SDK.')
+        }
+    }
+}
+
+// Safe check, just to be sure
+if (!(new File(firebase_cpp_sdk_dir)).exists()) {
+    throw new StopActionException(
+            sprintf('Firebase C++ SDK directory %s does not exist',
+                    firebase_cpp_sdk_dir))
+}
+
+// Setting gradle extension
+gradle.ext.firebase_cpp_sdk_dir = "$firebase_cpp_sdk_dir"
+includeBuild "$firebase_cpp_sdk_dir"
