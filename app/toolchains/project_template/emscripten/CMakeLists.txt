@@ -13,22 +13,7 @@ endif()
 
 #CMAKE_DEPENDENCIES#
 
-set(BUILD_PLATFORM android)
-set(BUILD_ARCH ${ANDROID_ABI})
-
-option(USE_PREBUILT_LIBS "Use prebuilt libraries" OFF)
-
-set(PROJECT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
-
-if(NOT DEFINED ANDROID)
-    set(ANDROID 1)
-    add_compile_options(-D__ANDROID__ -DANDROID -Wunknown-warning-option)
-endif()
-
-add_compile_options(
-    "$<$<CONFIG:DEBUG>:-Og>"
-    "$<$<CONFIG:RELEASE>:-Ofast>"
-)
+set(PROJECT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/..")
 
 set(SRC_FILES
     "${PROJECT_DIR}/src/Game.h"
@@ -37,26 +22,26 @@ set(SRC_FILES
     "${PROJECT_DIR}/src/pythonExtension.c"
     "${PROJECT_DIR}/src/pythonStarter.h"
     "${PROJECT_DIR}/src/pythonStarter.cpp"
-    "${PROJECT_DIR}/android/app/src/main/cpp/native-lib.cpp"
-    "${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c"
+    "${PROJECT_DIR}/emscripten/main.cpp"
 )
 
-add_library(${TARGET_NAME} SHARED ${SRC_FILES})
+add_executable(${TARGET_NAME} ${SRC_FILES})
+set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS "-m32 -s WASM=1 -s FORCE_FILESYSTEM=1 -pthread -s USE_PTHREADS=1 -s PTHREAD_POOL_SIZE=1 -s TOTAL_MEMORY=512MB -s OFFSCREENCANVAS_SUPPORT=1 -s MODULARIZE=1 -s FETCH=1 -s CASE_INSENSITIVE_FS=1 -s EXPORT_NAME='MyModule' -gsource-map -s DEMANGLE_SUPPORT=1 --bind")
 
-target_link_libraries(${TARGET_NAME} -Wl,--start-group)
+set_target_properties(${TARGET_NAME} PROPERTIES COMPILE_FLAGS "-m32 -pthread -s USE_PTHREADS=1")
 
-set (CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR}
-    ${PROJECT_DIR}/../../../cmake
-    ${PROJECT_DIR}/../../../libs/igeScene/cmake
-    ${PROJECT_DIR}/../../../libs/igeScene/libs/igeCore/cmake
-    ${PROJECT_DIR}/../../../libs/igeScene/libs/igeCore/libs/pyxCore/cmake
-    ${PROJECT_DIR}/../../../libs/igeScene/libs/igeCore/libs/pyxCore/pyxtools/cmake
-    ${PROJECT_DIR}/../../../libs/igeScene/libs/igeBullet/cmake
-    ${PROJECT_DIR}/../../../libs/igeScene/libs/igeEffekseer/cmake
-    ${PROJECT_DIR}/../../../libs/igeScene/libs/igeNavigation/cmake
-    ${PROJECT_DIR}/../../../libs/igeScene/libs/igeSound/cmake
-    ${PROJECT_DIR}/../../../libs/igeSdk/cmake
-    ${CMAKE_MODULE_PATH}
+list (APPEND CMAKE_MODULE_PATH
+    "${PROJECT_DIR}/../../../libs/igeSdk/cmake"
+    "${PROJECT_DIR}/../../../libs/igeScene/cmake"
+    "${PROJECT_DIR}/../../../libs/igeScene/libs/igeSound/cmake"
+    "${PROJECT_DIR}/../../../libs/igeScene/libs/igeBullet/cmake"
+    "${PROJECT_DIR}/../../../libs/igeScene/libs/igeEffekseer/cmake"
+    "${PROJECT_DIR}/../../../libs/igeScene/libs/igeNavigation/cmake"
+    "${PROJECT_DIR}/../../../libs/igeScene/libs/igeCore/cmake"
+    "${PROJECT_DIR}/../../../libs/igeScene/libs/igeCore/libs/pyxCore/cmake"
+    "${PROJECT_DIR}/../../../libs/igeScene/libs/igeCore/libs/pyxCore/pyxtools/cmake"
+    "${PROJECT_DIR}/../../../libs/igeScene/libs/igeCore/libs/pyxCore/libs/igeVmath/cmake"
+    "${PROJECT_DIR}/../../../cmake"
 )
 
 include(FindPython)
@@ -88,8 +73,6 @@ endif()
 if(USE_IGESDK)
     include(FindigeSdk)
 endif()
-
-include(Findzlib)
 
 target_include_directories(${TARGET_NAME} PUBLIC
     "${PROJECT_DIR}/src"
@@ -128,6 +111,8 @@ message(COMPILE_DEFINITIONS = ${COMPILE_DEFINITIONS})
 
 target_compile_definitions(${TARGET_NAME} PUBLIC ${COMPILE_DEFINITIONS} USE_NUMPY Py_NO_ENABLE_SHARED)
 
+message(Python = ${Python_LIB_DIRS})
+
 target_link_directories(${TARGET_NAME} PUBLIC
     ${Python_LIB_DIRS}
     ${numpy_LIB_DIRS}
@@ -145,7 +130,6 @@ target_link_directories(${TARGET_NAME} PUBLIC
     ${igeCore_LIB_DIRS}
     ${pyxCore_LIB_DIRS}
     ${openssl_LIB_DIRS}
-    ${zlib_LIB_DIRS}
 )
 
 target_link_libraries(${TARGET_NAME}
@@ -165,17 +149,4 @@ target_link_libraries(${TARGET_NAME}
     ${pyxCore_LIBRARIES}
     ${igeScene_LIBRARIES}
     ${igeSdk_LIBRARIES}
-    ${zlib_LIBRARIES}
 )
-
-target_link_libraries(${TARGET_NAME}
-    android
-    EGL
-    GLESv1_CM
-    GLESv2
-    GLESv3
-    OpenSLES
-    log
-    z
-)
-target_link_libraries(${TARGET_NAME} -Wl,--end-group)

@@ -518,6 +518,8 @@ def main(argv):
                 gen_windows = True
             elif arg == 'android':
                 gen_android = True
+            elif arg == 'emscripten':
+                gen_emscripten = True
             elif arg == 'ios':
                 gen_ios = True
             elif arg == 'macos':
@@ -529,7 +531,7 @@ def main(argv):
                     gen_ios = True
                     gen_macos = True
                 gen_android = True
-                gen_emscripten = True                    
+                gen_emscripten = True
         elif opt in ("-o", "--output"):
             if path.isabs(r'{}'.format(arg)):
                 output_dir = arg
@@ -563,6 +565,17 @@ def main(argv):
         os.chdir(build_dir)
         os.system(f'cmake {project_dir} -DCMAKE_BUILD_TYPE=Release -A X64')
         os.system('cmake --build . --config Release --target install -- -m')
+    if gen_emscripten:
+        genProject('emscripten')
+        project_dir = os.path.join(output_dir, 'emscripten')
+        build_dir = os.path.join(project_dir, 'build')
+        safeRemove(build_dir)
+        os.makedirs(build_dir)
+        os.chdir(build_dir)
+
+        toolchain = Path(os.environ.get("EMSCRIPTEN_ROOT_PATH")).absolute().as_posix() + '/cmake/Modules/Platform/Emscripten.cmake'
+        os.system(f'cmake {project_dir} -G "MinGW Makefiles" -DCMAKE_TOOLCHAIN_FILE={toolchain}')
+        os.system('cmake --build . --config Release --parallel')
     if gen_android:
         genProject('android')
         project_dir = os.path.join(output_dir, 'android')

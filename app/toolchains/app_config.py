@@ -35,6 +35,8 @@ class AppConfig:
         self.ios_libraryUsage = 'This app accesses your photo library to search and display photos.'
         self.macos_romDir = 'pc'
         self.macos_configDir = 'config/macos/Assets.xcassets'
+        self.ems_romDir = 'pc'
+        self.ems_configDir = ''
         self.macos_x64 = True
         self.requires = {}
 
