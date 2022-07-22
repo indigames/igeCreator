@@ -53,10 +53,6 @@ struct _inittab g_customInitTabs[] = {
     {"dlib", PyInit_dlib},
 #endif
 
-#ifdef USE_IGEDLIBEXT
-    {"igeDlibExt", PyInit_igeDlibExt},
-#endif
-
 #ifdef USE_IGEFIREBASE
     {"igeFirebase", PyInit_igeFirebase},
 #endif
@@ -65,20 +61,12 @@ struct _inittab g_customInitTabs[] = {
     {"igeWebview", PyInit_igeWebview},
 #endif
 
-#ifdef USE_IGEADS
-    {"igeAds", PyInit_igeAds},
-#endif
-
 #ifdef USE_IGESOCIAL
     {"igeSocial", PyInit_igeSocial},
 #endif
 
 #ifdef USE_IGEGAMESSERVICES
     {"igeGamesServices", PyInit_igeGamesServices},
-#endif
-
-#ifdef USE_IGEINAPPPURCHASE
-    {"igeInAppPurchase", PyInit_igeInAppPurchase},
 #endif
 
 #ifdef USE_IGESOUND

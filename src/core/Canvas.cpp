@@ -58,9 +58,6 @@ namespace ige::creator
     {
         m_menuBar = nullptr;
         m_toolBar = nullptr;
-
-        for (auto& [key, value] : m_panels)
-            value = nullptr;
         m_panels.clear();
     }
 

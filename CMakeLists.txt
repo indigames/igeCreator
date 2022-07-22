@@ -5,14 +5,29 @@ set(TARGET_NAME igeCreator)
 
 project(${TARGET_NAME})
 
+option(USE_PREBUILT_LIBS "Use prebuilt libraries" ON)
+option(FORCE_BUILD_IGECORE "Force build igeCore" ON)
+option(FORCE_BUILD_PYXCORE "Force build pyxCore" ON)
+option(FORCE_BUILD_IGESCENE "Force build igeScene" ON)
+option(FORCE_BUILD_IGEVMATH "Force build igeVmath" ON)
+option(FORCE_BUILD_IGESDK "Force build igeSdk" ON)
+
+if(USE_PREBUILT_LIBS)
+    set(USE_MSVC_RELEASE_RUNTIME_ALWAYS ON)
+else()
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
+
 set(CMAKE_PROJECT_VERSION_MAJOR 0)
 set(CMAKE_PROJECT_VERSION_MINOR 1)
 set(CMAKE_PROJECT_VERSION_PATCH 0)
 set(CMAKE_PROJECT_VERSION ${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR}.${CMAKE_PROJECT_VERSION_PATCH})
 
-# Modules and install path (required by conan)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
-set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR} ${CMAKE_MODULE_PATH})
+list(APPEND CMAKE_MODULE_PATH
+    "${CMAKE_CURRENT_SOURCE_DIR}/../cmake"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../pyxCore/pyxtools/cmake"
+)
 set(CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR} ${CMAKE_PREFIX_PATH})
 
 # Set the Relative Path Configurations
@@ -41,7 +56,7 @@ set(CPACK_PACKAGE_VENDOR "Indi Games")
 set(CPACK_PACKAGE_VERSION_MAJOR "${CMAKE_PROJECT_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR "${CMAKE_PROJECT_VERSION_MINOR}")
 set(CPACK_PACKAGE_VERSION_PATCH "${CMAKE_PROJECT_VERSION_PATCH}")
-set(CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+set(CPACK_PACKAGE_VERSION "v${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 set(CPACK_GENERATOR "ZIP;NSIS")
 set(CPACK_STRIP_FILES "TRUE")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
@@ -51,62 +66,46 @@ set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/src/igeCreator.ico")
 set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL "ON")
 set(CPACK_NSIS_INSTALLED_ICON_NAME "${CMAKE_CURRENT_SOURCE_DIR}/src/igeCreator.ico")
 set(CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${TARGET_NAME}.lnk' '$INSTDIR\\\\bin\\\\${TARGET_NAME}.exe'")
+set(CPACK_NSIS_DELETE_ICONS_EXTRA "Delete '$SMPROGRAMS\\\\$START_MENU\\\\${TARGET_NAME}.lnk'")
 set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "CreateShortCut \\\"$DESKTOP\\\\${TARGET_NAME}.lnk\\\" \\\"$INSTDIR\\\\bin\\\\${TARGET_NAME}.exe\\\"")
 set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "Delete \\\"$DESKTOP\\\\${TARGET_NAME}.lnk\\\"")
-set(CPACK_NSIS_MENU_LINKS "doc" "documents")
 include(CPack)
 
-if(DEFINED ANDROID_PLATFORM)
-    set (ANDROID 1)
-    if(ANDROID_ABI STREQUAL "armeabi-v7a")
-        add_compile_options(-marm -march=armv7-a -mtune=cortex-a15 -mfpu=neon-fp16 -mfloat-abi=softfp)
-    elseif(ANDROID_ABI STREQUAL "x86")
-        add_compile_options(-march=atom -m32 -msse -msse2 -msse3 -mssse3 -mfpmath=sse -mstackrealign)
-    elseif(ANDROID_ABI STREQUAL "arm64-v8a")
-        add_compile_options(-march=armv8-a+simd+sve -mtune=cortex-a53 -D__ARM_NEON -D__ARM_NEON__)
-    elseif(ANDROID_ABI STREQUAL "x86_64")
-        add_compile_options(-march=atom -m64 -msse -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mfpmath=sse)
-    endif()
-    if(CMAKE_BUILD_TYPE STREQUAL "Release")
-        add_compile_options(-g0 -Ofast)
-    else(CMAKE_BUILD_TYPE STREQUAL "Debug")
-        add_compile_options(-Og)
-    endif()
-elseif(MSVC)
-    add_compile_options(/MP /std:c++17)
-elseif(IOS)
-    if(CMAKE_BUILD_TYPE STREQUAL "Release")
-        add_compile_options(-g0 -Ofast)
-    endif()
+add_compile_options(/MP)
+add_compile_definitions(VERSION_NAME="${CMAKE_PROJECT_VERSION}" EDITOR_MODE=1 IMGUI_DEFINE_MATH_OPERATORS=1)
+add_compile_definitions($<$<CONFIG:Debug>:_ITERATOR_DEBUG_LEVEL=0>)
+
+if(USE_MSVC_RELEASE_RUNTIME_ALWAYS)
+    foreach(flag_var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO )
+        if(${flag_var} MATCHES "/MDd")
+            STRING(REGEX REPLACE "/MDd" "/MD" ${flag_var} "${${flag_var}}")
+        endif(${flag_var} MATCHES "/MDd")
+        if(${flag_var} MATCHES "/MTd")
+            STRING(REGEX REPLACE "/MTd" "/MT" ${flag_var} "${${flag_var}}")
+        endif(${flag_var} MATCHES "/MTd")
+        if(${flag_var} MATCHES "-D_DEBUG")
+            STRING(REGEX REPLACE "-D_DEBUG" "" ${flag_var} "${${flag_var}}")
+        endif(${flag_var} MATCHES "-D_DEBUG")
+    endforeach()
 endif()
 
-include_directories(
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/pyxcore"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/pyxtools"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/GLEW"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/edge/include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/vectormath/scalar/cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/doboz"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/simplecpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/tokenizer"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/spdlog/include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/spdlog/include/spdlog"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeCore"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeVMath"
-)
 
-add_compile_definitions(VERSION_NAME="${CMAKE_PROJECT_VERSION}" EDITOR_MODE=1 IMGUI_DEFINE_MATH_OPERATORS=1)
-add_subdirectory(libs/pyxCore ${CMAKE_BINARY_DIR}/pyxCore EXCLUDE_FROM_ALL)
-add_subdirectory(libs/igeCore ${CMAKE_BINARY_DIR}/igeCore EXCLUDE_FROM_ALL)
-add_subdirectory(libs/igeVMath ${CMAKE_BINARY_DIR}/igeVMath EXCLUDE_FROM_ALL)
-add_subdirectory(libs/igeScene ${CMAKE_BINARY_DIR}/igeScene EXCLUDE_FROM_ALL)
+include(pyxCore)
+include(igeCore)
+include(igeVmath)
+include(igeScene)
+include(igeBullet)
+include(igeSound)
+include(igeEffekseer)
+include(igeNavigation)
+include(igeSdk)
 
 if(${APP_STYLE} MATCHES "SHARED")
     find_package (Python3 ${PYTHON_VERSION} EXACT REQUIRED COMPONENTS Development)
 else()
     find_package(Python REQUIRED)
     set (Python3_INCLUDE_DIRS ${Python_INCLUDE_DIRS})
+    set (Python3_LIB_DIRS ${Python_LIB_DIRS})
     set (Python3_LIBRARIES ${Python_LIBRARIES})
 endif()
 
@@ -115,26 +114,9 @@ find_package(stb REQUIRED)
 find_package(SDL REQUIRED)
 find_package(openssl REQUIRED)
 find_package(taskflow REQUIRED)
-find_package(tracy REQUIRED)
-find_package(zlib)
-find_package(json)
-find_package(bullet REQUIRED)
-find_package(igeSound REQUIRED)
-find_package(igeEffekseer REQUIRED)
-find_package(igeNavigation REQUIRED)
-find_package(igeSdk REQUIRED)
-
-include_directories(
-    "${zlib_INCLUDE_DIRS}"
-    "${json_INCLUDE_DIRS}"
-    "${Python3_INCLUDE_DIRS}"
-    "${numpy_INCLUDE_DIRS}"
-    "${stb_INCLUDE_DIRS}"
-    "${SDL_INCLUDE_DIRS}"
-    "${openssl_INCLUDE_DIRS}"
-    "${taskflow_INCLUDE_DIRS}"
-    "${tracy_INCLUDE_DIRS}"
-)
+# find_package(tracy REQUIRED)
+find_package(zlib REQUIRED)
+find_package(json REQUIRED)
 
 # Source files
 file(GLOB_RECURSE SRC_FILES
@@ -178,50 +160,90 @@ set(SRC_FILES ${SRC_FILES}
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui/backends/imgui_impl_opengl3.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui/backends/imgui_impl_sdl.cpp"
 )
-
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SRC_FILES})
+
 add_executable(${TARGET_NAME} WIN32 "${CMAKE_CURRENT_SOURCE_DIR}/src/igeCreator.rc" ${SRC_FILES})
 
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ignore:4099 /ignore:4286 /ignore:4127") # Disable linker warning
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT") # Disable LIBCMT, avoid conflict definition
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:python37") # Disable python37, avoid conflict definition
+target_include_directories(${TARGET_NAME} PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src"
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/pfd"
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/ImGuizmo"
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui"
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui-node-editor"
+    "${igeVmath_INCLUDE_DIRS}"
+    "${pyxCore_INCLUDE_DIRS}"
+    "${igeCore_INCLUDE_DIRS}"
+    "${igeScene_INCLUDE_DIRS}"
+    "${igeBullet_INCLUDE_DIRS}"
+    "${igeSound_INCLUDE_DIRS}"
+    "${igeEffekseer_INCLUDE_DIRS}"
+    "${igeNavigation_INCLUDE_DIRS}"
+    "${igeSdk_INCLUDE_DIRS}"
+    "${Python3_INCLUDE_DIRS}"
+    "${numpy_INCLUDE_DIRS}"
+    "${zlib_INCLUDE_DIRS}"
+    "${openssl_INCLUDE_DIRS}"
+    "${json_INCLUDE_DIRS}"    
+    "${stb_INCLUDE_DIRS}"
+    "${SDL_INCLUDE_DIRS}"    
+    "${taskflow_INCLUDE_DIRS}"
+    "${tracy_INCLUDE_DIRS}"
+)
 
-message(STATUS "Python3_LIBRARIES: ${Python3_LIBRARIES}")
-message(STATUS "numpy_LIBRARIES: ${numpy_LIBRARIES}")
-message(STATUS "tracy_LIBRARIES: ${tracy_LIBRARIES}")
-message(STATUS "bullet_LIBRARIES: ${bullet_LIBRARIES}")
-message(STATUS "stb_LIBRARIES: ${stb_LIBRARIES}")
-message(STATUS "SDL_LIBRARIES: ${SDL_LIBRARIES}")
-message(STATUS "openssl_LIBRARIES: ${openssl_LIBRARIES}")
-message(STATUS "igeSound_LIBRARIES: ${igeSound_LIBRARIES}")
-message(STATUS "igeEffekseer_LIBRARIES: ${igeEffekseer_LIBRARIES}")
-message(STATUS "igeNavigation_LIBRARIES: ${igeNavigation_LIBRARIES}")
+set(COMPILE_DEFINITIONS
+    ${pyxCore_COMPILE_DEFINITIONS}
+    ${igeCore_COMPILE_DEFINITIONS}
+    ${igeVmath_COMPILE_DEFINITIONS}
+    ${igeSceme_COMPILE_DEFINITIONS}
+    ${igeBullet_COMPILE_DEFINITIONS}
+    ${igeSound_COMPILE_DEFINITIONS}
+    ${igeEffekseer_COMPILE_DEFINITIONS}
+    ${igeNavigation_COMPILE_DEFINITIONS}
+    ${igeSdk_COMPILE_DEFINITIONS}
+)
+target_compile_definitions(${TARGET_NAME} PUBLIC ${COMPILE_DEFINITIONS} Py_NO_ENABLE_SHARED)
 
-set (LIBS_TO_REMOVE "igeVmath::igeVmath" "pyxCore::pyxCore" )
-foreach(elem ${LIBS_TO_REMOVE})
-    list(REMOVE_ITEM igeSound_LIBRARIES ${elem})
-    list(REMOVE_ITEM igeEffekseer_LIBRARIES ${elem})
-    list(REMOVE_ITEM igeNavigation_LIBRARIES ${elem})
-    list(REMOVE_ITEM igeSdk_LIBRARIES ${elem})
-endforeach()
+target_link_directories(${TARGET_NAME} PUBLIC
+    "${igeVmath_LIB_DIRS}"
+    "${pyxCore_LIB_DIRS}"
+    "${igeCore_LIB_DIRS}"
+    "${igeScene_LIB_DIRS}"
+    "${igeBullet_LIB_DIRS}"
+    "${igeSound_LIB_DIRS}"
+    "${igeEffekseer_LIB_DIRS}"
+    "${igeNavigation_LIB_DIRS}"
+    "${igeSdk_LIB_DIRS}"
+    "${Python3_LIB_DIRS}"
+    "${numpy_LIB_DIRS}"
+    "${zlib_LIB_DIRS}"
+    "${openssl_LIB_DIRS}"
+    "${json_LIB_DIRS}"    
+    "${stb_LIB_DIRS}"
+    "${SDL_LIB_DIRS}"    
+    "${taskflow_LIB_DIRS}"
+    "${tracy_LIB_DIRS}"
+)
 
-target_link_libraries(${TARGET_NAME} 
-    igeScene-static
-    pyxcore
-    pyxtools
-    igeCore-static
-    igeVmath-static
-    ${Python3_LIBRARIES}
-    ${numpy_LIBRARIES}
-    ${tracy_LIBRARIES}
-    ${bullet_LIBRARIES}
-    ${stb_LIBRARIES}
-    ${SDL_LIBRARIES}
-    ${openssl_LIBRARIES}
+target_link_libraries(${TARGET_NAME}
+    ${igeVmath_LIBRARIES}
+    ${pyxCore_LIBRARIES}
+    ${igeCore_LIBRARIES}
+    ${igeScene_LIBRARIES}
+    ${igeBullet_LIBRARIES}
     ${igeSound_LIBRARIES}
     ${igeEffekseer_LIBRARIES}
     ${igeNavigation_LIBRARIES}
     ${igeSdk_LIBRARIES}
+    ${Python3_LIBRARIES}
+    ${numpy_LIBRARIES}
+    ${zlib_LIBRARIES}
+    ${openssl_LIBRARIES}
+    ${json_LIBRARIES}
+    ${stb_LIBRARIES}
+    ${SDL_LIBRARIES}
+    ${taskflow_LIBRARIES}
+    ${tracy_LIBRARIES}
     Crypt32
     opengl32
     glu32
@@ -251,61 +273,15 @@ target_link_libraries(${TARGET_NAME}
     Pathcch
 )
 
-target_include_directories(${TARGET_NAME} PUBLIC
-    "${CMAKE_CURRENT_SOURCE_DIR}"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src"
-    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/pfd"
-    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/ImGuizmo"
-    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui"
-    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/imgui-node-editor"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeScene"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/pyxcore"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/GLEW"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/edge/include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/vectormath/scalar/cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/doboz"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/simplecpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/tokenizer"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/spdlog/include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/pyxCore/ThirdParty/spdlog/include/spdlog"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeCore"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libs/igeVMath"
-    "${bullet_INCLUDE_DIRS}"
-    "${igeSound_INCLUDE_DIRS}"
-    "${igeSound_INCLUDE_DIRS}/ThirdParty/soloud/include"
-    "${igeEffekseer_INCLUDE_DIRS}"
-    "${igeEffekseer_INCLUDE_DIRS}/ThirdParty/Effekseer/Dev/Cpp"
-    "${igeEffekseer_INCLUDE_DIRS}/ThirdParty/Effekseer/Dev/Cpp/Effekseer"
-    "${igeNavigation_INCLUDE_DIRS}"
-    "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/Detour/Include"
-    "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/DetourCrowd/Include"
-    "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/DetourTileCache/Include"
-    "${igeNavigation_INCLUDE_DIRS}/3rd-party/recast/Recast/Include"
-    "${igeSdk_INCLUDE_DIRS}"
-)
-
-set(COMPILE_DEFINITIONS
-    ${Python3_COMPILE_DEFINITIONS}
-    ${numpy_COMPILE_DEFINITIONS}
-    ${tracy_COMPILE_DEFINITIONS}
-    ${bullet_COMPILE_DEFINITIONS}
-    ${stb_COMPILE_DEFINITIONS}
-    ${SDL_COMPILE_DEFINITIONS}
-    ${openssl_COMPILE_DEFINITIONS}
-    ${igeSound_COMPILE_DEFINITIONS}
-    ${igeEffekseer_COMPILE_DEFINITIONS}
-    ${igeNavigation_COMPILE_DEFINITIONS}
-    ${igeSdk_COMPILE_DEFINITIONS}
-)
-
-target_compile_definitions(${TARGET_NAME} PUBLIC ${COMPILE_DEFINITIONS} Py_NO_ENABLE_SHARED USE_PYXCORE USE_IGECORE USE_IGESCENE USE_IGEVMATH USE_IGESDK)
-
 set_target_properties(
     ${TARGET_NAME} PROPERTIES
-    VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/app")
-
+    VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/app"
+)
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${TARGET_NAME})
+
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ignore:4099 /ignore:4286 /ignore:4127") # Disable linker warning
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:libvcruntime /NODEFAULTLIB:libvcruntimed>")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:python37 /NODEFAULTLIB:python39")
 
 #####################################
 # Define Install Targets
@@ -317,6 +293,7 @@ install(TARGETS
   RUNTIME DESTINATION bin
 )
 
+FIND_PACKAGE(PVRTexLib REQUIRED)
 get_filename_component(PVRTEXLIB_LIB_DIR ${PVRTEXLIB_LIB} DIRECTORY)
 install(DIRECTORY
     ${PVRTEXLIB_LIB_DIR}/
@@ -327,6 +304,7 @@ install(DIRECTORY
         PATTERN "*.dylib"
 )
 
+FIND_PACKAGE(fbx REQUIRED)
 get_filename_component(FBX_LIB_DIR ${FBX_LIB} DIRECTORY)
 install(DIRECTORY
     ${FBX_LIB_DIR}/

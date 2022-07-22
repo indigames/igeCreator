@@ -47,38 +47,22 @@ Platforms: # Platforms config
         x64: true
 
 Requires: # Modules config
-    - igeCore/[>=0.5.68]@ige/test
-    - pyxCore/[>=0.5.68]@ige/test
-    - SDL/[>=2.0.11]@ige/test
-    - stb/[>=1.0.0]@ige/test
-    - openssl/[>=1.1.1c]@ige/test
-    - taskflow/[>=3.1.0]@ige/test
-    - tracy/[>=0.6.6]@ige/test
-    - Python/[>=3.9.1]@ige/test
-    - numpy/[>=1.19.5]@ige/test
-    - igePAL/[>=0.0.6]@ige/test
-    - bullet/[>=3.0.8]@ige/test
-    - igeBullet/[>=0.4.61]@ige/test 
-    - igeEffekseer/[>=0.1.6]@ige/test
-    - igeNavigation/[>=0.0.2]@ige/test
-    - igeScene/[>=0.0.6]@ige/test
-    - igeSound/[>=0.1.0]@ige/test
-    - igeSdk/[>=0.0.1]@ige/test
-    # - pyimgui/[>=1.2.0]@ige/test
-    # - dlib/[>=19.19.99]@ige/test
-    # - igeDlibExt/[>=0.0.1]@ige/test
-    # - opencv/[>=4.1.2]@ige/test
-    # - pybox2d/[>=2.3.8]@ige/test
-    # - pillow/[>=8.2.0]@ige/test
-    # - tensorflow/[>=2.5.0]@ige/test
-    # - igeAds/[>=0.0.3]@ige/test
-    # - igeAutoTest/[>=0.0.4]@ige/test
-    # - igeCamera/[>=0.0.1]@ige/test
-    # - igeFirebase/[>=0.0.33]@ige/test
-    # - igeGamesServices/[>=0.0.1]@ige/test
-    # - igeInAppPurchase/[>=0.0.2]@ige/test
-    # - igeNanoGUI/[>=0.0.1]@ige/test
-    # - igeNotify/[>=0.0.1]@ige/test
-    # - igeSocial/[>=0.0.5]@ige/test
-    # - igeWebview/[>=0.0.3]@ige/test
+    - igePAL
+    - igeBullet
+    - igeEffekseer
+    - igeNavigation
+    - igeScene
+    - igeSound
+    - igeSdk
+    - igeGamesServices
+    - igeSocial
+    - igeWebview
+    - igeFirebase
+    - igeNotify
+    - pyimgui
+    - dlib
+    - opencv
+    - pybox2d
+    - pillow
+    - tensorflow
 

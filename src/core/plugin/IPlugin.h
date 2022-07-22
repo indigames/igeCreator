@@ -59,7 +59,6 @@ namespace ige::creator
             }
             if (it != m_plugins.end()) {
                 m_plugins.erase(it);
-                *it = nullptr;
                 return true;
             }
             return false;
