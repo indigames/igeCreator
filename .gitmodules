@@ -14,3 +14,6 @@
 	path = 3rd-party/imgui-node-editor
 	url = https://github.com/indigames/imgui-node-editor.git
 	branch = develop
+[submodule "app/toolchains"]
+	path = app/toolchains
+	url = https://github.com/indigames/igeBuilder
