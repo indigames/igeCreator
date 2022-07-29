@@ -112,11 +112,6 @@ namespace ige::creator
             });
 
         auto buildMenu = createWidget<Menu>("Build");
-        buildMenu->createWidget<MenuItem>("ROM")->getOnClickEvent().addListener([](auto widget) {
-            TaskManager::getInstance()->addTask([]() {
-                Editor::getInstance()->buildRom();
-            });
-        });
         buildMenu->createWidget<MenuItem>("Windows")->getOnClickEvent().addListener([](auto widget) {
             TaskManager::getInstance()->addTask([]() {
                 Editor::getInstance()->buildPC();
@@ -125,6 +120,11 @@ namespace ige::creator
         buildMenu->createWidget<MenuItem>("Android")->getOnClickEvent().addListener([](auto widget) {
             TaskManager::getInstance()->addTask([]() {
                 Editor::getInstance()->buildAndroid();
+            });
+        });
+        buildMenu->createWidget<MenuItem>("WebGL")->getOnClickEvent().addListener([](auto widget) {
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->buildWebGL();
             });
         });
 

@@ -188,10 +188,10 @@ namespace ige::creator
         auto buildCmd = [](void* param)
         {
             pyxie_printf("Converting assets...");
-            auto scriptPath = fs::path(Editor::getInstance()->getEnginePath()).append("tools").append("convert-textures.bat");
+            auto scriptPath = fs::path(Editor::getInstance()->getEnginePath()).append("toolchains").append("convert_textures.py");
             auto projectDir = Editor::getInstance()->getProjectPath();
-            auto cmd = (std::string("cmd.exe /c \"\"") + scriptPath.string() + "\" \"" + projectDir +"\"\"").c_str();
-            system(cmd);
+            auto cmd = std::string("python \"") + scriptPath.string() + "\" -i \"" + projectDir +"\" -o \"" + projectDir;
+            system(cmd.c_str());
             pyxie_printf("Converting assets finished!");
             return 1;
         };
@@ -631,15 +631,17 @@ class %s(Script):\n\
        ofs.close();
     }
 
-    bool Editor::buildRom()
+    bool Editor::buildWebGL()
     {
         auto buildCmd = [](void*)
         {
-            pyxie_printf("Building ROM...");
-            auto scriptPath = fs::path(Editor::getInstance()->getEnginePath()).append("tools").append("build-rom.bat");
+            pyxie_printf("Building WebGL...");
+            auto scriptPath = fs::path(Editor::getInstance()->getEnginePath()).append("toolchains").append("build.py");
             auto projectDir = Editor::getInstance()->getProjectPath();
-            system((std::string("cmd.exe /c ") + scriptPath.string() + " " + projectDir).c_str());
-            pyxie_printf("Building ROM: DONE!");
+            auto releaseDir = fs::path(projectDir).append("release").string();
+            auto cmd = std::string("python \"") + scriptPath.string() + "\" -i \"" + projectDir + "\" -o \"" + releaseDir + "\" -p emscripten -v";
+            system(cmd.c_str());
+            pyxie_printf("Building WebGL: DONE!");
             return 1;
         };
 
@@ -652,14 +654,15 @@ class %s(Script):\n\
     {
         auto buildCmd = [](void*)
         {
-            pyxie_printf("Building Windows Desktop...");
-            auto scriptPath = fs::path(Editor::getInstance()->getEnginePath()).append("tools").append("build-windows.bat");
+            pyxie_printf("Building Windows...");
+            auto scriptPath = fs::path(Editor::getInstance()->getEnginePath()).append("toolchains").append("build.py");
             auto projectDir = Editor::getInstance()->getProjectPath();
-            system((std::string("cmd.exe /c ") + scriptPath.string() + " " + projectDir).c_str());
-            pyxie_printf("Building Windows Desktop: DONE!");
+            auto releaseDir = fs::path(projectDir).append("release").string();
+            auto cmd = std::string("python \"") + scriptPath.string() + "\" -i \"" + projectDir + "\" -o \"" + releaseDir + "\" -p windows -v";
+            system(cmd.c_str());
+            pyxie_printf("Building Windows: DONE!");
             return 1;
         };
-
         auto buildThread = SDL_CreateThreadWithStackSize(buildCmd, "Build_Thread", 32 * 1024 * 1024, (void*)nullptr);
         SDL_DetachThread(buildThread);
         return true;
@@ -670,9 +673,11 @@ class %s(Script):\n\
         auto buildCmd = [](void*)
         {
             pyxie_printf("Building Android...");
-            auto scriptPath = fs::path(Editor::getInstance()->getEnginePath()).append("tools").append("build-android.bat");
+            auto scriptPath = fs::path(Editor::getInstance()->getEnginePath()).append("toolchains").append("build.py");
             auto projectDir = Editor::getInstance()->getProjectPath();
-            system((std::string("cmd.exe /c ") + scriptPath.string() + " " + projectDir).c_str());
+            auto releaseDir = fs::path(projectDir).append("release").string();
+            auto cmd = std::string("python \"") + scriptPath.string() + "\" -i \"" + projectDir + "\" -o \"" + releaseDir + "\" -p android -v";
+            system(cmd.c_str());
             pyxie_printf("Building Android: DONE!");
             return 1;
         };

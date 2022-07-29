@@ -34,7 +34,7 @@ namespace ige::creator
         void resetLayout();
         void toggleFullScreen();
 
-        bool buildRom();
+        bool buildWebGL();
         bool buildPC();
         bool buildAndroid();
 
