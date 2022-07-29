@@ -4,13 +4,14 @@ App: # Application config
     VersionName: '0.0.1' # (major.minor.build)
     VersionCode: 1 # MUST BE INTEGER (without leading '0' character)
     BundleId: net.indigames.igesample # BundleID (iOS/MacOS), Package Name (Android)
+    Orientation: 'portrait' # 'landscape' or 'portrait'
 
 Platforms: # Platforms config
     android:
-        RomDir: rom/mobile
-        ConfigDir: config/android # Android 'res' folder
+        RomDir: 'mobile'
+        ConfigDir: 'config/android' # Android 'res' folder
         arm64-v8a: true
-        x86_64: false
+        armeabi-v7a: true
         MinSdkVersion: 21
         TargetSdkVersion: 31
         ScreenOrientation: portrait
@@ -29,12 +30,12 @@ Platforms: # Platforms config
             # android.hardware.camera.autofocus: false # Use camera auto focus, not required
             # - add more here
     windows:
-        RomDir: rom/pc
-        ConfigDir: ''
+        RomDir: 'pc'
+        ConfigDir: 'config/windows'
         x64: true
     ios:
-        RomDir: rom/mobile
-        ConfigDir: config/ios # iOS's 'Assets' folder
+        RomDir: 'mobile'
+        ConfigDir: 'config/ios' # iOS's 'Assets' folder
         arm64: true
         DeploymentTarget: '11.0'
         DeviveFamily: 1,2
@@ -42,9 +43,12 @@ Platforms: # Platforms config
         CodeSignIdentity: iPhone Development # use 'iPhone Development' for debug, 'iPhone Distribution' for release
         ProvisioningProfile: Automatic # use 'Automatic' for debug, 'igeSample-Adhoc-IOS' for release
     macos:
-        RomDir: rom/pc
-        ConfigDir: ''
+        RomDir: 'pc'
+        ConfigDir: 'config/macos'
         x64: true
+    emscripten:
+        RomDir: 'mobile'
+        ConfigDir: 'config/emscripten'
 
 Requires: # Modules config
     - igePAL
@@ -54,15 +58,15 @@ Requires: # Modules config
     - igeScene
     - igeSound
     - igeSdk
-    - igeGamesServices
-    - igeSocial
-    - igeWebview
-    - igeFirebase
-    - igeNotify
-    - pyimgui
-    - dlib
-    - opencv
-    - pybox2d
-    - pillow
-    - tensorflow
+    # - igeGamesServices
+    # - igeSocial
+    # - igeWebview
+    # - igeFirebase
+    # - igeNotify
+    # - pyimgui
+    # - dlib
+    # - opencv
+    # - pybox2d
+    # - pillow
+    # - tensorflow
 

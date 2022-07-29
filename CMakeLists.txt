@@ -71,7 +71,8 @@ set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "CreateShortCut \\\"$DESKTOP\\\\${TARGET_N
 set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "Delete \\\"$DESKTOP\\\\${TARGET_NAME}.lnk\\\"")
 include(CPack)
 
-add_compile_options(/MP)
+include(compiler_options)
+
 add_compile_definitions(VERSION_NAME="${CMAKE_PROJECT_VERSION}" EDITOR_MODE=1 IMGUI_DEFINE_MATH_OPERATORS=1)
 add_compile_definitions($<$<CONFIG:Debug>:_ITERATOR_DEBUG_LEVEL=0>)
 
@@ -88,7 +89,6 @@ if(USE_MSVC_RELEASE_RUNTIME_ALWAYS)
         endif(${flag_var} MATCHES "-D_DEBUG")
     endforeach()
 endif()
-
 
 include(pyxCore)
 include(igeCore)
@@ -113,8 +113,6 @@ find_package(numpy REQUIRED)
 find_package(stb REQUIRED)
 find_package(SDL REQUIRED)
 find_package(openssl REQUIRED)
-find_package(taskflow REQUIRED)
-# find_package(tracy REQUIRED)
 find_package(zlib REQUIRED)
 find_package(json REQUIRED)
 
@@ -184,11 +182,9 @@ target_include_directories(${TARGET_NAME} PUBLIC
     "${numpy_INCLUDE_DIRS}"
     "${zlib_INCLUDE_DIRS}"
     "${openssl_INCLUDE_DIRS}"
-    "${json_INCLUDE_DIRS}"    
+    "${json_INCLUDE_DIRS}"
     "${stb_INCLUDE_DIRS}"
-    "${SDL_INCLUDE_DIRS}"    
-    "${taskflow_INCLUDE_DIRS}"
-    "${tracy_INCLUDE_DIRS}"
+    "${SDL_INCLUDE_DIRS}"
 )
 
 set(COMPILE_DEFINITIONS
@@ -218,11 +214,9 @@ target_link_directories(${TARGET_NAME} PUBLIC
     "${numpy_LIB_DIRS}"
     "${zlib_LIB_DIRS}"
     "${openssl_LIB_DIRS}"
-    "${json_LIB_DIRS}"    
+    "${json_LIB_DIRS}"
     "${stb_LIB_DIRS}"
-    "${SDL_LIB_DIRS}"    
-    "${taskflow_LIB_DIRS}"
-    "${tracy_LIB_DIRS}"
+    "${SDL_LIB_DIRS}"
 )
 
 target_link_libraries(${TARGET_NAME}
@@ -242,8 +236,6 @@ target_link_libraries(${TARGET_NAME}
     ${json_LIBRARIES}
     ${stb_LIBRARIES}
     ${SDL_LIBRARIES}
-    ${taskflow_LIBRARIES}
-    ${tracy_LIBRARIES}
     Crypt32
     opengl32
     glu32
@@ -280,7 +272,7 @@ set_target_properties(
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${TARGET_NAME})
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ignore:4099 /ignore:4286 /ignore:4127") # Disable linker warning
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:libvcruntime /NODEFAULTLIB:libvcruntimed>")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:libvcruntime /NODEFAULTLIB:libvcruntimed")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:python37 /NODEFAULTLIB:python39")
 
 #####################################

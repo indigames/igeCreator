@@ -32,14 +32,13 @@ int main(void* data) {
 
 	// Create window
 	gApp = std::make_shared<Application>();
-	gApp->createAppWindow();
+	
+	// Show window
+	gApp->showAppWindow(true, -1, -1, true, true);
 
 	// Initialize
 	if (gApp->isInitialized())
 	{
-		// Show window
-		gApp->showAppWindow(true, -1, -1, true, true);
-
 		// Create editor instance
 		auto& editor = Editor::getInstance();
 		editor->registerApp(gApp);
