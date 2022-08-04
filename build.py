@@ -23,20 +23,28 @@ def safeRemove(rm_path):
     except:
         pass
 
-def collect_libs():
+def collect_libs(target):
     libs_dir = os.path.dirname(project_dir)
     toolchain_dir = os.path.join(project_dir, 'app', 'toolchains', 'libs')
     safeRemove(toolchain_dir)
     os.makedirs(toolchain_dir)
     shutil.copytree(os.path.join(libs_dir, 'cmake'), os.path.join(toolchain_dir, 'cmake'))
+    exclude = ['igeCreator', '.git', '.vscode']
+    if target == 'windows':
+        exclude.append('macos')
+        exclude.append('ios')
+    if target == 'macos':
+        exclude.append('windows')
     for root, dirs, files in os.walk(libs_dir):
-        if root.find('\.') != -1 or root.find('igeCreator') != -1: continue
+        dirs[:] = [d for d in dirs if d not in exclude]
         for _dir in dirs:
             src_path = os.path.join(root, _dir)
             dst_path = os.path.join(toolchain_dir, os.path.relpath(root, start = libs_dir), _dir)
-            if((_dir == 'prebuilt' or _dir == 'single_include' )and not os.path.exists(dst_path)):
-                print(f'copying {src_path} -> {dst_path}')                
+            if((_dir == 'prebuilt' or _dir == 'single_include') and not os.path.exists(dst_path)):
+                print(f'copying {src_path} -> {dst_path}')
                 shutil.copytree(src_path, dst_path)
+                for excl in exclude:
+                    safeRemove(os.path.join(dst_path, excl))
 
 def _generateCMakeProject(target, arch):
     cmake_cmd = f'cmake {project_dir} -DCMAKE_BUILD_TYPE=Release '
@@ -70,7 +78,7 @@ def _buildCMakeProject(target, arch):
     os.system(f'cmake --build . --config Release --target package --parallel {cpu_count} {platform_flags}')
 
 def build(target, arch):
-    collect_libs()
+    collect_libs(target)
     os.chdir(project_dir)
     build_dir = Path(os.path.join('build', target, arch)).as_posix()
     safeRemove(build_dir)
