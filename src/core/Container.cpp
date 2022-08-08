@@ -18,9 +18,8 @@ namespace ige::creator
         if (widget == nullptr) return;
         auto found = std::find(m_widgets.begin(), m_widgets.end(), widget);
         if (found == m_widgets.end())
-        {
-            auto thisWidget = dynamic_cast<Widget*>(this);
-            if (!thisWidget || thisWidget != widget.get())
+        {            
+            if(this != (void*)widget.get())
             {
                 widget->setContainer(this);
                 if (pos >= 0 && pos < m_widgets.size()) {

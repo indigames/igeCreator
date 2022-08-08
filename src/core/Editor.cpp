@@ -26,6 +26,8 @@ using namespace ige::scene;
 #include <backends/imgui_impl_opengl3.h>
 #define LAYOUT_CONFIG_INI "imgui.ini"
 
+#include <stb_image.h>
+
 namespace ige::creator
 {
     ige::scene::Event<const std::shared_ptr<SceneObject>&> Editor::m_targetAddedEvent;
@@ -77,6 +79,8 @@ namespace ige::creator
 
     void Editor::initialize()
     {
+        stbi_set_flip_vertically_on_load(true);
+
         // Set engine path to the runtime path
         setEnginePath(fs::current_path().string());
 

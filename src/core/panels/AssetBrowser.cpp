@@ -27,7 +27,7 @@
 
 namespace ige::creator
 {
-    fs::recursive_directory_cache g_cache;
+    auto g_cache = std::make_unique<fs::recursive_directory_cache>();
     std::thread g_watcherThread;
     std::mutex g_watcherMutex;
     bool g_stopWatcherThread = false;
@@ -35,8 +35,8 @@ namespace ige::creator
 
     void watchThreadFunc()
     {
-        g_cache.set_path(Editor::getInstance()->getProjectPath());
-        g_cache.set_scan_frequency(std::chrono::milliseconds(1000));
+        g_cache->set_path(Editor::getInstance()->getProjectPath());
+        g_cache->set_scan_frequency(std::chrono::milliseconds(1000));
 
         while (true) {
             // lock scope
@@ -50,9 +50,9 @@ namespace ige::creator
                 lk.unlock();
             }
 
-            auto size = g_cache.size();
-            if (!g_cache.isProcessed() && size > 0) {
-                for (const auto& file : g_cache) {
+            auto size = g_cache->size();
+            if (!g_cache->isProcessed() && size > 0) {
+                for (const auto& file : *g_cache) {
                     const auto& fsPath = file.entry.path();
                     const auto& name = file.stem;
                     const auto& relative = file.protocol_path;
@@ -146,7 +146,7 @@ namespace ige::creator
                         }
                     }
                 }
-                g_cache.setProcessed(true);
+                g_cache->setProcessed(true);
             }
 
             if(!g_assetMetaChecked)
@@ -185,6 +185,7 @@ namespace ige::creator
         stopWatcherThread();
         m_fileSystemWidget = nullptr;
         removeAllWidgets();
+        g_cache.reset();
         getOnFocusEvent().removeAllListeners();
     }
 
