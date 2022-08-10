@@ -22,23 +22,16 @@ ShortcutController::~ShortcutController()
 	m_foundTrigger.clear();
 	if (m_indexedShortcutEntries.size() > 0) {
 		for (auto& entries : m_indexedShortcutEntries) {
-			for (auto entry : entries.second) {
-				entry->release();
+			for (auto* entry : entries.second) {
+                if(entry->getReferenceCount() > 0)
+                    entry->release();
 			}
 			entries.second.clear();
 		}
 	}
 	m_indexedShortcutEntries.clear();
-
-	if (m_defaultShortcutEntries.size() > 0) {
-		for (auto& entry : m_defaultShortcutEntries) {
-			entry.second->release();
-		}
-	}
 	m_defaultShortcutEntries.clear();
-
 	m_entryCounter = 0;
-
 }
 
 

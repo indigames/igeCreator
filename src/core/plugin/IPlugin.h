@@ -27,11 +27,11 @@ namespace ige::creator
         }
         
         template<typename T, typename... Args>
-        std::shared_ptr<T> addPlugin(Args&& ... p_args)
+        std::shared_ptr<T> addPlugin(Args&& ... args)
         {
             static_assert(std::is_base_of<IPlugin, T>::value, "T should derive from IPlugin");
 
-            auto newPlugin = std::make_shared<T>(std::forward<Args>(p_args)...);
+            auto newPlugin = std::make_shared<T>(std::forward<Args>(args)...);
             m_plugins.push_back(newPlugin);
             return newPlugin;
         }

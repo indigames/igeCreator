@@ -71,23 +71,12 @@ namespace ige::creator
 
     void Container::removeAllWidgets()
     {
-        for (auto& widget : m_widgets)
-        {
-            if (widget)
-            {
-                auto& group = std::dynamic_pointer_cast<Group>(widget);
-                if (group) group->removeAllWidgets();
-                group = nullptr;
-            }
-        }
         m_widgets.clear();
     }
     
     void Container::drawWidgets()
     {
         for(const auto& widget: m_widgets)
-        {
-            if(widget != nullptr) widget->draw();
-        }
+            widget->draw();
     }
 }

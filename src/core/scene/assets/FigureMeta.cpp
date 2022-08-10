@@ -94,7 +94,7 @@ std::string FigureMeta::baseModelPath()
         baseModelPath.append(parentName.string() + ".fbx");
     else
         baseModelPath.append(parentName.string() + ".dae");
-    return fs::exists(baseModelPath) ? baseModelPath : m_path;
+    return fs::exists(baseModelPath) ? baseModelPath.string() : m_path;
 }
 
 bool FigureMeta::isAnim() 

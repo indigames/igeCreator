@@ -21,10 +21,7 @@ void AutoReleasePool::addObject(Ref* object) {
 void AutoReleasePool::clear() {
 	std::vector<Ref*> releasings;
 	releasings.swap(_managedObjectArray);
-	for (const auto& obj : releasings)
-	{
-		obj->release();
-	}
+    releasings.clear();
 }
 
 bool AutoReleasePool::contains(Ref* object) const

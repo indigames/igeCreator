@@ -55,6 +55,8 @@ namespace ige::creator
 
     void EditorScene::clear()
     {
+        unregisterShortcut();
+
         m_currCamera = nullptr;
         if (m_2dCamera) m_2dCamera->DecReference();
         m_2dCamera = nullptr;
@@ -201,17 +203,19 @@ namespace ige::creator
     }
 
     void EditorScene::unregisterShortcut() {
-        REMOVE_COMMAND(ShortcutDictionary::EDIT_SCENE_OBJECT_SELECTED);
-        REMOVE_COMMAND(ShortcutDictionary::DELETE_SCENE_OBJECT_SELECTED);
-        REMOVE_COMMAND(ShortcutDictionary::COPY_SCENE_OBJECT_SELECTED);
-        REMOVE_COMMAND(ShortcutDictionary::PASTE_SCENE_OBJECT_SELECTED);
-        REMOVE_COMMAND(ShortcutDictionary::FILE_NEW_PROJECT_SELECTED);
-        REMOVE_COMMAND(ShortcutDictionary::FILE_OPEN_PROJECT_SELECTED);
-        REMOVE_COMMAND(ShortcutDictionary::FILE_NEW_SCENE_SELECTED);
-        REMOVE_COMMAND(ShortcutDictionary::FILE_SAVE_SCENE_SELECTED);
-        REMOVE_COMMAND(ShortcutDictionary::FILE_SAVE_SCENE_AS_SELECTED);
-        REMOVE_COMMAND(ShortcutDictionary::EDIT_UNDO);
-        REMOVE_COMMAND(ShortcutDictionary::EDIT_REDO);
+        if(Editor::getShortcut() != nullptr) {
+            REMOVE_COMMAND(ShortcutDictionary::EDIT_SCENE_OBJECT_SELECTED);
+            REMOVE_COMMAND(ShortcutDictionary::DELETE_SCENE_OBJECT_SELECTED);
+            REMOVE_COMMAND(ShortcutDictionary::COPY_SCENE_OBJECT_SELECTED);
+            REMOVE_COMMAND(ShortcutDictionary::PASTE_SCENE_OBJECT_SELECTED);
+            REMOVE_COMMAND(ShortcutDictionary::FILE_NEW_PROJECT_SELECTED);
+            REMOVE_COMMAND(ShortcutDictionary::FILE_OPEN_PROJECT_SELECTED);
+            REMOVE_COMMAND(ShortcutDictionary::FILE_NEW_SCENE_SELECTED);
+            REMOVE_COMMAND(ShortcutDictionary::FILE_SAVE_SCENE_SELECTED);
+            REMOVE_COMMAND(ShortcutDictionary::FILE_SAVE_SCENE_AS_SELECTED);
+            REMOVE_COMMAND(ShortcutDictionary::EDIT_UNDO);
+            REMOVE_COMMAND(ShortcutDictionary::EDIT_REDO);
+        }
     }
 
     void EditorScene::initDragDrop()

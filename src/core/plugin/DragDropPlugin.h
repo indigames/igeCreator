@@ -209,7 +209,7 @@ namespace ige::creator
         if (ImGui::BeginDragDropTargetCustom(topRect, id))
         {
             ImGuiDragDropFlags flags = 0;
-            if (auto payload = ImGui::AcceptDragDropPayload(getId().c_str(), flags)) {
+            if (auto payload = ImGui::AcceptDragDropPayload(this->getId().c_str(), flags)) {
                 T data = *(T*)payload->Data;
                 m_onTopDataReceivedEvent.invoke(data);
             }
@@ -218,7 +218,7 @@ namespace ige::creator
         else if (ImGui::BeginDragDropTargetCustom(bottomRect, id))
         {
             ImGuiDragDropFlags flags = 0;
-            if (auto payload = ImGui::AcceptDragDropPayload(getId().c_str(), flags)) {
+            if (auto payload = ImGui::AcceptDragDropPayload(this->getId().c_str(), flags)) {
                 T data = *(T*)payload->Data;
                 m_onBottomDataReceivedEvent.invoke(data);
             }

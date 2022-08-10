@@ -17,7 +17,7 @@ namespace ige::creator
         template <typename T, typename... Args>
 		std::shared_ptr<T> createWidget(Args&&... args)
 		{
-            auto widget = std::make_shared<T>(args...);
+            auto widget = std::make_shared<T>(std::forward<Args>(args)...);
 			addWidget(widget);
 			return widget;
 		}

@@ -13,7 +13,7 @@
 #include <thread>
 #include <functional>
 
-#include "filesystem.h"
+#include "FileSystem.h"
 
 namespace fs
 {

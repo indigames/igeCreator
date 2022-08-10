@@ -11,10 +11,11 @@ namespace ige::creator
 
     Group::~Group()
     {
-        setContainer(nullptr);
-        removeAllWidgets();
         getOnOpenedEvent().removeAllListeners();
         getOnClosedEvent().removeAllListeners();
+
+        m_container = nullptr;
+        m_widgets.clear();
     }
 
     void Group::_drawImpl()

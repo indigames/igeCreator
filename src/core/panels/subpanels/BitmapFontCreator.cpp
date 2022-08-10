@@ -556,7 +556,7 @@ namespace ige::creator
         if (m_font != nullptr) m_font->setName(m_path);
     }
 
-    void BitmapFontCreator::setChacterCode(std::string& characterSet)
+    void BitmapFontCreator::setChacterCode(const std::string& characterSet)
     {
         m_CharacterCode = characterSet;
     }

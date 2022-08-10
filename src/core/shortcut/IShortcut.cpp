@@ -9,7 +9,7 @@ IShortcut::IShortcut() {
 }
 
 IShortcut::~IShortcut() {
-	unregisterShortcut();
+	// unregisterShortcut();
 }
 
 void IShortcut::unregisterShortcut() { }

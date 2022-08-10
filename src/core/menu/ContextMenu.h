@@ -10,7 +10,7 @@ namespace ige::creator
         ContextMenu(const std::string& name, bool enable = true);
         virtual ~ContextMenu();
 
-        virtual void execute();
+        virtual void execute() override;
         void open();
         void close();
 

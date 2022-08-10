@@ -227,6 +227,14 @@ public:
 		processed = process;
 	}
 
+	void unwatch()
+	{
+		if(watch_id_ > 0) {
+			watcher::unwatch(watch_id_);
+			watch_id_ = 0;
+		}
+	}
+
 private:
 	//-----------------------------------------------------------------------------
 	//  Name : should_refresh ()
@@ -246,10 +254,6 @@ private:
 
 		watch_id_ = watcher::watch(path_ / "*", is_recursive, false, scan_frequency_,
 								   [this](const auto&, bool) { should_refresh_ = true; });
-	}
-	void unwatch()
-	{
-		watcher::unwatch(watch_id_);
 	}
 
 	///

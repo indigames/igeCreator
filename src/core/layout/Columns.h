@@ -6,6 +6,9 @@
 #include "core/Container.h"
 #include "core/Widget.h"
 
+#include <imgui.h>
+#include <imgui_internal.h>
+
 namespace ige::creator
 {
     template <size_t N>

@@ -23,7 +23,7 @@ public:
     virtual ~EditorScene();
 
     virtual void clear();
-    virtual void update(float dt);
+    virtual void update(float dt) override;
 
     void registerShortcut() override;
     void unregisterShortcut() override;

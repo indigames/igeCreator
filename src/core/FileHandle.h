@@ -75,6 +75,6 @@ inline std::vector<std::string> GetFileExtensionSuported(E_FileExts fileExt) {
 inline bool IsFormat(E_FileExts fileExt, const std::string &ex) {
     if (ex.empty() || ex.size() <= 0 || ex.compare("") == 0) return false;
     auto ext = ex; std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-    const auto &supportExts = GetFileExtensionSuported(fileExt);
+    auto supportExts = GetFileExtensionSuported(fileExt);
     return std::find(std::begin(supportExts), std::end(supportExts), ext) != std::end(supportExts);
 }

@@ -43,7 +43,7 @@ namespace ige::creator
         virtual void clear();
         virtual void update(float dt) override;
 
-        void setChacterCode(std::string &characterSet);
+        void setChacterCode(const std::string &characterSet);
         bool saveBitmapFont();
         bool loadBitmapFont(const std::string& path);
 

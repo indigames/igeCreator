@@ -147,7 +147,7 @@ namespace ige::creator
         setImGUIStyle();
 
         ImGui_ImplSDL2_InitForOpenGL((SDL_Window*)m_app->getAppWindow(), m_app->getAppContext());
-        ImGui_ImplOpenGL3_Init("#version 130");
+        ImGui_ImplOpenGL3_Init();
     }
 
     void Editor::setImGUIStyle()
@@ -317,7 +317,7 @@ namespace ige::creator
     }
 
     bool Editor::reloadResource(const std::string& path) {
-        auto& scene = SceneManager::getInstance()->getCurrentScene();
+        auto scene = SceneManager::getInstance()->getCurrentScene();
         if (!scene) return false;
         return scene->reloadResource(path);
     }
@@ -338,7 +338,6 @@ namespace ige::creator
         if (getCanvas())
         {
             getCanvas()->getMenuBar()->initialize();
-            getCanvas()->getProjectSetting()->initialize();
             getCanvas()->getHierarchy()->initialize();
             getCanvas()->getHierarchy()->rebuildHierarchy();
             getCanvas()->getEditorScene()->set2DMode(!Editor::getInstance()->is3DCamera());
@@ -544,7 +543,7 @@ namespace ige::creator
     {
         auto scene = SceneManager::getInstance()->getCurrentScene();
         if (scene && scene->isPrefab()) {
-            auto prefabRootId = scene->getObjects()[0]->getId();            
+            auto prefabRootId = scene->getObjects()[0]->getId();
             auto path = scene->getPath();;
             return savePrefab(prefabRootId, path);
         }
@@ -703,7 +702,7 @@ class %s(Script):\n\
 
     bool Editor::openAbout()
     {
-        auto msgBox = MsgBox("About", "igeCreator \n Version: " + std::string(VERSION_NAME) + "\n Indi Games © 2022", MsgBox::EBtnLayout::ok, MsgBox::EMsgType::info);
+        auto msgBox = MsgBox("About", "igeCreator \n Version: " + std::to_string(VERSION_MAJOR) + "." + std::to_string(VERSION_MINOR) + "." + std::to_string(VERSION_PATCH) + "\n Indi Games © 2022", MsgBox::EBtnLayout::ok, MsgBox::EMsgType::info);
         while (!msgBox.ready(1000));
         return true;
     }

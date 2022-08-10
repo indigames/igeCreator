@@ -128,20 +128,21 @@ namespace ige::scene
         {
             for (auto& object : m_objects)
             {
-                if (!object.expired())
+                if (!object.expired()) {
                     if((*found)->canMultiEdit()) {
                         // just remove component by name
                         object.lock()->removeComponent((*found)->getName());
                     }
                     else {
                         // remove exact component by id
-                        auto& compoundComponent = std::dynamic_pointer_cast<CompoundComponent>((*found));
+                        auto compoundComponent = std::dynamic_pointer_cast<CompoundComponent>(*found);
                         for (auto& comp : compoundComponent->getComponents()) {
                             object.lock()->removeComponent(comp->getInstanceId());
                             comp = nullptr;
                         }
                         compoundComponent = nullptr;
                     }
+                }
             }
             m_components.erase(found);
             return true;

@@ -31,9 +31,9 @@ namespace ige::creator
 {
     template <typename T, size_t N>
     Drag<T, N>::Drag(const std::string& label, ImGuiDataType type, const std::array<T, N>& val, float speed, const T& minVal, const T& maxVal)
-        : DataWidget(val), m_label(label), m_dataType(type), m_speed(speed), m_min(minVal), m_max(maxVal), m_dragging(false)
+        : DataWidget<std::array<T, N>>(val), m_label(label), m_dataType(type), m_speed(speed), m_min(minVal), m_max(maxVal), m_dragging(false)
     {
-        m_label.append(getIdAsString());
+        m_label.append(this->getIdAsString());
     }
 
     template <typename T, size_t N>
@@ -49,14 +49,14 @@ namespace ige::creator
 
         for (size_t i = 0; i < N; ++i)
         {
-            if (m_data[i] < m_min)
-                m_data[i] = m_min;
-            else if (m_data[i] > m_max)
-                m_data[i] = m_max;
+            if (this->m_data[i] < m_min)
+                this->m_data[i] = m_min;
+            else if (this->m_data[i] > m_max)
+                this->m_data[i] = m_max;
         }
 
         auto label = m_label.c_str();
-        void* p_data = m_data.data();
+        void* p_data = this->m_data.data();
         int changedIdx = -1;
 
         auto& g = *(ImGui::GetCurrentContext());
@@ -103,14 +103,14 @@ namespace ige::creator
         if (changedIdx != -1)
         {
             if (begin) {
-                notifyBeginChange(m_data);
+                notifyBeginChange(this->m_data);
             }
-            if (std::isnan((float)m_data[changedIdx]))
-                m_data[changedIdx] = 0;
-            notifyChange(m_data);
+            if (std::isnan((float)this->m_data[changedIdx]))
+                this->m_data[changedIdx] = 0;
+            this->notifyChange(this->m_data);
         }
         if (finish) {
-            notifyFinishChange(m_data);
+            notifyFinishChange(this->m_data);
         }
     }
 

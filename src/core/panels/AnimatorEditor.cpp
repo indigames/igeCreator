@@ -284,7 +284,7 @@ namespace ige::creator
 
             if (stateMachine->getStates().size() > 0) {
                 for (const auto& state : stateMachine->getStates()) {
-                    auto& node = createNode(state->getName(), (NodeType)state->getType(), ImVec2(state->getPosition().X(), state->getPosition().Y()));
+                    auto node = createNode(state->getName(), (NodeType)state->getType(), ImVec2(state->getPosition().X(), state->getPosition().Y()));
                     node->state = state;
                 }
                 for (const auto& node : m_nodes) {
@@ -310,7 +310,7 @@ namespace ige::creator
                 auto fsPath = fs::path(path);
                 auto name = fsPath.stem().string();
                 if (!m_controller->getStateMachine(m_currLayer)->hasState(name)) {
-                    auto& node = createNode(name, NodeType::Normal, ImGui::GetIO().MousePos);
+                    auto node = createNode(name, NodeType::Normal, ImGui::GetIO().MousePos);
                     node->state = m_controller->getStateMachine(m_currLayer)->addState(name);
                     node->state.lock()->setPath(path);
                 }

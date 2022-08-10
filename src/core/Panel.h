@@ -31,7 +31,7 @@ namespace ige::creator
         };
         
     public:
-        Panel(const std::string& name = "", Panel::Settings setting = {});
+        Panel(const std::string& name, Panel::Settings setting);
         virtual ~Panel();
 
         void draw() override;
