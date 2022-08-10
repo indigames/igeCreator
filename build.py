@@ -116,7 +116,7 @@ def build(target, arch):
     safeRemove(release_dir)
     os.makedirs(release_dir)
     for fname in os.listdir(build_dir):
-        if fname.endswith('.exe') or fname.endswith('.zip'):
+        if fname.endswith('.exe') or fname.endswith('.zip') or fname.endswith('.dmg'):
             shutil.move(os.path.join(build_dir, fname), release_dir)
 
 def main():
