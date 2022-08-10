@@ -164,7 +164,6 @@ namespace ige::creator
         lk.unlock();
         if (g_watcherThread.joinable())
             g_watcherThread.join();
-        g_cache.unwatch();
     }
 
     void startWatcherThread() {

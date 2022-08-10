@@ -18,6 +18,7 @@ option(FORCE_BUILD_IGESDK "Force build igeSdk" ON)
 if(MSVC)
     if(USE_PREBUILT_LIBS)
         set(USE_MSVC_RELEASE_RUNTIME_ALWAYS ON)
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
     else()
         set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     endif()
@@ -441,28 +442,28 @@ endif()
 #####################################
 if(MSVC)
     install(DIRECTORY "${CMAKE_SOURCE_DIR}/app/" DESTINATION ".")
-    install(TARGETS ${TARGET_NAME} RUNTIME DESTINATION bin)
-    
-    get_filename_component(PVRTEXLIB_LIB_DIR ${PVRTEXLIB_LIB} DIRECTORY)
-    install(DIRECTORY
-        ${PVRTEXLIB_LIB_DIR}/
-        DESTINATION bin
-        FILES_MATCHING
-            PATTERN "*.dll"
-            PATTERN "*.so"
-            PATTERN "*.dylib"
+
+    install(TARGETS
+        ${TARGET_NAME}
+        RUNTIME DESTINATION bin
     )
 
-    get_filename_component(FBX_LIB_DIR ${FBX_LIB} DIRECTORY)
-    install(DIRECTORY
-        ${FBX_LIB_DIR}/
-        DESTINATION bin
-        FILES_MATCHING
-            PATTERN "*.dll"
-            PATTERN "*.so"
-            PATTERN "*.dylib"
-    )
-elseif(OSX)    
+    file(GLOB PVRTexLib_DLLS "${PVRTEXLIB_LIB_DIRS}/*.dll")
+    foreach(dll IN LISTS PVRTexLib_DLLS)
+        add_custom_command(
+            TARGET ${TARGET_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${dll}" $<TARGET_FILE_DIR:${TARGET_NAME}>
+            COMMENT "Copying dll: ${dll}")
+    endforeach()
+
+    file(GLOB FBX_DLLS "${FBX_LIB_DIRS}/*.dll")
+    foreach(dll IN LISTS FBX_DLLS)
+        add_custom_command(
+            TARGET ${TARGET_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${dll}" $<TARGET_FILE_DIR:${TARGET_NAME}>
+            COMMENT "Copying dll: ${dll}")
+    endforeach()
+elseif(OSX)
     get_filename_component(PVRTEXLIB_LIB_DIR ${PVRTEXLIB_LIB} DIRECTORY)
     install(DIRECTORY
         ${PVRTEXLIB_LIB_DIR}/
