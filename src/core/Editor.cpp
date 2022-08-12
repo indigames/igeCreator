@@ -34,6 +34,12 @@ namespace ige::creator
     ige::scene::Event<const std::shared_ptr<SceneObject>&> Editor::m_targetRemovedEvent;
     ige::scene::Event<> Editor::m_targetClearedEvent;
 
+#ifdef _WIN32
+    const auto python = std::string("python");
+#elif defined(__APPLE__)
+    const auto python = std::string("/usr/local/bin/python3");
+#endif
+
     Editor::Editor()
     {}
 
@@ -642,12 +648,11 @@ class %s(Script):\n\
             auto scriptPath = fs::path(Editor::getInstance()->getEnginePath()).append("toolchains").append("build.py");
             auto projectDir = Editor::getInstance()->getProjectPath();
             auto releaseDir = fs::path(projectDir).append("release").string();
-            auto cmd = std::string("python \"") + scriptPath.string() + "\" -i \"" + projectDir + "\" -o \"" + releaseDir + "\" -p emscripten -v";
+            auto cmd = python + std::string(" \"") + scriptPath.string() + "\" -i \"" + projectDir + "\" -o \"" + releaseDir + "\" -p emscripten -v";
             system(cmd.c_str());
             pyxie_printf("Building WebGL: DONE!");
             return 1;
         };
-
         auto buildThread = SDL_CreateThreadWithStackSize(buildCmd, "Build_Thread", 32 * 1024 * 1024, (void*)nullptr);
         SDL_DetachThread(buildThread);
         return true;
@@ -661,7 +666,7 @@ class %s(Script):\n\
             auto scriptPath = fs::path(Editor::getInstance()->getEnginePath()).append("toolchains").append("build.py");
             auto projectDir = Editor::getInstance()->getProjectPath();
             auto releaseDir = fs::path(projectDir).append("release").string();
-            auto cmd = std::string("python \"") + scriptPath.string() + "\" -i \"" + projectDir + "\" -o \"" + releaseDir + "\" -p windows -v";
+            auto cmd = python + std::string(" \"") + scriptPath.string() + "\" -i \"" + projectDir + "\" -o \"" + releaseDir + "\" -p windows -v";
             system(cmd.c_str());
             pyxie_printf("Building Windows: DONE!");
             return 1;
@@ -679,12 +684,45 @@ class %s(Script):\n\
             auto scriptPath = fs::path(Editor::getInstance()->getEnginePath()).append("toolchains").append("build.py");
             auto projectDir = Editor::getInstance()->getProjectPath();
             auto releaseDir = fs::path(projectDir).append("release").string();
-            auto cmd = std::string("python \"") + scriptPath.string() + "\" -i \"" + projectDir + "\" -o \"" + releaseDir + "\" -p android -v";
+            auto cmd =  python + std::string(" \"") + scriptPath.string() + "\" -i \"" + projectDir + "\" -o \"" + releaseDir + "\" -p android -v";
             system(cmd.c_str());
             pyxie_printf("Building Android: DONE!");
             return 1;
         };
+        auto buildThread = SDL_CreateThreadWithStackSize(buildCmd, "Build_Thread", 32 * 1024 * 1024, (void*)nullptr);
+        SDL_DetachThread(buildThread);
+        return true;
+    }
 
+    bool Editor::buildIOS(){
+        auto buildCmd = [](void*)
+        {
+            pyxie_printf("Building iOS...");
+            auto scriptPath = fs::path(Editor::getInstance()->getEnginePath()).append("toolchains").append("build.py");
+            auto projectDir = Editor::getInstance()->getProjectPath();
+            auto releaseDir = fs::path(projectDir).append("release").string();
+            auto cmd = python + std::string(" \"") + scriptPath.string() + "\" -i \"" + projectDir + "\" -o \"" + releaseDir + "\" -p ios -v";
+            system(cmd.c_str());
+            pyxie_printf("Building iOS: DONE!");
+            return 1;
+        };
+        auto buildThread = SDL_CreateThreadWithStackSize(buildCmd, "Build_Thread", 32 * 1024 * 1024, (void*)nullptr);
+        SDL_DetachThread(buildThread);
+        return true;
+    }
+
+    bool Editor::buildMacOS() {
+        auto buildCmd = [](void*)
+        {
+            pyxie_printf("Building macOS...");
+            auto scriptPath = fs::path(Editor::getInstance()->getEnginePath()).append("toolchains").append("build.py");
+            auto projectDir = Editor::getInstance()->getProjectPath();
+            auto releaseDir = fs::path(projectDir).append("release").string();
+            auto cmd = python + std::string(" \"") + scriptPath.string() + "\" -i \"" + projectDir + "\" -o \"" + releaseDir + "\" -p macos -v";
+            system(cmd.c_str());
+            pyxie_printf("Building macOS: DONE!");
+            return 1;
+        };
         auto buildThread = SDL_CreateThreadWithStackSize(buildCmd, "Build_Thread", 32 * 1024 * 1024, (void*)nullptr);
         SDL_DetachThread(buildThread);
         return true;

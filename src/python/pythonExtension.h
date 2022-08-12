@@ -4,7 +4,6 @@
 /// BEGIN - External Modules
 #ifdef USE_IGECORE
 extern PyObject *PyInit__igeCore(void);
-extern PyObject *PyInit__igeTools(void);
 extern PyObject *PyInit_igeVmath(void);
 extern PyObject* PyInit_igeScene();
 #endif

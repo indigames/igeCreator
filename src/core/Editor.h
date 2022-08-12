@@ -37,6 +37,8 @@ namespace ige::creator
         bool buildWebGL();
         bool buildPC();
         bool buildAndroid();
+        bool buildIOS();
+        bool buildMacOS();
 
         bool openDocument();
         bool openAbout();

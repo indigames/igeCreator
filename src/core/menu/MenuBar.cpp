@@ -112,11 +112,24 @@ namespace ige::creator
             });
 
         auto buildMenu = createWidget<Menu>("Build");
+#if defined(_WIN32)
         buildMenu->createWidget<MenuItem>("Windows")->getOnClickEvent().addListener([](auto widget) {
             TaskManager::getInstance()->addTask([]() {
                 Editor::getInstance()->buildPC();
             });
         });
+#elif defined(__APPLE__)
+        buildMenu->createWidget<MenuItem>("iOS")->getOnClickEvent().addListener([](auto widget) {
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->buildIOS();
+            });
+        });
+        buildMenu->createWidget<MenuItem>("macOS")->getOnClickEvent().addListener([](auto widget) {
+            TaskManager::getInstance()->addTask([]() {
+                Editor::getInstance()->buildMacOS();
+            });
+        });
+#endif
         buildMenu->createWidget<MenuItem>("Android")->getOnClickEvent().addListener([](auto widget) {
             TaskManager::getInstance()->addTask([]() {
                 Editor::getInstance()->buildAndroid();
