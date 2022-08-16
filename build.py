@@ -30,6 +30,7 @@ def collect_libs(target):
     safeRemove(toolchain_dir)
     os.makedirs(toolchain_dir)
     shutil.copytree(os.path.join(libs_dir, 'cmake'), os.path.join(toolchain_dir, 'cmake'))
+    shutil.copytree(os.path.join(libs_dir, 'pyxCore', 'pyxtools', 'cmake'), os.path.join(toolchain_dir, 'pyxCore', 'pyxtools', 'cmake'))
     exclude = ['igeCreator', '.git', '.vscode']
     if target == 'windows':
         exclude.append('macos')

@@ -49,33 +49,35 @@ static std::pair<path, std::string> visit_wild_card_path(const fs::path& path, b
 		}
 		else if(fs::exists(path_filter.first, err))
 		{
-			const auto iterate = [&](auto& it) {
-				for(const auto& entry : it)
-				{
-					std::string current = entry.path().string();
-					size_t before_pos = current.find(before);
-					size_t after_pos = current.find(after);
-					if((before_pos != std::string::npos || before.empty()) &&
-					   (after_pos != std::string::npos || after.empty()))
-					{
-						if(visitor(entry.path()))
-						{
-							break;
-						}
-					}
-				}
-			};
-
-			if(recursive)
-			{
-				fs::recursive_directory_iterator it(path_filter.first, err);
-				iterate(it);
-			}
-			else
-			{
-				fs::directory_iterator it(path_filter.first, err);
-				iterate(it);
-			}
+// [IGE]: TODO fix this to avoid dead lock on threads
+//			const auto iterate = [&](auto& it) {
+//				for(const auto& entry : it)
+//				{
+//					std::string current = entry.path().string();
+//					size_t before_pos = current.find(before);
+//					size_t after_pos = current.find(after);
+//					if((before_pos != std::string::npos || before.empty()) &&
+//					   (after_pos != std::string::npos || after.empty()))
+//					{
+//						if(visitor(entry.path()))
+//						{
+//							break;
+//						}
+//					}
+//				}
+//			};
+//
+//			if(recursive)
+//			{
+//				fs::recursive_directory_iterator it(path_filter.first, err);
+//				iterate(it);
+//			}
+//			else
+//			{
+//				fs::directory_iterator it(path_filter.first, err);
+//				iterate(it);
+//			}
+// [/IGE]
 		}
 	}
 	return path_filter;

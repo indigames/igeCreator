@@ -28,6 +28,34 @@ using namespace ige::scene;
 
 #include <stb_image.h>
 
+#include <cstdio>
+#include <iostream>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <array>
+
+int exec(const char* cmd) {
+    auto command = std::string(cmd);
+    command.append(" 2>&1"); // Allow pipe with mulpiple processes chain.
+    size_t buffer_size = 128;
+    char* buffer = (char*)malloc(buffer_size);
+    memset(buffer, 0, buffer_size);
+
+    FILE* pipe = popen(command.c_str(), "r");
+    if (!pipe)
+    {
+        pyxie_printf("Couldn't start command: %s", cmd);
+        return -1;
+    }
+    while (!feof(pipe)) {
+        if(getline(&buffer, &buffer_size, pipe) != -1)
+            pyxie_printf(buffer);
+        
+    }
+    return pclose(pipe);
+}
+
 namespace ige::creator
 {
     ige::scene::Event<const std::shared_ptr<SceneObject>&> Editor::m_targetAddedEvent;
@@ -648,8 +676,14 @@ class %s(Script):\n\
             auto scriptPath = fs::path(Editor::getInstance()->getEnginePath()).append("toolchains").append("build.py");
             auto projectDir = Editor::getInstance()->getProjectPath();
             auto releaseDir = fs::path(projectDir).append("release").string();
+            auto platformDir = fs::path(releaseDir).append("emscripten");
+            if(fs::exists(platformDir)) {
+                try {
+                    fs::remove(platformDir);
+                } catch(std::exception ex) {}
+            }
             auto cmd = python + std::string(" \"") + scriptPath.string() + "\" -i \"" + projectDir + "\" -o \"" + releaseDir + "\" -p emscripten -v";
-            system(cmd.c_str());
+            exec(cmd.c_str());
             pyxie_printf("Building WebGL: DONE!");
             return 1;
         };
@@ -666,8 +700,14 @@ class %s(Script):\n\
             auto scriptPath = fs::path(Editor::getInstance()->getEnginePath()).append("toolchains").append("build.py");
             auto projectDir = Editor::getInstance()->getProjectPath();
             auto releaseDir = fs::path(projectDir).append("release").string();
+            auto platformDir = fs::path(releaseDir).append("windows");
+            if(fs::exists(platformDir)) {
+                try {
+                    fs::remove(platformDir);
+                } catch(std::exception ex) {}
+            }
             auto cmd = python + std::string(" \"") + scriptPath.string() + "\" -i \"" + projectDir + "\" -o \"" + releaseDir + "\" -p windows -v";
-            system(cmd.c_str());
+            exec(cmd.c_str());
             pyxie_printf("Building Windows: DONE!");
             return 1;
         };
@@ -684,8 +724,14 @@ class %s(Script):\n\
             auto scriptPath = fs::path(Editor::getInstance()->getEnginePath()).append("toolchains").append("build.py");
             auto projectDir = Editor::getInstance()->getProjectPath();
             auto releaseDir = fs::path(projectDir).append("release").string();
+            auto platformDir = fs::path(releaseDir).append("android");
+            if(fs::exists(platformDir)) {
+                try {
+                    fs::remove(platformDir);
+                } catch(std::exception ex) {}
+            }
             auto cmd =  python + std::string(" \"") + scriptPath.string() + "\" -i \"" + projectDir + "\" -o \"" + releaseDir + "\" -p android -v";
-            system(cmd.c_str());
+            exec(cmd.c_str());
             pyxie_printf("Building Android: DONE!");
             return 1;
         };
@@ -701,10 +747,16 @@ class %s(Script):\n\
             auto scriptPath = fs::path(Editor::getInstance()->getEnginePath()).append("toolchains").append("build.py");
             auto projectDir = Editor::getInstance()->getProjectPath();
             auto releaseDir = fs::path(projectDir).append("release").string();
+            auto platformDir = fs::path(releaseDir).append("ios");
+            if(fs::exists(platformDir)) {
+                try {
+                    fs::remove(platformDir);
+                } catch(std::exception ex) {}
+            }
             auto cmd = python + std::string(" \"") + scriptPath.string() + "\" -i \"" + projectDir + "\" -o \"" + releaseDir + "\" -p ios -v";
-            system(cmd.c_str());
+            exec(cmd.c_str());
             pyxie_printf("Building iOS: DONE!");
-            return 1;
+           return 1;
         };
         auto buildThread = SDL_CreateThreadWithStackSize(buildCmd, "Build_Thread", 32 * 1024 * 1024, (void*)nullptr);
         SDL_DetachThread(buildThread);
@@ -718,8 +770,14 @@ class %s(Script):\n\
             auto scriptPath = fs::path(Editor::getInstance()->getEnginePath()).append("toolchains").append("build.py");
             auto projectDir = Editor::getInstance()->getProjectPath();
             auto releaseDir = fs::path(projectDir).append("release").string();
+            auto platformDir = fs::path(releaseDir).append("macos");
+            if(fs::exists(platformDir)) {
+                try {
+                    fs::remove(platformDir);
+                } catch(std::exception ex) {}
+            }
             auto cmd = python + std::string(" \"") + scriptPath.string() + "\" -i \"" + projectDir + "\" -o \"" + releaseDir + "\" -p macos -v";
-            system(cmd.c_str());
+            exec(cmd.c_str());
             pyxie_printf("Building macOS: DONE!");
             return 1;
         };
@@ -727,6 +785,9 @@ class %s(Script):\n\
         SDL_DetachThread(buildThread);
         return true;
     }
+
+
+
 
     bool Editor::openDocument()
     {
