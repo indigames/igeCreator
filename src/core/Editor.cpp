@@ -42,18 +42,29 @@ int exec(const char* cmd) {
     char* buffer = (char*)malloc(buffer_size);
     memset(buffer, 0, buffer_size);
 
+#ifdef _WIN32
+    FILE* pipe = _popen(command.c_str(), "r");
+#else
     FILE* pipe = popen(command.c_str(), "r");
+#endif
     if (!pipe)
     {
         pyxie_printf("Couldn't start command: %s", cmd);
         return -1;
     }
     while (!feof(pipe)) {
-        if(getline(&buffer, &buffer_size, pipe) != -1)
-            pyxie_printf(buffer);
-        
+    #ifdef _WIN32
+        if(fgets(buffer, buffer_size, pipe)) pyxie_printf(buffer);
+    #else
+        if(getline(&buffer, &buffer_size, pipe) != -1) pyxie_printf(buffer);
+    #endif        
     }
+    free(buffer);
+#ifdef _WIN32
+    return _pclose(pipe);
+#else
     return pclose(pipe);
+#endif
 }
 
 namespace ige::creator
