@@ -15,6 +15,8 @@ public:
 	static void Tools_Scale();
 	static void Tools_TogglePivotPosition();
 	static void Tools_TogglePivotOrientation();
+    static void openExplorer(const std::string& path);
+    static void openFile(const std::string& path);
 };
 
 NS_IGE_END

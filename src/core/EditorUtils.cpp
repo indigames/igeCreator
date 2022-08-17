@@ -6,6 +6,10 @@
 #include "core/panels/EditorScene.h"
 #include "core/scene/TargetObject.h"
 
+#ifdef WIN32
+#  include <window.h>
+#endif
+
 NS_IGE_BEGIN
 
 void EditorUtils::Tools_View() 
@@ -72,5 +76,21 @@ void EditorUtils::Tools_TogglePivotOrientation()
 {
     Editor::getInstance()->toggleLocalGizmo();
 }
+
+#ifdef _WIN32
+void EditorUtils::openExplorer(const std::string &path) {
+    auto fsPath = fs::path(path);
+    ShellExecute(NULL, "explore", fs::is_directory(fsPath) ? path.c_str() : fsPath.parent_path().string().c_str(), NULL, NULL, SW_SHOWNORMAL);
+}
+
+void EditorUtils::openFile(const std::string &path) {
+    if(fs::is_directory(fs::path(path))) {
+        ShellExecute(NULL, "explore", path.c_str(), NULL, NULL, SW_SHOWNORMAL);
+    }
+    else {
+        ShellExecuteA(NULL, "open", path.c_str(), NULL, NULL, SW_RESTORE);
+    }
+}
+#endif
 
 NS_IGE_END

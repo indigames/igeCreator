@@ -1,6 +1,7 @@
 #include "core/plugin/DragDropPlugin.h"
 #include "core/FileHandle.h"
 #include "core/Editor.h"
+#include "core/EditorUtils.h"
 #include "core/task/TaskManager.h"
 
 #include "core/widgets/FileSystemWidget.h"
@@ -11,10 +12,6 @@
 
 #include <imgui.h>
 #include <imgui_internal.h>
-
-#ifdef WIN32
-#include <window.h>
-#endif
 
 constexpr int ICON_SIZE = 64.f;
 
@@ -321,12 +318,14 @@ namespace ige::creator
                 new_absolute_path /= new_name;
                 std::error_code err;
                 fs::rename(absolute_path, new_absolute_path, err);
+                m_cache.refresh();
             };
 
             const auto on_delete = [&]() {
                 std::error_code err;
                 fs::remove(absolute_path, err);
                 m_selection = "";
+                m_cache.refresh();
             };
 
             const auto on_click = [&]() {
@@ -413,11 +412,7 @@ namespace ige::creator
                     }
                     else
                     {
-                    #ifdef WIN32
-                        PVOID OldValue = nullptr;
-                        Wow64DisableWow64FsRedirection(&OldValue);
-                        ShellExecuteA(NULL, "open", absolute_path.string().c_str(), NULL, NULL, SW_RESTORE);
-                    #endif
+                        EditorUtils::openFile(absolute_path);
                     }
                 };
 
@@ -573,11 +568,7 @@ namespace ige::creator
                 ImGui::CloseCurrentPopup();
             }
 
-#ifdef WIN32
             if (ImGui::MenuItem("Explore", "Ctrl + E"))
-#else
-            if (ImGui::MenuItem("Reveal In Finder", "Ctrl + E"))
-#endif
             {
                 action = entry_action::explored;
                 ImGui::CloseCurrentPopup();
@@ -679,14 +670,7 @@ namespace ige::creator
 
         case entry_action::explored:
         {
-#ifdef WIN32
-            if(fs::is_directory(absolute_path))
-                ShellExecute(NULL, "explore", absolute_path.string().c_str(), NULL, NULL, SW_SHOWNORMAL);
-            else if(fs::exists(absolute_path))
-                ShellExecute(NULL, "explore", absolute_path.parent_path().string().c_str(), NULL, NULL, SW_SHOWNORMAL);
-#else
-            // TODO: macOS
-#endif
+            EditorUtils::openExplorer(absolute_path);
         }
         break;
 
