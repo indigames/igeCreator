@@ -66,20 +66,19 @@ set(CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSIO
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 set(CPACK_RESOURCE_FILE_LICENSE_PROVIDED "1")
 if(MSVC)
-    set(CPACK_GENERATOR "NSIS")
+    set(CPACK_GENERATOR "ZIP;NSIS")
     set(CPACK_STRIP_FILES "TRUE")
     set(CPACK_NSIS_CONTACT "admin@indigames.net")
     set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/src/igeCreator.ico")
     set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL "ON")
+    set(CPACK_NSIS_MODIFY_PATH "ON")
     set(CPACK_NSIS_INSTALLED_ICON_NAME "${CMAKE_CURRENT_SOURCE_DIR}/src/igeCreator.ico")
-    set(CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${TARGET_NAME}.lnk' '$INSTDIR\\\\bin\\\\${TARGET_NAME}.exe'")
-    set(CPACK_NSIS_DELETE_ICONS_EXTRA "Delete '$SMPROGRAMS\\\\$START_MENU\\\\${TARGET_NAME}.lnk'")
-    set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "CreateShortCut \\\"$DESKTOP\\\\${TARGET_NAME}.lnk\\\" \\\"$INSTDIR\\\\bin\\\\${TARGET_NAME}.exe\\\"")
-    set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "Delete \\\"$DESKTOP\\\\${TARGET_NAME}.lnk\\\"")
+    list(APPEND CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${TARGET_NAME}.lnk' '$INSTDIR\\\\bin\\\\${TARGET_NAME}.exe'")
+    list(APPEND CPACK_NSIS_DELETE_ICONS_EXTRA " Delete '$SMPROGRAMS\\\\$START_MENU\\\\${TARGET_NAME}.lnk'")
 elseif(APPLE)
+    set(CPACK_GENERATOR "ZIP;DragNDrop")
     set(CMAKE_MACOSX_RPATH TRUE)
     set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-std=c++17" "-stdlib=libc++")
-    set(CPACK_GENERATOR "DragNDrop")
     set(PRODUCT_NAME "igeCreator")
     set(EXECUTABLE_NAME ${PRODUCT_NAME})
     set(BUNDLE_EXECUTABLE_NAME ${PRODUCT_NAME})
@@ -142,6 +141,7 @@ file(GLOB_RECURSE SRC_FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.mm"
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/pfd/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/pfd/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd-party/ImGuizmo/*.h"
@@ -197,11 +197,10 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SRC_FILES} ${XC_RESOURCES}
 
 
 if(MSVC)
-    add_executable(${TARGET_NAME} WIN32 ${SRC_FILES} ${RESOURCES})
+    add_executable(${TARGET_NAME} WIN32 ${SRC_FILES} ${XC_RESOURCES})
 elseif(APPLE)
     add_executable(${TARGET_NAME} MACOSX_BUNDLE ${SRC_FILES} ${XC_RESOURCES})
 endif()
-
 
 set(TARGET_INCLUDE_DIRS
     "${CMAKE_CURRENT_SOURCE_DIR}"
@@ -463,6 +462,22 @@ if(MSVC)
             COMMAND ${CMAKE_COMMAND} -E copy_if_different "${dll}" $<TARGET_FILE_DIR:${TARGET_NAME}>
             COMMENT "Copying dll: ${dll}")
     endforeach()
+    install(DIRECTORY
+        ${PVRTEXLIB_LIB_DIRS}/
+        DESTINATION bin
+        FILES_MATCHING
+            PATTERN "*.dll"
+            PATTERN "*.so"
+            PATTERN "*.dylib"
+    )
+    install(DIRECTORY
+        ${FBX_LIB_DIRS}/
+        DESTINATION bin
+        FILES_MATCHING
+            PATTERN "*.dll"
+            PATTERN "*.so"
+            PATTERN "*.dylib"
+    )
 elseif(OSX)
     get_filename_component(PVRTEXLIB_LIB_DIR ${PVRTEXLIB_LIB} DIRECTORY)
     install(DIRECTORY

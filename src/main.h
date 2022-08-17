@@ -1,3 +1,5 @@
+#ifdef __APPLE__
+
 #ifndef __main_h__
 #define __main_h__
 
@@ -9,4 +11,6 @@
     // return the path to Bundle folder
     std::string getBundlePath();
 
+
 #endif // __main_h__
+#endif // __APPLE__

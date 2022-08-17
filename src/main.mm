@@ -1,4 +1,6 @@
 
+#ifdef __APPLE__
+
 #include "main.h"
 
 #include <utils/PyxieHeaders.h>
@@ -90,3 +92,5 @@ int main(int argc, char *argv[])
 #ifdef __cplusplus
 }
 #endif
+
+#endif // __APPLE__
