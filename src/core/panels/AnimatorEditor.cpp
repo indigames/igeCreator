@@ -729,7 +729,7 @@ namespace ige::creator
                         case AnimatorParameterType::Int:
                         case AnimatorParameterType::Float:
                         {
-                            std::array vals = { val };
+                            std::array vals = { (float)val };
                             columns->createWidget<Drag<float>>("", (type == AnimatorParameterType::Int) ? ImGuiDataType_S32 : ImGuiDataType_Float, vals)->getOnDataChangedEvent().addListener([name, type, this](auto val) {
                                 CommandManager::getInstance()->PushCommand(COMMAND_TYPE::ANIMATOR, m_controller);
                                 m_controller->setParameter(name, (int)type, val[0]);

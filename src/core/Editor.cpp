@@ -106,14 +106,18 @@ namespace ige::creator
     }
 
     void Editor::setProjectPath(const std::string& path)
-    { 
-        if (m_projectPath.compare(path) != 0)
+    {
+        auto fsPath = fs::path(path);
+        auto fsPrjDir = fsPath.parent_path().string();
+        if (m_projectPath.compare(fsPrjDir) != 0)
         {
             auto retPath = (fs::path(m_projectPath).append(LAYOUT_CONFIG_INI)).string();
             ImGui::SaveIniSettingsToDisk(retPath.c_str());
             unloadScene();
-            m_projectPath = path;
+            m_projectPath = fsPrjDir;
+            m_projectFileName = fsPath.filename().string();
             fs::current_path(m_projectPath);
+            getCanvas()->getProjectSetting()->initialize();
             SceneManager::getInstance()->setProjectPath(m_projectPath);
             if (getCanvas() && getCanvas()->getAssetBrowser())
                 getCanvas()->getAssetBrowser()->setDirty();
@@ -286,55 +290,49 @@ namespace ige::creator
         if (path.compare(getEnginePath()) != 0) {
             const auto copyOptions = fs::copy_options::overwrite_existing | fs::copy_options::recursive;
             fs::copy(GetEnginePath("project_template"), path, copyOptions);
+            fs::rename(fs::path(path).append("sample.igeproj"), prjFile);
         }
-        setProjectPath(path);
+        setProjectPath(prjFile.string());
         createScene();
         SceneManager::getInstance()->saveScene(prjFile.parent_path().append("scenes").append("main.scene"));
-        json settingsJson = json{
-            {"startScene", "scenes/main.scene"},
-        };
-        std::ofstream file(prjFile.string());
-        file << settingsJson;
-        file.close();
-
         return true;
     }
     
     bool Editor::openProject()
     {
-        auto path = OpenFolderDialog("Open Project", ".", OpenFileDialog::Option::force_path).result();
-        if (!path.empty())
+        auto files = OpenFileDialog("Open Project", "", { "Project (*.igeproj)", "*.igeproj" }).result();
+        if (files.size() > 0)
         {
-            TaskManager::getInstance()->addTask([path]() {
-                Editor::getInstance()->openProjectInternal(path);
+            auto project = files[0];
+            TaskManager::getInstance()->addTask([project]() {
+                Editor::getInstance()->openProjectInternal(project);
             });
+            return true;
         }
-        return true;
+        return false;
     }
 
-    bool Editor::openProjectInternal(const std::string& path)
+    bool Editor::openProjectInternal(const std::string& prjFile)
     {
         // Stop previous logging process if any
         pyxie_logg_stop();
 
-        auto prjPath = fs::path(path);
-        auto prjName = prjPath.stem().string();
-        auto prjFile = prjPath.append(prjName + ".igeproj");
         auto loaded = false;
 
         if (fs::exists(prjFile))
         {
-            setProjectPath(path);
+            auto prjPath = fs::path(prjFile).parent_path();
+            setProjectPath(fs::path(prjFile).string());
 
             // Start new logging process
-            auto logFilePath = fs::path(path).append("error.log");
+            auto logFilePath = fs::path(prjPath).append("error.log");
             if (fs::exists(logFilePath)) {
                 std::error_code ec;
                 fs::remove(logFilePath, ec);
             }
             pyxie_logg_start();
 
-            std::ifstream file(prjFile.string());
+            std::ifstream file(prjFile);
             if (file.is_open())
             {
                 json settingsJson;
@@ -346,7 +344,7 @@ namespace ige::creator
                 }
                 else {
                     loaded = createScene();
-                    SceneManager::getInstance()->saveScene(prjFile.parent_path().append("scenes").append("main.scene"));
+                    SceneManager::getInstance()->saveScene(prjPath.append("scenes").append("main.scene"));
                 }
             }
         }
@@ -354,7 +352,7 @@ namespace ige::creator
         {
             auto btn = MsgBox("Project Does Not Exist", "Do you want to create?", MsgBox::EBtnLayout::ok_cancel, MsgBox::EMsgType::question).result();
             if (btn == MsgBox::EButton::ok) {
-                return createProjectInternal(path);
+                return createProjectInternal(fs::path(prjFile).parent_path().string());
             }
         }
 

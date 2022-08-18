@@ -1,0 +1,91 @@
+{
+  "BundleId": "net.indigames.igesample",
+  "Label": "Sample",
+  "Name": "Sample",
+  "Orientation": "landscape",
+  "Platforms": [
+    {
+      "Archs": [
+        "armeabi-v7a",
+        "arm64-v8a",
+        "x64",
+        "x86_64"
+      ],
+      "ConfigDir": "config/android",
+      "Features": {
+        "android.hardware.touchscreen": true
+      },
+      "MinSdkVersion": 21,
+      "Permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.ACCESS_WIFI_STATE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.VIBRATE"
+      ],
+      "Platform": "android",
+      "RomDir": "mobile",
+      "TargetSdkVersion": 31
+    },
+    {
+      "Archs": [
+        "arm64"
+      ],
+      "CodeSignIdentity": "iPhone Development",
+      "ConfigDir": "config/ios",
+      "DeploymentTarget": "11.0",
+      "DevelopmentTeamID": "R2TWY42MN5",
+      "DeviveFamily": "1,2",
+      "Platform": "ios",
+      "ProvisioningProfile": "Automatic",
+      "RomDir": "mobile"
+    },
+    {
+      "Archs": [
+        "x64"
+      ],
+      "ConfigDir": "config/windows",
+      "Platform": "windows",
+      "RomDir": "pc"
+    },
+    {
+      "Archs": [
+        "arm64"
+      ],
+      "ConfigDir": "config/macos",
+      "Platform": "macos",
+      "RomDir": "pc"
+    },
+    {
+      "Archs": [
+        "wasm"
+      ],
+      "ConfigDir": "config/emscripten",
+      "Platform": "emscripten",
+      "RomDir": "mobile"
+    }
+  ],
+  "Requires": {
+    "dlib": false,
+    "igeBullet": true,
+    "igeEffekseer": true,
+    "igeFirebase": false,
+    "igeGamesServices": false,
+    "igeNavigation": true,
+    "igeNotify": false,
+    "igePAL": true,
+    "igeScene": true,
+    "igeSdk": true,
+    "igeSocial": false,
+    "igeSound": true,
+    "igeWebview": false,
+    "opencv": false,
+    "pillow": false,
+    "pybox2d": false,
+    "pyimgui": false,
+    "tensorflow": false
+  },
+  "StartScene": "scenes/main.scene",
+  "VersionCode": 1,
+  "VersionName": "0.0.1"
+}
