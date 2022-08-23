@@ -38,26 +38,33 @@ using namespace ige::scene;
 int exec(const char* cmd) {
     auto command = std::string(cmd);
     command.append(" 2>&1"); // Allow pipe with mulpiple processes chain.
-    size_t buffer_size = 128;
-    char* buffer = (char*)malloc(buffer_size);
-    memset(buffer, 0, buffer_size);
 
 #ifdef _WIN32
+    int buffer_size = 512;
+    char* buffer = (char*)malloc(buffer_size);
     FILE* pipe = _popen(command.c_str(), "r");
 #else
+    size_t buffer_size;
+    char* buffer;
     FILE* pipe = popen(command.c_str(), "r");
 #endif
+
     if (!pipe)
     {
         pyxie_printf("Couldn't start command: %s", cmd);
         return -1;
     }
+
     while (!feof(pipe)) {
-    #ifdef _WIN32
-        if(fgets(buffer, buffer_size, pipe)) pyxie_printf(buffer);
-    #else
-        if(getline(&buffer, &buffer_size, pipe) != -1) pyxie_printf(buffer);
-    #endif        
+#ifdef _WIN32
+        if (fgets(buffer, buffer_size, pipe)) {
+            pyxie_printf("%s", buffer);
+        }
+#else
+        if (getline(&buffer, &buffer_size, pipe) != -1) {
+            pyxie_printf("%s", buffer);
+        }
+#endif
     }
     free(buffer);
 #ifdef _WIN32
@@ -107,15 +114,12 @@ namespace ige::creator
 
     void Editor::setProjectPath(const std::string& path)
     {
-        auto fsPath = fs::path(path);
-        auto fsPrjDir = fsPath.parent_path().string();
-        if (m_projectPath.compare(fsPrjDir) != 0)
+        if (m_projectPath.compare(path) != 0)
         {
             auto retPath = (fs::path(m_projectPath).append(LAYOUT_CONFIG_INI)).string();
             ImGui::SaveIniSettingsToDisk(retPath.c_str());
             unloadScene();
-            m_projectPath = fsPrjDir;
-            m_projectFileName = fsPath.filename().string();
+            m_projectPath = path;
             fs::current_path(m_projectPath);
             getCanvas()->getProjectSetting()->initialize();
             SceneManager::getInstance()->setProjectPath(m_projectPath);
@@ -290,9 +294,8 @@ namespace ige::creator
         if (path.compare(getEnginePath()) != 0) {
             const auto copyOptions = fs::copy_options::overwrite_existing | fs::copy_options::recursive;
             fs::copy(GetEnginePath("project_template"), path, copyOptions);
-            fs::rename(fs::path(path).append("sample.igeproj"), prjFile);
         }
-        setProjectPath(prjFile.string());
+        setProjectPath(path);
         createScene();
         SceneManager::getInstance()->saveScene(prjFile.parent_path().append("scenes").append("main.scene"));
         return true;
@@ -300,39 +303,37 @@ namespace ige::creator
     
     bool Editor::openProject()
     {
-        auto files = OpenFileDialog("Open Project", "", { "Project (*.igeproj)", "*.igeproj" }).result();
-        if (files.size() > 0)
+        auto path = OpenFolderDialog("Open Project", ".", OpenFileDialog::Option::force_path).result();
+        if (!path.empty())
         {
-            auto project = files[0];
-            TaskManager::getInstance()->addTask([project]() {
-                Editor::getInstance()->openProjectInternal(project);
+            TaskManager::getInstance()->addTask([path]() {
+                Editor::getInstance()->openProjectInternal(path);
             });
             return true;
         }
         return false;
     }
 
-    bool Editor::openProjectInternal(const std::string& prjFile)
+    bool Editor::openProjectInternal(const std::string& path)
     {
         // Stop previous logging process if any
         pyxie_logg_stop();
-
+        auto prjFile = fs::path(path).append("project.config");
         auto loaded = false;
 
         if (fs::exists(prjFile))
         {
-            auto prjPath = fs::path(prjFile).parent_path();
-            setProjectPath(fs::path(prjFile).string());
+            setProjectPath(path);
 
             // Start new logging process
-            auto logFilePath = fs::path(prjPath).append("error.log");
+            auto logFilePath = fs::path(path).append("error.log");
             if (fs::exists(logFilePath)) {
                 std::error_code ec;
                 fs::remove(logFilePath, ec);
             }
             pyxie_logg_start();
 
-            std::ifstream file(prjFile);
+            std::ifstream file(prjFile.string());
             if (file.is_open())
             {
                 json settingsJson;
@@ -344,7 +345,7 @@ namespace ige::creator
                 }
                 else {
                     loaded = createScene();
-                    SceneManager::getInstance()->saveScene(prjPath.append("scenes").append("main.scene"));
+                    SceneManager::getInstance()->saveScene(prjFile.parent_path().append("scenes").append("main.scene"));
                 }
             }
         }
@@ -352,7 +353,7 @@ namespace ige::creator
         {
             auto btn = MsgBox("Project Does Not Exist", "Do you want to create?", MsgBox::EBtnLayout::ok_cancel, MsgBox::EMsgType::question).result();
             if (btn == MsgBox::EButton::ok) {
-                return createProjectInternal(fs::path(prjFile).parent_path().string());
+                return createProjectInternal(path);
             }
         }
 

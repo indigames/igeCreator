@@ -32,18 +32,18 @@ namespace ige::creator
     {
         clear();
 
-        json settingsJson;
-        auto prjFile = fs::path(Editor::getInstance()->getProjectPath()).append(Editor::getInstance()->getProjectFileName());
+        json jProject;
+        auto prjFile = fs::path(Editor::getInstance()->getProjectPath()).append("project.config");
 
         std::ifstream file(prjFile);
         if (file.is_open()) {
-            file >> settingsJson;
+            file >> jProject;
             file.close();
         }
 
-        if (!settingsJson.is_null())
+        if (!jProject.is_null())
         {
-            from_json(settingsJson, *this);
+            from_json(jProject, *this);
         }
 
         drawSettings();
@@ -188,7 +188,7 @@ namespace ige::creator
                 platformGroup->createWidget<TextField>("DeploymentTarget", ios->deployTarget.c_str())->getOnDataChangedEvent().addListener([ios, this](const auto& txt) {
                     ios->deployTarget = txt;
                 });
-                platformGroup->createWidget<TextField>("DeviveFamily", ios->deviceFamily.c_str())->getOnDataChangedEvent().addListener([ios, this](const auto& txt) {
+                platformGroup->createWidget<TextField>("DeviceFamily", ios->deviceFamily.c_str())->getOnDataChangedEvent().addListener([ios, this](const auto& txt) {
                     ios->deviceFamily = txt;
                 });
                 platformGroup->createWidget<TextField>("DevelopmentTeamID", ios->developerTeamId.c_str())->getOnDataChangedEvent().addListener([ios, this](const auto& txt) {
@@ -224,12 +224,11 @@ namespace ige::creator
 
     void ProjectSetting::saveSettings()
     {
-        json settingsJson;
-        to_json(settingsJson, *this);
-
-        auto prjPath = fs::path(Editor::getInstance()->getProjectPath()).append(Editor::getInstance()->getProjectFileName());
+        json jProject;
+        to_json(jProject, *this);
+        auto prjPath = fs::path(Editor::getInstance()->getProjectPath()).append("project.config");
         std::ofstream file(prjPath);
-        file << std::setw(2) << settingsJson << std::endl;
+        file << std::setw(2) << jProject << std::endl;
         file.close();
     }
 

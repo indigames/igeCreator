@@ -111,10 +111,6 @@ namespace ige::creator
         const std::string& getProjectPath() const { return m_projectPath; }
         void setProjectPath(const std::string& path);
 
-        //! Project filename
-        const std::string& getProjectFileName() const { return m_projectFileName; }
-        void setProjectFileName(const std::string& name) { m_projectFileName = name; }
-
         //! Add target
         void addTarget(std::shared_ptr<SceneObject> target, bool clear = false);
 
@@ -150,7 +146,6 @@ namespace ige::creator
         //! Path settings
         std::string m_enginePath;
         std::string m_projectPath;
-        std::string m_projectFileName;
 
         //! Toggle local/global gizmo
         bool m_bIsLocalGizmo = true;

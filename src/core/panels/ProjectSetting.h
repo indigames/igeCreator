@@ -77,7 +77,7 @@ namespace ige::creator
         virtual void to_json(json& j) const override {
             PlatformSetting::to_json(j);
             j["DeploymentTarget"] = deployTarget;
-            j["DeviveFamily"] = deviceFamily;
+            j["DeviceFamily"] = deviceFamily;
             j["DevelopmentTeamID"] = developerTeamId;
             j["CodeSignIdentity"] = codeSignIdentity;
             j["ProvisioningProfile"] = provisionProfile;
@@ -87,7 +87,7 @@ namespace ige::creator
         virtual void from_json(const json& j) override {
             PlatformSetting::from_json(j);
             deployTarget = j.value("DeploymentTarget", "11.0");
-            deviceFamily = j.value("DeviveFamily", "1,2");
+            deviceFamily = j.value("DeviceFamily", "1,2");
             developerTeamId = j.value("DevelopmentTeamID", "None");
             codeSignIdentity = j.value("CodeSignIdentity", "iPhone Development");
             provisionProfile = j.value("ProvisioningProfile", "Automatic");
