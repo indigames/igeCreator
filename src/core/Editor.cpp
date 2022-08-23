@@ -66,8 +66,8 @@ int exec(const char* cmd) {
         }
 #endif
     }
-    free(buffer);
 #ifdef _WIN32
+    free(buffer);
     return _pclose(pipe);
 #else
     return pclose(pipe);
