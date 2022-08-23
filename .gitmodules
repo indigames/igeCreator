@@ -1,7 +1,6 @@
 [submodule "3rd-party/pfd"]
 	path = 3rd-party/pfd
 	url = git@github.com:samhocevar/portable-file-dialogs.git
-	branch = master
 [submodule "3rd-party/ImGuizmo"]
 	path = 3rd-party/ImGuizmo
 	url = git@github.com:indigames/ImGuizmo.git
