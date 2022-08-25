@@ -39,35 +39,29 @@ int exec(const char* cmd) {
     auto command = std::string(cmd);
     command.append(" 2>&1"); // Allow pipe with mulpiple processes chain.
 
-#ifdef _WIN32
     int buffer_size = 512;
     char* buffer = (char*)malloc(buffer_size);
+
+#ifdef _WIN32
     FILE* pipe = _popen(command.c_str(), "r");
 #else
-    size_t buffer_size;
-    char* buffer;
     FILE* pipe = popen(command.c_str(), "r");
 #endif
 
-    if (!pipe)
-    {
+    if (!pipe) {
         pyxie_printf("Couldn't start command: %s", cmd);
         return -1;
     }
 
     while (!feof(pipe)) {
-#ifdef _WIN32
         if (fgets(buffer, buffer_size, pipe)) {
             pyxie_printf("%s", buffer);
         }
-#else
-        if (getline(&buffer, &buffer_size, pipe) != -1) {
-            pyxie_printf("%s", buffer);
-        }
-#endif
     }
-#ifdef _WIN32
+
     free(buffer);
+
+#ifdef _WIN32
     return _pclose(pipe);
 #else
     return pclose(pipe);
@@ -83,7 +77,7 @@ namespace ige::creator
 #ifdef _WIN32
     const auto python = std::string("python");
 #elif defined(__APPLE__)
-    const auto python = std::string("/usr/local/bin/python3");
+    const auto python = std::string("/usr/local/bin/python3.9");
 #endif
 
     Editor::Editor()
