@@ -2,7 +2,7 @@
 
 struct _inittab g_customInitTabs[] = {
 #ifdef USE_IGECORE
-    {"igeCore._igeCore", PyInit__igeCore},
+    {"_igeCore", PyInit__igeCore},
     {"igeVmath", PyInit_igeVmath},
     {"igeScene", PyInit_igeScene},
 #endif
